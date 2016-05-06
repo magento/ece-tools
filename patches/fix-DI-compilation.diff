@@ -1,0 +1,200 @@
+diff --git a/setup/src/Magento/Setup/Console/Command/DiCompileCommand.php b/setup/src/Magento/Setup/Console/Command/DiCompileCommand.php
+index 96f8fb7..0cd35ad 100644
+--- a/setup/src/Magento/Setup/Console/Command/DiCompileCommand.php
++++ b/setup/src/Magento/Setup/Console/Command/DiCompileCommand.php
+@@ -107,9 +107,6 @@ class DiCompileCommand extends Command
+     private function checkEnvironment()
+     {
+         $messages = [];
+-        if (!$this->deploymentConfig->isAvailable()) {
+-            $messages[] = 'You cannot run this command because the Magento application is not installed.';
+-        }
+ 
+         /**
+          * By the time the command is able to execute, the Object Management configuration is already contaminated
+diff --git a/setup/src/Magento/Setup/Model/DateTime/DateTimeProvider.php b/fourth-project/setup/src/Magento/Setup/Model/DateTime/DateTimeProvider.php
+new file mode 100644
+index 0000000..1c9b9fa
+--- /dev/null
++++ b/setup/src/Magento/Setup/Model/DateTime/DateTimeProvider.php
+@@ -0,0 +1,64 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Setup\Model\DateTime;
++
++
++use Magento\Setup\Model\ObjectManagerProvider;
++
++/**
++ * Provider of DateTime instance
++ */
++class DateTimeProvider
++{
++    /**
++     * Timezone provider
++     *
++     * @var TimezoneProvider
++     */
++    private $tzProvider;
++
++    /**
++     * Object Manager provider
++     *
++     * @var ObjectManagerProvider
++     */
++    private $objectManagerProvider;
++
++    /**
++     * DateTime instance
++     *
++     * @var \Magento\Framework\Stdlib\DateTime\DateTime
++     */
++    private $dateTime;
++
++    /**
++     * Init
++     *
++     * @param TimezoneProvider $tzProvider
++     * @param ObjectManagerProvider $objectManagerProvider
++     */
++    public function __construct(TimezoneProvider $tzProvider, ObjectManagerProvider $objectManagerProvider)
++    {
++        $this->tzProvider = $tzProvider;
++        $this->objectManagerProvider = $objectManagerProvider;
++    }
++
++    /**
++     * Get instance of DateTime
++     *
++     * @return \Magento\Framework\Stdlib\DateTime\DateTime
++     */
++    public function get()
++    {
++        if (!$this->dateTime) {
++            $this->dateTime = $this->objectManagerProvider->get()->create(
++                'Magento\Framework\Stdlib\DateTime\DateTime',
++                ['localeDate' => $this->tzProvider->get()]
++            );
++        }
++        return $this->dateTime;
++    }
++}
+diff --git a/setup/src/Magento/Setup/Model/DateTime/TimeZoneProvider.php b/fourth-project/setup/src/Magento/Setup/Model/DateTime/TimeZoneProvider.php
+new file mode 100644
+index 0000000..dfff802
+--- /dev/null
++++ b/setup/src/Magento/Setup/Model/DateTime/TimeZoneProvider.php
+@@ -0,0 +1,55 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Setup\Model\DateTime;
++
++use Magento\Framework\App\Config\ScopeConfigInterface;
++use Magento\Setup\Model\ObjectManagerProvider;
++
++/**
++ * Provider of Timezone instance
++ */
++class TimezoneProvider
++{
++    /**
++     * Object Manager provider
++     *
++     * @var ObjectManagerProvider
++     */
++    private $objectManagerProvider;
++
++    /**
++     * Instance of Timezone
++     *
++     * @var \Magento\Framework\Stdlib\DateTime\Timezone
++     */
++    private $timezone;
++
++    /**
++     * Init
++     *
++     * @param ObjectManagerProvider $objectManagerProvider
++     */
++    public function __construct(ObjectManagerProvider $objectManagerProvider)
++    {
++        $this->objectManagerProvider = $objectManagerProvider;
++    }
++
++    /**
++     * Get instance of Timezone
++     *
++     * @return \Magento\Framework\Stdlib\DateTime\Timezone
++     */
++    public function get()
++    {
++        if (!$this->timezone) {
++            $this->timezone = $this->objectManagerProvider->get()->create(
++                'Magento\Framework\Stdlib\DateTime\Timezone',
++                ['scopeType' => ScopeConfigInterface::SCOPE_TYPE_DEFAULT]
++            );
++        }
++        return $this->timezone;
++    }
++}
+diff --git a/setup/src/Magento/Setup/Model/ObjectManagerProvider.php b/setup/src/Magento/Setup/Model/ObjectManagerProvider.php
+index 060b804..c2c30dd 100644
+--- a/setup/src/Magento/Setup/Model/ObjectManagerProvider.php
++++ b/setup/src/Magento/Setup/Model/ObjectManagerProvider.php
+@@ -51,15 +51,6 @@ class ObjectManagerProvider
+             $initParams = $this->serviceLocator->get(InitParamListener::BOOTSTRAP_PARAM);
+             $factory = Bootstrap::createObjectManagerFactory(BP, $initParams);
+             $this->objectManager = $factory->create($initParams);
+-            $this->objectManager->configure(
+-                [
+-                    'Magento\Framework\Stdlib\DateTime\Timezone' => [
+-                        'arguments' => [
+-                            'scopeType' => \Magento\Framework\App\Config\ScopeConfigInterface::SCOPE_TYPE_DEFAULT
+-                        ]
+-                    ]
+-                ]
+-            );
+         }
+         return $this->objectManager;
+     }
+diff --git a/setup/src/Magento/Setup/Model/UpdatePackagesCache.php b/setup/src/Magento/Setup/Model/UpdatePackagesCache.php
+index 918097d..78c0617 100644
+--- a/setup/src/Magento/Setup/Model/UpdatePackagesCache.php
++++ b/setup/src/Magento/Setup/Model/UpdatePackagesCache.php
+@@ -11,6 +11,7 @@ use Composer\Package\Version\VersionParser;
+ use Magento\Framework\App\Filesystem\DirectoryList;
+ use Magento\Framework\Filesystem;
+ use Magento\Framework\Composer\MagentoComposerApplicationFactory;
++use Magento\Setup\Model\DateTime\DateTimeProvider;
+ 
+ /**
+  * Class UpdatePackagesCache manages information about available for update packages though the cache file.
+@@ -57,18 +58,19 @@ class UpdatePackagesCache
+      * @param MagentoComposerApplicationFactory $applicationFactory
+      * @param \Magento\Framework\Filesystem $filesystem
+      * @param ComposerInformation $composerInformation
+-     * @param ObjectManagerProvider $objectManagerProvider
++     * @param DateTimeProvider $dateTimeProvider
+      * @throws \Exception
+      */
+     public function __construct(
+         MagentoComposerApplicationFactory $applicationFactory,
+         Filesystem $filesystem,
+         ComposerInformation $composerInformation,
+-        ObjectManagerProvider $objectManagerProvider
++        DateTimeProvider $dateTimeProvider
+     ) {
+         $this->application = $applicationFactory->create();
+         $this->directory = $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
+-        $this->dateTime = $objectManagerProvider->get()->get('Magento\Framework\Stdlib\DateTime\DateTime');
++
++        $this->dateTime = $dateTimeProvider->get();
+         $this->composerInformation = $composerInformation;
+     }
+ 

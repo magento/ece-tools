@@ -1,0 +1,130 @@
+diff --git a/setup/src/Magento/Setup/Model/FilePermissions.php b/setup/src/Magento/Setup/Model/FilePermissions.php
+index 43dc400..9b06dc7 100644
+--- a/setup/src/Magento/Setup/Model/FilePermissions.php
++++ b/setup/src/Magento/Setup/Model/FilePermissions.php
+@@ -30,6 +30,13 @@ class FilePermissions
+     protected $installationWritableDirectories = [];
+ 
+     /**
++     * List of required writable directories for upgrade
++     *
++     * @var array
++     */
++    protected $upgradeWritableDirectories = [];
++
++    /**
+      * List of recommended non-writable directories for application
+      *
+      * @var array
+@@ -44,6 +51,13 @@ class FilePermissions
+     protected $installationCurrentWritableDirectories = [];
+ 
+     /**
++     * List of current writable directories for upgrade
++     *
++     * @var array
++     */
++    protected $upgradeCurrentWritableDirectories = [];
++
++    /**
+      * List of current non-writable directories for application
+      *
+      * @var array
+@@ -84,6 +98,25 @@ class FilePermissions
+     }
+ 
+     /**
++     * Retrieve list of required writable directories for installation
++     *
++     * @return array
++     */
++    public function getUpgradeWritableDirectories()
++    {
++        if (!$this->upgradeWritableDirectories) {
++            $data = [
++                DirectoryList::CONFIG,
++                DirectoryList::VAR_DIR,
++            ];
++            foreach ($data as $code) {
++                $this->upgradeWritableDirectories[$code] = $this->directoryList->getPath($code);
++            }
++        }
++        return array_values($this->upgradeWritableDirectories);
++    }
++
++    /**
+      * Retrieve list of recommended non-writable directories for application
+      *
+      * @return array
+@@ -119,6 +152,23 @@ class FilePermissions
+     }
+ 
+     /**
++     * Retrieve list of currently writable directories for installation
++     *
++     * @return array
++     */
++    public function getUpgradeCurrentWritableDirectories()
++    {
++        if (!$this->upgradeCurrentWritableDirectories) {
++            foreach ($this->upgradeWritableDirectories as $code => $path) {
++                if ($this->isWritable($code) && $this->checkRecursiveDirectories($path)) {
++                    $this->upgradeCurrentWritableDirectories[] = $path;
++                }
++            }
++        }
++        return $this->upgradeCurrentWritableDirectories;
++    }
++
++    /**
+      * Check all sub-directories and files except for var/generation and var/di
+      *
+      * @param string $directory
+@@ -217,6 +267,18 @@ class FilePermissions
+     }
+ 
+     /**
++     * Checks writable directories for upgrade
++     *
++     * @return array
++     */
++    public function getMissingWritableDirectoriesForUpgrade()
++    {
++        $required = $this->getUpgradeWritableDirectories();
++        $current = $this->getUpgradeCurrentWritableDirectories();
++        return array_diff($required, $current);
++    }
++
++    /**
+      * Checks non-writable directories for application
+      *
+      * @return array
+diff --git a/setup/src/Magento/Setup/Model/Installer.php b/setup/src/Magento/Setup/Model/Installer.php
+index a5da578..3bbc3ac 100644
+--- a/setup/src/Magento/Setup/Model/Installer.php
++++ b/setup/src/Magento/Setup/Model/Installer.php
+@@ -439,6 +439,15 @@ class Installer
+         }
+     }
+ 
++    public function checkUpgradeFilePermissions()
++    {
++        $results = $this->filePermissions->getMissingWritableDirectoriesForUpgrade();
++        if ($results) {
++            $errorMsg = "Missing write permissions to the following directories: '" . implode("' '", $results) . "'";
++            throw new \Exception($errorMsg);
++        }
++    }
++
+     /**
+      * Check permissions of directories that are expected to be non-writable for application
+      *
+@@ -741,7 +750,7 @@ class Installer
+     public function installDataFixtures()
+     {
+         $setup = $this->dataSetupFactory->create();
+-        $this->checkInstallationFilePermissions();
++        $this->checkUpgradeFilePermissions();
+         $this->log->log('Data install/update:');
+         $this->handleDBSchemaData($setup, 'data');
+     }

@@ -1,0 +1,43 @@
+diff --git a/app/autoload.php b/app/autoload.php
+index 4d991dd..1d1873d 100644
+--- a/app/autoload.php
++++ b/app/autoload.php
+@@ -13,7 +13,7 @@ use Magento\Framework\Autoload\ClassLoaderWrapper;
+  */
+ define('BP', dirname(__DIR__));
+ 
+-$vendorDir = require BP . '/app/etc/vendor_path.php';
++$vendorDir = './vendor';
+ $vendorAutoload = BP . "/{$vendorDir}/autoload.php";
+ 
+ /* 'composer install' validation */
+
+diff --git a/vendor/magento/framework/App/Arguments/FileResolver/Primary.php b/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
+index 40b74e9..0f732c9 100644
+--- a/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
++++ b/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
+@@ -29,7 +29,7 @@ class Primary implements \Magento\Framework\Config\FileResolverInterface
+         \Magento\Framework\Filesystem $filesystem,
+         \Magento\Framework\Config\FileIteratorFactory $iteratorFactory
+     ) {
+-        $this->configDirectory = $filesystem->getDirectoryRead(DirectoryList::CONFIG);
++        $this->configDirectory = $filesystem->getDirectoryRead(DirectoryList::APP);
+         $this->iteratorFactory = $iteratorFactory;
+     }
+
+ff --git a/vendor/magento/framework/Composer/ComposerJsonFinder.php b/vendor/magento/framework/Composer/ComposerJsonFinder.php
+index bb17b2b..a48c5fc 100644
+--- a/vendor/magento/framework/Composer/ComposerJsonFinder.php
++++ b/vendor/magento/framework/Composer/ComposerJsonFinder.php
+@@ -36,10 +36,7 @@ class ComposerJsonFinder
+     public function findComposerJson()
+     {
+         // composer.json is in same directory as vendor
+-        $vendorPath = $this->directoryList->getPath(DirectoryList::CONFIG) . '/vendor_path.php';
+-        $vendorDir = require "{$vendorPath}";
+-
+-        $composerJson = $this->directoryList->getPath(DirectoryList::ROOT) . "/{$vendorDir}/../composer.json";
++        $composerJson = $this->directoryList->getPath(DirectoryList::ROOT) . "/vendor/../composer.json";
+
+         $composerJson = realpath($composerJson);
+

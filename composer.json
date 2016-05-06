@@ -1,0 +1,20 @@
+{
+  "name": "magento/magento-cloud-configuration",
+  "description": "Provides default configuration to build and deploy Magento 2 Enterprise Edition",
+  "version": "1.0.3",
+  "license": [
+      "OSL-3.0",
+      "AFL-3.0"
+  ],
+  "require": {
+    "php": ">=5.6.0"
+  },
+  "autoload": {
+    "files": [
+      "cli_commands.php"
+    ],
+    "psr-4": {
+      "Magento\\MagentoCloud\\": ["src/Magento/MagentoCloud"]
+    }
+  }
+}
