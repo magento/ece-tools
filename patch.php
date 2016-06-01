@@ -14,4 +14,5 @@ foreach ($dir as $fileinfo) {
 $root = __DIR__ . '/../../../';
 copy($root . 'app/etc/NonComposerComponentRegistration.php', $root . 'app/NonComposerComponentRegistration.php');
 copy($root . 'app/etc/di.xml', $root . 'app/di.xml');
-copy($root . 'app/etc/enterprise', $root . 'app/enterprise');
+mkdir($root . 'app/enterprise');
+copy($root . 'app/etc/enterprise/di.xml', $root . 'app/enterprise/di.xml');
