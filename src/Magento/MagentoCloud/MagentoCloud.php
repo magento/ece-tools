@@ -122,6 +122,10 @@ class MagentoCloud
         $this->log("Copying read/write directories back.");
 
         foreach ($this->magentoReadWriteDirs as $dir) {
+            if (!file_exists($dir)) {
+                mkdir($dir);
+                $this->log(sprintf('Created directory: %s', $dir));
+            }
             $this->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
             $this->log(sprintf('Copied directory: %s', $dir));
         }
