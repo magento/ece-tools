@@ -16,3 +16,19 @@ copy($root . 'app/etc/NonComposerComponentRegistration.php', $root . 'app/NonCom
 copy($root . 'app/etc/di.xml', $root . 'app/di.xml');
 mkdir($root . 'app/enterprise');
 copy($root . 'app/etc/enterprise/di.xml', $root . 'app/enterprise/di.xml');
+
+$sampleDataDir = $root . 'vendor/magento/sample-data-media';
+if (file_exists($sampleDataDir)) {
+    $destination = $root . '/pub/media';
+    foreach (
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($sampleDataDir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST) as $item
+    ) {
+        if ($item->isDir()) {
+            mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+        } else {
+            copy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+        }
+    }
+}
