@@ -26,7 +26,9 @@ if (file_exists($sampleDataDir)) {
             \RecursiveIteratorIterator::SELF_FIRST) as $item
     ) {
         if ($item->isDir()) {
-            mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+            if (!file_exists($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName())) {
+                mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+            }
         } else {
             copy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
         }
