@@ -44,6 +44,8 @@ class Deploy extends Command
 
     protected $redisHost;
     protected $redisPort;
+    protected $redisSessionDb = '0';
+    protected $redisCacheDb = '1'; // Value hard-coded in pre-deploy.php
 
     protected $solrHost;
     protected $solrPath;
@@ -320,14 +322,16 @@ class Deploy extends Command
                         'backend' => 'Cm_Cache_Backend_Redis',
                         'backend_options' => [
                             'server' => $this->redisHost,
-                            'port' => $this->redisPort
+                            'port' => $this->redisPort,
+                            'database' => $this->redisCacheDb
                         ]
                     ],
                     'page_cache' => [
                         'backend' => 'Cm_Cache_Backend_Redis',
                         'backend_options' => [
                             'server' => $this->redisHost,
-                            'port' => $this->redisPort
+                            'port' => $this->redisPort,
+                            'database' => $this->redisCacheDb
                         ]
                     ]
                 ]
@@ -338,6 +342,7 @@ class Deploy extends Command
                 'redis' => [
                     'host' => $this->redisHost,
                     'port' => $this->redisPort,
+                    'database' => $this->redisSessionDb
                 ]
             ];
         }
