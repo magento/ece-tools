@@ -12,10 +12,6 @@ foreach ($dir as $fileinfo) {
 }
 
 $root = __DIR__ . '/../../../';
-copy($root . 'app/etc/NonComposerComponentRegistration.php', $root . 'app/NonComposerComponentRegistration.php');
-copy($root . 'app/etc/di.xml', $root . 'app/di.xml');
-mkdir($root . 'app/enterprise');
-copy($root . 'app/etc/enterprise/di.xml', $root . 'app/enterprise/di.xml');
 
 $sampleDataDir = $root . 'vendor/magento/sample-data-media';
 if (file_exists($sampleDataDir)) {

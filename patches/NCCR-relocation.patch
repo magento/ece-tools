@@ -1,9 +1,9 @@
-diff --git a/app/etc/NonComposerComponentRegistration.php b/app/NonComposerComponentRegistrationECE.php
+diff --git a/app/etc/NonComposerComponentRegistration.php b/app/NonComposerComponentRegistration.php
 rename from app/etc/NonComposerComponentRegistration.php
-rename to app/NonComposerComponentRegistrationECE.php
+rename to app/NonComposerComponentRegistration.php
 index bd3289d..400670c
 --- a/app/etc/NonComposerComponentRegistration.php
-+++ b/app/NonComposerComponentRegistrationECE.php
++++ b/app/NonComposerComponentRegistration.php
 @@ -4,12 +4,12 @@
   * See COPYING.txt for license details.
   */
@@ -32,7 +32,7 @@ index 417f2aa..c8d3cbb 100644
          },
          "files": [
 -            "app/etc/NonComposerComponentRegistration.php"
-+            "app/NonComposerComponentRegistrationECE.php"
++            "app/NonComposerComponentRegistration.php"
          ]
      },
      "autoload-dev": {
