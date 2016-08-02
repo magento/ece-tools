@@ -14,7 +14,8 @@ $relationships = $env->getRelationships();
 if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
     $redisHost = $relationships['redis'][0]['host'];
     $redisPort = $relationships['redis'][0]['port'];
-    exec("redis-cli -h $redisHost -p $redisPort -n 1 flushall");
+    $redisCacheDb = '1'; // Matches \Magento\MagentoCloud\Console\Command\Deploy::$redisCacheDb
+    exec("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushall");
 }
 
 $fileCacheDir = \Magento\MagentoCloud\Environment::MAGENTO_ROOT . '/var/cache';
@@ -23,7 +24,7 @@ if (file_exists($fileCacheDir)) {
 }
 
 // Restore mounted directories
-$env->log("Copying read/write directories back.");
+$env->log("Copying writable directories back.");
 
 foreach ($env->writableDirs as $dir) {
     if (!file_exists($dir)) {
