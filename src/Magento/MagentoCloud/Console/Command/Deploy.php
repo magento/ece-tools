@@ -208,8 +208,8 @@ class Deploy extends Command
     private function updateMagento()
     {
         $this->env->log("File env.php contains installation date. Updating configuration.");
-        $this->setupUpgrade();
         $this->updateConfig();
+        $this->setupUpgrade();
         $this->clearCache();
     }
 
