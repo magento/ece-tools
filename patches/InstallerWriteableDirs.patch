@@ -100,13 +100,13 @@ index 43dc400..9b06dc7 100644
       *
       * @return array
 diff --git a/setup/src/Magento/Setup/Model/Installer.php b/setup/src/Magento/Setup/Model/Installer.php
-index a5da578..3bbc3ac 100644
+index 2874dec..955354f 100644
 --- a/setup/src/Magento/Setup/Model/Installer.php
 +++ b/setup/src/Magento/Setup/Model/Installer.php
-@@ -439,6 +439,15 @@ class Installer
+@@ -453,6 +453,15 @@ class Installer
          }
      }
- 
+
 +    public function checkUpgradeFilePermissions()
 +    {
 +        $results = $this->filePermissions->getMissingWritableDirectoriesForUpgrade();
@@ -119,12 +119,13 @@ index a5da578..3bbc3ac 100644
      /**
       * Check permissions of directories that are expected to be non-writable for application
       *
-@@ -741,7 +750,7 @@ class Installer
-     public function installDataFixtures()
-     {
+@@ -767,7 +776,7 @@ class Installer
+         $this->assertDbConfigExists();
+         $this->assertDbAccessible();
          $setup = $this->dataSetupFactory->create();
 -        $this->checkInstallationFilePermissions();
 +        $this->checkUpgradeFilePermissions();
          $this->log->log('Data install/update:');
          $this->handleDBSchemaData($setup, 'data');
      }
+
