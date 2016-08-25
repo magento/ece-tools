@@ -13,21 +13,6 @@ use Magento\Framework\ObjectManagerInterface;
 class CommandList implements \Magento\Framework\Console\CommandListInterface
 {
     /**
-     * Service Manager
-     *
-     * @var ObjectManagerInterface
-     */
-    private $objectManager;
-
-    /**
-     * @param ObjectManagerInterface $objectManager
-     */
-    public function __construct(ObjectManagerInterface $objectManager)
-    {
-        $this->objectManager = $objectManager;
-    }
-
-    /**
      * Gets list of command classes
      *
      * @return string[]
@@ -48,7 +33,7 @@ class CommandList implements \Magento\Framework\Console\CommandListInterface
         $commands = [];
         foreach ($this->getCommandsClasses() as $class) {
             if (class_exists($class)) {
-                $commands[] = $this->objectManager->get($class);
+                $commands[] = new $class();
             } else {
                 throw new \Exception('Class ' . $class . ' does not exist');
             }
