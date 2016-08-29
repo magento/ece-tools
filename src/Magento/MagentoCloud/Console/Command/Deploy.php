@@ -475,9 +475,9 @@ class Deploy extends Command
 
         $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code' and scope = 'default';");
         $default = "en_US";
-        if(is_array($output) && count($output) == 1){
-            $default = $output[0];
-            $default = preg_replace('/[^A-Za-z_/', "", $default); //No sql injection
+        if(is_array($output) && count($output) == 2){
+            $default = $output[1];
+            $default = preg_replace('/[^A-Za-z_]/', "", $default); //No sql injection
         }
 
         $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code' and scope <> 'default' and value <> '$default';");
@@ -501,8 +501,6 @@ class Deploy extends Command
             $threads = isset($_ENV["MAGENTO_STATIC_CONTENT_THREADS"]) ? $_ENV["MAGENTO_STATIC_CONTENT_THREADS"]: 1;
             $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P" . (int)$threads . " bash -c CMD");
         }
-
-
 
         /* Disable maintenance mode */
         $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable");
