@@ -45,8 +45,8 @@ class Build extends Command
     private function build()
     {
         $this->env->log("Start build.");
-
-        $this->applyPatches();
+        $this->applyMccPatches();
+        $this->applyCommittedPatches();
         $this->compileDI();
         $this->clearTemp();
         $this->env->execute('rm -rf app/etc/env.php');
@@ -66,12 +66,30 @@ class Build extends Command
     }
 
     /**
-     * Apply any existing patches
+     * Apply patches distributed through the magento-cloud-configuration file
      */
-    private function applyPatches()
+    private function applyMccPatches()
     {
-        $this->env->log("Patching Magento.");
+        $this->env->log("Applying magento-cloud-configuration patches.");
         $this->env->execute('/usr/bin/php ' . Environment::MAGENTO_ROOT . 'vendor/magento/magento-cloud-configuration/patch.php');
+    }
+
+    /**
+     * Apply patches distributed through the magento-cloud-configuration file
+     */
+    private function applyCommittedPatches()
+    {
+        $patchesDir = Environment::MAGENTO_ROOT . 'm2-hotfixes/';
+        $this->env->log("Checking if patches exist under " . $patchesDir);
+        if (is_dir($patchesDir)) {
+            $iterableDir = new \DirectoryIterator($patchesDir);
+            foreach ($iterableDir as $fileinfo) {
+                if (!$fileinfo->isDot()) {
+                    $cmd = 'git apply ' . $patchesDir . '/' . $fileinfo->getFilename();
+                    $this->env->execute($cmd);
+                }
+            }
+        }
     }
 
     private function compileDI()

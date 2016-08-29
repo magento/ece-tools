@@ -1,0 +1,16 @@
+diff --git a/setup/src/Magento/Setup/Console/Command/DiCompileCommand.php b/setup/src/Magento/Setup/Console/Command/DiCompileCommand.php
+index 96f8fb7..0cd35ad 100644
+--- a/setup/src/Magento/Setup/Console/Command/DiCompileCommand.php
++++ b/setup/src/Magento/Setup/Console/Command/DiCompileCommand.php
+@@ -107,11 +107,6 @@ class DiCompileCommand extends Command
+     private function checkEnvironment()
+     {
+         $messages = [];
+-        $config = $this->deploymentConfig->get(ConfigOptionsListConstants::KEY_MODULES);
+-        if (!$config) {
+-            $messages[] = 'You cannot run this command because modules are not enabled. You can enable modules by'
+-             . ' running the \'module:enable --all\' command.';
+-        }
+ 
+         /**
+          * By the time the command is able to execute, the Object Management configuration is already contaminated

@@ -96,6 +96,7 @@ class Deploy extends Command
         }
         $this->processMagentoMode();
         $this->disableGoogleAnalytics();
+        $this->env->log("Deployment complete.");
     }
 
     /**
@@ -470,16 +471,37 @@ class Deploy extends Command
 
         /* Generate static assets */
         $this->env->log("Extract locales");
-        $locales = '';
-        $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code';");
+        $locales = [];
+
+        $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code' and scope = 'default';");
+        $default = "en_US";
+        if(is_array($output) && count($output) == 2){
+            $default = $output[1];
+            $default = preg_replace('/[^A-Za-z_]/', "", $default); //No sql injection
+        }
+
+        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code' and scope <> 'default' and value <> '$default';");
         if (is_array($output) && count($output) > 1) {
             $locales = $output;
             array_shift($locales);
-            $locales = implode(' ', $locales);
         }
-        $logMessage = $locales ? "Generating static content for locales $locales." : "Generating static content.";
+
+        $logMessage = $locales ? "Generating static content for locale: $default" : "Generating static content.";
         $this->env->log($logMessage);
-        $this->env->execute("cd bin/; /usr/bin/php ./magento setup:static-content:deploy $locales");
+
+        $this->env->execute("cd bin/; /usr/bin/php -d zend.enable_gc=0 ./magento setup:static-content:deploy $default");
+
+        if(count($locales) > 0){
+            $logMessage = "Running remaining locals in parallel";
+            $this->env->log($logMessage);
+            $parallelCommands = "";
+            foreach ($locales as $locale){
+                $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $locale" . '\n';
+            }
+            $threads = isset($_ENV["MAGENTO_STATIC_CONTENT_THREADS"]) ? $_ENV["MAGENTO_STATIC_CONTENT_THREADS"]: 1;
+            $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P" . (int)$threads . " bash -c CMD");
+        }
+
         /* Disable maintenance mode */
         $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable");
         $this->env->log("Maintenance mode is disabled.");
