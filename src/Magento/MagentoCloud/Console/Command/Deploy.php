@@ -54,8 +54,9 @@ class Deploy extends Command
 
     protected $isMasterBranch = null;
     protected $desiredApplicationMode;
-    protected $isRecompileDI = false;
     protected $staticFilesCleaningStrategy = false;
+    private $staticDeployThreads;
+    private $staticDeployExcludeThemes = [];
 
     /**
      * @var Environment
@@ -124,7 +125,19 @@ class Deploy extends Command
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
 
         $this->staticFilesCleaningStrategy = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'enabled' ? true : false;
-        $this->isRecompileDI = isset($var["RECOMPILE_DI"]) && $var["RECOMPILE_DI"] == 'enabled' ? true : false;
+        $this->staticDeployExcludeThemes = isset($var["MAGENTO_STATIC_CONTENT_EXCLUDE_THEMES"])
+            ? explode(',', $var["MAGENTO_STATIC_CONTENT_EXCLUDE_THEMES"])
+            : [];
+        
+        if (isset($var["MAGENTO_STATIC_CONTENT_THREADS"])) {
+            $this->staticDeployThreads = $var["MAGENTO_STATIC_CONTENT_THREADS"];
+        } else if (isset($_ENV["MAGENTO_STATIC_CONTENT_THREADS"])) {
+            $this->staticDeployThreads = $_ENV["MAGENTO_STATIC_CONTENT_THREADS"];
+        } else if (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
+            $this->staticDeployThreads = 3;
+        } else { // if Paas environment
+            $this->staticDeployThreads = 1;
+        }
 
         $this->desiredApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
         $this->desiredApplicationMode =
@@ -471,36 +484,25 @@ class Deploy extends Command
 
         /* Generate static assets */
         $this->env->log("Extract locales");
-        $locales = [];
-
-        $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code' and scope = 'default';");
-        $default = "en_US";
-        if(is_array($output) && count($output) == 2){
-            $default = $output[1];
-            $default = preg_replace('/[^A-Za-z_]/', "", $default); //No sql injection
-        }
-
-        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code' and scope <> 'default' and value <> '$default';");
+        $locales = '';
+        $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code';");
         if (is_array($output) && count($output) > 1) {
             $locales = $output;
             array_shift($locales);
+            $locales = implode(' ', $locales);
         }
 
-        $logMessage = $locales ? "Generating static content for locale: $default" : "Generating static content.";
+        $jobsOption = "--jobs={$this->staticDeployThreads}";
+        $excludeThemesOptions = $this->staticDeployExcludeThemes
+            ? "--exclude-theme=" . implode(' --exclude-theme=', $this->staticDeployExcludeThemes)
+            : '';
+
+        $logMessage = $locales ? "Generating static content for locales $locales." : "Generating static content.";
         $this->env->log($logMessage);
 
-        $this->env->execute("cd bin/; /usr/bin/php -d zend.enable_gc=0 ./magento setup:static-content:deploy $default");
-
-        if(count($locales) > 0){
-            $logMessage = "Running remaining locals in parallel";
-            $this->env->log($logMessage);
-            $parallelCommands = "";
-            foreach ($locales as $locale){
-                $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $locale" . '\n';
-            }
-            $threads = isset($_ENV["MAGENTO_STATIC_CONTENT_THREADS"]) ? $_ENV["MAGENTO_STATIC_CONTENT_THREADS"]: 1;
-            $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P" . (int)$threads . " bash -c CMD");
-        }
+        $this->env->execute(
+            "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $locales"
+        );
 
         /* Disable maintenance mode */
         $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable");
