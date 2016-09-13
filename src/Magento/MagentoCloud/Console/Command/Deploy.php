@@ -128,11 +128,11 @@ class Deploy extends Command
         $this->staticDeployExcludeThemes = isset($var["MAGENTO_STATIC_CONTENT_EXCLUDE_THEMES"])
             ? explode(',', $var["MAGENTO_STATIC_CONTENT_EXCLUDE_THEMES"])
             : [];
-        
+
         if (isset($var["MAGENTO_STATIC_CONTENT_THREADS"])) {
-            $this->staticDeployThreads = $var["MAGENTO_STATIC_CONTENT_THREADS"];
+            $this->staticDeployThreads = (int)$var["MAGENTO_STATIC_CONTENT_THREADS"];
         } else if (isset($_ENV["MAGENTO_STATIC_CONTENT_THREADS"])) {
-            $this->staticDeployThreads = $_ENV["MAGENTO_STATIC_CONTENT_THREADS"];
+            $this->staticDeployThreads = (int)$_ENV["MAGENTO_STATIC_CONTENT_THREADS"];
         } else if (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
             $this->staticDeployThreads = 3;
         } else { // if Paas environment
@@ -484,25 +484,43 @@ class Deploy extends Command
 
         /* Generate static assets */
         $this->env->log("Extract locales");
-        $locales = '';
-        $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code';");
+        $locales = [];
+
+        $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code' and scope = 'default';");
+        $defaultLocale = "en_US";
+        if(is_array($output) && count($output) == 2){
+            $defaultLocale = $output[1];
+            $defaultLocale = preg_replace('/[^A-Za-z_]/', "", $defaultLocale); //No sql injection
+        }
+
+        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code' and scope <> 'default' and value <> '$defaultLocale';");
         if (is_array($output) && count($output) > 1) {
             $locales = $output;
             array_shift($locales);
             $locales = implode(' ', $locales);
         }
 
-        $jobsOption = "--jobs={$this->staticDeployThreads}";
         $excludeThemesOptions = $this->staticDeployExcludeThemes
             ? "--exclude-theme=" . implode(' --exclude-theme=', $this->staticDeployExcludeThemes)
             : '';
 
-        $logMessage = $locales ? "Generating static content for locales $locales." : "Generating static content.";
+        $logMessage = $locales ? "Generating static content for locale: $defaultLocale." : "Generating static content.";
         $this->env->log($logMessage);
 
         $this->env->execute(
-            "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $locales"
+            "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $defaultLocale "
         );
+
+        if(count($locales) > 0){
+            $logMessage = "Deploying static content for remaining locales in parallel.";
+            $this->env->log($logMessage);
+            $parallelCommands = "";
+            foreach ($locales as $locale){
+                $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale" . '\n';
+            }
+            $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P" . (int)$this->staticDeployThreads . " bash -c CMD");
+        }
+
 
         /* Disable maintenance mode */
         $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable");
