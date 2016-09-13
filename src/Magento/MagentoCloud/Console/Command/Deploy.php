@@ -58,6 +58,7 @@ class Deploy extends Command
     private $staticFilesCleaningStrategy = false;
     private $staticDeployThreads;
     private $staticDeployExcludeThemes = [];
+    private $adminLocale;
 
     /**
      * @var Environment
@@ -130,6 +131,7 @@ class Deploy extends Command
         $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
             ? explode(',', $var["STATIC_CONTENT_EXCLUDE_THEMES"])
             : [];
+        $this->adminLocale = isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
 
         if (isset($var["STATIC_CONTENT_THREADS"])) {
             $this->staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
@@ -196,7 +198,7 @@ class Deploy extends Command
             --currency=$this->defaultCurrency \
             --base-url=$urlUnsecure \
             --base-url-secure=$urlSecure \
-            --language=en_US \
+            --language=$this->adminLocale \
             --timezone=America/Los_Angeles \
             --db-host=$this->dbHost \
             --db-name=$this->dbName \
@@ -502,6 +504,10 @@ class Deploy extends Command
         if (is_array($output) && count($output) > 1) {
             $nonDefaultLocales = $output;
             array_shift($nonDefaultLocales);
+        }
+
+        if ($this->adminLocale != $defaultLocale && !in_array($this->adminLocale, $nonDefaultLocales)) {
+            $nonDefaultLocales[] = $this->adminLocale;
         }
 
         $excludeThemesOptions = $this->staticDeployExcludeThemes
