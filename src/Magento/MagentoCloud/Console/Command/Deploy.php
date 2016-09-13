@@ -484,7 +484,7 @@ class Deploy extends Command
 
         /* Generate static assets */
         $this->env->log("Extract locales");
-        $locales = [];
+        $nonDefaultLocales = [];
 
         $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code' and scope = 'default';");
         $defaultLocale = "en_US";
@@ -495,27 +495,26 @@ class Deploy extends Command
 
         $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code' and scope <> 'default' and value <> '$defaultLocale';");
         if (is_array($output) && count($output) > 1) {
-            $locales = $output;
-            array_shift($locales);
-            $locales = implode(' ', $locales);
+            $nonDefaultLocales = $output;
+            array_shift($nonDefaultLocales);
         }
 
         $excludeThemesOptions = $this->staticDeployExcludeThemes
             ? "--exclude-theme=" . implode(' --exclude-theme=', $this->staticDeployExcludeThemes)
             : '';
 
-        $logMessage = $locales ? "Generating static content for locale: $defaultLocale." : "Generating static content.";
+        $logMessage = $nonDefaultLocales ? "Generating static content for locale: $defaultLocale." : "Generating static content.";
         $this->env->log($logMessage);
 
         $this->env->execute(
             "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $defaultLocale "
         );
 
-        if(count($locales) > 0){
+        if(count($nonDefaultLocales) > 0){
             $logMessage = "Deploying static content for remaining locales in parallel.";
             $this->env->log($logMessage);
             $parallelCommands = "";
-            foreach ($locales as $locale){
+            foreach ($nonDefaultLocales as $locale){
                 $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale" . '\n';
             }
             $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P" . (int)$this->staticDeployThreads . " bash -c CMD");
