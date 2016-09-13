@@ -26,35 +26,36 @@ class Deploy extends Command
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
 
-    protected $urls = ['unsecure' => [], 'secure' => []];
+    private $urls = ['unsecure' => [], 'secure' => []];
 
-    protected $defaultCurrency = 'USD';
+    private $defaultCurrency = 'USD';
 
-    protected $dbHost;
-    protected $dbName;
-    protected $dbUser;
-    protected $dbPassword;
+    private $dbHost;
+    private $dbName;
+    private $dbUser;
+    private $dbPassword;
 
-    protected $adminUsername;
-    protected $adminFirstname;
-    protected $adminLastname;
-    protected $adminEmail;
-    protected $adminPassword;
-    protected $adminUrl;
+    private $adminUsername;
+    private $adminFirstname;
+    private $adminLastname;
+    private $adminEmail;
+    private $adminPassword;
+    private $adminUrl;
+    private $enableUpdateUrls;
 
-    protected $redisHost;
-    protected $redisPort;
-    protected $redisSessionDb = '0';
-    protected $redisCacheDb = '1'; // Value hard-coded in pre-deploy.php
+    private $redisHost;
+    private $redisPort;
+    private $redisSessionDb = '0';
+    private $redisCacheDb = '1'; // Value hard-coded in pre-deploy.php
 
-    protected $solrHost;
-    protected $solrPath;
-    protected $solrPort;
-    protected $solrScheme;
+    private $solrHost;
+    private $solrPath;
+    private $solrPort;
+    private $solrScheme;
 
-    protected $isMasterBranch = null;
-    protected $desiredApplicationMode;
-    protected $staticFilesCleaningStrategy = false;
+    private $isMasterBranch = null;
+    private $desiredApplicationMode;
+    private $staticFilesCleaningStrategy = false;
     private $staticDeployThreads;
     private $staticDeployExcludeThemes = [];
 
@@ -123,16 +124,17 @@ class Deploy extends Command
         $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : "john@example.com";
         $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "admin12";
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
+        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
 
         $this->staticFilesCleaningStrategy = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'enabled' ? true : false;
-        $this->staticDeployExcludeThemes = isset($var["MAGENTO_STATIC_CONTENT_EXCLUDE_THEMES"])
-            ? explode(',', $var["MAGENTO_STATIC_CONTENT_EXCLUDE_THEMES"])
+        $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
+            ? explode(',', $var["STATIC_CONTENT_EXCLUDE_THEMES"])
             : [];
 
-        if (isset($var["MAGENTO_STATIC_CONTENT_THREADS"])) {
-            $this->staticDeployThreads = (int)$var["MAGENTO_STATIC_CONTENT_THREADS"];
-        } else if (isset($_ENV["MAGENTO_STATIC_CONTENT_THREADS"])) {
-            $this->staticDeployThreads = (int)$_ENV["MAGENTO_STATIC_CONTENT_THREADS"];
+        if (isset($var["STATIC_CONTENT_THREADS"])) {
+            $this->staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
+        } else if (isset($_ENV["STATIC_CONTENT_THREADS"])) {
+            $this->staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
         } else if (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
             $this->staticDeployThreads = 3;
         } else { // if Paas environment
@@ -266,19 +268,22 @@ class Deploy extends Command
      */
     private function updateUrls()
     {
-        $this->env->log("Updating secure and unsecure URLs.");
-
-        foreach ($this->urls as $urlType => $urls) {
-            foreach ($urls as $route => $url) {
-                $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
-                if (!strlen($route)) {
-                    $this->executeDbQuery("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and scope_id = '0';");
-                    continue;
+        if ($this->enableUpdateUrls) {
+            $this->env->log("Updating secure and unsecure URLs.");
+            foreach ($this->urls as $urlType => $urls) {
+                foreach ($urls as $route => $url) {
+                    $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
+                    if (!strlen($route)) {
+                        $this->executeDbQuery("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and scope_id = '0';");
+                        continue;
+                    }
+                    $likeKey = $prefix . $route . '%';
+                    $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
+                    $this->executeDbQuery("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and (value like '$likeKey' or value like '$likeKeyParsed');");
                 }
-                $likeKey = $prefix . $route . '%';
-                $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
-                $this->executeDbQuery("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and (value like '$likeKey' or value like '$likeKeyParsed');");
             }
+        } else {
+            $this->env->log("Skipping URL updates");
         }
     }
 
