@@ -337,27 +337,7 @@ class Deploy extends Command
 
         if ($this->redisHost !== null && $this->redisPort !== null) {
             $this->env->log("Updating env.php Redis cache configuration.");
-            $config['cache'] = [
-                'frontend' => [
-                    'default' => [
-                        'backend' => 'Cm_Cache_Backend_Redis',
-                        'backend_options' => [
-                            'server' => $this->redisHost,
-                            'port' => $this->redisPort,
-                            'database' => $this->redisCacheDb
-                        ]
-                    ],
-                    'page_cache' => [
-                        'backend' => 'Cm_Cache_Backend_Redis',
-                        'backend_options' => [
-                            'server' => $this->redisHost,
-                            'port' => $this->redisPort,
-                            'database' => $this->redisCacheDb
-                        ]
-                    ]
-                ]
-            ];
-
+            $config['cache'] = $this->getRedisCacheConfiguration();
             $config['session'] = [
                 'save' => 'redis',
                 'redis' => [
@@ -463,7 +443,11 @@ class Deploy extends Command
 
         /* Enable application mode */
         if ($desiredApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
+            /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
+            $this->disableRedisCache();
             $this->generateStaticFiles();
+            $this->enableRedisCache();
+
             $this->env->log("Enable production mode");
             $configFileName = "app/etc/env.php";
             $config = include $configFileName;
@@ -560,4 +544,59 @@ class Deploy extends Command
         $this->env->log(sprintf("Routes: %s", var_export($this->urls, true)));
     }
 
+    /**
+     * If app/etc/env.php exists, make sure redis is not configured as the cache backend
+     */
+    private function disableRedisCache()
+    {
+        $this->env->log("Disabling redis cache.");
+        $configFile = Environment::MAGENTO_ROOT . '/app/etc/env.php';
+        if (file_exists($configFile)) {
+            $config = include $configFile;
+            if (isset($config['cache'])) {
+                unset ($config['cache']);
+            }
+            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
+            file_put_contents($configFile, $updatedConfig);
+        }
+    }
+
+    /**
+     * If app/etc/env.php exists, make sure redis is not configured as the cache backend
+     */
+    private function enableRedisCache()
+    {
+        $this->env->log("Enabling redis cache.");
+        $configFile = Environment::MAGENTO_ROOT . '/app/etc/env.php';
+        if (file_exists($configFile)) {
+            $config = include $configFile;
+            $config['cache'] = $this->getRedisCacheConfiguration();
+            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
+            file_put_contents($configFile, $updatedConfig);
+        }
+    }
+
+    private function getRedisCacheConfiguration()
+    {
+        return [
+            'frontend' => [
+                'default' => [
+                    'backend' => 'Cm_Cache_Backend_Redis',
+                    'backend_options' => [
+                        'server' => $this->redisHost,
+                        'port' => $this->redisPort,
+                        'database' => $this->redisCacheDb
+                    ]
+                ],
+                'page_cache' => [
+                    'backend' => 'Cm_Cache_Backend_Redis',
+                    'backend_options' => [
+                        'server' => $this->redisHost,
+                        'port' => $this->redisPort,
+                        'database' => $this->redisCacheDb
+                    ]
+                ]
+            ]
+        ];
+    }
 }
