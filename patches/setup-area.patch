@@ -1,4 +1,3 @@
-Ticket MAGETWO-45357
 diff --git a/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php b/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php
 index 844d3f0..d087d07 100644
 --- a/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php

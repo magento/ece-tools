@@ -1,4 +1,3 @@
-Ticket MAGETWO-57414
 diff --git a/vendor/magento/framework/App/StaticResource.php b/vendor/magento/framework/App/StaticResource.php
 index d591deb..6344322 100644
 --- a/vendor/magento/framework/App/StaticResource.php
