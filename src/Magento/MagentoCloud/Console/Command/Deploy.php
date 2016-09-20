@@ -498,11 +498,13 @@ class Deploy extends Command
 
         if (is_array($output) && count($output) > 1) {
             array_shift($output);
-            $locales = implode(' ', $output);
-        }
+            $locales = $output;
+            
+            if (!in_array($this->adminLocale, $locales)) {
+                $locales[] = $this->adminLocale;
+            }
 
-        if (!in_array($this->adminLocale, $locales)) {
-            $locales[] = $this->adminLocale;
+            $locales = implode(' ', $locales);
         }
 
         $excludeThemesOptions = $this->staticDeployExcludeThemes
