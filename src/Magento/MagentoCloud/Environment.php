@@ -46,7 +46,6 @@ class Environment
     }
 
 
-
     public function log($message)
     {
         echo sprintf('[%s] %s', date("Y-m-d H:i:s"), $message) . PHP_EOL;

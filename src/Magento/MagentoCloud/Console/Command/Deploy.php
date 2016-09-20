@@ -479,6 +479,7 @@ class Deploy extends Command
     private function generateStaticFiles()
     {
         $this->env->log("Enabling Maintenance mode.");
+
         /* Enable maintenance mode */
         $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:enable");
 
@@ -491,46 +492,32 @@ class Deploy extends Command
 
         /* Generate static assets */
         $this->env->log("Extract locales");
-        $nonDefaultLocales = [];
 
-        $output = $this->executeDbQuery("select value from core_config_data where path='general/locale/code' and scope = 'default';");
-        $defaultLocale = "en_US";
-        if(is_array($output) && count($output) == 2){
-            $defaultLocale = $output[1];
-            $defaultLocale = preg_replace('/[^A-Za-z_]/', "", $defaultLocale); //No sql injection
-        }
+        $locales = [];
+        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code';");
 
-        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code' and scope <> 'default' and value <> '$defaultLocale';");
         if (is_array($output) && count($output) > 1) {
-            $nonDefaultLocales = $output;
-            array_shift($nonDefaultLocales);
+            array_shift($output);
+            $locales = implode(' ', $output);
         }
 
-        if ($this->adminLocale != $defaultLocale && !in_array($this->adminLocale, $nonDefaultLocales)) {
-            $nonDefaultLocales[] = $this->adminLocale;
+        if (!in_array($this->adminLocale, $locales)) {
+            $locales[] = $this->adminLocale;
         }
 
         $excludeThemesOptions = $this->staticDeployExcludeThemes
             ? "--exclude-theme=" . implode(' --exclude-theme=', $this->staticDeployExcludeThemes)
             : '';
+        $jobsOption = $this->staticDeployThreads
+            ? "--jobs={$this->staticDeployThreads}"
+            : '';
 
-        $logMessage = $nonDefaultLocales ? "Generating static content for locale: $defaultLocale." : "Generating static content.";
+        $logMessage = $locales ? "Generating static content for locales: $locales" : "Generating static content.";
         $this->env->log($logMessage);
 
         $this->env->execute(
-            "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $defaultLocale "
+            "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $locales "
         );
-
-        if(count($nonDefaultLocales) > 0){
-            $logMessage = "Deploying static content for remaining locales in parallel.";
-            $this->env->log($logMessage);
-            $parallelCommands = "";
-            foreach ($nonDefaultLocales as $locale){
-                $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale" . '\n';
-            }
-            $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P" . (int)$this->staticDeployThreads . " bash -c CMD");
-        }
-
 
         /* Disable maintenance mode */
         $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable");
