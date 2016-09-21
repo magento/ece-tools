@@ -39,7 +39,7 @@ class Build extends Command
      */
     protected function configure()
     {
-        $this->buildOptions = $this->getBuildOptions();
+        $this->buildOptions = $this->parseBuildOptions();
         $this->setName('magento-cloud:build')
             ->setDescription('Invokes set of steps to build source code for the Magento on the Magento Cloud');
         parent::configure();
@@ -106,7 +106,7 @@ class Build extends Command
 
     private function compileDI()
     {
-        if (!$this->buildOptions[self::BUILD_OPT_SKIP_DI_CLEARING]) {
+        if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_CLEARING)) {
             $this->env->log("Clearing old compiled DI assets");
             $this->env->execute('rm -rf var/generation/*');
             $this->env->execute('rm -rf var/di/*');
@@ -114,14 +114,14 @@ class Build extends Command
             $this->env->log("Skip clearing old compiled DI assets");
         }
 
-        if (!$this->buildOptions[self::BUILD_OPT_SKIP_ENABLE_ALL_MODULES]) {
+        if (!$this->getBuildOption(self::BUILD_OPT_SKIP_ENABLE_ALL_MODULES)) {
             $this->env->log("Enabling all modules");
             $this->env->execute("cd bin/; /usr/bin/php ./magento setup:di:compile");
         } else {
             $this->env->log("Skip enabling modules");
         }
 
-        if (!$this->buildOptions[self::BUILD_OPT_SKIP_DI_COMPILATION]) {
+        if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
             $this->env->log("Running DI compilation");
             $this->env->execute("cd bin/; /usr/bin/php ./magento setup:di:compile");
         } else {
@@ -141,11 +141,16 @@ class Build extends Command
     /**
      * Parse optional build_options.ini file in Magento root directory
      */
-    private function getBuildOptions()
+    private function parseBuildOptions()
     {
+        $opts = [];
         $fileName = Environment::MAGENTO_ROOT . '/build_options.ini';
         return file_exists($fileName)
             ? parse_ini_file(Environment::MAGENTO_ROOT . '/build_options.ini')
             : [];
+    }
+
+    private function getBuildOption($key) {
+        return isset($this->buildOptions[$key]) ? $this->buildOptions[$key] : false;
     }
 }
