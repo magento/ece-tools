@@ -38,7 +38,6 @@ class Build extends Command
      */
     protected function configure()
     {
-        $this->buildOptions = $this->parseBuildOptions();
         $this->setName('magento-cloud:build')
             ->setDescription('Invokes set of steps to build source code for the Magento on the Magento Cloud');
         parent::configure();
@@ -49,6 +48,7 @@ class Build extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->buildOptions = $this->parseBuildOptions();
         $this->env = new Environment();
         $this->build();
     }
@@ -59,7 +59,7 @@ class Build extends Command
         $this->applyMccPatches();
         $this->applyCommittedPatches();
         $this->compileDI();
-        $this->clearTemp();
+        $this->clearInitDir();
         $this->env->execute('rm -rf app/etc/env.php');
         $this->env->execute('rm -rf app/etc/config.php');
 
@@ -105,14 +105,9 @@ class Build extends Command
 
     private function compileDI()
     {
-        if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_CLEARING)) {
-            $this->env->log("Clearing old compiled DI assets");
-            $this->env->execute('rm -rf var/generation/*');
-            $this->env->execute('rm -rf var/di/*');
-        } else {
-            $this->env->log("Skip clearing old compiled DI assets");
-        }
-
+        $this->env->execute('rm -rf var/generation/*');
+        $this->env->execute('rm -rf var/di/*');
+        
         $this->env->log("Enabling all modules");
         $this->env->execute("cd bin/; /usr/bin/php ./magento module:enable --all");
 
@@ -127,7 +122,7 @@ class Build extends Command
     /**
      * Clear content of temp directory
      */
-    private function clearTemp()
+    private function clearInitDir()
     {
         $this->env->log("Clearing temporary directory.");
         $this->env->execute('rm -rf ../init/*');
