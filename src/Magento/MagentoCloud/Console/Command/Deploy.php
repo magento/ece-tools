@@ -55,10 +55,12 @@ class Deploy extends Command
 
     private $isMasterBranch = null;
     private $magentoApplicationMode;
-    private $staticFilesCleaningStrategy = false;
+    private $cleanStaticViewFiles;
     private $staticDeployThreads;
     private $staticDeployExcludeThemes = [];
     private $adminLocale;
+
+    private $verbosityLevel;
 
     /**
      * @var Environment
@@ -127,7 +129,7 @@ class Deploy extends Command
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
         $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
 
-        $this->staticFilesCleaningStrategy = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled' ? false : true;
+        $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled' ? false : true;
         $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
             ? explode(',', $var["STATIC_CONTENT_EXCLUDE_THEMES"])
             : [];
@@ -163,6 +165,8 @@ class Deploy extends Command
             $this->solrPort = $relationships["solr"][0]["port"];
             $this->solrScheme = $relationships["solr"][0]["scheme"];
         }
+
+        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vv ' : '';
     }
 
     /**
@@ -217,6 +221,8 @@ class Deploy extends Command
             $command .= " \
             --db-password=$this->dbPassword";
         }
+
+        $command .= $this->verbosityLevel;
 
         $this->env->execute($command);
         $this->updateConfig();
@@ -301,7 +307,7 @@ class Deploy extends Command
         $this->env->log("Running setup upgrade.");
 
         $this->env->execute(
-            "cd bin/; /usr/bin/php ./magento setup:upgrade --keep-generated"
+            "cd bin/; /usr/bin/php ./magento setup:upgrade --keep-generated {$this->verbosityLevel}"
         );
     }
 
@@ -313,7 +319,7 @@ class Deploy extends Command
         $this->env->log("Clearing application cache.");
 
         $this->env->execute(
-            "cd bin/; /usr/bin/php ./magento cache:flush"
+            "cd bin/; /usr/bin/php ./magento cache:flush {$this->verbosityLevel}"
         );
     }
 
@@ -439,7 +445,7 @@ class Deploy extends Command
      */
     private function processMagentoMode()
     {
-        $this->env->log("Set Magento application to '{$this->magentoApplicationMode}' mode");
+        $this->env->log("Set Magento application mode to '{$this->magentoApplicationMode}'");
 
         /* Enable application mode */
         if ($this->magentoApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
@@ -456,7 +462,9 @@ class Deploy extends Command
             file_put_contents($configFileName, $updatedConfig);
         } else {
             $this->env->log("Enable developer mode");
-            $this->env->execute("cd bin/; /usr/bin/php ./magento deploy:mode:set " . self::MAGENTO_PRODUCTION_MODE);
+            $this->env->execute(
+                "cd bin/; /usr/bin/php ./magento deploy:mode:set " . self::MAGENTO_PRODUCTION_MODE . $this->verbosityLevel
+            );
         }
     }
 
@@ -465,10 +473,10 @@ class Deploy extends Command
         $this->env->log("Enabling Maintenance mode.");
 
         /* Enable maintenance mode */
-        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:enable");
+        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:enable {$this->verbosityLevel}");
 
         /* If static content is not cleaned, it will be incrementally updated */
-        if ($this->staticFilesCleaningStrategy) {
+        if ($this->cleanStaticViewFiles) {
             $this->env->log("Removing existing static content.");
             $this->env->execute('rm -rf var/view_preprocessed/*');
             $this->env->execute('rm -rf pub/static/*');
@@ -502,11 +510,11 @@ class Deploy extends Command
         $this->env->log($logMessage);
 
         $this->env->execute(
-            "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $locales "
+            "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
         );
 
         /* Disable maintenance mode */
-        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable");
+        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable {$this->verbosityLevel}");
         $this->env->log("Maintenance mode is disabled.");
     }
     /**
