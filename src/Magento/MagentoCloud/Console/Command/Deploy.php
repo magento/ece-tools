@@ -54,11 +54,13 @@ class Deploy extends Command
     private $solrScheme;
 
     private $isMasterBranch = null;
-    private $desiredApplicationMode;
-    private $staticFilesCleaningStrategy = false;
+    private $magentoApplicationMode;
+    private $cleanStaticViewFiles;
     private $staticDeployThreads;
     private $staticDeployExcludeThemes = [];
     private $adminLocale;
+
+    private $verbosityLevel;
 
     /**
      * @var Environment
@@ -127,7 +129,7 @@ class Deploy extends Command
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
         $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
 
-        $this->staticFilesCleaningStrategy = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'enabled' ? true : false;
+        $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled' ? false : true;
         $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
             ? explode(',', $var["STATIC_CONTENT_EXCLUDE_THEMES"])
             : [];
@@ -143,11 +145,14 @@ class Deploy extends Command
             $this->staticDeployThreads = 1;
         }
 
-        $this->desiredApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
-        $this->desiredApplicationMode =
-            in_array($this->desiredApplicationMode, array(self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE))
-                ? $this->desiredApplicationMode
-                : false;
+        if (
+            isset($var["APPLICATION_MODE"])
+            && in_array($var["APPLICATION_MODE"], [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
+        ) {
+            $this->magentoApplicationMode = $var["APPLICATION_MODE"];
+        } else {
+            $this->magentoApplicationMode = self::MAGENTO_PRODUCTION_MODE;
+        }
 
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
             $this->redisHost = $relationships['redis'][0]['host'];
@@ -160,6 +165,8 @@ class Deploy extends Command
             $this->solrPort = $relationships["solr"][0]["port"];
             $this->solrScheme = $relationships["solr"][0]["scheme"];
         }
+
+        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vv ' : '';
     }
 
     /**
@@ -214,6 +221,8 @@ class Deploy extends Command
             $command .= " \
             --db-password=$this->dbPassword";
         }
+
+        $command .= $this->verbosityLevel;
 
         $this->env->execute($command);
         $this->updateConfig();
@@ -298,7 +307,7 @@ class Deploy extends Command
         $this->env->log("Running setup upgrade.");
 
         $this->env->execute(
-            "cd bin/; /usr/bin/php ./magento setup:upgrade --keep-generated"
+            "cd bin/; /usr/bin/php ./magento setup:upgrade --keep-generated {$this->verbosityLevel}"
         );
     }
 
@@ -310,7 +319,7 @@ class Deploy extends Command
         $this->env->log("Clearing application cache.");
 
         $this->env->execute(
-            "cd bin/; /usr/bin/php ./magento cache:flush"
+            "cd bin/; /usr/bin/php ./magento cache:flush {$this->verbosityLevel}"
         );
     }
 
@@ -407,10 +416,7 @@ class Deploy extends Command
     }
 
     /**
-     * Executes database query
-     *
-     * $query must completed, finished with semicolon (;)
-     * If branch isn't master - disable Google Analytics
+     * If branch is not master then disable Google Analytics
      */
     private function disableGoogleAnalytics()
     {
@@ -425,6 +431,7 @@ class Deploy extends Command
      *
      * @param string $query
      * $query must be completed, finished with semicolon (;)
+     * @return mixed
      */
     private function executeDbQuery($query)
     {
@@ -438,11 +445,10 @@ class Deploy extends Command
      */
     private function processMagentoMode()
     {
-        $desiredApplicationMode = ($this->desiredApplicationMode) ? $this->desiredApplicationMode : self::MAGENTO_PRODUCTION_MODE;
-        $this->env->log("Set Magento application to '$desiredApplicationMode' mode");
+        $this->env->log("Set Magento application mode to '{$this->magentoApplicationMode}'");
 
         /* Enable application mode */
-        if ($desiredApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
+        if ($this->magentoApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
             /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
             $this->disableRedisCache();
             $this->generateStaticFiles();
@@ -454,9 +460,11 @@ class Deploy extends Command
             $config['MAGE_MODE'] = 'production';
             $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
             file_put_contents($configFileName, $updatedConfig);
-        } else if ($desiredApplicationMode == self::MAGENTO_DEVELOPER_MODE) {
+        } else {
             $this->env->log("Enable developer mode");
-            $this->env->execute("cd bin/; /usr/bin/php ./magento deploy:mode:set $desiredApplicationMode");
+            $this->env->execute(
+                "cd bin/; /usr/bin/php ./magento deploy:mode:set " . self::MAGENTO_PRODUCTION_MODE . $this->verbosityLevel
+            );
         }
     }
 
@@ -465,10 +473,10 @@ class Deploy extends Command
         $this->env->log("Enabling Maintenance mode.");
 
         /* Enable maintenance mode */
-        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:enable");
+        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:enable {$this->verbosityLevel}");
 
         /* If static content is not cleaned, it will be incrementally updated */
-        if ($this->staticFilesCleaningStrategy) {
+        if ($this->cleanStaticViewFiles) {
             $this->env->log("Removing existing static content.");
             $this->env->execute('rm -rf var/view_preprocessed/*');
             $this->env->execute('rm -rf pub/static/*');
@@ -502,11 +510,11 @@ class Deploy extends Command
         $this->env->log($logMessage);
 
         $this->env->execute(
-            "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $locales "
+            "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
         );
 
         /* Disable maintenance mode */
-        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable");
+        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable {$this->verbosityLevel}");
         $this->env->log("Maintenance mode is disabled.");
     }
     /**
