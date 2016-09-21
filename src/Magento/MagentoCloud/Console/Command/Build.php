@@ -69,8 +69,9 @@ class Build extends Command
          */
         $this->env->log("Copying writable directories to temp directory.");
         foreach ($this->env->writableDirs as $dir) {
-            $this->env->execute(sprintf('mkdir -p ./init/%s', $dir));
-            $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir));
+            $this->env->execute(sprintf('mkdir -p init/%s', $dir));
+            $this->env->execute(sprintf('mkdir -p %s', $dir));
+            $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* init/%s"', $dir, $dir));
             $this->env->execute(sprintf('rm -rf %s', $dir));
             $this->env->execute(sprintf('mkdir %s', $dir));
         }
@@ -107,7 +108,7 @@ class Build extends Command
     {
         $this->env->execute('rm -rf var/generation/*');
         $this->env->execute('rm -rf var/di/*');
-        
+
         $this->env->log("Enabling all modules");
         $this->env->execute("cd bin/; /usr/bin/php ./magento module:enable --all");
 
