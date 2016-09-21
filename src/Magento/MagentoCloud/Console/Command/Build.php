@@ -143,7 +143,6 @@ class Build extends Command
      */
     private function parseBuildOptions()
     {
-        $opts = [];
         $fileName = Environment::MAGENTO_ROOT . '/build_options.ini';
         return file_exists($fileName)
             ? parse_ini_file(Environment::MAGENTO_ROOT . '/build_options.ini')
