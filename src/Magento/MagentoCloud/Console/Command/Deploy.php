@@ -54,7 +54,7 @@ class Deploy extends Command
     private $solrScheme;
 
     private $isMasterBranch = null;
-    private $desiredApplicationMode;
+    private $magentoApplicationMode;
     private $staticFilesCleaningStrategy = false;
     private $staticDeployThreads;
     private $staticDeployExcludeThemes = [];
@@ -143,11 +143,14 @@ class Deploy extends Command
             $this->staticDeployThreads = 1;
         }
 
-        $this->desiredApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
-        $this->desiredApplicationMode =
-            in_array($this->desiredApplicationMode, array(self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE))
-                ? $this->desiredApplicationMode
-                : false;
+        if (
+            isset($var["APPLICATION_MODE"])
+            && in_array($var["APPLICATION_MODE"], [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
+        ) {
+            $this->magentoApplicationMode = $var["APPLICATION_MODE"];
+        } else {
+            $this->magentoApplicationMode = self::MAGENTO_PRODUCTION_MODE;
+        }
 
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
             $this->redisHost = $relationships['redis'][0]['host'];
@@ -407,10 +410,7 @@ class Deploy extends Command
     }
 
     /**
-     * Executes database query
-     *
-     * $query must completed, finished with semicolon (;)
-     * If branch isn't master - disable Google Analytics
+     * If branch is not master then disable Google Analytics
      */
     private function disableGoogleAnalytics()
     {
@@ -425,6 +425,7 @@ class Deploy extends Command
      *
      * @param string $query
      * $query must be completed, finished with semicolon (;)
+     * @return mixed
      */
     private function executeDbQuery($query)
     {
@@ -438,11 +439,10 @@ class Deploy extends Command
      */
     private function processMagentoMode()
     {
-        $desiredApplicationMode = ($this->desiredApplicationMode) ? $this->desiredApplicationMode : self::MAGENTO_PRODUCTION_MODE;
-        $this->env->log("Set Magento application to '$desiredApplicationMode' mode");
+        $this->env->log("Set Magento application to '{$this->magentoApplicationMode}' mode");
 
         /* Enable application mode */
-        if ($desiredApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
+        if ($this->magentoApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
             /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
             $this->disableRedisCache();
             $this->generateStaticFiles();
@@ -454,9 +454,9 @@ class Deploy extends Command
             $config['MAGE_MODE'] = 'production';
             $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
             file_put_contents($configFileName, $updatedConfig);
-        } else if ($desiredApplicationMode == self::MAGENTO_DEVELOPER_MODE) {
+        } else {
             $this->env->log("Enable developer mode");
-            $this->env->execute("cd bin/; /usr/bin/php ./magento deploy:mode:set $desiredApplicationMode");
+            $this->env->execute("cd bin/; /usr/bin/php ./magento deploy:mode:set " . self::MAGENTO_PRODUCTION_MODE);
         }
     }
 

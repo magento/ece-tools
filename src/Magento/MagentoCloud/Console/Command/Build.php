@@ -16,6 +16,12 @@ use Magento\MagentoCloud\Environment;
  */
 class Build extends Command
 {
+    /**
+     * Options for build_options.ini
+     */
+    const BUILD_OPT_SKIP_DI_COMPILATION = 'skip_di_compilation';
+    const BUILD_OPT_SKIP_DI_CLEARING = 'skip_di_clearing';
+    const BUILD_OPT_SKIP_ENABLE_ALL_MODULES = 'skip_enable_all_modules';
 
     /**
      * @var Environment
@@ -23,11 +29,17 @@ class Build extends Command
     private $env;
 
     /**
+     * @var array
+     */
+    private $buildOptions;
+
+    /**
      * {@inheritdoc}
      * @throws \InvalidArgumentException
      */
     protected function configure()
     {
+        $this->buildOptions = $this->getBuildOptions();
         $this->setName('magento-cloud:build')
             ->setDescription('Invokes set of steps to build source code for the Magento on the Magento Cloud');
         parent::configure();
@@ -54,7 +66,7 @@ class Build extends Command
 
         /**
          * Writable directories will be erased when the writable filesystem is mounted to them. This
-         * step backs them up to /app/init/
+         * step backs them up to ./init/
          */
         $this->env->log("Copying writable directories to temp directory.");
         foreach ($this->env->writableDirs as $dir) {
@@ -94,11 +106,27 @@ class Build extends Command
 
     private function compileDI()
     {
-        $this->env->log("Run DI compilation");
-        $this->env->execute('rm -rf var/generation/*');
-        $this->env->execute('rm -rf var/di/*');
-        $this->env->execute("cd bin/; /usr/bin/php ./magento module:enable --all");
-        $this->env->execute("cd bin/; /usr/bin/php ./magento setup:di:compile");
+        if (!$this->buildOptions[self::BUILD_OPT_SKIP_DI_CLEARING]) {
+            $this->env->log("Clearing old compiled DI assets");
+            $this->env->execute('rm -rf var/generation/*');
+            $this->env->execute('rm -rf var/di/*');
+        } else {
+            $this->env->log("Skip clearing old compiled DI assets");
+        }
+
+        if (!$this->buildOptions[self::BUILD_OPT_SKIP_ENABLE_ALL_MODULES]) {
+            $this->env->log("Enabling all modules");
+            $this->env->execute("cd bin/; /usr/bin/php ./magento setup:di:compile");
+        } else {
+            $this->env->log("Skip enabling modules");
+        }
+
+        if (!$this->buildOptions[self::BUILD_OPT_SKIP_DI_COMPILATION]) {
+            $this->env->log("Running DI compilation");
+            $this->env->execute("cd bin/; /usr/bin/php ./magento setup:di:compile");
+        } else {
+            $this->env->log("Skip running DI compilation");
+        }
     }
 
     /**
@@ -108,5 +136,16 @@ class Build extends Command
     {
         $this->env->log("Clearing temporary directory.");
         $this->env->execute('rm -rf ../init/*');
+    }
+
+    /**
+     * Parse optional build_options.ini file in Magento root directory
+     */
+    private function getBuildOptions()
+    {
+        $fileName = Environment::MAGENTO_ROOT . '/build_options.ini';
+        return file_exists($fileName)
+            ? parse_ini_file(Environment::MAGENTO_ROOT . '/build_options.ini')
+            : [];
     }
 }
