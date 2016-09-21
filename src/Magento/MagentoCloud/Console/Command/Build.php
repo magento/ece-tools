@@ -21,7 +21,6 @@ class Build extends Command
      */
     const BUILD_OPT_SKIP_DI_COMPILATION = 'skip_di_compilation';
     const BUILD_OPT_SKIP_DI_CLEARING = 'skip_di_clearing';
-    const BUILD_OPT_SKIP_ENABLE_ALL_MODULES = 'skip_enable_all_modules';
 
     /**
      * @var Environment
@@ -114,12 +113,8 @@ class Build extends Command
             $this->env->log("Skip clearing old compiled DI assets");
         }
 
-        if (!$this->getBuildOption(self::BUILD_OPT_SKIP_ENABLE_ALL_MODULES)) {
-            $this->env->log("Enabling all modules");
-            $this->env->execute("cd bin/; /usr/bin/php ./magento setup:di:compile");
-        } else {
-            $this->env->log("Skip enabling modules");
-        }
+        $this->env->log("Enabling all modules");
+        $this->env->execute("cd bin/; /usr/bin/php ./magento module:enable --all");
 
         if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
             $this->env->log("Running DI compilation");
