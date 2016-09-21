@@ -71,7 +71,7 @@ class Build extends Command
         foreach ($this->env->writableDirs as $dir) {
             $this->env->execute(sprintf('mkdir -p init/%s', $dir));
             $this->env->execute(sprintf('mkdir -p %s', $dir));
-            $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* init/%s"', $dir, $dir));
+            $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* init/%s/"', $dir, $dir));
             $this->env->execute(sprintf('rm -rf %s', $dir));
             $this->env->execute(sprintf('mkdir %s', $dir));
         }
