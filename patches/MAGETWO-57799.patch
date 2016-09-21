@@ -1,7 +1,7 @@
 diff -Naur a/vendor/magento/module-cms/Setup/UpgradeData.php b/vendor/magento/module-cms/Setup/UpgradeData.php
 --- a/vendor/magento/module-cms/Setup/UpgradeData.php	2016-08-29 16:34:24.000000000 -0500
 +++ b/vendor/magento/module-cms/Setup/UpgradeData.php	2016-08-29 16:34:12.000000000 -0500
-@@ -48,196 +48,5 @@
+@@ -48,199 +48,5 @@
       */
      public function upgrade(ModuleDataSetupInterface $setup, ModuleContextInterface $context)
      {
@@ -192,8 +192,11 @@ diff -Naur a/vendor/magento/module-cms/Setup/UpgradeData.php b/vendor/magento/mo
 -</div>
 -EOD;
 -            $privacyAndCookiePolicyPage = $this->createPage()->load(self::PRIVACY_COOKIE_PAGE_ID);
--            $privacyAndCookiePolicyPage->setContent($newPageContent);
--            $privacyAndCookiePolicyPage->save();
+-            $privacyAndCookiePolicyPageId = $privacyAndCookiePolicyPage->getId();
+-            if ($privacyAndCookiePolicyPageId) {
+-                $privacyAndCookiePolicyPage->setContent($newPageContent);
+-                $privacyAndCookiePolicyPage->save();
+-            }
 -        }
 -        $setup->endSetup();
      }

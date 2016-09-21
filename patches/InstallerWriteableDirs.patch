@@ -1,3 +1,4 @@
+Ticket MAGETWO-57398
 diff --git a/setup/src/Magento/Setup/Model/FilePermissions.php b/setup/src/Magento/Setup/Model/FilePermissions.php
 index 43dc400..9b06dc7 100644
 --- a/vendor/magento/framework/Setup/FilePermissions.php
