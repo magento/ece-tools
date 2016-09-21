@@ -1,0 +1,17 @@
+MAGETWO-57719
+diff --git a/vendor/magento/module-catalog-inventory/Helper/Stock.php b/vendor/magento/module-catalog-inventory/Helper/Stock.php
+index 0899592..d2ce697 100644
+--- a/vendor/magento/module-catalog-inventory/Helper/Stock.php
++++ b/vendor/magento/module-catalog-inventory/Helper/Stock.php
+@@ -154,7 +154,10 @@ class Stock
+                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+             );
+             $resource = $this->getStockStatusResource();
+-            $resource->addStockDataToCollection($collection, !$isShowOutOfStock);
++            $resource->addStockDataToCollection(
++                $collection,
++                !$isShowOutOfStock && $collection->getFlag('require_stock_items')
++            );
+             $collection->setFlag($stockFlag, true);
+         }
+     }
