@@ -11,7 +11,7 @@ index 0899592..d2ce697 100644
 +            $resource->addStockDataToCollection(
 +                $collection,
 +                !$isShowOutOfStock && $collection->getFlag('require_stock_items')
-+            )
++            );
              $collection->setFlag($stockFlag, true);
          }
      }
