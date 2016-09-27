@@ -94,12 +94,11 @@ class Build extends Command
         $patchesDir = Environment::MAGENTO_ROOT . 'm2-hotfixes/';
         $this->env->log("Checking if patches exist under " . $patchesDir);
         if (is_dir($patchesDir)) {
-            $iterableDir = new \DirectoryIterator($patchesDir);
-            foreach ($iterableDir as $fileinfo) {
-                if (!$fileinfo->isDot()) {
-                    $cmd = 'git apply ' . $patchesDir . '/' . $fileinfo->getFilename();
-                    $this->env->execute($cmd);
-                }
+            $files = glob($patchesDir . "*");
+            sort($files);
+            foreach ($files as $file) {
+                $cmd = 'git apply '  . $file;
+                $this->env->execute($cmd);
             }
         }
     }
