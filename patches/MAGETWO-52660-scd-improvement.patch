@@ -1,0 +1,3325 @@
+diff --git a/vendor/magento/module-deploy/Console/Command/DeployStaticContentCommand.php b/vendor/magento/module-deploy/Console/Command/DeployStaticContentCommand.php
+index bbd2dea..e515f4e 100644
+--- a/vendor/magento/module-deploy/Console/Command/DeployStaticContentCommand.php
++++ b/vendor/magento/module-deploy/Console/Command/DeployStaticContentCommand.php
+@@ -15,10 +15,8 @@
+ use Magento\Framework\App\ObjectManagerFactory;
+ use Magento\Framework\ObjectManagerInterface;
+ use Magento\Framework\Validator\Locale;
+-use Magento\Framework\Console\Cli;
+-use Magento\Deploy\Model\ProcessManager;
+-use Magento\Deploy\Model\Process;
+ use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
++use Magento\Deploy\Model\DeployManager;
+ 
+ /**
+  * Deploy static content command
+@@ -116,103 +114,110 @@ protected function configure()
+                     Options::NO_JAVASCRIPT,
+                     null,
+                     InputOption::VALUE_NONE,
+-                    'If specified, no JavaScript will be deployed.'
++                    'Do not deploy JavaScript files'
+                 ),
+                 new InputOption(
+                     Options::NO_CSS,
+                     null,
+                     InputOption::VALUE_NONE,
+-                    'If specified, no CSS will be deployed.'
++                    'Do not deploy CSS files.'
+                 ),
+                 new InputOption(
+                     Options::NO_LESS,
+                     null,
+                     InputOption::VALUE_NONE,
+-                    'If specified, no LESS will be deployed.'
++                    'Do not deploy LESS files.'
+                 ),
+                 new InputOption(
+                     Options::NO_IMAGES,
+                     null,
+                     InputOption::VALUE_NONE,
+-                    'If specified, no images will be deployed.'
++                    'Do not deploy images.'
+                 ),
+                 new InputOption(
+                     Options::NO_FONTS,
+                     null,
+                     InputOption::VALUE_NONE,
+-                    'If specified, no font files will be deployed.'
++                    'Do not deploy font files.'
+                 ),
+                 new InputOption(
+                     Options::NO_HTML,
+                     null,
+                     InputOption::VALUE_NONE,
+-                    'If specified, no html files will be deployed.'
++                    'Do not deploy HTML files.'
+                 ),
+                 new InputOption(
+                     Options::NO_MISC,
+                     null,
+                     InputOption::VALUE_NONE,
+-                    'If specified, no miscellaneous files will be deployed.'
++                    'Do not deploy other types of files (.md, .jbf, .csv, etc...).'
+                 ),
+                 new InputOption(
+                     Options::NO_HTML_MINIFY,
+                     null,
+                     InputOption::VALUE_NONE,
+-                    'If specified, html will not be minified.'
++                    'Do not minify HTML files.'
+                 ),
+                 new InputOption(
+                     Options::THEME,
+                     '-t',
+                     InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+-                    'If specified, just specific theme(s) will be actually deployed.',
++                    'Generate static view files for only the specified themes.',
+                     ['all']
+                 ),
+                 new InputOption(
+                     Options::EXCLUDE_THEME,
+                     null,
+                     InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+-                    'If specified, exclude specific theme(s) from deployment.',
++                    'Do not generate files for the specified themes.',
+                     ['none']
+                 ),
+                 new InputOption(
+                     Options::LANGUAGE,
+                     '-l',
+                     InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+-                    'List of languages you want the tool populate files for.',
++                    'Generate files only for the specified languages.',
+                     ['all']
+                 ),
+                 new InputOption(
+                     Options::EXCLUDE_LANGUAGE,
+                     null,
+                     InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+-                    'List of langiages you do not want the tool populate files for.',
++                    'Do not generate files for the specified languages.',
+                     ['none']
+                 ),
+                 new InputOption(
+                     Options::AREA,
+                     '-a',
+                     InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+-                    'List of areas you want the tool populate files for.',
++                    'Generate files only for the specified areas.',
+                     ['all']
+                 ),
+                 new InputOption(
+                     Options::EXCLUDE_AREA,
+                     null,
+                     InputOption::VALUE_IS_ARRAY | InputOption::VALUE_OPTIONAL,
+-                    'List of areas you do not want the tool populate files for.',
++                    'Do not generate files for the specified areas.',
+                     ['none']
+                 ),
+                 new InputOption(
+                     Options::JOBS_AMOUNT,
+                     '-j',
+                     InputOption::VALUE_OPTIONAL,
+-                    'Amount of jobs to which script can be paralleled.',
++                    'Enable parallel processing using the specified number of jobs.',
+                     self::DEFAULT_JOBS_AMOUNT
+                 ),
++                new InputOption(
++                    Options::SYMLINK_LOCALE,
++                    null,
++                    InputOption::VALUE_NONE,
++                    'Create symlinks for the files of those locales, which are passed for deployment, '
++                    . 'but have no customizations'
++                ),
+                 new InputArgument(
+                     self::LANGUAGES_ARGUMENT,
+                     InputArgument::IS_ARRAY,
+-                    'List of languages you want the tool populate files for.'
++                    'Space-separated list of ISO-636 language codes for which to output static view files.'
+                 ),
+             ]);
+ 
+@@ -358,20 +363,24 @@ protected function execute(InputInterface $input, OutputInterface $output)
+         $output->writeln("Requested areas: " . implode(', ', array_keys($deployableAreaThemeMap)));
+         $output->writeln("Requested themes: " . implode(', ', $requestedThemes));
+ 
+-        $deployer = $this->objectManager->create(
+-            \Magento\Deploy\Model\Deployer::class,
++        /** @var $deployManager DeployManager */
++        $deployManager = $this->objectManager->create(
++            DeployManager::class,
+             [
+-                'filesUtil' => $filesUtil,
+                 'output' => $output,
+                 'options' => $this->input->getOptions(),
+             ]
+         );
+ 
+-        if ($this->isCanBeParalleled()) {
+-            return $this->runProcessesInParallel($deployer, $deployableAreaThemeMap, $deployableLanguages);
+-        } else {
+-            return $this->deploy($deployer, $deployableLanguages, $deployableAreaThemeMap);
++        foreach ($deployableAreaThemeMap as $area => $themes) {
++            foreach ($deployableLanguages as $locale) {
++                foreach ($themes as $themePath) {
++                    $deployManager->addPack($area, $themePath, $locale);
++                }
++            }
+         }
++
++        return $deployManager->deploy();
+     }
+ 
+     /**
+@@ -432,89 +441,4 @@ private function prepareDeployableEntities($filesUtil)
+ 
+         return [$deployableLanguages, $deployableAreaThemeMap, $requestedThemes];
+     }
+-
+-    /**
+-     * @param \Magento\Deploy\Model\Deployer $deployer
+-     * @param array $deployableLanguages
+-     * @param array $deployableAreaThemeMap
+-     * @return int
+-     */
+-    private function deploy($deployer, $deployableLanguages, $deployableAreaThemeMap)
+-    {
+-        return $deployer->deploy(
+-            $this->objectManagerFactory,
+-            $deployableLanguages,
+-            $deployableAreaThemeMap
+-        );
+-    }
+-
+-    /**
+-     * @param \Magento\Deploy\Model\Deployer $deployer
+-     * @param array $deployableAreaThemeMap
+-     * @param array $deployableLanguages
+-     * @return int
+-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+-     */
+-    private function runProcessesInParallel($deployer, $deployableAreaThemeMap, $deployableLanguages)
+-    {
+-        /** @var ProcessManager $processManager */
+-        $processManager = $this->objectManager->create(ProcessManager::class);
+-        $processNumber = 0;
+-        $processQueue = [];
+-        foreach ($deployableAreaThemeMap as $area => &$themes) {
+-            foreach ($themes as $theme) {
+-                foreach ($deployableLanguages as $lang) {
+-                    $deployerFunc = function (Process $process) use ($area, $theme, $lang, $deployer) {
+-                        return $this->deploy($deployer, [$lang], [$area => [$theme]]);
+-                    };
+-                    if ($processNumber >= $this->getProcessesAmount()) {
+-                        $processQueue[] = $deployerFunc;
+-                    } else {
+-                        $processManager->fork($deployerFunc);
+-                    }
+-                    $processNumber++;
+-                }
+-            }
+-        }
+-        $returnStatus = null;
+-        while (count($processManager->getProcesses()) > 0) {
+-            foreach ($processManager->getProcesses() as $process) {
+-                if ($process->isCompleted()) {
+-                    $processManager->delete($process);
+-                    $returnStatus |= $process->getStatus();
+-                    if ($queuedProcess = array_shift($processQueue)) {
+-                        $processManager->fork($queuedProcess);
+-                    }
+-                    if (count($processManager->getProcesses()) >= $this->getProcessesAmount()) {
+-                        break 1;
+-                    }
+-                }
+-            }
+-            usleep(5000);
+-        }
+-
+-        return $returnStatus === Cli::RETURN_SUCCESS ?: Cli::RETURN_FAILURE;
+-    }
+-
+-    /**
+-     * @return bool
+-     */
+-    private function isCanBeParalleled()
+-    {
+-        return function_exists('pcntl_fork') && $this->getProcessesAmount() > 1;
+-    }
+-
+-    /**
+-     * @return int
+-     */
+-    private function getProcessesAmount()
+-    {
+-        $jobs = (int)$this->input->getOption(Options::JOBS_AMOUNT);
+-        if ($jobs < 1) {
+-            throw new \InvalidArgumentException(
+-                Options::JOBS_AMOUNT . ' argument has invalid value. It must be greater than 0'
+-            );
+-        }
+-        return $jobs;
+-    }
+ }
+diff --git a/vendor/magento/module-deploy/Console/Command/DeployStaticOptionsInterface.php b/vendor/magento/module-deploy/Console/Command/DeployStaticOptionsInterface.php
+index aa2ff44..98d0995 100644
+--- a/vendor/magento/module-deploy/Console/Command/DeployStaticOptionsInterface.php
++++ b/vendor/magento/module-deploy/Console/Command/DeployStaticOptionsInterface.php
+@@ -87,4 +87,9 @@
+      * Jey for jobs option
+      */
+     const JOBS_AMOUNT = 'jobs';
++
++    /**
++     * Symlink locale if it not customized
++     */
++    const SYMLINK_LOCALE = 'symlink-locale';
+ }
+diff --git a/vendor/magento/module-deploy/Model/Deploy/DeployInterface.php b/vendor/magento/module-deploy/Model/Deploy/DeployInterface.php
+new file mode 100644
+index 0000000..16168c2
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/Deploy/DeployInterface.php
+@@ -0,0 +1,23 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model\Deploy;
++
++interface DeployInterface
++{
++    /**
++     * Base locale option without customizations
++     */
++    const DEPLOY_BASE_LOCALE = 'deploy_base_locale';
++
++    /**
++     * @param string $area
++     * @param string $themePath
++     * @param string $locale
++     * @return int
++     */
++    public function deploy($area, $themePath, $locale);
++}
+diff --git a/vendor/magento/module-deploy/Model/Deploy/LocaleDeploy.php b/vendor/magento/module-deploy/Model/Deploy/LocaleDeploy.php
+new file mode 100644
+index 0000000..aa112a7
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/Deploy/LocaleDeploy.php
+@@ -0,0 +1,453 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model\Deploy;
++
++use Magento\Framework\App\Utility\Files;
++use Magento\Framework\App\View\Asset\Publisher;
++use Magento\Framework\View\Asset\ContentProcessorException;
++use Magento\Framework\View\Asset\PreProcessor\AlternativeSourceInterface;
++use Magento\Framework\View\Design\Theme\ThemeProviderInterface;
++use Symfony\Component\Console\Output\OutputInterface;
++use Magento\Framework\Config\Theme;
++use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
++use Magento\Framework\Translate\Js\Config as JsTranslationConfig;
++use Magento\Framework\View\Asset\Minification;
++use Psr\Log\LoggerInterface;
++use Magento\Framework\Console\Cli;
++
++/**
++ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
++ * @SuppressWarnings(PHPMD.TooManyFields)
++ */
++class LocaleDeploy implements DeployInterface
++{
++    /**
++     * @var int
++     */
++    private $count = 0;
++
++    /**
++     * @var int
++     */
++    private $errorCount = 0;
++
++    /**
++     * @var OutputInterface
++     */
++    private $output;
++
++    /**
++     * @var \Magento\Framework\View\Asset\Repository
++     */
++    private $assetRepo;
++
++    /**
++     * @var Publisher
++     */
++    private $assetPublisher;
++
++    /**
++     * @var \Magento\Framework\View\Asset\Bundle\Manager
++     */
++    private $bundleManager;
++
++    /**
++     * @var Files
++     */
++    private $filesUtil;
++
++    /**
++     * @var ThemeProviderInterface
++     */
++    private $themeProvider;
++
++    /**
++     * @var array
++     */
++    private $options = [];
++
++    /**
++     * @var JsTranslationConfig
++     */
++    private $jsTranslationConfig;
++
++    /**
++     * @var Minification
++     */
++    private $minification;
++
++    /**
++     * @var LoggerInterface
++     */
++    private $logger;
++
++    /**
++     * @var \Magento\Framework\View\Asset\RepositoryFactory
++     */
++    private $assetRepoFactory;
++
++    /**
++     * @var \Magento\RequireJs\Model\FileManagerFactory
++     */
++    private $fileManagerFactory;
++
++    /**
++     * @var \Magento\Framework\RequireJs\ConfigFactory
++     */
++    private $requireJsConfigFactory;
++
++    /**
++     * @var \Magento\Framework\View\DesignInterfaceFactory
++     */
++    private $designFactory;
++
++    /**
++     * @var \Magento\Framework\Locale\ResolverInterface
++     */
++    private $localeResolver;
++
++    /**
++     * @var \Magento\Framework\View\Asset\PreProcessor\AlternativeSourceInterface[]
++     */
++    private $alternativeSources;
++
++    /**
++     * @var array
++     */
++    private static $fileExtensionOptionMap = [
++        'js' => Options::NO_JAVASCRIPT,
++        'map' => Options::NO_JAVASCRIPT,
++        'css' => Options::NO_CSS,
++        'less' => Options::NO_LESS,
++        'html' => Options::NO_HTML,
++        'htm' => Options::NO_HTML,
++        'jpg' => Options::NO_IMAGES,
++        'jpeg' => Options::NO_IMAGES,
++        'gif' => Options::NO_IMAGES,
++        'png' => Options::NO_IMAGES,
++        'ico' => Options::NO_IMAGES,
++        'svg' => Options::NO_IMAGES,
++        'eot' => Options::NO_FONTS,
++        'ttf' => Options::NO_FONTS,
++        'woff' => Options::NO_FONTS,
++        'woff2' => Options::NO_FONTS,
++        'md' => Options::NO_MISC,
++        'jbf' => Options::NO_MISC,
++        'csv' => Options::NO_MISC,
++        'json' => Options::NO_MISC,
++        'txt' => Options::NO_MISC,
++        'htc' => Options::NO_MISC,
++        'swf' => Options::NO_MISC,
++        'LICENSE' => Options::NO_MISC,
++        '' => Options::NO_MISC,
++    ];
++
++    /**
++     * @param OutputInterface $output
++     * @param JsTranslationConfig $jsTranslationConfig
++     * @param Minification $minification
++     * @param \Magento\Framework\View\Asset\Repository $assetRepo
++     * @param \Magento\Framework\View\Asset\RepositoryFactory $assetRepoFactory
++     * @param \Magento\RequireJs\Model\FileManagerFactory $fileManagerFactory
++     * @param \Magento\Framework\RequireJs\ConfigFactory $requireJsConfigFactory
++     * @param Publisher $assetPublisher
++     * @param \Magento\Framework\View\Asset\Bundle\Manager $bundleManager
++     * @param ThemeProviderInterface $themeProvider
++     * @param LoggerInterface $logger
++     * @param Files $filesUtil
++     * @param \Magento\Framework\View\DesignInterfaceFactory $designFactory
++     * @param \Magento\Framework\Locale\ResolverInterface $localeResolver
++     * @param array $alternativeSources
++     * @param array $options
++     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
++     */
++    public function __construct(
++        OutputInterface $output,
++        JsTranslationConfig $jsTranslationConfig,
++        Minification $minification,
++        \Magento\Framework\View\Asset\Repository $assetRepo,
++        \Magento\Framework\View\Asset\RepositoryFactory $assetRepoFactory,
++        \Magento\RequireJs\Model\FileManagerFactory $fileManagerFactory,
++        \Magento\Framework\RequireJs\ConfigFactory $requireJsConfigFactory,
++        \Magento\Framework\App\View\Asset\Publisher $assetPublisher,
++        \Magento\Framework\View\Asset\Bundle\Manager $bundleManager,
++        \Magento\Framework\View\Design\Theme\ThemeProviderInterface $themeProvider,
++        LoggerInterface $logger,
++        Files $filesUtil,
++        \Magento\Framework\View\DesignInterfaceFactory $designFactory,
++        \Magento\Framework\Locale\ResolverInterface $localeResolver,
++        array $alternativeSources,
++        $options = []
++    ) {
++        $this->output = $output;
++        $this->assetRepo = $assetRepo;
++        $this->assetPublisher = $assetPublisher;
++        $this->bundleManager = $bundleManager;
++        $this->filesUtil = $filesUtil;
++        $this->jsTranslationConfig = $jsTranslationConfig;
++        $this->minification = $minification;
++        $this->logger = $logger;
++        $this->assetRepoFactory = $assetRepoFactory;
++        $this->fileManagerFactory = $fileManagerFactory;
++        $this->requireJsConfigFactory = $requireJsConfigFactory;
++        $this->themeProvider = $themeProvider;
++        $this->alternativeSources = array_map(
++            function (AlternativeSourceInterface $alternativeSource) {
++                return $alternativeSource;
++            },
++            $alternativeSources
++        );
++        $this->designFactory = $designFactory;
++        $this->localeResolver = $localeResolver;
++        $this->options = $options;
++    }
++
++    /**
++     * {@inheritdoc}
++     */
++    public function deploy($area, $themePath, $locale)
++    {
++        $this->output->writeln("=== {$area} -> {$themePath} -> {$locale} ===");
++
++        // emulate application locale needed for correct file path resolving
++        $this->localeResolver->setLocale($locale);
++
++        $this->deployRequireJsConfig($area, $themePath);
++        $this->deployAppFiles($area, $themePath, $locale);
++        $this->deployLibFiles($area, $themePath, $locale);
++
++        if (!$this->getOption(Options::NO_JAVASCRIPT)) {
++            if ($this->jsTranslationConfig->dictionaryEnabled()) {
++                $dictionaryFileName = $this->jsTranslationConfig->getDictionaryFileName();
++                $this->deployFile($dictionaryFileName, $area, $themePath, $locale, null);
++            }
++        }
++        if (!$this->getOption(Options::NO_JAVASCRIPT)) {
++            $this->bundleManager->flush();
++        }
++        $this->output->writeln("\nSuccessful: {$this->count} files; errors: {$this->errorCount}\n---\n");
++
++        return $this->errorCount ? Cli::RETURN_FAILURE : Cli::RETURN_SUCCESS;
++    }
++
++    /**
++     * @param string $area
++     * @param string $themePath
++     * @return void
++     */
++    private function deployRequireJsConfig($area, $themePath)
++    {
++        if (!$this->getOption(Options::DRY_RUN) && !$this->getOption(Options::NO_JAVASCRIPT)) {
++            $design = $this->designFactory->create()->setDesignTheme($themePath, $area);
++            $assetRepo = $this->assetRepoFactory->create(['design' => $design]);
++            /** @var \Magento\RequireJs\Model\FileManager $fileManager */
++            $fileManager = $this->fileManagerFactory->create(
++                [
++                    'config' => $this->requireJsConfigFactory->create(
++                        [
++                            'assetRepo' => $assetRepo,
++                            'design' => $design,
++                        ]
++                    ),
++                    'assetRepo' => $assetRepo,
++                ]
++            );
++            $fileManager->createRequireJsConfigAsset();
++            if ($this->minification->isEnabled('js')) {
++                $fileManager->createMinResolverAsset();
++            }
++        }
++    }
++
++    /**
++     * @param string $area
++     * @param string $themePath
++     * @param string $locale
++     * @return void
++     */
++    private function deployAppFiles($area, $themePath, $locale)
++    {
++        foreach ($this->filesUtil->getStaticPreProcessingFiles() as $info) {
++            list($fileArea, $fileTheme, , $module, $filePath, $fullPath) = $info;
++
++            if ($this->checkSkip($filePath)) {
++                continue;
++            }
++
++            if ($this->isCanBeDeployed($fileArea, $fileTheme, $area, $themePath)) {
++                $compiledFile = $this->deployFile(
++                    $filePath,
++                    $area,
++                    $themePath,
++                    $locale,
++                    $module,
++                    $fullPath
++                );
++                if ($compiledFile !== '' && !$this->checkSkip($compiledFile)) {
++                    $this->deployFile($compiledFile, $area, $themePath, $locale, $module, $fullPath);
++                }
++            }
++        }
++    }
++
++    /**
++     * @param string $fileArea
++     * @param string $fileTheme
++     * @param string $area
++     * @param string $themePath
++     * @return bool
++     */
++    private function isCanBeDeployed($fileArea, $fileTheme, $area, $themePath)
++    {
++        return ($fileArea == $area || $fileArea == 'base')
++        && ($fileTheme == '' || $fileTheme == $themePath
++            || in_array(
++                $fileArea . Theme::THEME_PATH_SEPARATOR . $fileTheme,
++                $this->findAncestors($area . Theme::THEME_PATH_SEPARATOR . $themePath)
++            )
++        );
++    }
++
++    /**
++     * @param string $area
++     * @param string $themePath
++     * @param string $locale
++     * @return void
++     */
++    private function deployLibFiles($area, $themePath, $locale)
++    {
++        foreach ($this->filesUtil->getStaticLibraryFiles() as $filePath) {
++
++            if ($this->checkSkip($filePath)) {
++                continue;
++            }
++
++            $compiledFile = $this->deployFile($filePath, $area, $themePath, $locale, null);
++
++            if ($compiledFile !== '' && !$this->checkSkip($compiledFile)) {
++                $this->deployFile($compiledFile, $area, $themePath, $locale, null);
++            }
++        }
++    }
++
++    /**
++     * Deploy a static view file
++     *
++     * @param string $filePath
++     * @param string $area
++     * @param string $themePath
++     * @param string $locale
++     * @param string $module
++     * @param string|null $fullPath
++     * @return string
++     *
++     * @SuppressWarnings(PHPMD.NPathComplexity)
++     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
++     */
++    private function deployFile($filePath, $area, $themePath, $locale, $module, $fullPath = null)
++    {
++        $compiledFile = '';
++        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
++
++        foreach ($this->alternativeSources as $name => $alternative) {
++            if (in_array($extension, $alternative->getAlternativesExtensionsNames(), true)
++                && strpos(basename($filePath), '_') !== 0
++            ) {
++                $compiledFile = substr($filePath, 0, strlen($filePath) - strlen($extension) - 1);
++                $compiledFile = $compiledFile . '.' . $name;
++            }
++        }
++
++        if ($this->output->isVeryVerbose()) {
++            $logMessage = "Processing file '$filePath' for area '$area', theme '$themePath', locale '$locale'";
++            if ($module) {
++                $logMessage .= ", module '$module'";
++            }
++            $this->output->writeln($logMessage);
++        }
++
++        try {
++            $asset = $this->assetRepo->createAsset(
++                $filePath,
++                ['area' => $area, 'theme' => $themePath, 'locale' => $locale, 'module' => $module]
++            );
++            if ($this->output->isVeryVerbose()) {
++                $this->output->writeln("\tDeploying the file to '{$asset->getPath()}'");
++            } else {
++                $this->output->write('.');
++            }
++            if ($this->getOption(Options::DRY_RUN)) {
++                $asset->getContent();
++            } else {
++                $this->assetPublisher->publish($asset);
++                if (!$this->getOption(Options::NO_JAVASCRIPT)) {
++                    $this->bundleManager->addAsset($asset);
++                }
++            }
++            $this->count++;
++        } catch (ContentProcessorException $exception) {
++            $pathInfo = $fullPath ?: $filePath;
++            $errorMessage =  __('Compilation from source: ') . $pathInfo . PHP_EOL . $exception->getMessage();
++            $this->errorCount++;
++            $this->output->write(PHP_EOL . PHP_EOL . $errorMessage . PHP_EOL, true);
++
++            $this->logger->critical($errorMessage);
++        } catch (\Exception $exception) {
++            $this->output->write('.');
++            if ($this->output->isVerbose()) {
++                $this->output->writeln($exception->getTraceAsString());
++            }
++            $this->errorCount++;
++        }
++
++        return $compiledFile;
++    }
++
++    /**
++     * @param string $name
++     * @return mixed|null
++     */
++    private function getOption($name)
++    {
++        return isset($this->options[$name]) ? $this->options[$name] : null;
++    }
++
++    /**
++     * Check if skip flag is affecting file by extension
++     *
++     * @param string $filePath
++     * @return boolean
++     */
++    private function checkSkip($filePath)
++    {
++        if ($filePath != '.') {
++            $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
++            $option = isset(self::$fileExtensionOptionMap[$ext]) ? self::$fileExtensionOptionMap[$ext] : null;
++
++            return $option ? $this->getOption($option) : false;
++        }
++
++        return false;
++    }
++
++    /**
++     * Find ancestor themes' full paths
++     *
++     * @param string $themeFullPath
++     * @return string[]
++     */
++    private function findAncestors($themeFullPath)
++    {
++        $theme = $this->themeProvider->getThemeByFullPath($themeFullPath);
++        $ancestors = $theme->getInheritedThemes();
++        $ancestorThemeFullPath = [];
++        foreach ($ancestors as $ancestor) {
++            $ancestorThemeFullPath[] = $ancestor->getFullPath();
++        }
++        return $ancestorThemeFullPath;
++    }
++}
+diff --git a/vendor/magento/module-deploy/Model/Deploy/LocaleQuickDeploy.php b/vendor/magento/module-deploy/Model/Deploy/LocaleQuickDeploy.php
+new file mode 100644
+index 0000000..8102afb
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/Deploy/LocaleQuickDeploy.php
+@@ -0,0 +1,152 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model\Deploy;
++
++use Magento\Deploy\Model\DeployManager;
++use Magento\Framework\App\Filesystem\DirectoryList;
++use Magento\Framework\App\Utility\Files;
++use Magento\Framework\Filesystem;
++use Magento\Framework\Filesystem\Directory\WriteInterface;
++use Symfony\Component\Console\Output\OutputInterface;
++use Magento\Framework\Console\Cli;
++use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
++use \Magento\Framework\RequireJs\Config as RequireJsConfig;
++
++class LocaleQuickDeploy implements DeployInterface
++{
++    /**
++     * @var Filesystem
++     */
++    private $filesystem;
++
++    /**
++     * @var WriteInterface
++     */
++    private $staticDirectory;
++
++    /**
++     * @var OutputInterface
++     */
++    private $output;
++
++    /**
++     * @var array
++     */
++    private $options = [];
++
++    /**
++     * @param Filesystem $filesystem
++     * @param OutputInterface $output
++     * @param array $options
++     */
++    public function __construct(\Magento\Framework\Filesystem $filesystem, OutputInterface $output, $options = [])
++    {
++        $this->filesystem = $filesystem;
++        $this->output = $output;
++        $this->options = $options;
++    }
++
++    /**
++     * @return WriteInterface
++     */
++    private function getStaticDirectory()
++    {
++        if ($this->staticDirectory === null) {
++            $this->staticDirectory = $this->filesystem->getDirectoryWrite(DirectoryList::STATIC_VIEW);
++        }
++
++        return $this->staticDirectory;
++    }
++
++    /**
++     * {@inheritdoc}
++     */
++    public function deploy($area, $themePath, $locale)
++    {
++        if (isset($this->options[Options::DRY_RUN]) && $this->options[Options::DRY_RUN]) {
++            return Cli::RETURN_SUCCESS;
++        }
++
++        $this->output->writeln("=== {$area} -> {$themePath} -> {$locale} ===");
++
++        if (!isset($this->options[self::DEPLOY_BASE_LOCALE])) {
++            throw new \InvalidArgumentException('Deploy base locale must be set for Quick Deploy');
++        }
++        $processedFiles = 0;
++        $errorAmount = 0;
++
++        $baseLocale = $this->options[self::DEPLOY_BASE_LOCALE];
++        $newLocalePath = $this->getLocalePath($area, $themePath, $locale);
++        $baseLocalePath = $this->getLocalePath($area, $themePath, $baseLocale);
++        $baseRequireJsPath = RequireJsConfig::DIR_NAME . DIRECTORY_SEPARATOR . $baseLocalePath;
++        $newRequireJsPath = RequireJsConfig::DIR_NAME . DIRECTORY_SEPARATOR . $newLocalePath;
++
++        $this->deleteLocaleResource($newLocalePath);
++        $this->deleteLocaleResource($newRequireJsPath);
++
++        if (isset($this->options[Options::SYMLINK_LOCALE]) && $this->options[Options::SYMLINK_LOCALE]) {
++            $this->getStaticDirectory()->createSymlink($baseLocalePath, $newLocalePath);
++            $this->getStaticDirectory()->createSymlink($baseRequireJsPath, $newRequireJsPath);
++
++            $this->output->writeln("\nSuccessful symlinked\n---\n");
++        } else {
++            $localeFiles = array_merge(
++                $this->getStaticDirectory()->readRecursively($baseLocalePath),
++                $this->getStaticDirectory()->readRecursively($baseRequireJsPath)
++            );
++            foreach ($localeFiles as $path) {
++                if ($this->getStaticDirectory()->isFile($path)) {
++                    $destination = $this->replaceLocaleInPath($path, $baseLocale, $locale);
++                    $this->getStaticDirectory()->copyFile($path, $destination);
++                    $processedFiles++;
++                }
++            }
++
++            $this->output->writeln("\nSuccessful copied: {$processedFiles} files; errors: {$errorAmount}\n---\n");
++        }
++
++        return Cli::RETURN_SUCCESS;
++    }
++
++    /**
++     * @param string $path
++     * @return void
++     */
++    private function deleteLocaleResource($path)
++    {
++        if ($this->getStaticDirectory()->isExist($path)) {
++            $absolutePath = $this->getStaticDirectory()->getAbsolutePath($path);
++            if (is_link($absolutePath)) {
++                $this->getStaticDirectory()->getDriver()->deleteFile($absolutePath);
++            } else {
++                $this->getStaticDirectory()->getDriver()->deleteDirectory($absolutePath);
++            }
++        }
++    }
++
++    /**
++     * @param string $path
++     * @param string $search
++     * @param string $replace
++     * @return string
++     */
++    private function replaceLocaleInPath($path, $search, $replace)
++    {
++        return preg_replace('~' . $search . '~', $replace, $path, 1);
++    }
++
++    /**
++     * @param string $area
++     * @param string $themePath
++     * @param string $locale
++     * @return string
++     */
++    private function getLocalePath($area, $themePath, $locale)
++    {
++        return $area . DIRECTORY_SEPARATOR . $themePath . DIRECTORY_SEPARATOR . $locale;
++    }
++}
+diff --git a/vendor/magento/module-deploy/Model/Deploy/TemplateMinifier.php b/vendor/magento/module-deploy/Model/Deploy/TemplateMinifier.php
+new file mode 100644
+index 0000000..7a5d8f9
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/Deploy/TemplateMinifier.php
+@@ -0,0 +1,49 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model\Deploy;
++
++use Magento\Framework\View\Template\Html\MinifierInterface;
++use Magento\Framework\App\Utility\Files;
++
++class TemplateMinifier
++{
++    /**
++     * @var Files
++     */
++    private $filesUtils;
++
++    /**
++     * @var MinifierInterface
++     */
++    private $htmlMinifier;
++
++    /**
++     * @param Files $filesUtils
++     * @param MinifierInterface $htmlMinifier
++     */
++    public function __construct(
++        Files $filesUtils,
++        MinifierInterface $htmlMinifier
++    ) {
++        $this->filesUtils = $filesUtils;
++        $this->htmlMinifier = $htmlMinifier;
++    }
++
++    /**
++     * Minify template files
++     * @return int
++     */
++    public function minifyTemplates()
++    {
++        $minified = 0;
++        foreach ($this->filesUtils->getPhtmlFiles(false, false) as $template) {
++            $this->htmlMinifier->minify($template);
++            $minified++;
++        }
++        return $minified;
++    }
++}
+diff --git a/vendor/magento/module-deploy/Model/DeployManager.php b/vendor/magento/module-deploy/Model/DeployManager.php
+new file mode 100644
+index 0000000..6dbb4cf
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/DeployManager.php
+@@ -0,0 +1,213 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model;
++
++use Magento\Framework\App\View\Deployment\Version\StorageInterface;
++use Symfony\Component\Console\Output\OutputInterface;
++use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
++use Magento\Deploy\Model\Deploy\TemplateMinifier;
++use Magento\Framework\App\State;
++
++class DeployManager
++{
++    /**
++     * @var array
++     */
++    private $packages = [];
++
++    /**
++     * @var OutputInterface
++     */
++    private $output;
++
++    /**
++     * @var array
++     */
++    private $options;
++
++    /**
++     * @var StorageInterface
++     */
++    private $versionStorage;
++
++    /**
++     * @var DeployStrategyProviderFactory
++     */
++    private $deployStrategyProviderFactory;
++
++    /**
++     * @var ProcessQueueManagerFactory
++     */
++    private $processQueueManagerFactory;
++
++    /**
++     * @var TemplateMinifier
++     */
++    private $templateMinifier;
++
++    /**
++     * @var bool
++     */
++    private $idDryRun;
++
++    /**
++     * @var State
++     */
++    private $state;
++
++    /**
++     * @param OutputInterface $output
++     * @param StorageInterface $versionStorage
++     * @param DeployStrategyProviderFactory $deployStrategyProviderFactory
++     * @param ProcessQueueManagerFactory $processQueueManagerFactory
++     * @param TemplateMinifier $templateMinifier
++     * @param State $state
++     * @param array $options
++     */
++    public function __construct(
++        OutputInterface $output,
++        StorageInterface $versionStorage,
++        DeployStrategyProviderFactory $deployStrategyProviderFactory,
++        ProcessQueueManagerFactory $processQueueManagerFactory,
++        TemplateMinifier $templateMinifier,
++        State $state,
++        array $options
++    ) {
++        $this->output = $output;
++        $this->options = $options;
++        $this->versionStorage = $versionStorage;
++        $this->deployStrategyProviderFactory = $deployStrategyProviderFactory;
++        $this->processQueueManagerFactory = $processQueueManagerFactory;
++        $this->templateMinifier = $templateMinifier;
++        $this->state = $state;
++        $this->idDryRun = !empty($this->options[Options::DRY_RUN]);
++    }
++
++    /**
++     * Add package tie to area and theme
++     *
++     * @param string $area
++     * @param string $themePath
++     * @param string $locale
++     * @return void
++     */
++    public function addPack($area, $themePath, $locale)
++    {
++        $this->packages[$area . '-' . $themePath][$locale] = [$area, $themePath];
++    }
++
++    /**
++     * Deploy local packages with chosen deploy strategy
++     * @return int
++     */
++    public function deploy()
++    {
++        if ($this->idDryRun) {
++            $this->output->writeln('Dry run. Nothing will be recorded to the target directory.');
++        }
++
++        /** @var DeployStrategyProvider $strategyProvider */
++        $strategyProvider = $this->deployStrategyProviderFactory->create(
++            ['output' => $this->output, 'options' => $this->options]
++        );
++
++        if ($this->isCanBeParalleled()) {
++            $result = $this->runInParallel($strategyProvider);
++        } else {
++            $result = 0;
++            foreach ($this->packages as $package) {
++                $locales = array_keys($package);
++                list($area, $themePath) = current($package);
++                foreach ($strategyProvider->getDeployStrategies($area, $themePath, $locales) as $locale => $strategy) {
++                    $result |= $this->state->emulateAreaCode(
++                        $area,
++                        [$strategy, 'deploy'],
++                        [$area, $themePath, $locale]
++                    );
++                }
++            }
++        }
++
++        $this->minifyTemplates();
++        $this->saveDeployedVersion();
++
++        return $result;
++    }
++
++    /**
++     * @return void
++     */
++    private function minifyTemplates()
++    {
++        $noHtmlMinify = isset($this->options[Options::NO_HTML_MINIFY]) ? $this->options[Options::NO_HTML_MINIFY] : null;
++        if (!$noHtmlMinify && !$this->idDryRun) {
++            $this->output->writeln('=== Minify templates ===');
++            $minified = $this->templateMinifier->minifyTemplates();
++            $this->output->writeln("\nSuccessful: {$minified} files modified\n---\n");
++        }
++    }
++
++    /**
++     * @param DeployStrategyProvider $strategyProvider
++     * @return int
++     */
++    private function runInParallel($strategyProvider)
++    {
++        $processQueueManager = $this->processQueueManagerFactory->create(
++            ['maxProcesses' => $this->getProcessesAmount()]
++        );
++        foreach ($this->packages as $package) {
++            $locales = array_keys($package);
++            list($area, $themePath) = current($package);
++            $baseStrategy = null;
++            $dependentStrategy = [];
++            foreach ($strategyProvider->getDeployStrategies($area, $themePath, $locales) as $locale => $strategy) {
++                $deploymentFunc = function () use ($area, $themePath, $locale, $strategy) {
++                    return $this->state->emulateAreaCode($area, [$strategy, 'deploy'], [$area, $themePath, $locale]);
++                };
++                if (null === $baseStrategy) {
++                    $baseStrategy = $deploymentFunc;
++                } else {
++                    $dependentStrategy[] = $deploymentFunc;
++                }
++
++            }
++            $processQueueManager->addTaskToQueue($baseStrategy, $dependentStrategy);
++        }
++
++        return $processQueueManager->process();
++    }
++
++    /**
++     * @return bool
++     */
++    private function isCanBeParalleled()
++    {
++        return function_exists('pcntl_fork') && $this->getProcessesAmount() > 1;
++    }
++
++    /**
++     * @return int
++     */
++    private function getProcessesAmount()
++    {
++        return isset($this->options[Options::JOBS_AMOUNT]) ? (int)$this->options[Options::JOBS_AMOUNT] : 0;
++    }
++
++    /**
++     * Save version of deployed files
++     * @return void
++     */
++    private function saveDeployedVersion()
++    {
++        if (!$this->idDryRun) {
++            $version = (new \DateTime())->getTimestamp();
++            $this->output->writeln("New version of deployed files: {$version}");
++            $this->versionStorage->save($version);
++        }
++    }
++}
+diff --git a/vendor/magento/module-deploy/Model/DeployStrategyFactory.php b/vendor/magento/module-deploy/Model/DeployStrategyFactory.php
+new file mode 100644
+index 0000000..884ff5b
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/DeployStrategyFactory.php
+@@ -0,0 +1,52 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model;
++
++use Magento\Deploy\Model\Deploy\DeployInterface;
++use Magento\Framework\Exception\InputException;
++use Magento\Framework\ObjectManagerInterface;
++
++class DeployStrategyFactory
++{
++    /**
++     * Standard deploy strategy
++     */
++    const DEPLOY_STRATEGY_STANDARD = 'standard';
++
++    /**
++     * Quick deploy strategy
++     */
++    const DEPLOY_STRATEGY_QUICK = 'quick';
++
++    /**
++     * @param ObjectManagerInterface $objectManager
++     */
++    public function __construct(ObjectManagerInterface $objectManager)
++    {
++        $this->objectManager = $objectManager;
++    }
++
++    /**
++     * @param string $type
++     * @param array $arguments
++     * @return DeployInterface
++     * @throws InputException
++     */
++    public function create($type, array $arguments = [])
++    {
++        $strategyMap = [
++            self::DEPLOY_STRATEGY_STANDARD => Deploy\LocaleDeploy::class,
++            self::DEPLOY_STRATEGY_QUICK => Deploy\LocaleQuickDeploy::class,
++        ];
++
++        if (!isset($strategyMap[$type])) {
++            throw new InputException(__('Wrong deploy strategy type: %1', $type));
++        }
++
++        return $this->objectManager->create($strategyMap[$type], $arguments);
++    }
++}
+diff --git a/vendor/magento/module-deploy/Model/DeployStrategyProvider.php b/vendor/magento/module-deploy/Model/DeployStrategyProvider.php
+new file mode 100644
+index 0000000..9893aa1
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/DeployStrategyProvider.php
+@@ -0,0 +1,193 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model;
++
++use Magento\Deploy\Model\Deploy\DeployInterface;
++use Magento\Framework\Component\ComponentRegistrar;
++use Magento\Framework\Module\Dir;
++use Magento\Framework\View\Design\Fallback\Rule\RuleInterface;
++use Magento\Framework\View\DesignInterface;
++use Magento\Framework\View\Design\Fallback\RulePool;
++use Symfony\Component\Console\Output\OutputInterface;
++
++class DeployStrategyProvider
++{
++    /**
++     * @var RulePool
++     */
++    private $rulePool;
++
++    /**
++     * @var RuleInterface
++     */
++    private $fallBackRule;
++
++    /**
++     * @var array
++     */
++    private $moduleDirectories;
++
++    /**
++     * @var DesignInterface
++     */
++    private $design;
++
++    /**
++     * @var OutputInterface
++     */
++    private $output;
++
++    /**
++     * @var array
++     */
++    private $options;
++
++    /**
++     * @var DeployStrategyFactory
++     */
++    private $deployStrategyFactory;
++
++    /**
++     * @param OutputInterface $output
++     * @param RulePool $rulePool
++     * @param DesignInterface $design
++     * @param DeployStrategyFactory $deployStrategyFactory
++     * @param array $options
++     */
++    public function __construct(
++        OutputInterface $output,
++        RulePool $rulePool,
++        DesignInterface $design,
++        DeployStrategyFactory $deployStrategyFactory,
++        array $options
++    ) {
++        $this->rulePool = $rulePool;
++        $this->design = $design;
++        $this->output = $output;
++        $this->options = $options;
++        $this->deployStrategyFactory = $deployStrategyFactory;
++    }
++
++    /**
++     * @param string $area
++     * @param string $themePath
++     * @param array $locales
++     * @return DeployInterface[]
++     */
++    public function getDeployStrategies($area, $themePath, array $locales)
++    {
++        if (count($locales) == 1) {
++            $locale = current($locales);
++            return [$locale => $this->getDeployStrategy(DeployStrategyFactory::DEPLOY_STRATEGY_STANDARD)];
++        }
++
++        $baseLocale = null;
++        $deployStrategies = [];
++
++        foreach ($locales as $locale) {
++            $hasCustomization = false;
++            foreach ($this->getCustomizationDirectories($area, $themePath, $locale) as $directory) {
++                if (glob($directory . DIRECTORY_SEPARATOR . '*', GLOB_NOSORT)) {
++                    $hasCustomization = true;
++                    break;
++                }
++            }
++            if ($baseLocale === null && !$hasCustomization) {
++                $baseLocale = $locale;
++            } else {
++                $deployStrategies[$locale] = $hasCustomization
++                    ? DeployStrategyFactory::DEPLOY_STRATEGY_STANDARD
++                    : DeployStrategyFactory::DEPLOY_STRATEGY_QUICK;
++            }
++        }
++        $deployStrategies = array_merge(
++            [$baseLocale => DeployStrategyFactory::DEPLOY_STRATEGY_STANDARD],
++            $deployStrategies
++        );
++
++        return array_map(function ($strategyType) use ($area, $baseLocale) {
++            return $this->getDeployStrategy($strategyType, $baseLocale);
++        }, $deployStrategies);
++    }
++
++    /**
++     * @param array $params
++     * @return array
++     */
++    private function getLocaleDirectories($params)
++    {
++        $dirs = $this->getFallbackRule()->getPatternDirs($params);
++
++        return array_filter($dirs, function ($dir) {
++            return strpos($dir, Dir::MODULE_I18N_DIR);
++        });
++    }
++
++    /**
++     * Get directories which can contains theme customization
++     * @param string $area
++     * @param string $themePath
++     * @param string $locale
++     * @return array
++     */
++    private function getCustomizationDirectories($area, $themePath, $locale)
++    {
++        $customizationDirectories = [];
++        $this->design->setDesignTheme($themePath, $area);
++
++        $params = ['area' => $area, 'theme' => $this->design->getDesignTheme(), 'locale' => $locale];
++        foreach ($this->getLocaleDirectories($params) as $patternDir) {
++            $customizationDirectories[] = $patternDir;
++        }
++
++        if ($this->moduleDirectories === null) {
++            $this->moduleDirectories = [];
++            $componentRegistrar = new ComponentRegistrar();
++            $this->moduleDirectories = array_keys($componentRegistrar->getPaths(ComponentRegistrar::MODULE));
++        }
++
++        foreach ($this->moduleDirectories as $moduleDir) {
++            $params['module_name'] = $moduleDir;
++            $patternDirs = $this->getLocaleDirectories($params);
++            foreach ($patternDirs as $patternDir) {
++                $customizationDirectories[] = $patternDir;
++            }
++        }
++
++        return $customizationDirectories;
++    }
++
++    /**
++     * @return \Magento\Framework\View\Design\Fallback\Rule\RuleInterface
++     */
++    private function getFallbackRule()
++    {
++        if (null === $this->fallBackRule) {
++            $this->fallBackRule = $this->rulePool->getRule(RulePool::TYPE_STATIC_FILE);
++        }
++
++        return $this->fallBackRule;
++    }
++
++    /**
++     * @param string $type
++     * @param null|string $baseLocale
++     * @return DeployInterface
++     */
++    private function getDeployStrategy($type, $baseLocale = null)
++    {
++        $options = $this->options;
++        if ($baseLocale) {
++            $options[DeployInterface::DEPLOY_BASE_LOCALE] = $baseLocale;
++        }
++
++        return $this->deployStrategyFactory->create(
++            $type,
++            ['output' => $this->output, 'options' => $options]
++        );
++    }
++}
+diff --git a/vendor/magento/module-deploy/Model/Deployer.php b/vendor/magento/module-deploy/Model/Deployer.php
+index b79bc24..9c1781d 100644
+--- a/vendor/magento/module-deploy/Model/Deployer.php
++++ b/vendor/magento/module-deploy/Model/Deployer.php
+@@ -6,131 +6,41 @@
+ 
+ namespace Magento\Deploy\Model;
+ 
+-use Magento\Framework\Exception\LocalizedException;
+-use Magento\Framework\View\Asset\ContentProcessorException;
++use Magento\Deploy\Console\Command\DeployStaticOptionsInterface;
+ use Magento\Framework\View\Asset\PreProcessor\AlternativeSourceInterface;
+ use Magento\Framework\App\ObjectManagerFactory;
+ use Magento\Framework\App\View\Deployment\Version;
+-use Magento\Framework\App\View\Asset\Publisher;
+ use Magento\Framework\App\Utility\Files;
+-use Magento\Framework\Config\Theme;
+-use Magento\Framework\ObjectManagerInterface;
+ use Magento\Framework\Translate\Js\Config as JsTranslationConfig;
+-use Magento\Framework\View\Design\Theme\ThemeProviderInterface;
+ use Symfony\Component\Console\Output\OutputInterface;
+-use Psr\Log\LoggerInterface;
+-use Magento\Framework\View\Asset\Minification;
+ use Magento\Framework\App\ObjectManager;
+-use Magento\Framework\View\Asset\ConfigInterface;
+-use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
++use Magento\Deploy\Model\DeployManagerFactory;
+ 
+ /**
+  * A service for deploying Magento static view files for production mode
+  *
+- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+- * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+- * @SuppressWarnings(PHPMD.TooManyFields)
++ * @deprecated
++ * @see Use DeployManager::deploy instead
+  */
+ class Deployer
+ {
+-    /** @var Files */
+-    private $filesUtil;
+-
+-    /** @var ObjectManagerFactory */
+-    private $omFactory;
+-
+     /** @var OutputInterface */
+     private $output;
+ 
+-    /** @var Version\StorageInterface */
+-    private $versionStorage;
+-
+-    /** @var \Magento\Framework\View\Asset\Repository */
+-    private $assetRepo;
+-
+-    /** @var Publisher */
+-    private $assetPublisher;
+-
+-    /** @var \Magento\Framework\View\Asset\Bundle\Manager */
+-    private $bundleManager;
+-
+-    /** @var int */
+-    private $count;
+-
+-    /** @var int */
+-    private $errorCount;
+-
+-    /** @var \Magento\Framework\View\Template\Html\MinifierInterface */
+-    private $htmlMinifier;
+-
+-    /**
+-     * @var ObjectManagerInterface
+-     */
+-    private $objectManager;
+-
+     /**
+      * @var JsTranslationConfig
+      */
+     protected $jsTranslationConfig;
+ 
+     /**
+-     * @var AlternativeSourceInterface[]
+-     */
+-    private $alternativeSources;
+-
+-    /**
+-     * @var ThemeProviderInterface
+-     */
+-    private $themeProvider;
+-
+-    /**
+      * @var array
+      */
+-    private static $fileExtensionOptionMap = [
+-        'js' => Options::NO_JAVASCRIPT,
+-        'map' => Options::NO_JAVASCRIPT,
+-        'css' => Options::NO_CSS,
+-        'less' => Options::NO_LESS,
+-        'html' => Options::NO_HTML,
+-        'htm' => Options::NO_HTML,
+-        'jpg' => Options::NO_IMAGES,
+-        'jpeg' => Options::NO_IMAGES,
+-        'gif' => Options::NO_IMAGES,
+-        'png' => Options::NO_IMAGES,
+-        'ico' => Options::NO_IMAGES,
+-        'svg' => Options::NO_IMAGES,
+-        'eot' => Options::NO_FONTS,
+-        'ttf' => Options::NO_FONTS,
+-        'woff' => Options::NO_FONTS,
+-        'woff2' => Options::NO_FONTS,
+-        'md' => Options::NO_MISC,
+-        'jbf' => Options::NO_MISC,
+-        'csv' => Options::NO_MISC,
+-        'json' => Options::NO_MISC,
+-        'txt' => Options::NO_MISC,
+-        'htc' => Options::NO_MISC,
+-        'swf' => Options::NO_MISC,
+-        'LICENSE' => Options::NO_MISC,
+-        '' => Options::NO_MISC,
+-    ];
+-
+-    /**
+-     * @var Minification
+-     */
+-    private $minification;
++    private $options;
+ 
+     /**
+-     * @var LoggerInterface
++     * @var DeployManagerFactory
+      */
+-    private $logger;
+-
+-    /** @var ConfigInterface */
+-    private $assetConfig;
+-
+-    /**
+-     * @var array
+-     */
+-    private $options;
++    private $deployManagerFactory;
+ 
+     /**
+      * Constructor
+@@ -140,7 +50,9 @@ class Deployer
+      * @param Version\StorageInterface $versionStorage
+      * @param JsTranslationConfig $jsTranslationConfig
+      * @param AlternativeSourceInterface[] $alternativeSources
++     * @param DeployManagerFactory $deployManagerFactory
+      * @param array $options
++     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+      */
+     public function __construct(
+         Files $filesUtil,
+@@ -148,56 +60,29 @@ public function __construct(
+         Version\StorageInterface $versionStorage,
+         JsTranslationConfig $jsTranslationConfig,
+         array $alternativeSources,
++        DeployManagerFactory $deployManagerFactory = null,
+         $options = []
+     ) {
+-        $this->filesUtil = $filesUtil;
+         $this->output = $output;
+-        $this->versionStorage = $versionStorage;
+-        $this->jsTranslationConfig = $jsTranslationConfig;
++        $this->deployManagerFactory = $deployManagerFactory;
+         if (is_array($options)) {
+             $this->options = $options;
+         } else {
+             // backward compatibility support
+-            $this->options = [Options::DRY_RUN => (bool)$options];
++            $this->options = [DeployStaticOptionsInterface::DRY_RUN => (bool)$options];
+         }
+-        $this->parentTheme = [];
+-
+-        array_map(
+-            function (AlternativeSourceInterface $alternative) {
+-            },
+-            $alternativeSources
+-        );
+-        $this->alternativeSources = $alternativeSources;
+-
+     }
+ 
+     /**
+-     * @param string $name
+-     * @return mixed|null
++     * @return \Magento\Deploy\Model\DeployManagerFactory
+      */
+-    private function getOption($name)
++    private function getDeployManagerFactory()
+     {
+-        return isset($this->options[$name]) ? $this->options[$name] : null;
+-    }
+-
+-    /**
+-     * Check if skip flag is affecting file by extension
+-     *
+-     * @param string $filePath
+-     * @return boolean
+-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+-     * @SuppressWarnings(PHPMD.NPathComplexity)
+-     */
+-    private function checkSkip($filePath)
+-    {
+-        if ($filePath != '.') {
+-            $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+-            $option = isset(self::$fileExtensionOptionMap[$ext]) ? self::$fileExtensionOptionMap[$ext] : null;
+-
+-            return $option ? $this->getOption($option) : false;
++        if (null === $this->deployManagerFactory) {
++            $this->deployManagerFactory = ObjectManager::getInstance()->get(DeployManagerFactory::class);
+         }
+ 
+-        return false;
++        return $this->deployManagerFactory;
+     }
+ 
+     /**
+@@ -207,170 +92,24 @@ private function checkSkip($filePath)
+      * @param array $locales
+      * @param array $deployableAreaThemeMap
+      * @return int
+-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+-     * @SuppressWarnings(PHPMD.NPathComplexity)
+-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
++     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
++     * @deprecated
+      */
+     public function deploy(ObjectManagerFactory $omFactory, array $locales, array $deployableAreaThemeMap = [])
+     {
+-        $this->omFactory = $omFactory;
+-
+-        if ($this->getOption(Options::DRY_RUN)) {
+-            $this->output->writeln('Dry run. Nothing will be recorded to the target directory.');
+-        }
+-        $libFiles = $this->filesUtil->getStaticLibraryFiles();
+-        $appFiles = $this->filesUtil->getStaticPreProcessingFiles();
++        /** @var DeployManager $deployerManager */
++        $deployerManager = $this->getDeployManagerFactory()->create(
++            ['options' => $this->options, 'output' => $this->output]
++        );
+ 
+         foreach ($deployableAreaThemeMap as $area => $themes) {
+-            $this->emulateApplicationArea($area);
+             foreach ($locales as $locale) {
+-                $this->emulateApplicationLocale($locale, $area);
+                 foreach ($themes as $themePath) {
+-
+-                    $this->output->writeln("=== {$area} -> {$themePath} -> {$locale} ===");
+-                    $this->count = 0;
+-                    $this->errorCount = 0;
+-
+-                    /** @var \Magento\Theme\Model\View\Design $design */
+-                    $design = $this->objectManager->create(\Magento\Theme\Model\View\Design::class);
+-                    $design->setDesignTheme($themePath, $area);
+-
+-                    $assetRepo = $this->objectManager->create(
+-                        \Magento\Framework\View\Asset\Repository::class,
+-                        [
+-                            'design' => $design,
+-                        ]
+-                    );
+-                    /** @var \Magento\RequireJs\Model\FileManager $fileManager */
+-                    $fileManager = $this->objectManager->create(
+-                        \Magento\RequireJs\Model\FileManager::class,
+-                        [
+-                            'config' => $this->objectManager->create(
+-                                \Magento\Framework\RequireJs\Config::class,
+-                                [
+-                                    'assetRepo' => $assetRepo,
+-                                    'design' => $design,
+-                                ]
+-                            ),
+-                            'assetRepo' => $assetRepo,
+-                        ]
+-                    );
+-                    $fileManager->createRequireJsConfigAsset();
+-
+-                    foreach ($appFiles as $info) {
+-                        list($fileArea, $fileTheme, , $module, $filePath, $fullPath) = $info;
+-
+-                        if ($this->checkSkip($filePath)) {
+-                            continue;
+-                        }
+-
+-                        if (($fileArea == $area || $fileArea == 'base') &&
+-                            ($fileTheme == '' || $fileTheme == $themePath ||
+-                                in_array(
+-                                    $fileArea . Theme::THEME_PATH_SEPARATOR . $fileTheme,
+-                                    $this->findAncestors($area . Theme::THEME_PATH_SEPARATOR . $themePath)
+-                                ))
+-                        ) {
+-                            $compiledFile = $this->deployFile(
+-                                $filePath,
+-                                $area,
+-                                $themePath,
+-                                $locale,
+-                                $module,
+-                                $fullPath
+-                            );
+-                            if ($compiledFile !== '') {
+-                                $this->deployFile($compiledFile, $area, $themePath, $locale, $module, $fullPath);
+-                            }
+-                        }
+-                    }
+-                    foreach ($libFiles as $filePath) {
+-
+-                        if ($this->checkSkip($filePath)) {
+-                            continue;
+-                        }
+-
+-                        $compiledFile = $this->deployFile($filePath, $area, $themePath, $locale, null);
+-
+-                        if ($compiledFile !== '') {
+-                            $this->deployFile($compiledFile, $area, $themePath, $locale, null);
+-                        }
+-                    }
+-                    if (!$this->getOption(Options::NO_JAVASCRIPT)) {
+-                        if ($this->jsTranslationConfig->dictionaryEnabled()) {
+-                            $dictionaryFileName = $this->jsTranslationConfig->getDictionaryFileName();
+-                            $this->deployFile($dictionaryFileName, $area, $themePath, $locale, null);
+-                        }
+-                        if ($this->getMinification()->isEnabled('js')) {
+-                            $fileManager->createMinResolverAsset();
+-                        }
+-                    }
+-                    $this->bundleManager->flush();
+-                    $this->output->writeln("\nSuccessful: {$this->count} files; errors: {$this->errorCount}\n---\n");
+-                }
+-            }
+-        }
+-        if (!($this->getOption(Options::NO_HTML_MINIFY) ?: !$this->getAssetConfig()->isMinifyHtml())) {
+-            $this->output->writeln('=== Minify templates ===');
+-            $this->count = 0;
+-            foreach ($this->filesUtil->getPhtmlFiles(false, false) as $template) {
+-                $this->htmlMinifier->minify($template);
+-                if ($this->output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
+-                    $this->output->writeln($template . " minified\n");
+-                } else {
+-                    $this->output->write('.');
++                    $deployerManager->addPack($area, $themePath, $locale);
+                 }
+-                $this->count++;
+             }
+-            $this->output->writeln("\nSuccessful: {$this->count} files modified\n---\n");
+         }
+-
+-        $version = (new \DateTime())->getTimestamp();
+-        $this->output->writeln("New version of deployed files: {$version}");
+-        if (!$this->getOption(Options::DRY_RUN)) {
+-            $this->versionStorage->save($version);
+-        }
+-
+-        if ($this->errorCount > 0) {
+-            // we must have an exit code higher than zero to indicate something was wrong
+-            return \Magento\Framework\Console\Cli::RETURN_FAILURE;
+-        }
+-        return \Magento\Framework\Console\Cli::RETURN_SUCCESS;
+-    }
+-
+-    /**
+-     * Get Minification instance
+-     *
+-     * @deprecated
+-     * @return Minification
+-     */
+-    private function getMinification()
+-    {
+-        if (null === $this->minification) {
+-            $this->minification = ObjectManager::getInstance()->get(Minification::class);
+-        }
+-
+-        return $this->minification;
+-    }
+-
+-    /**
+-     * Emulate application area and various services that are necessary for populating files
+-     *
+-     * @param string $areaCode
+-     * @return void
+-     */
+-    private function emulateApplicationArea($areaCode)
+-    {
+-        $this->objectManager = $this->omFactory->create(
+-            [\Magento\Framework\App\State::PARAM_MODE => \Magento\Framework\App\State::MODE_PRODUCTION]
+-        );
+-        /** @var \Magento\Framework\App\State $appState */
+-        $appState = $this->objectManager->get(\Magento\Framework\App\State::class);
+-        $appState->setAreaCode($areaCode);
+-        $this->assetRepo = $this->objectManager->get(\Magento\Framework\View\Asset\Repository::class);
+-        $this->assetPublisher = $this->objectManager->create(\Magento\Framework\App\View\Asset\Publisher::class);
+-        $this->htmlMinifier = $this->objectManager->get(\Magento\Framework\View\Template\Html\MinifierInterface::class);
+-        $this->bundleManager = $this->objectManager->get(\Magento\Framework\View\Asset\Bundle\Manager::class);
++        return $deployerManager->deploy();
+     }
+ 
+     /**
+@@ -379,158 +118,10 @@ private function emulateApplicationArea($areaCode)
+      * @param string $locale
+      * @param string $area
+      * @return void
+-     */
+-    protected function emulateApplicationLocale($locale, $area)
+-    {
+-        /** @var \Magento\Framework\TranslateInterface $translator */
+-        $translator = $this->objectManager->get(\Magento\Framework\TranslateInterface::class);
+-        $translator->setLocale($locale);
+-        $translator->loadData($area, true);
+-        /** @var \Magento\Framework\Locale\ResolverInterface $localeResolver */
+-        $localeResolver = $this->objectManager->get(\Magento\Framework\Locale\ResolverInterface::class);
+-        $localeResolver->setLocale($locale);
+-    }
+-
+-    /**
+-     * Deploy a static view file
+-     *
+-     * @param string $filePath
+-     * @param string $area
+-     * @param string $themePath
+-     * @param string $locale
+-     * @param string $module
+-     * @param string|null $fullPath
+-     * @return string
+-     * @throws \InvalidArgumentException
+-     * @throws LocalizedException
+-     *
+-     * @SuppressWarnings(PHPMD.NPathComplexity)
+-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+-     */
+-    private function deployFile($filePath, $area, $themePath, $locale, $module, $fullPath = null)
+-    {
+-        $compiledFile = '';
+-        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+-
+-        foreach ($this->alternativeSources as $name => $alternative) {
+-            if (in_array($extension, $alternative->getAlternativesExtensionsNames(), true)
+-                && strpos(basename($filePath), '_') !== 0
+-            ) {
+-                $compiledFile = substr($filePath, 0, strlen($filePath) - strlen($extension) - 1);
+-                $compiledFile = $compiledFile . '.' . $name;
+-            }
+-        }
+-
+-        if ($this->output->isVeryVerbose()) {
+-            $logMessage = "Processing file '$filePath' for area '$area', theme '$themePath', locale '$locale'";
+-            if ($module) {
+-                $logMessage .= ", module '$module'";
+-            }
+-            $this->output->writeln($logMessage);
+-        }
+-
+-        try {
+-            $asset = $this->assetRepo->createAsset(
+-                $filePath,
+-                ['area' => $area, 'theme' => $themePath, 'locale' => $locale, 'module' => $module]
+-            );
+-            if ($this->output->isVeryVerbose()) {
+-                $this->output->writeln("\tDeploying the file to '{$asset->getPath()}'");
+-            } else {
+-                $this->output->write('.');
+-            }
+-            if ($this->getOption(Options::DRY_RUN)) {
+-                $asset->getContent();
+-            } else {
+-                $this->assetPublisher->publish($asset);
+-                $this->bundleManager->addAsset($asset);
+-            }
+-            $this->count++;
+-        } catch (ContentProcessorException $exception) {
+-            $pathInfo = $fullPath ?: $filePath;
+-            $errorMessage =  __('Compilation from source: ') . $pathInfo
+-                . PHP_EOL . $exception->getMessage();
+-            $this->errorCount++;
+-            $this->output->write(PHP_EOL . PHP_EOL . $errorMessage . PHP_EOL, true);
+-
+-            $this->getLogger()->critical($errorMessage);
+-        } catch (\Exception $exception) {
+-            $this->output->write('.');
+-            $this->verboseLog($exception->getTraceAsString());
+-            $this->errorCount++;
+-        }
+-
+-        return $compiledFile;
+-    }
+-
+-    /**
+-     * Find ancestor themes' full paths
+-     *
+-     * @param string $themeFullPath
+-     * @return string[]
+-     */
+-    private function findAncestors($themeFullPath)
+-    {
+-        $theme = $this->getThemeProvider()->getThemeByFullPath($themeFullPath);
+-        $ancestors = $theme->getInheritedThemes();
+-        $ancestorThemeFullPath = [];
+-        foreach ($ancestors as $ancestor) {
+-            $ancestorThemeFullPath[] = $ancestor->getFullPath();
+-        }
+-        return $ancestorThemeFullPath;
+-    }
+-
+-
+-    /**
+-     * @return ThemeProviderInterface
+-     * @deprecated
+-     */
+-    private function getThemeProvider()
+-    {
+-        if (null === $this->themeProvider) {
+-            $this->themeProvider = ObjectManager::getInstance()->get(ThemeProviderInterface::class);
+-        }
+-
+-        return $this->themeProvider;
+-    }
+-
+-    /**
+-     * @return \Magento\Framework\View\Asset\ConfigInterface
+-     * @deprecated
+-     */
+-    private function getAssetConfig()
+-    {
+-        if (null === $this->assetConfig) {
+-            $this->assetConfig = ObjectManager::getInstance()->get(ConfigInterface::class);
+-        }
+-        return $this->assetConfig;
+-    }
+-
+-    /**
+-     * Verbose log
+-     *
+-     * @param string $message
+-     * @return void
+-     */
+-    private function verboseLog($message)
+-    {
+-        if ($this->output->isVerbose()) {
+-            $this->output->writeln($message);
+-        }
+-    }
+-
+-    /**
+-     * Retrieves LoggerInterface instance
+-     *
+-     * @return LoggerInterface
++     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+      * @deprecated
+      */
+-    private function getLogger()
++    protected function emulateApplicationLocale($locale, $area)
+     {
+-        if (!$this->logger) {
+-            $this->logger = $this->objectManager->get(LoggerInterface::class);
+-        }
+-
+-        return $this->logger;
+     }
+ }
+diff --git a/vendor/magento/module-deploy/Model/ProcessManager.php b/vendor/magento/module-deploy/Model/ProcessManager.php
+index cff7e34..9490f6d 100644
+--- a/vendor/magento/module-deploy/Model/ProcessManager.php
++++ b/vendor/magento/module-deploy/Model/ProcessManager.php
+@@ -12,6 +12,20 @@ class ProcessManager
+     private $processes = [];
+ 
+     /**
++     * @var ProcessFactory
++     */
++    private $processFactory;
++
++    /**
++     * ProcessManager constructor.
++     * @param ProcessFactory $processFactory
++     */
++    public function __construct(ProcessFactory $processFactory)
++    {
++        $this->processFactory = $processFactory;
++    }
++
++    /**
+      * Forks the currently running process.
+      *
+      * @param callable $handler
+@@ -66,7 +80,7 @@ public function delete(Process $process)
+      */
+     private function createProcess(callable $handler)
+     {
+-        return new Process($handler);
++        return $this->processFactory->create(['handler' => $handler]);
+     }
+ 
+     /**
+diff --git a/vendor/magento/module-deploy/Model/ProcessQueueManager.php b/vendor/magento/module-deploy/Model/ProcessQueueManager.php
+new file mode 100644
+index 0000000..c96a2db
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/ProcessQueueManager.php
+@@ -0,0 +1,160 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model;
++
++use Magento\Framework\App\ResourceConnection;
++
++class ProcessQueueManager
++{
++    /**
++     * Default max amount of processes
++     */
++    const DEFAULT_MAX_PROCESSES_AMOUNT = 4;
++
++    /**
++     * @var ProcessTask[]
++     */
++    private $tasksQueue = [];
++
++    /**
++     * @var ProcessTask[]
++     */
++    private $processTaskMap = [];
++
++    /**
++     * @var int
++     */
++    private $maxProcesses;
++
++    /**
++     * @var ProcessManager
++     */
++    private $processManager;
++
++    /**
++     * @var ResourceConnection
++     */
++    private $resourceConnection;
++
++    /**
++     * @var ProcessTaskFactory
++     */
++    private $processTaskFactory;
++
++    /**
++     * @param ProcessManager $processManager
++     * @param ResourceConnection $resourceConnection
++     * @param ProcessTaskFactory $processTaskFactory
++     * @param int $maxProcesses
++     */
++    public function __construct(
++        ProcessManager $processManager,
++        ResourceConnection $resourceConnection,
++        ProcessTaskFactory $processTaskFactory,
++        $maxProcesses = self::DEFAULT_MAX_PROCESSES_AMOUNT
++    ) {
++        $this->processManager = $processManager;
++        $this->resourceConnection = $resourceConnection;
++        $this->processTaskFactory = $processTaskFactory;
++        $this->maxProcesses = $maxProcesses;
++    }
++
++    /**
++     * @param callable $task
++     * @param callable[] $dependentTasks
++     * @return void
++     */
++    public function addTaskToQueue(callable $task, $dependentTasks = [])
++    {
++        $dependentTasks = array_map(function (callable $task) {
++            return $this->createTask($task);
++        }, $dependentTasks);
++
++        $task = $this->createTask($task, $dependentTasks);
++        $this->tasksQueue[$task->getId()] = $task;
++    }
++
++    /**
++     * Process tasks queue
++     * @return int
++     */
++    public function process()
++    {
++        $processQueue = [];
++        $this->internalQueueProcess($this->tasksQueue, $processQueue);
++
++        $returnStatus = 0;
++        while (count($this->processManager->getProcesses()) > 0) {
++            foreach ($this->processManager->getProcesses() as $process) {
++                if ($process->isCompleted()) {
++                    $dependedTasks = isset($this->processTaskMap[$process->getPid()])
++                        ? $this->processTaskMap[$process->getPid()]
++                        : [];
++
++                    $this->processManager->delete($process);
++                    $returnStatus |= $process->getStatus();
++
++                    $this->internalQueueProcess(array_merge($processQueue, $dependedTasks), $processQueue);
++
++                    if (count($this->processManager->getProcesses()) >= $this->maxProcesses) {
++                        break 1;
++                    }
++                }
++            }
++            usleep(5000);
++        }
++        $this->resourceConnection->closeConnection();
++
++        return $returnStatus;
++    }
++
++    /**
++     * @param ProcessTask[] $taskQueue
++     * @param ProcessTask[] $processQueue
++     * @return void
++     */
++    private function internalQueueProcess($taskQueue, &$processQueue)
++    {
++        $processNumber = count($this->processManager->getProcesses());
++        foreach ($taskQueue as $task) {
++            if ($processNumber >= $this->maxProcesses) {
++                if (!isset($processQueue[$task->getId()])) {
++                    $processQueue[$task->getId()] = $task;
++                }
++            } else {
++                unset($processQueue[$task->getId()]);
++                $this->fork($task);
++                $processNumber++;
++            }
++        }
++    }
++
++    /**
++     * @param callable $handler
++     * @param array $dependentTasks
++     * @return ProcessTask
++     */
++    private function createTask($handler, $dependentTasks = [])
++    {
++        return $this->processTaskFactory->create(['handler' => $handler, 'dependentTasks' => $dependentTasks]);
++    }
++
++    /**
++     * @param ProcessTask $task
++     * @return void
++     */
++    private function fork(ProcessTask $task)
++    {
++        $process = $this->processManager->fork($task->getHandler());
++        if ($task->getDependentTasks()) {
++            $pid = $process->getPid();
++            foreach ($task->getDependentTasks() as $dependentTask) {
++                $this->processTaskMap[$pid][$dependentTask->getId()] = $dependentTask;
++            }
++        }
++    }
++}
+diff --git a/vendor/magento/module-deploy/Model/ProcessTask.php b/vendor/magento/module-deploy/Model/ProcessTask.php
+new file mode 100644
+index 0000000..8db7439
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/ProcessTask.php
+@@ -0,0 +1,60 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model;
++
++class ProcessTask
++{
++    /**
++     * @var string
++     */
++    private $taskId;
++
++    /**
++     * @var callable
++     */
++    private $handler;
++
++    /**
++     * @var array
++     */
++    private $dependentTasks;
++
++    /**
++     * @param callable $handler
++     * @param array $dependentTasks
++     */
++    public function __construct($handler, array $dependentTasks = [])
++    {
++        $this->taskId = uniqid('', true);
++        $this->handler = $handler;
++        $this->dependentTasks = $dependentTasks;
++    }
++
++    /**
++     * @return callable
++     */
++    public function getHandler()
++    {
++        return $this->handler;
++    }
++
++    /**
++     * @return string
++     */
++    public function getId()
++    {
++        return $this->taskId;
++    }
++
++    /**
++     * @return ProcessTask[]
++     */
++    public function getDependentTasks()
++    {
++        return $this->dependentTasks;
++    }
++}
+diff --git a/vendor/magento/module-deploy/Test/Unit/Console/Command/DeployStaticContentCommandTest.php b/vendor/magento/module-deploy/Test/Unit/Console/Command/DeployStaticContentCommandTest.php
+index ac4c27a..c758807 100644
+--- a/vendor/magento/module-deploy/Test/Unit/Console/Command/DeployStaticContentCommandTest.php
++++ b/vendor/magento/module-deploy/Test/Unit/Console/Command/DeployStaticContentCommandTest.php
+@@ -15,7 +15,7 @@
+ class DeployStaticContentCommandTest extends \PHPUnit_Framework_TestCase
+ {
+     /**
+-     * @var \Magento\Deploy\Model\Deployer|\PHPUnit_Framework_MockObject_MockObject
++     * @var \Magento\Deploy\Model\DeployManager|\PHPUnit_Framework_MockObject_MockObject
+      */
+     private $deployer;
+ 
+@@ -54,7 +54,7 @@ protected function setUp()
+             '',
+             false
+         );
+-        $this->deployer = $this->getMock(\Magento\Deploy\Model\Deployer::class, [], [], '', false);
++        $this->deployer = $this->getMock(\Magento\Deploy\Model\DeployManager::class, [], [], '', false);
+         $this->filesUtil = $this->getMock(\Magento\Framework\App\Utility\Files::class, [], [], '', false);
+ 
+         $this->validator = $this->getMock(\Magento\Framework\Validator\Locale::class, [], [], '', false);
+diff --git a/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleDeployTest.php b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleDeployTest.php
+new file mode 100644
+index 0000000..757da13
+--- /dev/null
++++ b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleDeployTest.php
+@@ -0,0 +1,214 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Deploy\Test\Unit\Model\Deploy;
++
++use Magento\Framework\App\Utility\Files;
++use Magento\Framework\App\View\Asset\Publisher;
++use Magento\Framework\Translate\Js\Config;
++use Magento\Framework\View\Asset\Minification;
++use Magento\Framework\View\Asset\Repository;
++use Magento\Framework\View\Asset\RepositoryFactory;
++use Psr\Log\LoggerInterface;
++use Symfony\Component\Console\Output\OutputInterface;
++
++/**
++ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
++ */
++class LocaleDeployTest extends \PHPUnit_Framework_TestCase
++{
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|Config
++     */
++    private $jsTranslationMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|Minification
++     */
++    private $minificationMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|RepositoryFactory
++     */
++    private $assetRepoFactoryMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\RequireJs\Model\FileManagerFactory
++     */
++    private $fileManagerFactoryMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\RequireJs\ConfigFactory
++     */
++    private $configFactoryMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\View\Asset\Bundle\Manager
++     */
++    private $bundleManagerMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|Files
++     */
++    private $filesUtilMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\View\DesignInterfaceFactory
++     */
++    private $designFactoryMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\Locale\ResolverInterface
++     */
++    private $localeResolverMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|OutputInterface
++     */
++    private $outputMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|LoggerInterface
++     */
++    private $loggerMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject
++     */
++    private $assetRepoMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject
++     */
++    private $assetPublisherMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject
++     */
++    private $themeProviderMock;
++
++    protected function setUp()
++    {
++        $this->outputMock = $this->getMock(OutputInterface::class, [], [], '', false);
++        $this->loggerMock = $this->getMock(LoggerInterface::class, [], [], '', false);
++        $this->filesUtilMock = $this->getMock(Files::class, [], [], '', false);
++        $this->assetRepoMock = $this->getMock(Repository::class, [], [], '', false);
++        $this->minificationMock = $this->getMock(Minification::class, [], [], '', false);
++        $this->jsTranslationMock = $this->getMock(Config::class, [], [], '', false);
++        $this->assetPublisherMock = $this->getMock(Publisher::class, [], [], '', false);
++        $this->assetRepoFactoryMock = $this->getMock(
++            RepositoryFactory::class,
++            ['create'],
++            [],
++            '',
++            false
++        );
++        $this->fileManagerFactoryMock = $this->getMock(
++            \Magento\RequireJs\Model\FileManagerFactory::class,
++            ['create'],
++            [],
++            '',
++            false
++        );
++        $this->configFactoryMock = $this->getMock(
++            \Magento\Framework\RequireJs\ConfigFactory::class,
++            ['create'],
++            [],
++            '',
++            false
++        );
++        $this->bundleManagerMock = $this->getMock(
++            \Magento\Framework\View\Asset\Bundle\Manager::class,
++            [],
++            [],
++            '',
++            false
++        );
++        $this->themeProviderMock = $this->getMock(
++            \Magento\Framework\View\Design\Theme\ThemeProviderInterface::class,
++            [],
++            [],
++            '',
++            false
++        );
++        $this->designFactoryMock = $this->getMock(
++            \Magento\Framework\View\DesignInterfaceFactory::class,
++            ['create'],
++            [],
++            '',
++            false
++        );
++        $this->localeResolverMock = $this->getMock(
++            \Magento\Framework\Locale\ResolverInterface::class,
++            [],
++            [],
++            '',
++            false
++        );
++    }
++
++    public function testDeploy()
++    {
++        $area = 'adminhtml';
++        $themePath = '/theme/path';
++        $locale = 'en_US';
++
++        $designMock = $this->getMock(\Magento\Framework\View\DesignInterface::class, [], [], '', false);
++        $assetRepoMock = $this->getMock(Repository::class, [], [], '', false);
++        $requireJsConfigMock = $this->getMock(\Magento\Framework\RequireJs\Config::class, [], [], '', false);
++        $fileManagerMock = $this->getMock(\Magento\RequireJs\Model\FileManager::class, [], [], '', false);
++
++        $model = $this->getModel([\Magento\Deploy\Console\Command\DeployStaticOptionsInterface::NO_JAVASCRIPT => 0]);
++
++        $this->localeResolverMock->expects($this->once())->method('setLocale')->with($locale);
++        $this->designFactoryMock->expects($this->once())->method('create')->willReturn($designMock);
++        $designMock->expects($this->once())->method('setDesignTheme')->with($themePath, $area)->willReturnSelf();
++        $this->assetRepoFactoryMock->expects($this->once())->method('create')->with(['design' => $designMock])
++            ->willReturn($assetRepoMock);
++        $this->configFactoryMock->expects($this->once())->method('create')->willReturn($requireJsConfigMock);
++        $this->fileManagerFactoryMock->expects($this->once())->method('create')->willReturn($fileManagerMock);
++
++        $fileManagerMock->expects($this->once())->method('createRequireJsConfigAsset')->willReturnSelf();
++        $this->filesUtilMock->expects($this->once())->method('getStaticPreProcessingFiles')->willReturn([]);
++        $this->filesUtilMock->expects($this->once())->method('getStaticLibraryFiles')->willReturn([]);
++
++        $this->jsTranslationMock->expects($this->once())->method('dictionaryEnabled')->willReturn(false);
++        $this->minificationMock->expects($this->once())->method('isEnabled')->with('js')->willReturn(true);
++        $fileManagerMock->expects($this->once())->method('createMinResolverAsset')->willReturnSelf();
++
++        $this->bundleManagerMock->expects($this->once())->method('flush');
++
++        $this->assertEquals(
++            \Magento\Framework\Console\Cli::RETURN_SUCCESS,
++            $model->deploy($area, $themePath, $locale)
++        );
++    }
++
++    /**
++     * @param array $options
++     * @return \Magento\Deploy\Model\Deploy\LocaleDeploy
++     */
++    private function getModel($options = [])
++    {
++        return new \Magento\Deploy\Model\Deploy\LocaleDeploy(
++            $this->outputMock,
++            $this->jsTranslationMock,
++            $this->minificationMock,
++            $this->assetRepoMock,
++            $this->assetRepoFactoryMock,
++            $this->fileManagerFactoryMock,
++            $this->configFactoryMock,
++            $this->assetPublisherMock,
++            $this->bundleManagerMock,
++            $this->themeProviderMock,
++            $this->loggerMock,
++            $this->filesUtilMock,
++            $this->designFactoryMock,
++            $this->localeResolverMock,
++            [],
++            $options
++        );
++    }
++}
+diff --git a/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleQuickDeployTest.php b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleQuickDeployTest.php
+new file mode 100644
+index 0000000..0c7d459
+--- /dev/null
++++ b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleQuickDeployTest.php
+@@ -0,0 +1,114 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Deploy\Test\Unit\Model\Deploy;
++
++use Magento\Deploy\Model\Deploy\DeployInterface;
++use Magento\Deploy\Model\Deploy\LocaleQuickDeploy;
++use Magento\Framework\Filesystem\Directory\WriteInterface;
++use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
++use Symfony\Component\Console\Output\OutputInterface;
++use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
++use \Magento\Framework\RequireJs\Config as RequireJsConfig;
++
++class LocaleQuickDeployTest extends \PHPUnit_Framework_TestCase
++{
++    /**
++     * @var OutputInterface|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $outputMock;
++
++    /**
++     * @var WriteInterface|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $staticDirectoryMock;
++
++    protected function setUp()
++    {
++        $this->outputMock = $this->getMockBuilder(OutputInterface::class)
++            ->setMethods(['writeln'])
++            ->getMockForAbstractClass();
++
++        $this->staticDirectoryMock = $this->getMockBuilder(WriteInterface::class)
++            ->setMethods(['createSymlink', 'getAbsolutePath', 'getRelativePath', 'copyFile', 'readRecursively'])
++            ->getMockForAbstractClass();
++    }
++
++    /**
++     * @expectedException \InvalidArgumentException
++     * @expectedExceptionMessage Deploy base locale must be set for Quick Deploy
++     */
++    public function testDeployWithoutBaseLocale()
++    {
++        $this->getModel()->deploy('adminhtml', 'Magento/backend', 'en_US');
++    }
++
++    public function testDeployWithSymlinkStrategy()
++    {
++        $area = 'adminhtml';
++        $themePath = 'Magento/backend';
++        $locale = 'uk_UA';
++        $baseLocal = 'en_US';
++
++        $this->staticDirectoryMock->expects(self::exactly(2))
++            ->method('createSymlink')
++            ->withConsecutive(
++                ['adminhtml/Magento/backend/en_US', 'adminhtml/Magento/backend/uk_UA'],
++                ['_requirejs/adminhtml/Magento/backend/en_US', '_requirejs/adminhtml/Magento/backend/uk_UA']
++            );
++
++        $model = $this->getModel([
++            DeployInterface::DEPLOY_BASE_LOCALE => $baseLocal,
++            Options::SYMLINK_LOCALE => 1,
++        ]);
++        $model->deploy($area, $themePath, $locale);
++    }
++
++    public function testDeployWithCopyStrategy()
++    {
++
++        $area = 'adminhtml';
++        $themePath = 'Magento/backend';
++        $locale = 'uk_UA';
++        $baseLocal = 'en_US';
++
++        $this->staticDirectoryMock->expects(self::never())->method('createSymlink');
++        $this->staticDirectoryMock->expects(self::exactly(2))->method('readRecursively')->willReturnMap([
++            ['adminhtml/Magento/backend/en_US', [$baseLocal . 'file1', $baseLocal . 'dir']],
++            [RequireJsConfig::DIR_NAME  . '/adminhtml/Magento/backend/en_US', [$baseLocal . 'file2']]
++        ]);
++        $this->staticDirectoryMock->expects(self::exactly(3))->method('isFile')->willReturnMap([
++            [$baseLocal . 'file1', true],
++            [$baseLocal . 'dir', false],
++            [$baseLocal . 'file2', true],
++        ]);
++        $this->staticDirectoryMock->expects(self::exactly(2))->method('copyFile')->withConsecutive(
++            [$baseLocal . 'file1', $locale . 'file1', null],
++            [$baseLocal . 'file2', $locale . 'file2', null]
++        );
++
++        $model = $this->getModel([
++            DeployInterface::DEPLOY_BASE_LOCALE => $baseLocal,
++            Options::SYMLINK_LOCALE => 0,
++        ]);
++        $model->deploy($area, $themePath, $locale);
++    }
++
++    /**
++     * @param array $options
++     * @return LocaleQuickDeploy
++     */
++    private function getModel($options = [])
++    {
++        return (new ObjectManager($this))->getObject(
++            LocaleQuickDeploy::class,
++            [
++                'output' => $this->outputMock,
++                'staticDirectory' => $this->staticDirectoryMock,
++                'options' => $options
++            ]
++        );
++    }
++}
+diff --git a/vendor/magento/module-deploy/Test/Unit/Model/Deploy/TemplateMinifierTest.php b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/TemplateMinifierTest.php
+new file mode 100644
+index 0000000..e6859fa
+--- /dev/null
++++ b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/TemplateMinifierTest.php
+@@ -0,0 +1,56 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Deploy\Test\Unit\Model\Deploy;
++
++/**
++ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
++ */
++class TemplateMinifierTest extends \PHPUnit_Framework_TestCase
++{
++    /**
++     * @var \Magento\Deploy\Model\Deploy\TemplateMinifier
++     */
++    private $model;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\App\Utility\Files
++     */
++    private $filesUtilsMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\View\Template\Html\MinifierInterface
++     */
++    private $minifierMock;
++
++    protected function setUp()
++    {
++        $this->minifierMock = $this->getMock(
++            \Magento\Framework\View\Template\Html\MinifierInterface::class,
++            [],
++            [],
++            '',
++            false
++        );
++        $this->filesUtilsMock = $this->getMock(\Magento\Framework\App\Utility\Files::class, [], [], '', false);
++
++        $this->model = new \Magento\Deploy\Model\Deploy\TemplateMinifier(
++            $this->filesUtilsMock,
++            $this->minifierMock
++        );
++    }
++
++    public function testMinifyTemplates()
++    {
++        $templateMock = "template.phtml";
++        $templatesMock = [$templateMock];
++
++        $this->filesUtilsMock->expects($this->once())->method('getPhtmlFiles')->with(false, false)
++            ->willReturn($templatesMock);
++        $this->minifierMock->expects($this->once())->method('minify')->with($templateMock);
++
++        self::assertEquals(1, $this->model->minifyTemplates());
++    }
++}
+diff --git a/vendor/magento/module-deploy/Test/Unit/Model/DeployManagerTest.php b/vendor/magento/module-deploy/Test/Unit/Model/DeployManagerTest.php
+new file mode 100644
+index 0000000..b9a9f60
+--- /dev/null
++++ b/vendor/magento/module-deploy/Test/Unit/Model/DeployManagerTest.php
+@@ -0,0 +1,168 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Deploy\Test\Unit\Model;
++
++use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
++
++/**
++ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
++ */
++class DeployManagerTest extends \PHPUnit_Framework_TestCase
++{
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Deploy\Model\DeployStrategyProviderFactory
++     */
++    private $deployStrategyProviderFactoryMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Symfony\Component\Console\Output\OutputInterface
++     */
++    private $outputMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\App\View\Deployment\Version\StorageInterface
++     */
++    private $versionStorageMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Deploy\Model\Deploy\TemplateMinifier
++     */
++    private $minifierTemplateMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Deploy\Model\ProcessQueueManagerFactory
++     */
++    private $processQueueManagerFactoryMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\App\State
++     */
++    private $stateMock;
++
++    protected function setUp()
++    {
++        $this->deployStrategyProviderFactoryMock = $this->getMock(
++            \Magento\Deploy\Model\DeployStrategyProviderFactory::class,
++            ['create'],
++            [],
++            '',
++            false
++        );
++        $this->versionStorageMock = $this->getMock(
++            \Magento\Framework\App\View\Deployment\Version\StorageInterface::class,
++            [],
++            [],
++            '',
++            false
++        );
++        $this->minifierTemplateMock = $this->getMock(
++            \Magento\Deploy\Model\Deploy\TemplateMinifier::class,
++            [],
++            [],
++            '',
++            false
++        );
++        $this->processQueueManagerFactoryMock = $this->getMock(
++            \Magento\Deploy\Model\ProcessQueueManagerFactory::class,
++            [],
++            [],
++            '',
++            false
++        );
++        $this->stateMock = $this->getMockBuilder(\Magento\Framework\App\State::class)
++            ->disableOriginalConstructor()
++            ->getMock();
++        $this->outputMock = $this->getMock(\Symfony\Component\Console\Output\OutputInterface::class, [], [], '', false);
++    }
++
++    public function testSaveDeployedVersion()
++    {
++        $version = (new \DateTime())->getTimestamp();
++        $this->outputMock->expects($this->once())->method('writeln')->with("New version of deployed files: {$version}");
++        $this->versionStorageMock->expects($this->once())->method('save')->with($version);
++
++        $this->assertEquals(
++            \Magento\Framework\Console\Cli::RETURN_SUCCESS,
++            $this->getModel([Options::NO_HTML_MINIFY => true])->deploy()
++        );
++    }
++
++    public function testSaveDeployedVersionDryRun()
++    {
++        $options = [Options::DRY_RUN => true, Options::NO_HTML_MINIFY => true];
++
++        $this->outputMock->expects(self::once())->method('writeln')->with(
++            'Dry run. Nothing will be recorded to the target directory.'
++        );
++        $this->versionStorageMock->expects($this->never())->method('save');
++
++        $this->getModel($options)->deploy();
++    }
++
++    public function testMinifyTemplates()
++    {
++        $this->minifierTemplateMock->expects($this->once())->method('minifyTemplates')->willReturn(2);
++        $this->outputMock->expects($this->atLeastOnce())->method('writeln')->withConsecutive(
++            ["=== Minify templates ==="],
++            ["\nSuccessful: 2 files modified\n---\n"]
++        );
++
++        $this->getModel([Options::NO_HTML_MINIFY => false])->deploy();
++    }
++
++    public function testMinifyTemplatesNoHtmlMinify()
++    {
++        $version = (new \DateTime())->getTimestamp();
++        $this->outputMock->expects($this->once())->method('writeln')->with("New version of deployed files: {$version}");
++        $this->versionStorageMock->expects($this->once())->method('save')->with($version);
++
++        $this->getModel([Options::NO_HTML_MINIFY => true])->deploy();
++    }
++
++    public function testDeploy()
++    {
++        $area = 'frontend';
++        $themePath = 'themepath';
++        $locale = 'en_US';
++        $options = [Options::NO_HTML_MINIFY => true];
++        $strategyProviderMock = $this->getMock(\Magento\Deploy\Model\DeployStrategyProvider::class, [], [], '', false);
++        $deployStrategyMock = $this->getMock(\Magento\Deploy\Model\Deploy\DeployInterface::class, [], [], '', false);
++
++        $model = $this->getModel($options);
++        $model->addPack($area, $themePath, $locale);
++        $this->deployStrategyProviderFactoryMock->expects($this->once())->method('create')->with(
++            ['output' => $this->outputMock, 'options' => $options]
++        )->willReturn($strategyProviderMock);
++        $strategyProviderMock->expects($this->once())->method('getDeployStrategies')->with($area, $themePath, [$locale])
++            ->willReturn([$locale => $deployStrategyMock]);
++        $this->stateMock->expects(self::once())->method('emulateAreaCode')
++            ->with($area, [$deployStrategyMock, 'deploy'], [$area, $themePath, $locale])
++            ->willReturn(\Magento\Framework\Console\Cli::RETURN_SUCCESS);
++
++        $version = (new \DateTime())->getTimestamp();
++        $this->outputMock->expects(self::once())->method('writeln')->with("New version of deployed files: {$version}");
++        $this->versionStorageMock->expects($this->once())->method('save')->with($version);
++
++        $this->assertEquals(\Magento\Framework\Console\Cli::RETURN_SUCCESS, $model->deploy());
++    }
++
++    /**
++     * @param array $options
++     * @return \Magento\Deploy\Model\DeployManager
++     */
++    private function getModel(array $options)
++    {
++        return new \Magento\Deploy\Model\DeployManager(
++            $this->outputMock,
++            $this->versionStorageMock,
++            $this->deployStrategyProviderFactoryMock,
++            $this->processQueueManagerFactoryMock,
++            $this->minifierTemplateMock,
++            $this->stateMock,
++            $options
++        );
++    }
++}
+diff --git a/vendor/magento/module-deploy/Test/Unit/Model/DeployStrategyFactoryTest.php b/vendor/magento/module-deploy/Test/Unit/Model/DeployStrategyFactoryTest.php
+new file mode 100644
+index 0000000..2af443e
+--- /dev/null
++++ b/vendor/magento/module-deploy/Test/Unit/Model/DeployStrategyFactoryTest.php
+@@ -0,0 +1,53 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Deploy\Test\Unit\Model;
++
++use Magento\Deploy\Model\Deploy\LocaleDeploy;
++use Magento\Deploy\Model\DeployStrategyFactory;
++use Magento\Framework\ObjectManagerInterface;
++use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
++
++class DeployStrategyFactoryTest extends \PHPUnit_Framework_TestCase
++{
++    /**
++     * @var ObjectManagerInterface|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $objectManagerMock;
++
++    /**
++     * @var DeployStrategyFactory
++     */
++    private $unit;
++
++    protected function setUp()
++    {
++        $this->objectManagerMock = $this->getMock(ObjectManagerInterface::class);
++
++        $this->unit = (new ObjectManager($this))->getObject(
++            DeployStrategyFactory::class,
++            [
++                'objectManager' => $this->objectManagerMock,
++            ]
++        );
++    }
++
++    /**
++     * @expectedException \Magento\Framework\Exception\InputException
++     * @expectedExceptionMessage Wrong deploy strategy type: wrong-type
++     */
++    public function testCreateWithWrongStrategyType()
++    {
++        $this->unit->create('wrong-type');
++    }
++
++    public function testCreate()
++    {
++        $this->objectManagerMock->expects(self::once())->method('create')
++            ->with(LocaleDeploy::class, ['arg1' => 1]);
++
++        $this->unit->create(DeployStrategyFactory::DEPLOY_STRATEGY_STANDARD, ['arg1' => 1]);
++    }
++}
+diff --git a/vendor/magento/module-deploy/Test/Unit/Model/ProcessQueueManagerTest.php b/vendor/magento/module-deploy/Test/Unit/Model/ProcessQueueManagerTest.php
+new file mode 100644
+index 0000000..e770687
+--- /dev/null
++++ b/vendor/magento/module-deploy/Test/Unit/Model/ProcessQueueManagerTest.php
+@@ -0,0 +1,85 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Deploy\Test\Unit\Model;
++
++use Magento\Deploy\Model\ProcessManager;
++use Magento\Framework\App\ResourceConnection;
++use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
++use Magento\Deploy\Model\ProcessTaskFactory;
++use Magento\Deploy\Model\ProcessTask;
++
++class ProcessQueueManagerTest extends \PHPUnit_Framework_TestCase
++{
++    /**
++     * @var \Magento\Deploy\Model\ProcessQueueManager
++     */
++    private $model;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Deploy\Model\ProcessManager
++     */
++    private $processManagerMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Framework\App\ResourceConnection
++     */
++    private $resourceConnectionMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|ProcessTaskFactory
++     */
++    private $processTaskFactoryMock;
++
++    /**
++     * @var \PHPUnit_Framework_MockObject_MockObject|ProcessTask
++     */
++    private $processTaskMock;
++
++    protected function setUp()
++    {
++        $this->processManagerMock = $this->getMock(ProcessManager::class, [], [], '', false);
++        $this->resourceConnectionMock = $this->getMock(ResourceConnection::class, [], [], '', false);
++        $this->processTaskFactoryMock = $this->getMock(ProcessTaskFactory::class, ['create'], [], '', false);
++        $this->processTaskMock = $this->getMock(ProcessTask::class, [], [], '', false);
++        $this->processTaskFactoryMock->expects($this->any())->method('create')->willReturn($this->processTaskMock);
++        $this->model = (new ObjectManager($this))->getObject(
++            \Magento\Deploy\Model\ProcessQueueManager::class,
++            [
++                'processManager' => $this->processManagerMock,
++                'resourceConnection' => $this->resourceConnectionMock,
++                'processTaskFactory' => $this->processTaskFactoryMock
++            ]
++        );
++    }
++
++    public function testProcess()
++    {
++        $callableMock = function () {
++            return true;
++        };
++        $this->processTaskMock->expects($this->any())->method('getHandler')->willReturn($callableMock);
++
++        $processMock = $this->getMock(\Magento\Deploy\Model\Process::class, [], [], '', false);
++
++        $this->model->addTaskToQueue($callableMock, []);
++        $this->processManagerMock->expects($this->atLeastOnce())->method('getProcesses')->willReturnOnConsecutiveCalls(
++            [$processMock],
++            [$processMock],
++            [$processMock],
++            [$processMock],
++            [$processMock],
++            []
++        );
++        $processMock->expects($this->once())->method('isCompleted')->willReturn(true);
++        $processMock->expects($this->atLeastOnce())->method('getPid')->willReturn(42);
++        $processMock->expects($this->once())->method('getStatus')->willReturn(0);
++        $this->processManagerMock->expects($this->once())->method('delete')->with($processMock);
++
++        $this->resourceConnectionMock->expects(self::once())->method('closeConnection');
++
++        $this->assertEquals(0, $this->model->process());
++    }
++}
+diff --git a/vendor/magento/module-deploy/composer.json b/vendor/magento/module-deploy/composer.json
+index b185217..9da57b6 100644
+--- a/vendor/magento/module-deploy/composer.json
++++ b/vendor/magento/module-deploy/composer.json
+@@ -5,7 +5,6 @@
+         "php": "~5.6.5|7.0.2|7.0.4|~7.0.6",
+         "magento/framework": "100.1.*",
+         "magento/module-store": "100.1.*",
+-        "magento/module-theme": "100.1.*",
+         "magento/module-require-js": "100.1.*",
+         "magento/module-user": "100.1.*"
+     },
+diff --git a/vendor/magento/module-deploy/etc/di.xml b/vendor/magento/module-deploy/etc/di.xml
+index e1a0295..52c880c 100644
+--- a/vendor/magento/module-deploy/etc/di.xml
++++ b/vendor/magento/module-deploy/etc/di.xml
+@@ -13,6 +13,13 @@
+             </argument>
+         </arguments>
+     </type>
++    <type name="Magento\Deploy\Model\Deploy\LocaleDeploy">
++        <arguments>
++            <argument name="alternativeSources" xsi:type="array">
++                <item name="css" xsi:type="object">AlternativeSourceProcessors</item>
++            </argument>
++        </arguments>
++    </type>
+     <type name="Magento\Framework\Console\CommandListInterface">
+         <arguments>
+             <argument name="commands" xsi:type="array">
+diff --git a/dev/tests/integration/testsuite/Magento/Framework/View/Asset/MinifierTest.php b/dev/tests/integration/testsuite/Magento/Framework/View/Asset/MinifierTest.php
+index d88f79f..c155ef8 100644
+--- a/dev/tests/integration/testsuite/Magento/Framework/View/Asset/MinifierTest.php
++++ b/dev/tests/integration/testsuite/Magento/Framework/View/Asset/MinifierTest.php
+@@ -235,13 +235,13 @@ public function testDeploymentWithMinifierEnabled()
+                 ]
+             ));
+ 
+-        /** @var \Magento\Deploy\Model\Deployer $deployer */
++        /** @var \Magento\Deploy\Model\Deploy\LocaleDeploy $deployer */
+         $deployer = $this->objectManager->create(
+-            \Magento\Deploy\Model\Deployer::class,
++            \Magento\Deploy\Model\Deploy\LocaleDeploy::class,
+             ['filesUtil' => $filesUtil, 'output' => $output]
+         );
+ 
+-        $deployer->deploy($omFactory, ['en_US'], ['frontend' => ['FrameworkViewMinifier/default']]);
++        $deployer->deploy('frontend', 'FrameworkViewMinifier/default', 'en_US', []);
+ 
+         $this->assertFileExists($fileToBePublished);
+         $this->assertEquals(
+diff --git a/vendor/magento/framework/App/ResourceConnection.php b/vendor/magento/framework/App/ResourceConnection.php
+index 5a2e4a6..d41a457 100644
+--- a/vendor/magento/framework/App/ResourceConnection.php
++++ b/vendor/magento/framework/App/ResourceConnection.php
+@@ -93,6 +93,18 @@ public function getConnection($resourceName = self::DEFAULT_CONNECTION)
+     }
+ 
+     /**
++     * @param string $resourceName
++     * @return void
++     */
++    public function closeConnection($resourceName = self::DEFAULT_CONNECTION)
++    {
++        $processConnectionName = $this->getProcessConnectionName($this->config->getConnectionName($resourceName));
++        if (isset($this->connections[$processConnectionName])) {
++            $this->connections[$processConnectionName] = null;
++        }
++    }
++
++    /**
+      * Retrieve connection by $connectionName
+      *
+      * @param string $connectionName
+@@ -101,8 +113,9 @@ public function getConnection($resourceName = self::DEFAULT_CONNECTION)
+      */
+     public function getConnectionByName($connectionName)
+     {
+-        if (isset($this->connections[$connectionName])) {
+-            return $this->connections[$connectionName];
++        $processConnectionName = $this->getProcessConnectionName($connectionName);
++        if (isset($this->connections[$processConnectionName])) {
++            return $this->connections[$processConnectionName];
+         }
+ 
+         $connectionConfig = $this->deploymentConfig->get(
+@@ -115,11 +128,20 @@ public function getConnectionByName($connectionName)
+             throw new \DomainException('Connection "' . $connectionName . '" is not defined');
+         }
+ 
+-        $this->connections[$connectionName] = $connection;
++        $this->connections[$processConnectionName] = $connection;
+         return $connection;
+     }
+ 
+     /**
++     * @param string $connectionName
++     * @return string
++     */
++    private function getProcessConnectionName($connectionName)
++    {
++        return  $connectionName . '_process_' . getmypid();
++    }
++
++    /**
+      * Get resource table name, validated by db adapter
+      *
+      * @param   string|string[] $modelEntity
+diff --git a/vendor/magento/framework/Css/PreProcessor/Instruction/MagentoImport.php b/vendor/magento/framework/Css/PreProcessor/Instruction/MagentoImport.php
+index 1ed47c9..ab5db00 100644
+--- a/vendor/magento/framework/Css/PreProcessor/Instruction/MagentoImport.php
++++ b/vendor/magento/framework/Css/PreProcessor/Instruction/MagentoImport.php
+@@ -16,6 +16,7 @@
+ 
+ /**
+  * @magento_import instruction preprocessor
++ * @SuppressWarnings(PHPMD.CouplingBetweenObjects) Must be deleted after moving themeProvider to construct
+  */
+ class MagentoImport implements PreProcessorInterface
+ {
+diff --git a/vendor/magento/framework/Filesystem/Directory/Write.php b/vendor/magento/framework/Filesystem/Directory/Write.php
+index 0a46a17..9d7ac32 100644
+--- a/vendor/magento/framework/Filesystem/Directory/Write.php
++++ b/vendor/magento/framework/Filesystem/Directory/Write.php
+@@ -143,8 +143,6 @@ public function copyFile($path, $destination, WriteInterface $targetDirectory =
+      */
+     public function createSymlink($path, $destination, WriteInterface $targetDirectory = null)
+     {
+-        $this->assertIsFile($path);
+-
+         $targetDirectory = $targetDirectory ?: $this;
+         $parentDirectory = $this->driver->getParentDirectory($destination);
+         if (!$targetDirectory->isExist($parentDirectory)) {
+diff --git a/vendor/magento/framework/Filesystem/Directory/WriteInterface.php b/vendor/magento/framework/Filesystem/Directory/WriteInterface.php
+index 472c54a..3fa0513 100644
+--- a/vendor/magento/framework/Filesystem/Directory/WriteInterface.php
++++ b/vendor/magento/framework/Filesystem/Directory/WriteInterface.php
+@@ -48,7 +48,7 @@ public function renameFile($path, $newPath, WriteInterface $targetDirectory = nu
+     public function copyFile($path, $destination, WriteInterface $targetDirectory = null);
+ 
+     /**
+-     * Creates symlink on a file and places it to destination
++     * Creates symlink on a file or directory and places it to destination
+      *
+      * @param string $path
+      * @param string $destination
+diff --git a/vendor/magento/framework/Test/Unit/App/ResourceConnectionTest.php b/vendor/magento/framework/Test/Unit/App/ResourceConnectionTest.php
+new file mode 100644
+index 0000000..9cbdea9
+--- /dev/null
++++ b/vendor/magento/framework/Test/Unit/App/ResourceConnectionTest.php
+@@ -0,0 +1,97 @@
++<?php
++/**
++ * Copyright © 2016 Magento. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Framework\Test\Unit\App;
++
++use Magento\Framework\App\DeploymentConfig;
++use Magento\Framework\App\ResourceConnection;
++use Magento\Framework\Config\ConfigOptionsListConstants;
++use Magento\Framework\Model\ResourceModel\Type\Db\ConnectionFactoryInterface;
++use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
++use Magento\Framework\App\ResourceConnection\ConfigInterface;
++
++class ResourceConnectionTest extends \PHPUnit_Framework_TestCase
++{
++    /**
++     * @var ResourceConnection
++     */
++    private $unit;
++
++    /**
++     * @var ResourceConnection|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $deploymentConfigMock;
++
++    /**
++     * @var ConnectionFactoryInterface|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $connectionFactoryMock;
++
++    /**
++     * @var ObjectManager
++     */
++    private $objectManager;
++
++    /**
++     * @var ConfigInterface|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $configMock;
++
++    protected function setUp()
++    {
++        $this->deploymentConfigMock = $this->getMockBuilder(DeploymentConfig::class)
++            ->disableOriginalConstructor()
++            ->getMock();
++
++        $this->connectionFactoryMock = $this->getMockBuilder(ConnectionFactoryInterface::class)
++            ->getMock();
++
++        $this->configMock = $this->getMockBuilder(ConfigInterface::class)->getMock();
++
++        $this->objectManager = (new ObjectManager($this));
++        $this->unit = $this->objectManager->getObject(
++            ResourceConnection::class,
++            [
++                'deploymentConfig' => $this->deploymentConfigMock,
++                'connectionFactory' => $this->connectionFactoryMock,
++                'config' => $this->configMock,
++            ]
++        );
++    }
++
++    public function testGetConnectionByName()
++    {
++        $this->deploymentConfigMock->expects(self::once())->method('get')
++            ->with(ConfigOptionsListConstants::CONFIG_PATH_DB_CONNECTIONS  . '/default')
++            ->willReturn(['config']);
++        $this->connectionFactoryMock->expects(self::once())->method('create')
++            ->with(['config'])
++            ->willReturn('connection');
++
++        self::assertEquals('connection', $this->unit->getConnectionByName('default'));
++    }
++
++    public function testGetExistingConnectionByName()
++    {
++        $unit = $this->objectManager->getObject(
++            ResourceConnection::class,
++            [
++                'deploymentConfig' => $this->deploymentConfigMock,
++                'connections' => ['default_process_' . getmypid() => 'existing_connection']
++            ]
++        );
++        $this->deploymentConfigMock->expects(self::never())->method('get');
++
++        self::assertEquals('existing_connection', $unit->getConnectionByName('default'));
++    }
++
++    public function testCloseConnection()
++    {
++        $this->configMock->expects(self::once())->method('getConnectionName')->with('default');
++
++        $this->unit->closeConnection('default');
++
++    }
++}
+diff --git a/vendor/magento/framework/View/Asset/Bundle/Config.php b/vendor/magento/framework/View/Asset/Bundle/Config.php
+index 9fbed5a..ebd0a21 100644
+--- a/vendor/magento/framework/View/Asset/Bundle/Config.php
++++ b/vendor/magento/framework/View/Asset/Bundle/Config.php
+@@ -100,7 +100,7 @@ public function getPartSize(FallbackContext $assetContext)
+             case 'MB':
+                 return (int)$size * 1024;
+             default:
+-                return (int)$size / 1024;
++                return (int)($size / 1024);
+         }
+     }
+ 
+diff --git a/vendor/magento/framework/View/Asset/LockerProcess.php b/vendor/magento/framework/View/Asset/LockerProcess.php
+index 660cf04..e893821 100644
+--- a/vendor/magento/framework/View/Asset/LockerProcess.php
++++ b/vendor/magento/framework/View/Asset/LockerProcess.php
+@@ -59,7 +59,6 @@ public function __construct(Filesystem $filesystem)
+ 
+     /**
+      * @inheritdoc
+-     * @throws FileSystemException
+      */
+     public function lockProcess($lockName)
+     {
+@@ -94,14 +93,18 @@ public function unlockProcess()
+      * Check whether generation process has already locked
+      *
+      * @return bool
+-     * @throws FileSystemException
+      */
+     private function isProcessLocked()
+     {
+         if ($this->tmpDirectory->isExist($this->lockFilePath)) {
+-            $lockTime = (int) $this->tmpDirectory->readFile($this->lockFilePath);
+-            if ((time() - $lockTime) >= self::MAX_LOCK_TIME) {
+-                $this->tmpDirectory->delete($this->lockFilePath);
++            try {
++                $lockTime = (int)$this->tmpDirectory->readFile($this->lockFilePath);
++                if ((time() - $lockTime) >= self::MAX_LOCK_TIME) {
++                    $this->tmpDirectory->delete($this->lockFilePath);
++
++                    return false;
++                }
++            } catch (FileSystemException $e) {
+ 
+                 return false;
+             }
