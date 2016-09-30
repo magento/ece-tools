@@ -500,6 +500,10 @@ class Deploy extends Command
                     rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
                 }
             }
+            $varLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/';
+            if (file_exists($varLocation . 'view_preprocessed')) {
+                rename ($varLocation . 'view_preprocessed', $varLocation . 'view_preprocessed_old_' . $timestamp);
+            }
         }
 
         // Check can move in from stash
