@@ -71,5 +71,10 @@ class Environment
         return $output;
     }
 
-
+    public function backgroundExecute($command)
+    {
+        $command = "nohup {$command} 1>/dev/null 2>&1 &";
+        $this->log("Execute command in background: $command");
+        shell_exec($command);
+    }
 }

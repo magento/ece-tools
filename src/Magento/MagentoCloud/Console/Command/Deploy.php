@@ -502,14 +502,14 @@ class Deploy extends Command
             }
 
             $this->env->log("Removing $oldStaticContentLocation in the background");
-            $this->env->execute("nohup rm -rf $oldStaticContentLocation &");
+            $this->env->backgroundExecute("rm -rf $oldStaticContentLocation");
 
             $varLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/';
             if (file_exists($varLocation . 'view_preprocessed')) {
                 $oldPreprocessedLocation = $varLocation . 'view_preprocessed_old_' . $timestamp;
-                rename ($varLocation . 'view_preprocessed', $oldPreprocessedLocation . $timestamp);
+                rename ($varLocation . 'view_preprocessed', $oldPreprocessedLocation);
                 $this->env->log("Removing $oldPreprocessedLocation in the background");
-                $this->env->execute("nohup rm -rf $oldPreprocessedLocation &");
+                $this->env->backgroundExecute("rm -rf $oldPreprocessedLocation");
             }
         }
 

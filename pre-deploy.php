@@ -47,8 +47,8 @@ foreach ($env->writableDirs as $dir) {
             $oldGenerationDir = "{$generationDir}_old_{$timestamp}";
             $env->log("Clearing generated code out from $generationDir to $oldGenerationDir");
             rename($generationDir, $oldGenerationDir);
-            $this->env->log("Removing $oldGenerationDir in the background");
-            $this->env->execute("nohup rm -rf $oldGenerationDir &");
+            $env->log("Removing $oldGenerationDir in the background");
+            $env->backgroundExecute("rm -rf {$oldGenerationDir}");
         }
         $env->log("Moving generated code from stash location $generatedCodeStash to $generationDir");
         rename($generatedCodeStash, $generationDir);
