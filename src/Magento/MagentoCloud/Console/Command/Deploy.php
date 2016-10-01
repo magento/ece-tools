@@ -699,6 +699,6 @@ class Deploy extends Command
     {
         $this->env->log("Removing old generated code in the background");
         // Must match filename of old generated assets directory in pre-deploy.php
-        $this->env->backgroundExecute("rm -rf " . realpath(Environment::MAGENTO_ROOT . 'var') . '/generated_old_*');
+        $this->env->backgroundExecute("rm -rf " . realpath(Environment::MAGENTO_ROOT . 'var') . '/generation_old_*');
     }
 }
