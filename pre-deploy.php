@@ -41,7 +41,7 @@ foreach ($env->writableDirs as $dir) {
         $env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
         $env->log(sprintf('Copied directory: %s', $dir));
     } else {
-        $generationDir = realpath(Environment::MAGENTO_ROOT . 'var/generation') . '/';
+        $generationDir = realpath(Environment::MAGENTO_ROOT . 'var/generation');
         if (file_exists($generationDir)) {
             $timestamp = time();
             $oldGenerationDir = "{$generationDir}_old_{$timestamp}";
