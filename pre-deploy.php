@@ -41,11 +41,14 @@ foreach ($env->writableDirs as $dir) {
         $env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
         $env->log(sprintf('Copied directory: %s', $dir));
     } else {
-        $timestamp = time();
-        $generationDir = Environment::MAGENTO_ROOT . 'var/generation';
+        $generationDir = realpath(Environment::MAGENTO_ROOT . 'var/generation') . '/';
         if (file_exists($generationDir)) {
-            $env->log("Clearing generated code out from $generationDir to {$generationDir}_old_{$timestamp}");
-            rename($generationDir, $generationDir . '_old_' . $timestamp);
+            $timestamp = time();
+            $oldGenerationDir = "{$generationDir}_old_{$timestamp}";
+            $env->log("Clearing generated code out from $generationDir to $oldGenerationDir");
+            rename($generationDir, $oldGenerationDir);
+            $this->env->log("Removing $oldGenerationDir in the background");
+            $this->env->execute("nohup rm -rf $oldGenerationDir &");
         }
         $env->log("Moving generated code from stash location $generatedCodeStash to $generationDir");
         rename($generatedCodeStash, $generationDir);

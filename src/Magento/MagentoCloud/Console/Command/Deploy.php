@@ -475,7 +475,7 @@ class Deploy extends Command
         // Clear old static content if necessary
         if ($this->cleanStaticViewFiles) {
             // atomic move within pub/static directory
-            $staticContentLocation = Environment::MAGENTO_ROOT . 'pub/static/';
+            $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static/') . '/';
             $timestamp = time();
             $oldStaticContentLocation = $staticContentLocation . 'old_static_content_' . $timestamp;
 
@@ -500,9 +500,16 @@ class Deploy extends Command
                     rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
                 }
             }
+
+            $this->env->log("Removing $oldStaticContentLocation in the background");
+            $this->env->execute("nohup rm -rf $oldStaticContentLocation &");
+
             $varLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/';
             if (file_exists($varLocation . 'view_preprocessed')) {
-                rename ($varLocation . 'view_preprocessed', $varLocation . 'view_preprocessed_old_' . $timestamp);
+                $oldPreprocessedLocation = $varLocation . 'view_preprocessed_old_' . $timestamp;
+                rename ($varLocation . 'view_preprocessed', $oldPreprocessedLocation . $timestamp);
+                $this->env->log("Removing $oldPreprocessedLocation in the background");
+                $this->env->execute("nohup rm -rf $oldPreprocessedLocation &");
             }
         }
 
