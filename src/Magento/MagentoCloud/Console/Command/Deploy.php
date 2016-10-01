@@ -103,6 +103,7 @@ class Deploy extends Command
         }
         $this->processMagentoMode();
         $this->disableGoogleAnalytics();
+        $this->cleanupOldAssets();
         $this->env->log("Deployment complete.");
     }
 
@@ -689,5 +690,15 @@ class Deploy extends Command
                 ]
             ]
         ];
+    }
+
+    /**
+     * Clean up any "old" assets that were atomically moved out of place, by deleting them in the background
+     */
+    private function cleanupOldAssets()
+    {
+        $this->env->log("Removing old generated code in the background");
+        // Must match filename of old generated assets directory in pre-deploy.php
+        $this->env->backgroundExecute("rm -rf " . realpath(Environment::MAGENTO_ROOT . 'var') . '/generated_old_*');
     }
 }

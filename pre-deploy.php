@@ -44,11 +44,10 @@ foreach ($env->writableDirs as $dir) {
         $generationDir = realpath(Environment::MAGENTO_ROOT . 'var/generation');
         if (file_exists($generationDir)) {
             $timestamp = time();
+            // Must match directory name for the cleanup step in deploy command
             $oldGenerationDir = "{$generationDir}_old_{$timestamp}";
             $env->log("Clearing generated code out from $generationDir to $oldGenerationDir");
             rename($generationDir, $oldGenerationDir);
-            $env->log("Removing $oldGenerationDir in the background");
-            $env->backgroundExecute("rm -rf {$oldGenerationDir}");
         }
         $env->log("Moving generated code from stash location $generatedCodeStash to $generationDir");
         rename($generatedCodeStash, $generationDir);
