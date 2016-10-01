@@ -525,7 +525,7 @@ class Deploy extends Command
             foreach ($dir as $fileInfo) {
                 $fileName = $fileInfo->getFilename();
                 if (!$fileInfo->isDot()) {
-                    $this->env->log("Rename " . $this->staticContentStashLocation . '/' . $fileName . " to " . $this->staticContentStashLocation . '/' . $fileName);
+                    $this->env->log("Rename " . $this->staticContentStashLocation . '/' . $fileName . " to " . $staticContentLocation . '/' . $fileName);
                     rename($this->staticContentStashLocation . '/' . $fileName, $staticContentLocation . '/' . $fileName);
                 }
             }
