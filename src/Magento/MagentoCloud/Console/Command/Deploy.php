@@ -504,10 +504,11 @@ class Deploy extends Command
             $this->env->log("Removing $oldStaticContentLocation in the background");
             $this->env->backgroundExecute("rm -rf $oldStaticContentLocation");
 
-            $varLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/';
-            if (file_exists($varLocation . 'view_preprocessed')) {
-                $oldPreprocessedLocation = $varLocation . 'view_preprocessed_old_' . $timestamp;
-                rename ($varLocation . 'view_preprocessed', $oldPreprocessedLocation);
+            $preprocessedLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/view_preprocessed';
+            if (file_exists($preprocessedLocation)) {
+                $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
+                $this->env->log("Rename $preprocessedLocation  to $oldPreprocessedLocation");
+                rename($preprocessedLocation, $oldPreprocessedLocation);
                 $this->env->log("Removing $oldPreprocessedLocation in the background");
                 $this->env->backgroundExecute("rm -rf $oldPreprocessedLocation");
             }
