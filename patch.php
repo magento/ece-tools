@@ -9,13 +9,12 @@ $env->log("Copying static.php to front-static.php");
 copy(Environment::MAGENTO_ROOT . 'pub/static.php', Environment::MAGENTO_ROOT . 'pub/front-static.php');
 
 $dirName = __DIR__ . '/patches';
-$dir = new DirectoryIterator($dirName);
-foreach ($dir as $fileinfo) {
-    if (!$fileinfo->isDot()) {
-        $filename = $fileinfo->getFilename();
-        $cmd = 'git apply ' . $dirName . '/' . $filename;
-        $env->execute($cmd);
-    }
+
+$files = glob($patchesDir . "*");
+sort($files);
+foreach ($files as $file) {
+    $cmd = 'git apply '  . $file;
+    $this->env->execute($cmd);
 }
 
 copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
