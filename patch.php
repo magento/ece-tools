@@ -14,7 +14,7 @@ $files = glob($dirName . '/*');
 sort($files);
 foreach ($files as $file) {
     $cmd = 'git apply '  . $file;
-    $this->env->execute($cmd);
+    $env->execute($cmd);
 }
 
 copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
