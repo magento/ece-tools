@@ -10,7 +10,7 @@ copy(Environment::MAGENTO_ROOT . 'pub/static.php', Environment::MAGENTO_ROOT . '
 
 $dirName = __DIR__ . '/patches';
 
-$files = glob($patchesDir . "*");
+$files = glob($dirName . '/*');
 sort($files);
 foreach ($files as $file) {
     $cmd = 'git apply '  . $file;
