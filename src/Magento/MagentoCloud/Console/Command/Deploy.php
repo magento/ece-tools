@@ -473,6 +473,7 @@ class Deploy extends Command
 
     private function deployStaticContent()
     {
+        $this->env->execute('touch ' . Environment::MAGENTO_ROOT . 'pub/static/deployed_version.txt');
         // Clear old static content if necessary
         if ($this->cleanStaticViewFiles) {
             // atomic move within pub/static directory
