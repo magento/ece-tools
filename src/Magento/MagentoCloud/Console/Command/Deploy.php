@@ -181,6 +181,12 @@ class Deploy extends Command
     {
         $configFile = 'app/etc/env.php';
         $installed = false;
+	//1. from enviornment variables check if db exists and has tables 
+	//2. check if core_config_data and setup_module tables exist
+	//3. check versions between setup_module and filesystem
+	//4. check install date
+	$var = $this->env->getVariables();
+	$this->env->log($var["MAGENTO_CLOUD_RELATIONSHIPS"]);	
         if (file_exists($configFile)) { //TODO
             $data = include $configFile;
             if (isset($data['install']) && isset($data['install']['date'])) {
