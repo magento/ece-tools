@@ -202,7 +202,7 @@ class Deploy extends Command
         $urlSecure = $this->urls['secure'][''];
 
         $command =
-            "cd bin/; /usr/bin/php ./magento setup:install \
+            "php ./bin/magento setup:install \
             --session-save=db \
             --cleanup-database \
             --currency=$this->defaultCurrency \
@@ -310,7 +310,7 @@ class Deploy extends Command
         $this->env->log("Running setup upgrade.");
 
         $this->env->execute(
-            "cd bin/; /usr/bin/php ./magento setup:upgrade --keep-generated {$this->verbosityLevel}"
+            "php ./bin/magento setup:upgrade --keep-generated {$this->verbosityLevel}"
         );
     }
 
@@ -322,7 +322,7 @@ class Deploy extends Command
         $this->env->log("Clearing application cache.");
 
         $this->env->execute(
-            "cd bin/; /usr/bin/php ./magento cache:flush {$this->verbosityLevel}"
+            "php ./bin/magento cache:flush {$this->verbosityLevel}"
         );
     }
 
@@ -466,7 +466,7 @@ class Deploy extends Command
         } else {
             $this->env->log("Enable developer mode");
             $this->env->execute(
-                "cd bin/; /usr/bin/php ./magento deploy:mode:set " . self::MAGENTO_DEVELOPER_MODE . $this->verbosityLevel
+                "php ./bin/magento deploy:mode:set " . self::MAGENTO_DEVELOPER_MODE . $this->verbosityLevel
             );
         }
     }
@@ -563,7 +563,7 @@ class Deploy extends Command
     {
         /* Enable maintenance mode */
         $this->env->log("Enabling Maintenance mode.");
-        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:enable {$this->verbosityLevel}");
+        $this->env->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");
 
         /* Generate static assets */
         $this->env->log("Extract locales");
@@ -597,7 +597,7 @@ class Deploy extends Command
         );
 
         /* Disable maintenance mode */
-        $this->env->execute("cd bin/; /usr/bin/php ./magento maintenance:disable {$this->verbosityLevel}");
+        $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
         $this->env->log("Maintenance mode is disabled.");
     }
 

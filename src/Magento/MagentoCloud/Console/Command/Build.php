@@ -109,11 +109,11 @@ class Build extends Command
         $this->env->execute('rm -rf var/di/*');
 
         $this->env->log("Enabling all modules");
-        $this->env->execute("cd bin/; /usr/bin/php ./magento module:enable --all");
+        $this->env->execute("php ./bin/magento module:enable --all");
 
         if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
             $this->env->log("Running DI compilation");
-            $this->env->execute("cd bin/; /usr/bin/php ./magento setup:di:compile");
+            $this->env->execute("php ./bin/magento setup:di:compile");
         } else {
             $this->env->log("Skip running DI compilation");
         }
