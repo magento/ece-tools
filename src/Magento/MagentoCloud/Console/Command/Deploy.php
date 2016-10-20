@@ -384,6 +384,8 @@ class Deploy extends Command
         }
         $config['backend']['frontName'] = $this->adminUrl;
 
+        $config['resource']['default_setup']['connection'] = 'default';
+
         $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
 
         file_put_contents($configFileName, $updatedConfig);
