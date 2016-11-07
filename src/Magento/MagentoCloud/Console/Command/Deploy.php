@@ -181,10 +181,33 @@ class Deploy extends Command
     {
         $configFile = 'app/etc/env.php';
         $installed = false;
-        if (file_exists($configFile)) { //TODO
-            $data = include $configFile;
-            if (isset($data['install']) && isset($data['install']['date'])) {
-                $this->env->log("Magento was installed on " . $data['install']['date']);
+
+        //1. from environment variables check if db exists and has tables
+        //2. check if core_config_data and setup_module tables exist
+        //3. check install date
+
+        $this->env->log('Checking if db exists and has tables');
+        $output = $this->executeDbQuery('SHOW TABLES');
+        if (is_array($output) && count($output) > 1) {
+            if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
+                $this->env->log('Missing either core_config_data or setup_module table');
+                exit(5);
+            } elseif (file_exists($configFile)) {
+                $data = include $configFile;
+                if (isset($data['install']) && isset($data['install']['date'])) {
+                    $this->env->log("Magento was installed on " . $data['install']['date']);
+                    $installed = true;
+                } else {
+                    $config['install']['date'] = date('r');
+                    $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
+                    file_put_contents($configFile, $updatedConfig);
+                    $installed = true;
+                }
+            } else {
+                $this->env->execute('touch ' . Environment::MAGENTO_ROOT . $configFile);
+                $config['install']['date'] = date('r');
+                $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
+                file_put_contents($configFile, $updatedConfig);
                 $installed = true;
             }
         }
@@ -196,7 +219,7 @@ class Deploy extends Command
      */
     public function installMagento()
     {
-        $this->env->log("File env.php does not contain installation date. Installing Magento.");
+        $this->env->log("Installing Magento.");
 
         $urlUnsecure = $this->urls['unsecure'][''];
         $urlSecure = $this->urls['secure'][''];
@@ -360,6 +383,8 @@ class Deploy extends Command
             ];
         }
         $config['backend']['frontName'] = $this->adminUrl;
+
+        $config['resource']['default_setup']['connection'] = 'default';
 
         $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
 
