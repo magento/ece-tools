@@ -342,7 +342,7 @@ class Deploy extends Command
         $this->env->execute("php ./bin/magento module:enable --all");
         $this->env->log("Running setup upgrade.");
         try {
-            $this->env->execute("cd bin/; /usr/bin/php ./magento setup:upgrade --keep-generated");
+            $this->env->execute("cd bin/; /usr/bin/php ./magento setup:upgrade --keep-generated {$this->verbosityLevel}");
         }catch (\RuntimeException $e) {
             if (file_exists($configFile . '.bak')) {
                 $this->env->log("Rollback config.php");
