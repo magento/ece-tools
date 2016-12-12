@@ -330,11 +330,37 @@ class Deploy extends Command
      */
     private function setupUpgrade()
     {
+        $this->env->log("Saving disabled modules.");
+        $configFile = 'app/etc/config.php';
+        $disabledModules = [];
+        if (file_exists($configFile)) {
+            $this->env->execute("cp -f app/etc/config.php app/etc/config.php.bak");
+            $moduleData = include $configFile;
+            $disabledModules = array_filter($moduleData['modules'], function ($v){return $v == 0;});
+        }
+        $this->env->log("Enabling all modules");
+        $this->env->execute("php ./bin/magento module:enable --all");
         $this->env->log("Running setup upgrade.");
-
-        $this->env->execute(
-            "php ./bin/magento setup:upgrade --keep-generated {$this->verbosityLevel}"
-        );
+        try {
+            $this->env->execute("php ./bin/magento setup:upgrade --keep-generated {$this->verbosityLevel}");
+        }catch (\RuntimeException $e) {
+            if (file_exists($configFile . '.bak')) {
+                $this->env->log("Rollback config.php");
+                $this->env->execute("cp -f app/etc/config.php.bak app/etc/config.php");
+            } else {
+                $this->env->log("No backup config file to perform rollback");
+            }
+            $this->env->log($e->getMessage());
+            //Rollback required by database
+            exit(6);
+        }
+        if (count($disabledModules) > 0) {
+            $this->env->execute("php ./bin/magento module:disable  -f " . implode(' ' ,array_keys($disabledModules)));
+        }
+        if (file_exists($configFile . '.bak')) {
+            $this->env->log("Deleting backup file");
+            $this->env->execute("rm app/etc/config.php.bak");
+        }
     }
 
     /**
