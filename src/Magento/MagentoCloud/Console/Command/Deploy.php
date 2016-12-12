@@ -350,7 +350,8 @@ class Deploy extends Command
             } else {
                 $this->env->log("No backup config file to perform rollback");
             }
-            throw new \RuntimeException($e);
+            //Rollback required by database
+            exit(6);
         }
         if (count($disabledModules) > 0) {
             $this->env->execute("php ./bin/magento module:disable  -f " . implode(' ' ,array_keys($disabledModules)));
