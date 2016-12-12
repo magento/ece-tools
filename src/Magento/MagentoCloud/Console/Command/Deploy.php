@@ -350,6 +350,7 @@ class Deploy extends Command
             } else {
                 $this->env->log("No backup config file to perform rollback");
             }
+            $this->env->log($e->getMessage());
             //Rollback required by database
             exit(6);
         }
