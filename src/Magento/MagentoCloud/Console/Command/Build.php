@@ -59,6 +59,7 @@ class Build extends Command
         $this->applyMccPatches();
         $this->applyCommittedPatches();
         $this->compileDI();
+        $this->deployStaticContent();
         $this->clearInitDir();
         $this->env->execute('rm -rf app/etc/env.php');
         $this->env->execute('rm -rf app/etc/config.php');
@@ -74,6 +75,27 @@ class Build extends Command
             $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir));
             $this->env->execute(sprintf('rm -rf %s', $dir));
             $this->env->execute(sprintf('mkdir %s', $dir));
+        }
+
+        $this->env->execute('mkdir -p ./init/pub/static');
+        rename('./pub/static/', './init/pub/static');
+        mkdir('./pub/static/');
+
+    }
+
+    public function deployStaticContent()
+    {
+        $config = include Environment::MAGENTO_ROOT . 'app/etc/setup.config.php';
+        if (file_exists($config)) {
+            $locales = [];
+            foreach ($config as $scopeCode => $scopeConfig) {
+                foreach ($scopeConfig as $scopeItem => $itemConfig) {
+                    if (isset($itemConfig['general/locale/code'])) {
+                        $locales[] = $itemConfig['general/locale/code'];
+                    }
+                }
+            }
+            $this->env->execute('php bin/magento setup:static-content:deploy ' . implode(' ', array_unique($locales)) . '-vv');
         }
     }
 

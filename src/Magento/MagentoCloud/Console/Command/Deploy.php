@@ -150,7 +150,6 @@ class Deploy extends Command
         $this->staticContentStashLocation = isset($var["STATIC_CONTENT_STASH_LOCATION"]) ? $var["STATIC_CONTENT_STASH_LOCATION"] : false;
         $this->doDeployStaticContent = isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled' ? false : true;
 
-
         $this->magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
         $this->magentoApplicationMode =
             in_array($this->magentoApplicationMode, array(self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE))
@@ -363,9 +362,11 @@ class Deploy extends Command
      */
     private function updateConfiguration()
     {
+        $this->env->log("Backing up environment config to app/etc/env.php.bak");
         $this->env->log("Updating env.php database configuration.");
 
         $configFileName = "app/etc/env.php";
+        copy (Environment::MAGENTO_ROOT . $configFileName, Environment::MAGENTO_ROOT . $configFileName . '.bak');
 
         $config = include $configFileName;
 
@@ -453,7 +454,10 @@ class Deploy extends Command
     }
 
     /**
-     * If branch is not master then disable Google Analytics
+     * Executes database query
+     *
+     * $query must completed, finished with semicolon (;)
+     * If branch isn't master - disable Google Analytics
      */
     private function disableGoogleAnalytics()
     {
@@ -609,7 +613,7 @@ class Deploy extends Command
         if (is_array($output) && count($output) > 1) {
             array_shift($output);
             $locales = $output;
-            
+
             if (!in_array($this->adminLocale, $locales)) {
                 $locales[] = $this->adminLocale;
             }
@@ -676,9 +680,10 @@ class Deploy extends Command
      */
     private function disableRedisCache()
     {
-        $this->env->log("Disabling redis cache.");
         $configFile = Environment::MAGENTO_ROOT . '/app/etc/env.php';
         if (file_exists($configFile)) {
+            $this->env->log("Disabling redis cache.");
+            copy($configFile, $configFile . '.bak');
             $config = include $configFile;
             if (isset($config['cache'])) {
                 unset ($config['cache']);
