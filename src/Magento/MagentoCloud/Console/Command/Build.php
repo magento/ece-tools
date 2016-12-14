@@ -85,8 +85,9 @@ class Build extends Command
 
     public function deployStaticContent()
     {
-        $config = include Environment::MAGENTO_ROOT . 'app/etc/setup.config.php';
-        if (file_exists($config)) {
+        $configFile = Environment::MAGENTO_ROOT . 'app/etc/setup.config.php';
+        if (file_exists($configFile)) {
+            $config = include $configFile;
             $locales = [];
             foreach ($config as $scopeCode => $scopeConfig) {
                 foreach ($scopeConfig as $scopeItem => $itemConfig) {
