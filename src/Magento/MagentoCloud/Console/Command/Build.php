@@ -10,6 +10,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Environment;
+use Vaimo\HellyHansenWebScraper\Exception;
 
 /**
  * CLI command for build hook. Responsible for preparing the codebase before it's moved to the server.
@@ -107,14 +108,28 @@ class Build extends Command
                 }
             }
 
+            $SCDLocales = implode(' ', array_unique($locales));
+
             $excludeThemesOptions = $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)
                 ? "--exclude-theme=" . implode(' --exclude-theme=', $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES))
                 : '';
             $jobsOption = $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "--jobs={$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '';
 
-            $this->env->execute(
-                "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions implode(' ', array_unique($locales)) {$this->verbosityLevel}"
-            );
+            try {
+                $logMessage = $SCDLocales ? "Generating static content for locales: $SCDLocales" : "Generating static content.";
+                $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
+                $logMessage .= $jobsOption ? "\nUsing $jobsOption Threads" : "";
+
+                $this->env->log($logMessage);
+
+                $this->env->execute(
+                    "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $SCDLocales {$this->verbosityLevel}"
+                );
+            } catch (\Exception $e) {
+                $this->env->log($e->getMessage());
+            }
+        } else {
+            $this->env->log("Skipping static content deploy");
         }
     }
 
