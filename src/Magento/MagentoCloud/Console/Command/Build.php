@@ -21,6 +21,9 @@ class Build extends Command
      */
     const BUILD_OPT_SKIP_DI_COMPILATION = 'skip_di_compilation';
     const BUILD_OPT_SKIP_DI_CLEARING = 'skip_di_clearing';
+    const BUILD_OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
+    const BUILD_OPT_SCD_THREADS = 'scd_threads';
+    const BUILD_OPT_SKIP_SCD = 'skip_scd';
 
     /**
      * @var Environment
@@ -31,6 +34,11 @@ class Build extends Command
      * @var array
      */
     private $buildOptions;
+
+    /**
+     * @var string
+     */
+    private $verbosityLevel;
 
     /**
      * {@inheritdoc}
@@ -51,6 +59,8 @@ class Build extends Command
         $this->buildOptions = $this->parseBuildOptions();
         $this->env = new Environment();
         $this->build();
+        $buildVerbosityLevel = $this->getBuildOption('VERBOSE_COMMANDS');
+        $this->verbosityLevel = isset($buildVerbosityLevel) && $buildVerbosityLevel == 'enabled' ? ' -vv ' : '';
     }
 
     private function build()
@@ -86,7 +96,7 @@ class Build extends Command
     public function deployStaticContent()
     {
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.local.php';
-        if (file_exists($configFile)) {
+        if (file_exists($configFile) && !$this->getBuildOption(self::BUILD_OPT_SKIP_SCD)) {
             $config = include $configFile;
             $locales = [];
             foreach ($config as $scopeCode => $scopeConfig) {
@@ -96,7 +106,15 @@ class Build extends Command
                     }
                 }
             }
-            $this->env->execute('php bin/magento setup:static-content:deploy ' . implode(' ', array_unique($locales)) . '-vv');
+
+            $excludeThemesOptions = $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)
+                ? "--exclude-theme=" . implode(' --exclude-theme=', $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES))
+                : '';
+            $jobsOption = $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "--jobs={$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '';
+
+            $this->env->execute(
+                "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions implode(' ', array_unique($locales)) {$this->verbosityLevel}"
+            );
         }
     }
 
@@ -136,7 +154,7 @@ class Build extends Command
 
         if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
             $this->env->log("Running DI compilation");
-            $this->env->execute("php ./bin/magento setup:di:compile");
+            $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
         } else {
             $this->env->log("Skip running DI compilation");
         }
