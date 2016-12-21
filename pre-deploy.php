@@ -72,14 +72,14 @@ if ($useStaticContentSymlink) {
 }
 
 
-/**
- * Remove application configuration files whose information should be represented in the DB
- */
-$etcDir = realpath(Environment::MAGENTO_ROOT . 'app/etc/') . '/';
-$appConfigFiles = ['setup.config.php', 'scope.config.php'];
-foreach ($appConfigFiles as $file) {
-    if (file_exists($etcDir . $file)) {
-        unlink($etcDir . $file);
-    }
-}
+///**
+// * Remove application configuration files whose information should be represented in the DB
+// */
+//$etcDir = realpath(Environment::MAGENTO_ROOT . 'app/etc/') . '/';
+//$appConfigFiles = ['setup.config.php', 'scope.config.php'];
+//foreach ($appConfigFiles as $file) {
+//    if (file_exists($etcDir . $file)) {
+//        unlink($etcDir . $file);
+//    }
+//}
 $env->log("Pre-deploy complete.");
