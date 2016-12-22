@@ -22,14 +22,15 @@ class SCDConfigDump extends Command
      */
     const KEEP_CONFIG = 'keep-config';
 
-    private $requiredConfigs = [
+    private $requiredConfigKeys = [
         'scopes',
-        'system/default/general/locale',
-        'dev/static/sign',
-        'dev/static/front_end_development_workflow',
-        'dev/static/template',
-        'dev/static/js',
-        'dev/static/css',
+        'system/default/general/locale/code',
+        'system/default/dev/static/sign',
+        'system/default/dev/front_end_development_workflow',
+        'system/default/dev/template',
+        'system/default/dev/js',
+        'system/default/dev/css',
+        'system/default/advanced/modules_disable_output',
         'system/stores',
         'system/websites',
     ];
@@ -48,9 +49,7 @@ class SCDConfigDump extends Command
             )
         ];
 
-        $this->setName('magento-cloud:configdump')
-            ->setDescription('Dump config related to SCD')
-            ->setDefinition($options);
+        $this->setName('magento-cloud:SCDdump')->setDescription('Dump config related to SCD')->setDefinition($options);
         parent::configure();
     }
 
@@ -69,31 +68,39 @@ class SCDConfigDump extends Command
 
         if ($returnCode == 0 && file_exists($configFile)) {
             $oldConfig = include $configFile;
-            $oldConfig = $this->flatten($oldConfig);
-            var_dump($oldConfig);
             $newConfig = [];
-            foreach ($oldConfig as $scopeCode => $scopeConfig) {
-                foreach ($this->requiredConfigs as $requiredConfig) {
-                    if (0 === strpos($scopeCode, $requiredConfig)) {
-                        echo PHP_EOL . "save " . $scopeCode;
-                        $newConfig[$scopeCode] = $scopeConfig;
+
+            foreach ($this->requiredConfigKeys as $requiredConfigKey) {
+                $oldConfigCopy = $oldConfig;
+                $configKeys = explode('/', $requiredConfigKey);
+
+                //get value of the config recursively
+                foreach( $configKeys as $configKey) {
+                    if (isset($oldConfigCopy[$configKey])) {
+                        $oldConfigCopy = $oldConfigCopy[$configKey];
+                    } else {
+                        $oldConfigCopy = null;
                     }
                 }
+                //set value in new array.
+                if (isset($oldConfigCopy)) {
+                    $newConfig = $this->buildNestedArray($configKeys, $oldConfigCopy, $newConfig);
+                }
             }
+            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ';';
+            file_put_contents($configFile, $updatedConfig);
         }
     }
 
-    private function flatten($array, $prefix ='')
-    {
-        $result = [];
-        foreach($array as $key=>$value) {
-            if(is_array($value)) {
-                $result = $result + $this->flatten($value, $prefix . $key . '/');
+    private function buildNestedArray($keys, $val, $out) {
+        $data = &$out;
+        foreach ($keys as $key) {
+            if (!isset($data[$key])) {
+                $data[$key] = [];
             }
-            else {
-                $result[$prefix . $key] = $value;
-            }
+            $data = &$data[$key];
         }
-        return $result;
+        $data = $val;
+        return $out;
     }
 }
