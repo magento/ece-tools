@@ -10,7 +10,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Environment;
-use Vaimo\HellyHansenWebScraper\Exception;
 
 /**
  * CLI command for build hook. Responsible for preparing the codebase before it's moved to the server.
