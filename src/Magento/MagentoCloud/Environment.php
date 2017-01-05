@@ -12,6 +12,8 @@ namespace Magento\MagentoCloud;
 class Environment
 {
     const MAGENTO_ROOT = __DIR__ . '/../../../../../../';
+    const STATIC_CONTENT_DEPLOY_FLAG = 'var/static_content_deploy';
+    const PRE_DEPLOY_FLAG = self::MAGENTO_ROOT . 'var/.predeploy_in_progress';
 
     public $writableDirs = ['var/di', 'var/generation', 'app/etc', 'pub/media'];
 
@@ -76,5 +78,23 @@ class Environment
         $command = "nohup {$command} 1>/dev/null 2>&1 &";
         $this->log("Execute command in background: $command");
         shell_exec($command);
+    }
+
+    public function setStaticDeployInBuild($flag)		
+    {
+        if ($flag) {
+         $this->log('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+         touch(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        } else {
+            if ($this->isStaticDeployInBuild()) {
+                    $this->log('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+                    unlink(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+                }
+        }
+    }
+
+    public function isStaticDeployInBuild()
+    {
+        return file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
     }
 }
