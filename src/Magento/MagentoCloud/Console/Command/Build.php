@@ -111,19 +111,39 @@ class Build extends Command
         }
     }
 
+    private function flatten($array, $prefix='')
+    {
+        $result = [];
+        foreach($array as $key=>$value) {
+            if(is_array($value)) {
+                $result = $result + $this->flatten($value, $prefix . $key . '/');
+            }
+            else {
+                $result[$prefix . $key] = $value;
+            }
+        }
+        return $result;
+    }
+
+    private function filter($array, $pattern)
+    {
+        $filteredResult = [];
+        $length = strlen($pattern);
+        foreach ($array as $key => $value) {
+            if (substr($key, -$length) === $pattern) {
+                $filteredResult[$key] = $value;
+            }
+        }
+        return array_values($filteredResult);
+    }
+
     public function deployStaticContent()
     {
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.local.php';
         if (file_exists($configFile) && !$this->getBuildOption(self::BUILD_OPT_SKIP_SCD)) {
             $config = include $configFile;
-            $locales = [];
-            foreach ($config as $scopeCode => $scopeConfig) {
-                foreach ($scopeConfig as $scopeItem => $itemConfig) {
-                    if (isset($itemConfig['general/locale/code'])) {
-                        $locales[] = $itemConfig['general/locale/code'];
-                    }
-                }
-            }
+
+            $locales = $this->filter($this->flatten($config), 'general/locale/code');
 
             $SCDLocales = implode(' ', array_unique($locales));
 
