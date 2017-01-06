@@ -145,6 +145,10 @@ class Build extends Command
 
             $locales = $this->filter($this->flatten($config), 'general/locale/code');
 
+            if (count($locales) === 0 ) {
+                throw new \Exception("No locales found in config.local.php");
+            }
+
             $SCDLocales = implode(' ', array_unique($locales));
 
             $excludeThemesOptions = $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)
