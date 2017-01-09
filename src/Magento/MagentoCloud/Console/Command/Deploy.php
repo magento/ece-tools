@@ -378,8 +378,7 @@ class Deploy extends Command
         $this->env->log("Updating env.php database configuration.");
 
         $configFileName = "app/etc/env.php";
-        copy (Environment::MAGENTO_ROOT . $configFileName, Environment::MAGENTO_ROOT . $configFileName . '.bak');
-
+        
         $config = include $configFileName;
 
         $config['db']['connection']['default']['username'] = $this->dbUser;
