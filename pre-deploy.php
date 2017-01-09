@@ -24,7 +24,7 @@ if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
     $redisHost = $relationships['redis'][0]['host'];
     $redisPort = $relationships['redis'][0]['port'];
     $redisCacheDb = '1'; // Matches \Magento\MagentoCloud\Console\Command\Deploy::$redisCacheDb
-    exec("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushall");
+    $env->exec("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushall");
 }
 
 $fileCacheDir = Environment::MAGENTO_ROOT . '/var/cache';
@@ -32,17 +32,7 @@ if (file_exists($fileCacheDir)) {
     $env->execute("rm -rf $fileCacheDir");
 }
 
-// Restore mounted directories
-$env->log("Copying writable directories back.");
-
-foreach (['app/etc', 'pub/media'] as $dir) {
-    if (!file_exists($dir)) {
-        mkdir($dir);
-        $env->log(sprintf('Created directory: %s', $dir));
-    }
-    $env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
-    $env->log(sprintf('Copied directory: %s', $dir));
-}
+$mountedDirectories = ['app/etc', 'pub/media'];
 
 /**
  * optionally symlink DI assets from build resources directory(var/generation to init/var/generation
@@ -61,6 +51,9 @@ if ($useGeneratedCodeSymlink) {
     if (symlink($buildDir . 'var/di', $varDir . 'di')) {
         $env->log('Symlinked var/di to init/var/di');
     }
+} else {
+    array_push($mountedDirectories, 'var/di');
+    array_push($mountedDirectories, 'var/generation');
 }
 
 if ($useStaticContentSymlink) {
@@ -73,6 +66,18 @@ if ($useStaticContentSymlink) {
             $env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
         }
     }
+}
+
+// Restore mounted directories
+$env->log("Copying writable directories back.");
+
+foreach ($mountedDirectories as $dir) {
+    if (!file_exists($dir)) {
+        mkdir($dir);
+        $env->log(sprintf('Created directory: %s', $dir));
+    }
+    $env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
+    $env->log(sprintf('Copied directory: %s', $dir));
 }
 
 $env->log("Pre-deploy complete.");
