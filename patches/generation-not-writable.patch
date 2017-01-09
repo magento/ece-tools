@@ -1,4 +1,4 @@
-MAGECLOUD-278
+MAGETWO-63032
 diff -Naur a/vendor/magento/framework/Console/Cli.php b/vendor/magento/framework/Console/Cli.php
 --- a/vendor/magento/framework/Console/Cli.php	2016-09-28 00:46:02.000000000 -0500
 +++ b/vendor/magento/framework/Console/Cli.php	2016-09-28 00:46:38.000000000 -0500
