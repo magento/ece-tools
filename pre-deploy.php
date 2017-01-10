@@ -83,3 +83,4 @@ foreach ($mountedDirectories as $dir) {
 }
 
 $env->log("Pre-deploy complete.");
+unlink(Environment::PRE_DEPLOY_FLAG);
