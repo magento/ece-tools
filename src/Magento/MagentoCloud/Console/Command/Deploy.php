@@ -464,7 +464,7 @@ class Deploy extends Command
     }
 
     /**
-     * Executes database query
+     * If branch is not master then disable Google Analytics
      *
      * $query must completed, finished with semicolon (;)
      * If branch isn't master - disable Google Analytics
@@ -556,13 +556,8 @@ class Deploy extends Command
                 $this->env->backgroundExecute("rm -rf $oldPreprocessedLocation");
             }
         }
-
-        /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
-        //$this->disableRedisCache();
         $this->env->log("Generating fresh static content");
         $this->generateFreshStaticContent();
-        //$this->enableRedisCache();
-
     }
 
     private function generateFreshStaticContent()
@@ -641,39 +636,6 @@ class Deploy extends Command
         }
 
         $this->env->log(sprintf("Routes: %s", var_export($this->urls, true)));
-    }
-
-    /**
-     * If app/etc/env.php exists, make sure redis is not configured as the cache backend
-     */
-    private function disableRedisCache()
-    {
-        $configFile = Environment::MAGENTO_ROOT . '/app/etc/env.php';
-        if (file_exists($configFile)) {
-            $this->env->log("Disabling redis cache.");
-            copy($configFile, $configFile . '.bak');
-            $config = include $configFile;
-            if (isset($config['cache'])) {
-                unset ($config['cache']);
-            }
-            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
-            file_put_contents($configFile, $updatedConfig);
-        }
-    }
-
-    /**
-     * If app/etc/env.php exists, make sure redis is not configured as the cache backend
-     */
-    private function enableRedisCache()
-    {
-        $this->env->log("Enabling redis cache.");
-        $configFile = Environment::MAGENTO_ROOT . '/app/etc/env.php';
-        if (file_exists($configFile)) {
-            $config = include $configFile;
-            $config['cache'] = $this->getRedisCacheConfiguration();
-            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
-            file_put_contents($configFile, $updatedConfig);
-        }
     }
 
     private function getRedisCacheConfiguration()
