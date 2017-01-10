@@ -100,8 +100,9 @@ class Deploy extends Command
             throw new \RuntimeException("Predeploy flag still exists!");		
          }
 
-        if (file_exists(Environment::MAGENTO_ROOT . 'var/.regenerate')) {
-            unlink(Environment::MAGENTO_ROOT . 'var/.regenerate');
+        if (file_exists(Environment::REGENERATE_FLAG)) {
+            $this->env->log("Removing .regenerate flag");
+            unlink(Environment::REGENERATE_FLAG);
         }
 
         $this->env->log("Start deploy.");
