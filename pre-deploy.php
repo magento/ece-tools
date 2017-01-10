@@ -24,7 +24,7 @@ if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
     $redisHost = $relationships['redis'][0]['host'];
     $redisPort = $relationships['redis'][0]['port'];
     $redisCacheDb = '1'; // Matches \Magento\MagentoCloud\Console\Command\Deploy::$redisCacheDb
-    $env->exec("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushall");
+    $env->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushall");
 }
 
 $fileCacheDir = Environment::MAGENTO_ROOT . '/var/cache';
