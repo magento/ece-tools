@@ -99,7 +99,11 @@ class Deploy extends Command
                 );
             throw new \RuntimeException("Predeploy flag still exists!");		
          }
- 
+
+        if (file_exists(Environment::MAGENTO_ROOT . 'var/.regenerate')) {
+            unlink(Environment::MAGENTO_ROOT . 'var/.regenerate');
+        }
+
         $this->env->log("Start deploy.");
         $this->saveEnvironmentData();
 
@@ -374,7 +378,6 @@ class Deploy extends Command
      */
     private function updateConfiguration()
     {
-        $this->env->log("Backing up environment config to app/etc/env.php.bak");
         $this->env->log("Updating env.php database configuration.");
 
         $configFileName = "app/etc/env.php";
