@@ -59,11 +59,13 @@ if ($useGeneratedCodeSymlink) {
 if ($useStaticContentSymlink) {
     $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
     $env->execute("rm -rf {$staticContentLocation}/*");
-    $dir = new \DirectoryIterator($buildDir . 'pub/static');
-    foreach ($dir as $fileInfo) {
-        $fileName = $fileInfo->getFilename();
-        if (!$fileInfo->isDot() && symlink($buildDir . 'pub/static/' . $fileName, $staticContentLocation . '/' . $fileName)) {
-            $env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
+    if (file_exists($buildDir . 'pub/static')) {
+        $dir = new \DirectoryIterator($buildDir . 'pub/static');
+        foreach ($dir as $fileInfo) {
+            $fileName = $fileInfo->getFilename();
+            if (!$fileInfo->isDot() && symlink($buildDir . 'pub/static/' . $fileName, $staticContentLocation . '/' . $fileName)) {
+                $env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
+            }
         }
     }
 }
