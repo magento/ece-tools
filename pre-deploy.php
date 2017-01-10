@@ -6,10 +6,10 @@
 
 // Should be deleted at the end of pre-deploy, so presence of flag later indicate if something failed in the pre-deploy.
 echo "Setting the pre-deploy flag." . PHP_EOL;
+use Magento\MagentoCloud\Environment;
 require_once 'src/Magento/MagentoCloud/Environment.php';
-touch(Environment::PRE_DEPLOY_FLAG);
 
-require_once 'src/Magento/MagentoCloud/Environment.php';
+touch(Environment::PRE_DEPLOY_FLAG);
 
 $env = new Environment();
 $env->log("Starting pre-deploy.");
