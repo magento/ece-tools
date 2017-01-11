@@ -158,8 +158,10 @@ class Deploy extends Command
         // Can use environment variable to always disable. Default is to deploy static content if it was not deployed in the build step.
         if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
             $this->doDeployStaticContent = false;
+            $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
         } else {
             $this->doDeployStaticContent = !$this->env->isStaticDeployInBuild();
+            $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to ' + $this->doDeployStaticContent);
         }
 
         $this->magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
