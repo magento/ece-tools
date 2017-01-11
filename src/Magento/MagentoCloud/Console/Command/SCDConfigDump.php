@@ -49,7 +49,7 @@ class SCDConfigDump extends Command
             )
         ];
 
-        $this->setName('magento-cloud:SCDdump')->setDescription('Dump config related to SCD')->setDefinition($options);
+        $this->setName('magento-cloud:scd-dump')->setDescription('Dump config related to SCD')->setDefinition($options);
         parent::configure();
     }
 
