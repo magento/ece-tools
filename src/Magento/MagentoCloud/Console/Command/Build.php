@@ -168,7 +168,7 @@ class Build extends Command
 
                 $this->env->log($logMessage);
 
-                $this->env->execute("php ./bin/magento module:status");
+                $this->env->execute("php ./bin/magento module:enable --all");
                 $this->env->execute(
                     "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $SCDLocales {$this->verbosityLevel} -vvv"
                 );
