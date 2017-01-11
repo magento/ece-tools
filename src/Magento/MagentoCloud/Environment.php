@@ -12,7 +12,7 @@ namespace Magento\MagentoCloud;
 class Environment
 {
     const MAGENTO_ROOT = __DIR__ . '/../../../../../../';
-    const STATIC_CONTENT_DEPLOY_FLAG = 'var/static_content_deploy';
+    const STATIC_CONTENT_DEPLOY_FLAG = '.static_content_deploy';
     const PRE_DEPLOY_FLAG = self::MAGENTO_ROOT . 'var/.predeploy_in_progress';
     const REGENERATE_FLAG = self::MAGENTO_ROOT . 'var/.regenerate';
 
