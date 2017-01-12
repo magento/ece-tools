@@ -82,5 +82,15 @@ foreach ($mountedDirectories as $dir) {
     $env->log(sprintf('Copied directory: %s', $dir));
 }
 
+if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
+    copy(
+        Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG,
+        Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG
+    );
+
+    $env->log(sprintf('Copied %s', Environment::STATIC_CONTENT_DEPLOY_FLAG));
+
+}
+
 $env->log("Pre-deploy complete.");
 unlink(Environment::PRE_DEPLOY_FLAG);
