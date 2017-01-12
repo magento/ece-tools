@@ -353,7 +353,7 @@ class Deploy extends Command
         $this->env->log("Enabling all modules");
         $this->env->execute("php ./bin/magento module:enable --all");
         $this->env->log("Running setup upgrade.");
-        $this->env->execute("cd bin/; /usr/bin/php ./magento setup:upgrade --keep-generated");
+        $this->env->execute("php ./bin/magento setup:upgrade --keep-generated");
         if (count($disabledModules) > 0) {
             $this->env->execute("php ./bin/magento module:disable  -f " . implode(' ' ,array_keys($disabledModules)));
         }

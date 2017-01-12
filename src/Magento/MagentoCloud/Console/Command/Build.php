@@ -76,11 +76,6 @@ class Build extends Command
         $this->env->execute('rm -rf app/etc/env.php');
         $this->env->execute('rm -rf app/etc/config.php');
         $this->backupToInit();
-
-        if (file_exists(Environment::REGENERATE_FLAG)) {
-            $this->env->log("Removing .regenerate flag");
-            unlink(Environment::REGENERATE_FLAG);
-        }
     }
 
     /**
@@ -89,6 +84,11 @@ class Build extends Command
      */
     private function backupToInit()
     {
+        if (file_exists(Environment::REGENERATE_FLAG)) {
+            $this->env->log("Removing .regenerate flag");
+            unlink(Environment::REGENERATE_FLAG);
+        }
+
         $this->env->log("Copying writable directories to temp directory.");
         foreach ($this->env->writableDirs as $dir) {
             $this->env->execute(sprintf('mkdir -p init/%s', $dir));
