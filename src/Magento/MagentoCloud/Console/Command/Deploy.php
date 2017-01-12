@@ -97,7 +97,7 @@ class Deploy extends Command
                     . "successfully. Aborting the rest of the deploy hook! Flag is located at: "
                     . realpath(Environment::PRE_DEPLOY_FLAG)
                 );
-            throw new \RuntimeException("Predeploy flag still exists!");		
+            throw new \RuntimeException("Predeploy flag still exists!");
          }
 
         $this->env->log("Start deploy.");
@@ -347,6 +347,7 @@ class Deploy extends Command
         $configFile = 'app/etc/config.php';
         $disabledModules = [];
         if (file_exists($configFile)) {
+            $this->env->execute("cp -f app/etc/config.php app/etc/config.php.bak");
             $moduleData = include $configFile;
             $disabledModules = array_filter($moduleData['modules'], function ($v){return $v == 0;});
         }
@@ -354,8 +355,25 @@ class Deploy extends Command
         $this->env->execute("php ./bin/magento module:enable --all");
         $this->env->log("Running setup upgrade.");
         $this->env->execute("php ./bin/magento setup:upgrade --keep-generated");
+        try {
+            $this->env->execute("php ./bin/magento setup:upgrade --keep-generated {$this->verbosityLevel}");
+        }catch (\RuntimeException $e) {
+            if (file_exists($configFile . '.bak')) {
+                $this->env->log("Rollback config.php");
+                $this->env->execute("cp -f app/etc/config.php.bak app/etc/config.php");
+            } else {
+                $this->env->log("No backup config file to perform rollback");
+            }
+            $this->env->log($e->getMessage());
+            //Rollback required by database
+            exit(6);
+        }
         if (count($disabledModules) > 0) {
             $this->env->execute("php ./bin/magento module:disable  -f " . implode(' ' ,array_keys($disabledModules)));
+        }
+        if (file_exists($configFile . '.bak')) {
+            $this->env->log("Deleting backup file");
+            $this->env->execute("rm app/etc/config.php.bak");
         }
     }
 
@@ -379,7 +397,7 @@ class Deploy extends Command
         $this->env->log("Updating env.php database configuration.");
 
         $configFileName = "app/etc/env.php";
-        
+
         $config = include $configFileName;
 
         $config['db']['connection']['default']['username'] = $this->dbUser;
@@ -467,9 +485,6 @@ class Deploy extends Command
 
     /**
      * If branch is not master then disable Google Analytics
-     *
-     * $query must completed, finished with semicolon (;)
-     * If branch isn't master - disable Google Analytics
      */
     private function disableGoogleAnalytics()
     {
@@ -578,7 +593,7 @@ class Deploy extends Command
         if (is_array($output) && count($output) > 1) {
             array_shift($output);
             $locales = $output;
-
+            
             if (!in_array($this->adminLocale, $locales)) {
                 $locales[] = $this->adminLocale;
             }
