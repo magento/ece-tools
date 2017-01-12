@@ -159,9 +159,11 @@ class Deploy extends Command
         if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
             $this->doDeployStaticContent = false;
             $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
+            die("in if");
         } else {
             $this->doDeployStaticContent = !$this->env->isStaticDeployInBuild();
             $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to ' . $this->doDeployStaticContent);
+            die("in else");
         }
 
         $this->magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
