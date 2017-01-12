@@ -353,10 +353,19 @@ class Deploy extends Command
         }
         $this->env->log("Enabling all modules");
         $this->env->execute("php ./bin/magento module:enable --all");
-        $this->env->log("Running setup upgrade.");
-        $this->env->execute("php ./bin/magento setup:upgrade --keep-generated");
+
         try {
+            /* Enable maintenance mode */
+            $this->env->log("Enabling Maintenance mode.");
+            $this->env->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");
+
+            $this->env->log("Running setup upgrade.");
             $this->env->execute("php ./bin/magento setup:upgrade --keep-generated {$this->verbosityLevel}");
+
+            /* Disable maintenance mode */
+            $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
+            $this->env->log("Maintenance mode is disabled.");
+
         }catch (\RuntimeException $e) {
             if (file_exists($configFile . '.bak')) {
                 $this->env->log("Rollback config.php");
@@ -593,7 +602,7 @@ class Deploy extends Command
         if (is_array($output) && count($output) > 1) {
             array_shift($output);
             $locales = $output;
-            
+
             if (!in_array($this->adminLocale, $locales)) {
                 $locales[] = $this->adminLocale;
             }
