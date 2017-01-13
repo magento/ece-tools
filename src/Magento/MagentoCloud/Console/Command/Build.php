@@ -169,7 +169,7 @@ class Build extends Command
                 $this->env->log($logMessage);
 
                 $parallelCommands = "";
-                foreach ($SCDLocales as $locale){
+                foreach ($locales as $locale){
                     $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $locale" . '\n';
                 }
                 $threads =  1;
