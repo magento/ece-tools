@@ -172,7 +172,7 @@ class Build extends Command
                 foreach ($locales as $locale){
                     $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $locale" . '\n';
                 }
-                $threads =  1;
+                $threads =  30; //$this->getBuildOption(self::BUILD_OPT_SCD_THREADS);
                 $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P" . (int)$threads . " bash -c CMD");
 
                 $this->env->setStaticDeployInBuild(true);
