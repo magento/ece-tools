@@ -168,11 +168,12 @@ class Build extends Command
 
                 $this->env->log($logMessage);
 
-                foreach ($locales as $SCDLocale) {
-                    $this->env->execute(
-                        "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $SCDLocale {$this->verbosityLevel}"
-                    );
+                $parallelCommands = "";
+                foreach ($SCDLocales as $locale){
+                    $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $locale" . '\n';
                 }
+                $threads =  1;
+                $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P" . (int)$threads . " bash -c CMD");
 
                 $this->env->setStaticDeployInBuild(true);
             } catch (\Exception $e) {
