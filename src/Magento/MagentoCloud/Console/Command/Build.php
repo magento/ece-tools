@@ -164,13 +164,16 @@ class Build extends Command
             try {
                 $logMessage = $SCDLocales ? "Generating static content for locales: $SCDLocales" : "Generating static content.";
                 $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
-                $logMessage .= $jobsOption ? "\nUsing $jobsOption Threads" : "";
+                //$logMessage .= $jobsOption ? "\nUsing $jobsOption Threads" : "";
 
                 $this->env->log($logMessage);
 
-                $this->env->execute(
-                    "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $SCDLocales {$this->verbosityLevel}"
-                );
+                foreach ($locales as $SCDLocale) {
+                    $this->env->execute(
+                        "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $SCDLocale {$this->verbosityLevel}"
+                    );
+                }
+
                 $this->env->setStaticDeployInBuild(true);
             } catch (\Exception $e) {
                 $this->env->log($e->getMessage());
