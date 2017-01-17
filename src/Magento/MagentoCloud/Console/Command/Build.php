@@ -159,21 +159,20 @@ class Build extends Command
             $excludeThemesOptions = $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)
                 ? "--exclude-theme=" . implode(' --exclude-theme=', $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES))
                 : '';
-            $jobsOption = $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "--jobs={$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '';
+            //Can be enabled when MAGETWO-62660 is fixed
+            //$threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '0';
 
             try {
                 $logMessage = $SCDLocales ? "Generating static content for locales: $SCDLocales" : "Generating static content.";
                 $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
-                $logMessage .= $jobsOption ? "\nUsing $jobsOption Threads" : "";
+                //Can be enabled when MAGETWO-62660 is fixed
+                //$logMessage .= $threads ? "\nUsing $threads Threads" : "";
 
                 $this->env->log($logMessage);
 
-                $parallelCommands = "";
                 foreach ($locales as $locale){
-                    $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $locale" . '\n';
+                    $this->env->execute("php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale {$this->verbosityLevel}");
                 }
-                $threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS);
-                $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
 
                 $this->env->setStaticDeployInBuild(true);
             } catch (\Exception $e) {
