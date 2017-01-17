@@ -139,7 +139,7 @@ class Build extends Command
                 $filteredResult[$key] = $value;
             }
         }
-        return array_values($filteredResult);
+        return array_unique(array_values($filteredResult));
     }
 
     public function deployStaticContent()
@@ -154,7 +154,7 @@ class Build extends Command
                 throw new \Exception("No locales found in config.local.php");
             }
 
-            $SCDLocales = implode(' ', array_unique($locales));
+            $SCDLocales = implode(' ', $locales);
 
             $excludeThemesOptions = $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)
                 ? "--exclude-theme=" . implode(' --exclude-theme=', $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES))
@@ -164,15 +164,15 @@ class Build extends Command
             try {
                 $logMessage = $SCDLocales ? "Generating static content for locales: $SCDLocales" : "Generating static content.";
                 $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
-                //$logMessage .= $jobsOption ? "\nUsing $jobsOption Threads" : "";
+                $logMessage .= $jobsOption ? "\nUsing $jobsOption Threads" : "";
 
                 $this->env->log($logMessage);
 
                 $parallelCommands = "";
-                foreach (array_unique($locales) as $locale){
+                foreach ($locales as $locale){
                     $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $locale" . '\n';
                 }
-                $threads =  1;//$this->getBuildOption(self::BUILD_OPT_SCD_THREADS);
+                $threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS);
                 $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
 
                 $this->env->setStaticDeployInBuild(true);
