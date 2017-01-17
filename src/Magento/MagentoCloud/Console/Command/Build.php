@@ -156,9 +156,13 @@ class Build extends Command
 
             $SCDLocales = implode(' ', $locales);
 
-            $excludeThemesOptions = $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)
-                ? "--exclude-theme=" . implode(' --exclude-theme=', $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES))
-                : '';
+            $excludeThemesOptions = '';
+            if ($this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)) {
+                $themes = explode(',', $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES));
+                array_walk($themes, create_function('&$val', '$val = " --exclude-theme=" . $val;'));
+                $excludeThemesOptions = implode($themes);
+            }
+
             //Can be enabled when MAGETWO-62660 is fixed
             //$threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '0';
 
