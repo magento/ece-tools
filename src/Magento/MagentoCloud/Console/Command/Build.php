@@ -174,9 +174,13 @@ class Build extends Command
 
                 $this->env->log($logMessage);
 
+                $parallelCommands = "";
                 foreach ($locales as $locale){
-                    $this->env->execute("php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale {$this->verbosityLevel}");
+                    $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
                 }
+                $threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS);
+                $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
+
 
                 $this->env->setStaticDeployInBuild(true);
             } catch (\Exception $e) {
