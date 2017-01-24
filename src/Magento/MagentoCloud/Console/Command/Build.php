@@ -60,6 +60,7 @@ class Build extends Command
         $this->env = new Environment();
         $this->build();
         $buildVerbosityLevel = $this->getBuildOption('VERBOSE_COMMANDS');
+        $this->env->log("Verbosity level is set to " + $buildVerbosityLevel);
         $this->verbosityLevel = isset($buildVerbosityLevel) && $buildVerbosityLevel == 'enabled' ? ' -vv ' : '';
     }
 
@@ -176,7 +177,7 @@ class Build extends Command
 
                 $parallelCommands = "";
                 foreach ($locales as $locale){
-                    $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
+                    $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale -v {$this->verbosityLevel}" . '\n';
                 }
                 $threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS);
                 $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
