@@ -167,6 +167,14 @@ class Build extends Command
             //Can be enabled when MAGETWO-62660 is fixed
             //$threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '0';
 
+            //enable production mode
+            $this->env->log("Enable production mode");
+            $configFileName = "app/etc/env.php";
+            $config = include $configFileName;
+            $config['MAGE_MODE'] = 'production';
+            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
+            file_put_contents($configFileName, $updatedConfig);
+
             try {
                 $logMessage = $SCDLocales ? "Generating static content for locales: $SCDLocales" : "Generating static content.";
                 $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
