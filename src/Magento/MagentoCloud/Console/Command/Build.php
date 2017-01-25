@@ -164,8 +164,7 @@ class Build extends Command
                 $excludeThemesOptions = implode($themes);
             }
 
-            //Can be enabled when MAGETWO-62660 is fixed
-            //$threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '0';
+            $threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '0';
 
             //enable production mode
             $this->env->log("Enable production mode");
@@ -178,8 +177,7 @@ class Build extends Command
             try {
                 $logMessage = $SCDLocales ? "Generating static content for locales: $SCDLocales" : "Generating static content.";
                 $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
-                //Can be enabled when MAGETWO-62660 is fixed
-                //$logMessage .= $threads ? "\nUsing $threads Threads" : "";
+                $logMessage .= $threads ? "\nUsing $threads Threads" : "";
 
                 $this->env->log($logMessage);
 
@@ -187,7 +185,6 @@ class Build extends Command
                 foreach ($locales as $locale){
                     $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
                 }
-                $threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS);
                 $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
 
 
