@@ -100,11 +100,6 @@ class Deploy extends Command
             throw new \RuntimeException("Predeploy flag still exists!");
          }
 
-        if (file_exists(Environment::REGENERATE_FLAG)) {
-            $this->env->log("Removing .regenerate flag");
-            unlink(Environment::REGENERATE_FLAG);
-        }
-        
         $this->env->log("Start deploy.");
         $this->saveEnvironmentData();
 
@@ -359,6 +354,11 @@ class Deploy extends Command
         $this->env->log("Enabling all modules");
         $this->env->execute("php ./bin/magento module:enable --all");
 
+        if (file_exists(Environment::REGENERATE_FLAG)) {
+            $this->env->log("Removing .regenerate flag");
+            unlink(Environment::REGENERATE_FLAG);
+        }
+        
         try {
             /* Enable maintenance mode */
             $this->env->log("Enabling Maintenance mode.");
