@@ -92,5 +92,10 @@ if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTEN
 
 }
 
+if (file_exists(Environment::REGENERATE_FLAG)) {
+    $this->env->log("Removing .regenerate flag");
+    unlink(Environment::REGENERATE_FLAG);
+}
+
 $env->log("Pre-deploy complete.");
 unlink(Environment::PRE_DEPLOY_FLAG);
