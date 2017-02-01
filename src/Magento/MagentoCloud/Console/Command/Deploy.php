@@ -182,7 +182,7 @@ class Deploy extends Command
             $this->solrScheme = $relationships["solr"][0]["scheme"];
         }
 
-        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vv ' : '';
+        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
     }
 
     /**
