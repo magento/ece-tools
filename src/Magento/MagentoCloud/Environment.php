@@ -98,4 +98,40 @@ class Environment
     {
         return file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
     }
+
+    public function removeStaticContent()
+    {
+        // atomic move within pub/static directory
+        $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static/') . '/';
+        $timestamp = time();
+        $oldStaticContentLocation = $staticContentLocation . 'old_static_content_' . $timestamp;
+
+        $this->log("Moving out old static content into $oldStaticContentLocation");
+
+        if (!file_exists($oldStaticContentLocation)) {
+            mkdir($oldStaticContentLocation);
+        }
+
+        $dir = new \DirectoryIterator($staticContentLocation);
+
+        foreach ($dir as $fileInfo) {
+            $fileName = $fileInfo->getFilename();
+            if (!$fileInfo->isDot() && strpos($fileName, 'old_static_content_') !== 0) {
+                $this->log("Rename " . $staticContentLocation . '/' . $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
+                rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
+            }
+        }
+
+        $this->log("Removing $oldStaticContentLocation in the background");
+        $this->backgroundExecute("rm -rf $oldStaticContentLocation");
+
+        $preprocessedLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/view_preprocessed';
+        if (file_exists($preprocessedLocation)) {
+            $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
+            $this->log("Rename $preprocessedLocation  to $oldPreprocessedLocation");
+            rename($preprocessedLocation, $oldPreprocessedLocation);
+            $this->log("Removing $oldPreprocessedLocation in the background");
+            $this->backgroundExecute("rm -rf $oldPreprocessedLocation");
+        }
+    }
 }

@@ -58,7 +58,7 @@ if ($useGeneratedCodeSymlink) {
 
 if ($useStaticContentSymlink) {
     $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
-    $env->execute("rm -rf {$staticContentLocation}/*");
+    $env->removeStaticContent();
     if (file_exists($buildDir . 'pub/static')) {
         $dir = new \DirectoryIterator($buildDir . 'pub/static');
         foreach ($dir as $fileInfo) {
@@ -89,7 +89,6 @@ if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTEN
     );
 
     $env->log(sprintf('Copied %s', Environment::STATIC_CONTENT_DEPLOY_FLAG));
-
 }
 
 if (file_exists(Environment::REGENERATE_FLAG)) {

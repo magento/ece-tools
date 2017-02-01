@@ -554,38 +554,7 @@ class Deploy extends Command
     {
         // Clear old static content if necessary
         if ($this->cleanStaticViewFiles) {
-            // atomic move within pub/static directory
-            $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static/') . '/';
-            $timestamp = time();
-            $oldStaticContentLocation = $staticContentLocation . 'old_static_content_' . $timestamp;
-
-            $this->env->log("Moving out old static content into $oldStaticContentLocation");
-
-            if (!file_exists($oldStaticContentLocation)) {
-                mkdir($oldStaticContentLocation);
-            }
-
-            $dir = new \DirectoryIterator($staticContentLocation);
-
-            foreach ($dir as $fileInfo) {
-                $fileName = $fileInfo->getFilename();
-                if (!$fileInfo->isDot() && strpos($fileName, 'old_static_content_') !== 0) {
-                    $this->env->log("Rename " . $staticContentLocation . '/' . $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
-                    rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
-                }
-            }
-
-            $this->env->log("Removing $oldStaticContentLocation in the background");
-            $this->env->backgroundExecute("rm -rf $oldStaticContentLocation");
-
-            $preprocessedLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/view_preprocessed';
-            if (file_exists($preprocessedLocation)) {
-                $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
-                $this->env->log("Rename $preprocessedLocation  to $oldPreprocessedLocation");
-                rename($preprocessedLocation, $oldPreprocessedLocation);
-                $this->env->log("Removing $oldPreprocessedLocation in the background");
-                $this->env->backgroundExecute("rm -rf $oldPreprocessedLocation");
-            }
+            $this->env->removeStaticContent();
         }
         $this->env->log("Generating fresh static content");
         $this->generateFreshStaticContent();
