@@ -6,8 +6,7 @@ diff --Naur a/vendor/magento/framework/View/Design/Theme/FlyweightFactory.php b/
              $themeModel = $this->_loadByPath($themeKey, $area);
          }
 -        if (!$themeModel->getId()) {
-+        if (!$themeModel) {
++        if (!$themeModel->getCode()) {
              throw new \LogicException("Unable to load theme by specified key: '{$themeKey}'");
          }
          $this->_addTheme($themeModel);
-         
