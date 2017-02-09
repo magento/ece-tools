@@ -159,9 +159,12 @@ class Build extends Command
 
             $excludeThemesOptions = '';
             if ($this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)) {
-                $themes = explode(',', $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES));
-                array_walk($themes, create_function('&$val', '$val = " --exclude-theme=" . $val;'));
-                $excludeThemesOptions = implode($themes);
+                $themes = preg_split("/[,]+/", $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES));
+                if (count($themes) > 1) {
+                    $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
+                } elseif (count($themes) === 1){
+                    $excludeThemesOptions = "--exclude-theme=" .  $themes[0];
+                }
             }
 
             $threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '0';

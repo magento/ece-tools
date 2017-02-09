@@ -97,6 +97,9 @@ class Deploy extends Command
                     . "successfully. Aborting the rest of the deploy hook! Flag is located at: "
                     . realpath(Environment::PRE_DEPLOY_FLAG)
                 );
+            $this->env->log("Enabling Maintenance mode.");
+            //not relying on bin/magento in case it is broken due to some reason.
+            $this->env->execute('touch ' . realpath(Environment::MAGENTO_ROOT . 'var') . '.maintenance.flag' );
             throw new \RuntimeException("Predeploy flag still exists!");
          }
 
@@ -584,9 +587,16 @@ class Deploy extends Command
             $locales = implode(' ', $locales);
         }
 
-        $excludeThemesOptions = $this->staticDeployExcludeThemes
-            ? "--exclude-theme=" . implode(' --exclude-theme=', $this->staticDeployExcludeThemes)
-            : '';
+        $excludeThemesOptions = '';
+        if ($this->staticDeployExcludeThemes) {
+            $themes = preg_split("/[,]+/", $this->staticDeployExcludeThemes);
+            if (count($themes) > 1) {
+                $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
+            } elseif (count($themes) === 1){
+                $excludeThemesOptions = "--exclude-theme=" .  $themes[0];
+            }
+        }
+
         $jobsOption = $this->staticDeployThreads
             ? "--jobs={$this->staticDeployThreads}"
             : '';
