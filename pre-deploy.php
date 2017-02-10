@@ -56,7 +56,7 @@ if ($useGeneratedCodeSymlink) {
     array_push($mountedDirectories, 'var/generation');
 }
 
-if ($useStaticContentSymlink) {
+if ($useStaticContentSymlink && file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
     $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
     $env->removeStaticContent();
     if (file_exists($buildDir . 'pub/static')) {
