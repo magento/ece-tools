@@ -144,8 +144,7 @@ class Deploy extends Command
 
         $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled' ? false : true;
         $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
-            ? explode(',', $var["STATIC_CONTENT_EXCLUDE_THEMES"])
-            : [];
+            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"]     : [];
         $this->adminLocale = isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
 
         if (isset($var["STATIC_CONTENT_THREADS"])) {
