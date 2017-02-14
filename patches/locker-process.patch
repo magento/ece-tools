@@ -1,0 +1,47 @@
+MDVA-2470
+--- a/vendor/magento/module-deploy/Model/Deploy/LocaleDeploy.php	2017-02-08 19:50:59.000000000 +0000
++++ b/vendor/magento/module-deploy/Model/Deploy/LocaleDeploy.php	2017-02-13 18:50:46.000000000 +0000
+@@ -410,7 +410,7 @@
+             $this->logger->critical($errorMessage);
+         } catch (\Exception $exception) {
+             $this->output->write('.');
+-            if ($this->output->isVerbose()) {
++            if ($this->output->isVerbose() || $this->output->isVeryVerbose()) {
+                 $this->output->writeln($exception->getTraceAsString());
+             }
+             $this->errorCount++;
+
+--- a/vendor/magento/framework/View/Asset/LockerProcess.php	2017-02-13 17:38:15.000000000 +0000
++++ b/vendor/magento/framework/View/Asset/LockerProcess.php	2017-02-13 18:53:22.000000000 +0000
+@@ -68,12 +68,28 @@
+
+         $this->tmpDirectory = $this->filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
+         $this->lockFilePath = $this->getFilePath($lockName);
++        $this->waitForLock();
+
+-        while ($this->isProcessLocked()) {
+-            usleep(1000);
++        try {
++            $this->tmpDirectory->writeFile($this->lockFilePath, time(), 'x+');
++        }catch (\Exception $e) {
++            $this->waitForLock();
++            try {
++                $this->tmpDirectory->writeFile($this->lockFilePath, time(), 'x+');
++            }catch (\Exception $e) {
++                throw new \Exception($e->getMessage());
++            }
+         }
+
+-        $this->tmpDirectory->writeFile($this->lockFilePath, time());
++    }
++
++    public function waitForLock()
++    {
++        while ($this->isProcessLocked() ) {
++            usleep(500);
++            $logDir = $this->filesystem->getDirectoryWrite(DirectoryList::STATIC_VIEW);
++            file_put_contents($logDir.'/maddylogs.txt', $this->lockFilePath.PHP_EOL , FILE_APPEND | LOCK_EX);
++        }
+     }
+
+     /**
