@@ -13,7 +13,7 @@ MDVA-2470
 
 --- a/vendor/magento/framework/View/Asset/LockerProcess.php	2017-02-13 17:38:15.000000000 +0000
 +++ b/vendor/magento/framework/View/Asset/LockerProcess.php	2017-02-13 18:53:22.000000000 +0000
-@@ -68,12 +68,28 @@
+@@ -68,12 +68,26 @@
 
          $this->tmpDirectory = $this->filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
          $this->lockFilePath = $this->getFilePath($lockName);
@@ -39,8 +39,6 @@ MDVA-2470
 +    {
 +        while ($this->isProcessLocked() ) {
 +            usleep(500);
-+            $logDir = $this->filesystem->getDirectoryWrite(DirectoryList::STATIC_VIEW);
-+            file_put_contents($logDir.'/maddylogs.txt', $this->lockFilePath.PHP_EOL , FILE_APPEND | LOCK_EX);
 +        }
      }
 
