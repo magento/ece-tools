@@ -4,18 +4,21 @@
  * the main deploy hook is able to start.
  */
 
+// Should be deleted at the end of pre-deploy, so presence of flag later indicate if something failed in the pre-deploy.
+echo "Setting the pre-deploy flag." . PHP_EOL;
 use Magento\MagentoCloud\Environment;
-
 require_once 'src/Magento/MagentoCloud/Environment.php';
+
+touch(Environment::PRE_DEPLOY_FLAG);
 
 $env = new Environment();
 $env->log("Starting pre-deploy.");
+
 // Clear redis and file caches
 $relationships = $env->getRelationships();
 $var = $env->getVariables();
-$generatedCodeStash = isset($var["GENERATED_CODE_STASH"]) && file_exists($var["GENERATED_CODE_STASH"])
-    ? $var["GENERATED_CODE_STASH"]
-    : false;
+$useGeneratedCodeSymlink = isset($var["GENERATED_CODE_SYMLINK"]) && $var["GENERATED_CODE_SYMLINK"] == 'disabled' ? false : true;
+$useStaticContentSymlink = isset($var["STATIC_CONTENT_SYMLINK"]) && $var["STATIC_CONTENT_SYMLINK"] == 'disabled' ? false : true;
 
 if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
     $redisHost = $relationships['redis'][0]['host'];
@@ -29,28 +32,69 @@ if (file_exists($fileCacheDir)) {
     $env->execute("rm -rf $fileCacheDir");
 }
 
+$mountedDirectories = ['app/etc', 'pub/media'];
+
+/**
+ * optionally symlink DI assets from build resources directory(var/generation to init/var/generation
+ * (var/di -> init/var/di, var/generation -> init/var/generation)
+ **/
+
+$buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
+if ($useGeneratedCodeSymlink) {
+    $varDir = realpath(Environment::MAGENTO_ROOT . 'var') . '/';
+    $env->execute("rm -rf {$varDir}/di");
+    $env->execute("rm -rf {$varDir}/generation");
+    if (symlink($buildDir . 'var/generation', $varDir . 'generation')) {
+        $env->log('Symlinked var/generation to init/var/generation');
+    }
+
+    if (symlink($buildDir . 'var/di', $varDir . 'di')) {
+        $env->log('Symlinked var/di to init/var/di');
+    }
+} else {
+    array_push($mountedDirectories, 'var/di');
+    array_push($mountedDirectories, 'var/generation');
+}
+
+if ($useStaticContentSymlink && file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
+    $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
+    $env->removeStaticContent();
+    if (file_exists($buildDir . 'pub/static')) {
+        $dir = new \DirectoryIterator($buildDir . 'pub/static');
+        foreach ($dir as $fileInfo) {
+            $fileName = $fileInfo->getFilename();
+            if (!$fileInfo->isDot() && symlink($buildDir . 'pub/static/' . $fileName, $staticContentLocation . '/' . $fileName)) {
+                $env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
+            }
+        }
+    }
+}
+
 // Restore mounted directories
 $env->log("Copying writable directories back.");
 
-foreach ($env->writableDirs as $dir) {
-    if (!($generatedCodeStash && $dir == 'var/generation')) {
-        if (!file_exists($dir)) {
-            mkdir($dir);
-            $env->log(sprintf('Created directory: %s', $dir));
-        }
-        $env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
-        $env->log(sprintf('Copied directory: %s', $dir));
-    } else {
-        $generationDir = realpath(Environment::MAGENTO_ROOT . 'var/generation');
-        if (file_exists($generationDir)) {
-            $timestamp = time();
-            // Must match directory name for the cleanup step in deploy command
-            $oldGenerationDir = "{$generationDir}_old_{$timestamp}";
-            $env->log("Clearing generated code out from $generationDir to $oldGenerationDir");
-            rename($generationDir, $oldGenerationDir);
-        }
-        $env->log("Moving generated code from stash location $generatedCodeStash to $generationDir");
-        rename($generatedCodeStash, $generationDir);
+foreach ($mountedDirectories as $dir) {
+    if (!file_exists($dir)) {
+        mkdir($dir);
+        $env->log(sprintf('Created directory: %s', $dir));
     }
+    $env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
+    $env->log(sprintf('Copied directory: %s', $dir));
 }
+
+if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
+    copy(
+        Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG,
+        Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG
+    );
+
+    $env->log(sprintf('Copied %s', Environment::STATIC_CONTENT_DEPLOY_FLAG));
+}
+
+if (file_exists(Environment::REGENERATE_FLAG)) {
+    $this->env->log("Removing .regenerate flag");
+    unlink(Environment::REGENERATE_FLAG);
+}
+
 $env->log("Pre-deploy complete.");
+unlink(Environment::PRE_DEPLOY_FLAG);

@@ -21,7 +21,8 @@ class CommandList implements \Magento\Framework\Console\CommandListInterface
     {
         return [
             'Magento\MagentoCloud\Console\Command\Build',
-            'Magento\MagentoCloud\Console\Command\Deploy'
+            'Magento\MagentoCloud\Console\Command\Deploy',
+            'Magento\MagentoCloud\Console\Command\SCDConfigDump',
         ];
     }
 
