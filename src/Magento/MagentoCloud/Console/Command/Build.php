@@ -186,6 +186,7 @@ class Build extends Command
                 $this->env->setStaticDeployInBuild(true);
             } catch (\Exception $e) {
                 $this->env->log($e->getMessage());
+                exit(5);
             }
         } else {
             $this->env->log("Skipping static content deploy");
