@@ -387,6 +387,10 @@ class Deploy extends Command
         if (count($disabledModules) > 0) {
             $this->env->execute("php ./bin/magento module:disable  -f " . implode(' ' ,array_keys($disabledModules)));
         }
+        if (file_exists(Environment::REGENERATE_FLAG)) {
+            $this->env->log("Removing .regenerate flag");
+            unlink(Environment::REGENERATE_FLAG);
+        }
         if (file_exists($configFile . '.bak')) {
             $this->env->log("Deleting backup file");
             $this->env->execute("rm app/etc/config.php.bak");
