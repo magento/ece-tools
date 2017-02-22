@@ -57,6 +57,7 @@ if ($useGeneratedCodeSymlink) {
 }
 
 if ($useStaticContentSymlink && file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
+    // Symlink pub/static/* to init/pub/static/*
     $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
     $env->removeStaticContent();
     if (file_exists($buildDir . 'pub/static')) {
@@ -68,18 +69,16 @@ if ($useStaticContentSymlink && file_exists(Environment::MAGENTO_ROOT . Environm
             }
         }
     }
+} else {
+    // copy files from pub/static
+    copyFromBuildDir('pub/static', $env);
 }
 
 // Restore mounted directories
 $env->log("Copying writable directories back.");
 
 foreach ($mountedDirectories as $dir) {
-    if (!file_exists($dir)) {
-        mkdir($dir);
-        $env->log(sprintf('Created directory: %s', $dir));
-    }
-    $env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
-    $env->log(sprintf('Copied directory: %s', $dir));
+    copyFromBuildDir($dir, $env);
 }
 
 if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
@@ -98,3 +97,17 @@ if (file_exists(Environment::REGENERATE_FLAG)) {
 
 $env->log("Pre-deploy complete.");
 unlink(Environment::PRE_DEPLOY_FLAG);
+
+/**
+ * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
+ *                    or trailing slashes
+ * @param Environment $env
+ */
+function copyFromBuildDir($dir, Environment $env) {
+    if (!file_exists($dir)) {
+        mkdir($dir);
+        $env->log(sprintf('Created directory: %s', $dir));
+    }
+    $env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
+    $env->log(sprintf('Copied directory: %s', $dir));
+}
