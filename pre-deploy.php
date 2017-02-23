@@ -56,22 +56,33 @@ if ($useGeneratedCodeSymlink) {
     array_push($mountedDirectories, 'var/generation');
 }
 
-if ($useStaticContentSymlink && file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
-    // Symlink pub/static/* to init/pub/static/*
-    $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
+/**
+ * Handle case where static content is deployed during build hook:
+ *  1. set a flag to be read by magento-cloud:deploy
+ *  2. Either copy or symlink files from init/ directory, depending on strategy
+ */
+if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
+    $env->log("Static content deployment was performed during build hook");
     $env->removeStaticContent();
-    if (file_exists($buildDir . 'pub/static')) {
-        $dir = new \DirectoryIterator($buildDir . 'pub/static');
-        foreach ($dir as $fileInfo) {
-            $fileName = $fileInfo->getFilename();
-            if (!$fileInfo->isDot() && symlink($buildDir . 'pub/static/' . $fileName, $staticContentLocation . '/' . $fileName)) {
-                $env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
+
+    if ($useStaticContentSymlink) {
+        $env->log("Symlinking static content from pub/static to init/pub/static");
+
+        // Symlink pub/static/* to init/pub/static/*
+        $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
+        if (file_exists($buildDir . 'pub/static')) {
+            $dir = new \DirectoryIterator($buildDir . 'pub/static');
+            foreach ($dir as $fileInfo) {
+                $fileName = $fileInfo->getFilename();
+                if (!$fileInfo->isDot() && symlink($buildDir . 'pub/static/' . $fileName, $staticContentLocation . '/' . $fileName)) {
+                    $env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
+                }
             }
         }
+    } else {
+        $env->log("Copying static content from init/pub/static to pub/static");
+        copyFromBuildDir('pub/static', $env);
     }
-} else {
-    // copy files from pub/static
-    copyFromBuildDir('pub/static', $env);
 }
 
 // Restore mounted directories
@@ -81,17 +92,8 @@ foreach ($mountedDirectories as $dir) {
     copyFromBuildDir($dir, $env);
 }
 
-if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
-    copy(
-        Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-        Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG
-    );
-
-    $env->log(sprintf('Copied %s', Environment::STATIC_CONTENT_DEPLOY_FLAG));
-}
-
 if (file_exists(Environment::REGENERATE_FLAG)) {
-    $this->env->log("Removing .regenerate flag");
+    $this->env->log("Removing var/.regenerate flag");
     unlink(Environment::REGENERATE_FLAG);
 }
 

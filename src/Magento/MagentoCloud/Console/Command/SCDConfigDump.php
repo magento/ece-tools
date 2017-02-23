@@ -87,7 +87,7 @@ class SCDConfigDump extends Command
                     $newConfig = $this->buildNestedArray($configKeys, $oldConfigCopy, $newConfig);
                 }
             }
-            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ';';
+            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
             file_put_contents($configFile, $updatedConfig);
         }
     }
