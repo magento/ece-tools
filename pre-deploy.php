@@ -63,7 +63,6 @@ if ($useGeneratedCodeSymlink) {
  */
 if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
     $env->log("Static content deployment was performed during build hook");
-    $env->setStaticDeployInBuild(true);
     $env->removeStaticContent();
 
     if ($useStaticContentSymlink) {
