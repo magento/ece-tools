@@ -105,8 +105,8 @@ class Build extends Command
 
     private function compileDI()
     {
-        $this->env->execute('rm -rf var/generation/*');
-        $this->env->execute('rm -rf var/di/*');
+        $this->env->execute('rm -rf generated/code/*');
+        $this->env->execute('rm -rf generated/metadata/*');
 
         $this->env->log("Enabling all modules");
         $this->env->execute("php ./bin/magento module:enable --all");

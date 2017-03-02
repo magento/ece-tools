@@ -13,7 +13,7 @@ class Environment
 {
     const MAGENTO_ROOT = __DIR__ . '/../../../../../../';
 
-    public $writableDirs = ['var/di', 'var/generation', 'app/etc', 'pub/media'];
+    public $writableDirs = ['app/etc', 'pub/media'];
 
     /**
      * Get routes information from MagentoCloud environment variable.
