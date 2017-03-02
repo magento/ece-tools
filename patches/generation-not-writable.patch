@@ -3,7 +3,7 @@ diff -Naur a/vendor/magento/framework/Console/Cli.php b/vendor/magento/framework
 --- a/vendor/magento/framework/Console/Cli.php	2016-09-28 00:46:02.000000000 -0500
 +++ b/vendor/magento/framework/Console/Cli.php	2016-09-28 00:46:38.000000000 -0500
 @@ -237,14 +237,7 @@
-    */
+      */
      private function writeGenerationDirectoryReadError()
      {
 -        $output = new \Symfony\Component\Console\Output\ConsoleOutput();
