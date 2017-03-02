@@ -59,7 +59,6 @@ class Deploy extends Command
     private $staticDeployThreads;
     private $staticDeployExcludeThemes = [];
     private $adminLocale;
-    private $staticContentStashLocation;
     private $doDeployStaticContent;
 
     private $verbosityLevel;
@@ -93,6 +92,17 @@ class Deploy extends Command
      */
     private function deploy()
     {
+        if (file_exists(Environment::PRE_DEPLOY_FLAG)) {
+            $this->env->log("Error: pre-deploy flag still exists. This means pre-deploy hook did not execute "
+                    . "successfully. Aborting the rest of the deploy hook! Flag is located at: "
+                    . realpath(Environment::PRE_DEPLOY_FLAG)
+                );
+            $this->env->log("Enabling Maintenance mode.");
+            //not relying on bin/magento in case it is broken due to some reason.
+            $this->env->execute('touch ' . realpath(Environment::MAGENTO_ROOT . 'var') . '.maintenance.flag' );
+            throw new \RuntimeException("Predeploy flag still exists!");
+         }
+
         $this->env->log("Start deploy.");
         $this->saveEnvironmentData();
 
@@ -134,8 +144,7 @@ class Deploy extends Command
 
         $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled' ? false : true;
         $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
-            ? explode(',', $var["STATIC_CONTENT_EXCLUDE_THEMES"])
-            : [];
+            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"]     : [];
         $this->adminLocale = isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
 
         if (isset($var["STATIC_CONTENT_THREADS"])) {
@@ -147,9 +156,15 @@ class Deploy extends Command
         } else { // if Paas environment
             $this->staticDeployThreads = 1;
         }
-        $this->staticContentStashLocation = isset($var["STATIC_CONTENT_STASH_LOCATION"]) ? $var["STATIC_CONTENT_STASH_LOCATION"] : false;
         $this->doDeployStaticContent = isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled' ? false : true;
-
+        // Can use environment variable to always disable. Default is to deploy static content if it was not deployed in the build step.
+        if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
+            $this->doDeployStaticContent = false;
+            $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
+        } else {
+            $this->doDeployStaticContent = !$this->env->isStaticDeployInBuild();
+            $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to ' . $this->doDeployStaticContent);
+        }
 
         $this->magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
         $this->magentoApplicationMode =
@@ -169,7 +184,7 @@ class Deploy extends Command
             $this->solrScheme = $relationships["solr"][0]["scheme"];
         }
 
-        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vv ' : '';
+        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
     }
 
     /**
@@ -340,9 +355,24 @@ class Deploy extends Command
         }
         $this->env->log("Enabling all modules");
         $this->env->execute("php ./bin/magento module:enable --all");
-        $this->env->log("Running setup upgrade.");
+
+        if (file_exists(Environment::REGENERATE_FLAG)) {
+            $this->env->log("Removing .regenerate flag");
+            unlink(Environment::REGENERATE_FLAG);
+        }
+
         try {
+            /* Enable maintenance mode */
+            $this->env->log("Enabling Maintenance mode.");
+            $this->env->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");
+
+            $this->env->log("Running setup upgrade.");
             $this->env->execute("php ./bin/magento setup:upgrade --keep-generated {$this->verbosityLevel}");
+
+            /* Disable maintenance mode */
+            $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
+            $this->env->log("Maintenance mode is disabled.");
+
         }catch (\RuntimeException $e) {
             if (file_exists($configFile . '.bak')) {
                 $this->env->log("Rollback config.php");
@@ -356,6 +386,10 @@ class Deploy extends Command
         }
         if (count($disabledModules) > 0) {
             $this->env->execute("php ./bin/magento module:disable  -f " . implode(' ' ,array_keys($disabledModules)));
+        }
+        if (file_exists(Environment::REGENERATE_FLAG)) {
+            $this->env->log("Removing .regenerate flag");
+            unlink(Environment::REGENERATE_FLAG);
         }
         if (file_exists($configFile . '.bak')) {
             $this->env->log("Deleting backup file");
@@ -526,88 +560,10 @@ class Deploy extends Command
     {
         // Clear old static content if necessary
         if ($this->cleanStaticViewFiles) {
-            // atomic move within pub/static directory
-            $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static/') . '/';
-            $timestamp = time();
-            $oldStaticContentLocation = $staticContentLocation . 'old_static_content_' . $timestamp;
-
-            $this->env->log("Moving out old static content into $oldStaticContentLocation");
-
-            if (!file_exists($oldStaticContentLocation)) {
-                mkdir($oldStaticContentLocation);
-            }
-
-            $dir = new \DirectoryIterator($staticContentLocation);
-            $stashName = $this->staticContentStashLocation
-                ? substr(rtrim($this->staticContentStashLocation, '/'), strrpos($this->staticContentStashLocation, '/') + 1)
-                : false;
-            $doNotMoveLocations = ['.htaccess'];
-            if ($stashName) {
-                $doNotMoveLocations[] = $stashName;
-            }
-            foreach ($dir as $fileInfo) {
-                $fileName = $fileInfo->getFilename();
-                if (!$fileInfo->isDot() && !in_array($fileName, $doNotMoveLocations) && strpos($fileName, 'old_static_content_') !== 0) {
-                    $this->env->log("Rename " . $staticContentLocation . '/' . $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
-                    rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
-                }
-            }
-
-            $this->env->log("Removing $oldStaticContentLocation in the background");
-            $this->env->backgroundExecute("rm -rf $oldStaticContentLocation");
-
-            $preprocessedLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/view_preprocessed';
-            if (file_exists($preprocessedLocation)) {
-                $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
-                $this->env->log("Rename $preprocessedLocation  to $oldPreprocessedLocation");
-                rename($preprocessedLocation, $oldPreprocessedLocation);
-                $this->env->log("Removing $oldPreprocessedLocation in the background");
-                $this->env->backgroundExecute("rm -rf $oldPreprocessedLocation");
-            }
+            $this->env->removeStaticContent();
         }
-
-        // Check can move in from stash
-        if ($this->checkCanMoveStaticContentFromStash()) {
-            // atomic move within pub/static directory
-            $staticContentLocation = Environment::MAGENTO_ROOT . 'pub/static/';
-            $this->env->log("Moving in new static content from stash location {$this->staticContentStashLocation} into $staticContentLocation");
-
-            $dir = new \DirectoryIterator($this->staticContentStashLocation);
-            foreach ($dir as $fileInfo) {
-                $fileName = $fileInfo->getFilename();
-                if (!$fileInfo->isDot()) {
-                    $this->env->log("Rename " . $this->staticContentStashLocation . '/' . $fileName . " to " . $staticContentLocation . '/' . $fileName);
-                    rename($this->staticContentStashLocation . '/' . $fileName, $staticContentLocation . '/' . $fileName);
-                }
-            }
-        } else {
-            /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
-            $this->disableRedisCache();
-            $this->env->log("Generating fresh static content");
-            $this->generateFreshStaticContent();
-            $this->enableRedisCache();
-        }
-    }
-
-    private function checkCanMoveStaticContentFromStash()
-    {
-        if ($this->staticContentStashLocation) {
-            if (!$this->cleanStaticViewFiles) {
-                $this->env->log(
-                    "Warning: must remove existing static files in order to move in static content from stashed location. "
-                    . "Static content will NOT be moved into place from {$this->staticContentStashLocation}"
-                );
-                return false;
-            } else if (!file_exists($this->staticContentStashLocation)) {
-                $this->env->log(
-                    "Warning: stash location {$this->staticContentStashLocation} could not be found."
-                    . "Static content will NOT be moved into place from {$this->staticContentStashLocation}"
-                );
-                return false;
-            }
-            return true;
-        }
-        return false;
+        $this->env->log("Generating fresh static content");
+        $this->generateFreshStaticContent();
     }
 
     private function generateFreshStaticContent()
@@ -626,7 +582,7 @@ class Deploy extends Command
         if (is_array($output) && count($output) > 1) {
             array_shift($output);
             $locales = $output;
-            
+
             if (!in_array($this->adminLocale, $locales)) {
                 $locales[] = $this->adminLocale;
             }
@@ -634,9 +590,16 @@ class Deploy extends Command
             $locales = implode(' ', $locales);
         }
 
-        $excludeThemesOptions = $this->staticDeployExcludeThemes
-            ? "--exclude-theme=" . implode(' --exclude-theme=', $this->staticDeployExcludeThemes)
-            : '';
+        $excludeThemesOptions = '';
+        if ($this->staticDeployExcludeThemes) {
+            $themes = preg_split("/[,]+/", $this->staticDeployExcludeThemes);
+            if (count($themes) > 1) {
+                $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
+            } elseif (count($themes) === 1){
+                $excludeThemesOptions = "--exclude-theme=" .  $themes[0];
+            }
+        }
+
         $jobsOption = $this->staticDeployThreads
             ? "--jobs={$this->staticDeployThreads}"
             : '';
@@ -688,38 +651,6 @@ class Deploy extends Command
         $this->env->log(sprintf("Routes: %s", var_export($this->urls, true)));
     }
 
-    /**
-     * If app/etc/env.php exists, make sure redis is not configured as the cache backend
-     */
-    private function disableRedisCache()
-    {
-        $this->env->log("Disabling redis cache.");
-        $configFile = Environment::MAGENTO_ROOT . '/app/etc/env.php';
-        if (file_exists($configFile)) {
-            $config = include $configFile;
-            if (isset($config['cache'])) {
-                unset ($config['cache']);
-            }
-            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
-            file_put_contents($configFile, $updatedConfig);
-        }
-    }
-
-    /**
-     * If app/etc/env.php exists, make sure redis is not configured as the cache backend
-     */
-    private function enableRedisCache()
-    {
-        $this->env->log("Enabling redis cache.");
-        $configFile = Environment::MAGENTO_ROOT . '/app/etc/env.php';
-        if (file_exists($configFile)) {
-            $config = include $configFile;
-            $config['cache'] = $this->getRedisCacheConfiguration();
-            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
-            file_put_contents($configFile, $updatedConfig);
-        }
-    }
-
     private function getRedisCacheConfiguration()
     {
         return [
@@ -752,5 +683,7 @@ class Deploy extends Command
         $this->env->log("Removing old generated code in the background");
         // Must match filename of old generated assets directory in pre-deploy.php
         $this->env->backgroundExecute("rm -rf " . realpath(Environment::MAGENTO_ROOT . 'var') . '/generation_old_*');
+        // Remove the flag to clean up for next deploy
+        $this->env->setStaticDeployInBuild(false);
     }
 }
