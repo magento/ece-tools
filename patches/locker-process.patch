@@ -91,8 +91,8 @@ MDVA-2470
 
 --- a/vendor/magento/module-developer/Model/View/Asset/PreProcessor/FrontendCompilation.php	2017-02-15 16:24:07.000000000 +0000
 +++ b/vendor/magento/module-developer/Model/View/Asset/PreProcessor/FrontendCompilation.php	2017-02-15 16:24:07.000000000 +0000
-@@ -80,7 +80,7 @@
-         }
+@@ -76,7 +76,7 @@
+     {
 
          try {
 -            $this->lockerProcess->lockProcess($this->lockName);
@@ -100,4 +100,3 @@ MDVA-2470
 
              $path = $chain->getAsset()->getFilePath();
              $module = $chain->getAsset()->getModule();
-
