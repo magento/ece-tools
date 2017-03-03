@@ -16,7 +16,7 @@ class Environment
     const PRE_DEPLOY_FLAG = self::MAGENTO_ROOT . 'var/.predeploy_in_progress';
     const REGENERATE_FLAG = self::MAGENTO_ROOT . 'var/.regenerate';
 
-    public $writableDirs = ['app/etc', 'pub/media'];
+    public $writableDirs = ['var', 'app/etc', 'pub/media'];
 
     /**
      * Get routes information from MagentoCloud environment variable.
