@@ -608,7 +608,7 @@ class Deploy extends Command
         $this->env->log($logMessage);
 
         $this->env->execute(
-            "/usr/bin/php ./bin/magento setup:static-content:deploy $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
+            "/usr/bin/php ./bin/magento setup:static-content:deploy  -f $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
         );
 
         /* Disable maintenance mode */

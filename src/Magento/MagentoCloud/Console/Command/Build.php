@@ -178,7 +178,7 @@ class Build extends Command
 
                 $parallelCommands = "";
                 foreach ($locales as $locale){
-                    $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
+                    $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy -f $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
                 }
                 $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
 
