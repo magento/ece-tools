@@ -184,7 +184,7 @@ class Build
     private function applyPatches()
     {
         $this->env->log("Applying patches.");
-        $this->env->execute('php ' . Environment::MAGENTO_ROOT . 'vendor/bin/m2-apply-patches');
+        $this->env->execute('php vendor/bin/m2-apply-patches');
     }
 
     /**
