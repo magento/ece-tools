@@ -20,5 +20,8 @@
     "psr-4": {
       "Magento\\MagentoCloud\\": ["src/Magento/MagentoCloud"]
     }
-  }
+  },
+  "bin":[
+    "m2-ece-build", "m2-ece-deploy", "m2-ece-scd-dump"
+  ]
 }
