@@ -4,17 +4,14 @@
  * See COPYING.txt for license details.
  */
 
-namespace Magento\MagentoCloud\Console\Command;
+namespace Magento\MagentoCloud\Command;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Environment;
 
 /**
  * CLI command for build hook. Responsible for preparing the codebase before it's moved to the server.
  */
-class Build extends Command
+class Build
 {
     /**
      * Options for build_options.ini
@@ -40,36 +37,24 @@ class Build extends Command
      */
     private $verbosityLevel;
 
-    /**
-     * {@inheritdoc}
-     * @throws \InvalidArgumentException
-     */
-    protected function configure()
-    {
-        $this->setName('magento-cloud:build')
-            ->setDescription('Invokes set of steps to build source code for the Magento on the Magento Cloud');
-        parent::configure();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function __construct()
     {
         $this->buildOptions = $this->parseBuildOptions();
         $this->env = new Environment();
         $buildVerbosityLevel = $this->getBuildOption('VERBOSE_COMMANDS');
         isset($buildVerbosityLevel) && $buildVerbosityLevel == 'enabled' ? $this->env->log("Verbosity level is set to " . $buildVerbosityLevel) : $this->env->log("Verbosity level is not set");
         $this->verbosityLevel = isset($buildVerbosityLevel) && $buildVerbosityLevel == 'enabled' ? ' -vv ' : '';
-        $this->build();
     }
 
-    private function build()
+    /**
+     *
+     */
+    public function execute()
     {
         $this->env->setStaticDeployInBuild(false);
         $this->env->log("Start build.");
-        $this->applyMccPatches();
-        $this->applyCommittedPatches();
+        $this->applyPatches();
+        $this->marshallingFiles();
         $this->composerDumpAutoload();
         $this->compileDI();
         $this->deployStaticContent();
@@ -194,27 +179,39 @@ class Build extends Command
     }
 
     /**
-     * Apply patches distributed through the magento-cloud-configuration file
+     * Apply ECE patches as well as patches in m2-hotfixes
      */
     private function applyMccPatches()
     {
-        $this->env->log("Applying magento-cloud-configuration patches.");
-        $this->env->execute('/usr/bin/php ' . Environment::MAGENTO_ROOT . 'vendor/magento/magento-cloud-configuration/patch.php');
+        $this->env->log("Applying patches.");
+        $this->env->execute('/usr/bin/php ' . Environment::MAGENTO_ROOT . 'vendor/bin/m2-apply-patches');
     }
 
     /**
-     * Apply patches distributed through the magento-cloud-configuration file
+     * Marshalls required files.
      */
-    private function applyCommittedPatches()
+    private function marshallingFiles()
     {
-        $patchesDir = Environment::MAGENTO_ROOT . 'm2-hotfixes/';
-        $this->env->log("Checking if patches exist under " . $patchesDir);
-        if (is_dir($patchesDir)) {
-            $files = glob($patchesDir . "*");
-            sort($files);
-            foreach ($files as $file) {
-                $cmd = 'git apply '  . $file;
-                $this->env->execute($cmd);
+        copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
+        mkdir(Environment::MAGENTO_ROOT . 'app/enterprise', 0777, true);
+        copy(Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml', Environment::MAGENTO_ROOT . 'app/enterprise/di.xml');
+
+        $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
+        if (file_exists($sampleDataDir)) {
+            $this->env->log("Sample data media found. Marshalling to pub/media.");
+            $destination = Environment::MAGENTO_ROOT . '/pub/media';
+            foreach (
+                $iterator = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($sampleDataDir, \RecursiveDirectoryIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::SELF_FIRST) as $item
+            ) {
+                if ($item->isDir()) {
+                    if (!file_exists($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName())) {
+                        mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                    }
+                } else {
+                    copy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                }
             }
         }
     }

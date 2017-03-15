@@ -4,17 +4,14 @@
  * See COPYING.txt for license details.
  */
 
-namespace Magento\MagentoCloud\Console\Command;
+namespace Magento\MagentoCloud\Command;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Environment;
 
 /**
  * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
  */
-class Deploy extends Command
+class Deploy
 {
     const MAGIC_ROUTE = '{default}';
 
@@ -68,30 +65,17 @@ class Deploy extends Command
      */
     private $env;
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure()
-    {
-        $this->setName('magento-cloud:deploy')
-            ->setDescription('Deploy an instance of Magento on the Magento Cloud');
-        parent::configure();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function __construct()
     {
         $this->env = new Environment();
-        $this->deploy();
     }
 
     /**
      * Deploy application: copy writable directories back, install or update Magento data.
      */
-    private function deploy()
+    public function execute()
     {
+        $this->preDeploy();
         if (file_exists(Environment::PRE_DEPLOY_FLAG)) {
             $this->env->log("Error: pre-deploy flag still exists. This means pre-deploy hook did not execute "
                     . "successfully. Aborting the rest of the deploy hook! Flag is located at: "
@@ -685,5 +669,121 @@ class Deploy extends Command
         $this->env->backgroundExecute("rm -rf " . realpath(Environment::MAGENTO_ROOT . 'var') . '/generation_old_*');
         // Remove the flag to clean up for next deploy
         $this->env->setStaticDeployInBuild(false);
+    }
+
+    /**
+     * This script contains logic to cleanup outdated caches and restore the contents of mounted directories so that
+     * the main deploy hook is able to start.
+     */
+    private function preDeploy()
+    {
+
+        // Should be deleted at the end of pre-deploy, so presence of flag later indicate if something failed in the pre-deploy.
+        $this->env->log("Setting the pre-deploy flag." . PHP_EOL);
+
+        touch(Environment::PRE_DEPLOY_FLAG);
+
+        $this->env = new Environment();
+        $this->env->log("Starting pre-deploy.");
+
+        // Clear redis and file caches
+        $relationships = $this->env->getRelationships();
+        $var = $this->env->getVariables();
+        $useGeneratedCodeSymlink = isset($var["GENERATED_CODE_SYMLINK"]) && $var["GENERATED_CODE_SYMLINK"] == 'disabled' ? false : true;
+        $useStaticContentSymlink = isset($var["STATIC_CONTENT_SYMLINK"]) && $var["STATIC_CONTENT_SYMLINK"] == 'disabled' ? false : true;
+
+        if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
+            $redisHost = $relationships['redis'][0]['host'];
+            $redisPort = $relationships['redis'][0]['port'];
+            $redisCacheDb = '1'; // Matches \Magento\MagentoCloud\Command\Deploy::$redisCacheDb
+            $this->env->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushall");
+        }
+
+        $fileCacheDir = Environment::MAGENTO_ROOT . '/var/cache';
+        if (file_exists($fileCacheDir)) {
+            $this->env->execute("rm -rf $fileCacheDir");
+        }
+
+        $mountedDirectories = ['app/etc', 'pub/media'];
+
+        /**
+         * optionally symlink DI assets from build resources directory(var/generation to init/var/generation
+         * (var/di -> init/var/di, var/generation -> init/var/generation)
+         **/
+
+        $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
+        if ($useGeneratedCodeSymlink) {
+            $varDir = realpath(Environment::MAGENTO_ROOT . 'var') . '/';
+            $this->env->execute("rm -rf {$varDir}/di");
+            $this->env->execute("rm -rf {$varDir}/generation");
+            if (symlink($buildDir . 'var/generation', $varDir . 'generation')) {
+                $this->env->log('Symlinked var/generation to init/var/generation');
+            }
+
+            if (symlink($buildDir . 'var/di', $varDir . 'di')) {
+                $this->env->log('Symlinked var/di to init/var/di');
+            }
+        } else {
+            array_push($mountedDirectories, 'var/di');
+            array_push($mountedDirectories, 'var/generation');
+        }
+
+        /**
+         * Handle case where static content is deployed during build hook:
+         *  1. set a flag to be read by magento-cloud:deploy
+         *  2. Either copy or symlink files from init/ directory, depending on strategy
+         */
+        if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
+            $this->env->log("Static content deployment was performed during build hook");
+            $this->env->removeStaticContent();
+            $this->env->setStaticDeployInBuild(true);
+
+            if ($useStaticContentSymlink) {
+                $this->env->log("Symlinking static content from pub/static to init/pub/static");
+
+                // Symlink pub/static/* to init/pub/static/*
+                $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
+                if (file_exists($buildDir . 'pub/static')) {
+                    $dir = new \DirectoryIterator($buildDir . 'pub/static');
+                    foreach ($dir as $fileInfo) {
+                        $fileName = $fileInfo->getFilename();
+                        if (!$fileInfo->isDot() && symlink($buildDir . 'pub/static/' . $fileName, $staticContentLocation . '/' . $fileName)) {
+                            $this->env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
+                        }
+                    }
+                }
+            } else {
+                $this->env->log("Copying static content from init/pub/static to pub/static");
+                $this->copyFromBuildDir('pub/static');
+            }
+        }
+
+        // Restore mounted directories
+        $this->env->log("Copying writable directories back.");
+
+        foreach ($mountedDirectories as $dir) {
+            $this->copyFromBuildDir($dir);
+        }
+
+        if (file_exists(Environment::REGENERATE_FLAG)) {
+            $this->env->log("Removing var/.regenerate flag");
+            unlink(Environment::REGENERATE_FLAG);
+        }
+
+        $this->env->log("Pre-deploy complete.");
+        unlink(Environment::PRE_DEPLOY_FLAG);
+    }
+
+    /**
+    * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
+    *                    or trailing slashes
+    */
+    private function copyFromBuildDir($dir) {
+        if (!file_exists($dir)) {
+            mkdir($dir);
+            $this->env->log(sprintf('Created directory: %s', $dir));
+        }
+        $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
+        $this->env->log(sprintf('Copied directory: %s', $dir));
     }
 }

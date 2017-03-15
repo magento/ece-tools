@@ -4,24 +4,15 @@
  * See COPYING.txt for license details.
  */
 
-namespace Magento\MagentoCloud\Console\Command;
+namespace Magento\MagentoCloud\Command;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Environment;
 
 /**
  * CLI command for dumping SCD related config.
  */
-class SCDConfigDump extends Command
+class SCDConfigDump
 {
-    /**
-     * Option to skip regeneration of config
-     */
-    const KEEP_CONFIG = 'keep-config';
-
     private $requiredConfigKeys = [
         'scopes',
         'system/default/general/locale/code',
@@ -35,35 +26,9 @@ class SCDConfigDump extends Command
         'system/websites',
     ];
 
-    /**
-     * {@inheritdoc}
-     */
-    protected function configure()
+    public function execute()
     {
-        $options = [
-            new InputOption(
-                self::KEEP_CONFIG,
-                null,
-                InputOption::VALUE_NONE,
-                'Prevents existing config being overwritten. ' . PHP_EOL
-            )
-        ];
-
-        $this->setName('magento-cloud:scd-dump')->setDescription('Dump config related to SCD')->setDefinition($options);
-        parent::configure();
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $keepConfig = $input->getOption(self::KEEP_CONFIG);
         $returnCode = 0;
-        if (!$keepConfig) {
-            $command = $this->getApplication()->find('app:config:dump');
-            $returnCode = $command->run($input, $output);
-        }
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.local.php';
 
         if ($returnCode == 0 && file_exists($configFile)) {

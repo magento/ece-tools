@@ -6,7 +6,14 @@
       "OSL-3.0",
       "AFL-3.0"
   ],
+  "repositories": {
+    "magento-ece-patches": {
+      "type": "vcs",
+      "url": "git@github.com:magento/ece-patches.git"
+    }
+  },
   "require": {
+    "magento/ece-patches": "dev-master",
     "php": ">=5.6.0"
   },
   "autoload": {

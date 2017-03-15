@@ -81,16 +81,16 @@ class Environment
         shell_exec($command);
     }
 
-    public function setStaticDeployInBuild($flag)		
+    public function setStaticDeployInBuild($flag)
     {
         if ($flag) {
-         $this->log('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-         touch(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            $this->log('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            touch(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
         } else {
             if ($this->isStaticDeployInBuild()) {
-                    $this->log('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-                    unlink(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-                }
+                $this->log('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+                unlink(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            }
         }
     }
 
