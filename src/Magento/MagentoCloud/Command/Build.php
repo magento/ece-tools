@@ -181,7 +181,7 @@ class Build
     /**
      * Apply ECE patches as well as patches in m2-hotfixes
      */
-    private function applyMccPatches()
+    private function applyPatches()
     {
         $this->env->log("Applying patches.");
         $this->env->execute('/usr/bin/php ' . Environment::MAGENTO_ROOT . 'vendor/bin/m2-apply-patches');
