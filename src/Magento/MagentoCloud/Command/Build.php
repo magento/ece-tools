@@ -130,14 +130,14 @@ class Build
 
     public function deployStaticContent()
     {
-        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.local.php';
+        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
         if (file_exists($configFile) && !$this->getBuildOption(self::BUILD_OPT_SKIP_SCD)) {
             $config = include $configFile;
 
             $locales = $this->filter($this->flatten($config), 'general/locale/code');
 
             if (count($locales) === 0 ) {
-                throw new \Exception("No locales found in config.local.php");
+                throw new \Exception("No locales found in config.php");
             }
 
             $SCDLocales = implode(' ', $locales);
