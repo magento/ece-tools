@@ -60,7 +60,6 @@ class Build
         $this->deployStaticContent();
         $this->clearInitDir();
         $this->env->execute('rm -rf app/etc/env.php');
-        $this->env->execute('rm -rf app/etc/config.php');
         $this->backupToInit();
     }
 
@@ -75,18 +74,6 @@ class Build
             unlink(Environment::REGENERATE_FLAG);
         }
 
-        $this->env->log("Copying writable directories to temp directory.");
-        foreach ($this->env->writableDirs as $dir) {
-            $this->env->execute(sprintf('mkdir -p init/%s', $dir));
-            $this->env->execute(sprintf('mkdir -p %s', $dir));
-
-            if (count(scandir($dir)) >  2) {
-                $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir));
-                $this->env->execute(sprintf('rm -rf %s', $dir));
-                $this->env->execute(sprintf('mkdir -p %s', $dir));
-            }
-        }
-
         if ($this->env->isStaticDeployInBuild()) {
             $this->env->log("Moving static content to init directory");
             $this->env->execute('mkdir -p ./init/pub/');
@@ -99,6 +86,20 @@ class Build
                 Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG,
                 Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
             );
+        } else {
+            $this->env->log("No file " . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        }
+
+        $this->env->log("Copying writable directories to temp directory.");
+        foreach ($this->env->writableDirs as $dir) {
+            $this->env->execute(sprintf('mkdir -p init/%s', $dir));
+            $this->env->execute(sprintf('mkdir -p %s', $dir));
+
+            if (count(scandir($dir)) >  2) {
+                $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir));
+                $this->env->execute(sprintf('rm -rf %s', $dir));
+                $this->env->execute(sprintf('mkdir -p %s', $dir));
+            }
         }
     }
 
