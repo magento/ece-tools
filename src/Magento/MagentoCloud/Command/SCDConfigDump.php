@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Environment;
 class SCDConfigDump
 {
     private $requiredConfigKeys = [
+        'modules',
         'scopes',
         'system/default/general/locale/code',
         'system/default/dev/static/sign',
@@ -29,7 +30,7 @@ class SCDConfigDump
     public function execute()
     {
         $returnCode = 0;
-        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.local.php';
+        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
 
         if ($returnCode == 0 && file_exists($configFile)) {
             $oldConfig = include $configFile;
