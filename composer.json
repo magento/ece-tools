@@ -1,5 +1,5 @@
 {
-  "name": "magento/magento-cloud-configuration",
+  "name": "magento/ece-tools",
   "description": "Provides default configuration to build and deploy Magento 2 Enterprise Edition",
   "version": "102.0.0-dev",
   "license": [
