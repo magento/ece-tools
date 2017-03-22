@@ -1,19 +1,12 @@
 {
   "name": "magento/ece-tools",
-  "description": "Provides default configuration to build and deploy Magento 2 Enterprise Edition",
-  "version": "102.0.0-dev",
+  "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
+  "version": "2002.0",
   "license": [
       "OSL-3.0",
       "AFL-3.0"
   ],
-  "repositories": {
-    "magento-ece-patches": {
-      "type": "vcs",
-      "url": "git@github.com:magento/ece-patches.git"
-    }
-  },
   "require": {
-    "magento/ece-patches": "dev-master",
     "php": ">=5.6.0"
   },
   "autoload": {
