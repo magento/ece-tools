@@ -326,8 +326,6 @@ class Deploy
             $moduleData = include $configFile;
             $disabledModules = array_filter($moduleData['modules'], function ($v){return $v == 0;});
         }
-        $this->env->log("Enabling all modules");
-        $this->env->execute("php ./bin/magento module:enable --all");
 
         if (file_exists(Environment::REGENERATE_FLAG)) {
             $this->env->log("Removing .regenerate flag");

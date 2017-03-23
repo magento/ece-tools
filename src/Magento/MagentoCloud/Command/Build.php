@@ -218,9 +218,6 @@ class Build
         $this->env->execute('rm -rf generated/code/*');
         $this->env->execute('rm -rf generated/metadata/*');
 
-        $this->env->log("Enabling all modules");
-        $this->env->execute("php ./bin/magento module:enable --all");
-
         if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
             $this->env->log("Running DI compilation");
             $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
