@@ -76,17 +76,6 @@ class Deploy
     public function execute()
     {
         $this->preDeploy();
-        if (file_exists(Environment::PRE_DEPLOY_FLAG)) {
-            $this->env->log("Error: pre-deploy flag still exists. This means pre-deploy hook did not execute "
-                    . "successfully. Aborting the rest of the deploy hook! Flag is located at: "
-                    . realpath(Environment::PRE_DEPLOY_FLAG)
-                );
-            $this->env->log("Enabling Maintenance mode.");
-            //not relying on bin/magento in case it is broken due to some reason.
-            $this->env->execute('touch ' . realpath(Environment::MAGENTO_ROOT . 'var') . '.maintenance.flag' );
-            throw new \RuntimeException("Predeploy flag still exists!");
-         }
-
         $this->env->log("Start deploy.");
         $this->saveEnvironmentData();
 
@@ -677,15 +666,6 @@ class Deploy
      */
     private function preDeploy()
     {
-
-        // Should be deleted at the end of pre-deploy, so presence of flag later indicate if something failed in the pre-deploy.
-        $this->env->log("Setting the pre-deploy flag." . PHP_EOL);
-
-        touch(Environment::PRE_DEPLOY_FLAG);
-
-        $this->env = new Environment();
-        $this->env->log("Starting pre-deploy.");
-
         // Clear redis and file caches
         $relationships = $this->env->getRelationships();
         $var = $this->env->getVariables();
@@ -769,15 +749,12 @@ class Deploy
             $this->env->log("Removing var/.regenerate flag");
             unlink(Environment::REGENERATE_FLAG);
         }
-
-        $this->env->log("Pre-deploy complete.");
-        unlink(Environment::PRE_DEPLOY_FLAG);
     }
 
     /**
-    * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
-    *                    or trailing slashes
-    */
+     * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
+     *                    or trailing slashes
+     */
     private function copyFromBuildDir($dir) {
         if (!file_exists($dir)) {
             mkdir($dir);
