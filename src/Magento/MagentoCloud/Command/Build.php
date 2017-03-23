@@ -193,6 +193,10 @@ class Build
      */
     private function marshallingFiles()
     {
+        $this->env->execute('rm -rf generated/code/*');
+        $this->env->execute('rm -rf generated/metadata/*');
+        $this->env->execute('rm -rf var/cache');
+
         $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
         if (file_exists($sampleDataDir)) {
             $this->env->log("Sample data media found. Marshalling to pub/media.");
@@ -215,10 +219,6 @@ class Build
 
     private function compileDI()
     {
-        $this->env->execute('rm -rf generated/code/*');
-        $this->env->execute('rm -rf generated/metadata/*');
-        $this->env->execute('rm -rf var/cache');
-
         if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
             $this->env->log("Running DI compilation");
             $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
