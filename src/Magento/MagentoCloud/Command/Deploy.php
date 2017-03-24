@@ -319,13 +319,6 @@ class Deploy
     private function setupUpgrade()
     {
         $this->env->log("Saving disabled modules.");
-        $configFile = 'app/etc/config.php';
-        $disabledModules = [];
-        if (file_exists($configFile)) {
-            $this->env->execute("cp -f app/etc/config.php app/etc/config.php.bak");
-            $moduleData = include $configFile;
-            $disabledModules = array_filter($moduleData['modules'], function ($v){return $v == 0;});
-        }
 
         if (file_exists(Environment::REGENERATE_FLAG)) {
             $this->env->log("Removing .regenerate flag");
@@ -345,26 +338,13 @@ class Deploy
             $this->env->log("Maintenance mode is disabled.");
 
         }catch (\RuntimeException $e) {
-            if (file_exists($configFile . '.bak')) {
-                $this->env->log("Rollback config.php");
-                $this->env->execute("cp -f app/etc/config.php.bak app/etc/config.php");
-            } else {
-                $this->env->log("No backup config file to perform rollback");
-            }
             $this->env->log($e->getMessage());
             //Rollback required by database
             exit(6);
         }
-        if (count($disabledModules) > 0) {
-            $this->env->execute("php ./bin/magento module:disable  -f " . implode(' ' ,array_keys($disabledModules)));
-        }
         if (file_exists(Environment::REGENERATE_FLAG)) {
             $this->env->log("Removing .regenerate flag");
             unlink(Environment::REGENERATE_FLAG);
-        }
-        if (file_exists($configFile . '.bak')) {
-            $this->env->log("Deleting backup file");
-            $this->env->execute("rm app/etc/config.php.bak");
         }
     }
 
@@ -647,18 +627,6 @@ class Deploy
     }
 
     /**
-     * Clean up any "old" assets that were atomically moved out of place, by deleting them in the background
-     */
-    private function cleanupOldAssets()
-    {
-        $this->env->log("Removing old generated code in the background");
-        // Must match filename of old generated assets directory in pre-deploy.php
-        $this->env->backgroundExecute("rm -rf " . realpath(Environment::MAGENTO_ROOT . 'var') . '/generation_old_*');
-        // Remove the flag to clean up for next deploy
-        $this->env->setStaticDeployInBuild(false);
-    }
-
-    /**
      * This script contains logic to cleanup outdated caches and restore the contents of mounted directories so that
      * the main deploy hook is able to start.
      */
@@ -667,7 +635,6 @@ class Deploy
         // Clear redis and file caches
         $relationships = $this->env->getRelationships();
         $var = $this->env->getVariables();
-        $useGeneratedCodeSymlink = isset($var["GENERATED_CODE_SYMLINK"]) && $var["GENERATED_CODE_SYMLINK"] == 'disabled' ? false : true;
         $useStaticContentSymlink = isset($var["STATIC_CONTENT_SYMLINK"]) && $var["STATIC_CONTENT_SYMLINK"] == 'disabled' ? false : true;
 
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
@@ -684,37 +651,19 @@ class Deploy
 
         $mountedDirectories = ['app/etc', 'pub/media'];
 
-        /**
-         * optionally symlink DI assets from build resources directory(var/generation to init/var/generation
-         * (var/di -> init/var/di, var/generation -> init/var/generation)
-         **/
-
         $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
-        if ($useGeneratedCodeSymlink) {
-            $varDir = realpath(Environment::MAGENTO_ROOT . 'var') . '/';
-            $this->env->execute("rm -rf {$varDir}/di");
-            $this->env->execute("rm -rf {$varDir}/generation");
-            if (symlink($buildDir . 'var/generation', $varDir . 'generation')) {
-                $this->env->log('Symlinked var/generation to init/var/generation');
-            }
-
-            if (symlink($buildDir . 'var/di', $varDir . 'di')) {
-                $this->env->log('Symlinked var/di to init/var/di');
-            }
-        } else {
-            array_push($mountedDirectories, 'var/di');
-            array_push($mountedDirectories, 'var/generation');
-        }
 
         /**
          * Handle case where static content is deployed during build hook:
          *  1. set a flag to be read by magento-cloud:deploy
          *  2. Either copy or symlink files from init/ directory, depending on strategy
          */
-        if (file_exists(Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
+        if (file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
             $this->env->log("Static content deployment was performed during build hook");
-            $this->env->removeStaticContent();
-            $this->env->setStaticDeployInBuild(true);
+            // Clear old static content if necessary
+            if ($this->cleanStaticViewFiles) {
+                $this->env->removeStaticContent();
+            }
 
             if ($useStaticContentSymlink) {
                 $this->env->log("Symlinking static content from pub/static to init/pub/static");

@@ -116,7 +116,7 @@ class Environment
         foreach ($dir as $fileInfo) {
             $fileName = $fileInfo->getFilename();
             if (!$fileInfo->isDot() && strpos($fileName, 'old_static_content_') !== 0) {
-                $this->log("Rename " . $staticContentLocation . '/' . $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
+                $this->log("Rename " . $staticContentLocation .  $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
                 rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
             }
         }
