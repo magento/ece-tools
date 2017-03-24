@@ -660,11 +660,8 @@ class Deploy
          */
         if (file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
             $this->env->log("Static content deployment was performed during build hook");
-            // Clear old static content if necessary
-            if ($this->cleanStaticViewFiles) {
-                $this->env->removeStaticContent();
-            }
-
+            $this->env->removeStaticContent();
+            
             if ($useStaticContentSymlink) {
                 $this->env->log("Symlinking static content from pub/static to init/pub/static");
 
