@@ -86,7 +86,6 @@ class Deploy
         }
         $this->processMagentoMode();
         $this->disableGoogleAnalytics();
-        $this->cleanupOldAssets();
         $this->env->log("Deployment complete.");
     }
 
