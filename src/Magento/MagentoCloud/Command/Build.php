@@ -164,7 +164,7 @@ class Build
 
                 $parallelCommands = "";
                 foreach ($locales as $locale){
-                    $parallelCommands .= "/usr/bin/php ./bin/magento setup:static-content:deploy -f $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
+                    $parallelCommands .= "php ./bin/magento setup:static-content:deploy -f $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
                 }
                 $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
 
@@ -196,6 +196,10 @@ class Build
         $this->env->execute('rm -rf generated/code/*');
         $this->env->execute('rm -rf generated/metadata/*');
         $this->env->execute('rm -rf var/cache');
+
+        copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
+        mkdir(Environment::MAGENTO_ROOT . 'app/enterprise', 0777, true);
+        copy(Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml', Environment::MAGENTO_ROOT . 'app/enterprise/di.xml');
 
         $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
         if (file_exists($sampleDataDir)) {

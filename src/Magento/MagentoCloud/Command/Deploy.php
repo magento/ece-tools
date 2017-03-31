@@ -559,7 +559,7 @@ class Deploy
         $this->env->log($logMessage);
 
         $this->env->execute(
-            "/usr/bin/php ./bin/magento setup:static-content:deploy  -f $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
+            "php ./bin/magento setup:static-content:deploy  -f $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
         );
 
         /* Disable maintenance mode */
