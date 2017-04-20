@@ -138,7 +138,9 @@ class Build
             $locales = $this->filter($this->flatten($config), 'general/locale/code');
 
             if (count($locales) === 0 ) {
-                throw new \Exception("No locales found in config.php");
+                $this->env->log("No locales found in config.php");
+                $this->env->setStaticDeployInBuild(false);
+                return;
             }
 
             $SCDLocales = implode(' ', $locales);
