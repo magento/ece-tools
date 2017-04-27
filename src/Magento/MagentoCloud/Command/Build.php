@@ -117,13 +117,20 @@ class Build
         return $result;
     }
 
-    private function filter($array, $pattern)
+    private function filter($array, $pattern, $ending = true)
     {
         $filteredResult = [];
         $length = strlen($pattern);
         foreach ($array as $key => $value) {
-            if (substr($key, -$length) === $pattern) {
-                $filteredResult[$key] = $value;
+            if($ending){
+                if (substr($key, -$length) === $pattern) {
+                    $filteredResult[$key] = $value;
+                }
+            }
+            else {
+                if (substr($key, 0, strlen($pattern)) === $pattern) {
+                    $filteredResult[$key] = $value;
+                }
             }
         }
         return array_unique(array_values($filteredResult));
@@ -135,10 +142,18 @@ class Build
         if (file_exists($configFile) && !$this->getBuildOption(self::BUILD_OPT_SKIP_SCD)) {
             $config = include $configFile;
 
-            $locales = $this->filter($this->flatten($config), 'general/locale/code');
+            $flattenedConfig = $this->flatten($config);
+            $isWebsitePresent = $this->filter($flattenedConfig, 'scopes/websites', false);
+            $isStorePresent = $this->filter($flattenedConfig, 'scopes/stores', false);
 
-            if (count($locales) === 0 ) {
-                $this->env->log("No locales found in config.php");
+            $locales = $this->filter($flattenedConfig, 'general/locale/code');
+
+            if (count($isStorePresent) !== 0 && count($isWebsitePresent) !== 0 ){
+                if(count($locales) === 0 ) {
+                    $locales = ['en_US'];
+                }
+            } else {
+                $this->env->log("No stores/website/locales found in config.php");
                 $this->env->setStaticDeployInBuild(false);
                 return;
             }
@@ -225,11 +240,17 @@ class Build
 
     private function compileDI()
     {
-        if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
-            $this->env->log("Running DI compilation");
-            $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
+        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
+        if (file_exists($configFile)) {
+            if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
+                $this->env->log("Running DI compilation");
+                $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
+            } else {
+                $this->env->log("Skip running DI compilation");
+            }
         } else {
-            $this->env->log("Skip running DI compilation");
+            $this->env->log("Missing config.php, please run the following commands \n 1. bin/magento module:enable --all \n 2. git add app/etc/config.php \n 3. git commit -a -m `adding config.php` 4. git push");
+            exit(6);
         }
     }
 
