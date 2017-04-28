@@ -143,12 +143,12 @@ class Build
             $config = include $configFile;
 
             $flattenedConfig = $this->flatten($config);
-            $isWebsitePresent = $this->filter($flattenedConfig, 'scopes/websites', false);
-            $isStorePresent = $this->filter($flattenedConfig, 'scopes/stores', false);
+            $websites = $this->filter($flattenedConfig, 'scopes/websites', false);
+            $stores = $this->filter($flattenedConfig, 'scopes/stores', false);
 
             $locales = $this->filter($flattenedConfig, 'general/locale/code');
 
-            if (count($isStorePresent) !== 0 && count($isWebsitePresent) !== 0 ){
+            if (count($stores) !== 0 && count($websites) !== 0 ){
                 if(count($locales) === 0 ) {
                     $locales = ['en_US'];
                 }
@@ -249,7 +249,7 @@ class Build
                 $this->env->log("Skip running DI compilation");
             }
         } else {
-            $this->env->log("Missing config.php, please run the following commands \n 1. bin/magento module:enable --all \n 2. git add app/etc/config.php \n 3. git commit -a -m `adding config.php` 4. git push");
+            $this->env->log("Missing config.php, please run the following commands \n 1. bin/magento module:enable --all \n 2. git add -f app/etc/config.php \n 3. git commit -a -m 'adding config.php' \n 4. git push");
             exit(6);
         }
     }
