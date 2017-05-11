@@ -53,6 +53,26 @@ class SCDConfigDump
                     $newConfig = $this->buildNestedArray($configKeys, $oldConfigCopy, $newConfig);
                 }
             }
+
+            //only saving general/locale/code
+            $configLocales = array_keys($newConfig['system']['stores']);
+            foreach ($configLocales as $configLocale) {
+                if(isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
+                    $temp = $newConfig['system']['stores'][$configLocale]['general']['locale']['code'];
+                    unset($newConfig['system']['stores'][$configLocale]);
+                    $newConfig['system']['stores'][$configLocale]['general']['locale']['code'] = $temp;
+                }
+            }
+            //unsetting base_url
+            if(isset($newConfig['system']['stores']['admin']['web']['secure']['base_url'])) {
+                unset($newConfig['system']['stores']['admin']['web']['secure']['base_url']);
+            }
+            if(isset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url'])) {
+                unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
+            }
+            //locales for admin user
+            $newConfig['admin_user']['locale']['code'] = $this->executeDbQuery("select distinct interface_locale from admin_user");
+
             $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
             file_put_contents($configFile, $updatedConfig);
         }
@@ -68,5 +88,24 @@ class SCDConfigDump
         }
         $data = $val;
         return $out;
+    }
+
+    /**
+     * Executes database query
+     *
+     * @param string $query
+     * $query must be completed, finished with semicolon (;)
+     * @return mixed
+     */
+    private function executeDbQuery($query)
+    {
+        $env = new Environment();
+        $relationships = $env->getRelationships();
+        $dbHost = $relationships["database"][0]["host"];
+        $dbName = $relationships["database"][0]["path"];
+        $dbUser = $relationships["database"][0]["username"];
+        $dbPassword = $relationships["database"][0]["password"];
+        $password = strlen($dbPassword) ? sprintf('-p%s', $dbPassword) : '';
+        return $env->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
     }
 }
