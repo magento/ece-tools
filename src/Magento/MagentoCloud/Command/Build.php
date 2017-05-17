@@ -146,7 +146,8 @@ class Build
             $websites = $this->filter($flattenedConfig, 'scopes/websites', false);
             $stores = $this->filter($flattenedConfig, 'scopes/stores', false);
 
-            $locales = $this->filter($flattenedConfig, 'general/locale/code');
+            $locales = [];
+            $locales[] = $this->filter($flattenedConfig, 'general/locale/code');
             $locales[] = $this->filter($flattenedConfig, 'admin_user/locale/code', false);
             $locales[] = 'en_US';
             $locales = array_unique($locales);
