@@ -27,10 +27,20 @@ class SCDConfigDump
         'system/websites',
     ];
 
+    /**
+     * @var Environment
+     */
+    private $env;
+
+    public function __construct()
+    {
+        $this->env = new Environment();
+    }
+
     public function execute()
     {
-        $returnCode = 0;
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
+        $returnCode = $this->env->execute("php bin/magento app:config:dump");
 
         if ($returnCode == 0 && file_exists($configFile)) {
             $oldConfig = include $configFile;
@@ -99,13 +109,12 @@ class SCDConfigDump
      */
     private function executeDbQuery($query)
     {
-        $env = new Environment();
         $relationships = $env->getRelationships();
         $dbHost = $relationships["database"][0]["host"];
         $dbName = $relationships["database"][0]["path"];
         $dbUser = $relationships["database"][0]["username"];
         $dbPassword = $relationships["database"][0]["password"];
         $password = strlen($dbPassword) ? sprintf('-p%s', $dbPassword) : '';
-        return $env->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
+        return $this->env->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
     }
 }
