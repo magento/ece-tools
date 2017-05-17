@@ -149,7 +149,9 @@ class Build
             $locales = [];
             $locales[] = $this->filter($flattenedConfig, 'general/locale/code');
             $locales[] = $this->filter($flattenedConfig, 'admin_user/locale/code', false);
+            var_dump($locales);
             $locales[] = 'en_US';
+            var_dump($locales);
             $locales = array_unique($locales);
 
             if (count($stores) === 0 && count($websites) === 0 ){
