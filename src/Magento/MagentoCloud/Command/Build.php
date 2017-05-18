@@ -146,13 +146,13 @@ class Build
             $websites = $this->filter($flattenedConfig, 'scopes/websites', false);
             $stores = $this->filter($flattenedConfig, 'scopes/stores', false);
 
-            $locales = $this->filter($flattenedConfig, 'general/locale/code');
+            $locales = [];
+            $locales = array_merge($locales, $this->filter($flattenedConfig, 'general/locale/code'));
+            $locales = array_merge($locales, $this->filter($flattenedConfig, 'admin_user/locale/code', false));
+            $locales[] = 'en_US';
+            $locales = array_unique($locales);
 
-            if (count($stores) !== 0 && count($websites) !== 0 ){
-                if(count($locales) === 0 ) {
-                    $locales = ['en_US'];
-                }
-            } else {
+            if (count($stores) === 0 && count($websites) === 0 ){
                 $this->env->log("No stores/website/locales found in config.php");
                 $this->env->setStaticDeployInBuild(false);
                 return;
@@ -215,7 +215,10 @@ class Build
         $this->env->execute('rm -rf var/cache');
 
         copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
-        mkdir(Environment::MAGENTO_ROOT . 'app/enterprise', 0777, true);
+        $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
+        if(!file_exists($enterpriseFolder)){
+            mkdir($enterpriseFolder, 0777, true);
+        }
         copy(Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml', Environment::MAGENTO_ROOT . 'app/enterprise/di.xml');
 
         $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';

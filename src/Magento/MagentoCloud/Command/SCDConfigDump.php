@@ -27,10 +27,20 @@ class SCDConfigDump
         'system/websites',
     ];
 
+    /**
+     * @var Environment
+     */
+    private $env;
+
+    public function __construct()
+    {
+        $this->env = new Environment();
+    }
+
     public function execute()
     {
-        $returnCode = 0;
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
+        $returnCode = $this->env->execute("php bin/magento app:config:dump");
 
         if ($returnCode == 0 && file_exists($configFile)) {
             $oldConfig = include $configFile;
@@ -53,8 +63,35 @@ class SCDConfigDump
                     $newConfig = $this->buildNestedArray($configKeys, $oldConfigCopy, $newConfig);
                 }
             }
+
+            //only saving general/locale/code
+            $configLocales = array_keys($newConfig['system']['stores']);
+            foreach ($configLocales as $configLocale) {
+                if(isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
+                    $temp = $newConfig['system']['stores'][$configLocale]['general']['locale']['code'];
+                    unset($newConfig['system']['stores'][$configLocale]);
+                    $newConfig['system']['stores'][$configLocale]['general']['locale']['code'] = $temp;
+                }
+            }
+            //unsetting base_url
+            if(isset($newConfig['system']['stores']['admin']['web']['secure']['base_url'])) {
+                unset($newConfig['system']['stores']['admin']['web']['secure']['base_url']);
+            }
+            if(isset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url'])) {
+                unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
+            }
+            //locales for admin user
+            $newConfig['admin_user']['locale']['code'] = $this->executeDbQuery("select distinct interface_locale from admin_user");
+
             $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
             file_put_contents($configFile, $updatedConfig);
+        } else {
+            if($returnCode ==0) {
+                $this->env->log('Something went wrong in running app:config:dump');
+            }
+            if(!file_exists($configFile)) {
+                $this->env->log('No config file');
+            }
         }
     }
 
@@ -68,5 +105,23 @@ class SCDConfigDump
         }
         $data = $val;
         return $out;
+    }
+
+    /**
+     * Executes database query
+     *
+     * @param string $query
+     * $query must be completed, finished with semicolon (;)
+     * @return mixed
+     */
+    private function executeDbQuery($query)
+    {
+        $relationships = $this->env->getRelationships();
+        $dbHost = $relationships["database"][0]["host"];
+        $dbName = $relationships["database"][0]["path"];
+        $dbUser = $relationships["database"][0]["username"];
+        $dbPassword = $relationships["database"][0]["password"];
+        $password = strlen($dbPassword) ? sprintf('-p%s', $dbPassword) : '';
+        return $this->env->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
     }
 }
