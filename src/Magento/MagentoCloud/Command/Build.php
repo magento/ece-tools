@@ -147,11 +147,9 @@ class Build
             $stores = $this->filter($flattenedConfig, 'scopes/stores', false);
 
             $locales = [];
-            $locales[] = $this->filter($flattenedConfig, 'general/locale/code');
-            $locales[] = $this->filter($flattenedConfig, 'admin_user/locale/code', false);
-            var_dump($locales);
+            $locales = array_merge($locales, $this->filter($flattenedConfig, 'general/locale/code'));
+            $locales = array_merge($locales, $this->filter($flattenedConfig, 'admin_user/locale/code', false));
             $locales[] = 'en_US';
-            var_dump($locales);
             $locales = array_unique($locales);
 
             if (count($stores) === 0 && count($websites) === 0 ){
@@ -217,7 +215,10 @@ class Build
         $this->env->execute('rm -rf var/cache');
 
         copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
-        mkdir(Environment::MAGENTO_ROOT . 'app/enterprise', 0777, true);
+        $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
+        if(!file_exists($enterpriseFolder)){
+            mkdir($enterpriseFolder, 0777, true);
+        }
         copy(Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml', Environment::MAGENTO_ROOT . 'app/enterprise/di.xml');
 
         $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
