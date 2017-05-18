@@ -85,6 +85,13 @@ class SCDConfigDump
 
             $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
             file_put_contents($configFile, $updatedConfig);
+        } else {
+            if($returnCode ==0) {
+                $this->env->log('Something went wrong in running app:config:dump');
+            }
+            if(!file_exists($configFile)) {
+                $this->env->log('No config file');
+            }
         }
     }
 
@@ -109,7 +116,7 @@ class SCDConfigDump
      */
     private function executeDbQuery($query)
     {
-        $relationships = $env->getRelationships();
+        $relationships = $this->env->getRelationships();
         $dbHost = $relationships["database"][0]["host"];
         $dbName = $relationships["database"][0]["path"];
         $dbUser = $relationships["database"][0]["username"];
