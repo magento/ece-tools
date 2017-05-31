@@ -640,7 +640,7 @@ class Deploy
             $redisHost = $relationships['redis'][0]['host'];
             $redisPort = $relationships['redis'][0]['port'];
             $redisCacheDb = '1'; // Matches \Magento\MagentoCloud\Command\Deploy::$redisCacheDb
-            $this->env->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushall");
+            $this->env->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushdb");
         }
 
         $fileCacheDir = Environment::MAGENTO_ROOT . '/var/cache';
