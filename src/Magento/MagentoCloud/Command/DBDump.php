@@ -39,14 +39,14 @@ class DBDump
         $alternate_ip = preg_replace('~\.5\.5$~', '.6.6', gethostbyname($this_host));
         $alternate_host = gethostbyaddr($alternate_ip);
 
-
+        $fp = fopen('/tmp/dbsync.prod.lock', "r+");
         if ($current_active == $this_host) {
             // Use a different DB host.
-            echo "Using host #2 ($alternate_host) for database dump as #1 is the active master..." . PHP_EOL;
+            $this->log($fp, "Using host #2 ($alternate_host) for database dump as #1 is the active master..." . PHP_EOL);
             $dbHost = $alternate_host;
         }
         else {
-            echo "Using host #1 ($this_host) for database dump..." . PHP_EOL;
+            $this->log($fp, "Using host #1 ($this_host) for database dump..." . PHP_EOL);
             $dbHost = '127.0.0.1';
         }
 
@@ -61,25 +61,37 @@ class DBDump
 
         # Lock the production sql dump so staging sync doesn't start using it until we're done.
         $this->env->log('Waiting for lock on prod db dump...');
-        $lockReturnValue = $this->env->execute('flock -w 3600 9 || exit 1');
 
-        $this->env->log('Got it.');
-        $this->env->log('Starting dump...');
+        if (flock($fp, LOCK_EX)){
+            $this->log($fp, 'Got the lock!');
+            $this->log($fp, 'Starting dump...');
 
-        # The actual dump script.
-        $pipeStatus = $this->env->execute("timeout 3600 mysqldump -h {$dbHost} -P {$dbPort} -p{$dbPassword} -u {$dbUser} $dbName --single-transaction --no-autocommit --quick | gzip > /tmp/prod-attempt.sql.gz");
+            # The actual dump script.
+            $pipeStatus = $this->env->execute("timeout 3600 mysqldump -h {$dbHost} -P {$dbPort} -p{$dbPassword} -u {$dbUser} $dbName --single-transaction --no-autocommit --quick | gzip > /tmp/prod-attempt.sql.gz");
 
-        # Eventually we want to use a Magento-supplied export script, which currently has too much locking and is not usable.
-        # vendor/bin/m2-ece-db-sanitize > $TMPDIR/prod-attempt.sql.gz
+            # Eventually we want to use a Magento-supplied export script, which currently has too much locking and is not usable.
+            # vendor/bin/m2-ece-db-sanitize > $TMPDIR/prod-attempt.sql.gz
 
-        if($pipeStatus[0] === 0){
-            $this->env->log('Done');
-            $this->env->log('Success, renaming dump to final location.');
-            $this->env->execute('mv $TMPDIR/prod-attempt.sql.gz $TMPDIR/prod-latest.sql.gz');
+            if($pipeStatus[0] === 0){
+                $this->log($fp, 'Done');
+                $this->log($fp, 'Success, renaming dump to final location.');
+                $this->env->execute('mv $TMPDIR/prod-attempt.sql.gz $TMPDIR/prod-latest.sql.gz');
+            } else {
+                $this->log($fp, 'Done.');
+                $this->log($fp, 'Failed.');
+            }
+            fflush($fp);
+            flock($fp, LOCK_UN);
+            $this->log($fp, 'Finished production db dump.');
         } else {
-            $this->env->log('Done.');
-            $this->env->log('Failed.');
+            $this->log($fp, "Couldn't get the lock!");
         }
-        $this->env->log('Finished production db dump.');
+        fclose($fp);
+    }
+
+    private function log($fp, $message)
+    {
+        $this->env->log($message);
+        fwrite($fp, sprintf('[%s] %s', date("Y-m-d H:i:s"), $message) . PHP_EOL);
     }
 }
