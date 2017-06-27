@@ -3,5 +3,8 @@
 
 require_once __DIR__ . '/autoload.php';
 
+includeIfExists("Magento\MagentoCloud\Command\Build");
+includeIfExists('Magento\MagentoCloud\Environment');
+
 $build = new Magento\MagentoCloud\Command\Build();
 $build->execute();
