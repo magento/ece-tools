@@ -3,5 +3,8 @@
 
 require_once __DIR__ . '/autoload.php';
 
+includeIfExists('Magento\MagentoCloud\Command\Deploy');
+includeIfExists('Magento\MagentoCloud\Environment');
+
 $deploy = new Magento\MagentoCloud\Command\Deploy();
 $deploy->execute();
