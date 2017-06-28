@@ -78,15 +78,30 @@ class Deploy
         $this->preDeploy();
         $this->env->log("Start deploy.");
         $this->saveEnvironmentData();
-
+        $this->createConfigIfNotYetExist();
+        $this->processMagentoMode();
         if (!$this->isInstalled()) {
             $this->installMagento();
         } else {
             $this->updateMagento();
         }
-        $this->processMagentoMode();
+        $this->staticContentDeploy();
         $this->disableGoogleAnalytics();
         $this->env->log("Deployment complete.");
+    }
+
+    /**
+     * Create config file if it doesn't yet exist.
+     */
+    private function createConfigIfNotYetExist()
+    {
+        $configFile = 'app/etc/env.php';
+        if (file_exists($configFile)) {
+            return;
+        }
+        //$this->env->execute('touch ' . Environment::MAGENTO_ROOT . $configFile);
+        $updatedConfig = '<?php' . "\n" . 'return array();';
+        file_put_contents($configFile, $updatedConfig);
     }
 
     /**
@@ -479,6 +494,23 @@ class Deploy
 
 
     /**
+     *  This function deploys the static content.
+     *  Moved this from processMagentoMode() to its own function because we changed the order to have
+     *  processMagentoMode called before the install.  Static content deployment still needs to happen after install.
+     */
+    private function staticContentDeploy()
+    {
+        if ($this->magentoApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
+            /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
+            if ($this->doDeployStaticContent) {
+                $this->deployStaticContent();
+            }
+        }
+    }
+
+
+
+    /**
      * Based on variable APPLICATION_MODE. Production mode by default
      */
     private function processMagentoMode()
@@ -487,11 +519,7 @@ class Deploy
 
         /* Enable application mode */
         if ($this->magentoApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
-            /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
-            if ($this->doDeployStaticContent) {
-                $this->deployStaticContent();
-            }
-
+            // Note: We moved call to deployStaticContent to a new function, staticContentDeploy(), and made it run after production mode is enabled to work around the bug with the read only
             $this->env->log("Enable production mode");
             $configFileName = "app/etc/env.php";
             $config = include $configFileName;
