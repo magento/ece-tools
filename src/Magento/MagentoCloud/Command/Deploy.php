@@ -494,7 +494,9 @@ class Deploy
 
 
     /**
-     * moving to its own function
+     *  This function deploys the static content.
+     *  Moved this from processMagentoMode() to its own function because we changed the order to have
+     *  processMagentoMode called before the install.  Static content deployment still needs to happen after install.
      */
     private function staticContentDeploy()
     {
