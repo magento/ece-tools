@@ -7,6 +7,7 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Database;
 
 /**
  * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
@@ -59,6 +60,7 @@ class Deploy
     private $doDeployStaticContent;
 
     private $verbosityLevel;
+    private $database;
 
     /**
      * @var Environment
@@ -189,8 +191,9 @@ class Deploy
         //3. check install date
 
         $this->env->log('Checking if db exists and has tables');
-        $output = $this->executeDbQuery('SHOW TABLES');
-        if (is_array($output) && count($output) > 1) {
+        $output = $this->executeDbQuery('SHOW TABLES', [], MYSQLI_NUM);
+        $output = array_map(function($arrayin) {return $arrayin[0];}, $output);
+        if (is_array($output) && count($output) > 0) {
             if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
                 $this->env->log('Missing either core_config_data or setup_module table');
                 exit(5);
@@ -284,7 +287,8 @@ class Deploy
     {
         $this->env->log("Updating admin credentials.");
 
-        $this->executeDbQuery("update admin_user set firstname = '$this->adminFirstname', lastname = '$this->adminLastname', email = '$this->adminEmail', username = '$this->adminUsername', password='{$this->generatePassword($this->adminPassword)}' where user_id = '1';");
+        $this->executeDbQuery("update admin_user set firstname = ?, lastname = ?, email = ?, username = ?, password = ? where user_id = '1';",
+        [["s", $this->adminFirstname], ["s", $this->adminLastname], ["s", $this->adminEmail], ["s", $this->adminUsername], ["s", $this->generatePassword($this->adminPassword)] ]);
     }
 
     /**
@@ -295,10 +299,14 @@ class Deploy
         $this->env->log("Updating SOLR configuration.");
 
         if ($this->solrHost !== null && $this->solrPort !== null && $this->solrPath !== null && $this->solrHost !== null) {
-            $this->executeDbQuery("update core_config_data set value = '$this->solrHost' where path = 'catalog/search/solr_server_hostname' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrPort' where path = 'catalog/search/solr_server_port' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrScheme' where path = 'catalog/search/solr_server_username' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrPath' where path = 'catalog/search/solr_server_path' and scope_id = '0';");
+            $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_hostname' and scope_id = '0';",
+                [["s", $this->generatePassword($this->solrHost)]]);
+            $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_port' and scope_id = '0';",
+                [["s", $this->generatePassword($this->solrPort)]]);
+            $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_username' and scope_id = '0';",
+                [["s", $this->generatePassword($this->solrScheme)]]);
+            $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_path' and scope_id = '0';",
+                [["s", $this->generatePassword($this->solrPath)]]);
         }
     }
 
@@ -313,12 +321,14 @@ class Deploy
                 foreach ($urls as $route => $url) {
                     $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
                     if (!strlen($route)) {
-                        $this->executeDbQuery("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and scope_id = '0';");
+                        $this->executeDbQuery("update core_config_data set value = ? where path = ? and scope_id = '0';",
+                            [["s", $url], ["s", "web/$urlType/base_url"]]);
                         continue;
                     }
                     $likeKey = $prefix . $route . '%';
                     $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
-                    $this->executeDbQuery("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and (value like '$likeKey' or value like '$likeKeyParsed');");
+                    $this->executeDbQuery("update core_config_data set value = ? where path = ? and (value like ? or value like ?);",
+                        [["s", $url], ["s", "web/$urlType/base_url"], ["s", $likeKey], ["s", $likeKeyParsed]]);
                 }
             }
         } else {
@@ -486,10 +496,12 @@ class Deploy
      * $query must be completed, finished with semicolon (;)
      * @return mixed
      */
-    private function executeDbQuery($query)
+    private function executeDbQuery($query, $parameters = [], $resulttype = null )
     {
-        $password = strlen($this->dbPassword) ? sprintf('-p%s', $this->dbPassword) : '';
-        return $this->env->execute("mysql -u $this->dbUser -h $this->dbHost -e \"$query\" $password $this->dbName");
+        if (is_null($this->database)) {
+            $database = new Database($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
+        }
+        return $this->database->executeDbQuery($query, $parameters, $resulttype);
     }
 
 
@@ -553,18 +565,14 @@ class Deploy
 
         /* Generate static assets */
         $this->env->log("Extract locales");
-
         $locales = [];
-        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code';");
-
-        if (is_array($output) && count($output) > 1) {
-            array_shift($output);
+        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code';", [], MYSQLI_NUM);
+        $output = array_map(function($arrayin) {return $arrayin[0];}, $output);
+        if (is_array($output) && count($output) > 0) {
             $locales = $output;
-
             if (!in_array($this->adminLocale, $locales)) {
                 $locales[] = $this->adminLocale;
             }
-
             $locales = implode(' ', $locales);
         }
 
