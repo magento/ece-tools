@@ -499,7 +499,7 @@ class Deploy
     private function executeDbQuery($query, $parameters = [], $resulttype = null )
     {
         if (is_null($this->database)) {
-            $database = new Database($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
+            $this->database = new Database($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
         }
         return $this->database->executeDbQuery($query, $parameters, $resulttype);
     }
