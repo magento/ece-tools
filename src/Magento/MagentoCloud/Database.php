@@ -14,7 +14,7 @@ class Database
     private $connection;
 
     function __construct($host, /*$port,*/ $user, $pass, $databasename) {
-        $this->connection = new mysqli($host, $user, $pass, $databasename);
+        $this->connection = new \mysqli($host, $user, $pass, $databasename);
         if ($this->connection->connect_errno) {
             throw new \RuntimeException("Error connecting to database.  $this->connection->connect_errno $this->connection->connect_error ", $this->connection->connect_error);
         }
