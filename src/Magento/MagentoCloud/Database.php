@@ -34,15 +34,15 @@ class Database
         if (!$statement->execute() ) {
             throw new \RuntimeException("Database execute error.  $statement->error ");
         }
-        $result = $statement->get_result();
-        if ($result === FALSE) {
-            throw new \RuntimeException("Database execute error.  $statement->error ");
-        }
         $data = null;
         if ($resulttype == MYSQLI_NUM || $resulttype == MYSQLI_ASSOC || $resulttype == MYSQLI_BOTH) {
+            $result = $statement->get_result();
+            if ($result === FALSE) {
+                throw new \RuntimeException("Database execute error.  $statement->error ");
+            }
             $data = $result->fetch_all($resulttype);
+            $result->free();
         }
-        $result->free();
         $statement->close();
         return $data;
     }
