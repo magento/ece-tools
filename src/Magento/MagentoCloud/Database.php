@@ -24,18 +24,18 @@ class Database
         $statement = $this->connection->prepare($query);
         foreach ($parameters as $parameter) {
             if (count($parameter != 2)) {
-                throw new \RuntimeException("Parameter not supplied correctly.", "parameter");
+                throw new \RuntimeException("Parameter not supplied correctly.");
             }
             if (!$statement->bind_param($parameter[0], $parameter[1])) {
-                throw new \RuntimeException("Database bind_param error.  $statement->error ", $statement->error );
+                throw new \RuntimeException("Database bind_param error.  $statement->error ");
             }
         }
         if (!$statement->execute() ) {
-            throw new \RuntimeException("Database execute error.  $statement->error ", $statement->error );
+            throw new \RuntimeException("Database execute error.  $statement->error ");
         }
         $result = $statement->get_result();
         if ($result === FALSE) {
-            throw new \RuntimeException("Database execute error.  $statement->error ", $statement->error );
+            throw new \RuntimeException("Database execute error.  $statement->error ");
         }
         $data = null;
         if ($resulttype == MYSQLI_NUM || $resulttype == MYSQLI_ASSOC || $resulttype == MYSQLI_BOTH) {
