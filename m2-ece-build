@@ -5,6 +5,7 @@ require_once __DIR__ . '/autoload.php';
 
 includeIfExists("Magento\MagentoCloud\Command\Build");
 includeIfExists('Magento\MagentoCloud\Environment');
+// Note: not loading Database class here because Build can't access database anyways
 
 $build = new Magento\MagentoCloud\Command\Build();
 $build->execute();
