@@ -23,7 +23,7 @@ class Database
     function executeDbQuery($query, $parameters = [], $resulttype = null) {
         $statement = $this->connection->prepare($query);
         foreach ($parameters as $parameter) {
-            if (count($parameter != 2)) {
+            if (count($parameter) != 2) {
                 throw new \RuntimeException("Parameter not supplied correctly.");
             }
             if (!$statement->bind_param($parameter[0], $parameter[1])) {
