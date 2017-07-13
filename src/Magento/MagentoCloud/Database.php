@@ -23,9 +23,11 @@ class Database
     function executeDbQuery($query, $parameters = [], $resulttype = null) {
         $statement = $this->connection->prepare($query);
         if (count($parameters) >= 2 ) {
-            $reflectionclass = new \ReflectionClass('mysqli_stmt');  // TODO: Is there a better way to do this without reflection?
-            $bindparammethod = $reflectionclass->getMethod("bind_param");
-            if (!$bindparammethod->invokeArgs($statement, $parameters)) {
+            $referencearray = array(); // Note: workaround because bind_param requires references instead of values.
+            foreach($parameters as $key => $value) {
+                $referencearray[$key] = &$parameters[$key];
+            }
+            if (!call_user_func_array(array($statement, 'bind_param'), $referencearray)) {
                 throw new \RuntimeException("Database bind_param error.  $statement->error ");
             }
         }
