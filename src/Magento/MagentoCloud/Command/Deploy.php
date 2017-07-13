@@ -18,7 +18,7 @@ class Deploy
     const PREFIX_SECURE = 'https://';
     const PREFIX_UNSECURE = 'http://';
 
-    const GIT_MASTER_BRANCH = 'master';
+    const GIT_MASTER_BRANCH_RE = '/^master(:?-[a-z[0-9]+)?$/i';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
@@ -459,7 +459,7 @@ class Deploy
     private function isMasterBranch()
     {
         if (is_null($this->isMasterBranch)) {
-            if (isset($_ENV["MAGENTO_CLOUD_ENVIRONMENT"]) && $_ENV["MAGENTO_CLOUD_ENVIRONMENT"] == self::GIT_MASTER_BRANCH) {
+            if (isset($_ENV["MAGENTO_CLOUD_ENVIRONMENT"]) && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV["MAGENTO_CLOUD_ENVIRONMENT"])) {
                 $this->isMasterBranch = true;
             } else {
                 $this->isMasterBranch = false;
@@ -688,7 +688,7 @@ class Deploy
         if (file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
             $this->env->log("Static content deployment was performed during build hook");
             $this->env->removeStaticContent();
-            
+
             if ($useStaticContentSymlink) {
                 $this->env->log("Symlinking static content from pub/static to init/pub/static");
 
