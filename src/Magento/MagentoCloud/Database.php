@@ -22,11 +22,10 @@ class Database
 
     function executeDbQuery($query, $parameters = [], $resulttype = null) {
         $statement = $this->connection->prepare($query);
-        foreach ($parameters as $parameter) {
-            if (count($parameter) != 2) {
-                throw new \RuntimeException("Parameter not supplied correctly.");
-            }
-            if (!$statement->bind_param($parameter[0], $parameter[1])) {
+        if (count($parameters) >= 2 ) {
+            $reflectionclass = new \ReflectionClass('mysqli_stmt');  // TODO: Is there a better way to do this without reflection?
+            $bindparammethod = $reflectionclass->getMethod("bind_param");
+            if (!$bindparammethod->invokeArgs($statement, $parameters)) {
                 throw new \RuntimeException("Database bind_param error.  $statement->error ");
             }
         }

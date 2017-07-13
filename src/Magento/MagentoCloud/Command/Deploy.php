@@ -288,7 +288,7 @@ class Deploy
         $this->env->log("Updating admin credentials.");
 
         $this->executeDbQuery("update admin_user set firstname = ?, lastname = ?, email = ?, username = ?, password = ? where user_id = '1';",
-        [["s", $this->adminFirstname], ["s", $this->adminLastname], ["s", $this->adminEmail], ["s", $this->adminUsername], ["s", $this->generatePassword($this->adminPassword)] ]);
+        ["sssss", $this->adminFirstname, $this->adminLastname, $this->adminEmail, $this->adminUsername, $this->generatePassword($this->adminPassword) ]);
     }
 
     /**
@@ -300,13 +300,13 @@ class Deploy
 
         if ($this->solrHost !== null && $this->solrPort !== null && $this->solrPath !== null && $this->solrHost !== null) {
             $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_hostname' and scope_id = '0';",
-                [["s", $this->generatePassword($this->solrHost)]]);
+                ["s", $this->generatePassword($this->solrHost)]);
             $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_port' and scope_id = '0';",
-                [["s", $this->generatePassword($this->solrPort)]]);
+                ["s", $this->generatePassword($this->solrPort)]);
             $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_username' and scope_id = '0';",
-                [["s", $this->generatePassword($this->solrScheme)]]);
+                ["s", $this->generatePassword($this->solrScheme)]);
             $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_path' and scope_id = '0';",
-                [["s", $this->generatePassword($this->solrPath)]]);
+                ["s", $this->generatePassword($this->solrPath)]);
         }
     }
 
@@ -322,13 +322,13 @@ class Deploy
                     $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
                     if (!strlen($route)) {
                         $this->executeDbQuery("update core_config_data set value = ? where path = ? and scope_id = '0';",
-                            [["s", $url], ["s", "web/$urlType/base_url"]]);
+                            ["ss", $url, "web/$urlType/base_url"]);
                         continue;
                     }
                     $likeKey = $prefix . $route . '%';
                     $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
                     $this->executeDbQuery("update core_config_data set value = ? where path = ? and (value like ? or value like ?);",
-                        [["s", $url], ["s", "web/$urlType/base_url"], ["s", $likeKey], ["s", $likeKeyParsed]]);
+                        ["ssss", $url, "web/$urlType/base_url", $likeKey, $likeKeyParsed]);
                 }
             }
         } else {
