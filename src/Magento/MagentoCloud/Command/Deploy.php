@@ -253,9 +253,22 @@ class Deploy
         $command .= $this->verbosityLevel;
 
         $this->env->execute($command);
+
+        $this->setSecureAdmin();
         $this->updateConfig();
     }
 
+    /**
+    * Update secure admin
+    **/
+    public function setSecureAdmin()
+    {
+      $this->env->log("Setting secure admin");
+      $command =
+          "php ./bin/magento app:config:set web/secure/use_in_adminhtml 1";
+      $command .= $this->verbosityLevel;
+      $this->env->execute($command);
+    }
 
     /**
      * Update Magento configuration
@@ -688,7 +701,7 @@ class Deploy
         if (file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
             $this->env->log("Static content deployment was performed during build hook");
             $this->env->removeStaticContent();
-            
+
             if ($useStaticContentSymlink) {
                 $this->env->log("Symlinking static content from pub/static to init/pub/static");
 
