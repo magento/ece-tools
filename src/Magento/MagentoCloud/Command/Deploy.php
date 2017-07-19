@@ -345,7 +345,7 @@ class Deploy
             $this->env->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");
 
             $this->env->log("Running setup upgrade.");
-            $this->env->execute("php ./bin/magento setup:upgrade --keep-generated {$this->verbosityLevel}");
+            $this->env->execute("php ./bin/magento setup:upgrade --keep-generated -n {$this->verbosityLevel}");
 
             /* Disable maintenance mode */
             $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
