@@ -52,7 +52,7 @@ class Build
     public function execute()
     {
         $this->env->setStaticDeployInBuild(false);
-        $this->env->log("Start build.");
+        $this->env->log($this->env->startingMessage("build"));
         $this->applyPatches();
         $this->marshallingFiles();
         $this->composerDumpAutoload();

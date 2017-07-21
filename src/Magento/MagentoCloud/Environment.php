@@ -133,4 +133,61 @@ class Environment
             $this->backgroundExecute("rm -rf $oldPreprocessedLocation");
         }
     }
+
+    private $componentVersions = [];  // We only want to look up each component version once since it shouldn't change
+
+    private function getVersionOfComponent($component) {
+        $composerjsonpath = Environment::MAGENTO_ROOT . "/vendor/magento/" .$component . "/composer.json";
+        $version = null;
+        try {
+            if (file_exists($composerjsonpath)) {
+                $jsondata = json_decode(file_get_contents($composerjsonpath), true);
+                if (array_key_exists("version", $jsondata)) {
+                    $version = $jsondata["version"];
+                }
+            }
+        } catch (\Exception $e) {
+            // If we get an exception (or error), we don't worry because we just won't use the version.
+            // Note: We could use Throwable to catch them both, but that only works in PHP >= 7
+        } catch (\Error $e) {  // Note: this only works PHP >= 7
+        }
+        $this->componentVersions[$component] = $version;
+    }
+
+    public function versionOfComponent($component) {
+        if (! array_key_exists( $component, $this->componentVersions)) {
+            $this->getVersionOfComponent($component);
+        }
+        return $this->componentVersions[$component];
+    }
+
+    public function hasVersionOfComponent($component) {
+        if (! array_key_exists( $component, $this->componentVersions)) {
+            $this->getVersionOfComponent($component);
+        }
+        return ! is_null($this->componentVersions[$component]);
+    }
+
+    public function startingMessage($starttype)
+    {
+        $componentsWeCareAbout = ["ece-tools", "magento2-base"];
+        $message = "Starting " . $starttype . ".";
+        $first = true;
+        foreach ($componentsWeCareAbout as $component) {
+            if ($this->hasVersionOfComponent($component)) {
+                if ($first) {
+                    $first = false;
+                    $message .= " (";
+                } else {
+                    $message .= ", ";
+                }
+                $message .= $component . " version: " . $this->versionOfComponent($component);
+            }
+        }
+        if (!$first) {
+            $message .= ")";
+        }
+        return $message;
+    }
+
 }
