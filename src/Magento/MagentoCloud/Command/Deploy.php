@@ -265,7 +265,7 @@ class Deploy
     {
       $this->env->log("Setting secure admin");
       $command =
-          "php ./bin/magento app:config:set web/secure/use_in_adminhtml 1";
+          "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
       $command .= $this->verbosityLevel;
       $this->env->execute($command);
     }
