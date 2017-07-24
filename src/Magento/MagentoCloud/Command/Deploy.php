@@ -554,19 +554,6 @@ class Deploy
         /* Generate static assets */
         $this->env->log("Extract locales");
 
-        $locales = [];
-        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code';");
-
-        if (is_array($output) && count($output) > 1) {
-            array_shift($output);
-            $locales = $output;
-
-            if (!in_array($this->adminLocale, $locales)) {
-                $locales[] = $this->adminLocale;
-            }
-
-            $locales = implode(' ', $locales);
-        }
 
         $excludeThemesOptions = '';
         if ($this->staticDeployExcludeThemes) {
@@ -582,6 +569,7 @@ class Deploy
             ? "--jobs={$this->staticDeployThreads}"
             : '';
 
+        $locales = implode(' ', $this->getLocales());
         $logMessage = $locales ? "Generating static content for locales: $locales" : "Generating static content.";
         $this->env->log($logMessage);
 
@@ -592,6 +580,39 @@ class Deploy
         /* Disable maintenance mode */
         $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
         $this->env->log("Maintenance mode is disabled.");
+    }
+
+
+    /**
+     * Gets locales from DB which are set to stores and admin users.
+     * Adds additional default 'en_US' locale to result, if it does't exist yet in defined list.
+     *
+     * @return array List of locales. Returns empty array in case when no locales are defined in DB
+     * ```php
+     * [
+     *     'en_US',
+     *     'fr_FR'
+     * ]
+     * ```
+     */
+    private function getLocales()
+    {
+        $locales = [];
+
+        $query = 'SELECT value FROM `core_config_data` WHERE path=\'general/locale/code\' '
+            . 'UNION SELECT `interface_locale` FROM `admin_user`;';
+        $output = $this->executeDbQuery($query);
+
+        if (is_array($output) && count($output) > 1) {
+            //first element should be shifted as it is the name of column
+            array_shift($output);
+            $locales = $output;
+
+            if (!in_array($this->adminLocale, $locales)) {
+                $locales[] = $this->adminLocale;
+            }
+        }
+        return $locales;
     }
 
     /**
