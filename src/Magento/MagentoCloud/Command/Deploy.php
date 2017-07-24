@@ -253,9 +253,22 @@ class Deploy
         $command .= $this->verbosityLevel;
 
         $this->env->execute($command);
+
+        $this->setSecureAdmin();
         $this->updateConfig();
     }
 
+    /**
+    * Update secure admin
+    **/
+    public function setSecureAdmin()
+    {
+      $this->env->log("Setting secure admin");
+      $command =
+          "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
+      $command .= $this->verbosityLevel;
+      $this->env->execute($command);
+    }
 
     /**
      * Update Magento configuration
