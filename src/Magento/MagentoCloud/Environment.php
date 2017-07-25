@@ -6,6 +6,9 @@
 
 namespace Magento\MagentoCloud;
 
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+
 /**
  * Contains logic for interacting with the server environment
  */
@@ -15,7 +18,23 @@ class Environment
     const STATIC_CONTENT_DEPLOY_FLAG = '/.static_content_deploy';
     const REGENERATE_FLAG = self::MAGENTO_ROOT . 'var/.regenerate';
 
+    /**
+     * Deploy log file.
+     */
+    const DEPLOY_LOG = self::MAGENTO_ROOT . 'var/cloud_deploy.log';
+
     public $writableDirs = ['var', 'app/etc', 'pub/media'];
+
+    /**
+     * @var Logger
+     */
+    private $logger;
+
+    public function __construct()
+    {
+        $this->logger = new Logger('default');
+        $this->logger->pushHandler(new StreamHandler(static::DEPLOY_LOG));
+    }
 
     /**
      * Get routes information from MagentoCloud environment variable.
@@ -47,15 +66,21 @@ class Environment
         return json_decode(base64_decode($_ENV["MAGENTO_CLOUD_VARIABLES"]), true);
     }
 
-
+    /**
+     * Log message to stream.
+     *
+     * @param string $message The message string.
+     */
     public function log($message)
     {
         echo sprintf('[%s] %s', date("Y-m-d H:i:s"), $message) . PHP_EOL;
+
+        $this->logger->notice($message);
     }
 
     public function execute($command)
     {
-        $this->log('Command:'.$command);
+        $this->log('Command:' . $command);
 
         exec(
             $command,
@@ -63,8 +88,8 @@ class Environment
             $status
         );
 
-        $this->log('Status:'.var_export($status, true));
-        $this->log('Output:'.var_export($output, true));
+        $this->log('Status:' . var_export($status, true));
+        $this->log('Output:' . var_export($output, true));
 
         if ($status != 0) {
             throw new \RuntimeException("Command $command returned code $status", $status);
@@ -116,7 +141,7 @@ class Environment
         foreach ($dir as $fileInfo) {
             $fileName = $fileInfo->getFilename();
             if (!$fileInfo->isDot() && strpos($fileName, 'old_static_content_') !== 0) {
-                $this->log("Rename " . $staticContentLocation .  $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
+                $this->log("Rename " . $staticContentLocation . $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
                 rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
             }
         }

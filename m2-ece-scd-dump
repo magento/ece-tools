@@ -1,10 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__ . '/autoload.php';
-
-includeIfExists('Magento\MagentoCloud\Command\SCDConfigDump');
-includeIfExists('Magento\MagentoCloud\Environment');
+require_once __DIR__ . '/vendor/autoload.php';
 
 $scdDump = new Magento\MagentoCloud\Command\SCDConfigDump();
 $scdDump->execute();

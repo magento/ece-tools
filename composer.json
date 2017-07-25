@@ -7,9 +7,15 @@
       "AFL-3.0"
   ],
   "require": {
-    "php": ">=5.6.0"
+    "php": ">=5.6.0",
+    "monolog/monolog": "^1.23"
   },
   "bin":[
     "m2-ece-build", "m2-ece-deploy", "m2-ece-scd-dump"
-  ]
+  ],
+  "autoload": {
+    "psr-4": {
+      "Magento\\": "src/Magento/"
+    }
+  }
 }

@@ -1,10 +1,7 @@
 #!/usr/bin/env php
 <?php
 
-require_once __DIR__ . '/autoload.php';
-
-includeIfExists("Magento\MagentoCloud\Command\Build");
-includeIfExists('Magento\MagentoCloud\Environment');
+require_once __DIR__ . '/vendor/autoload.php';
 
 $build = new Magento\MagentoCloud\Command\Build();
 $build->execute();
