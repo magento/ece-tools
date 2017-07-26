@@ -53,6 +53,11 @@ class Environment
         echo sprintf('[%s] %s', date("Y-m-d H:i:s"), $message) . PHP_EOL;
     }
 
+    /**
+     * @param string $command
+     * @return mixed
+     * @throws \RuntimeException Throws exception if CLI command returns non-zero status
+     */
     public function execute($command)
     {
         $this->log('Command:'.$command);
