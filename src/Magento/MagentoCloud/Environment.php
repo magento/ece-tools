@@ -6,6 +6,7 @@
 
 namespace Magento\MagentoCloud;
 
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Psr\Log\LoggerInterface;
@@ -37,8 +38,15 @@ class Environment
     public function __construct(LoggerInterface $logger = null)
     {
         $this->logger = $logger ?: new Logger('default');
-        $this->logger->pushHandler(new StreamHandler(static::DEPLOY_LOG));
-        $this->logger->pushHandler(new StreamHandler('php://stdout'));
+
+        $formatter = new LineFormatter();
+        $formatter->allowInlineLineBreaks(true);
+
+        $logHandler = (new StreamHandler(static::DEPLOY_LOG))->setFormatter($formatter);
+        $stdOutHandler = (new StreamHandler('php://stdout'))->setFormatter($formatter);
+
+        $this->logger->pushHandler($logHandler);
+        $this->logger->pushHandler($stdOutHandler);
     }
 
     /**
@@ -75,17 +83,16 @@ class Environment
      * Log message to stream.
      *
      * @param string $message The message string.
-     * @param array $context The context array.
      * @return void
      */
-    public function log($message, array $context = [])
+    public function log($message)
     {
-        $this->logger->notice($message, $context);
+        $this->logger->notice($message);
     }
 
     public function execute($command)
     {
-        $this->log('Command: ' . $command);
+        $this->log('Command:' . $command);
 
         exec(
             $command,
@@ -93,10 +100,11 @@ class Environment
             $status
         );
 
-        $this->log('Command: ' . $command, [
-            'status' => $status,
-            'output' => $output
-        ]);
+        $this->log('Status:' . var_export($status, true));
+
+        if ($output) {
+            $this->log('Output:' . var_export($output, true));
+        }
 
         if ($status != 0) {
             throw new \RuntimeException("Command $command returned code $status", $status);
