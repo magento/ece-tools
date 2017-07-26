@@ -7,11 +7,14 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
  */
-class Deploy
+class Deploy extends Command
 {
     const MAGIC_ROUTE = '{default}';
 
@@ -68,12 +71,27 @@ class Deploy
     public function __construct()
     {
         $this->env = new Environment();
+
+        parent::__construct();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function configure()
+    {
+        $this->setName('deploy')
+            ->setDescription('Deploys application');
+
+        parent::configure();
     }
 
     /**
      * Deploy application: copy writable directories back, install or update Magento data.
+     *
+     * {@inheritdoc}
      */
-    public function execute()
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->preDeploy();
         $this->env->log("Start deploy.");
