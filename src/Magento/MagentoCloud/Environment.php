@@ -75,15 +75,17 @@ class Environment
      * Log message to stream.
      *
      * @param string $message The message string.
+     * @param array $context The context array.
+     * @return void
      */
-    public function log($message)
+    public function log($message, array $context = [])
     {
-        $this->logger->notice($message);
+        $this->logger->notice($message, $context);
     }
 
     public function execute($command)
     {
-        $this->log('Command:' . $command);
+        $this->log('Command: ' . $command);
 
         exec(
             $command,
@@ -91,8 +93,10 @@ class Environment
             $status
         );
 
-        $this->log('Status:' . var_export($status, true));
-        $this->log('Output:' . var_export($output, true));
+        $this->log('Command: ' . $command, [
+            'status' => $status,
+            'output' => $output
+        ]);
 
         if ($status != 0) {
             throw new \RuntimeException("Command $command returned code $status", $status);
