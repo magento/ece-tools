@@ -55,7 +55,7 @@ class Environment
 
     /**
      * @param string $command
-     * @return mixed
+     * @return array
      * @throws \RuntimeException Throws exception if CLI command returns non-zero status
      */
     public function execute($command)

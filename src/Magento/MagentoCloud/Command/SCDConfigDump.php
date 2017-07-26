@@ -52,7 +52,7 @@ class SCDConfigDump
                     $configKeys = explode('/', $requiredConfigKey);
 
                     //get value of the config recursively
-                    foreach( $configKeys as $configKey) {
+                    foreach ($configKeys as $configKey) {
                         if (isset($oldConfigCopy[$configKey])) {
                             $oldConfigCopy = $oldConfigCopy[$configKey];
                         } else {
@@ -113,7 +113,7 @@ class SCDConfigDump
      *
      * @param string $query
      * $query must be completed, finished with semicolon (;)
-     * @return mixed
+     * @return array
      */
     private function executeDbQuery($query)
     {
