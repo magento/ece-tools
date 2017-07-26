@@ -38,6 +38,7 @@ class Environment
     {
         $this->logger = $logger ?: new Logger('default');
         $this->logger->pushHandler(new StreamHandler(static::DEPLOY_LOG));
+        $this->logger->pushHandler(new StreamHandler('php://stdout'));
     }
 
     /**
@@ -77,8 +78,6 @@ class Environment
      */
     public function log($message)
     {
-        echo sprintf('[%s] %s', date("Y-m-d H:i:s"), $message) . PHP_EOL;
-
         $this->logger->notice($message);
     }
 
