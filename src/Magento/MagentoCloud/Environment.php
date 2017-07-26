@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud;
 
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 /**
  * Contains logic for interacting with the server environment
@@ -26,13 +27,16 @@ class Environment
     public $writableDirs = ['var', 'app/etc', 'pub/media'];
 
     /**
-     * @var Logger
+     * @var LoggerInterface
      */
     private $logger;
 
-    public function __construct()
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function __construct(LoggerInterface $logger = null)
     {
-        $this->logger = new Logger('default');
+        $this->logger = $logger ?: new Logger('default');
         $this->logger->pushHandler(new StreamHandler(static::DEPLOY_LOG));
     }
 
