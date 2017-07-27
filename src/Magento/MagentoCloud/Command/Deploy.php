@@ -419,7 +419,10 @@ class Deploy
                     'database' => $this->redisSessionDb
                 ]
             ];
+        } else {
+            $config = $this->removeRedisConfiguration($config);
         }
+
         $config['backend']['frontName'] = $this->adminUrl;
 
         $config['resource']['default_setup']['connection'] = 'default';
@@ -746,5 +749,33 @@ class Deploy
         }
         $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
         $this->env->log(sprintf('Copied directory: %s', $dir));
+    }
+
+    /**
+     * Clears configuration from redis usages.
+     *
+     * @param array $config An array of application configuration
+     * @return array
+     */
+    private function removeRedisConfiguration($config)
+    {
+        $this->env->log("Removing redis cache and session configuration from env.php.");
+
+        if (isset($config['session']['save']) && $config['session']['save'] == 'redis') {
+            $config['session']['save'] = 'db';
+            if (isset($config['session']['redis'])) {
+                unset($config['session']['redis']);
+            }
+        }
+
+        if (isset($config['cache']['frontend'])) {
+            foreach ($config['cache']['frontend'] as $cacheName => $cacheData) {
+                if (isset($cacheData['backend']) && $cacheData['backend'] == 'Cm_Cache_Backend_Redis') {
+                    unset($config['cache']['frontend'][$cacheName]);
+                }
+            }
+        }
+
+        return $config;
     }
 }
