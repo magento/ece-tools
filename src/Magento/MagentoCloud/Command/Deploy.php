@@ -76,7 +76,7 @@ class Deploy
     public function execute()
     {
         $this->preDeploy();
-        $this->env->log("Start deploy.");
+        $this->env->log("Starting deploy.");
         $this->saveEnvironmentData();
         $this->createConfigIfNotYetExist();
         $this->processMagentoMode();
@@ -672,6 +672,7 @@ class Deploy
      */
     private function preDeploy()
     {
+        $this->env->log($this->env->startingMessage("pre-deploy"));
         // Clear redis and file caches
         $relationships = $this->env->getRelationships();
         $var = $this->env->getVariables();
