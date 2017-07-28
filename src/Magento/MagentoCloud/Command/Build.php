@@ -68,7 +68,7 @@ class Build extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->env->setStaticDeployInBuild(false);
-        $this->env->log("Start build.");
+        $this->env->log($this->env->startingMessage("build"));
         $this->applyPatches();
         $this->marshallingFiles();
         $this->composerDumpAutoload();

@@ -94,7 +94,7 @@ class Deploy extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->preDeploy();
-        $this->env->log("Start deploy.");
+        $this->env->log("Starting deploy.");
         $this->saveEnvironmentData();
         $this->createConfigIfNotYetExist();
         $this->processMagentoMode();
@@ -271,9 +271,22 @@ class Deploy extends Command
         $command .= $this->verbosityLevel;
 
         $this->env->execute($command);
+
+        $this->setSecureAdmin();
         $this->updateConfig();
     }
 
+    /**
+    * Update secure admin
+    **/
+    public function setSecureAdmin()
+    {
+      $this->env->log("Setting secure admin");
+      $command =
+          "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
+      $command .= $this->verbosityLevel;
+      $this->env->execute($command);
+    }
 
     /**
      * Update Magento configuration
@@ -677,6 +690,7 @@ class Deploy extends Command
      */
     private function preDeploy()
     {
+        $this->env->log($this->env->startingMessage("pre-deploy"));
         // Clear redis and file caches
         $relationships = $this->env->getRelationships();
         $var = $this->env->getVariables();
