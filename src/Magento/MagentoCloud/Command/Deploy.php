@@ -27,6 +27,13 @@ class Deploy
 
     private $defaultCurrency = 'USD';
 
+    private $amqpHost;
+    private $amqpPort;
+    private $amqpUser;
+    private $amqpPasswd;
+    private $amqpVirtualhost = '/';
+    private $amqpSsl = '';
+
     private $dbHost;
     private $dbName;
     private $dbUser;
@@ -169,6 +176,13 @@ class Deploy
             $this->solrPath = $relationships["solr"][0]["path"];
             $this->solrPort = $relationships["solr"][0]["port"];
             $this->solrScheme = $relationships["solr"][0]["scheme"];
+        }
+
+        if (isset($relationships["mq"]) && count($relationships['mq']) > 0) {
+            $this->amqpHost = $relationships["mq"][0]["host"];
+            $this->amqpUser = $relationships["mq"][0]["username"];
+            $this->amqpPasswd = $relationships["mq"][0]["password"];
+            $this->amqpPort = $relationships["mq"][0]["port"];
         }
 
         $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
@@ -407,6 +421,16 @@ class Deploy
         $config['db']['connection']['indexer']['host'] = $this->dbHost;
         $config['db']['connection']['indexer']['dbname'] = $this->dbName;
         $config['db']['connection']['indexer']['password'] = $this->dbPassword;
+
+        if ($this->amqpHost !== null && $this->amqpPort !== null
+            && $this->amqpUser !== null && $this->amqpPasswd !== null) {
+            $config['queue']['amqp']['host'] = $this->amqpHost;
+            $config['queue']['amqp']['port'] = $this->amqpPort;
+            $config['queue']['amqp']['user'] = $this->amqpUser;
+            $config['queue']['amqp']['password'] = $this->amqpPasswd;
+            $config['queue']['amqp']['virtualhost'] = $this->amqpVirtualhost;
+            $config['queue']['amqp']['ssl'] = $this->amqpSsl;
+        }
 
         if ($this->redisHost !== null && $this->redisPort !== null) {
             $this->env->log("Updating env.php Redis cache configuration.");
