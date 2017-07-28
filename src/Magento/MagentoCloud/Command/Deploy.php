@@ -19,7 +19,7 @@ class Deploy
     const PREFIX_SECURE = 'https://';
     const PREFIX_UNSECURE = 'http://';
 
-    const GIT_MASTER_BRANCH = 'master';
+    const GIT_MASTER_BRANCH_RE = '/^master(:?-[a-z0-9]+)?$/i';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
@@ -78,7 +78,7 @@ class Deploy
     public function execute()
     {
         $this->preDeploy();
-        $this->env->log("Start deploy.");
+        $this->env->log("Starting deploy.");
         $this->saveEnvironmentData();
         $this->createConfigIfNotYetExist();
         $this->processMagentoMode();
@@ -256,9 +256,22 @@ class Deploy
         $command .= $this->verbosityLevel;
 
         $this->env->execute($command);
+
+        $this->setSecureAdmin();
         $this->updateConfig();
     }
 
+    /**
+    * Update secure admin
+    **/
+    public function setSecureAdmin()
+    {
+      $this->env->log("Setting secure admin");
+      $command =
+          "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
+      $command .= $this->verbosityLevel;
+      $this->env->execute($command);
+    }
 
     /**
      * Update Magento configuration
@@ -355,7 +368,7 @@ class Deploy
             $this->env->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");
 
             $this->env->log("Running setup upgrade.");
-            $this->env->execute("php ./bin/magento setup:upgrade --keep-generated {$this->verbosityLevel}");
+            $this->env->execute("php ./bin/magento setup:upgrade --keep-generated -n {$this->verbosityLevel}");
 
             /* Disable maintenance mode */
             $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
@@ -469,7 +482,7 @@ class Deploy
     private function isMasterBranch()
     {
         if (is_null($this->isMasterBranch)) {
-            if (isset($_ENV["MAGENTO_CLOUD_ENVIRONMENT"]) && $_ENV["MAGENTO_CLOUD_ENVIRONMENT"] == self::GIT_MASTER_BRANCH) {
+            if (isset($_ENV["MAGENTO_CLOUD_ENVIRONMENT"]) && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV["MAGENTO_CLOUD_ENVIRONMENT"])) {
                 $this->isMasterBranch = true;
             } else {
                 $this->isMasterBranch = false;
@@ -667,6 +680,7 @@ class Deploy
      */
     private function preDeploy()
     {
+        $this->env->log($this->env->startingMessage("pre-deploy"));
         // Clear redis and file caches
         $relationships = $this->env->getRelationships();
         $var = $this->env->getVariables();
@@ -696,7 +710,7 @@ class Deploy
         if (file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
             $this->env->log("Static content deployment was performed during build hook");
             $this->env->removeStaticContent();
-            
+
             if ($useStaticContentSymlink) {
                 $this->env->log("Symlinking static content from pub/static to init/pub/static");
 
