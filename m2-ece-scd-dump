@@ -3,8 +3,5 @@
 
 require_once __DIR__ . '/autoload.php';
 
-includeIfExists('Magento\MagentoCloud\Command\SCDConfigDump');
-includeIfExists('Magento\MagentoCloud\Environment');
-
 $scdDump = new Magento\MagentoCloud\Command\SCDConfigDump();
 $scdDump->execute();
