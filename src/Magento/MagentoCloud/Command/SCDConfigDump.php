@@ -51,7 +51,7 @@ class SCDConfigDump
                 $configKeys = explode('/', $requiredConfigKey);
 
                 //get value of the config recursively
-                foreach( $configKeys as $configKey) {
+                foreach ($configKeys as $configKey) {
                     if (isset($oldConfigCopy[$configKey])) {
                         $oldConfigCopy = $oldConfigCopy[$configKey];
                     } else {
@@ -67,35 +67,37 @@ class SCDConfigDump
             //only saving general/locale/code
             $configLocales = array_keys($newConfig['system']['stores']);
             foreach ($configLocales as $configLocale) {
-                if(isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
+                if (isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
                     $temp = $newConfig['system']['stores'][$configLocale]['general']['locale']['code'];
                     unset($newConfig['system']['stores'][$configLocale]);
                     $newConfig['system']['stores'][$configLocale]['general']['locale']['code'] = $temp;
                 }
             }
             //unsetting base_url
-            if(isset($newConfig['system']['stores']['admin']['web']['secure']['base_url'])) {
+            if (isset($newConfig['system']['stores']['admin']['web']['secure']['base_url'])) {
                 unset($newConfig['system']['stores']['admin']['web']['secure']['base_url']);
             }
-            if(isset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url'])) {
+            if (isset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url'])) {
                 unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
             }
             //locales for admin user
-            $newConfig['admin_user']['locale']['code'] = $this->executeDbQuery("select distinct interface_locale from admin_user");
+            $newConfig['admin_user']['locale']['code'] =
+                $this->executeDbQuery("select distinct interface_locale from admin_user");
 
-            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
+            $updatedConfig = '<?php' . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
             file_put_contents($configFile, $updatedConfig);
         } else {
-            if($returnCode ==0) {
+            if ($returnCode == 0) {
                 $this->env->log('Something went wrong in running app:config:dump');
             }
-            if(!file_exists($configFile)) {
+            if (!file_exists($configFile)) {
                 $this->env->log('No config file');
             }
         }
     }
 
-    private function buildNestedArray($keys, $val, $out) {
+    private function buildNestedArray($keys, $val, $out)
+    {
         $data = &$out;
         foreach ($keys as $key) {
             if (!isset($data[$key])) {
