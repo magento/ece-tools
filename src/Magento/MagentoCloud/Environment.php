@@ -94,8 +94,10 @@ class Environment
     {
         $this->log('Command:' . $command);
 
+        $rootPathCommand = sprintf('cd %s && %s', Environment::MAGENTO_ROOT, $command);
+
         exec(
-            $command,
+            $rootPathCommand,
             $output,
             $status
         );
@@ -229,5 +231,4 @@ class Environment
         }
         return $message;
     }
-
 }

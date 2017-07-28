@@ -95,7 +95,7 @@ class Deploy
      */
     private function createConfigIfNotYetExist()
     {
-        $configFile = 'app/etc/env.php';
+        $configFile = $this->getConfigFilePath();
         if (file_exists($configFile)) {
             return;
         }
@@ -181,7 +181,7 @@ class Deploy
      */
     public function isInstalled()
     {
-        $configFile = 'app/etc/env.php';
+        $configFile = $this->getConfigFilePath();
         $installed = false;
 
         //1. from environment variables check if db exists and has tables
@@ -394,7 +394,7 @@ class Deploy
     {
         $this->env->log("Updating env.php database configuration.");
 
-        $configFileName = "app/etc/env.php";
+        $configFileName = $this->getConfigFilePath();
 
         $config = include $configFileName;
 
@@ -534,7 +534,7 @@ class Deploy
         if ($this->magentoApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
             // Note: We moved call to deployStaticContent to a new function, staticContentDeploy(), and made it run after production mode is enabled to work around the bug with the read only
             $this->env->log("Enable production mode");
-            $configFileName = "app/etc/env.php";
+            $configFileName = $this->getConfigFilePath();
             $config = include $configFileName;
             $config['MAGE_MODE'] = 'production';
             $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
@@ -741,11 +741,29 @@ class Deploy
      *                    or trailing slashes
      */
     private function copyFromBuildDir($dir) {
-        if (!file_exists($dir)) {
-            mkdir($dir);
-            $this->env->log(sprintf('Created directory: %s', $dir));
+        $fullPathDir = Environment::MAGENTO_ROOT . $dir;
+        if (!file_exists($fullPathDir)) {
+            mkdir($fullPathDir);
+            $this->env->log(sprintf('Created directory: %s', $fullPathDir));
         }
-        $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
+        $this->env->execute(
+            sprintf(
+                '/bin/bash -c "shopt -s dotglob; cp -R %sinit/%s/* %s/ || true"',
+                Environment::MAGENTO_ROOT,
+                $dir,
+                $fullPathDir
+            )
+        );
         $this->env->log(sprintf('Copied directory: %s', $dir));
+    }
+
+    /**
+     * Return full path to environment configuration file.
+     *
+     * @return string path ti configuration file
+     */
+    private function getConfigFilePath()
+    {
+        return Environment::MAGENTO_ROOT . 'app/etc/env.php';
     }
 }
