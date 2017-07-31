@@ -450,9 +450,8 @@ class Deploy
     /**
      * Generates admin password using default Magento settings
      */
-    private function generatePassword(
-        $password
-    ) {
+    private function generatePassword($password)
+    {
         $saltLenght = 32;
         $charsLowers = 'abcdefghijklmnopqrstuvwxyz';
         $charsUppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -507,9 +506,7 @@ class Deploy
     {
         if (!$this->isMasterBranch()) {
             $this->env->log("Disabling Google Analytics");
-            // @codingStandardsIgnoreStart
             $this->executeDbQuery("update core_config_data set value = 0 where path = 'google/analytics/active';");
-            // @codingStandardsIgnoreEnd
         }
     }
 
@@ -520,10 +517,10 @@ class Deploy
      * $query must be completed, finished with semicolon (;)
      * @return mixed
      */
-    private function executeDbQuery(
-        $query
-    ) {
+    private function executeDbQuery($query)
+    {
         $password = strlen($this->dbPassword) ? sprintf('-p%s', $this->dbPassword) : '';
+
         return $this->env->execute("mysql -u $this->dbUser -h $this->dbHost -e \"$query\" $password $this->dbName");
     }
 

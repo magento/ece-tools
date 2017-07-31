@@ -239,10 +239,12 @@ class Build
         if (file_exists($sampleDataDir)) {
             $this->env->log("Sample data media found. Marshalling to pub/media.");
             $destination = Environment::MAGENTO_ROOT . '/pub/media';
-            foreach ($iterator = new \RecursiveIteratorIterator(
+            $iterator = new \RecursiveIteratorIterator(
                 new \RecursiveDirectoryIterator($sampleDataDir, \RecursiveDirectoryIterator::SKIP_DOTS),
                 \RecursiveIteratorIterator::SELF_FIRST
-            ) as $item) {
+            );
+
+            foreach ($iterator as $item) {
                 if ($item->isDir()) {
                     if (!file_exists($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName())) {
                         mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());

@@ -24,8 +24,8 @@
   },
   "scripts": {
     "test": [
-      "phpunit",
-      "vendor/bin/phpcs src --standard=ruleset.xml"
+      "phpunit -c phpunit.xml.dist",
+      "phpcs src --standard=ruleset.xml"
     ]
   }
 }
