@@ -6,6 +6,11 @@
 
 namespace Magento\MagentoCloud;
 
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+use Psr\Log\LoggerInterface;
+
 /**
  * Contains logic for interacting with the server environment
  */
@@ -15,7 +20,34 @@ class Environment
     const STATIC_CONTENT_DEPLOY_FLAG = '/.static_content_deploy';
     const REGENERATE_FLAG = self::MAGENTO_ROOT . 'var/.regenerate';
 
+    /**
+     * Deploy log file.
+     */
+    const DEPLOY_LOG = self::MAGENTO_ROOT . 'var/log/cloud_deploy.log';
+
     public $writableDirs = ['var', 'app/etc', 'pub/media'];
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @param LoggerInterface $logger
+     */
+    public function __construct(LoggerInterface $logger = null)
+    {
+        $this->logger = $logger ?: new Logger('default');
+
+        $formatter = new LineFormatter();
+        $formatter->allowInlineLineBreaks(true);
+
+        $logHandler = (new StreamHandler(static::DEPLOY_LOG))->setFormatter($formatter);
+        $stdOutHandler = (new StreamHandler('php://stdout'))->setFormatter($formatter);
+
+        $this->logger->pushHandler($logHandler);
+        $this->logger->pushHandler($stdOutHandler);
+    }
 
     /**
      * Get routes information from MagentoCloud environment variable.
@@ -47,15 +79,20 @@ class Environment
         return json_decode(base64_decode($_ENV["MAGENTO_CLOUD_VARIABLES"]), true);
     }
 
-
+    /**
+     * Log message to stream.
+     *
+     * @param string $message The message string.
+     * @return void
+     */
     public function log($message)
     {
-        echo sprintf('[%s] %s', date("Y-m-d H:i:s"), $message) . PHP_EOL;
+        $this->logger->notice($message);
     }
 
     public function execute($command)
     {
-        $this->log('Command:'.$command);
+        $this->log('Command:' . $command);
 
         exec(
             $command,
@@ -63,8 +100,11 @@ class Environment
             $status
         );
 
-        $this->log('Status:'.var_export($status, true));
-        $this->log('Output:'.var_export($output, true));
+        $this->log('Status:' . var_export($status, true));
+
+        if ($output) {
+            $this->log('Output:' . var_export($output, true));
+        }
 
         if ($status != 0) {
             throw new \RuntimeException("Command $command returned code $status", $status);
@@ -116,7 +156,7 @@ class Environment
         foreach ($dir as $fileInfo) {
             $fileName = $fileInfo->getFilename();
             if (!$fileInfo->isDot() && strpos($fileName, 'old_static_content_') !== 0) {
-                $this->log("Rename " . $staticContentLocation .  $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
+                $this->log("Rename " . $staticContentLocation . $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
                 rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
             }
         }
@@ -133,4 +173,61 @@ class Environment
             $this->backgroundExecute("rm -rf $oldPreprocessedLocation");
         }
     }
+
+    private $componentVersions = [];  // We only want to look up each component version once since it shouldn't change
+
+    private function getVersionOfComponent($component) {
+        $composerjsonpath = Environment::MAGENTO_ROOT . "/vendor/magento/" .$component . "/composer.json";
+        $version = null;
+        try {
+            if (file_exists($composerjsonpath)) {
+                $jsondata = json_decode(file_get_contents($composerjsonpath), true);
+                if (array_key_exists("version", $jsondata)) {
+                    $version = $jsondata["version"];
+                }
+            }
+        } catch (\Exception $e) {
+            // If we get an exception (or error), we don't worry because we just won't use the version.
+            // Note: We could use Throwable to catch them both, but that only works in PHP >= 7
+        } catch (\Error $e) {  // Note: this only works PHP >= 7
+        }
+        $this->componentVersions[$component] = $version;
+    }
+
+    public function versionOfComponent($component) {
+        if (! array_key_exists( $component, $this->componentVersions)) {
+            $this->getVersionOfComponent($component);
+        }
+        return $this->componentVersions[$component];
+    }
+
+    public function hasVersionOfComponent($component) {
+        if (! array_key_exists( $component, $this->componentVersions)) {
+            $this->getVersionOfComponent($component);
+        }
+        return ! is_null($this->componentVersions[$component]);
+    }
+
+    public function startingMessage($starttype)
+    {
+        $componentsWeCareAbout = ["ece-tools", "magento2-base"];
+        $message = "Starting " . $starttype . ".";
+        $first = true;
+        foreach ($componentsWeCareAbout as $component) {
+            if ($this->hasVersionOfComponent($component)) {
+                if ($first) {
+                    $first = false;
+                    $message .= " (";
+                } else {
+                    $message .= ", ";
+                }
+                $message .= $component . " version: " . $this->versionOfComponent($component);
+            }
+        }
+        if (!$first) {
+            $message .= ")";
+        }
+        return $message;
+    }
+
 }
