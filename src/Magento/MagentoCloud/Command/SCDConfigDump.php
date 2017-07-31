@@ -87,21 +87,22 @@ class SCDConfigDump extends Command
                 //only saving general/locale/code
                 $configLocales = array_keys($newConfig['system']['stores']);
                 foreach ($configLocales as $configLocale) {
-                    if(isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
+                    if (isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
                         $temp = $newConfig['system']['stores'][$configLocale]['general']['locale']['code'];
                         unset($newConfig['system']['stores'][$configLocale]);
                         $newConfig['system']['stores'][$configLocale]['general']['locale']['code'] = $temp;
                     }
                 }
                 //unsetting base_url
-                if(isset($newConfig['system']['stores']['admin']['web']['secure']['base_url'])) {
+                if (isset($newConfig['system']['stores']['admin']['web']['secure']['base_url'])) {
                     unset($newConfig['system']['stores']['admin']['web']['secure']['base_url']);
                 }
-                if(isset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url'])) {
+                if (isset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url'])) {
                     unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
                 }
                 //locales for admin user
-                $newConfig['admin_user']['locale']['code'] = $this->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user');
+                $newConfig['admin_user']['locale']['code'] =
+                    $this->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user');
 
                 $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
                 file_put_contents($configFile, $updatedConfig);

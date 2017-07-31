@@ -161,8 +161,14 @@ class Environment
         foreach ($dir as $fileInfo) {
             $fileName = $fileInfo->getFilename();
             if (!$fileInfo->isDot() && strpos($fileName, 'old_static_content_') !== 0) {
-                $this->log("Rename " . $staticContentLocation . $fileName . " to " . $oldStaticContentLocation . '/' . $fileName);
-                rename($staticContentLocation . '/' . $fileName, $oldStaticContentLocation . '/' . $fileName);
+                $this->log(
+                    "Rename " . $staticContentLocation . $fileName
+                    . " to " . $oldStaticContentLocation . '/' . $fileName
+                );
+                rename(
+                    $staticContentLocation . '/' . $fileName,
+                    $oldStaticContentLocation . '/' . $fileName
+                );
             }
         }
 
@@ -181,8 +187,9 @@ class Environment
 
     private $componentVersions = [];  // We only want to look up each component version once since it shouldn't change
 
-    private function getVersionOfComponent($component) {
-        $composerjsonpath = Environment::MAGENTO_ROOT . "/vendor/magento/" .$component . "/composer.json";
+    private function getVersionOfComponent($component)
+    {
+        $composerjsonpath = Environment::MAGENTO_ROOT . "/vendor/magento/" . $component . "/composer.json";
         $version = null;
         try {
             if (file_exists($composerjsonpath)) {
@@ -199,18 +206,20 @@ class Environment
         $this->componentVersions[$component] = $version;
     }
 
-    public function versionOfComponent($component) {
-        if (! array_key_exists( $component, $this->componentVersions)) {
+    public function versionOfComponent($component)
+    {
+        if (!array_key_exists($component, $this->componentVersions)) {
             $this->getVersionOfComponent($component);
         }
         return $this->componentVersions[$component];
     }
 
-    public function hasVersionOfComponent($component) {
-        if (! array_key_exists( $component, $this->componentVersions)) {
+    public function hasVersionOfComponent($component)
+    {
+        if (!array_key_exists($component, $this->componentVersions)) {
             $this->getVersionOfComponent($component);
         }
-        return ! is_null($this->componentVersions[$component]);
+        return !is_null($this->componentVersions[$component]);
     }
 
     public function startingMessage($starttype)
@@ -234,5 +243,4 @@ class Environment
         }
         return $message;
     }
-
 }
