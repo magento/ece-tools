@@ -300,7 +300,7 @@ class Deploy
     {
         $this->env->log("Updating admin credentials.");
 
-        $this->executeDbQuery("update admin_user set firstname = ?, lastname = ?, email = ?, username = ?, password = ? where user_id = '1';",
+        $this->executeDbQuery("UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';",
         ["sssss", $this->adminFirstname, $this->adminLastname, $this->adminEmail, $this->adminUsername, $this->generatePassword($this->adminPassword) ]);
     }
 
@@ -312,13 +312,13 @@ class Deploy
         $this->env->log("Updating SOLR configuration.");
 
         if ($this->solrHost !== null && $this->solrPort !== null && $this->solrPath !== null && $this->solrHost !== null) {
-            $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_hostname' and scope_id = '0';",
+            $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_hostname' AND scope_id = '0';",
                 ["s", $this->generatePassword($this->solrHost)]);
-            $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_port' and scope_id = '0';",
+            $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_port' AND scope_id = '0';",
                 ["s", $this->generatePassword($this->solrPort)]);
-            $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_username' and scope_id = '0';",
+            $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_username' AND scope_id = '0';",
                 ["s", $this->generatePassword($this->solrScheme)]);
-            $this->executeDbQuery("update core_config_data set value = ? where path = 'catalog/search/solr_server_path' and scope_id = '0';",
+            $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_path' AND scope_id = '0';",
                 ["s", $this->generatePassword($this->solrPath)]);
         }
     }
@@ -334,13 +334,13 @@ class Deploy
                 foreach ($urls as $route => $url) {
                     $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
                     if (!strlen($route)) {
-                        $this->executeDbQuery("update core_config_data set value = ? where path = ? and scope_id = '0';",
+                        $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = ? AND scope_id = '0';",
                             ["ss", $url, "web/$urlType/base_url"]);
                         continue;
                     }
                     $likeKey = $prefix . $route . '%';
                     $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
-                    $this->executeDbQuery("update core_config_data set value = ? where path = ? and (value like ? or value like ?);",
+                    $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = ? AND (value LIKE ? OR value LIKE ?);",
                         ["ssss", $url, "web/$urlType/base_url", $likeKey, $likeKeyParsed]);
                 }
             }
@@ -498,7 +498,7 @@ class Deploy
     {
         if (!$this->isMasterBranch()) {
             $this->env->log("Disabling Google Analytics");
-            $this->executeDbQuery("update core_config_data set value = 0 where path = 'google/analytics/active';");
+            $this->executeDbQuery("UPDATE core_config_data SET value = 0 WHERE path = 'google/analytics/active';");
         }
     }
 
@@ -579,7 +579,7 @@ class Deploy
         /* Generate static assets */
         $this->env->log("Extract locales");
         $locales = [];
-        $output = $this->executeDbQuery("select distinct value from core_config_data where path='general/locale/code';", [], MYSQLI_NUM);
+        $output = $this->executeDbQuery("SELECT DISTINCT value FROM core_config_data WHERE path='general/locale/code';", [], MYSQLI_NUM);
         $output = array_map(function($arrayin) {return $arrayin[0];}, $output);
         if (is_array($output) && count($output) > 0) {
             $locales = $output;
