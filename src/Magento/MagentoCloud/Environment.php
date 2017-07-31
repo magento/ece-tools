@@ -90,6 +90,11 @@ class Environment
         $this->logger->notice($message);
     }
 
+    /**
+     * @param string $command
+     * @return array
+     * @throws \RuntimeException Throws exception if CLI command returns non-zero status
+     */
     public function execute($command)
     {
         $this->log('Command:' . $command);
