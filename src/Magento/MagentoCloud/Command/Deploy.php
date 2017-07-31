@@ -612,8 +612,8 @@ class Deploy
     {
         $locales = [];
 
-        $query = 'SELECT value FROM `core_config_data` WHERE path=\'general/locale/code\' '
-            . 'UNION SELECT `interface_locale` FROM `admin_user`;';
+        $query = 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
+            . 'UNION SELECT interface_locale FROM admin_user;';
         $output = $this->executeDbQuery($query);
 
         if (is_array($output) && count($output) > 1) {
