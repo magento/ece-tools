@@ -137,9 +137,9 @@ class Deploy
 
         if (isset($var["STATIC_CONTENT_THREADS"])) {
             $this->staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
-        } else if (isset($_ENV["STATIC_CONTENT_THREADS"])) {
+        } elseif (isset($_ENV["STATIC_CONTENT_THREADS"])) {
                 $this->staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
-        } else if (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
+        } elseif (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
             $this->staticDeployThreads = 3;
         } else { // if Paas environment
             $this->staticDeployThreads = 1;
