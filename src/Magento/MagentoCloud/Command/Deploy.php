@@ -430,6 +430,8 @@ class Deploy
             $config['queue']['amqp']['password'] = $this->amqpPasswd;
             $config['queue']['amqp']['virtualhost'] = $this->amqpVirtualhost;
             $config['queue']['amqp']['ssl'] = $this->amqpSsl;
+        } else {
+            $config = $this->removeAmqpConfig($config);
         }
 
         if ($this->redisHost !== null && $this->redisPort !== null) {
@@ -453,7 +455,25 @@ class Deploy
         file_put_contents($configFileName, $updatedConfig);
     }
 
+    /**
+     * Remove AMQP configuration from env.php
+     *
+     * @param array $config
+     * @return array
+     */
+    private function removeAmqpConfig(array $config)
+    {
+        $this->env->log("Removing AMQP configuration from env.php.");
+        if (isset($config['queue']['amqp'])) {
+            if (count($config['queue']) > 1) {
+                unset($config['queue']['amqp']);
+            } else {
+                unset($config['queue']);
+            }
+        }
 
+        return $config;
+    }
 
     /**
      * Generates admin password using default Magento settings
