@@ -1,7 +1,10 @@
 <?php
 
 $rootDir = __DIR__ . '/../../../';
-if (file_exists($rootDir . '/init/app/etc/NonComposerComponentRegistration.php')) {
+if (
+    !file_exists($rootDir . '/app/etc/NonComposerComponentRegistration.php') &&
+    file_exists($rootDir . '/init/app/etc/NonComposerComponentRegistration.php')
+) {
     copy(
         $rootDir . '/init/app/etc/NonComposerComponentRegistration.php',
         $rootDir . '/app/etc/NonComposerComponentRegistration.php'
