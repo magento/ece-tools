@@ -869,7 +869,7 @@ class Deploy extends Command
     /**
      * Return full path to environment configuration file.
      *
-     * @return string path ti configuration file
+     * @return string The path to configuration file
      */
     private function getConfigFilePath()
     {
