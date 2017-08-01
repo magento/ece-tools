@@ -21,7 +21,7 @@ class Deploy extends Command
     const PREFIX_SECURE = 'https://';
     const PREFIX_UNSECURE = 'http://';
 
-    const GIT_MASTER_BRANCH_RE = '/^master(:?-[a-z0-9]+)?$/i';
+    const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
