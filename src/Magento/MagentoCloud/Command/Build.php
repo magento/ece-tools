@@ -113,7 +113,7 @@ class Build extends Command
             $this->env->execute(sprintf('mkdir -p init/%s', $dir));
             $this->env->execute(sprintf('mkdir -p %s', $dir));
 
-            if (count(scandir($dir)) > 2) {
+            if (count(scandir(Environment::MAGENTO_ROOT . $dir)) > 2) {
                 $this->env->execute(
                     sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir)
                 );
