@@ -7,11 +7,14 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * CLI command for dumping SCD related config.
  */
-class SCDConfigDump
+class SCDConfigDump extends Command
 {
     private $requiredConfigKeys = [
         'modules',
@@ -35,67 +38,86 @@ class SCDConfigDump
     public function __construct()
     {
         $this->env = new Environment();
+
+        parent::__construct();
     }
 
-    public function execute()
+    /**
+     * @inheritdoc
+     */
+    protected function configure()
     {
-        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
-        $returnCode = $this->env->execute("php bin/magento app:config:dump");
+        $this->setName('dump')
+            ->setDescription('Dump static content');
 
-        if ($returnCode == 0 && file_exists($configFile)) {
-            $oldConfig = include $configFile;
-            $newConfig = [];
+        parent::configure();
+    }
 
-            foreach ($this->requiredConfigKeys as $requiredConfigKey) {
-                $oldConfigCopy = $oldConfig;
-                $configKeys = explode('/', $requiredConfigKey);
+    /**
+     * @inheritdoc
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        try {
+            $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
+            $this->env->execute("php bin/magento app:config:dump");
 
-                //get value of the config recursively
-                foreach( $configKeys as $configKey) {
-                    if (isset($oldConfigCopy[$configKey])) {
-                        $oldConfigCopy = $oldConfigCopy[$configKey];
-                    } else {
-                        $oldConfigCopy = null;
+            if (file_exists($configFile)) {
+                $oldConfig = include $configFile;
+                $newConfig = [];
+
+                foreach ($this->requiredConfigKeys as $requiredConfigKey) {
+                    $oldConfigCopy = $oldConfig;
+                    $configKeys = explode('/', $requiredConfigKey);
+
+                    //get value of the config recursively
+                    foreach ($configKeys as $configKey) {
+                        if (isset($oldConfigCopy[$configKey])) {
+                            $oldConfigCopy = $oldConfigCopy[$configKey];
+                        } else {
+                            $oldConfigCopy = null;
+                        }
+                    }
+                    //set value in new array.
+                    if (isset($oldConfigCopy)) {
+                        $newConfig = $this->buildNestedArray($configKeys, $oldConfigCopy, $newConfig);
                     }
                 }
-                //set value in new array.
-                if (isset($oldConfigCopy)) {
-                    $newConfig = $this->buildNestedArray($configKeys, $oldConfigCopy, $newConfig);
-                }
-            }
 
-            //only saving general/locale/code
-            $configLocales = array_keys($newConfig['system']['stores']);
-            foreach ($configLocales as $configLocale) {
-                if(isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
-                    $temp = $newConfig['system']['stores'][$configLocale]['general']['locale']['code'];
-                    unset($newConfig['system']['stores'][$configLocale]);
-                    $newConfig['system']['stores'][$configLocale]['general']['locale']['code'] = $temp;
+                //only saving general/locale/code
+                $configLocales = array_keys($newConfig['system']['stores']);
+                foreach ($configLocales as $configLocale) {
+                    if (isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
+                        $temp = $newConfig['system']['stores'][$configLocale]['general']['locale']['code'];
+                        unset($newConfig['system']['stores'][$configLocale]);
+                        $newConfig['system']['stores'][$configLocale]['general']['locale']['code'] = $temp;
+                    }
                 }
-            }
-            //unsetting base_url
-            if(isset($newConfig['system']['stores']['admin']['web']['secure']['base_url'])) {
-                unset($newConfig['system']['stores']['admin']['web']['secure']['base_url']);
-            }
-            if(isset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url'])) {
-                unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
-            }
-            //locales for admin user
-            $newConfig['admin_user']['locale']['code'] = $this->executeDbQuery("select distinct interface_locale from admin_user");
+                //unsetting base_url
+                if (isset($newConfig['system']['stores']['admin']['web']['secure']['base_url'])) {
+                    unset($newConfig['system']['stores']['admin']['web']['secure']['base_url']);
+                }
+                if (isset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url'])) {
+                    unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
+                }
+                //locales for admin user
+                $newConfig['admin_user']['locale']['code'] =
+                    $this->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user');
 
-            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
-            file_put_contents($configFile, $updatedConfig);
-        } else {
-            if($returnCode ==0) {
-                $this->env->log('Something went wrong in running app:config:dump');
-            }
-            if(!file_exists($configFile)) {
+                $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
+                file_put_contents($configFile, $updatedConfig);
+                $this->env->execute('php bin/magento app:config:import -n');
+            } else {
                 $this->env->log('No config file');
             }
+        } catch (\RuntimeException $e) {
+            $this->env->log('Something went wrong in running app:config:dump');
+            $this->env->log($e->getTraceAsString());
         }
     }
 
-    private function buildNestedArray($keys, $val, $out) {
+    private function buildNestedArray($keys, $val, $out)
+    {
         $data = &$out;
         foreach ($keys as $key) {
             if (!isset($data[$key])) {
@@ -112,7 +134,7 @@ class SCDConfigDump
      *
      * @param string $query
      * $query must be completed, finished with semicolon (;)
-     * @return mixed
+     * @return array
      */
     private function executeDbQuery($query)
     {
