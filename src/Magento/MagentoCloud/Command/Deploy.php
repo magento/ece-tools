@@ -860,16 +860,9 @@ class Deploy extends Command
         $fullPathDir = Environment::MAGENTO_ROOT . $dir;
         if (!file_exists($fullPathDir)) {
             mkdir($fullPathDir);
-            $this->env->log(sprintf('Created directory: %s', $fullPathDir));
+            $this->env->log(sprintf('Created directory: %s', $dir));
         }
-        $this->env->execute(
-            sprintf(
-                '/bin/bash -c "shopt -s dotglob; cp -R %sinit/%s/* %s/ || true"',
-                Environment::MAGENTO_ROOT,
-                $dir,
-                $fullPathDir
-            )
-        );
+        $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
         $this->env->log(sprintf('Copied directory: %s', $dir));
     }
 
