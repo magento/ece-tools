@@ -7,11 +7,14 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * CLI command for build hook. Responsible for preparing the codebase before it's moved to the server.
  */
-class Build
+class Build extends Command
 {
     /**
      * Options for build_options.ini
@@ -42,14 +45,29 @@ class Build
         $this->buildOptions = $this->parseBuildOptions();
         $this->env = new Environment();
         $buildVerbosityLevel = $this->getBuildOption('VERBOSE_COMMANDS');
-        isset($buildVerbosityLevel) && $buildVerbosityLevel == 'enabled' ? $this->env->log("Verbosity level is set to " . $buildVerbosityLevel) : $this->env->log("Verbosity level is not set");
+        isset($buildVerbosityLevel) && $buildVerbosityLevel == 'enabled'
+            ? $this->env->log("Verbosity level is set to " . $buildVerbosityLevel)
+            : $this->env->log("Verbosity level is not set");
         $this->verbosityLevel = isset($buildVerbosityLevel) && $buildVerbosityLevel == 'enabled' ? ' -vv ' : '';
+
+        parent::__construct();
     }
 
     /**
-     *
+     * @inheritdoc
      */
-    public function execute()
+    protected function configure()
+    {
+        $this->setName('build')
+            ->setDescription('Builds application');
+
+        parent::configure();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->env->setStaticDeployInBuild(false);
         $this->env->log($this->env->startingMessage("build"));
@@ -95,22 +113,23 @@ class Build
             $this->env->execute(sprintf('mkdir -p init/%s', $dir));
             $this->env->execute(sprintf('mkdir -p %s', $dir));
 
-            if (count(scandir($dir)) >  2) {
-                $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir));
+            if (count(scandir(Environment::MAGENTO_ROOT . $dir)) > 2) {
+                $this->env->execute(
+                    sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir)
+                );
                 $this->env->execute(sprintf('rm -rf %s', $dir));
                 $this->env->execute(sprintf('mkdir -p %s', $dir));
             }
         }
     }
 
-    private function flatten($array, $prefix='')
+    private function flatten($array, $prefix = '')
     {
         $result = [];
-        foreach($array as $key=>$value) {
-            if(is_array($value)) {
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
                 $result = $result + $this->flatten($value, $prefix . $key . '/');
-            }
-            else {
+            } else {
                 $result[$prefix . $key] = $value;
             }
         }
@@ -122,12 +141,11 @@ class Build
         $filteredResult = [];
         $length = strlen($pattern);
         foreach ($array as $key => $value) {
-            if($ending){
+            if ($ending) {
                 if (substr($key, -$length) === $pattern) {
                     $filteredResult[$key] = $value;
                 }
-            }
-            else {
+            } else {
                 if (substr($key, 0, strlen($pattern)) === $pattern) {
                     $filteredResult[$key] = $value;
                 }
@@ -148,11 +166,14 @@ class Build
 
             $locales = [];
             $locales = array_merge($locales, $this->filter($flattenedConfig, 'general/locale/code'));
-            $locales = array_merge($locales, $this->filter($flattenedConfig, 'admin_user/locale/code', false));
+            $locales = array_merge(
+                $locales,
+                $this->filter($flattenedConfig, 'admin_user/locale/code', false)
+            );
             $locales[] = 'en_US';
             $locales = array_unique($locales);
 
-            if (count($stores) === 0 && count($websites) === 0 ){
+            if (count($stores) === 0 && count($websites) === 0) {
                 $this->env->log("No stores/website/locales found in config.php");
                 $this->env->setStaticDeployInBuild(false);
                 return;
@@ -165,23 +186,29 @@ class Build
                 $themes = preg_split("/[,]+/", $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES));
                 if (count($themes) > 1) {
                     $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
-                } elseif (count($themes) === 1){
-                    $excludeThemesOptions = "--exclude-theme=" .  $themes[0];
+                } elseif (count($themes) === 1) {
+                    $excludeThemesOptions = "--exclude-theme=" . $themes[0];
                 }
             }
 
-            $threads =  $this->getBuildOption(self::BUILD_OPT_SCD_THREADS) ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}" : '0';
+            $threads = $this->getBuildOption(self::BUILD_OPT_SCD_THREADS)
+                ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}"
+                : '0';
 
             try {
-                $logMessage = $SCDLocales ? "Generating static content for locales: $SCDLocales" : "Generating static content.";
+                $logMessage = $SCDLocales
+                    ? "Generating static content for locales: $SCDLocales"
+                    : "Generating static content.";
                 $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
                 $logMessage .= $threads ? "\nUsing $threads Threads" : "";
 
                 $this->env->log($logMessage);
 
                 $parallelCommands = "";
-                foreach ($locales as $locale){
+                foreach ($locales as $locale) {
+                    // @codingStandardsIgnoreStart
                     $parallelCommands .= "php ./bin/magento setup:static-content:deploy -f $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
+                    // @codingStandardsIgnoreEnd
                 }
                 $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
 
@@ -216,20 +243,24 @@ class Build
 
         copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
         $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
-        if(!file_exists($enterpriseFolder)){
+        if (!file_exists($enterpriseFolder)) {
             mkdir($enterpriseFolder, 0777, true);
         }
-        copy(Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml', Environment::MAGENTO_ROOT . 'app/enterprise/di.xml');
+        copy(
+            Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml',
+            Environment::MAGENTO_ROOT . 'app/enterprise/di.xml'
+        );
 
         $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
         if (file_exists($sampleDataDir)) {
             $this->env->log("Sample data media found. Marshalling to pub/media.");
             $destination = Environment::MAGENTO_ROOT . '/pub/media';
-            foreach (
-                $iterator = new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($sampleDataDir, \RecursiveDirectoryIterator::SKIP_DOTS),
-                    \RecursiveIteratorIterator::SELF_FIRST) as $item
-            ) {
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($sampleDataDir, \RecursiveDirectoryIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::SELF_FIRST
+            );
+
+            foreach ($iterator as $item) {
                 if ($item->isDir()) {
                     if (!file_exists($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName())) {
                         mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
@@ -252,7 +283,13 @@ class Build
                 $this->env->log("Skip running DI compilation");
             }
         } else {
-            $this->env->log("Missing config.php, please run the following commands \n 1. bin/magento module:enable --all \n 2. git add -f app/etc/config.php \n 3. git commit -a -m 'adding config.php' \n 4. git push");
+            $this->env->log(
+                "Missing config.php, please run the following commands "
+                . "\n 1. bin/magento module:enable --all "
+                . "\n 2. git add -f app/etc/config.php "
+                . "\n 3. git commit -a -m 'adding config.php' "
+                . "\n 4. git push"
+            );
             exit(6);
         }
     }
@@ -277,7 +314,8 @@ class Build
             : [];
     }
 
-    private function getBuildOption($key) {
+    private function getBuildOption($key)
+    {
         return isset($this->buildOptions[$key]) ? $this->buildOptions[$key] : false;
     }
 

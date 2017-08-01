@@ -8,18 +8,21 @@ namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
 use Magento\MagentoCloud\Database;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
  */
-class Deploy
+class Deploy extends Command
 {
     const MAGIC_ROUTE = '{default}';
 
     const PREFIX_SECURE = 'https://';
     const PREFIX_UNSECURE = 'http://';
 
-    const GIT_MASTER_BRANCH_RE = '/^master(:?-[a-z0-9]+)?$/i';
+    const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
@@ -27,6 +30,13 @@ class Deploy
     private $urls = ['unsecure' => [], 'secure' => []];
 
     private $defaultCurrency = 'USD';
+
+    private $amqpHost;
+    private $amqpPort;
+    private $amqpUser;
+    private $amqpPasswd;
+    private $amqpVirtualhost = '/';
+    private $amqpSsl = '';
 
     private $dbHost;
     private $dbName;
@@ -70,12 +80,27 @@ class Deploy
     public function __construct()
     {
         $this->env = new Environment();
+
+        parent::__construct();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function configure()
+    {
+        $this->setName('deploy')
+            ->setDescription('Deploys application');
+
+        parent::configure();
     }
 
     /**
      * Deploy application: copy writable directories back, install or update Magento data.
+     *
+     * {@inheritdoc}
      */
-    public function execute()
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->preDeploy();
         $this->env->log("Starting deploy.");
@@ -97,7 +122,7 @@ class Deploy
      */
     private function createConfigIfNotYetExist()
     {
-        $configFile = 'app/etc/env.php';
+        $configFile = $this->getConfigFilePath();
         if (file_exists($configFile)) {
             return;
         }
@@ -131,22 +156,28 @@ class Deploy
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
         $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
 
-        $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled' ? false : true;
+        $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
+            ? false : true;
         $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
-            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"]     : [];
+            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"] : [];
         $this->adminLocale = isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
 
         if (isset($var["STATIC_CONTENT_THREADS"])) {
             $this->staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
-        } else if (isset($_ENV["STATIC_CONTENT_THREADS"])) {
-            $this->staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
-        } else if (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
+        } elseif (isset($_ENV["STATIC_CONTENT_THREADS"])) {
+                $this->staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
+        } elseif (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
             $this->staticDeployThreads = 3;
         } else { // if Paas environment
             $this->staticDeployThreads = 1;
         }
-        $this->doDeployStaticContent = isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled' ? false : true;
-        // Can use environment variable to always disable. Default is to deploy static content if it was not deployed in the build step.
+
+        $this->doDeployStaticContent =
+            isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled' ? false : true;
+        /**
+         * Can use environment variable to always disable.
+         * Default is to deploy static content if it was not deployed in the build step.
+         */
         if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
             $this->doDeployStaticContent = false;
             $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
@@ -173,7 +204,15 @@ class Deploy
             $this->solrScheme = $relationships["solr"][0]["scheme"];
         }
 
-        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
+        if (isset($relationships["mq"]) && count($relationships['mq']) > 0) {
+            $this->amqpHost = $relationships["mq"][0]["host"];
+            $this->amqpUser = $relationships["mq"][0]["username"];
+            $this->amqpPasswd = $relationships["mq"][0]["password"];
+            $this->amqpPort = $relationships["mq"][0]["port"];
+        }
+
+        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled'
+            ? ' -vvv ' : '';
     }
 
     /**
@@ -183,7 +222,7 @@ class Deploy
      */
     public function isInstalled()
     {
-        $configFile = 'app/etc/env.php';
+        $configFile = $this->getConfigFilePath();
         $installed = false;
 
         //1. from environment variables check if db exists and has tables
@@ -262,15 +301,15 @@ class Deploy
     }
 
     /**
-    * Update secure admin
-    **/
+     * Update secure admin
+     */
     public function setSecureAdmin()
     {
-      $this->env->log("Setting secure admin");
-      $command =
-          "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
-      $command .= $this->verbosityLevel;
-      $this->env->execute($command);
+        $this->env->log("Setting secure admin");
+        $command =
+            "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
+        $command .= $this->verbosityLevel;
+        $this->env->execute($command);
     }
 
     /**
@@ -300,8 +339,10 @@ class Deploy
     {
         $this->env->log("Updating admin credentials.");
 
+        // @codingStandardsIgnoreStart
         $this->executeDbQuery("UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';",
         ["sssss", $this->adminFirstname, $this->adminLastname, $this->adminEmail, $this->adminUsername, $this->generatePassword($this->adminPassword) ]);
+        // @codingStandardsIgnoreEnd
     }
 
     /**
@@ -310,8 +351,8 @@ class Deploy
     private function updateSolrConfiguration()
     {
         $this->env->log("Updating SOLR configuration.");
-
         if ($this->solrHost !== null && $this->solrPort !== null && $this->solrPath !== null && $this->solrHost !== null) {
+          // @codingStandardsIgnoreStart
             $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_hostname' AND scope_id = '0';",
                 ["s", $this->generatePassword($this->solrHost)]);
             $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_port' AND scope_id = '0';",
@@ -320,6 +361,7 @@ class Deploy
                 ["s", $this->generatePassword($this->solrScheme)]);
             $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_path' AND scope_id = '0';",
                 ["s", $this->generatePassword($this->solrPath)]);
+          // @codingStandardsIgnoreEnd
         }
     }
 
@@ -334,14 +376,18 @@ class Deploy
                 foreach ($urls as $route => $url) {
                     $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
                     if (!strlen($route)) {
-                        $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = ? AND scope_id = '0';",
+                    // @codingStandardsIgnoreStart                      
+                    $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = ? AND scope_id = '0';",
                             ["ss", $url, "web/$urlType/base_url"]);
+                      // @codingStandardsIgnoreEnd
                         continue;
                     }
                     $likeKey = $prefix . $route . '%';
                     $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
+                    // @codingStandardsIgnoreStart
                     $this->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = ? AND (value LIKE ? OR value LIKE ?);",
                         ["ssss", $url, "web/$urlType/base_url", $likeKey, $likeKeyParsed]);
+                    // @codingStandardsIgnoreEnd
                 }
             }
         } else {
@@ -373,8 +419,7 @@ class Deploy
             /* Disable maintenance mode */
             $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
             $this->env->log("Maintenance mode is disabled.");
-
-        }catch (\RuntimeException $e) {
+        } catch (\RuntimeException $e) {
             $this->env->log($e->getMessage());
             //Rollback required by database
             exit(6);
@@ -404,7 +449,7 @@ class Deploy
     {
         $this->env->log("Updating env.php database configuration.");
 
-        $configFileName = "app/etc/env.php";
+        $configFileName = $this->getConfigFilePath();
 
         $config = include $configFileName;
 
@@ -418,6 +463,18 @@ class Deploy
         $config['db']['connection']['indexer']['dbname'] = $this->dbName;
         $config['db']['connection']['indexer']['password'] = $this->dbPassword;
 
+        if ($this->amqpHost !== null && $this->amqpPort !== null
+            && $this->amqpUser !== null && $this->amqpPasswd !== null) {
+            $config['queue']['amqp']['host'] = $this->amqpHost;
+            $config['queue']['amqp']['port'] = $this->amqpPort;
+            $config['queue']['amqp']['user'] = $this->amqpUser;
+            $config['queue']['amqp']['password'] = $this->amqpPasswd;
+            $config['queue']['amqp']['virtualhost'] = $this->amqpVirtualhost;
+            $config['queue']['amqp']['ssl'] = $this->amqpSsl;
+        } else {
+            $config = $this->removeAmqpConfig($config);
+        }
+
         if ($this->redisHost !== null && $this->redisPort !== null) {
             $this->env->log("Updating env.php Redis cache configuration.");
             $config['cache'] = $this->getRedisCacheConfiguration();
@@ -429,17 +486,38 @@ class Deploy
                     'database' => $this->redisSessionDb
                 ]
             ];
+        } else {
+            $config = $this->removeRedisConfiguration($config);
         }
+
         $config['backend']['frontName'] = $this->adminUrl;
 
         $config['resource']['default_setup']['connection'] = 'default';
 
-        $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
+        $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
 
         file_put_contents($configFileName, $updatedConfig);
     }
 
+    /**
+     * Remove AMQP configuration from env.php
+     *
+     * @param array $config
+     * @return array
+     */
+    private function removeAmqpConfig(array $config)
+    {
+        $this->env->log("Removing AMQP configuration from env.php.");
+        if (isset($config['queue']['amqp'])) {
+            if (count($config['queue']) > 1) {
+                unset($config['queue']['amqp']);
+            } else {
+                unset($config['queue']);
+            }
+        }
 
+        return $config;
+    }
 
     /**
      * Generates admin password using default Magento settings
@@ -482,7 +560,9 @@ class Deploy
     private function isMasterBranch()
     {
         if (is_null($this->isMasterBranch)) {
-            if (isset($_ENV["MAGENTO_CLOUD_ENVIRONMENT"]) && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV["MAGENTO_CLOUD_ENVIRONMENT"])) {
+            if (isset($_ENV["MAGENTO_CLOUD_ENVIRONMENT"])
+                && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV["MAGENTO_CLOUD_ENVIRONMENT"])
+            ) {
                 $this->isMasterBranch = true;
             } else {
                 $this->isMasterBranch = false;
@@ -517,7 +597,6 @@ class Deploy
         return $this->database->executeDbQuery($query, $parameters, $resulttype);
     }
 
-
     /**
      *  This function deploys the static content.
      *  Moved this from processMagentoMode() to its own function because we changed the order to have
@@ -533,8 +612,6 @@ class Deploy
         }
     }
 
-
-
     /**
      * Based on variable APPLICATION_MODE. Production mode by default
      */
@@ -544,12 +621,14 @@ class Deploy
 
         /* Enable application mode */
         if ($this->magentoApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
-            // Note: We moved call to deployStaticContent to a new function, staticContentDeploy(), and made it run after production mode is enabled to work around the bug with the read only
+            /** Note: We moved call to deployStaticContent to a new function, staticContentDeploy(),
+             * and made it run after production mode is enabled to work around the bug with the read only
+             */
             $this->env->log("Enable production mode");
-            $configFileName = "app/etc/env.php";
+            $configFileName = $this->getConfigFilePath();
             $config = include $configFileName;
             $config['MAGE_MODE'] = 'production';
-            $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($config, true) . ';';
+            $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
             file_put_contents($configFileName, $updatedConfig);
         } else {
             $this->env->log("Enable developer mode");
@@ -578,24 +657,14 @@ class Deploy
 
         /* Generate static assets */
         $this->env->log("Extract locales");
-        $locales = [];
-        $output = $this->executeDbQuery("SELECT DISTINCT value FROM core_config_data WHERE path='general/locale/code';", [], MYSQLI_NUM);
-        $output = array_map(function($arrayin) {return $arrayin[0];}, $output);
-        if (is_array($output) && count($output) > 0) {
-            $locales = $output;
-            if (!in_array($this->adminLocale, $locales)) {
-                $locales[] = $this->adminLocale;
-            }
-            $locales = implode(' ', $locales);
-        }
 
         $excludeThemesOptions = '';
         if ($this->staticDeployExcludeThemes) {
             $themes = preg_split("/[,]+/", $this->staticDeployExcludeThemes);
             if (count($themes) > 1) {
                 $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
-            } elseif (count($themes) === 1){
-                $excludeThemesOptions = "--exclude-theme=" .  $themes[0];
+            } elseif (count($themes) === 1) {
+                $excludeThemesOptions = "--exclude-theme=" . $themes[0];
             }
         }
 
@@ -603,16 +672,52 @@ class Deploy
             ? "--jobs={$this->staticDeployThreads}"
             : '';
 
+        $locales = implode(' ', $this->getLocales());
         $logMessage = $locales ? "Generating static content for locales: $locales" : "Generating static content.";
         $this->env->log($logMessage);
 
+        // @codingStandardsIgnoreStart
         $this->env->execute(
             "php ./bin/magento setup:static-content:deploy  -f $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
         );
+        // @codingStandardsIgnoreEnd
 
         /* Disable maintenance mode */
         $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
         $this->env->log("Maintenance mode is disabled.");
+    }
+
+
+    /**
+     * Gets locales from DB which are set to stores and admin users.
+     * Adds additional default 'en_US' locale to result, if it does't exist yet in defined list.
+     *
+     * @return array List of locales. Returns empty array in case when no locales are defined in DB
+     * ```php
+     * [
+     *     'en_US',
+     *     'fr_FR'
+     * ]
+     * ```
+     */
+    private function getLocales()
+    {
+        $locales = [];
+
+        $query = 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
+            . 'UNION SELECT interface_locale FROM admin_user;';
+        $output = $this->executeDbQuery($query);
+
+        if (is_array($output) && count($output) > 1) {
+            //first element should be shifted as it is the name of column
+            array_shift($output);
+            $locales = $output;
+
+            if (!in_array($this->adminLocale, $locales)) {
+                $locales[] = $this->adminLocale;
+            }
+        }
+        return $locales;
     }
 
     /**
@@ -624,7 +729,7 @@ class Deploy
 
         $routes = $this->env->getRoutes();
 
-        foreach($routes as $key => $val) {
+        foreach ($routes as $key => $val) {
             if ($val["type"] !== "upstream") {
                 continue;
             }
@@ -632,12 +737,12 @@ class Deploy
             $urlParts = parse_url($val['original_url']);
             $originalUrl = str_replace(self::MAGIC_ROUTE, '', $urlParts['host']);
 
-            if(strpos($key, self::PREFIX_UNSECURE) === 0) {
+            if (strpos($key, self::PREFIX_UNSECURE) === 0) {
                 $this->urls['unsecure'][$originalUrl] = $key;
                 continue;
             }
 
-            if(strpos($key, self::PREFIX_SECURE) === 0) {
+            if (strpos($key, self::PREFIX_SECURE) === 0) {
                 $this->urls['secure'][$originalUrl] = $key;
                 continue;
             }
@@ -684,7 +789,8 @@ class Deploy
         // Clear redis and file caches
         $relationships = $this->env->getRelationships();
         $var = $this->env->getVariables();
-        $useStaticContentSymlink = isset($var["STATIC_CONTENT_SYMLINK"]) && $var["STATIC_CONTENT_SYMLINK"] == 'disabled' ? false : true;
+        $useStaticContentSymlink = isset($var["STATIC_CONTENT_SYMLINK"]) && $var["STATIC_CONTENT_SYMLINK"] == 'disabled'
+            ? false : true;
 
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
             $redisHost = $relationships['redis'][0]['host'];
@@ -720,8 +826,15 @@ class Deploy
                     $dir = new \DirectoryIterator($buildDir . 'pub/static');
                     foreach ($dir as $fileInfo) {
                         $fileName = $fileInfo->getFilename();
-                        if (!$fileInfo->isDot() && symlink($buildDir . 'pub/static/' . $fileName, $staticContentLocation . '/' . $fileName)) {
+                        if (!$fileInfo->isDot()
+                            && symlink(
+                                $buildDir . 'pub/static/' . $fileName,
+                                $staticContentLocation . '/' . $fileName
+                            )
+                        ) {
+                            // @codingStandardsIgnoreStart
                             $this->env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
+                            // @codingStandardsIgnoreEnd
                         }
                     }
                 }
@@ -748,12 +861,52 @@ class Deploy
      * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
      *                    or trailing slashes
      */
-    private function copyFromBuildDir($dir) {
-        if (!file_exists($dir)) {
-            mkdir($dir);
+    private function copyFromBuildDir($dir)
+    {
+        $fullPathDir = Environment::MAGENTO_ROOT . $dir;
+        if (!file_exists($fullPathDir)) {
+            mkdir($fullPathDir);
             $this->env->log(sprintf('Created directory: %s', $dir));
         }
         $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
         $this->env->log(sprintf('Copied directory: %s', $dir));
+    }
+
+    /**
+     * Return full path to environment configuration file.
+     *
+     * @return string The path to configuration file
+     */
+    private function getConfigFilePath()
+    {
+        return Environment::MAGENTO_ROOT . 'app/etc/env.php';
+    }
+
+    /**
+     * Clears configuration from redis usages.
+     *
+     * @param array $config An array of application configuration
+     * @return array
+     */
+    private function removeRedisConfiguration($config)
+    {
+        $this->env->log("Removing redis cache and session configuration from env.php.");
+
+        if (isset($config['session']['save']) && $config['session']['save'] == 'redis') {
+            $config['session']['save'] = 'db';
+            if (isset($config['session']['redis'])) {
+                unset($config['session']['redis']);
+            }
+        }
+
+        if (isset($config['cache']['frontend'])) {
+            foreach ($config['cache']['frontend'] as $cacheName => $cacheData) {
+                if (isset($cacheData['backend']) && $cacheData['backend'] == 'Cm_Cache_Backend_Redis') {
+                    unset($config['cache']['frontend'][$cacheName]);
+                }
+            }
+        }
+
+        return $config;
     }
 }
