@@ -855,7 +855,8 @@ class Deploy extends Command
      * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
      *                    or trailing slashes
      */
-    private function copyFromBuildDir($dir) {
+    private function copyFromBuildDir($dir)
+    {
         $fullPathDir = Environment::MAGENTO_ROOT . $dir;
         if (!file_exists($fullPathDir)) {
             mkdir($fullPathDir);
