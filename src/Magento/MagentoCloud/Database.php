@@ -12,15 +12,30 @@ namespace Magento\MagentoCloud;
 class Database
 {
     private $connection;
+    private $host;
+    private $user;
+    private $pass;
+    private $databasename;
 
     function __construct($host, /*$port,*/ $user, $pass, $databasename) {
-        $this->connection = new \mysqli($host, $user, $pass, $databasename);
-        if ($this->connection->connect_errno) {
-            throw new \RuntimeException("Error connecting to database.  $this->connection->connect_errno $this->connection->connect_error ", $this->connection->connect_error);
+        $this->host = $host;
+        $this->user = $user;
+        $this->pass = $pass;
+        $this->databasename = $databasename;
+    }
+
+    private function lazyConnect()
+    {
+        if ($this->connection == null) {
+            $this->connection = new \mysqli($this->host, $this->user, $this->pass, $this->databasename);
+            if ($this->connection->connect_errno) {
+                throw new \RuntimeException("Error connecting to database.  $this->connection->connect_errno $this->connection->connect_error ", $this->connection->connect_error);
+            }
         }
     }
 
     function executeDbQuery($query, $parameters = [], $resulttype = null) {
+        $this->lazyConnect();
         $statement = $this->connection->prepare($query);
         if (count($parameters) >= 2 ) {
             $referencearray = array(); // Note: workaround because bind_param requires references instead of values.
