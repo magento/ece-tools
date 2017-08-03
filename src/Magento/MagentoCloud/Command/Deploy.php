@@ -149,7 +149,7 @@ class Deploy extends Command
         $this->dbPassword = $relationships["database"][0]["password"];
 
         /* Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
-        $this->loadEnvironmentDataForAdmin();
+        $this->loadEnvironmentDataForAdmin($var);
 
         $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
             ? false : true;
@@ -213,8 +213,11 @@ class Deploy extends Command
     /**
      * Load the admin settings from the environment.  TODO: This logic will change once I'm done with MAGECLOUD-115/MAGERCLOUD-894
      */
-    private function loadEnvironmentDataForAdmin()
+    private function loadEnvironmentDataForAdmin($var = null)
     {
+        if (is_null($var)) {
+            $var = $this->env->getVariables();
+        }
         $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "admin";
         $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : "John";
         $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : "Doe";
