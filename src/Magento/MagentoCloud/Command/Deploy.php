@@ -714,10 +714,8 @@ class Deploy extends Command
         $query = 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
             . 'UNION SELECT interface_locale FROM admin_user;';
         $output = $this->database->executeDbQuery($query, [], MYSQLI_NUM);
-
-        if (is_array($output) && count($output) > 1) {
-            //first element should be shifted as it is the name of column
-            array_shift($output);
+        $output = array_map(function($arrayin) {return $arrayin[0];}, $output);
+        if (is_array($output) && count($output) > 0) {
             $locales = $output;
 
             if (!in_array($this->adminLocale, $locales)) {
