@@ -236,7 +236,6 @@ class Deploy extends Command
     }
 
 
-
     /**
      * Verifies is Magento installed based on install date in env.php
      *
@@ -253,7 +252,9 @@ class Deploy extends Command
 
         $this->env->log('Checking if db exists and has tables');
         $output = $this->database->executeDbQuery('SHOW TABLES', [], MYSQLI_NUM);
-        $output = array_map(function($arrayin) {return $arrayin[0];}, $output);
+        $output = array_map(function($arrayin) {
+            return $arrayin[0];
+        }, $output);
         if (is_array($output) && count($output) > 0) {
             if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
                 $this->env->log('Missing either core_config_data or setup_module table');
@@ -714,7 +715,9 @@ class Deploy extends Command
         $query = 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
             . 'UNION SELECT interface_locale FROM admin_user;';
         $output = $this->database->executeDbQuery($query, [], MYSQLI_NUM);
-        $output = array_map(function($arrayin) {return $arrayin[0];}, $output);
+        $output = array_map(function($arrayin) {
+            return $arrayin[0];
+            }, $output);
         if (is_array($output) && count($output) > 0) {
             $locales = $output;
 

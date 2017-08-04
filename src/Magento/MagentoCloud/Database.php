@@ -15,25 +15,40 @@ class Database
     private $host;
     private $user;
     private $pass;
-    private $databasename;
+    private $databaseName;
 
-    function __construct($host, /*$port,*/ $user, $pass, $databasename) {
+    function __construct($host, $user, $pass, $databasename) {
         $this->host = $host;
         $this->user = $user;
         $this->pass = $pass;
-        $this->databasename = $databasename;
+        $this->databaseName = $databasename;
     }
 
     private function lazyConnect()
     {
         if ($this->connection == null) {
-            $this->connection = new \mysqli($this->host, $this->user, $this->pass, $this->databasename);
+            $this->connection = new \mysqli($this->host, $this->user, $this->pass, $this->databaseName);
             if ($this->connection->connect_errno) {
-                throw new \RuntimeException("Error connecting to database.  $this->connection->connect_errno $this->connection->connect_error ", $this->connection->connect_error);
+                throw new \RuntimeException("Error connecting to database.  $this->connection->connect_errno $this->connection->connect_error ");
             }
         }
     }
 
+    /**
+     * Executes database query.  We are currently using mysqli for this, so the parameters, and output are specific to that.
+     * If we switch to a different database backend in the future, this will change.
+     *
+     * @param string $query
+     * $query must be completed, finished with semicolon (;)  Use question mark (?) for parameters.
+     * @param string $parameters
+     * $parameters is empty, [], if you don't need them.  Otherwise, the first element in the array must be the types
+     * of the rest of the array.  See http://php.net/manual/en/mysqli-stmt.bind-param.php for documentation on this.
+     * @param string $resulttype
+     * $resulttype should be set to null when you don't need the result of the query (ie.  UPDATE, INSERT, DELETE, etc)
+     * $resulttype should be either MYSQLI_NUM, MYSQLI_ASSOC, or MYSQLI_BOTH if you do want the output (ie. SELECT).
+     * http://php.net/manual/en/mysqli-stmt.get-result.php
+     * @return array|null
+     */
     function executeDbQuery($query, $parameters = [], $resulttype = null) {
         $this->lazyConnect();
         $statement = $this->connection->prepare($query);
