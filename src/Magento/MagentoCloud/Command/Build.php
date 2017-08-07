@@ -73,8 +73,8 @@ class Build extends Command
         $this->env->log($this->env->startingMessage("build"));
         $this->applyPatches();
         $this->marshallingFiles();
-        $this->composerDumpAutoload();
         $this->compileDI();
+        $this->composerDumpAutoload();
         $this->deployStaticContent();
         $this->clearInitDir();
         $this->env->execute('rm -rf app/etc/env.php');
