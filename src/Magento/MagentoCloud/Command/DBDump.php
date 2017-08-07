@@ -39,7 +39,7 @@ class DBDump
         $alternate_ip = preg_replace('~\.5\.5$~', '.6.6', gethostbyname($this_host));
         $alternate_host = gethostbyaddr($alternate_ip);
 
-        touch('/tmp/dbsync.prod.lock', "r+");
+        touch('/tmp/dbsync.prod.lock');
         $fp = fopen('/tmp/dbsync.prod.lock', "r+");
         if ($current_active == $this_host) {
             // Use a different DB host.
