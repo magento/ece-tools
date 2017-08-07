@@ -1,0 +1,16 @@
+sudo: false
+dist: trusty
+
+language: php
+php:
+  - 7.0
+  - 7.1
+env:
+  global:
+    - COMPOSER_BIN_DIR=~/bin
+cache:
+  apt: true
+  directories:
+    - $HOME/.composer/cache
+install: composer install --no-interaction --prefer-dist
+script: composer test

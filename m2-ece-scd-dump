@@ -3,5 +3,10 @@
 
 require_once __DIR__ . '/autoload.php';
 
-$scdDump = new Magento\MagentoCloud\Command\SCDConfigDump();
-$scdDump->execute();
+$command = new Magento\MagentoCloud\Command\SCDConfigDump();
+$application = new Symfony\Component\Console\Application();
+
+$application->addCommands([$command]);
+$application->setDefaultCommand($command->getName());
+
+$application->run();
