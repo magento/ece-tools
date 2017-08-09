@@ -78,6 +78,10 @@ class Application extends \Symfony\Component\Console\Application
                         300 => $container->make(\Magento\MagentoCloud\Process\CopySampleData::class),
                         400 => $container->make(\Magento\MagentoCloud\Process\CompileDi::class),
                         500 => $container->make(\Magento\MagentoCloud\Process\ComposerDumpAutoload::class),
+                        700 => $container->make(\Magento\MagentoCloud\Process\Build\ClearInitDirectory::class),
+                        800 => $container->make(
+                            \Magento\MagentoCloud\Process\Build\BackupToInitDirectory::class
+                        ),
                     ],
                 ]);
             });

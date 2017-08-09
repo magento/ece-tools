@@ -213,6 +213,7 @@ class Environment
         if (!array_key_exists($component, $this->componentVersions)) {
             $this->getVersionOfComponent($component);
         }
+
         return $this->componentVersions[$component];
     }
 
@@ -221,6 +222,7 @@ class Environment
         if (!array_key_exists($component, $this->componentVersions)) {
             $this->getVersionOfComponent($component);
         }
+
         return !is_null($this->componentVersions[$component]);
     }
 
@@ -243,6 +245,17 @@ class Environment
         if (!$first) {
             $message .= ")";
         }
+
         return $message;
+    }
+
+    /**
+     * Retrieves writable directories.
+     *
+     * @return array
+     */
+    public function getWritableDirectories(): array
+    {
+        return $this->writableDirs;
     }
 }
