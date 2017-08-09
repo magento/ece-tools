@@ -7,6 +7,7 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Database;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -69,6 +70,7 @@ class Deploy extends Command
     private $doDeployStaticContent;
 
     private $verbosityLevel;
+    private $database; /** @var Database|null This our connection to the database we use to execute queries. */
 
     /**
      * @var Environment
@@ -77,8 +79,8 @@ class Deploy extends Command
 
     public function __construct()
     {
-        $this->env = new Environment();
-
+        $this->loadEnvironmentData();
+        $this->createDatabaseConnection();
         parent::__construct();
     }
 
@@ -102,7 +104,6 @@ class Deploy extends Command
     {
         $this->preDeploy();
         $this->env->log("Starting deploy.");
-        $this->saveEnvironmentData();
         $this->createConfigIfNotYetExist();
         $this->processMagentoMode();
         if (!$this->isInstalled()) {
@@ -132,8 +133,9 @@ class Deploy extends Command
     /**
      * Parse and save information about environment configuration and variables.
      */
-    private function saveEnvironmentData()
+    private function loadEnvironmentData()
     {
+        $this->env = new Environment();
         $this->env->log("Preparing environment specific data.");
 
         $this->initRoutes();
@@ -146,13 +148,8 @@ class Deploy extends Command
         $this->dbUser = $relationships["database"][0]["username"];
         $this->dbPassword = $relationships["database"][0]["password"];
 
-        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "admin";
-        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : "John";
-        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : "Doe";
-        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : "john@example.com";
-        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "admin12";
-        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
-        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
+        /* Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
+        $this->loadEnvironmentDataForAdmin($var);
 
         $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
             ? false : true;
@@ -214,6 +211,32 @@ class Deploy extends Command
     }
 
     /**
+     * Load the admin settings from the environment.  TODO: This logic will change once I'm done with MAGECLOUD-115/MAGERCLOUD-894
+     */
+    private function loadEnvironmentDataForAdmin($var = null)
+    {
+        if (is_null($var)) {
+            $var = $this->env->getVariables();
+        }
+        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "admin";
+        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : "John";
+        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : "Doe";
+        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : "john@example.com";
+        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "admin12";
+        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
+        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
+    }
+
+    /**
+     * Create the database connection;
+     */
+    private function createDatabaseConnection()
+    {
+        $this->database = new Database($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
+    }
+
+
+    /**
      * Verifies is Magento installed based on install date in env.php
      *
      * @return bool
@@ -228,8 +251,11 @@ class Deploy extends Command
         //3. check install date
 
         $this->env->log('Checking if db exists and has tables');
-        $output = $this->executeDbQuery('SHOW TABLES');
-        if (is_array($output) && count($output) > 1) {
+        $output = $this->database->executeDbQuery('SHOW TABLES', [], MYSQLI_NUM);
+        $output = array_map(function($arrayin) {
+            return $arrayin[0];
+        }, $output);
+        if (is_array($output) && count($output) > 0) {
             if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
                 $this->env->log('Missing either core_config_data or setup_module table');
                 exit(5);
@@ -337,7 +363,8 @@ class Deploy extends Command
         $this->env->log("Updating admin credentials.");
 
         // @codingStandardsIgnoreStart
-        $this->executeDbQuery("update admin_user set firstname = '$this->adminFirstname', lastname = '$this->adminLastname', email = '$this->adminEmail', username = '$this->adminUsername', password='{$this->generatePassword($this->adminPassword)}' where user_id = '1';");
+        $this->database->executeDbQuery("UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';",
+        ["sssss", $this->adminFirstname, $this->adminLastname, $this->adminEmail, $this->adminUsername, $this->generatePassword($this->adminPassword) ]);
         // @codingStandardsIgnoreEnd
     }
 
@@ -347,18 +374,17 @@ class Deploy extends Command
     private function updateSolrConfiguration()
     {
         $this->env->log("Updating SOLR configuration.");
-
-        if ($this->solrHost !== null
-            && $this->solrPort !== null
-            && $this->solrPath !== null
-            && $this->solrHost !== null
-        ) {
-            // @codingStandardsIgnoreStart
-            $this->executeDbQuery("update core_config_data set value = '$this->solrHost' where path = 'catalog/search/solr_server_hostname' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrPort' where path = 'catalog/search/solr_server_port' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrScheme' where path = 'catalog/search/solr_server_username' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrPath' where path = 'catalog/search/solr_server_path' and scope_id = '0';");
-            // @codingStandardsIgnoreEnd
+        if ($this->solrHost !== null && $this->solrPort !== null && $this->solrPath !== null && $this->solrHost !== null) {
+          // @codingStandardsIgnoreStart
+            $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_hostname' AND scope_id = '0';",
+                ["s", $this->generatePassword($this->solrHost)]);
+            $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_port' AND scope_id = '0';",
+                ["s", $this->generatePassword($this->solrPort)]);
+            $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_username' AND scope_id = '0';",
+                ["s", $this->generatePassword($this->solrScheme)]);
+            $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_path' AND scope_id = '0';",
+                ["s", $this->generatePassword($this->solrPath)]);
+          // @codingStandardsIgnoreEnd
         }
     }
 
@@ -373,15 +399,17 @@ class Deploy extends Command
                 foreach ($urls as $route => $url) {
                     $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
                     if (!strlen($route)) {
-                        // @codingStandardsIgnoreStart
-                        $this->executeDbQuery("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and scope_id = '0';");
-                        // @codingStandardsIgnoreEnd
+                    // @codingStandardsIgnoreStart                      
+                        $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = ? AND scope_id = '0';",
+                            ["ss", $url, "web/$urlType/base_url"]);
+                      // @codingStandardsIgnoreEnd
                         continue;
                     }
                     $likeKey = $prefix . $route . '%';
                     $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
                     // @codingStandardsIgnoreStart
-                    $this->executeDbQuery("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and (value like '$likeKey' or value like '$likeKeyParsed');");
+                    $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = ? AND (value LIKE ? OR value LIKE ?);",
+                        ["ssss", $url, "web/$urlType/base_url", $likeKey, $likeKeyParsed]);
                     // @codingStandardsIgnoreEnd
                 }
             }
@@ -573,22 +601,8 @@ class Deploy extends Command
     {
         if (!$this->isMasterBranch()) {
             $this->env->log("Disabling Google Analytics");
-            $this->executeDbQuery("update core_config_data set value = 0 where path = 'google/analytics/active';");
+            $this->database->executeDbQuery("UPDATE core_config_data SET value = 0 WHERE path = 'google/analytics/active';");
         }
-    }
-
-    /**
-     * Executes database query
-     *
-     * @param string $query
-     * $query must be completed, finished with semicolon (;)
-     * @return mixed
-     */
-    private function executeDbQuery($query)
-    {
-        $password = strlen($this->dbPassword) ? sprintf('-p%s', $this->dbPassword) : '';
-
-        return $this->env->execute("mysql -u $this->dbUser -h $this->dbHost -e \"$query\" $password $this->dbName");
     }
 
     /**
@@ -700,11 +714,11 @@ class Deploy extends Command
 
         $query = 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
             . 'UNION SELECT interface_locale FROM admin_user;';
-        $output = $this->executeDbQuery($query);
-
-        if (is_array($output) && count($output) > 1) {
-            //first element should be shifted as it is the name of column
-            array_shift($output);
+        $output = $this->database->executeDbQuery($query, [], MYSQLI_NUM);
+        $output = array_map(function($arrayin) {
+            return $arrayin[0];
+            }, $output);
+        if (is_array($output) && count($output) > 0) {
             $locales = $output;
 
             if (!in_array($this->adminLocale, $locales)) {

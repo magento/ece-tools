@@ -7,6 +7,7 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Database;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -34,12 +35,26 @@ class SCDConfigDump extends Command
      * @var Environment
      */
     private $env;
+    private $database;
 
     public function __construct()
     {
         $this->env = new Environment();
-
+        $this->createDatabaseConnection();
         parent::__construct();
+    }
+
+    /**
+     * Create the database connection;
+     */
+    private function createDatabaseConnection()
+    {
+        $relationships = $this->env->getRelationships();
+        $dbHost = $relationships["database"][0]["host"];
+        $dbName = $relationships["database"][0]["path"];
+        $dbUser = $relationships["database"][0]["username"];
+        $dbPassword = $relationships["database"][0]["password"];
+        $this->database = new Database($dbHost, $dbUser, $dbPassword, $dbName);
     }
 
     /**
@@ -101,9 +116,11 @@ class SCDConfigDump extends Command
                     unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
                 }
                 //locales for admin user
-                $newConfig['admin_user']['locale']['code'] =
-                    $this->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user');
-
+                $output = $this->database->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user', [], MYSQLI_NUM);
+                $output = array_map(function($arrayin) {
+                    return $arrayin[0];
+                }, $output);
+                $newConfig['admin_user']['locale']['code'] = $output;
                 $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
                 file_put_contents($configFile, $updatedConfig);
                 $this->env->execute('php bin/magento app:config:import -n');
@@ -129,21 +146,4 @@ class SCDConfigDump extends Command
         return $out;
     }
 
-    /**
-     * Executes database query
-     *
-     * @param string $query
-     * $query must be completed, finished with semicolon (;)
-     * @return array
-     */
-    private function executeDbQuery($query)
-    {
-        $relationships = $this->env->getRelationships();
-        $dbHost = $relationships["database"][0]["host"];
-        $dbName = $relationships["database"][0]["path"];
-        $dbUser = $relationships["database"][0]["username"];
-        $dbPassword = $relationships["database"][0]["password"];
-        $password = strlen($dbPassword) ? sprintf('-p%s', $dbPassword) : '';
-        return $this->env->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
-    }
 }
