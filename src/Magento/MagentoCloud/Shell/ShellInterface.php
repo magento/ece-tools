@@ -11,8 +11,7 @@ interface ShellInterface
      * Runs shell command.
      *
      * @param string $command The command.
-     * @param string|null $message The message to be displayed before execution
      * @return string The last line from execution result.
      */
-    public function execute(string $command, string $message = null);
+    public function execute(string $command);
 }

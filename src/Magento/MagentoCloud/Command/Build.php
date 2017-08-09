@@ -81,7 +81,6 @@ class Build extends Command
 
         $this->process->execute();
 
-        $this->applyPatches();
         $this->marshallingFiles();
         $this->compileDI();
         $this->composerDumpAutoload();

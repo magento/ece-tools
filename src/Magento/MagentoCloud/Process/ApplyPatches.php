@@ -6,7 +6,11 @@
 namespace Magento\MagentoCloud\Process;
 
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class ApplyPatches implements ProcessInterface
 {
     /**
@@ -15,11 +19,18 @@ class ApplyPatches implements ProcessInterface
     private $shell;
 
     /**
-     * @param ShellInterface $shell
+     * @var LoggerInterface
      */
-    public function __construct(ShellInterface $shell)
+    private $logger;
+
+    /**
+     * @param ShellInterface $shell
+     * @param LoggerInterface $logger
+     */
+    public function __construct(ShellInterface $shell, LoggerInterface $logger)
     {
         $this->shell = $shell;
+        $this->logger = $logger;
     }
 
     /**
@@ -27,6 +38,7 @@ class ApplyPatches implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute('php vendor/bin/m2-apply-patches', 'Applying patches.');
+        $this->logger->info('Applying patches.');
+        $this->shell->execute('php vendor/bin/m2-apply-patches');
     }
 }

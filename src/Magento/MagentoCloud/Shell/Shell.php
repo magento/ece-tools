@@ -29,12 +29,8 @@ class Shell implements ShellInterface
     /**
      * @inheritdoc
      */
-    public function execute(string $command, string $message = null)
+    public function execute(string $command)
     {
-        if ($message) {
-            $this->logger->info($message);
-        }
-
         $this->logger->info('Command:' . $command);
 
         $rootPathCommand = sprintf('cd %s && %s', Environment::MAGENTO_ROOT, $command);
