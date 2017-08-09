@@ -76,15 +76,21 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->env->setStaticDeployInBuild(false);
-        $this->env->log($this->env->startingMessage("build"));
+        try {
+            $this->env->setStaticDeployInBuild(false);
+            $this->env->log($this->env->startingMessage("build"));
 
-        $this->process->execute();
+            $this->process->execute();
 
-        $this->deployStaticContent();
-        $this->clearInitDir();
-        $this->env->execute('rm -rf app/etc/env.php');
-        $this->backupToInit();
+            $this->deployStaticContent();
+            $this->clearInitDir();
+            $this->env->execute('rm -rf app/etc/env.php');
+            $this->backupToInit();
+        } catch (\Exception $exception) {
+            $output->writeln($exception->getMessage());
+
+            return $exception->getCode();
+        }
     }
 
     /**
@@ -139,6 +145,7 @@ class Build extends Command
                 $result[$prefix . $key] = $value;
             }
         }
+
         return $result;
     }
 
@@ -157,6 +164,7 @@ class Build extends Command
                 }
             }
         }
+
         return array_unique(array_values($filteredResult));
     }
 
@@ -182,6 +190,7 @@ class Build extends Command
             if (count($stores) === 0 && count($websites) === 0) {
                 $this->env->log("No stores/website/locales found in config.php");
                 $this->env->setStaticDeployInBuild(false);
+
                 return;
             }
 
@@ -244,6 +253,7 @@ class Build extends Command
     private function parseBuildOptions()
     {
         $fileName = Environment::MAGENTO_ROOT . '/build_options.ini';
+
         return file_exists($fileName)
             ? parse_ini_file(Environment::MAGENTO_ROOT . '/build_options.ini')
             : [];

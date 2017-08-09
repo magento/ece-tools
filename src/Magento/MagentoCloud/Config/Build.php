@@ -34,4 +34,9 @@ class Build
 
         return isset($config[$key]) ? $config[$key] : null;
     }
+
+    public function getVerbosityLevel(): string
+    {
+        return $this->get('VERBOSE_COMMANDS') === 'enabled' ? ' -vv ' : '';
+    }
 }

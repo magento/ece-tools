@@ -6,10 +6,14 @@
 namespace Magento\MagentoCloud\Process;
 
 use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 
+/**
+ * @inheritdoc
+ */
 class CompileDi implements ProcessInterface
 {
     /**
@@ -28,30 +32,43 @@ class CompileDi implements ProcessInterface
     private $buildConfig;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
+     * @param File $file
      * @param BuildConfig $buildConfig
      */
-    public function __construct(LoggerInterface $logger, ShellInterface $shell, BuildConfig $buildConfig)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        ShellInterface $shell,
+        File $file,
+        BuildConfig $buildConfig
+    ) {
         $this->logger = $logger;
         $this->shell = $shell;
+        $this->file = $file;
         $this->buildConfig = $buildConfig;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     * @throws \RuntimeException
      */
     public function execute()
     {
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
+        $verbosityLevel = $this->buildConfig->getVerbosityLevel();
 
-        if (file_exists($configFile)) {
+        if ($this->file->isExists($configFile)) {
             if (!$this->buildConfig->get(BuildConfig::BUILD_OPT_SKIP_DI_COMPILATION)) {
-                $this->logger->info("Running DI compilation");
-                $this->shell->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
+                $this->logger->info('Running DI compilation');
+                $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel} ");
             } else {
-                $this->logger->info("Skip running DI compilation");
+                $this->logger->info('Skip running DI compilation');
             }
         } else {
             $this->logger->info(
@@ -61,7 +78,8 @@ class CompileDi implements ProcessInterface
                 . "\n 3. git commit -a -m 'adding config.php' "
                 . "\n 4. git push"
             );
-            exit(6);
+
+            throw new \RuntimeException('Missing config.php file', 6);
         }
     }
 }

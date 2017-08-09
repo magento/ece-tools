@@ -5,6 +5,12 @@
  */
 namespace Magento\MagentoCloud\Process;
 
+/**
+ * Process represent different application operations, such us:
+ * - DI Compilation
+ * - Static content deploy
+ * - etc
+ */
 interface ProcessInterface
 {
     /**
