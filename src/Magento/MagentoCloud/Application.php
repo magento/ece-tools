@@ -74,6 +74,8 @@ class Application extends \Symfony\Component\Console\Application
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
                         100 => $container->make(\Magento\MagentoCloud\Process\ApplyPatches::class),
+                        200 => $container->make(\Magento\MagentoCloud\Process\MarshallingFiles::class),
+                        300 => $container->make(\Magento\MagentoCloud\Process\CopySampleData::class),
                     ],
                 ]);
             });
