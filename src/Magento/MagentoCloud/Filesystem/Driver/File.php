@@ -37,7 +37,7 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isExists($path)
+    public function isExists($path) : bool
     {
         clearstatcache();
         $result = @file_exists($path);
@@ -88,7 +88,7 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isFile($path)
+    public function isFile($path) : bool
     {
         clearstatcache();
         $result = @is_file($path);
@@ -105,7 +105,7 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isDirectory($path)
+    public function isDirectory($path) : bool
     {
         clearstatcache();
         $result = @is_dir($path);
