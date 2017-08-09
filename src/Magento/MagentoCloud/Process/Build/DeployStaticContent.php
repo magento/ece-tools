@@ -121,7 +121,7 @@ class DeployStaticContent implements ProcessInterface
                     "php ./bin/magento setup:static-content:deploy -f %s %s %s\n",
                     $excludeThemesOptions,
                     $locale,
-                    $this->verbosityLevel
+                    $this->buildConfig->getVerbosityLevel()
                 );
             }
             $this->shell->execute(sprintf(
