@@ -3,9 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process;
+namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Process\ApplyPatches;
+use Magento\MagentoCloud\Process\Build\ApplyPatches;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
