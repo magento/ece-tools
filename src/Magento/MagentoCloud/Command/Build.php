@@ -56,7 +56,6 @@ class Build extends Command
         try {
             $this->process->execute();
         } catch (\Exception $exception) {
-            $output->writeln($exception->getMessage());
             $this->logger->error($exception->getMessage());
 
             return $exception->getCode();

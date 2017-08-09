@@ -58,11 +58,13 @@ class Application extends \Symfony\Component\Console\Application
          */
         $container->bind(
             \Psr\Log\LoggerInterface::class,
-            \Magento\MagentoCloud\Logger\Logger::class
+            \Magento\MagentoCloud\Logger\Logger::class,
+            true
         );
         $container->bind(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
-            \Magento\MagentoCloud\Shell\Shell::class
+            \Magento\MagentoCloud\Shell\Shell::class,
+            true
         );
 
         /**
