@@ -28,11 +28,16 @@ class Build
         $this->reader = $reader;
     }
 
-    public function get(string $key)
+    /**
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function get(string $key, $default = null)
     {
         $config = $this->reader->read();
 
-        return isset($config[$key]) ? $config[$key] : null;
+        return isset($config[$key]) ? $config[$key] : $default;
     }
 
     public function getVerbosityLevel(): string

@@ -82,7 +82,6 @@ class Build extends Command
 
             $this->process->execute();
 
-            $this->deployStaticContent();
             $this->clearInitDir();
             $this->env->execute('rm -rf app/etc/env.php');
             $this->backupToInit();
@@ -132,109 +131,6 @@ class Build extends Command
                 $this->env->execute(sprintf('rm -rf %s', $dir));
                 $this->env->execute(sprintf('mkdir -p %s', $dir));
             }
-        }
-    }
-
-    private function flatten($array, $prefix = '')
-    {
-        $result = [];
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                $result = $result + $this->flatten($value, $prefix . $key . '/');
-            } else {
-                $result[$prefix . $key] = $value;
-            }
-        }
-
-        return $result;
-    }
-
-    private function filter($array, $pattern, $ending = true)
-    {
-        $filteredResult = [];
-        $length = strlen($pattern);
-        foreach ($array as $key => $value) {
-            if ($ending) {
-                if (substr($key, -$length) === $pattern) {
-                    $filteredResult[$key] = $value;
-                }
-            } else {
-                if (substr($key, 0, strlen($pattern)) === $pattern) {
-                    $filteredResult[$key] = $value;
-                }
-            }
-        }
-
-        return array_unique(array_values($filteredResult));
-    }
-
-    public function deployStaticContent()
-    {
-        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
-        if (file_exists($configFile) && !$this->getBuildOption(self::BUILD_OPT_SKIP_SCD)) {
-            $config = include $configFile;
-
-            $flattenedConfig = $this->flatten($config);
-            $websites = $this->filter($flattenedConfig, 'scopes/websites', false);
-            $stores = $this->filter($flattenedConfig, 'scopes/stores', false);
-
-            $locales = [];
-            $locales = array_merge($locales, $this->filter($flattenedConfig, 'general/locale/code'));
-            $locales = array_merge(
-                $locales,
-                $this->filter($flattenedConfig, 'admin_user/locale/code', false)
-            );
-            $locales[] = 'en_US';
-            $locales = array_unique($locales);
-
-            if (count($stores) === 0 && count($websites) === 0) {
-                $this->env->log("No stores/website/locales found in config.php");
-                $this->env->setStaticDeployInBuild(false);
-
-                return;
-            }
-
-            $SCDLocales = implode(' ', $locales);
-
-            $excludeThemesOptions = '';
-            if ($this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES)) {
-                $themes = preg_split("/[,]+/", $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES));
-                if (count($themes) > 1) {
-                    $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
-                } elseif (count($themes) === 1) {
-                    $excludeThemesOptions = "--exclude-theme=" . $themes[0];
-                }
-            }
-
-            $threads = $this->getBuildOption(self::BUILD_OPT_SCD_THREADS)
-                ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}"
-                : '0';
-
-            try {
-                $logMessage = $SCDLocales
-                    ? "Generating static content for locales: $SCDLocales"
-                    : "Generating static content.";
-                $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
-                $logMessage .= $threads ? "\nUsing $threads Threads" : "";
-
-                $this->env->log($logMessage);
-
-                $parallelCommands = "";
-                foreach ($locales as $locale) {
-                    // @codingStandardsIgnoreStart
-                    $parallelCommands .= "php ./bin/magento setup:static-content:deploy -f $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
-                    // @codingStandardsIgnoreEnd
-                }
-                $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
-
-
-                $this->env->setStaticDeployInBuild(true);
-            } catch (\Exception $e) {
-                $this->env->log($e->getMessage());
-                exit(5);
-            }
-        } else {
-            $this->env->log("Skipping static content deploy");
         }
     }
 
