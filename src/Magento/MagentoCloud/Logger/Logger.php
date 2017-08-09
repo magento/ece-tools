@@ -11,16 +11,15 @@ use Monolog\Handler\StreamHandler;
 
 class Logger extends \Monolog\Logger implements \Psr\Log\LoggerInterface
 {
-    const DEPLOY_LOG = Environment::MAGENTO_ROOT . 'var/log/cloud_deploy.log';
-
     public function __construct()
     {
         $formatter = new LineFormatter();
         $formatter->allowInlineLineBreaks(true);
 
-        $file = (new StreamHandler(static::DEPLOY_LOG))->setFormatter($formatter);
+        $deployLogPath = Environment::MAGENTO_ROOT . 'var/log/cloud_deploy.log';
+        $fileHandler = (new StreamHandler($deployLogPath))->setFormatter($formatter);
         $stdOutHandler = (new StreamHandler('php://stdout'))->setFormatter($formatter);
 
-        parent::__construct('default', [$file, $stdOutHandler]);
+        parent::__construct('default', [$fileHandler, $stdOutHandler]);
     }
 }

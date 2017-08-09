@@ -81,7 +81,6 @@ class Build extends Command
 
         $this->process->execute();
 
-        $this->marshallingFiles();
         $this->compileDI();
         $this->composerDumpAutoload();
         $this->deployStaticContent();
@@ -239,46 +238,6 @@ class Build extends Command
     {
         $this->env->log("Applying patches.");
         $this->env->execute('php vendor/bin/m2-apply-patches');
-    }
-
-    /**
-     * Marshalls required files.
-     */
-    private function marshallingFiles()
-    {
-        $this->env->execute('rm -rf generated/code/*');
-        $this->env->execute('rm -rf generated/metadata/*');
-        $this->env->execute('rm -rf var/cache');
-
-        copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
-        $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
-        if (!file_exists($enterpriseFolder)) {
-            mkdir($enterpriseFolder, 0777, true);
-        }
-        copy(
-            Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml',
-            Environment::MAGENTO_ROOT . 'app/enterprise/di.xml'
-        );
-
-        $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
-        if (file_exists($sampleDataDir)) {
-            $this->env->log("Sample data media found. Marshalling to pub/media.");
-            $destination = Environment::MAGENTO_ROOT . '/pub/media';
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($sampleDataDir, \RecursiveDirectoryIterator::SKIP_DOTS),
-                \RecursiveIteratorIterator::SELF_FIRST
-            );
-
-            foreach ($iterator as $item) {
-                if ($item->isDir()) {
-                    if (!file_exists($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName())) {
-                        mkdir($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
-                    }
-                } else {
-                    copy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
-                }
-            }
-        }
     }
 
     private function compileDI()
