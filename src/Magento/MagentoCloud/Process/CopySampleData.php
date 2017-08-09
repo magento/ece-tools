@@ -33,6 +33,9 @@ class CopySampleData implements ProcessInterface
         $this->file = $file;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
         $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
