@@ -81,66 +81,11 @@ class Build extends Command
             $this->env->log($this->env->startingMessage("build"));
 
             $this->process->execute();
-
-            $this->clearInitDir();
-            $this->env->execute('rm -rf app/etc/env.php');
-            $this->backupToInit();
         } catch (\Exception $exception) {
             $output->writeln($exception->getMessage());
 
             return $exception->getCode();
         }
-    }
-
-    /**
-     * Writable directories will be erased when the writable filesystem is mounted to them. This
-     * step backs them up to ./init/
-     */
-    private function backupToInit()
-    {
-        if (file_exists(Environment::REGENERATE_FLAG)) {
-            $this->env->log("Removing .regenerate flag");
-            unlink(Environment::REGENERATE_FLAG);
-        }
-
-        if ($this->env->isStaticDeployInBuild()) {
-            $this->env->log("Moving static content to init directory");
-            $this->env->execute('mkdir -p ./init/pub/');
-            if (file_exists('./init/pub/static')) {
-                $this->env->log("Remove ./init/pub/static");
-                unlink('./init/pub/static');
-            }
-            $this->env->execute('cp -R ./pub/static/ ./init/pub/static');
-            copy(
-                Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
-            );
-        } else {
-            $this->env->log("No file " . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        }
-
-        $this->env->log("Copying writable directories to temp directory.");
-        foreach ($this->env->writableDirs as $dir) {
-            $this->env->execute(sprintf('mkdir -p init/%s', $dir));
-            $this->env->execute(sprintf('mkdir -p %s', $dir));
-
-            if (count(scandir(Environment::MAGENTO_ROOT . $dir)) > 2) {
-                $this->env->execute(
-                    sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir)
-                );
-                $this->env->execute(sprintf('rm -rf %s', $dir));
-                $this->env->execute(sprintf('mkdir -p %s', $dir));
-            }
-        }
-    }
-
-    /**
-     * Clear content of temp directory
-     */
-    private function clearInitDir()
-    {
-        $this->env->log("Clearing temporary directory.");
-        $this->env->execute('rm -rf ../init/*');
     }
 
     /**

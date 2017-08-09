@@ -79,6 +79,10 @@ class Application extends \Symfony\Component\Console\Application
                         400 => $container->make(\Magento\MagentoCloud\Process\Build\CompileDi::class),
                         500 => $container->make(\Magento\MagentoCloud\Process\Build\ComposerDumpAutoload::class),
                         600 => $container->make(\Magento\MagentoCloud\Process\Build\DeployStaticContent::class),
+                        700 => $container->make(\Magento\MagentoCloud\Process\Build\ClearInitDirectory::class),
+                        800 => $container->make(
+                            \Magento\MagentoCloud\Process\Build\BackupToInitDirectory::class
+                        ),
                     ],
                 ]);
             });
