@@ -21,6 +21,11 @@ class Build
     private $reader;
 
     /**
+     * @var array
+     */
+    private $config;
+
+    /**
      * @param ReaderInterface $reader
      */
     public function __construct(ReaderInterface $reader)
@@ -35,11 +40,16 @@ class Build
      */
     public function get(string $key, $default = null)
     {
-        $config = $this->reader->read();
+        if ($this->config === null) {
+            $this->config = $this->reader->read();
+        }
 
-        return isset($config[$key]) ? $config[$key] : $default;
+        return isset($this->config[$key]) ? $this->config[$key] : $default;
     }
 
+    /**
+     * @return string
+     */
     public function getVerbosityLevel(): string
     {
         return $this->get('VERBOSE_COMMANDS') === 'enabled' ? ' -vv ' : '';
