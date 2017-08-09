@@ -6,11 +6,11 @@
 namespace Magento\MagentoCloud;
 
 use Illuminate\Container\Container;
-use Illuminate\Contracts\Container\Container as ContainerContract;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessPool;
+use Magento\MagentoCloud\Process\Build as BuildProcess;
 
 /**
  * @inheritdoc
@@ -48,10 +48,10 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Binds interfaces and contexts.
      *
-     * @param ContainerContract $container
-     * @return ContainerContract
+     * @param Container $container
+     * @return Container
      */
-    private function configureContainer(ContainerContract $container)
+    private function configureContainer(Container $container)
     {
         /**
          * Interface to implementation binding.
@@ -73,16 +73,15 @@ class Application extends \Symfony\Component\Console\Application
             ->give(function () use ($container) {
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
-                        100 => $container->make(\Magento\MagentoCloud\Process\Build\ApplyPatches::class),
-                        200 => $container->make(\Magento\MagentoCloud\Process\Build\MarshallingFiles::class),
-                        300 => $container->make(\Magento\MagentoCloud\Process\Build\CopySampleData::class),
-                        400 => $container->make(\Magento\MagentoCloud\Process\Build\CompileDi::class),
-                        500 => $container->make(\Magento\MagentoCloud\Process\Build\ComposerDumpAutoload::class),
-                        600 => $container->make(\Magento\MagentoCloud\Process\Build\DeployStaticContent::class),
-                        700 => $container->make(\Magento\MagentoCloud\Process\Build\ClearInitDirectory::class),
-                        800 => $container->make(
-                            \Magento\MagentoCloud\Process\Build\BackupToInitDirectory::class
-                        ),
+                        100 => $container->make(BuildProcess\PreBuild::class),
+                        200 => $container->make(BuildProcess\ApplyPatches::class),
+                        300 => $container->make(BuildProcess\MarshallingFiles::class),
+                        400 => $container->make(BuildProcess\CopySampleData::class),
+                        500 => $container->make(BuildProcess\CompileDi::class),
+                        600 => $container->make(BuildProcess\ComposerDumpAutoload::class),
+                        700 => $container->make(BuildProcess\DeployStaticContent::class),
+                        800 => $container->make(BuildProcess\ClearInitDirectory::class),
+                        900 => $container->make(BuildProcess\BackupToInitDirectory::class),
                     ],
                 ]);
             });
