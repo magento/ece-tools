@@ -35,21 +35,29 @@ class DeployStaticContent implements ProcessInterface
     private $buildConfig;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param BuildConfig $buildConfig
      * @param File $file
+     * @param Environment $environment
      */
     public function __construct(
         ShellInterface $shell,
         LoggerInterface $logger,
         BuildConfig $buildConfig,
-        File $file
+        File $file,
+        Environment $environment
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->shell = $shell;
         $this->buildConfig = $buildConfig;
+        $this->environment = $environment;
     }
 
     /**
@@ -59,7 +67,7 @@ class DeployStaticContent implements ProcessInterface
     {
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
         if (!$this->file->isExists($configFile) || $this->buildConfig->get(BuildConfig::BUILD_OPT_SKIP_SCD)) {
-            $this->logger->info('Skipping static content deploy');
+            $this->logger->notice('Skipping static content deploy');
         }
 
         $config = include $configFile;
@@ -79,7 +87,7 @@ class DeployStaticContent implements ProcessInterface
 
         if (count($stores) === 0 && count($websites) === 0) {
             $this->logger->info("No stores/website/locales found in config.php");
-            $this->env->setStaticDeployInBuild(false);
+            $this->environment->setStaticDeployInBuild(false);
 
             return;
         }
@@ -88,7 +96,7 @@ class DeployStaticContent implements ProcessInterface
 
         $excludeThemesOptions = '';
         if ($this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES)) {
-            $themes = preg_split("/[,]+/", $this->getBuildOption(self::BUILD_OPT_SCD_EXCLUDE_THEMES));
+            $themes = preg_split("/[,]+/", $this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES));
             if (count($themes) > 1) {
                 $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
             } elseif (count($themes) === 1) {
@@ -96,9 +104,7 @@ class DeployStaticContent implements ProcessInterface
             }
         }
 
-        $threads = $this->getBuildOption(self::BUILD_OPT_SCD_THREADS)
-            ? "{$this->getBuildOption(self::BUILD_OPT_SCD_THREADS)}"
-            : '0';
+        $threads = (int)$this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_THREADS, 0);
 
         try {
             $logMessage = $SCDLocales
@@ -111,17 +117,67 @@ class DeployStaticContent implements ProcessInterface
 
             $parallelCommands = "";
             foreach ($locales as $locale) {
-                // @codingStandardsIgnoreStart
-                $parallelCommands .= "php ./bin/magento setup:static-content:deploy -f $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
-                // @codingStandardsIgnoreEnd
+                $parallelCommands .= sprintf(
+                    "php ./bin/magento setup:static-content:deploy -f %s %s %s\n",
+                    $excludeThemesOptions,
+                    $locale,
+                    $this->buildConfig->getVerbosityLevel()
+                );
             }
-            $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
+            $this->shell->execute(sprintf(
+                "printf '%s' | xargs -I CMD -P %d bash -c CMD",
+                $parallelCommands,
+                $threads
+            ));
 
-
-            $this->env->setStaticDeployInBuild(true);
+            $this->environment->setStaticDeployInBuild(true);
         } catch (\Exception $e) {
-            $this->logger->info($e->getMessage());
+            $this->logger->error($e->getMessage());
             exit(5);
         }
+    }
+
+    /**
+     * @param array $array
+     * @param string $prefix
+     * @return array
+     */
+    private function flatten($array, $prefix = '') : array
+    {
+        $result = [];
+        foreach ($array as $key => $value) {
+            if (is_array($value)) {
+                $result = $result + $this->flatten($value, $prefix . $key . '/');
+            } else {
+                $result[$prefix . $key] = $value;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param array $array
+     * @param string $pattern
+     * @param bool $ending
+     * @return array
+     */
+    private function filter($array, $pattern, $ending = true) : array
+    {
+        $filteredResult = [];
+        $length = strlen($pattern);
+        foreach ($array as $key => $value) {
+            if ($ending) {
+                if (substr($key, -$length) === $pattern) {
+                    $filteredResult[$key] = $value;
+                }
+            } else {
+                if (substr($key, 0, strlen($pattern)) === $pattern) {
+                    $filteredResult[$key] = $value;
+                }
+            }
+        }
+
+        return array_unique(array_values($filteredResult));
     }
 }
