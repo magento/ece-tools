@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\Process;
 interface ProcessInterface
 {
     /**
+     * Executes the process.
+     *
      * @return void
      */
     public function execute();

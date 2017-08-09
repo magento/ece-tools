@@ -76,6 +76,8 @@ class Application extends \Symfony\Component\Console\Application
                         100 => $container->make(\Magento\MagentoCloud\Process\ApplyPatches::class),
                         200 => $container->make(\Magento\MagentoCloud\Process\MarshallingFiles::class),
                         300 => $container->make(\Magento\MagentoCloud\Process\CopySampleData::class),
+                        400 => $container->make(\Magento\MagentoCloud\Process\CompileDi::class),
+                        500 => $container->make(\Magento\MagentoCloud\Process\ComposerDumpAutoload::class),
                     ],
                 ]);
             });
@@ -86,6 +88,11 @@ class Application extends \Symfony\Component\Console\Application
                     'processes' => [
                     ],
                 ]);
+            });
+        $container->when(\Magento\MagentoCloud\Config\Build::class)
+            ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
+            ->give(function () use ($container) {
+                return $container->make(\Magento\MagentoCloud\Config\Build\Reader::class);
             });
 
         return $container;
