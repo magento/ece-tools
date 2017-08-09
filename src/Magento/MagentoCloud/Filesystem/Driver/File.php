@@ -7,7 +7,6 @@
  */
 namespace Magento\MagentoCloud\Filesystem\Driver;
 
-use Magento\Framework\Filesystem\Glob;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
@@ -17,11 +16,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
  */
 class File
 {
-    /**
-     * @var string
-     */
-    protected $scheme = '';
-
     /**
      * Returns last warning message string
      *
@@ -43,10 +37,10 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isExists($path)
+    public function isExists($path) : bool
     {
         clearstatcache();
-        $result = @file_exists($this->getScheme() . $path);
+        $result = @file_exists($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
@@ -63,7 +57,7 @@ class File
     public function stat($path)
     {
         clearstatcache();
-        $result = @stat($this->getScheme() . $path);
+        $result = @stat($path);
         if (!$result) {
             $this->fileSystemException('Cannot gather stats! %1', [$this->getWarningMessage()]);
         }
@@ -80,7 +74,7 @@ class File
     public function isReadable($path)
     {
         clearstatcache();
-        $result = @is_readable($this->getScheme() . $path);
+        $result = @is_readable($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
@@ -94,10 +88,10 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isFile($path)
+    public function isFile($path) : bool
     {
         clearstatcache();
-        $result = @is_file($this->getScheme() . $path);
+        $result = @is_file($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
@@ -111,10 +105,10 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isDirectory($path)
+    public function isDirectory($path) : bool
     {
         clearstatcache();
-        $result = @is_dir($this->getScheme() . $path);
+        $result = @is_dir($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
@@ -133,7 +127,7 @@ class File
     public function fileGetContents($path, $flag = null, $context = null)
     {
         clearstatcache();
-        $result = @file_get_contents($this->getScheme() . $path, $flag, $context);
+        $result = @file_get_contents($path, $flag, $context);
         if (false === $result) {
             $this->fileSystemException('Cannot read contents from file "%1" %2', [$path, $this->getWarningMessage()]);
         }
@@ -150,7 +144,7 @@ class File
     public function isWritable($path)
     {
         clearstatcache();
-        $result = @is_writable($this->getScheme() . $path);
+        $result = @is_writable($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
@@ -165,7 +159,7 @@ class File
      */
     public function getParentDirectory($path)
     {
-        return dirname($this->getScheme() . $path);
+        return dirname($path);
     }
 
     /**
@@ -191,7 +185,6 @@ class File
      */
     private function mkdirRecursive($path, $permissions = 0777)
     {
-        $path = $this->getScheme() . $path;
         if (is_dir($path)) {
             return true;
         }
@@ -246,7 +239,7 @@ class File
     {
         clearstatcache();
         $globPattern = rtrim($path, '/') . '/' . ltrim($pattern, '/');
-        $result = Glob::glob($globPattern, Glob::GLOB_BRACE);
+        $result = glob($globPattern, GLOB_BRACE);
         return is_array($result) ? $result : [];
     }
 
@@ -255,22 +248,12 @@ class File
      *
      * @param string $oldPath
      * @param string $newPath
-     * @param DriverInterface|null $targetDriver
      * @return bool
      * @throws FileSystemException
      */
-    public function rename($oldPath, $newPath, DriverInterface $targetDriver = null)
+    public function rename($oldPath, $newPath)
     {
-        $result = false;
-        $targetDriver = $targetDriver ?: $this;
-        if (get_class($targetDriver) == get_class($this)) {
-            $result = @rename($this->getScheme() . $oldPath, $newPath);
-        } else {
-            $content = $this->fileGetContents($oldPath);
-            if (false !== $targetDriver->filePutContents($newPath, $content)) {
-                $result = $this->deleteFile($newPath);
-            }
-        }
+        $result = @rename($oldPath, $newPath);
         if (!$result) {
             $this->fileSystemException(
                 'The path "%1" cannot be renamed into "%2" %3',
@@ -285,19 +268,12 @@ class File
      *
      * @param string $source
      * @param string $destination
-     * @param DriverInterface|null $targetDriver
      * @return bool
      * @throws FileSystemException
      */
-    public function copy($source, $destination, DriverInterface $targetDriver = null)
+    public function copy($source, $destination)
     {
-        $targetDriver = $targetDriver ?: $this;
-        if (get_class($targetDriver) == get_class($this)) {
-            $result = @copy($this->getScheme() . $source, $destination);
-        } else {
-            $content = $this->fileGetContents($source);
-            $result = $targetDriver->filePutContents($destination, $content);
-        }
+        $result = @copy($source, $destination);
         if (!$result) {
             $this->fileSystemException(
                 'The file or directory "%1" cannot be copied to "%2" %3',
@@ -308,6 +284,7 @@ class File
                 ]
             );
         }
+
         return $result;
     }
 
@@ -324,16 +301,13 @@ class File
             \RecursiveIteratorIterator::SELF_FIRST
         );
 
+        /** @var \RecursiveDirectoryIterator $iterator */
         foreach ($iterator as $item) {
+            $destinationPath = $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName();
             if ($item->isDir()) {
-                $this->createDirectory(
-                    $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName()
-                );
+                $this->createDirectory($destinationPath);
             } else {
-                $this->copy(
-                    $item,
-                    $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName()
-                );
+                $this->copy($item, $destinationPath);
             }
         }
     }
@@ -343,16 +317,12 @@ class File
      *
      * @param string $source
      * @param string $destination
-     * @param DriverInterface|null $targetDriver
      * @return bool
      * @throws FileSystemException
      */
-    public function symlink($source, $destination, DriverInterface $targetDriver = null)
+    public function symlink($source, $destination)
     {
-        $result = false;
-        if (get_class($targetDriver) == get_class($this)) {
-            $result = @symlink($this->getScheme() . $source, $destination);
-        }
+        $result = @symlink($source, $destination);
         if (!$result) {
             $this->fileSystemException(
                 'Cannot create a symlink for "%1" and place it to "%2" %3',
@@ -375,7 +345,7 @@ class File
      */
     public function deleteFile($path)
     {
-        $result = @unlink($this->getScheme() . $path);
+        $result = @unlink($path);
         if (!$result) {
             $this->fileSystemException('The file "%1" cannot be deleted %2', [$path, $this->getWarningMessage()]);
         }
@@ -401,7 +371,7 @@ class File
                 $this->deleteFile($entity->getPathname());
             }
         }
-        $result = @rmdir($this->getScheme() . $path);
+        $result = @rmdir($path);
         if (!$result) {
             $this->fileSystemException(
                 'The directory "%1" cannot be deleted %2',
@@ -421,7 +391,7 @@ class File
      */
     public function changePermissions($path, $permissions)
     {
-        $result = @chmod($this->getScheme() . $path, $permissions);
+        $result = @chmod($path, $permissions);
         if (!$result) {
             $this->fileSystemException(
                 'Cannot change permissions for path "%1" %2',
@@ -442,12 +412,12 @@ class File
      */
     public function changePermissionsRecursively($path, $dirPermissions, $filePermissions)
     {
-        $result = true;
         if ($this->isFile($path)) {
             $result = @chmod($path, $filePermissions);
         } else {
             $result = @chmod($path, $dirPermissions);
         }
+
         if (!$result) {
             $this->fileSystemException(
                 'Cannot change permissions for path "%1" %2',
@@ -489,9 +459,9 @@ class File
     public function touch($path, $modificationTime = null)
     {
         if (!$modificationTime) {
-            $result = @touch($this->getScheme() . $path);
+            $result = @touch($path);
         } else {
-            $result = @touch($this->getScheme() . $path, $modificationTime);
+            $result = @touch($path, $modificationTime);
         }
         if (!$result) {
             $this->fileSystemException(
@@ -513,7 +483,7 @@ class File
      */
     public function filePutContents($path, $content, $mode = null)
     {
-        $result = @file_put_contents($this->getScheme() . $path, $content, $mode);
+        $result = @file_put_contents($path, $content, $mode);
         if (!$result) {
             $this->fileSystemException(
                 'The specified "%1" file could not be written %2',
@@ -533,7 +503,7 @@ class File
      */
     public function fileOpen($path, $mode)
     {
-        $result = @fopen($this->getScheme() . $path, $mode);
+        $result = @fopen($path, $mode);
         if (!$result) {
             $this->fileSystemException('File "%1" cannot be opened %2', [$path, $this->getWarningMessage()]);
         }
@@ -817,10 +787,10 @@ class File
         // basepath. so if the basepath starts at position 0 in the path, we
         // must not concatinate them again because path is already absolute.
         if (0 === strpos($path, $basePath)) {
-            return $this->getScheme($scheme) . $path;
+            return $scheme . $path;
         }
 
-        return $this->getScheme($scheme) . $basePath . ltrim($this->fixSeparator($path), '/');
+        return $scheme . $basePath . ltrim($this->fixSeparator($path), '/');
     }
 
     /**
@@ -851,17 +821,6 @@ class File
     protected function fixSeparator($path)
     {
         return str_replace('\\', '/', $path);
-    }
-
-    /**
-     * Return path with scheme
-     *
-     * @param null|string $scheme
-     * @return string
-     */
-    protected function getScheme($scheme = null)
-    {
-        return $scheme ? $scheme . '://' : '';
     }
 
     /**

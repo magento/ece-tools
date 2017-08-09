@@ -73,6 +73,12 @@ class Application extends \Symfony\Component\Console\Application
             ->give(function () use ($container) {
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
+                        100 => $container->make(\Magento\MagentoCloud\Process\Build\ApplyPatches::class),
+                        200 => $container->make(\Magento\MagentoCloud\Process\Build\MarshallingFiles::class),
+                        300 => $container->make(\Magento\MagentoCloud\Process\Build\CopySampleData::class),
+                        400 => $container->make(\Magento\MagentoCloud\Process\Build\CompileDi::class),
+                        500 => $container->make(\Magento\MagentoCloud\Process\Build\ComposerDumpAutoload::class),
+                        600 => $container->make(\Magento\MagentoCloud\Process\Build\DeployStaticContent::class),
                         100 => $container->make(\Magento\MagentoCloud\Process\ApplyPatches::class),
                         200 => $container->make(\Magento\MagentoCloud\Process\MarshallingFiles::class),
                         300 => $container->make(\Magento\MagentoCloud\Process\CopySampleData::class),

@@ -3,10 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process;
+namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;

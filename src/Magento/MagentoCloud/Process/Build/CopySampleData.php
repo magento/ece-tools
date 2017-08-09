@@ -3,10 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process;
+namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
 class CopySampleData implements ProcessInterface
@@ -33,6 +34,9 @@ class CopySampleData implements ProcessInterface
         $this->file = $file;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
         $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
