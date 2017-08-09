@@ -233,15 +233,6 @@ class Build extends Command
     }
 
     /**
-     * Apply ECE patches as well as patches in m2-hotfixes
-     */
-    private function applyPatches()
-    {
-        $this->env->log("Applying patches.");
-        $this->env->execute('php vendor/bin/m2-apply-patches');
-    }
-
-    /**
      * Marshalls required files.
      */
     private function marshallingFiles()
