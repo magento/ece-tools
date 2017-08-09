@@ -81,8 +81,6 @@ class Build extends Command
 
         $this->process->execute();
 
-        $this->compileDI();
-        $this->composerDumpAutoload();
         $this->deployStaticContent();
         $this->clearInitDir();
         $this->env->execute('rm -rf app/etc/env.php');
@@ -231,28 +229,6 @@ class Build extends Command
         }
     }
 
-    private function compileDI()
-    {
-        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
-        if (file_exists($configFile)) {
-            if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
-                $this->env->log("Running DI compilation");
-                $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
-            } else {
-                $this->env->log("Skip running DI compilation");
-            }
-        } else {
-            $this->env->log(
-                "Missing config.php, please run the following commands "
-                . "\n 1. bin/magento module:enable --all "
-                . "\n 2. git add -f app/etc/config.php "
-                . "\n 3. git commit -a -m 'adding config.php' "
-                . "\n 4. git push"
-            );
-            exit(6);
-        }
-    }
-
     /**
      * Clear content of temp directory
      */
@@ -276,10 +252,5 @@ class Build extends Command
     private function getBuildOption($key)
     {
         return isset($this->buildOptions[$key]) ? $this->buildOptions[$key] : false;
-    }
-
-    private function composerDumpAutoload()
-    {
-        $this->env->execute('composer dump-autoload -o');
     }
 }

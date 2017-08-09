@@ -74,8 +74,8 @@ class Application extends \Symfony\Component\Console\Application
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
                         100 => $container->make(\Magento\MagentoCloud\Process\ApplyPatches::class),
-                        300 => $container->make(\Magento\MagentoCloud\Process\CompileDi::class),
-                        400 => $container->make(\Magento\MagentoCloud\Process\ComposerDumpAutoload::class),
+                        400 => $container->make(\Magento\MagentoCloud\Process\CompileDi::class),
+                        500 => $container->make(\Magento\MagentoCloud\Process\ComposerDumpAutoload::class),
                     ],
                 ]);
             });
