@@ -7,6 +7,7 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -40,8 +41,14 @@ class Build extends Command
      */
     private $verbosityLevel;
 
-    public function __construct()
+    /**
+     * @var ProcessInterface
+     */
+    private $process;
+
+    public function __construct(ProcessInterface $process)
     {
+        $this->process = $process;
         $this->buildOptions = $this->parseBuildOptions();
         $this->env = new Environment();
         $buildVerbosityLevel = $this->getBuildOption('VERBOSE_COMMANDS');
@@ -71,6 +78,9 @@ class Build extends Command
     {
         $this->env->setStaticDeployInBuild(false);
         $this->env->log($this->env->startingMessage("build"));
+
+        $this->process->execute();
+
         $this->applyPatches();
         $this->marshallingFiles();
         $this->compileDI();
