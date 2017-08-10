@@ -97,6 +97,8 @@ class Application extends \Symfony\Component\Console\Application
                         200 => $container->make(DeployProcess\ConfigFileCreator::class),
                         300 => $container->make(DeployProcess\MagentoMode::class),
                         400 => $container->make(DeployProcess\InstallUpdate::class),
+
+                        600 => $container->make(DeployProcess\DisableGoogleAnalytics::class),
                     ],
                 ]);
             });
