@@ -58,7 +58,7 @@ class PreDeploy implements ProcessInterface
     {
         $this->logger->info($this->env->startingMessage("pre-deploy"));
 
-        $relationships = $this->env->getRelationships();
+        $relationships = $this->deployConfig->getRelationships();
 
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
             $redisHost = $relationships['redis'][0]['host'];
