@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Process\ProcessInterface;
  */
 class Deploy extends Command
 {
-    const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
@@ -27,7 +26,6 @@ class Deploy extends Command
     private $dbUser;
     private $dbPassword;
 
-    private $isMasterBranch = null;
     private $magentoApplicationMode;
     private $cleanStaticViewFiles;
     private $staticDeployThreads;
@@ -79,7 +77,6 @@ class Deploy extends Command
             $this->process->execute();
 
             $this->staticContentDeploy();
-            $this->disableGoogleAnalytics();
 
             $this->env->log('Deployment complete.');
         } catch (\Exception $exception) {
@@ -87,37 +84,6 @@ class Deploy extends Command
         }
 
         return 0;
-    }
-
-    /**
-     * If current deploy is about master branch
-     *
-     * @return boolean
-     */
-    private function isMasterBranch()
-    {
-        if (is_null($this->isMasterBranch)) {
-            if (isset($_ENV["MAGENTO_CLOUD_ENVIRONMENT"])
-                && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV["MAGENTO_CLOUD_ENVIRONMENT"])
-            ) {
-                $this->isMasterBranch = true;
-            } else {
-                $this->isMasterBranch = false;
-            }
-        }
-
-        return $this->isMasterBranch;
-    }
-
-    /**
-     * If branch is not master then disable Google Analytics
-     */
-    private function disableGoogleAnalytics()
-    {
-        if (!$this->isMasterBranch()) {
-            $this->env->log("Disabling Google Analytics");
-            $this->executeDbQuery("update core_config_data set value = 0 where path = 'google/analytics/active';");
-        }
     }
 
     /**
