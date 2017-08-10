@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
+use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 
 /**
  * @inheritdoc
@@ -92,9 +93,10 @@ class Application extends \Symfony\Component\Console\Application
             ->give(function () use ($container) {
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
-                        100 => $container->make(\Magento\MagentoCloud\Process\Deploy\PreDeploy::class),
-                        200 => $container->make(\Magento\MagentoCloud\Process\Deploy\ConfigFileCreator::class),
-                        300 => $container->make(\Magento\MagentoCloud\Process\Deploy\MagentoMode::class),
+                        100 => $container->make(DeployProcess\PreDeploy::class),
+                        200 => $container->make(DeployProcess\ConfigFileCreator::class),
+                        300 => $container->make(DeployProcess\MagentoMode::class),
+                        400 => $container->make(DeployProcess\InstallUpdate::class),
                     ],
                 ]);
             });
