@@ -252,7 +252,7 @@ class Deploy extends Command
 
         $this->env->log('Checking if db exists and has tables');
         $output = $this->database->executeDbQuery('SHOW TABLES', [], MYSQLI_NUM);
-        $output = array_map(function($arrayin) {
+        $output = array_map(function ($arrayin) {
             return $arrayin[0];
         }, $output);
         if (is_array($output) && count($output) > 0) {
@@ -715,9 +715,9 @@ class Deploy extends Command
         $query = 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
             . 'UNION SELECT interface_locale FROM admin_user;';
         $output = $this->database->executeDbQuery($query, [], MYSQLI_NUM);
-        $output = array_map(function($arrayin) {
+        $output = array_map(function ($arrayin) {
             return $arrayin[0];
-            }, $output);
+        }, $output);
         if (is_array($output) && count($output) > 0) {
             $locales = $output;
 

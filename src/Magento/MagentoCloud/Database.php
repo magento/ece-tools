@@ -17,7 +17,8 @@ class Database
     private $pass;
     private $databaseName;
 
-    function __construct($host, $user, $pass, $databasename) {
+    public function __construct($host, $user, $pass, $databasename)
+    {
         $this->host = $host;
         $this->user = $user;
         $this->pass = $pass;
@@ -49,25 +50,26 @@ class Database
      * http://php.net/manual/en/mysqli-stmt.get-result.php
      * @return array|null
      */
-    function executeDbQuery($query, $parameters = [], $resulttype = null) {
+    public function executeDbQuery($query, $parameters = [], $resulttype = null)
+    {
         $this->lazyConnect();
         $statement = $this->connection->prepare($query);
-        if (count($parameters) >= 2 ) {
+        if (count($parameters) >= 2) {
             $referencearray = array(); // Note: workaround because bind_param requires references instead of values.
-            foreach($parameters as $key => $value) {
+            foreach ($parameters as $key => $value) {
                 $referencearray[$key] = &$parameters[$key];
             }
             if (!call_user_func_array(array($statement, 'bind_param'), $referencearray)) {
                 throw new \RuntimeException("Database bind_param error.  $statement->error ");
             }
         }
-        if (!$statement->execute() ) {
+        if (!$statement->execute()) {
             throw new \RuntimeException("Database execute error.  $statement->error ");
         }
         $data = null;
         if ($resulttype == MYSQLI_NUM || $resulttype == MYSQLI_ASSOC || $resulttype == MYSQLI_BOTH) {
             $result = $statement->get_result();
-            if ($result === FALSE) {
+            if ($result === false) {
                 throw new \RuntimeException("Database execute error.  $statement->error ");
             }
             $data = $result->fetch_all($resulttype);
@@ -76,5 +78,4 @@ class Database
         $statement->close();
         return $data;
     }
-
 }
