@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -61,7 +60,7 @@ class CompileDi implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
+        $configFile = MAGENTO_ROOT . 'app/etc/config.php';
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
 
         if ($this->file->isExists($configFile)) {

@@ -5,20 +5,31 @@
  */
 namespace Magento\MagentoCloud\Config\Build;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
 class Reader implements ReaderInterface
 {
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @param File $file
+     */
+    public function __construct(File $file)
+    {
+        $this->file = $file;
+    }
+
+    /**
      * @inheritdoc
      */
     public function read(): array
     {
-        $fileName = Environment::MAGENTO_ROOT . '/build_options.ini';
+        $fileName = MAGENTO_ROOT . '/build_options.ini';
 
-        return file_exists($fileName)
-            ? parse_ini_file(Environment::MAGENTO_ROOT . '/build_options.ini')
-            : [];
+        return $this->file->isExists($fileName) ? parse_ini_file($fileName) : [];
     }
 }

@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -57,18 +56,18 @@ class MarshallingFiles implements ProcessInterface
 
         try {
             $this->file->copy(
-                Environment::MAGENTO_ROOT . 'app/etc/di.xml',
-                Environment::MAGENTO_ROOT . 'app/di.xml'
+                MAGENTO_ROOT . 'app/etc/di.xml',
+                MAGENTO_ROOT . 'app/di.xml'
             );
 
-            $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
+            $enterpriseFolder = MAGENTO_ROOT . 'app/enterprise';
             if (!$this->file->isExists($enterpriseFolder)) {
                 $this->file->createDirectory($enterpriseFolder, 0777);
             }
 
             $this->file->copy(
-                Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml',
-                Environment::MAGENTO_ROOT . 'app/enterprise/di.xml'
+                MAGENTO_ROOT . 'app/etc/enterprise/di.xml',
+                MAGENTO_ROOT . 'app/enterprise/di.xml'
             );
         } catch (FileSystemException $e) {
             $this->logger->warning($e->getMessage());

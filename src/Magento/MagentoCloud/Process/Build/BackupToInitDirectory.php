@@ -76,8 +76,8 @@ class BackupToInitDirectory implements ProcessInterface
             $this->shell->execute('cp -R ./pub/static/ ./init/pub/static');
 
             $this->file->copy(
-                Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                Environment::MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+                MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG,
+                MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
             );
         } else {
             $this->logger->info('No file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
@@ -89,7 +89,7 @@ class BackupToInitDirectory implements ProcessInterface
             $this->shell->execute(sprintf('mkdir -p init/%s', $dir));
             $this->shell->execute(sprintf('mkdir -p %s', $dir));
 
-            if (count(scandir(Environment::MAGENTO_ROOT . $dir)) > 2) {
+            if (count(scandir(MAGENTO_ROOT . $dir)) > 2) {
                 $this->shell->execute(
                     sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir)
                 );

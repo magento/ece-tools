@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Shell;
 
-use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -33,7 +32,7 @@ class Shell implements ShellInterface
     {
         $this->logger->info('Command:' . $command);
 
-        $rootPathCommand = sprintf('cd %s && %s', Environment::MAGENTO_ROOT, $command);
+        $rootPathCommand = sprintf('cd %s && %s', MAGENTO_ROOT, $command);
 
         exec(
             $rootPathCommand,

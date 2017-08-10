@@ -587,7 +587,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function getConfigFilePath()
     {
-        return Environment::MAGENTO_ROOT . 'app/etc/env.php';
+        return MAGENTO_ROOT . 'app/etc/env.php';
     }
 
     /**

@@ -59,7 +59,7 @@ class SCDConfigDump extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
+            $configFile = MAGENTO_ROOT . 'app/etc/config.php';
             $this->env->execute("php bin/magento app:config:dump");
 
             if (file_exists($configFile)) {

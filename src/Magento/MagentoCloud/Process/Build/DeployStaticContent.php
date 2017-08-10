@@ -65,7 +65,7 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
+        $configFile = MAGENTO_ROOT. 'app/etc/config.php';
         if (!$this->file->isExists($configFile) || $this->buildConfig->get(BuildConfig::BUILD_OPT_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
         }

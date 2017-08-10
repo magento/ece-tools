@@ -127,7 +127,7 @@ class Deploy extends Command
 
     private function generateFreshStaticContent()
     {
-        $this->env->execute('touch ' . Environment::MAGENTO_ROOT . 'pub/static/deployed_version.txt');
+        $this->env->execute('touch ' . MAGENTO_ROOT . 'pub/static/deployed_version.txt');
         /* Enable maintenance mode */
         $this->env->log("Enabling Maintenance mode.");
         $this->env->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");

@@ -12,9 +12,8 @@ use Psr\Log\LoggerInterface;
  */
 class Environment
 {
-    const MAGENTO_ROOT = __DIR__ . '/../../../../../../../';
     const STATIC_CONTENT_DEPLOY_FLAG = '/.static_content_deploy';
-    const REGENERATE_FLAG = self::MAGENTO_ROOT . 'var/.regenerate';
+    const REGENERATE_FLAG = MAGENTO_ROOT. 'var/.regenerate';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
@@ -146,7 +145,7 @@ class Environment
     {
         $this->log('Command:' . $command);
 
-        $rootPathCommand = sprintf('cd %s && %s', Environment::MAGENTO_ROOT, $command);
+        $rootPathCommand = sprintf('cd %s && %s', MAGENTO_ROOT, $command);
 
         exec(
             $rootPathCommand,
@@ -178,24 +177,24 @@ class Environment
     {
         if ($flag) {
             $this->log('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-            touch(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            touch(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
         } else {
             if ($this->isStaticDeployInBuild()) {
                 $this->log('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-                unlink(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+                unlink(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
             }
         }
     }
 
     public function isStaticDeployInBuild()
     {
-        return file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        return file_exists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
     }
 
     public function removeStaticContent()
     {
         // atomic move within pub/static directory
-        $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static/') . '/';
+        $staticContentLocation = realpath(MAGENTO_ROOT . 'pub/static/') . '/';
         $timestamp = time();
         $oldStaticContentLocation = $staticContentLocation . 'old_static_content_' . $timestamp;
 
@@ -224,7 +223,7 @@ class Environment
         $this->log("Removing $oldStaticContentLocation in the background");
         $this->backgroundExecute("rm -rf $oldStaticContentLocation");
 
-        $preprocessedLocation = realpath(Environment::MAGENTO_ROOT . 'var') . '/view_preprocessed';
+        $preprocessedLocation = realpath(MAGENTO_ROOT . 'var') . '/view_preprocessed';
         if (file_exists($preprocessedLocation)) {
             $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
             $this->log("Rename $preprocessedLocation  to $oldPreprocessedLocation");
@@ -238,7 +237,7 @@ class Environment
 
     private function getVersionOfComponent($component)
     {
-        $composerjsonpath = Environment::MAGENTO_ROOT . "/vendor/magento/" . $component . "/composer.json";
+        $composerjsonpath = MAGENTO_ROOT . "/vendor/magento/" . $component . "/composer.json";
         $version = null;
         try {
             if (file_exists($composerjsonpath)) {

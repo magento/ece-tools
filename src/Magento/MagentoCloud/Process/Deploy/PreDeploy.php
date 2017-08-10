@@ -66,21 +66,21 @@ class PreDeploy implements ProcessInterface
             $this->shell->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushdb");
         }
 
-        $fileCacheDir = Environment::MAGENTO_ROOT . '/var/cache';
+        $fileCacheDir = MAGENTO_ROOT . '/var/cache';
         if ($this->file->isExists($fileCacheDir)) {
             $this->shell->execute("rm -rf $fileCacheDir");
         }
 
         $mountedDirectories = ['app/etc', 'pub/media'];
 
-        $buildDir = $this->file->getRealPath(Environment::MAGENTO_ROOT . 'init') . '/';
+        $buildDir = $this->file->getRealPath(MAGENTO_ROOT . 'init') . '/';
 
         /**
          * Handle case where static content is deployed during build hook:
          *  1. set a flag to be read by magento-cloud:deploy
          *  2. Either copy or symlink files from init/ directory, depending on strategy
          */
-        if ($this->file->isExists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
+        if ($this->file->isExists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
             $this->logger->info("Static content deployment was performed during build hook");
             $this->env->removeStaticContent();
 
@@ -88,7 +88,7 @@ class PreDeploy implements ProcessInterface
                 $this->logger->info("Symlinking static content from pub/static to init/pub/static");
 
                 // Symlink pub/static/* to init/pub/static/*
-                $staticContentLocation = $this->file->getRealPath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
+                $staticContentLocation = $this->file->getRealPath(MAGENTO_ROOT . 'pub/static') . '/';
                 if ($this->file->isExists($buildDir . 'pub/static')) {
                     $dir = new \DirectoryIterator($buildDir . 'pub/static');
                     foreach ($dir as $fileInfo) {
@@ -130,7 +130,7 @@ class PreDeploy implements ProcessInterface
      */
     private function copyFromBuildDir($dir)
     {
-        $fullPathDir = Environment::MAGENTO_ROOT . $dir;
+        $fullPathDir = MAGENTO_ROOT . $dir;
         if (!$this->file->isExists($fullPathDir)) {
             $this->file->createDirectory($fullPathDir);
             $this->logger->info(sprintf('Created directory: %s', $dir));

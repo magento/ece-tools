@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -39,7 +38,7 @@ class CopySampleData implements ProcessInterface
      */
     public function execute()
     {
-        $sampleDataDir = Environment::MAGENTO_ROOT . 'vendor/magento/sample-data-media';
+        $sampleDataDir = MAGENTO_ROOT . 'vendor/magento/sample-data-media';
         if (!$this->file->isExists($sampleDataDir)) {
             return;
         }
@@ -47,7 +46,7 @@ class CopySampleData implements ProcessInterface
         $this->logger->info("Sample data media found. Marshalling to pub/media.");
         $this->file->copyDirectory(
             $sampleDataDir,
-            Environment::MAGENTO_ROOT . '/pub/media'
+            MAGENTO_ROOT . '/pub/media'
         );
     }
 }
