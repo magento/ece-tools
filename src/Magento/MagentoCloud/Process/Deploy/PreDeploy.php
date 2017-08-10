@@ -40,6 +40,13 @@ class PreDeploy implements ProcessInterface
      */
     private $deployConfig;
 
+    /**
+     * @param Deploy $deployConfig
+     * @param Environment $env
+     * @param LoggerInterface $logger
+     * @param ShellInterface $shell
+     * @param File $file
+     */
     public function __construct(
         DeployConfig $deployConfig,
         Environment $env,
@@ -54,15 +61,17 @@ class PreDeploy implements ProcessInterface
         $this->file = $file;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
         $this->logger->info($this->env->startingMessage("pre-deploy"));
+        $redis = $this->deployConfig->getRelationship('redis');
 
-        $relationships = $this->deployConfig->getRelationships();
-
-        if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
-            $redisHost = $relationships['redis'][0]['host'];
-            $redisPort = $relationships['redis'][0]['port'];
+        if (count($redis) > 0) {
+            $redisHost = $redis[0]['host'];
+            $redisPort = $redis[0]['port'];
             $redisCacheDb = '1'; // Matches \Magento\MagentoCloud\Command\Deploy::$redisCacheDb
             $this->shell->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushdb");
         }

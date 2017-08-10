@@ -3,11 +3,8 @@
 
 require_once __DIR__ . '/autoload.php';
 
-$command = new Magento\MagentoCloud\Command\Deploy();
-$application = new Symfony\Component\Console\Application();
+$application = new \Magento\MagentoCloud\Application();
 
-$application->addCommands([$command]);
-$application->setDefaultCommand($command->getName());
-
+$application->setDefaultCommand('deploy');
 $application->run();
 

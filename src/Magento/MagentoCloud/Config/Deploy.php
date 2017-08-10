@@ -5,8 +5,6 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
-
 class Deploy
 {
     /**
@@ -40,6 +38,19 @@ class Deploy
     }
 
     /**
+     * Get relationship information from MagentoCloud environment variable by key.
+     *
+     * @param string $key
+     * @return array
+     */
+    public function getRelationship($key)
+    {
+        $relationships = $this->getRelationships();
+
+        return isset($relationships[$key]) ? $relationships[$key] : [];
+    }
+
+    /**
      * Get custom variables from MagentoCloud environment variable.
      *
      * @return mixed
@@ -60,7 +71,19 @@ class Deploy
     public function isStaticContentSymlinkOn()
     {
         $var = $this->getVariables();
+
         return isset($var['STATIC_CONTENT_SYMLINK']) && $var['STATIC_CONTENT_SYMLINK'] == 'disabled'
             ? false : true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVerbosityLevel(): string
+    {
+        $var = $this->getVariables();
+
+        return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled'
+            ? ' -vvv ' : '';
     }
 }

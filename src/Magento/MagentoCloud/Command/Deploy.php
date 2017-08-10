@@ -111,7 +111,7 @@ class Deploy extends Command
 
         $this->env->log("Starting deploy.");
         $this->saveEnvironmentData();
-        $this->createConfigIfNotYetExist();
+        //$this->createConfigIfNotYetExist();
         $this->processMagentoMode();
         if (!$this->isInstalled()) {
             $this->installMagento();
@@ -121,20 +121,6 @@ class Deploy extends Command
         $this->staticContentDeploy();
         $this->disableGoogleAnalytics();
         $this->env->log("Deployment complete.");
-    }
-
-    /**
-     * Create config file if it doesn't yet exist.
-     */
-    private function createConfigIfNotYetExist()
-    {
-        $configFile = $this->getConfigFilePath();
-        if (file_exists($configFile)) {
-            return;
-        }
-        //$this->env->execute('touch ' . Environment::MAGENTO_ROOT . $configFile);
-        $updatedConfig = '<?php' . "\n" . 'return array();';
-        file_put_contents($configFile, $updatedConfig);
     }
 
     /**
