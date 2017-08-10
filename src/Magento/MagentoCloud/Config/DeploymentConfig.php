@@ -92,7 +92,7 @@ class DeploymentConfig
      *
      * @return string The path to configuration file
      */
-    private function getConfigFilePath()
+    public function getConfigFilePath()
     {
         return Environment::MAGENTO_ROOT . 'app/etc/env.php';
     }

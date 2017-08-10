@@ -241,14 +241,4 @@ class Environment
     {
         return $this->writableDirs;
     }
-
-    /**
-     * Return full path to environment configuration file.
-     *
-     * @return string The path to configuration file
-     */
-    public function getConfigFilePath()
-    {
-        return Environment::MAGENTO_ROOT . 'app/etc/env.php';
-    }
 }

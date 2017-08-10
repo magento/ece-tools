@@ -7,27 +7,27 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Config\DeploymentConfig;
 
 class ConfigFileCreator implements ProcessInterface
 {
-    /**
-     * @var Environment
-     */
-    private $env;
-
     /**
      * @var File
      */
     private $file;
 
     /**
-     * @param Environment $env
+     * @var DeploymentConfig
+     */
+    private $deploymentConfig;
+
+    /**
+     * @param DeploymentConfig $deploymentConfig
      * @param File $file
      */
-    public function __construct(Environment $env, File $file)
+    public function __construct(DeploymentConfig $deploymentConfig, File $file)
     {
-        $this->env = $env;
+        $this->deploymentConfig = $deploymentConfig;
         $this->file = $file;
     }
 
@@ -36,7 +36,7 @@ class ConfigFileCreator implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = $this->env->getConfigFilePath();
+        $configFile = $this->deploymentConfig->getConfigFilePath();
         if ($this->file->isExists($configFile)) {
             return;
         }
