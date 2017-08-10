@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
-class MagentoMode implements ProcessInterface
+class SetMode implements ProcessInterface
 {
     /**
      * @var DeploymentConfig
@@ -65,11 +65,11 @@ class MagentoMode implements ProcessInterface
      */
     public function execute()
     {
-        $magentoApplicationMode = $this->env->getApplicationMode();
-        $this->logger->info("Set Magento application mode to '{$magentoApplicationMode}'");
+        $mode = $this->env->getApplicationMode();
+        $this->logger->info("Set Magento application mode to '{$mode}'");
 
         /* Enable application mode */
-        if ($magentoApplicationMode == Environment::MAGENTO_PRODUCTION_MODE) {
+        if ($mode == Environment::MAGENTO_PRODUCTION_MODE) {
             $this->logger->info("Enable production mode");
             $configFileName = $this->deploymentConfig->getConfigFilePath();
             $config = include $configFileName;

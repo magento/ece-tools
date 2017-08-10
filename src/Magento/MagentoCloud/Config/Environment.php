@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 class Environment
 {
     const STATIC_CONTENT_DEPLOY_FLAG = '/.static_content_deploy';
-    const REGENERATE_FLAG = MAGENTO_ROOT. 'var/.regenerate';
+    const REGENERATE_FLAG = MAGENTO_ROOT . 'var/.regenerate';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
@@ -118,7 +118,7 @@ class Environment
         $var = $this->getVariables();
         $magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
         $magentoApplicationMode =
-            in_array($magentoApplicationMode, array(self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE))
+            in_array($magentoApplicationMode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
                 ? $magentoApplicationMode
                 : self::MAGENTO_PRODUCTION_MODE;
 
@@ -303,5 +303,66 @@ class Environment
     public function getWritableDirectories(): array
     {
         return $this->writableDirs;
+    }
+
+    public function doDeployStaticContent(): bool
+    {
+        $var = $this->getVariables();
+
+        /**
+         * Can use environment variable to always disable.
+         * Default is to deploy static content if it was not deployed in the build step.
+         */
+        if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
+            $flag = false;
+            $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
+        } else {
+            $flag = !$this->isStaticDeployInBuild();
+            $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . $flag);
+        }
+
+        return $flag;
+    }
+
+    public function getStaticDeployThreads(): int
+    {
+        /**
+         * Use 1 for PAAS environment.
+         */
+        $staticDeployThreads = 1;
+        $var = $this->getVariables();
+
+        if (isset($var["STATIC_CONTENT_THREADS"])) {
+            $staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
+        } elseif (isset($_ENV["STATIC_CONTENT_THREADS"])) {
+            $staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
+        } elseif (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
+            $staticDeployThreads = 3;
+        }
+
+        return $staticDeployThreads;
+    }
+
+    public function getAdminLocale(): string
+    {
+        $var = $this->getVariables();
+
+        return isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
+    }
+
+    public function doCleanStaticFiles(): bool
+    {
+        $var = $this->getVariables();
+
+        return isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
+            ? false : true;
+    }
+
+    public function getStaticDeployExcludeThemes()
+    {
+        $var = $this->getVariables();
+
+        return isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
+            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"] : [];
     }
 }

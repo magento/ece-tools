@@ -45,9 +45,6 @@ class InstallUpdate implements ProcessInterface
      */
     private $adapter;
 
-    const MAGENTO_PRODUCTION_MODE = 'production';
-    const MAGENTO_DEVELOPER_MODE = 'developer';
-
     const MAGIC_ROUTE = '{default}';
 
     const PREFIX_SECURE = 'https://';
@@ -87,12 +84,7 @@ class InstallUpdate implements ProcessInterface
     private $solrPort;
     private $solrScheme;
 
-    private $magentoApplicationMode;
-    private $cleanStaticViewFiles;
-    private $staticDeployThreads;
-    private $staticDeployExcludeThemes = [];
     private $adminLocale;
-    private $doDeployStaticContent;
 
     private $verbosityLevel;
 
@@ -145,41 +137,7 @@ class InstallUpdate implements ProcessInterface
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
         $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
 
-        $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
-            ? false : true;
-        $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
-            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"] : [];
         $this->adminLocale = isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
-
-        if (isset($var["STATIC_CONTENT_THREADS"])) {
-            $this->staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
-        } elseif (isset($_ENV["STATIC_CONTENT_THREADS"])) {
-            $this->staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
-        } elseif (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
-            $this->staticDeployThreads = 3;
-        } else { // if Paas environment
-            $this->staticDeployThreads = 1;
-        }
-
-        $this->doDeployStaticContent =
-            isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled' ? false : true;
-        /**
-         * Can use environment variable to always disable.
-         * Default is to deploy static content if it was not deployed in the build step.
-         */
-        if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
-            $this->doDeployStaticContent = false;
-            $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
-        } else {
-            $this->doDeployStaticContent = !$this->environment->isStaticDeployInBuild();
-            $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . $this->doDeployStaticContent);
-        }
-
-        $this->magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
-        $this->magentoApplicationMode =
-            in_array($this->magentoApplicationMode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
-                ? $this->magentoApplicationMode
-                : self::MAGENTO_PRODUCTION_MODE;
 
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
             $this->redisHost = $relationships['redis'][0]['host'];
@@ -565,18 +523,18 @@ class InstallUpdate implements ProcessInterface
                     'backend_options' => [
                         'server' => $this->redisHost,
                         'port' => $this->redisPort,
-                        'database' => $this->redisCacheDb
-                    ]
+                        'database' => $this->redisCacheDb,
+                    ],
                 ],
                 'page_cache' => [
                     'backend' => 'Cm_Cache_Backend_Redis',
                     'backend_options' => [
                         'server' => $this->redisHost,
                         'port' => $this->redisPort,
-                        'database' => $this->redisCacheDb
-                    ]
-                ]
-            ]
+                        'database' => $this->redisCacheDb,
+                    ],
+                ],
+            ],
         ];
     }
 

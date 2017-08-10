@@ -65,7 +65,7 @@ class Application extends \Symfony\Component\Console\Application
             \Magento\MagentoCloud\Shell\ShellInterface::class,
             \Magento\MagentoCloud\Shell\Shell::class
         );
-        $container->singleton(\Magento\MagentoCloud\Environment::class);
+        $container->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $container->singleton(\Magento\MagentoCloud\DB\Adapter::class);
 
         /**
@@ -78,7 +78,7 @@ class Application extends \Symfony\Component\Console\Application
                     'processes' => [
                         100 => $container->make(BuildProcess\PreBuild::class),
                         200 => $container->make(BuildProcess\ApplyPatches::class),
-                        300 => $container->make(BuildProcess\MarshallingFiles::class),
+                        300 => $container->make(BuildProcess\MarshallFiles::class),
                         400 => $container->make(BuildProcess\CopySampleData::class),
                         500 => $container->make(BuildProcess\CompileDi::class),
                         600 => $container->make(BuildProcess\ComposerDumpAutoload::class),
@@ -94,10 +94,10 @@ class Application extends \Symfony\Component\Console\Application
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
                         100 => $container->make(DeployProcess\PreDeploy::class),
-                        200 => $container->make(DeployProcess\ConfigFileCreator::class),
-                        300 => $container->make(DeployProcess\MagentoMode::class),
+                        200 => $container->make(DeployProcess\CreateConfigFile::class),
+                        300 => $container->make(DeployProcess\SetMode::class),
                         400 => $container->make(DeployProcess\InstallUpdate::class),
-
+                        500 => $container->make(DeployProcess\DeployStaticContent::class),
                         600 => $container->make(DeployProcess\DisableGoogleAnalytics::class),
                     ],
                 ]);

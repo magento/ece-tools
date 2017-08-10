@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Marshalls required files.
  */
-class MarshallingFiles implements ProcessInterface
+class MarshallFiles implements ProcessInterface
 {
     /**
      * @var ShellInterface

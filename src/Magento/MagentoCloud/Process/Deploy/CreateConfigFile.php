@@ -9,7 +9,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Config\DeploymentConfig;
 
-class ConfigFileCreator implements ProcessInterface
+class CreateConfigFile implements ProcessInterface
 {
     /**
      * @var File
