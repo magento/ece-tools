@@ -33,11 +33,11 @@ class SCDConfigDump extends Command
     /**
      * @var Environment
      */
-    private $env;
+    private $environment;
 
-    public function __construct()
+    public function __construct(Environment $environment)
     {
-        $this->env = new Environment();
+        $this->environment = $environment;
 
         parent::__construct();
     }
@@ -60,7 +60,7 @@ class SCDConfigDump extends Command
     {
         try {
             $configFile = MAGENTO_ROOT . 'app/etc/config.php';
-            $this->env->execute("php bin/magento app:config:dump");
+            $this->environment->execute("php bin/magento app:config:dump");
 
             if (file_exists($configFile)) {
                 $oldConfig = include $configFile;
@@ -104,15 +104,15 @@ class SCDConfigDump extends Command
                 $newConfig['admin_user']['locale']['code'] =
                     $this->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user');
 
-                $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
+                $updatedConfig = '<?php' . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
                 file_put_contents($configFile, $updatedConfig);
-                $this->env->execute('php bin/magento app:config:import -n');
+                $this->environment->execute('php bin/magento app:config:import -n');
             } else {
-                $this->env->log('No config file');
+                $this->environment->log('No config file');
             }
         } catch (\RuntimeException $e) {
-            $this->env->log('Something went wrong in running app:config:dump');
-            $this->env->log($e->getTraceAsString());
+            $this->environment->log('Something went wrong in running app:config:dump');
+            $this->environment->log($e->getTraceAsString());
         }
     }
 
@@ -126,6 +126,7 @@ class SCDConfigDump extends Command
             $data = &$data[$key];
         }
         $data = $val;
+
         return $out;
     }
 
@@ -138,12 +139,13 @@ class SCDConfigDump extends Command
      */
     private function executeDbQuery($query)
     {
-        $relationships = $this->env->getRelationships();
+        $relationships = $this->environment->getRelationships();
         $dbHost = $relationships["database"][0]["host"];
         $dbName = $relationships["database"][0]["path"];
         $dbUser = $relationships["database"][0]["username"];
         $dbPassword = $relationships["database"][0]["password"];
         $password = strlen($dbPassword) ? sprintf('-p%s', $dbPassword) : '';
-        return $this->env->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
+
+        return $this->environment->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
     }
 }

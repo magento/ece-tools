@@ -305,7 +305,7 @@ class Environment
         return $this->writableDirs;
     }
 
-    public function doDeployStaticContent(): bool
+    public function isDeployStaticContent(): bool
     {
         $var = $this->getVariables();
 
@@ -313,7 +313,7 @@ class Environment
          * Can use environment variable to always disable.
          * Default is to deploy static content if it was not deployed in the build step.
          */
-        if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
+        if (isset($var['DO_DEPLOY_STATIC_CONTENT']) && $var['DO_DEPLOY_STATIC_CONTENT'] == 'disabled') {
             $flag = false;
             $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
         } else {
@@ -324,7 +324,7 @@ class Environment
         return $flag;
     }
 
-    public function getStaticDeployThreads(): int
+    public function getStaticDeployThreadsCount(): int
     {
         /**
          * Use 1 for PAAS environment.
@@ -332,11 +332,11 @@ class Environment
         $staticDeployThreads = 1;
         $var = $this->getVariables();
 
-        if (isset($var["STATIC_CONTENT_THREADS"])) {
-            $staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
-        } elseif (isset($_ENV["STATIC_CONTENT_THREADS"])) {
-            $staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
-        } elseif (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
+        if (isset($var['STATIC_CONTENT_THREADS'])) {
+            $staticDeployThreads = (int)$var['STATIC_CONTENT_THREADS'];
+        } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
+            $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
+        } elseif (isset($_ENV['MAGENTO_CLOUD_MODE']) && $_ENV['MAGENTO_CLOUD_MODE'] === 'enterprise') {
             $staticDeployThreads = 3;
         }
 
@@ -347,22 +347,20 @@ class Environment
     {
         $var = $this->getVariables();
 
-        return isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
+        return isset($var['ADMIN_LOCALE']) ? $var['ADMIN_LOCALE'] : 'en_US';
     }
 
     public function doCleanStaticFiles(): bool
     {
         $var = $this->getVariables();
 
-        return isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
-            ? false : true;
+        return isset($var['CLEAN_STATIC_FILES']) && $var['CLEAN_STATIC_FILES'] == 'disabled' ? false : true;
     }
 
     public function getStaticDeployExcludeThemes()
     {
         $var = $this->getVariables();
 
-        return isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
-            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"] : [];
+        return isset($var['STATIC_CONTENT_EXCLUDE_THEMES']) ? $var['STATIC_CONTENT_EXCLUDE_THEMES'] : [];
     }
 }

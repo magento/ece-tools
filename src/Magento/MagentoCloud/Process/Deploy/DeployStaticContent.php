@@ -65,7 +65,7 @@ class DeployStaticContent implements ProcessInterface
     {
         if ($this->environment->getApplicationMode() == Environment::MAGENTO_PRODUCTION_MODE) {
             /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
-            if ($this->environment->doDeployStaticContent()) {
+            if ($this->environment->isDeployStaticContent()) {
                 $this->deployStaticContent();
             }
         }
@@ -101,8 +101,8 @@ class DeployStaticContent implements ProcessInterface
             }
         }
 
-        $jobsOption = $this->environment->getStaticDeployThreads()
-            ? "--jobs={$this->environment->getStaticDeployThreads()}"
+        $jobsOption = $this->environment->getStaticDeployThreadsCount()
+            ? "--jobs={$this->environment->getStaticDeployThreadsCount()}"
             : '';
 
         $locales = implode(' ', $this->getLocales());

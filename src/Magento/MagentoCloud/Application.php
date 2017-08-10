@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud;
 use Illuminate\Container\Container;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\SCDConfigDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -23,11 +24,9 @@ class Application extends \Symfony\Component\Console\Application
      */
     public function __construct()
     {
-        $container = $this->configureContainer(
-            Container::getInstance()
+        Container::setInstance(
+            $this->createContainer()
         );
-
-        Container::setInstance($container);
 
         parent::__construct();
     }
@@ -42,6 +41,7 @@ class Application extends \Symfony\Component\Console\Application
             [
                 Container::getInstance()->make(Build::class),
                 Container::getInstance()->make(Deploy::class),
+                Container::getInstance()->make(SCDConfigDump::class),
             ]
         );
     }
@@ -49,11 +49,12 @@ class Application extends \Symfony\Component\Console\Application
     /**
      * Binds interfaces and contexts.
      *
-     * @param Container $container
      * @return Container
      */
-    private function configureContainer(Container $container)
+    private function createContainer()
     {
+        $container = Container::getInstance();
+
         /**
          * Interface to implementation binding.
          */
@@ -99,6 +100,14 @@ class Application extends \Symfony\Component\Console\Application
                         400 => $container->make(DeployProcess\InstallUpdate::class),
                         500 => $container->make(DeployProcess\DeployStaticContent::class),
                         600 => $container->make(DeployProcess\DisableGoogleAnalytics::class),
+                    ],
+                ]);
+            });
+        $container->when(SCDConfigDump::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () use ($container) {
+                return $container->makeWith(ProcessPool::class, [
+                    'processes' => [
                     ],
                 ]);
             });

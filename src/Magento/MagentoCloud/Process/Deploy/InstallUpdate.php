@@ -158,8 +158,7 @@ class InstallUpdate implements ProcessInterface
             $this->amqpPort = $relationships["mq"][0]["port"];
         }
 
-        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled'
-            ? ' -vvv ' : '';
+        $this->verbosityLevel = $this->environment->getVerbosityLevel();
     }
 
     /**
@@ -235,7 +234,6 @@ class InstallUpdate implements ProcessInterface
         $this->setSecureAdmin();
         $this->updateConfig();
     }
-
 
     /**
      * Update Magento configuration
@@ -359,7 +357,7 @@ class InstallUpdate implements ProcessInterface
             throw new \RuntimeException($e->getMessage(), 6);
         }
         if (file_exists(Environment::REGENERATE_FLAG)) {
-            $this->logger->info("Removing .regenerate flag");
+            $this->logger->info('Removing .regenerate flag');
             unlink(Environment::REGENERATE_FLAG);
         }
     }
@@ -369,7 +367,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function clearCache()
     {
-        $this->logger->info("Clearing application cache.");
+        $this->logger->info('Clearing application cache.');
 
         $this->shell->execute(
             "php ./bin/magento cache:flush {$this->verbosityLevel}"

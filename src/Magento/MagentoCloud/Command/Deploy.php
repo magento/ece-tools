@@ -6,7 +6,7 @@
 
 namespace Magento\MagentoCloud\Command;
 
-use Magento\Framework\DB\LoggerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -58,16 +58,13 @@ class Deploy extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->log('Starting deploy.');
-
+            $this->logger->notice('Starting deploy.');
             $this->process->execute();
-
-            $this->logger->log('Deployment complete.');
+            $this->logger->notice('Deployment complete.');
         } catch (\Exception $exception) {
             return $exception->getCode();
         }
 
         return 0;
     }
-
 }
