@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Environment;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**
  * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
@@ -75,8 +76,14 @@ class Deploy extends Command
      */
     private $env;
 
-    public function __construct()
+    /**
+     * @var ProcessInterface
+     */
+    private $process;
+
+    public function __construct(ProcessInterface $process)
     {
+        $this->process = $process;
         $this->env = new Environment();
 
         parent::__construct();
@@ -100,7 +107,8 @@ class Deploy extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->preDeploy();
+        $this->process->execute();
+
         $this->env->log("Starting deploy.");
         $this->saveEnvironmentData();
         $this->createConfigIfNotYetExist();
@@ -771,99 +779,6 @@ class Deploy extends Command
                 ]
             ]
         ];
-    }
-
-    /**
-     * This script contains logic to cleanup outdated caches and restore the contents of mounted directories so that
-     * the main deploy hook is able to start.
-     */
-    private function preDeploy()
-    {
-        $this->env->log($this->env->startingMessage("pre-deploy"));
-        // Clear redis and file caches
-        $relationships = $this->env->getRelationships();
-        $var = $this->env->getVariables();
-        $useStaticContentSymlink = isset($var["STATIC_CONTENT_SYMLINK"]) && $var["STATIC_CONTENT_SYMLINK"] == 'disabled'
-            ? false : true;
-
-        if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
-            $redisHost = $relationships['redis'][0]['host'];
-            $redisPort = $relationships['redis'][0]['port'];
-            $redisCacheDb = '1'; // Matches \Magento\MagentoCloud\Command\Deploy::$redisCacheDb
-            $this->env->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushdb");
-        }
-
-        $fileCacheDir = Environment::MAGENTO_ROOT . '/var/cache';
-        if (file_exists($fileCacheDir)) {
-            $this->env->execute("rm -rf $fileCacheDir");
-        }
-
-        $mountedDirectories = ['app/etc', 'pub/media'];
-
-        $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
-
-        /**
-         * Handle case where static content is deployed during build hook:
-         *  1. set a flag to be read by magento-cloud:deploy
-         *  2. Either copy or symlink files from init/ directory, depending on strategy
-         */
-        if (file_exists(Environment::MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
-            $this->env->log("Static content deployment was performed during build hook");
-            $this->env->removeStaticContent();
-
-            if ($useStaticContentSymlink) {
-                $this->env->log("Symlinking static content from pub/static to init/pub/static");
-
-                // Symlink pub/static/* to init/pub/static/*
-                $staticContentLocation = realpath(Environment::MAGENTO_ROOT . 'pub/static') . '/';
-                if (file_exists($buildDir . 'pub/static')) {
-                    $dir = new \DirectoryIterator($buildDir . 'pub/static');
-                    foreach ($dir as $fileInfo) {
-                        $fileName = $fileInfo->getFilename();
-                        if (!$fileInfo->isDot()
-                            && symlink(
-                                $buildDir . 'pub/static/' . $fileName,
-                                $staticContentLocation . '/' . $fileName
-                            )
-                        ) {
-                            // @codingStandardsIgnoreStart
-                            $this->env->log('Symlinked ' . $staticContentLocation . '/' . $fileName . ' to ' . $buildDir . 'pub/static/' . $fileName);
-                            // @codingStandardsIgnoreEnd
-                        }
-                    }
-                }
-            } else {
-                $this->env->log("Copying static content from init/pub/static to pub/static");
-                $this->copyFromBuildDir('pub/static');
-            }
-        }
-
-        // Restore mounted directories
-        $this->env->log("Copying writable directories back.");
-
-        foreach ($mountedDirectories as $dir) {
-            $this->copyFromBuildDir($dir);
-        }
-
-        if (file_exists(Environment::REGENERATE_FLAG)) {
-            $this->env->log("Removing var/.regenerate flag");
-            unlink(Environment::REGENERATE_FLAG);
-        }
-    }
-
-    /**
-     * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
-     *                    or trailing slashes
-     */
-    private function copyFromBuildDir($dir)
-    {
-        $fullPathDir = Environment::MAGENTO_ROOT . $dir;
-        if (!file_exists($fullPathDir)) {
-            mkdir($fullPathDir);
-            $this->env->log(sprintf('Created directory: %s', $dir));
-        }
-        $this->env->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
-        $this->env->log(sprintf('Copied directory: %s', $dir));
     }
 
     /**

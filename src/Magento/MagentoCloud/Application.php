@@ -92,6 +92,7 @@ class Application extends \Symfony\Component\Console\Application
             ->give(function () use ($container) {
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
+                        100 => $container->make(\Magento\MagentoCloud\Process\Deploy\PreDeploy::class)
                     ],
                 ]);
             });
