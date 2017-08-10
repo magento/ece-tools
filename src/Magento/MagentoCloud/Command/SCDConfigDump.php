@@ -35,6 +35,7 @@ class SCDConfigDump extends Command
      * @var Environment
      */
     private $env;
+    /** @var Database|null This our connection to the database we use to execute queries. */
     private $database;
 
     public function __construct()
@@ -116,7 +117,11 @@ class SCDConfigDump extends Command
                     unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
                 }
                 //locales for admin user
-                $output = $this->database->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user', [], MYSQLI_NUM);
+                $output = $this->database->executeDbQuery(
+                    'SELECT DISTINCT interface_locale FROM admin_user',
+                    [],
+                    MYSQLI_NUM
+                );
                 $output = array_map(function ($arrayin) {
                     return $arrayin[0];
                 }, $output);
