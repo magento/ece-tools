@@ -7,8 +7,10 @@ namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Marshalls required files.
@@ -26,15 +28,22 @@ class MarshallingFiles implements ProcessInterface
     private $file;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param ShellInterface $shell
      * @param File $file
      */
     public function __construct(
         ShellInterface $shell,
-        File $file
+        File $file,
+        LoggerInterface $logger
     ) {
         $this->shell = $shell;
         $this->file = $file;
+        $this->logger = $logger;
     }
 
     /**
@@ -46,19 +55,23 @@ class MarshallingFiles implements ProcessInterface
         $this->shell->execute('rm -rf generated/metadata/*');
         $this->shell->execute('rm -rf var/cache');
 
-        $this->file->copy(
-            Environment::MAGENTO_ROOT . 'app/etc/di.xml',
-            Environment::MAGENTO_ROOT . 'app/di.xml'
-        );
+        try {
+            $this->file->copy(
+                Environment::MAGENTO_ROOT . 'app/etc/di.xml',
+                Environment::MAGENTO_ROOT . 'app/di.xml'
+            );
 
-        $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
-        if (!$this->file->isExists($enterpriseFolder)) {
-            $this->file->createDirectory($enterpriseFolder, 0777);
+            $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
+            if (!$this->file->isExists($enterpriseFolder)) {
+                $this->file->createDirectory($enterpriseFolder, 0777);
+            }
+
+            $this->file->copy(
+                Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml',
+                Environment::MAGENTO_ROOT . 'app/enterprise/di.xml'
+            );
+        } catch (FileSystemException $e) {
+            $this->logger->warning($e->getMessage());
         }
-
-        $this->file->copy(
-            Environment::MAGENTO_ROOT . 'app/etc/enterprise/di.xml',
-            Environment::MAGENTO_ROOT . 'app/enterprise/di.xml'
-        );
     }
 }
