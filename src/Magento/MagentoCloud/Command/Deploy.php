@@ -70,7 +70,8 @@ class Deploy extends Command
     private $doDeployStaticContent;
 
     private $verbosityLevel;
-    private $database; /** @var Database|null This our connection to the database we use to execute queries. */
+    /** @var Database|null This our connection to the database we use to execute queries. */
+    private $database;
 
     /**
      * @var Environment
@@ -211,7 +212,9 @@ class Deploy extends Command
     }
 
     /**
-     * Load the admin settings from the environment.  TODO: This logic will change once I'm done with MAGECLOUD-115/MAGERCLOUD-894
+     * Load the admin settings from the environment.
+     * TODO: This logic will change once I'm done with MAGECLOUD-115/MAGERCLOUD-894
+     * @param array $var
      */
     private function loadEnvironmentDataForAdmin($var = null)
     {
@@ -252,7 +255,7 @@ class Deploy extends Command
 
         $this->env->log('Checking if db exists and has tables');
         $output = $this->database->executeDbQuery('SHOW TABLES', [], MYSQLI_NUM);
-        $output = array_map(function($arrayin) {
+        $output = array_map(function ($arrayin) {
             return $arrayin[0];
         }, $output);
         if (is_array($output) && count($output) > 0) {
@@ -543,7 +546,9 @@ class Deploy extends Command
     }
 
     /**
-     * Generates admin password using default Magento settings
+     * Generates Hash from a new Salt and the admin password using default Magento settings
+     * @param string $password This is the plaintext password to be hashed
+     * @return string The hash:salt:version
      */
     private function generatePassword($password)
     {
@@ -715,9 +720,9 @@ class Deploy extends Command
         $query = 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
             . 'UNION SELECT interface_locale FROM admin_user;';
         $output = $this->database->executeDbQuery($query, [], MYSQLI_NUM);
-        $output = array_map(function($arrayin) {
+        $output = array_map(function ($arrayin) {
             return $arrayin[0];
-            }, $output);
+        }, $output);
         if (is_array($output) && count($output) > 0) {
             $locales = $output;
 
