@@ -93,7 +93,8 @@ class Application extends \Symfony\Component\Console\Application
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
                         100 => $container->make(\Magento\MagentoCloud\Process\Deploy\PreDeploy::class),
-                        200 => $container->make(\Magento\MagentoCloud\Process\Deploy\ConfigFileCreator::class)
+                        200 => $container->make(\Magento\MagentoCloud\Process\Deploy\ConfigFileCreator::class),
+                        300 => $container->make(\Magento\MagentoCloud\Process\Deploy\MagentoMode::class),
                     ],
                 ]);
             });

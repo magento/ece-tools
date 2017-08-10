@@ -7,6 +7,9 @@ namespace Magento\MagentoCloud\Config;
 
 class Deploy
 {
+    const MAGENTO_PRODUCTION_MODE = 'production';
+    const MAGENTO_DEVELOPER_MODE = 'developer';
+
     /**
      * @param string $key
      * @param mixed $default
@@ -85,5 +88,17 @@ class Deploy
 
         return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled'
             ? ' -vvv ' : '';
+    }
+
+    public function getApplicationMode()
+    {
+        $var = $this->getVariables();
+        $magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
+        $magentoApplicationMode =
+            in_array($magentoApplicationMode, array(self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE))
+                ? $magentoApplicationMode
+                : self::MAGENTO_PRODUCTION_MODE;
+
+        return $magentoApplicationMode;
     }
 }

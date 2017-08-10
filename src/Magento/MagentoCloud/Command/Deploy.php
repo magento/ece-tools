@@ -111,8 +111,6 @@ class Deploy extends Command
 
         $this->env->log("Starting deploy.");
         $this->saveEnvironmentData();
-        //$this->createConfigIfNotYetExist();
-        $this->processMagentoMode();
         if (!$this->isInstalled()) {
             $this->installMagento();
         } else {
@@ -597,32 +595,6 @@ class Deploy extends Command
             if ($this->doDeployStaticContent) {
                 $this->deployStaticContent();
             }
-        }
-    }
-
-    /**
-     * Based on variable APPLICATION_MODE. Production mode by default
-     */
-    private function processMagentoMode()
-    {
-        $this->env->log("Set Magento application mode to '{$this->magentoApplicationMode}'");
-
-        /* Enable application mode */
-        if ($this->magentoApplicationMode == self::MAGENTO_PRODUCTION_MODE) {
-            /** Note: We moved call to deployStaticContent to a new function, staticContentDeploy(),
-             * and made it run after production mode is enabled to work around the bug with the read only
-             */
-            $this->env->log("Enable production mode");
-            $configFileName = $this->getConfigFilePath();
-            $config = include $configFileName;
-            $config['MAGE_MODE'] = 'production';
-            $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-            file_put_contents($configFileName, $updatedConfig);
-        } else {
-            $this->env->log("Enable developer mode");
-            $this->env->execute(
-                "php ./bin/magento deploy:mode:set " . self::MAGENTO_DEVELOPER_MODE . $this->verbosityLevel
-            );
         }
     }
 
