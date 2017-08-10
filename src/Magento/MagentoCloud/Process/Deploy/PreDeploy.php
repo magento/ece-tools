@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Deploy as DeployConfig;
-use Magento\MagentoCloud\Config\Deploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -41,7 +40,7 @@ class PreDeploy implements ProcessInterface
     private $deployConfig;
 
     /**
-     * @param Deploy $deployConfig
+     * @param DeployConfig $deployConfig
      * @param Environment $env
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
