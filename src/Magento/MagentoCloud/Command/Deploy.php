@@ -17,49 +17,15 @@ use Magento\MagentoCloud\Process\ProcessInterface;
  */
 class Deploy extends Command
 {
-    const MAGIC_ROUTE = '{default}';
-
-    const PREFIX_SECURE = 'https://';
-    const PREFIX_UNSECURE = 'http://';
-
     const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
 
-    private $urls = ['unsecure' => [], 'secure' => []];
-
-    private $defaultCurrency = 'USD';
-
-    private $amqpHost;
-    private $amqpPort;
-    private $amqpUser;
-    private $amqpPasswd;
-    private $amqpVirtualhost = '/';
-    private $amqpSsl = '';
-
     private $dbHost;
     private $dbName;
     private $dbUser;
     private $dbPassword;
-
-    private $adminUsername;
-    private $adminFirstname;
-    private $adminLastname;
-    private $adminEmail;
-    private $adminPassword;
-    private $adminUrl;
-    private $enableUpdateUrls;
-
-    private $redisHost;
-    private $redisPort;
-    private $redisSessionDb = '0';
-    private $redisCacheDb = '1'; // Value hard-coded in pre-deploy.php
-
-    private $solrHost;
-    private $solrPath;
-    private $solrPort;
-    private $solrScheme;
 
     private $isMasterBranch = null;
     private $magentoApplicationMode;
@@ -81,10 +47,10 @@ class Deploy extends Command
      */
     private $process;
 
-    public function __construct(ProcessInterface $process)
+    public function __construct(ProcessInterface $process, Environment $environment)
     {
         $this->process = $process;
-        $this->env = new Environment();
+        $this->env = $environment;
 
         parent::__construct();
     }
@@ -107,110 +73,20 @@ class Deploy extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->process->execute();
+        try {
+            $this->env->log('Starting deploy.');
 
-        $this->env->log("Starting deploy.");
-        $this->saveEnvironmentData();
+            $this->process->execute();
 
-        $this->staticContentDeploy();
-        $this->disableGoogleAnalytics();
-        $this->env->log("Deployment complete.");
-    }
+            $this->staticContentDeploy();
+            $this->disableGoogleAnalytics();
 
-    /**
-     * Parse and save information about environment configuration and variables.
-     */
-    private function saveEnvironmentData()
-    {
-        $this->env->log("Preparing environment specific data.");
-
-        $this->initRoutes();
-
-        $relationships = $this->env->getRelationships();
-        $var = $this->env->getVariables();
-
-        $this->dbHost = $relationships["database"][0]["host"];
-        $this->dbName = $relationships["database"][0]["path"];
-        $this->dbUser = $relationships["database"][0]["username"];
-        $this->dbPassword = $relationships["database"][0]["password"];
-
-        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "admin";
-        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : "John";
-        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : "Doe";
-        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : "john@example.com";
-        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "admin12";
-        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
-        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
-
-        $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
-            ? false : true;
-        $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
-            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"] : [];
-        $this->adminLocale = isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
-
-        if (isset($var["STATIC_CONTENT_THREADS"])) {
-            $this->staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
-        } elseif (isset($_ENV["STATIC_CONTENT_THREADS"])) {
-                $this->staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
-        } elseif (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
-            $this->staticDeployThreads = 3;
-        } else { // if Paas environment
-            $this->staticDeployThreads = 1;
+            $this->env->log('Deployment complete.');
+        } catch (\Exception $exception) {
+            return $exception->getCode();
         }
 
-        $this->doDeployStaticContent =
-            isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled' ? false : true;
-        /**
-         * Can use environment variable to always disable.
-         * Default is to deploy static content if it was not deployed in the build step.
-         */
-        if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
-            $this->doDeployStaticContent = false;
-            $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
-        } else {
-            $this->doDeployStaticContent = !$this->env->isStaticDeployInBuild();
-            $this->env->log(' Flag DO_DEPLOY_STATIC_CONTENT is set to ' . $this->doDeployStaticContent);
-        }
-
-        $this->magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
-        $this->magentoApplicationMode =
-            in_array($this->magentoApplicationMode, array(self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE))
-                ? $this->magentoApplicationMode
-                : self::MAGENTO_PRODUCTION_MODE;
-
-        if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
-            $this->redisHost = $relationships['redis'][0]['host'];
-            $this->redisPort = $relationships['redis'][0]['port'];
-        }
-
-        if (isset($relationships["solr"]) && count($relationships['solr']) > 0) {
-            $this->solrHost = $relationships["solr"][0]["host"];
-            $this->solrPath = $relationships["solr"][0]["path"];
-            $this->solrPort = $relationships["solr"][0]["port"];
-            $this->solrScheme = $relationships["solr"][0]["scheme"];
-        }
-
-        if (isset($relationships["mq"]) && count($relationships['mq']) > 0) {
-            $this->amqpHost = $relationships["mq"][0]["host"];
-            $this->amqpUser = $relationships["mq"][0]["username"];
-            $this->amqpPasswd = $relationships["mq"][0]["password"];
-            $this->amqpPort = $relationships["mq"][0]["port"];
-        }
-
-        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled'
-            ? ' -vvv ' : '';
-    }
-
-    /**
-     * Update secure admin
-     */
-    public function setSecureAdmin()
-    {
-        $this->env->log("Setting secure admin");
-        $command =
-            "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
-        $command .= $this->verbosityLevel;
-        $this->env->execute($command);
+        return 0;
     }
 
     /**
@@ -229,6 +105,7 @@ class Deploy extends Command
                 $this->isMasterBranch = false;
             }
         }
+
         return $this->isMasterBranch;
     }
 
@@ -351,66 +228,8 @@ class Deploy extends Command
                 $locales[] = $this->adminLocale;
             }
         }
+
         return $locales;
-    }
-
-    /**
-     * Parse MagentoCloud routes to more readable format.
-     */
-    private function initRoutes()
-    {
-        $this->env->log("Initializing routes.");
-
-        $routes = $this->env->getRoutes();
-
-        foreach ($routes as $key => $val) {
-            if ($val["type"] !== "upstream") {
-                continue;
-            }
-
-            $urlParts = parse_url($val['original_url']);
-            $originalUrl = str_replace(self::MAGIC_ROUTE, '', $urlParts['host']);
-
-            if (strpos($key, self::PREFIX_UNSECURE) === 0) {
-                $this->urls['unsecure'][$originalUrl] = $key;
-                continue;
-            }
-
-            if (strpos($key, self::PREFIX_SECURE) === 0) {
-                $this->urls['secure'][$originalUrl] = $key;
-                continue;
-            }
-        }
-
-        if (!count($this->urls['secure'])) {
-            $this->urls['secure'] = $this->urls['unsecure'];
-        }
-
-        $this->env->log(sprintf("Routes: %s", var_export($this->urls, true)));
-    }
-
-    private function getRedisCacheConfiguration()
-    {
-        return [
-            'frontend' => [
-                'default' => [
-                    'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => [
-                        'server' => $this->redisHost,
-                        'port' => $this->redisPort,
-                        'database' => $this->redisCacheDb
-                    ]
-                ],
-                'page_cache' => [
-                    'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => [
-                        'server' => $this->redisHost,
-                        'port' => $this->redisPort,
-                        'database' => $this->redisCacheDb
-                    ]
-                ]
-            ]
-        ];
     }
 
 }

@@ -6,9 +6,6 @@
 
 namespace Magento\MagentoCloud;
 
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,11 +17,6 @@ class Environment
     const STATIC_CONTENT_DEPLOY_FLAG = '/.static_content_deploy';
     const REGENERATE_FLAG = self::MAGENTO_ROOT . 'var/.regenerate';
 
-    /**
-     * Deploy log file.
-     */
-    const DEPLOY_LOG = self::MAGENTO_ROOT . 'var/log/cloud_deploy.log';
-
     public $writableDirs = ['var', 'app/etc', 'pub/media'];
 
     /**
@@ -35,18 +27,9 @@ class Environment
     /**
      * @param LoggerInterface $logger
      */
-    public function __construct(LoggerInterface $logger = null)
+    public function __construct(LoggerInterface $logger)
     {
-        $this->logger = $logger ?: new Logger('default');
-
-        $formatter = new LineFormatter();
-        $formatter->allowInlineLineBreaks(true);
-
-        $logHandler = (new StreamHandler(static::DEPLOY_LOG))->setFormatter($formatter);
-        $stdOutHandler = (new StreamHandler('php://stdout'))->setFormatter($formatter);
-
-        $this->logger->pushHandler($logHandler);
-        $this->logger->pushHandler($stdOutHandler);
+        $this->logger = $logger;
     }
 
     /**
@@ -87,7 +70,7 @@ class Environment
      */
     public function log($message)
     {
-        $this->logger->notice($message);
+        $this->logger->info($message);
     }
 
     /**

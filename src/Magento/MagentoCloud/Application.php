@@ -57,16 +57,16 @@ class Application extends \Symfony\Component\Console\Application
         /**
          * Interface to implementation binding.
          */
-        $container->bind(
+        $container->singleton(
             \Psr\Log\LoggerInterface::class,
-            \Magento\MagentoCloud\Logger\Logger::class,
-            true
+            \Magento\MagentoCloud\Logger\Logger::class
         );
-        $container->bind(
+        $container->singleton(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
-            \Magento\MagentoCloud\Shell\Shell::class,
-            true
+            \Magento\MagentoCloud\Shell\Shell::class
         );
+        $container->singleton(\Magento\MagentoCloud\Environment::class);
+        $container->singleton(\Magento\MagentoCloud\DB\Adapter::class);
 
         /**
          * Contextual binding.
@@ -102,9 +102,7 @@ class Application extends \Symfony\Component\Console\Application
             });
         $container->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
-            ->give(function () use ($container) {
-                return $container->make(\Magento\MagentoCloud\Config\Build\Reader::class);
-            });
+            ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
 
         return $container;
     }

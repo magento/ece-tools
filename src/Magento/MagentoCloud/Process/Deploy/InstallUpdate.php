@@ -5,11 +5,13 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
+use Magento\MagentoCloud\Config\DeploymentConfig;
+use Magento\MagentoCloud\DB\Adapter;
+use Magento\MagentoCloud\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Application as AppConfig;
 
 class InstallUpdate implements ProcessInterface
 {
@@ -29,35 +31,217 @@ class InstallUpdate implements ProcessInterface
     private $file;
 
     /**
-     * @var AppConfig
+     * @var DeploymentConfig
      */
-    private $appConfig;
+    private $deploymentConfig;
+
+    /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
+     * @var Adapter
+     */
+    private $adapter;
+
+    const MAGENTO_PRODUCTION_MODE = 'production';
+    const MAGENTO_DEVELOPER_MODE = 'developer';
+
+    const MAGIC_ROUTE = '{default}';
+
+    const PREFIX_SECURE = 'https://';
+    const PREFIX_UNSECURE = 'http://';
+
+    private $urls = ['unsecure' => [], 'secure' => []];
+
+    private $defaultCurrency = 'USD';
+
+    private $amqpHost;
+    private $amqpPort;
+    private $amqpUser;
+    private $amqpPasswd;
+    private $amqpVirtualhost = '/';
+    private $amqpSsl = '';
+
+    private $dbHost;
+    private $dbName;
+    private $dbUser;
+    private $dbPassword;
+
+    private $adminUsername;
+    private $adminFirstname;
+    private $adminLastname;
+    private $adminEmail;
+    private $adminPassword;
+    private $adminUrl;
+    private $enableUpdateUrls;
+
+    private $redisHost;
+    private $redisPort;
+    private $redisSessionDb = '0';
+    private $redisCacheDb = '1'; // Value hard-coded in pre-deploy.php
+
+    private $solrHost;
+    private $solrPath;
+    private $solrPort;
+    private $solrScheme;
+
+    private $magentoApplicationMode;
+    private $cleanStaticViewFiles;
+    private $staticDeployThreads;
+    private $staticDeployExcludeThemes = [];
+    private $adminLocale;
+    private $doDeployStaticContent;
+
+    private $verbosityLevel;
 
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
         File $file,
-        AppConfig $appConfig
+        DeploymentConfig $deploymentConfig,
+        Environment $environment,
+        Adapter $adapter
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->file = $file;
-        $this->appConfig = $appConfig;
+        $this->deploymentConfig = $deploymentConfig;
+        $this->environment = $environment;
+        $this->adapter = $adapter;
     }
 
     public function execute()
     {
-        if (!$this->appConfig->isInstalled()) {
+        $this->saveEnvironmentData();
+
+        if (!$this->deploymentConfig->isInstalled()) {
             $this->install();
         } else {
             $this->update();
         }
     }
 
+    private function saveEnvironmentData()
+    {
+        $this->logger->info('Preparing environment specific data.');
+
+        $this->initRoutes();
+
+        $relationships = $this->environment->getRelationships();
+        $var = $this->environment->getVariables();
+
+        $this->dbHost = $relationships["database"][0]["host"];
+        $this->dbName = $relationships["database"][0]["path"];
+        $this->dbUser = $relationships["database"][0]["username"];
+        $this->dbPassword = $relationships["database"][0]["password"];
+
+        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "admin";
+        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : "John";
+        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : "Doe";
+        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : "john@example.com";
+        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "admin12";
+        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
+        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
+
+        $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
+            ? false : true;
+        $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
+            ? $var["STATIC_CONTENT_EXCLUDE_THEMES"] : [];
+        $this->adminLocale = isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
+
+        if (isset($var["STATIC_CONTENT_THREADS"])) {
+            $this->staticDeployThreads = (int)$var["STATIC_CONTENT_THREADS"];
+        } elseif (isset($_ENV["STATIC_CONTENT_THREADS"])) {
+            $this->staticDeployThreads = (int)$_ENV["STATIC_CONTENT_THREADS"];
+        } elseif (isset($_ENV["MAGENTO_CLOUD_MODE"]) && $_ENV["MAGENTO_CLOUD_MODE"] === 'enterprise') {
+            $this->staticDeployThreads = 3;
+        } else { // if Paas environment
+            $this->staticDeployThreads = 1;
+        }
+
+        $this->doDeployStaticContent =
+            isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled' ? false : true;
+        /**
+         * Can use environment variable to always disable.
+         * Default is to deploy static content if it was not deployed in the build step.
+         */
+        if (isset($var["DO_DEPLOY_STATIC_CONTENT"]) && $var["DO_DEPLOY_STATIC_CONTENT"] == 'disabled') {
+            $this->doDeployStaticContent = false;
+            $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
+        } else {
+            $this->doDeployStaticContent = !$this->environment->isStaticDeployInBuild();
+            $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . $this->doDeployStaticContent);
+        }
+
+        $this->magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
+        $this->magentoApplicationMode =
+            in_array($this->magentoApplicationMode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
+                ? $this->magentoApplicationMode
+                : self::MAGENTO_PRODUCTION_MODE;
+
+        if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
+            $this->redisHost = $relationships['redis'][0]['host'];
+            $this->redisPort = $relationships['redis'][0]['port'];
+        }
+
+        if (isset($relationships["solr"]) && count($relationships['solr']) > 0) {
+            $this->solrHost = $relationships["solr"][0]["host"];
+            $this->solrPath = $relationships["solr"][0]["path"];
+            $this->solrPort = $relationships["solr"][0]["port"];
+            $this->solrScheme = $relationships["solr"][0]["scheme"];
+        }
+
+        if (isset($relationships["mq"]) && count($relationships['mq']) > 0) {
+            $this->amqpHost = $relationships["mq"][0]["host"];
+            $this->amqpUser = $relationships["mq"][0]["username"];
+            $this->amqpPasswd = $relationships["mq"][0]["password"];
+            $this->amqpPort = $relationships["mq"][0]["port"];
+        }
+
+        $this->verbosityLevel = isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled'
+            ? ' -vvv ' : '';
+    }
+
+    /**
+     * Parse MagentoCloud routes to more readable format.
+     */
+    private function initRoutes()
+    {
+        $this->logger->info('Initializing routes.');
+
+        $routes = $this->environment->getRoutes();
+
+        foreach ($routes as $key => $val) {
+            if ($val["type"] !== "upstream") {
+                continue;
+            }
+
+            $urlParts = parse_url($val['original_url']);
+            $originalUrl = str_replace(self::MAGIC_ROUTE, '', $urlParts['host']);
+
+            if (strpos($key, self::PREFIX_UNSECURE) === 0) {
+                $this->urls['unsecure'][$originalUrl] = $key;
+                continue;
+            }
+
+            if (strpos($key, self::PREFIX_SECURE) === 0) {
+                $this->urls['secure'][$originalUrl] = $key;
+                continue;
+            }
+        }
+
+        if (!count($this->urls['secure'])) {
+            $this->urls['secure'] = $this->urls['unsecure'];
+        }
+
+        $this->logger->info(sprintf("Routes: %s", var_export($this->urls, true)));
+    }
 
     private function install()
     {
-        $this->logger->info("Installing Magento.");
+        $this->logger->info('Installing Magento.');
 
         $urlUnsecure = $this->urls['unsecure'][''];
         $urlSecure = $this->urls['secure'][''];
@@ -88,7 +272,7 @@ class InstallUpdate implements ProcessInterface
 
         $command .= $this->verbosityLevel;
 
-        $this->env->execute($command);
+        $this->shell->execute($command);
 
         $this->setSecureAdmin();
         $this->updateConfig();
@@ -100,15 +284,27 @@ class InstallUpdate implements ProcessInterface
      */
     private function update()
     {
-        $this->env->log("File env.php contains installation date. Updating configuration.");
+        $this->logger->info('File env.php contains installation date. Updating configuration.');
         $this->updateConfig();
         $this->setupUpgrade();
         $this->clearCache();
     }
 
+    /**
+     * Update secure admin
+     */
+    public function setSecureAdmin()
+    {
+        $this->logger->info('Setting secure admin');
+        $command =
+            "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
+        $command .= $this->verbosityLevel;
+        $this->shell->execute($command);
+    }
+
     private function updateConfig()
     {
-        $this->env->log("Updating configuration from environment variables.");
+        $this->logger->info("Updating configuration from environment variables.");
         $this->updateConfiguration();
         $this->updateAdminCredentials();
         $this->updateSolrConfiguration();
@@ -120,7 +316,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function updateAdminCredentials()
     {
-        $this->env->log("Updating admin credentials.");
+        $this->logger->info('Updating admin credentials.');
 
         // @codingStandardsIgnoreStart
         $this->executeDbQuery("update admin_user set firstname = '$this->adminFirstname', lastname = '$this->adminLastname', email = '$this->adminEmail', username = '$this->adminUsername', password='{$this->generatePassword($this->adminPassword)}' where user_id = '1';");
@@ -132,7 +328,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function updateSolrConfiguration()
     {
-        $this->env->log("Updating SOLR configuration.");
+        $this->logger->info('Updating SOLR configuration.');
 
         if ($this->solrHost !== null
             && $this->solrPort !== null
@@ -154,7 +350,7 @@ class InstallUpdate implements ProcessInterface
     private function updateUrls()
     {
         if ($this->enableUpdateUrls) {
-            $this->env->log("Updating secure and unsecure URLs.");
+            $this->logger->info("Updating secure and unsecure URLs.");
             foreach ($this->urls as $urlType => $urls) {
                 foreach ($urls as $route => $url) {
                     $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
@@ -172,7 +368,7 @@ class InstallUpdate implements ProcessInterface
                 }
             }
         } else {
-            $this->env->log("Skipping URL updates");
+            $this->logger->info("Skipping URL updates");
         }
     }
 
@@ -182,31 +378,30 @@ class InstallUpdate implements ProcessInterface
      */
     private function setupUpgrade()
     {
-        $this->env->log("Saving disabled modules.");
+        $this->logger->info("Saving disabled modules.");
 
         if (file_exists(Environment::REGENERATE_FLAG)) {
-            $this->env->log("Removing .regenerate flag");
+            $this->logger->info("Removing .regenerate flag");
             unlink(Environment::REGENERATE_FLAG);
         }
 
         try {
             /* Enable maintenance mode */
-            $this->env->log("Enabling Maintenance mode.");
-            $this->env->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");
+            $this->logger->info("Enabling Maintenance mode.");
+            $this->shell->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");
 
-            $this->env->log("Running setup upgrade.");
-            $this->env->execute("php ./bin/magento setup:upgrade --keep-generated -n {$this->verbosityLevel}");
+            $this->logger->info("Running setup upgrade.");
+            $this->shell->execute("php ./bin/magento setup:upgrade --keep-generated -n {$this->verbosityLevel}");
 
             /* Disable maintenance mode */
-            $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
-            $this->env->log("Maintenance mode is disabled.");
+            $this->shell->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
+            $this->logger->info("Maintenance mode is disabled.");
         } catch (\RuntimeException $e) {
-            $this->env->log($e->getMessage());
             //Rollback required by database
-            exit(6);
+            throw new \RuntimeException($e->getMessage(), 6);
         }
         if (file_exists(Environment::REGENERATE_FLAG)) {
-            $this->env->log("Removing .regenerate flag");
+            $this->logger->info("Removing .regenerate flag");
             unlink(Environment::REGENERATE_FLAG);
         }
     }
@@ -216,9 +411,9 @@ class InstallUpdate implements ProcessInterface
      */
     private function clearCache()
     {
-        $this->env->log("Clearing application cache.");
+        $this->logger->info("Clearing application cache.");
 
-        $this->env->execute(
+        $this->shell->execute(
             "php ./bin/magento cache:flush {$this->verbosityLevel}"
         );
     }
@@ -228,7 +423,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function updateConfiguration()
     {
-        $this->env->log("Updating env.php database configuration.");
+        $this->logger->info("Updating env.php database configuration.");
 
         $configFileName = $this->getConfigFilePath();
 
@@ -257,22 +452,21 @@ class InstallUpdate implements ProcessInterface
         }
 
         if ($this->redisHost !== null && $this->redisPort !== null) {
-            $this->env->log("Updating env.php Redis cache configuration.");
+            $this->logger->info("Updating env.php Redis cache configuration.");
             $config['cache'] = $this->getRedisCacheConfiguration();
             $config['session'] = [
                 'save' => 'redis',
                 'redis' => [
                     'host' => $this->redisHost,
                     'port' => $this->redisPort,
-                    'database' => $this->redisSessionDb
-                ]
+                    'database' => $this->redisSessionDb,
+                ],
             ];
         } else {
             $config = $this->removeRedisConfiguration($config);
         }
 
         $config['backend']['frontName'] = $this->adminUrl;
-
         $config['resource']['default_setup']['connection'] = 'default';
 
         $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
@@ -288,7 +482,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function removeAmqpConfig(array $config)
     {
-        $this->env->log("Removing AMQP configuration from env.php.");
+        $this->logger->info("Removing AMQP configuration from env.php.");
         if (isset($config['queue']['amqp'])) {
             if (count($config['queue']) > 1) {
                 unset($config['queue']['amqp']);
@@ -328,7 +522,7 @@ class InstallUpdate implements ProcessInterface
             [
                 $hash,
                 $salt,
-                $version
+                $version,
             ]
         );
     }
@@ -341,7 +535,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function removeRedisConfiguration($config)
     {
-        $this->env->log("Removing redis cache and session configuration from env.php.");
+        $this->logger->info("Removing redis cache and session configuration from env.php.");
 
         if (isset($config['session']['save']) && $config['session']['save'] == 'redis') {
             $config['session']['save'] = 'db';
@@ -359,5 +553,52 @@ class InstallUpdate implements ProcessInterface
         }
 
         return $config;
+    }
+
+
+    private function getRedisCacheConfiguration()
+    {
+        return [
+            'frontend' => [
+                'default' => [
+                    'backend' => 'Cm_Cache_Backend_Redis',
+                    'backend_options' => [
+                        'server' => $this->redisHost,
+                        'port' => $this->redisPort,
+                        'database' => $this->redisCacheDb
+                    ]
+                ],
+                'page_cache' => [
+                    'backend' => 'Cm_Cache_Backend_Redis',
+                    'backend_options' => [
+                        'server' => $this->redisHost,
+                        'port' => $this->redisPort,
+                        'database' => $this->redisCacheDb
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Return full path to environment configuration file.
+     *
+     * @return string The path to configuration file
+     */
+    private function getConfigFilePath()
+    {
+        return Environment::MAGENTO_ROOT . 'app/etc/env.php';
+    }
+
+    /**
+     * Executes database query
+     *
+     * @param string $query
+     * $query must be completed, finished with semicolon (;)
+     * @return mixed
+     */
+    private function executeDbQuery($query)
+    {
+        return $this->adapter->execute($query);
     }
 }
