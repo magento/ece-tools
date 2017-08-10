@@ -6,7 +6,7 @@
 
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Config\Environment;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Logger;
 
-use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Config\Environment;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 

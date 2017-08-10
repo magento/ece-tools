@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\DeploymentConfig;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -35,29 +35,29 @@ class MagentoMode implements ProcessInterface
     private $file;
 
     /**
-     * @var DeployConfig
+     * @var Environment
      */
-    private $deployConfig;
+    private $env;
 
     /**
-     * @param DeploymentConfig $deploymentConfig
+     * @param Environment $env
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param File $file
-     * @param DeployConfig $deployConfig
+     * @param DeploymentConfig $deploymentConfig
      */
     public function __construct(
-        DeploymentConfig $deploymentConfig,
+        Environment $env,
         LoggerInterface $logger,
         ShellInterface $shell,
         File $file,
-        DeployConfig $deployConfig
+        DeploymentConfig $deploymentConfig
     ) {
-        $this->deploymentConfig = $deploymentConfig;
+        $this->env = $env;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->file = $file;
-        $this->deployConfig = $deployConfig;
+        $this->deploymentConfig = $deploymentConfig;
     }
 
     /**
@@ -65,11 +65,11 @@ class MagentoMode implements ProcessInterface
      */
     public function execute()
     {
-        $magentoApplicationMode = $this->deployConfig->getApplicationMode();
+        $magentoApplicationMode = $this->env->getApplicationMode();
         $this->logger->info("Set Magento application mode to '{$magentoApplicationMode}'");
 
         /* Enable application mode */
-        if ($magentoApplicationMode == DeployConfig::MAGENTO_PRODUCTION_MODE) {
+        if ($magentoApplicationMode == Environment::MAGENTO_PRODUCTION_MODE) {
             $this->logger->info("Enable production mode");
             $configFileName = $this->deploymentConfig->getConfigFilePath();
             $config = include $configFileName;
@@ -79,7 +79,7 @@ class MagentoMode implements ProcessInterface
         } else {
             $this->logger->info("Enable developer mode");
             $this->shell->execute(
-                "php ./bin/magento deploy:mode:set " . DeployConfig::MAGENTO_DEVELOPER_MODE . $this->deployConfig->getVerbosityLevel()
+                "php ./bin/magento deploy:mode:set " . Environment::MAGENTO_DEVELOPER_MODE . $this->env->getVerbosityLevel()
             );
         }
     }

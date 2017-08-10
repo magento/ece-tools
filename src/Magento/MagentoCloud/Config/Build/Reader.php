@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Build;
 
-use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
 class Reader implements ReaderInterface

@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
-use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
 class Adapter

@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\DB\Adapter;
-use Magento\MagentoCloud\Environment;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 

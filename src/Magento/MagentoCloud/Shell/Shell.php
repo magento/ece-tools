@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Shell;
 
-use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
 
 /**

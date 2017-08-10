@@ -5,11 +5,10 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Environment;
+use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
 
 class PreDeploy implements ProcessInterface
@@ -35,25 +34,17 @@ class PreDeploy implements ProcessInterface
     private $file;
 
     /**
-     * @var DeployConfig
-     */
-    private $deployConfig;
-
-    /**
-     * @param DeployConfig $deployConfig
      * @param Environment $env
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param File $file
      */
     public function __construct(
-        DeployConfig $deployConfig,
         Environment $env,
         LoggerInterface $logger,
         ShellInterface $shell,
         File $file
     ) {
-        $this->deployConfig = $deployConfig;
         $this->env = $env;
         $this->logger = $logger;
         $this->shell = $shell;
@@ -66,7 +57,7 @@ class PreDeploy implements ProcessInterface
     public function execute()
     {
         $this->logger->info($this->env->startingMessage("pre-deploy"));
-        $redis = $this->deployConfig->getRelationship('redis');
+        $redis = $this->env->getRelationship('redis');
 
         if (count($redis) > 0) {
             $redisHost = $redis[0]['host'];
@@ -93,7 +84,7 @@ class PreDeploy implements ProcessInterface
             $this->logger->info("Static content deployment was performed during build hook");
             $this->env->removeStaticContent();
 
-            if ($this->deployConfig->isStaticContentSymlinkOn()) {
+            if ($this->env->isStaticContentSymlinkOn()) {
                 $this->logger->info("Symlinking static content from pub/static to init/pub/static");
 
                 // Symlink pub/static/* to init/pub/static/*

@@ -3,8 +3,7 @@
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
-
-namespace Magento\MagentoCloud;
+namespace Magento\MagentoCloud\Config;
 
 use Psr\Log\LoggerInterface;
 
@@ -13,9 +12,12 @@ use Psr\Log\LoggerInterface;
  */
 class Environment
 {
-    const MAGENTO_ROOT = __DIR__ . '/../../../../../../';
+    const MAGENTO_ROOT = __DIR__ . '/../../../../../../../';
     const STATIC_CONTENT_DEPLOY_FLAG = '/.static_content_deploy';
     const REGENERATE_FLAG = self::MAGENTO_ROOT . 'var/.regenerate';
+
+    const MAGENTO_PRODUCTION_MODE = 'production';
+    const MAGENTO_DEVELOPER_MODE = 'developer';
 
     public $writableDirs = ['var', 'app/etc', 'pub/media'];
 
@@ -33,13 +35,23 @@ class Environment
     }
 
     /**
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function get(string $key, $default = null)
+    {
+        return isset($_ENV[$key]) ? json_decode(base64_decode($_ENV[$key])) : $default;
+    }
+
+    /**
      * Get routes information from MagentoCloud environment variable.
      *
      * @return mixed
      */
     public function getRoutes()
     {
-        return json_decode(base64_decode($_ENV["MAGENTO_CLOUD_ROUTES"]), true);
+        return $this->get('MAGENTO_CLOUD_ROUTES');
     }
 
     /**
@@ -49,7 +61,20 @@ class Environment
      */
     public function getRelationships()
     {
-        return json_decode(base64_decode($_ENV["MAGENTO_CLOUD_RELATIONSHIPS"]), true);
+        return $this->get('MAGENTO_CLOUD_RELATIONSHIPS');
+    }
+
+    /**
+     * Get relationship information from MagentoCloud environment variable by key.
+     *
+     * @param string $key
+     * @return array
+     */
+    public function getRelationship($key)
+    {
+        $relationships = $this->getRelationships();
+
+        return isset($relationships[$key]) ? $relationships[$key] : [];
     }
 
     /**
@@ -59,7 +84,46 @@ class Environment
      */
     public function getVariables()
     {
-        return json_decode(base64_decode($_ENV["MAGENTO_CLOUD_VARIABLES"]), true);
+        return $this->get('MAGENTO_CLOUD_VARIABLES');
+    }
+
+    /**
+     * Checks that static content symlink is on.
+     *
+     * If STATIC_CONTENT_SYMLINK == disabled return false
+     * Returns true by default
+     *
+     * @return bool
+     */
+    public function isStaticContentSymlinkOn()
+    {
+        $var = $this->getVariables();
+
+        return isset($var['STATIC_CONTENT_SYMLINK']) && $var['STATIC_CONTENT_SYMLINK'] == 'disabled'
+            ? false : true;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVerbosityLevel(): string
+    {
+        $var = $this->getVariables();
+
+        return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled'
+            ? ' -vvv ' : '';
+    }
+
+    public function getApplicationMode()
+    {
+        $var = $this->getVariables();
+        $magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
+        $magentoApplicationMode =
+            in_array($magentoApplicationMode, array(self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE))
+                ? $magentoApplicationMode
+                : self::MAGENTO_PRODUCTION_MODE;
+
+        return $magentoApplicationMode;
     }
 
     /**
