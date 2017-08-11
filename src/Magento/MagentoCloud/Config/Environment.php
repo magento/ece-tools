@@ -116,13 +116,12 @@ class Environment
     public function getApplicationMode()
     {
         $var = $this->getVariables();
-        $magentoApplicationMode = isset($var["APPLICATION_MODE"]) ? $var["APPLICATION_MODE"] : false;
-        $magentoApplicationMode =
-            in_array($magentoApplicationMode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
-                ? $magentoApplicationMode
-                : self::MAGENTO_PRODUCTION_MODE;
+        $mode = isset($var['APPLICATION_MODE']) ? $var['APPLICATION_MODE'] : false;
+        $mode = in_array($mode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
+            ? $mode
+            : self::MAGENTO_PRODUCTION_MODE;
 
-        return $magentoApplicationMode;
+        return $mode;
     }
 
     /**
