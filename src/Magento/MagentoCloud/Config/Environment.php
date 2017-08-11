@@ -36,11 +36,11 @@ class Environment
     /**
      * @param string $key
      * @param mixed $default
-     * @return mixed
+     * @return array
      */
     public function get(string $key, $default = null)
     {
-        return isset($_ENV[$key]) ? json_decode(base64_decode($_ENV[$key])) : $default;
+        return isset($_ENV[$key]) ? json_decode(base64_decode($_ENV[$key]), true) : $default;
     }
 
     /**
