@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Filesystem\Reader;
 
+/**
+ * Read content of file.
+ */
 interface ReaderInterface
 {
     /**

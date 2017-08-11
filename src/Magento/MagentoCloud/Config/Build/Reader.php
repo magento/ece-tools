@@ -8,6 +8,9 @@ namespace Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
+/**
+ * @inheritdoc
+ */
 class Reader implements ReaderInterface
 {
     /**
@@ -30,6 +33,6 @@ class Reader implements ReaderInterface
     {
         $fileName = MAGENTO_ROOT . '/build_options.ini';
 
-        return $this->file->isExists($fileName) ? parse_ini_file($fileName) : [];
+        return $this->file->isExists($fileName) ? $this->file->parseIni($fileName) : [];
     }
 }

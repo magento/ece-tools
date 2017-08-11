@@ -15,26 +15,33 @@ class Adapter
      */
     private $shell;
 
-    private $dbHost;
-    private $dbName;
-    private $dbUser;
-    private $dbPassword;
+    /**
+     * @var Environment
+     */
+    private $environment;
 
+    /**
+     * @param Environment $environment
+     * @param ShellInterface $shell
+     */
     public function __construct(Environment $environment, ShellInterface $shell)
     {
         $this->shell = $shell;
-        $relationships = $environment->getRelationships();
-
-        $this->dbHost = $relationships["database"][0]["host"];
-        $this->dbName = $relationships["database"][0]["path"];
-        $this->dbUser = $relationships["database"][0]["username"];
-        $this->dbPassword = $relationships["database"][0]["password"];
+        $this->environment = $environment;
     }
 
     public function execute(string $query)
     {
-        $password = strlen($this->dbPassword) ? sprintf('-p%s', $this->dbPassword) : '';
+        $relationships = $this->environment->getRelationships();
 
-        return $this->shell->execute("mysql -u $this->dbUser -h $this->dbHost -e \"$query\" $password $this->dbName");
+        $dbHost = $relationships['database'][0]['host'];
+        $dbName = $relationships['database'][0]['path'];
+        $dbUser = $relationships['database'][0]['username'];
+        $dbPassword = $relationships['database'][0]['password'];
+        $password = strlen($dbPassword) ? sprintf('-p%s', $dbPassword) : '';
+
+        return $this->shell->execute(
+            "mysql -u $dbUser -h $dbHost -e \"$query\" $password $dbName"
+        );
     }
 }

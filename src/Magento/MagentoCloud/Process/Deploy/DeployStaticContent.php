@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Adapter;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Utils\StaticContentCleaner;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -37,6 +38,11 @@ class DeployStaticContent implements ProcessInterface
     private $adapter;
 
     /**
+     * @var StaticContentCleaner
+     */
+    private $staticContentCleaner;
+
+    /**
      * @param Environment $environment
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
@@ -46,12 +52,14 @@ class DeployStaticContent implements ProcessInterface
         Environment $environment,
         ShellInterface $shell,
         LoggerInterface $logger,
-        Adapter $adapter
+        Adapter $adapter,
+        StaticContentCleaner $staticContentCleaner
     ) {
         $this->environment = $environment;
         $this->shell = $shell;
         $this->logger = $logger;
         $this->adapter = $adapter;
+        $this->staticContentCleaner = $staticContentCleaner;
     }
 
     /**
@@ -77,7 +85,7 @@ class DeployStaticContent implements ProcessInterface
     {
         // Clear old static content if necessary
         if ($this->environment->doCleanStaticFiles()) {
-            $this->environment->removeStaticContent();
+            $this->staticContentCleaner->clean();
         }
         $this->logger->info('Generating fresh static content');
         $this->generateFreshStaticContent();
