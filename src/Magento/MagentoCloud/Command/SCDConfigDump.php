@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -41,10 +42,21 @@ class SCDConfigDump extends Command
      */
     private $shell;
 
-    public function __construct(Environment $environment, ShellInterface $shell)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @param Environment $environment
+     * @param ShellInterface $shell
+     * @param LoggerInterface $logger
+     */
+    public function __construct(Environment $environment, ShellInterface $shell, LoggerInterface $logger)
     {
         $this->environment = $environment;
         $this->shell = $shell;
+        $this->logger = $logger;
 
         parent::__construct();
     }
@@ -115,11 +127,11 @@ class SCDConfigDump extends Command
                 file_put_contents($configFile, $updatedConfig);
                 $this->shell->execute('php bin/magento app:config:import -n');
             } else {
-                $this->environment->log('No config file');
+                $this->logger->info('No config file');
             }
         } catch (\RuntimeException $e) {
-            $this->environment->log('Something went wrong in running app:config:dump');
-            $this->environment->log($e->getTraceAsString());
+            $this->logger->info('Something went wrong in running app:config:dump');
+            $this->logger->info($e->getTraceAsString());
         }
     }
 

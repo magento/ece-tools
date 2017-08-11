@@ -106,8 +106,7 @@ class Environment
     {
         $var = $this->getVariables();
 
-        return isset($var['STATIC_CONTENT_SYMLINK']) && $var['STATIC_CONTENT_SYMLINK'] == 'disabled'
-            ? false : true;
+        return isset($var['STATIC_CONTENT_SYMLINK']) && $var['STATIC_CONTENT_SYMLINK'] == 'disabled' ? false : true;
     }
 
     /**
@@ -132,25 +131,14 @@ class Environment
         return $mode;
     }
 
-    /**
-     * Log message to stream.
-     *
-     * @param string $message The message string.
-     * @return void
-     */
-    public function log($message)
-    {
-        $this->logger->info($message);
-    }
-
     public function setStaticDeployInBuild($flag)
     {
         if ($flag) {
-            $this->log('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            $this->logger->info('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
             touch(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
         } else {
             if ($this->isStaticDeployInBuild()) {
-                $this->log('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+                $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
                 unlink(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
             }
         }
