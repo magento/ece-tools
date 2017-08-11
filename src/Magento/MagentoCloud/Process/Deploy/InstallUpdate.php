@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\Config\DeploymentConfig;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\DB\Adapter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -35,9 +35,9 @@ class InstallUpdate implements ProcessInterface
     private $file;
 
     /**
-     * @var DeploymentConfig
+     * @var DeployConfig
      */
-    private $deploymentConfig;
+    private $deployConfig;
 
     /**
      * @var Environment
@@ -101,7 +101,7 @@ class InstallUpdate implements ProcessInterface
         LoggerInterface $logger,
         ShellInterface $shell,
         File $file,
-        DeploymentConfig $deploymentConfig,
+        DeployConfig $deployConfig,
         Environment $environment,
         Adapter $adapter,
         PasswordGenerator $passwordGenerator
@@ -109,7 +109,7 @@ class InstallUpdate implements ProcessInterface
         $this->logger = $logger;
         $this->shell = $shell;
         $this->file = $file;
-        $this->deploymentConfig = $deploymentConfig;
+        $this->deployConfig = $deployConfig;
         $this->environment = $environment;
         $this->adapter = $adapter;
         $this->passwordGenerator = $passwordGenerator;
@@ -119,7 +119,7 @@ class InstallUpdate implements ProcessInterface
     {
         $this->saveEnvironmentData();
 
-        if (!$this->deploymentConfig->isInstalled()) {
+        if (!$this->deployConfig->isInstalled()) {
             $this->install();
         } else {
             $this->update();

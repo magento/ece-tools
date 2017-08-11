@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Config\DeploymentConfig;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 
 /**
  * @inheritdoc
@@ -20,17 +20,17 @@ class CreateConfigFile implements ProcessInterface
     private $file;
 
     /**
-     * @var DeploymentConfig
+     * @var DeployConfig
      */
-    private $deploymentConfig;
+    private $deployConfig;
 
     /**
-     * @param DeploymentConfig $deploymentConfig
+     * @param DeployConfig $deployConfig
      * @param File $file
      */
-    public function __construct(DeploymentConfig $deploymentConfig, File $file)
+    public function __construct(DeployConfig $deployConfig, File $file)
     {
-        $this->deploymentConfig = $deploymentConfig;
+        $this->deployConfig = $deployConfig;
         $this->file = $file;
     }
 
@@ -39,7 +39,7 @@ class CreateConfigFile implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = $this->deploymentConfig->getConfigFilePath();
+        $configFile = $this->deployConfig->getConfigFilePath();
 
         if ($this->file->isExists($configFile)) {
             return;

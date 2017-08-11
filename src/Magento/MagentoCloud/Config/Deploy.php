@@ -9,7 +9,7 @@ use Magento\MagentoCloud\DB\Adapter;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
-class DeploymentConfig
+class Deploy
 {
     /**
      * @var Environment

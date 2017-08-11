@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Config\DeploymentConfig;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -18,9 +18,9 @@ use Psr\Log\LoggerInterface;
 class SetMode implements ProcessInterface
 {
     /**
-     * @var DeploymentConfig
+     * @var DeployConfig
      */
-    private $deploymentConfig;
+    private $deployConfig;
 
     /**
      * @var LoggerInterface
@@ -47,20 +47,20 @@ class SetMode implements ProcessInterface
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param File $file
-     * @param DeploymentConfig $deploymentConfig
+     * @param DeployConfig $deployConfig
      */
     public function __construct(
         Environment $env,
         LoggerInterface $logger,
         ShellInterface $shell,
         File $file,
-        DeploymentConfig $deploymentConfig
+        DeployConfig $deployConfig
     ) {
         $this->env = $env;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->file = $file;
-        $this->deploymentConfig = $deploymentConfig;
+        $this->deployConfig = $deployConfig;
     }
 
     /**
@@ -74,7 +74,7 @@ class SetMode implements ProcessInterface
         /* Enable application mode */
         if ($mode == Environment::MAGENTO_PRODUCTION_MODE) {
             $this->logger->info("Enable production mode");
-            $configFileName = $this->deploymentConfig->getConfigFilePath();
+            $configFileName = $this->deployConfig->getConfigFilePath();
             $config = include $configFileName;
             $config['MAGE_MODE'] = 'production';
             $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
