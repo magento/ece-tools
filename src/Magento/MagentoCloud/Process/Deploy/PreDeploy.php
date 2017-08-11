@@ -9,6 +9,8 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Utils\ComponentInfo;
+use Magento\MagentoCloud\Utils\StaticContentCleaner;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -37,21 +39,33 @@ class PreDeploy implements ProcessInterface
     private $file;
 
     /**
+     * @var ComponentInfo
+     */
+    private $componentInfo;
+
+    private $staticContentCleaner;
+
+    /**
      * @param Environment $env
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param File $file
+     * @param ComponentInfo $componentInfo
      */
     public function __construct(
         Environment $env,
         LoggerInterface $logger,
         ShellInterface $shell,
-        File $file
+        File $file,
+        ComponentInfo $componentInfo,
+        StaticContentCleaner $staticContentCleaner
     ) {
         $this->env = $env;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->file = $file;
+        $this->componentInfo = $componentInfo;
+        $this->staticContentCleaner = $staticContentCleaner;
     }
 
     /**
@@ -59,7 +73,9 @@ class PreDeploy implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info($this->env->startingMessage("pre-deploy"));
+        $this->logger->info(
+            'Starting deploy. ' . $this->componentInfo->get()
+        );
         $redis = $this->env->getRelationship('redis');
 
         if (count($redis) > 0) {
@@ -85,7 +101,7 @@ class PreDeploy implements ProcessInterface
          */
         if ($this->file->isExists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG)) {
             $this->logger->info("Static content deployment was performed during build hook");
-            $this->env->removeStaticContent();
+            $this->staticContentCleaner->clean();
 
             if ($this->env->isStaticContentSymlinkOn()) {
                 $this->logger->info("Symlinking static content from pub/static to init/pub/static");
