@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Utils\PasswordGenerator;
 
 /**
  * @inheritdoc
@@ -47,6 +48,11 @@ class InstallUpdate implements ProcessInterface
      * @var Adapter
      */
     private $adapter;
+
+    /**
+     * @var PasswordGenerator
+     */
+    private $passwordGenerator;
 
     const MAGIC_ROUTE = '{default}';
 
@@ -97,7 +103,8 @@ class InstallUpdate implements ProcessInterface
         File $file,
         DeploymentConfig $deploymentConfig,
         Environment $environment,
-        Adapter $adapter
+        Adapter $adapter,
+        PasswordGenerator $passwordGenerator
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
@@ -105,6 +112,7 @@ class InstallUpdate implements ProcessInterface
         $this->deploymentConfig = $deploymentConfig;
         $this->environment = $environment;
         $this->adapter = $adapter;
+        $this->passwordGenerator = $passwordGenerator;
     }
 
     public function execute()
@@ -278,7 +286,7 @@ class InstallUpdate implements ProcessInterface
         $this->logger->info('Updating admin credentials.');
 
         // @codingStandardsIgnoreStart
-        $this->executeDbQuery("update admin_user set firstname = '$this->adminFirstname', lastname = '$this->adminLastname', email = '$this->adminEmail', username = '$this->adminUsername', password='{$this->generatePassword($this->adminPassword)}' where user_id = '1';");
+        $this->executeDbQuery("update admin_user set firstname = '$this->adminFirstname', lastname = '$this->adminLastname', email = '$this->adminEmail', username = '$this->adminUsername', password='{$this->passwordGenerator->generate($this->adminPassword)}' where user_id = '1';");
         // @codingStandardsIgnoreEnd
     }
 
@@ -451,39 +459,6 @@ class InstallUpdate implements ProcessInterface
         }
 
         return $config;
-    }
-
-    /**
-     * Generates admin password using default Magento settings
-     */
-    private function generatePassword($password)
-    {
-        $saltLenght = 32;
-        $charsLowers = 'abcdefghijklmnopqrstuvwxyz';
-        $charsUppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charsDigits = '0123456789';
-        $randomStr = '';
-        $chars = $charsLowers . $charsUppers . $charsDigits;
-
-        // use openssl lib
-        for ($i = 0, $lc = strlen($chars) - 1; $i < $saltLenght; $i++) {
-            $bytes = openssl_random_pseudo_bytes(PHP_INT_SIZE);
-            $hex = bin2hex($bytes); // hex() doubles the length of the string
-            $rand = abs(hexdec($hex) % $lc); // random integer from 0 to $lc
-            $randomStr .= $chars[$rand]; // random character in $chars
-        }
-        $salt = $randomStr;
-        $version = 1;
-        $hash = hash('sha256', $salt . $password);
-
-        return implode(
-            ':',
-            [
-                $hash,
-                $salt,
-                $version,
-            ]
-        );
     }
 
     /**
