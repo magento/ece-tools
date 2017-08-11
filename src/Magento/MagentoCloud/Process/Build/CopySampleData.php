@@ -9,6 +9,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class CopySampleData implements ProcessInterface
 {
     /**
@@ -39,6 +42,7 @@ class CopySampleData implements ProcessInterface
     public function execute()
     {
         $sampleDataDir = MAGENTO_ROOT . 'vendor/magento/sample-data-media';
+
         if (!$this->file->isExists($sampleDataDir)) {
             return;
         }

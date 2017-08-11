@@ -12,6 +12,9 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class DeployStaticContent implements ProcessInterface
 {
     /**
@@ -65,7 +68,7 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = MAGENTO_ROOT. 'app/etc/config.php';
+        $configFile = MAGENTO_ROOT . 'app/etc/config.php';
         if (!$this->file->isExists($configFile) || $this->buildConfig->get(BuildConfig::BUILD_OPT_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
         }
@@ -132,8 +135,7 @@ class DeployStaticContent implements ProcessInterface
 
             $this->environment->setStaticDeployInBuild(true);
         } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
-            exit(5);
+            throw new \Exception($e->getMessage(), 5);
         }
     }
 
@@ -142,7 +144,7 @@ class DeployStaticContent implements ProcessInterface
      * @param string $prefix
      * @return array
      */
-    private function flatten($array, $prefix = '') : array
+    private function flatten($array, $prefix = ''): array
     {
         $result = [];
         foreach ($array as $key => $value) {
@@ -162,7 +164,7 @@ class DeployStaticContent implements ProcessInterface
      * @param bool $ending
      * @return array
      */
-    private function filter($array, $pattern, $ending = true) : array
+    private function filter($array, $pattern, $ending = true): array
     {
         $filteredResult = [];
         $length = strlen($pattern);

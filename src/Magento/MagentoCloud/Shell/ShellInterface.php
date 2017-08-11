@@ -14,4 +14,12 @@ interface ShellInterface
      * @return string The last line from execution result.
      */
     public function execute(string $command);
+
+    /**
+     * Runs shell command in background.
+     *
+     * @param string $command The command.
+     * @return string The last line from execution result.
+     */
+    public function backgroundExecute(string $command);
 }

@@ -13,6 +13,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Marshalls required files.
+ *
+ * {@inheritdoc}
  */
 class MarshallFiles implements ProcessInterface
 {

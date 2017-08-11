@@ -7,6 +7,7 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -35,9 +36,15 @@ class SCDConfigDump extends Command
      */
     private $environment;
 
-    public function __construct(Environment $environment)
+    /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    public function __construct(Environment $environment, ShellInterface $shell)
     {
         $this->environment = $environment;
+        $this->shell = $shell;
 
         parent::__construct();
     }
@@ -60,7 +67,7 @@ class SCDConfigDump extends Command
     {
         try {
             $configFile = MAGENTO_ROOT . 'app/etc/config.php';
-            $this->environment->execute("php bin/magento app:config:dump");
+            $this->shell->execute("php bin/magento app:config:dump");
 
             if (file_exists($configFile)) {
                 $oldConfig = include $configFile;
@@ -106,7 +113,7 @@ class SCDConfigDump extends Command
 
                 $updatedConfig = '<?php' . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
                 file_put_contents($configFile, $updatedConfig);
-                $this->environment->execute('php bin/magento app:config:import -n');
+                $this->shell->execute('php bin/magento app:config:import -n');
             } else {
                 $this->environment->log('No config file');
             }
@@ -135,7 +142,7 @@ class SCDConfigDump extends Command
      *
      * @param string $query
      * $query must be completed, finished with semicolon (;)
-     * @return array
+     * @return string
      */
     private function executeDbQuery($query)
     {
@@ -146,6 +153,6 @@ class SCDConfigDump extends Command
         $dbPassword = $relationships["database"][0]["password"];
         $password = strlen($dbPassword) ? sprintf('-p%s', $dbPassword) : '';
 
-        return $this->environment->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
+        return $this->shell->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
     }
 }

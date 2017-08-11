@@ -11,6 +11,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class PreDeploy implements ProcessInterface
 {
     /**

@@ -8,6 +8,9 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
+/**
+ * @inheritdoc
+ */
 class ComposerDumpAutoload implements ProcessInterface
 {
     /**

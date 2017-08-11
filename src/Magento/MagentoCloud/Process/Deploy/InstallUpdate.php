@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class InstallUpdate implements ProcessInterface
 {
     /**

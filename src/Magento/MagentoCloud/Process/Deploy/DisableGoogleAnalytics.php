@@ -9,6 +9,9 @@ use Magento\MagentoCloud\DB\Adapter;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class DisableGoogleAnalytics implements ProcessInterface
 {
     const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
@@ -33,6 +36,9 @@ class DisableGoogleAnalytics implements ProcessInterface
         $this->logger = $logger;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
         if (!$this->isMasterBranch()) {

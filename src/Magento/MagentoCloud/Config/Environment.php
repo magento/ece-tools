@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,11 +27,18 @@ class Environment
     private $logger;
 
     /**
-     * @param LoggerInterface $logger
+     * @var ShellInterface
      */
-    public function __construct(LoggerInterface $logger)
+    private $shell;
+
+    /**
+     * @param LoggerInterface $logger
+     * @param ShellInterface $shell
+     */
+    public function __construct(LoggerInterface $logger, ShellInterface $shell)
     {
         $this->logger = $logger;
+        $this->shell = $shell;
     }
 
     /**
@@ -135,43 +143,6 @@ class Environment
         $this->logger->info($message);
     }
 
-    /**
-     * @param string $command
-     * @return array
-     * @throws \RuntimeException Throws exception if CLI command returns non-zero status
-     */
-    public function execute($command)
-    {
-        $this->log('Command:' . $command);
-
-        $rootPathCommand = sprintf('cd %s && %s', MAGENTO_ROOT, $command);
-
-        exec(
-            $rootPathCommand,
-            $output,
-            $status
-        );
-
-        $this->log('Status:' . var_export($status, true));
-
-        if ($output) {
-            $this->log('Output:' . var_export($output, true));
-        }
-
-        if ($status != 0) {
-            throw new \RuntimeException("Command $command returned code $status", $status);
-        }
-
-        return $output;
-    }
-
-    public function backgroundExecute($command)
-    {
-        $command = "nohup {$command} 1>/dev/null 2>&1 &";
-        $this->log("Execute command in background: $command");
-        shell_exec($command);
-    }
-
     public function setStaticDeployInBuild($flag)
     {
         if ($flag) {
@@ -220,7 +191,7 @@ class Environment
         }
 
         $this->log("Removing $oldStaticContentLocation in the background");
-        $this->backgroundExecute("rm -rf $oldStaticContentLocation");
+        $this->shell->backgroundExecute("rm -rf $oldStaticContentLocation");
 
         $preprocessedLocation = realpath(MAGENTO_ROOT . 'var') . '/view_preprocessed';
         if (file_exists($preprocessedLocation)) {
@@ -228,7 +199,7 @@ class Environment
             $this->log("Rename $preprocessedLocation  to $oldPreprocessedLocation");
             rename($preprocessedLocation, $oldPreprocessedLocation);
             $this->log("Removing $oldPreprocessedLocation in the background");
-            $this->backgroundExecute("rm -rf $oldPreprocessedLocation");
+            $this->shell->backgroundExecute("rm -rf $oldPreprocessedLocation");
         }
     }
 

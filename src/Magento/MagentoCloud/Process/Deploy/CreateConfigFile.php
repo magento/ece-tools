@@ -9,6 +9,9 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Config\DeploymentConfig;
 
+/**
+ * @inheritdoc
+ */
 class CreateConfigFile implements ProcessInterface
 {
     /**
@@ -37,6 +40,7 @@ class CreateConfigFile implements ProcessInterface
     public function execute()
     {
         $configFile = $this->deploymentConfig->getConfigFilePath();
+
         if ($this->file->isExists($configFile)) {
             return;
         }
