@@ -80,7 +80,7 @@ class SetMode implements ProcessInterface
             $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
             $this->file->filePutContents($configFileName, $updatedConfig);
         } else {
-            $this->logger->info("Enable developer mode");
+            $this->logger->info('Enable developer mode');
             $this->shell->execute(
                 "php ./bin/magento deploy:mode:set " . Environment::MAGENTO_DEVELOPER_MODE . $this->env->getVerbosityLevel()
             );

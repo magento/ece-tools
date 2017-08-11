@@ -59,11 +59,9 @@ class PreBuild implements ProcessInterface
     public function execute()
     {
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
-        $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
 
+        $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
         $this->environment->setStaticDeployInBuild(false);
-        $this->logger->info(
-            'Starting build. ' . $this->componentInfo->get()
-        );
+        $this->logger->info('Starting build. ' . $this->componentInfo->get());
     }
 }

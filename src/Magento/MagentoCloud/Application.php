@@ -68,6 +68,8 @@ class Application extends \Symfony\Component\Console\Application
         );
         $container->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $container->singleton(\Magento\MagentoCloud\DB\Adapter::class);
+        $container->singleton(\Magento\MagentoCloud\Config\Build::class);
+        $container->singleton(\Magento\MagentoCloud\Config\Deploy::class);
 
         /**
          * Contextual binding.
@@ -77,15 +79,15 @@ class Application extends \Symfony\Component\Console\Application
             ->give(function () use ($container) {
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
-                        100 => $container->make(BuildProcess\PreBuild::class),
-                        200 => $container->make(BuildProcess\ApplyPatches::class),
-                        300 => $container->make(BuildProcess\MarshallFiles::class),
-                        400 => $container->make(BuildProcess\CopySampleData::class),
-                        500 => $container->make(BuildProcess\CompileDi::class),
-                        600 => $container->make(BuildProcess\ComposerDumpAutoload::class),
-                        700 => $container->make(BuildProcess\DeployStaticContent::class),
-                        800 => $container->make(BuildProcess\ClearInitDirectory::class),
-                        900 => $container->make(BuildProcess\BackupToInitDirectory::class),
+                        $container->make(BuildProcess\PreBuild::class),
+                        $container->make(BuildProcess\ApplyPatches::class),
+                        $container->make(BuildProcess\MarshallFiles::class),
+                        $container->make(BuildProcess\CopySampleData::class),
+                        $container->make(BuildProcess\CompileDi::class),
+                        $container->make(BuildProcess\ComposerDumpAutoload::class),
+                        $container->make(BuildProcess\DeployStaticContent::class),
+                        $container->make(BuildProcess\ClearInitDirectory::class),
+                        $container->make(BuildProcess\BackupToInitDirectory::class),
                     ],
                 ]);
             });
@@ -94,12 +96,12 @@ class Application extends \Symfony\Component\Console\Application
             ->give(function () use ($container) {
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
-                        100 => $container->make(DeployProcess\PreDeploy::class),
-                        200 => $container->make(DeployProcess\CreateConfigFile::class),
-                        300 => $container->make(DeployProcess\SetMode::class),
-                        400 => $container->make(DeployProcess\InstallUpdate::class),
-                        500 => $container->make(DeployProcess\DeployStaticContent::class),
-                        600 => $container->make(DeployProcess\DisableGoogleAnalytics::class),
+                        $container->make(DeployProcess\PreDeploy::class),
+                        $container->make(DeployProcess\CreateConfigFile::class),
+                        $container->make(DeployProcess\SetMode::class),
+                        $container->make(DeployProcess\InstallUpdate::class),
+                        $container->make(DeployProcess\DeployStaticContent::class),
+                        $container->make(DeployProcess\DisableGoogleAnalytics::class),
                     ],
                 ]);
             });

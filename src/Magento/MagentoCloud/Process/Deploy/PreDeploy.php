@@ -125,20 +125,20 @@ class PreDeploy implements ProcessInterface
                     }
                 }
             } else {
-                $this->logger->info("Copying static content from init/pub/static to pub/static");
+                $this->logger->info('Copying static content from init/pub/static to pub/static');
                 $this->copyFromBuildDir('pub/static');
             }
         }
 
         // Restore mounted directories
-        $this->logger->info("Copying writable directories back.");
+        $this->logger->info('Copying writable directories back.');
 
         foreach ($mountedDirectories as $dir) {
             $this->copyFromBuildDir($dir);
         }
 
         if ($this->file->isExists(Environment::REGENERATE_FLAG)) {
-            $this->logger->info("Removing var/.regenerate flag");
+            $this->logger->info('Removing var/.regenerate flag');
             $this->file->deleteFile(Environment::REGENERATE_FLAG);
         }
     }

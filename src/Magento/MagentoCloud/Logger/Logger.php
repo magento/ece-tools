@@ -8,6 +8,9 @@ namespace Magento\MagentoCloud\Logger;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 
+/**
+ * @inheritdoc
+ */
 class Logger extends \Monolog\Logger implements \Psr\Log\LoggerInterface
 {
     public function __construct()
@@ -15,7 +18,7 @@ class Logger extends \Monolog\Logger implements \Psr\Log\LoggerInterface
         $formatter = new LineFormatter();
         $formatter->allowInlineLineBreaks(true);
 
-        $deployLogPath = MAGENTO_ROOT . 'var/log/cloud_deploy.log';
+        $deployLogPath = MAGENTO_ROOT . 'var/log/cloud_build.log';
         $fileHandler = (new StreamHandler($deployLogPath))->setFormatter($formatter);
         $stdOutHandler = (new StreamHandler('php://stdout'))->setFormatter($formatter);
 

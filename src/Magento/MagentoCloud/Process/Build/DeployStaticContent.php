@@ -89,7 +89,7 @@ class DeployStaticContent implements ProcessInterface
         $locales = array_unique($locales);
 
         if (count($stores) === 0 && count($websites) === 0) {
-            $this->logger->info("No stores/website/locales found in config.php");
+            $this->logger->info('No stores/website/locales found in config.php');
             $this->environment->setStaticDeployInBuild(false);
 
             return;
@@ -99,7 +99,10 @@ class DeployStaticContent implements ProcessInterface
 
         $excludeThemesOptions = '';
         if ($this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES)) {
-            $themes = preg_split("/[,]+/", $this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES));
+            $themes = preg_split(
+                "/[,]+/",
+                $this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES)
+            );
             if (count($themes) > 1) {
                 $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
             } elseif (count($themes) === 1) {
@@ -112,13 +115,13 @@ class DeployStaticContent implements ProcessInterface
         try {
             $logMessage = $SCDLocales
                 ? "Generating static content for locales: $SCDLocales"
-                : "Generating static content.";
-            $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : "";
+                : 'Generating static content.';
+            $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : '';
             $logMessage .= $threads ? "\nUsing $threads Threads" : "";
 
             $this->logger->info($logMessage);
 
-            $parallelCommands = "";
+            $parallelCommands = '';
             foreach ($locales as $locale) {
                 $parallelCommands .= sprintf(
                     "php ./bin/magento setup:static-content:deploy -f %s %s %s\n",
