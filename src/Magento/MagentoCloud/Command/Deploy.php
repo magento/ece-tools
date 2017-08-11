@@ -122,7 +122,7 @@ class Deploy extends Command
      */
     private function createConfigIfNotYetExist()
     {
-        $configFile = $this->getConfigFilePath();
+        $configFile = $this->getEnvConfigFilePath();
         if (file_exists($configFile)) {
             return;
         }
@@ -238,7 +238,6 @@ class Deploy extends Command
         $this->database = new Database($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
     }
 
-
     /**
      * Verifies is Magento installed based on install date in env.php
      *
@@ -246,7 +245,7 @@ class Deploy extends Command
      */
     public function isInstalled()
     {
-        $configFile = $this->getConfigFilePath();
+        $configFile = $this->getEnvConfigFilePath();
         $installed = false;
 
         //1. from environment variables check if db exists and has tables
@@ -324,6 +323,7 @@ class Deploy extends Command
 
         $this->setSecureAdmin();
         $this->updateConfig();
+        $this->importDeploymentConfig();
     }
 
     /**
@@ -332,10 +332,32 @@ class Deploy extends Command
     public function setSecureAdmin()
     {
         $this->env->log("Setting secure admin");
-        $command =
-            "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
-        $command .= $this->verbosityLevel;
-        $this->env->execute($command);
+        $secPath = 'web/secure/use_in_adminhtml';
+        if (empty($this->database->executeDbQuery("SELECT * FROM core_config_data WHERE path='$secPath';", [], MYSQLI_ASSOC))) {
+            $this->database->executeDbQuery("INSERT INTO core_config_data (scope, scope_id, path, value) VALUES('default', '0', '$secPath', '1');");
+        } else {
+            $this->database->executeDbQuery("UPDATE core_config_data SET value = '1' WHERE path = '$secPath';");
+        }
+    }
+
+    /**
+    * Import deployment config if present
+    *
+    * @return void
+    */
+    public function importDeploymentConfig()
+    {
+        $configFile = $this->getSharedConfigFilePath();
+        $config = include $configFile;
+        unset($config['modules']);
+
+        // Test for deployment config
+        if (count($config) > 0) {
+            $this->env->log("Importing deployment config");
+            $this->env->execute("php ./bin/magento app:config:import {$this->verbosityLevel}");
+        } else {
+            $this->env->log("No deployment config present to import");
+        }
     }
 
     /**
@@ -475,7 +497,7 @@ class Deploy extends Command
     {
         $this->env->log("Updating env.php database configuration.");
 
-        $configFileName = $this->getConfigFilePath();
+        $configFileName = $this->getEnvConfigFilePath();
 
         $config = include $configFileName;
 
@@ -638,7 +660,7 @@ class Deploy extends Command
              * and made it run after production mode is enabled to work around the bug with the read only
              */
             $this->env->log("Enable production mode");
-            $configFileName = $this->getConfigFilePath();
+            $configFileName = $this->getEnvConfigFilePath();
             $config = include $configFileName;
             $config['MAGE_MODE'] = 'production';
             $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
@@ -890,9 +912,19 @@ class Deploy extends Command
      *
      * @return string The path to configuration file
      */
-    private function getConfigFilePath()
+    private function getEnvConfigFilePath()
     {
         return Environment::MAGENTO_ROOT . 'app/etc/env.php';
+    }
+
+    /**
+     * Return full path to shared configuration file.
+     *
+     * @return string The path to configuration file
+     */
+    private function getSharedConfigFilePath()
+    {
+        return Environment::MAGENTO_ROOT . 'app/etc/config.php';
     }
 
     /**
