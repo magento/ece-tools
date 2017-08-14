@@ -233,7 +233,7 @@ class InstallUpdate implements ProcessInterface
     /**
      * Update secure admin
      */
-    public function setSecureAdmin()
+    private function setSecureAdmin()
     {
         $this->logger->info('Setting secure admin');
 

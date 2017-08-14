@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\DB\Adapter;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -31,16 +32,23 @@ class Deploy
      */
     private $adapter;
 
+    /**
+     * @var File
+     */
+    private $file;
+
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
         ShellInterface $shell,
-        Adapter $adapter
+        Adapter $adapter,
+        File $file
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->adapter = $adapter;
+        $this->file = $file;
     }
 
     /**
@@ -59,26 +67,28 @@ class Deploy
 
         $this->logger->info('Checking if db exists and has tables');
         $output = $this->adapter->execute('SHOW TABLES');
+
         if (is_array($output) && count($output) > 1) {
             if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
                 $this->logger->info('Missing either core_config_data or setup_module table');
                 exit(5);
-            } elseif (file_exists($configFile)) {
+            } elseif ($this->file->isExists($configFile)) {
                 $data = include $configFile;
+
                 if (isset($data['install']) && isset($data['install']['date'])) {
-                    $this->logger->info("Magento was installed on " . $data['install']['date']);
+                    $this->logger->info('Magento was installed on ' . $data['install']['date']);
                     $isInstalled = true;
                 } else {
                     $config['install']['date'] = date('r');
                     $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-                    file_put_contents($configFile, $updatedConfig);
+                    $this->file->filePutContents($configFile, $updatedConfig);
                     $isInstalled = true;
                 }
             } else {
                 $this->shell->execute('touch ' . $configFile);
                 $config['install']['date'] = date('r');
                 $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-                file_put_contents($configFile, $updatedConfig);
+                $this->file->filePutContents($configFile, $updatedConfig);
                 $isInstalled = true;
             }
         }
