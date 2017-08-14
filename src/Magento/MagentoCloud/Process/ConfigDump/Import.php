@@ -1,37 +1,20 @@
 <?php
 /**
- * Copyright © 2016 Magento. All rights reserved.
+ * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
-namespace Magento\MagentoCloud\Command;
+namespace Magento\MagentoCloud\Process\ConfigDump;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * CLI command for dumping SCD related config.
+ * @inheritdoc
  */
-class SCDConfigDump extends Command
+class Import implements ProcessInterface
 {
-    private $requiredConfigKeys = [
-        'modules',
-        'scopes',
-        'system/default/general/locale/code',
-        'system/default/dev/static/sign',
-        'system/default/dev/front_end_development_workflow',
-        'system/default/dev/template',
-        'system/default/dev/js',
-        'system/default/dev/css',
-        'system/default/advanced/modules_disable_output',
-        'system/stores',
-        'system/websites',
-    ];
-
     /**
      * @var Environment
      */
@@ -47,6 +30,20 @@ class SCDConfigDump extends Command
      */
     private $logger;
 
+    private $requiredConfigKeys = [
+        'modules',
+        'scopes',
+        'system/default/general/locale/code',
+        'system/default/dev/static/sign',
+        'system/default/dev/front_end_development_workflow',
+        'system/default/dev/template',
+        'system/default/dev/js',
+        'system/default/dev/css',
+        'system/default/advanced/modules_disable_output',
+        'system/stores',
+        'system/websites',
+    ];
+
     /**
      * @param Environment $environment
      * @param ShellInterface $shell
@@ -57,25 +54,13 @@ class SCDConfigDump extends Command
         $this->environment = $environment;
         $this->shell = $shell;
         $this->logger = $logger;
-
-        parent::__construct();
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     * @throws \RuntimeException
      */
-    protected function configure()
-    {
-        $this->setName('dump')
-            ->setDescription('Dump static content');
-
-        parent::configure();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute()
     {
         try {
             $configFile = MAGENTO_ROOT . 'app/etc/config.php';
@@ -130,8 +115,9 @@ class SCDConfigDump extends Command
                 $this->logger->info('No config file');
             }
         } catch (\RuntimeException $e) {
-            $this->logger->info('Something went wrong in running app:config:dump');
-            $this->logger->info($e->getTraceAsString());
+            $this->logger->error('Something went wrong in running app:config:dump');
+
+            throw $e;
         }
     }
 

@@ -58,7 +58,7 @@ class Build extends Command
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
 
-            return $exception->getCode();
+            return $exception->getCode() ?: 1;
         }
 
         return 0;

@@ -6,35 +6,34 @@
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**
- * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
+ * CLI command for dumping SCD related config.
  */
-class Deploy extends Command
+class ConfigDump extends Command
 {
-    /**
-     * @var ProcessInterface
-     */
-    private $process;
-
     /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @param ProcessInterface $process
-     * @param LoggerInterface $logger
+     * @var ProcessInterface
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
+    private $process;
+
+    /**
+     * @param ProcessInterface $process
+     */
+    public function __construct(LoggerInterface $logger, ProcessInterface $process)
     {
-        $this->process = $process;
         $this->logger = $logger;
+        $this->process = $process;
 
         parent::__construct();
     }
@@ -44,24 +43,22 @@ class Deploy extends Command
      */
     protected function configure()
     {
-        $this->setName('deploy')
-            ->setDescription('Deploys application');
+        $this->setName('dump')
+            ->setDescription('Dump static content');
 
         parent::configure();
     }
 
     /**
-     * Deploy application: copy writable directories back, install or update Magento data.
-     *
-     * {@inheritdoc}
+     * @inheritdoc
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->notice('Starting deploy.');
             $this->process->execute();
-            $this->logger->notice('Deployment complete.');
         } catch (\Exception $exception) {
+            $this->logger->error($exception->getMessage());
+
             return $exception->getCode() ?: 1;
         }
 

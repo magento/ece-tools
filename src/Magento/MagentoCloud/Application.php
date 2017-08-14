@@ -8,11 +8,12 @@ namespace Magento\MagentoCloud;
 use Illuminate\Container\Container;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Command\SCDConfigDump;
+use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
+use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 
 /**
  * @inheritdoc
@@ -41,7 +42,7 @@ class Application extends \Symfony\Component\Console\Application
             [
                 Container::getInstance()->make(Build::class),
                 Container::getInstance()->make(Deploy::class),
-                Container::getInstance()->make(SCDConfigDump::class),
+                Container::getInstance()->make(ConfigDump::class),
             ]
         );
     }
@@ -105,11 +106,12 @@ class Application extends \Symfony\Component\Console\Application
                     ],
                 ]);
             });
-        $container->when(SCDConfigDump::class)
+        $container->when(ConfigDump::class)
             ->needs(ProcessInterface::class)
             ->give(function () use ($container) {
                 return $container->makeWith(ProcessPool::class, [
                     'processes' => [
+                        $container->make(ConfigDumpProcess\Import::class),
                     ],
                 ]);
             });
