@@ -116,8 +116,7 @@ class Environment
     {
         $var = $this->getVariables();
 
-        return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled'
-            ? ' -vvv ' : '';
+        return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
     }
 
     public function getApplicationMode()
@@ -216,5 +215,79 @@ class Environment
         $var = $this->getVariables();
 
         return isset($var['STATIC_CONTENT_EXCLUDE_THEMES']) ? $var['STATIC_CONTENT_EXCLUDE_THEMES'] : [];
+    }
+
+    public function getDbHost()
+    {
+        return $this->getRelationship('database')[0]['host'];
+    }
+
+    public function getDbName()
+    {
+        return $this->getRelationship('database')[0]['path'];
+    }
+
+    public function getDbUser()
+    {
+        return $this->getRelationship('database')[0]['username'];
+    }
+
+    public function getDbPassword()
+    {
+        return $this->getRelationship('database')[0]['password'];
+    }
+
+    public function getAdminUsername()
+    {
+        $var = $this->getVariables();
+
+        return isset($var['ADMIN_USERNAME']) ? $var['ADMIN_USERNAME'] : 'admin';
+    }
+
+    public function getAdminFirstname()
+    {
+        $var = $this->getVariables();
+
+        return isset($var['ADMIN_FIRSTNAME']) ? $var['ADMIN_FIRSTNAME'] : 'John';
+    }
+
+    public function getAdminLastname()
+    {
+        $var = $this->getVariables();
+
+        return isset($var['ADMIN_LASTNAME']) ? $var['ADMIN_LASTNAME'] : 'Doe';
+    }
+
+    public function getAdminEmail()
+    {
+        $var = $this->getVariables();
+
+        return isset($var['ADMIN_EMAIL']) ? $var['ADMIN_EMAIL'] : 'john@example.com';
+    }
+
+    public function getAdminPassword()
+    {
+        $var = $this->getVariables();
+
+        return isset($var['ADMIN_PASSWORD']) ? $var['ADMIN_PASSWORD'] : 'admin12';
+    }
+
+    public function getAdminUrl()
+    {
+        $var = $this->getVariables();
+
+        return isset($var['ADMIN_URL']) ? $var['ADMIN_URL'] : 'admin';
+    }
+
+    public function isUpdateUrlsEnabled()
+    {
+        $var = $this->getVariables();
+
+        return isset($var['UPDATE_URLS']) && $var['UPDATE_URLS'] == 'disabled' ? false : true;
+    }
+
+    public function getDefaultCurrency()
+    {
+        return 'USD';
     }
 }

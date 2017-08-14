@@ -13,6 +13,9 @@ use Monolog\Handler\StreamHandler;
  */
 class Logger extends \Monolog\Logger implements \Psr\Log\LoggerInterface
 {
+    /**
+     * @inheritdoc
+     */
     public function __construct()
     {
         $formatter = new LineFormatter();

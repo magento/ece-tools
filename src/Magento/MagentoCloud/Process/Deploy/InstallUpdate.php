@@ -61,27 +61,12 @@ class InstallUpdate implements ProcessInterface
 
     private $urls = ['unsecure' => [], 'secure' => []];
 
-    private $defaultCurrency = 'USD';
-
     private $amqpHost;
     private $amqpPort;
     private $amqpUser;
     private $amqpPasswd;
     private $amqpVirtualhost = '/';
     private $amqpSsl = '';
-
-    private $dbHost;
-    private $dbName;
-    private $dbUser;
-    private $dbPassword;
-
-    private $adminUsername;
-    private $adminFirstname;
-    private $adminLastname;
-    private $adminEmail;
-    private $adminPassword;
-    private $adminUrl;
-    private $enableUpdateUrls;
 
     private $redisHost;
     private $redisPort;
@@ -93,10 +78,15 @@ class InstallUpdate implements ProcessInterface
     private $solrPort;
     private $solrScheme;
 
-    private $adminLocale;
-
-    private $verbosityLevel;
-
+    /**
+     * @param LoggerInterface $logger
+     * @param ShellInterface $shell
+     * @param File $file
+     * @param DeployConfig $deployConfig
+     * @param Environment $environment
+     * @param Adapter $adapter
+     * @param PasswordGenerator $passwordGenerator
+     */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
@@ -117,7 +107,7 @@ class InstallUpdate implements ProcessInterface
 
     public function execute()
     {
-        $this->saveEnvironmentData();
+        $this->loadEnvironmentData();
 
         if (!$this->deployConfig->isInstalled()) {
             $this->install();
@@ -126,29 +116,13 @@ class InstallUpdate implements ProcessInterface
         }
     }
 
-    private function saveEnvironmentData()
+    private function loadEnvironmentData()
     {
         $this->logger->info('Preparing environment specific data.');
 
         $this->initRoutes();
 
         $relationships = $this->environment->getRelationships();
-        $var = $this->environment->getVariables();
-
-        $this->dbHost = $relationships["database"][0]["host"];
-        $this->dbName = $relationships["database"][0]["path"];
-        $this->dbUser = $relationships["database"][0]["username"];
-        $this->dbPassword = $relationships["database"][0]["password"];
-
-        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "admin";
-        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : "John";
-        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : "Doe";
-        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : "john@example.com";
-        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "admin12";
-        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
-        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
-
-        $this->adminLocale = isset($var["ADMIN_LOCALE"]) ? $var["ADMIN_LOCALE"] : "en_US";
 
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
             $this->redisHost = $relationships['redis'][0]['host'];
@@ -168,8 +142,6 @@ class InstallUpdate implements ProcessInterface
             $this->amqpPasswd = $relationships["mq"][0]["password"];
             $this->amqpPort = $relationships["mq"][0]["port"];
         }
-
-        $this->verbosityLevel = $this->environment->getVerbosityLevel();
     }
 
     /**
@@ -218,27 +190,27 @@ class InstallUpdate implements ProcessInterface
             "php ./bin/magento setup:install \
             --session-save=db \
             --cleanup-database \
-            --currency=$this->defaultCurrency \
+            --currency={$this->environment->getDefaultCurrency()} \
             --base-url=$urlUnsecure \
             --base-url-secure=$urlSecure \
-            --language=$this->adminLocale \
+            --language={$this->environment->getAdminLocale()} \
             --timezone=America/Los_Angeles \
-            --db-host=$this->dbHost \
-            --db-name=$this->dbName \
-            --db-user=$this->dbUser \
-            --backend-frontname=$this->adminUrl \
-            --admin-user=$this->adminUsername \
-            --admin-firstname=$this->adminFirstname \
-            --admin-lastname=$this->adminLastname \
-            --admin-email=$this->adminEmail \
-            --admin-password=$this->adminPassword";
+            --db-host={$this->environment->getDbHost()} \
+            --db-name={$this->environment->getDbName()} \
+            --db-user={$this->environment->getDbUser()} \
+            --backend-frontname={$this->environment->getAdminUrl()} \
+            --admin-user={$this->environment->getAdminUsername()} \
+            --admin-firstname={$this->environment->getAdminFirstname()} \
+            --admin-lastname={$this->environment->getAdminLastname()} \
+            --admin-email={$this->environment->getAdminEmail()} \
+            --admin-password={$this->environment->getAdminPassword()}";
 
-        if (strlen($this->dbPassword)) {
+        if (strlen($this->environment->getDbPassword())) {
             $command .= " \
-            --db-password=$this->dbPassword";
+            --db-password={$this->environment->getDbPassword()}";
         }
 
-        $command .= $this->verbosityLevel;
+        $command .= $this->environment->getVerbosityLevel();
 
         $this->shell->execute($command);
 
@@ -252,6 +224,7 @@ class InstallUpdate implements ProcessInterface
     private function update()
     {
         $this->logger->info('File env.php contains installation date. Updating configuration.');
+
         $this->updateConfig();
         $this->setupUpgrade();
         $this->clearCache();
@@ -263,15 +236,16 @@ class InstallUpdate implements ProcessInterface
     public function setSecureAdmin()
     {
         $this->logger->info('Setting secure admin');
+
         $command =
             "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
-        $command .= $this->verbosityLevel;
+        $command .= $this->environment->getVerbosityLevel();
         $this->shell->execute($command);
     }
 
     private function updateConfig()
     {
-        $this->logger->info("Updating configuration from environment variables.");
+        $this->logger->info('Updating configuration from environment variables.');
         $this->updateConfiguration();
         $this->updateAdminCredentials();
         $this->updateSolrConfiguration();
@@ -285,8 +259,14 @@ class InstallUpdate implements ProcessInterface
     {
         $this->logger->info('Updating admin credentials.');
 
+        $password = $this->passwordGenerator->generate(
+            $this->environment->getAdminPassword()
+        );
+
         // @codingStandardsIgnoreStart
-        $this->executeDbQuery("update admin_user set firstname = '$this->adminFirstname', lastname = '$this->adminLastname', email = '$this->adminEmail', username = '$this->adminUsername', password='{$this->passwordGenerator->generate($this->adminPassword)}' where user_id = '1';");
+        $this->executeDbQuery(
+            "update admin_user set firstname = '{$this->environment->getAdminFirstname()}', lastname = '{$this->environment->getAdminLastname()}', email = '{$this->environment->getAdminEmail()}', username = '{$this->environment->getAdminUsername()}', password='$password' where user_id = '1';"
+        );
         // @codingStandardsIgnoreEnd
     }
 
@@ -316,8 +296,9 @@ class InstallUpdate implements ProcessInterface
      */
     private function updateUrls()
     {
-        if ($this->enableUpdateUrls) {
-            $this->logger->info("Updating secure and unsecure URLs.");
+        if ($this->environment->isUpdateUrlsEnabled()) {
+            $this->logger->info('Updating secure and unsecure URLs.');
+
             foreach ($this->urls as $urlType => $urls) {
                 foreach ($urls as $route => $url) {
                     $prefix = 'unsecure' === $urlType ? self::PREFIX_UNSECURE : self::PREFIX_SECURE;
@@ -335,34 +316,37 @@ class InstallUpdate implements ProcessInterface
                 }
             }
         } else {
-            $this->logger->info("Skipping URL updates");
+            $this->logger->info('Skipping URL updates');
         }
     }
-
 
     /**
      * Run Magento setup upgrade
      */
     private function setupUpgrade()
     {
-        $this->logger->info("Saving disabled modules.");
+        $this->logger->info('Saving disabled modules.');
 
         if (file_exists(Environment::REGENERATE_FLAG)) {
-            $this->logger->info("Removing .regenerate flag");
+            $this->logger->info('Removing .regenerate flag');
             unlink(Environment::REGENERATE_FLAG);
         }
 
         try {
             /* Enable maintenance mode */
-            $this->logger->info("Enabling Maintenance mode.");
-            $this->shell->execute("php ./bin/magento maintenance:enable {$this->verbosityLevel}");
+            $this->logger->info('Enabling Maintenance mode.');
+            $this->shell->execute("php ./bin/magento maintenance:enable {$this->environment->getVerbosityLevel()}");
 
-            $this->logger->info("Running setup upgrade.");
-            $this->shell->execute("php ./bin/magento setup:upgrade --keep-generated -n {$this->verbosityLevel}");
+            $this->logger->info('Running setup upgrade.');
+            $this->shell->execute(
+                "php ./bin/magento setup:upgrade --keep-generated -n {$this->environment->getVerbosityLevel()}"
+            );
 
             /* Disable maintenance mode */
-            $this->shell->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
-            $this->logger->info("Maintenance mode is disabled.");
+            $this->shell->execute(
+                "php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}"
+            );
+            $this->logger->info('Maintenance mode is disabled.');
         } catch (\RuntimeException $e) {
             //Rollback required by database
             throw new \RuntimeException($e->getMessage(), 6);
@@ -381,7 +365,7 @@ class InstallUpdate implements ProcessInterface
         $this->logger->info('Clearing application cache.');
 
         $this->shell->execute(
-            "php ./bin/magento cache:flush {$this->verbosityLevel}"
+            "php ./bin/magento cache:flush {$this->environment->getVerbosityLevel()}"
         );
     }
 
@@ -390,21 +374,21 @@ class InstallUpdate implements ProcessInterface
      */
     private function updateConfiguration()
     {
-        $this->logger->info("Updating env.php database configuration.");
+        $this->logger->info('Updating env.php database configuration.');
 
         $configFileName = $this->getConfigFilePath();
 
         $config = include $configFileName;
 
-        $config['db']['connection']['default']['username'] = $this->dbUser;
-        $config['db']['connection']['default']['host'] = $this->dbHost;
-        $config['db']['connection']['default']['dbname'] = $this->dbName;
-        $config['db']['connection']['default']['password'] = $this->dbPassword;
+        $config['db']['connection']['default']['username'] = $this->environment->getDbUser();
+        $config['db']['connection']['default']['host'] = $this->environment->getDbHost();
+        $config['db']['connection']['default']['dbname'] = $this->environment->getDbName();
+        $config['db']['connection']['default']['password'] = $this->environment->getDbPassword();
 
-        $config['db']['connection']['indexer']['username'] = $this->dbUser;
-        $config['db']['connection']['indexer']['host'] = $this->dbHost;
-        $config['db']['connection']['indexer']['dbname'] = $this->dbName;
-        $config['db']['connection']['indexer']['password'] = $this->dbPassword;
+        $config['db']['connection']['indexer']['username'] = $this->environment->getDbUser();
+        $config['db']['connection']['indexer']['host'] = $this->environment->getDbHost();
+        $config['db']['connection']['indexer']['dbname'] = $this->environment->getDbName();
+        $config['db']['connection']['indexer']['password'] = $this->environment->getDbPassword();
 
         if ($this->amqpHost !== null && $this->amqpPort !== null
             && $this->amqpUser !== null && $this->amqpPasswd !== null) {
@@ -419,7 +403,7 @@ class InstallUpdate implements ProcessInterface
         }
 
         if ($this->redisHost !== null && $this->redisPort !== null) {
-            $this->logger->info("Updating env.php Redis cache configuration.");
+            $this->logger->info('Updating env.php Redis cache configuration.');
             $config['cache'] = $this->getRedisCacheConfiguration();
             $config['session'] = [
                 'save' => 'redis',
@@ -433,7 +417,7 @@ class InstallUpdate implements ProcessInterface
             $config = $this->removeRedisConfiguration($config);
         }
 
-        $config['backend']['frontName'] = $this->adminUrl;
+        $config['backend']['frontName'] = $this->environment->getAdminUrl();
         $config['resource']['default_setup']['connection'] = 'default';
 
         $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
@@ -449,7 +433,8 @@ class InstallUpdate implements ProcessInterface
      */
     private function removeAmqpConfig(array $config)
     {
-        $this->logger->info("Removing AMQP configuration from env.php.");
+        $this->logger->info('Removing AMQP configuration from env.php.');
+
         if (isset($config['queue']['amqp'])) {
             if (count($config['queue']) > 1) {
                 unset($config['queue']['amqp']);
@@ -469,7 +454,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function removeRedisConfiguration($config)
     {
-        $this->logger->info("Removing redis cache and session configuration from env.php.");
+        $this->logger->info('Removing redis cache and session configuration from env.php.');
 
         if (isset($config['session']['save']) && $config['session']['save'] == 'redis') {
             $config['session']['save'] = 'db';
