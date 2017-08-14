@@ -61,11 +61,6 @@ class InstallUpdate implements ProcessInterface
 
     private $urls = ['unsecure' => [], 'secure' => []];
 
-    private $redisHost;
-    private $redisPort;
-    private $redisSessionDb = '0';
-    private $redisCacheDb = '1'; // Value hard-coded in pre-deploy.php
-
     /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
@@ -109,13 +104,6 @@ class InstallUpdate implements ProcessInterface
         $this->logger->info('Preparing environment specific data.');
 
         $this->initRoutes();
-
-        $relationships = $this->environment->getRelationships();
-
-        if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
-            $this->redisHost = $relationships['redis'][0]['host'];
-            $this->redisPort = $relationships['redis'][0]['port'];
-        }
     }
 
     /**
@@ -379,15 +367,29 @@ class InstallUpdate implements ProcessInterface
             $config = $this->removeAmqpConfig($config);
         }
 
-        if ($this->redisHost !== null && $this->redisPort !== null) {
+        $redisConfig = $this->environment->getRelationship('redis');
+        if (count($redisConfig)) {
             $this->logger->info('Updating env.php Redis cache configuration.');
-            $config['cache'] = $this->getRedisCacheConfiguration();
+            $redisCache = [
+                'backend' => 'Cm_Cache_Backend_Redis',
+                'backend_options' => [
+                    'server' => $redisConfig[0]['host'],
+                    'port' => $redisConfig[0]['port'],
+                    'database' => 1,
+                ],
+            ];
+            $config['cache'] = [
+                'frontend' => [
+                    'default' => $redisCache,
+                    'page_cache' => $redisCache,
+                ],
+            ];
             $config['session'] = [
                 'save' => 'redis',
                 'redis' => [
-                    'host' => $this->redisHost,
-                    'port' => $this->redisPort,
-                    'database' => $this->redisSessionDb,
+                    'host' => $redisConfig[0]['host'],
+                    'port' =>  $redisConfig[0]['port'],
+                    'database' => 0,
                 ],
             ];
         } else {
@@ -449,31 +451,6 @@ class InstallUpdate implements ProcessInterface
         }
 
         return $config;
-    }
-
-
-    private function getRedisCacheConfiguration()
-    {
-        return [
-            'frontend' => [
-                'default' => [
-                    'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => [
-                        'server' => $this->redisHost,
-                        'port' => $this->redisPort,
-                        'database' => $this->redisCacheDb,
-                    ],
-                ],
-                'page_cache' => [
-                    'backend' => 'Cm_Cache_Backend_Redis',
-                    'backend_options' => [
-                        'server' => $this->redisHost,
-                        'port' => $this->redisPort,
-                        'database' => $this->redisCacheDb,
-                    ],
-                ],
-            ],
-        ];
     }
 
     /**
