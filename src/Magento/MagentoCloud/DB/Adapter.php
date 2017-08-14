@@ -30,6 +30,14 @@ class Adapter
         $this->environment = $environment;
     }
 
+    /**
+     * Execute the query.
+     *
+     * TODO: Use MySQL Adapter.
+     *
+     * @param string $query
+     * @return string
+     */
     public function execute(string $query)
     {
         $relationships = $this->environment->getRelationships();
