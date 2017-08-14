@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Utils;
 
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -21,13 +22,20 @@ class StaticContentCleaner
     private $shell;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
+     * @param File $file
      */
-    public function __construct(LoggerInterface $logger, ShellInterface $shell)
+    public function __construct(LoggerInterface $logger, ShellInterface $shell, File $file)
     {
         $this->logger = $logger;
         $this->shell = $shell;
+        $this->file = $file;
     }
 
     public function clean()
@@ -39,8 +47,8 @@ class StaticContentCleaner
 
         $this->logger->info("Moving out old static content into $oldStaticContentLocation");
 
-        if (!file_exists($oldStaticContentLocation)) {
-            mkdir($oldStaticContentLocation);
+        if (!$this->file->isExists($oldStaticContentLocation)) {
+            $this->file->createDirectory($oldStaticContentLocation);
         }
 
         $dir = new \DirectoryIterator($staticContentLocation);
@@ -52,7 +60,7 @@ class StaticContentCleaner
                     "Rename " . $staticContentLocation . $fileName
                     . " to " . $oldStaticContentLocation . '/' . $fileName
                 );
-                rename(
+                $this->file->rename(
                     $staticContentLocation . '/' . $fileName,
                     $oldStaticContentLocation . '/' . $fileName
                 );
@@ -62,8 +70,9 @@ class StaticContentCleaner
         $this->logger->info("Removing $oldStaticContentLocation in the background");
         $this->shell->backgroundExecute("rm -rf $oldStaticContentLocation");
 
-        $preprocessedLocation = realpath(MAGENTO_ROOT . 'var') . '/view_preprocessed';
-        if (file_exists($preprocessedLocation)) {
+        $preprocessedLocation = $this->file->getRealPath(MAGENTO_ROOT . 'var') . '/view_preprocessed';
+
+        if ($this->file->isExists($preprocessedLocation)) {
             $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
             $this->logger->info("Rename $preprocessedLocation  to $oldPreprocessedLocation");
             rename($preprocessedLocation, $oldPreprocessedLocation);
