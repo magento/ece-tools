@@ -61,22 +61,10 @@ class InstallUpdate implements ProcessInterface
 
     private $urls = ['unsecure' => [], 'secure' => []];
 
-    private $amqpHost;
-    private $amqpPort;
-    private $amqpUser;
-    private $amqpPasswd;
-    private $amqpVirtualhost = '/';
-    private $amqpSsl = '';
-
     private $redisHost;
     private $redisPort;
     private $redisSessionDb = '0';
     private $redisCacheDb = '1'; // Value hard-coded in pre-deploy.php
-
-    private $solrHost;
-    private $solrPath;
-    private $solrPort;
-    private $solrScheme;
 
     /**
      * @param LoggerInterface $logger
@@ -127,20 +115,6 @@ class InstallUpdate implements ProcessInterface
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
             $this->redisHost = $relationships['redis'][0]['host'];
             $this->redisPort = $relationships['redis'][0]['port'];
-        }
-
-        if (isset($relationships["solr"]) && count($relationships['solr']) > 0) {
-            $this->solrHost = $relationships["solr"][0]["host"];
-            $this->solrPath = $relationships["solr"][0]["path"];
-            $this->solrPort = $relationships["solr"][0]["port"];
-            $this->solrScheme = $relationships["solr"][0]["scheme"];
-        }
-
-        if (isset($relationships["mq"]) && count($relationships['mq']) > 0) {
-            $this->amqpHost = $relationships["mq"][0]["host"];
-            $this->amqpUser = $relationships["mq"][0]["username"];
-            $this->amqpPasswd = $relationships["mq"][0]["password"];
-            $this->amqpPort = $relationships["mq"][0]["port"];
         }
     }
 
@@ -277,17 +251,19 @@ class InstallUpdate implements ProcessInterface
     {
         $this->logger->info('Updating SOLR configuration.');
 
-        if ($this->solrHost !== null
-            && $this->solrPort !== null
-            && $this->solrPath !== null
-            && $this->solrHost !== null
-        ) {
-            // @codingStandardsIgnoreStart
-            $this->executeDbQuery("update core_config_data set value = '$this->solrHost' where path = 'catalog/search/solr_server_hostname' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrPort' where path = 'catalog/search/solr_server_port' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrScheme' where path = 'catalog/search/solr_server_username' and scope_id = '0';");
-            $this->executeDbQuery("update core_config_data set value = '$this->solrPath' where path = 'catalog/search/solr_server_path' and scope_id = '0';");
-            // @codingStandardsIgnoreEnd
+        $solrConfig = $this->environment->getRelationship('solr');
+        if (count($solrConfig)) {
+            $updateQuery = "update core_config_data set value = '%s' where path = '%s' and scope_id = '0';";
+            $updateConfig = [
+                'catalog/search/solr_server_hostname' => $solrConfig[0]['host'],
+                'catalog/search/solr_server_port' => $solrConfig[0]['port'],
+                'catalog/search/solr_server_username' => $solrConfig[0]['scheme'],
+                'catalog/search/solr_server_path' => $solrConfig[0]['path'],
+            ];
+
+            foreach ($updateConfig as $configPath => $value) {
+                $this->executeDbQuery(sprintf($updateQuery, $value, $configPath));
+            }
         }
     }
 
@@ -390,14 +366,15 @@ class InstallUpdate implements ProcessInterface
         $config['db']['connection']['indexer']['dbname'] = $this->environment->getDbName();
         $config['db']['connection']['indexer']['password'] = $this->environment->getDbPassword();
 
-        if ($this->amqpHost !== null && $this->amqpPort !== null
-            && $this->amqpUser !== null && $this->amqpPasswd !== null) {
-            $config['queue']['amqp']['host'] = $this->amqpHost;
-            $config['queue']['amqp']['port'] = $this->amqpPort;
-            $config['queue']['amqp']['user'] = $this->amqpUser;
-            $config['queue']['amqp']['password'] = $this->amqpPasswd;
-            $config['queue']['amqp']['virtualhost'] = $this->amqpVirtualhost;
-            $config['queue']['amqp']['ssl'] = $this->amqpSsl;
+        $mqConfig = $this->environment->getRelationship('mq');
+        if (count($mqConfig)) {
+            $amqpConfig = $mqConfig[0];
+            $config['queue']['amqp']['host'] = $amqpConfig['host'];
+            $config['queue']['amqp']['port'] = $amqpConfig['port'];
+            $config['queue']['amqp']['user'] = $amqpConfig['username'];
+            $config['queue']['amqp']['password'] = $amqpConfig['password'];
+            $config['queue']['amqp']['virtualhost'] = '/';
+            $config['queue']['amqp']['ssl'] = '';
         } else {
             $config = $this->removeAmqpConfig($config);
         }
