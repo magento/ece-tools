@@ -168,11 +168,11 @@ class Environment
          */
         if (isset($var['DO_DEPLOY_STATIC_CONTENT']) && $var['DO_DEPLOY_STATIC_CONTENT'] == 'disabled') {
             $flag = false;
-            $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to disabled');
         } else {
             $flag = !$this->isStaticDeployInBuild();
-            $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . $flag);
         }
+
+        $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . ($flag ? 'enabled' : 'disabled'));
 
         return $flag;
     }
