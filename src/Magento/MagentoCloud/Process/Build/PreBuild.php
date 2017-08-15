@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
-use Magento\MagentoCloud\Utils\ComponentInfo;
+use Magento\MagentoCloud\Util\ComponentInfo;
 use Psr\Log\LoggerInterface;
 
 /**
