@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -19,6 +20,8 @@ class Environment
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
 
+    const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
+
     public $writableDirs = ['var', 'app/etc', 'pub/media'];
 
     /**
@@ -32,13 +35,20 @@ class Environment
     private $shell;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
+     * @param File $file
      */
-    public function __construct(LoggerInterface $logger, ShellInterface $shell)
+    public function __construct(LoggerInterface $logger, ShellInterface $shell, File $file)
     {
         $this->logger = $logger;
         $this->shell = $shell;
+        $this->file = $file;
     }
 
     /**
@@ -102,7 +112,7 @@ class Environment
      *
      * @return bool
      */
-    public function isStaticContentSymlinkOn()
+    public function isStaticContentSymlinkOn(): bool
     {
         $var = $this->getVariables();
 
@@ -119,33 +129,30 @@ class Environment
         return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
     }
 
-    public function getApplicationMode()
+    public function getApplicationMode(): string
     {
         $var = $this->getVariables();
         $mode = isset($var['APPLICATION_MODE']) ? $var['APPLICATION_MODE'] : false;
-        $mode = in_array($mode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
+
+        return in_array($mode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
             ? $mode
             : self::MAGENTO_PRODUCTION_MODE;
-
-        return $mode;
     }
 
     public function setStaticDeployInBuild($flag)
     {
         if ($flag) {
             $this->logger->info('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-            touch(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        } else {
-            if ($this->isStaticDeployInBuild()) {
-                $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-                unlink(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-            }
+            $this->file->touch(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        } elseif ($this->isStaticDeployInBuild()) {
+            $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            $this->file->deleteFile(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
         }
     }
 
     public function isStaticDeployInBuild()
     {
-        return file_exists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        return $this->file->isExists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
     }
 
     /**
@@ -289,5 +296,11 @@ class Environment
     public function getDefaultCurrency()
     {
         return 'USD';
+    }
+
+    public function isMasterBranch()
+    {
+        return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
+            && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
     }
 }

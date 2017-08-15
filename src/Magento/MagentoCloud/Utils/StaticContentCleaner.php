@@ -41,7 +41,7 @@ class StaticContentCleaner
     public function clean()
     {
         // atomic move within pub/static directory
-        $staticContentLocation = realpath(MAGENTO_ROOT . 'pub/static/') . '/';
+        $staticContentLocation = $this->file->getRealPath(MAGENTO_ROOT . 'pub/static/') . '/';
         $timestamp = time();
         $oldStaticContentLocation = $staticContentLocation . 'old_static_content_' . $timestamp;
 
@@ -75,7 +75,7 @@ class StaticContentCleaner
         if ($this->file->isExists($preprocessedLocation)) {
             $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
             $this->logger->info("Rename $preprocessedLocation  to $oldPreprocessedLocation");
-            rename($preprocessedLocation, $oldPreprocessedLocation);
+            $this->file->rename($preprocessedLocation, $oldPreprocessedLocation);
             $this->logger->info("Removing $oldPreprocessedLocation in the background");
             $this->shell->backgroundExecute("rm -rf $oldPreprocessedLocation");
         }

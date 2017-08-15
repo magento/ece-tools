@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Adapter;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -14,8 +15,6 @@ use Psr\Log\LoggerInterface;
  */
 class DisableGoogleAnalytics implements ProcessInterface
 {
-    const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
-
     /**
      * @var Adapter
      */
@@ -27,13 +26,20 @@ class DisableGoogleAnalytics implements ProcessInterface
     private $logger;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @param Adapter $adapter
      * @param LoggerInterface $logger
+     * @param Environment $environment
      */
-    public function __construct(Adapter $adapter, LoggerInterface $logger)
+    public function __construct(Adapter $adapter, LoggerInterface $logger, Environment $environment)
     {
         $this->adapter = $adapter;
         $this->logger = $logger;
+        $this->environment = $environment;
     }
 
     /**
@@ -41,25 +47,9 @@ class DisableGoogleAnalytics implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->isMasterBranch()) {
+        if (!$this->environment->isMasterBranch()) {
             $this->logger->info('Disabling Google Analytics');
             $this->adapter->execute("update core_config_data set value = 0 where path = 'google/analytics/active';");
         }
-    }
-
-    /**
-     * If current deploy is about master branch
-     *
-     * @return boolean
-     */
-    private function isMasterBranch()
-    {
-        if (isset($_ENV["MAGENTO_CLOUD_ENVIRONMENT"])
-            && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV["MAGENTO_CLOUD_ENVIRONMENT"])
-        ) {
-            return true;
-        }
-
-        return false;
     }
 }

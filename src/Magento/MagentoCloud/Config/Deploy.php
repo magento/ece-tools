@@ -37,6 +37,13 @@ class Deploy
      */
     private $file;
 
+    /**
+     * @param Environment $environment
+     * @param LoggerInterface $logger
+     * @param ShellInterface $shell
+     * @param Adapter $adapter
+     * @param File $file
+     */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
@@ -55,6 +62,7 @@ class Deploy
      * Verifies is Magento installed based on install date in env.php
      *
      * @return bool
+     * @throws \Exception
      */
     public function isInstalled()
     {
@@ -70,8 +78,7 @@ class Deploy
 
         if (is_array($output) && count($output) > 1) {
             if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
-                $this->logger->info('Missing either core_config_data or setup_module table');
-                exit(5);
+                throw new \Exception('Missing either core_config_data or setup_module table', 5);
             } elseif ($this->file->isExists($configFile)) {
                 $data = include $configFile;
 
