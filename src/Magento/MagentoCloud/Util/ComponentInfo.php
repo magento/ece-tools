@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Utils;
+namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 

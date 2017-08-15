@@ -9,7 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Adapter;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Utils\StaticContentCleaner;
+use Magento\MagentoCloud\Util\StaticContentCleaner;
 use Psr\Log\LoggerInterface;
 
 /**

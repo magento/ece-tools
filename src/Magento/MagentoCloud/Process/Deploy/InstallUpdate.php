@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Utils\PasswordGenerator;
+use Magento\MagentoCloud\Util\PasswordGenerator;
 
 /**
  * @inheritdoc
