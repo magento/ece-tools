@@ -21,13 +21,16 @@ use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 class Application extends \Symfony\Component\Console\Application
 {
     /**
+     * @var Container
+     */
+    private $container;
+
+    /**
      * @inheritdoc
      */
     public function __construct()
     {
-        Container::setInstance(
-            $this->createContainer()
-        );
+        $this->container = $this->createContainer();
 
         parent::__construct();
     }
@@ -40,9 +43,9 @@ class Application extends \Symfony\Component\Console\Application
         return array_merge(
             parent::getDefaultCommands(),
             [
-                Container::getInstance()->make(Build::class),
-                Container::getInstance()->make(Deploy::class),
-                Container::getInstance()->make(ConfigDump::class),
+                $this->container->make(Build::class),
+                $this->container->make(Deploy::class),
+                $this->container->make(ConfigDump::class),
             ]
         );
     }
@@ -61,7 +64,20 @@ class Application extends \Symfony\Component\Console\Application
          */
         $container->singleton(
             \Psr\Log\LoggerInterface::class,
-            \Magento\MagentoCloud\Logger\Logger::class
+            function () use ($container) {
+                $formatter = new \Monolog\Formatter\LineFormatter();
+                $formatter->allowInlineLineBreaks(true);
+
+                return $container->makeWith(\Monolog\Logger::class, [
+                    'name' => 'default',
+                    'handlers' => [
+                        (new \Monolog\Handler\StreamHandler(MAGENTO_ROOT . 'var/log/cloud_build.log'))
+                            ->setFormatter($formatter),
+                        (new \Monolog\Handler\StreamHandler('php://stdout'))
+                            ->setFormatter($formatter),
+                    ],
+                ]);
+            }
         );
         $container->singleton(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
@@ -119,6 +135,6 @@ class Application extends \Symfony\Component\Console\Application
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
 
-        return $container;
+        return Container::setInstance($container);
     }
 }
