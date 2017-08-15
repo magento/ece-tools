@@ -3,6 +3,8 @@
 
 require_once __DIR__ . '/autoload.php';
 
-$application = new \Magento\MagentoCloud\Application();
+$application = new \Magento\MagentoCloud\Application(
+    new \Magento\MagentoCloud\Container\Container()
+);
 $application->setDefaultCommand('build');
 $application->run();
