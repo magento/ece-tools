@@ -53,6 +53,12 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->process->execute();
+        try {
+            $this->process->execute();
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception->getMessage());
+
+            throw $exception;
+        }
     }
 }
