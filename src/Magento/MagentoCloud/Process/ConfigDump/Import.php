@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\ConfigDump;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -30,6 +31,11 @@ class Import implements ProcessInterface
      */
     private $logger;
 
+    /**
+     * @var File $file
+     */
+    private $file;
+
     private $requiredConfigKeys = [
         'modules',
         'scopes',
@@ -48,12 +54,14 @@ class Import implements ProcessInterface
      * @param Environment $environment
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
+     * @param File $file
      */
-    public function __construct(Environment $environment, ShellInterface $shell, LoggerInterface $logger)
+    public function __construct(Environment $environment, ShellInterface $shell, LoggerInterface $logger, File $file)
     {
         $this->environment = $environment;
         $this->shell = $shell;
         $this->logger = $logger;
+        $this->file = $file;
     }
 
     /**
@@ -66,7 +74,7 @@ class Import implements ProcessInterface
             $configFile = MAGENTO_ROOT . 'app/etc/config.php';
             $this->shell->execute("php bin/magento app:config:dump");
 
-            if (file_exists($configFile)) {
+            if ($this->file->isExists($configFile)) {
                 $oldConfig = include $configFile;
                 $newConfig = [];
 
@@ -109,7 +117,7 @@ class Import implements ProcessInterface
                     $this->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user');
 
                 $updatedConfig = '<?php' . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
-                file_put_contents($configFile, $updatedConfig);
+                $this->file->filePutContents($configFile, $updatedConfig);
                 $this->shell->execute('php bin/magento app:config:import -n');
             } else {
                 $this->logger->info('No config file');
