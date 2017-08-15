@@ -54,14 +54,6 @@ class ConfigDump extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
-            $this->process->execute();
-        } catch (\Exception $exception) {
-            $this->logger->error($exception->getMessage());
-
-            return $exception->getCode() ?: 1;
-        }
-
-        return 0;
+        $this->process->execute();
     }
 }
