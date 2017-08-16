@@ -70,6 +70,7 @@ class Deploy extends Command
     private $doDeployStaticContent;
 
     private $verbosityLevel;
+    private $isInstalling;
     /** @var Database|null This our connection to the database we use to execute queries. */
     private $database;
 
@@ -107,13 +108,16 @@ class Deploy extends Command
         $this->env->log("Starting deploy.");
         $this->createConfigIfNotYetExist();
         $this->processMagentoMode();
-        if (!$this->isInstalled()) {
+        if ($this->isInstalling) {
             $this->installMagento();
         } else {
             $this->updateMagento();
         }
         $this->staticContentDeploy();
         $this->disableGoogleAnalytics();
+        if ($this->isInstalling) {
+            $this->sendPasswordResetEmail();
+        }
         $this->env->log("Deployment complete.");
     }
 
@@ -149,9 +153,12 @@ class Deploy extends Command
         $this->dbUser = $relationships["database"][0]["username"];
         $this->dbPassword = $relationships["database"][0]["password"];
 
+        $this->isInstalling = !$this->isInstalled();
+
         /* Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
         $this->loadEnvironmentDataForAdmin($var);
 
+        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
         $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
             ? false : true;
         $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
@@ -213,7 +220,6 @@ class Deploy extends Command
 
     /**
      * Load the admin settings from the environment.
-     * TODO: This logic will change once I'm done with MAGECLOUD-115/MAGERCLOUD-894
      * @param array $var
      */
     private function loadEnvironmentDataForAdmin($var = null)
@@ -221,13 +227,24 @@ class Deploy extends Command
         if (is_null($var)) {
             $var = $this->env->getVariables();
         }
-        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "admin";
-        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : "John";
-        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : "Doe";
-        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : "john@example.com";
-        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "admin12";
-        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
-        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
+        /* We no longer set default username/password.  If we are installing, we will use random username/password.*/
+        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "";
+        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "";
+        if ($this->isInstalling && (empty($this->adminUsername) && empty($this->adminPassword))) {
+            // TODO: We want to have a random username , but because the username is not sent in the reset password email, the new admin has no way of knowing what it is at the moment.
+            //       We may either make a custom email template to do this, or find a different way to do this.  Then, we can use random a username.
+            //$this->adminUsername = "admin-" . $this->generateRandomString(6);
+            $this->adminUsername = "admin";
+            $this->adminPassword = $this->generateRandomString(20);
+        }
+        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : ($this->isInstalling ? "Changeme" : "");
+        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : ($this->isInstalling ? "Changeme" : "");
+        /*   Note: We are going to have the onboarding process set the ADMIN_EMAIL variables to the email address specified during
+         * the project creation.  This will let us do the reset password for the new installs. */
+        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : ($this->isInstalling ? "changeme@127.0.0.1" : "");
+        /* Note: ADMIN_URL should be set durring the onboarding process also.  They should have generated a random one for us to use. */
+        //$this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin_" . $this->generateRandomString(8) : "");
+        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin" : "");
     }
 
     /**
@@ -295,27 +312,26 @@ class Deploy extends Command
         $urlSecure = $this->urls['secure'][''];
 
         $command =
-            "php ./bin/magento setup:install \
-            --session-save=db \
-            --cleanup-database \
-            --currency=$this->defaultCurrency \
-            --base-url=$urlUnsecure \
-            --base-url-secure=$urlSecure \
-            --language=$this->adminLocale \
-            --timezone=America/Los_Angeles \
-            --db-host=$this->dbHost \
-            --db-name=$this->dbName \
-            --db-user=$this->dbUser \
-            --backend-frontname=$this->adminUrl \
-            --admin-user=$this->adminUsername \
-            --admin-firstname=$this->adminFirstname \
-            --admin-lastname=$this->adminLastname \
-            --admin-email=$this->adminEmail \
-            --admin-password=$this->adminPassword";
+            "php ./bin/magento setup:install"
+            . " " . escapeshellarg(" --session-save=db")
+            . " " . escapeshellarg("--cleanup-database")
+            . " " . escapeshellarg("--currency=$this->defaultCurrency")
+            . " " . escapeshellarg("--base-url=$urlUnsecure")
+            . " " . escapeshellarg("--base-url-secure=$urlSecure")
+            . " " . escapeshellarg("--language=$this->adminLocale")
+            . " " . escapeshellarg("--timezone=America/Los_Angeles")
+            . " " . escapeshellarg("--db-host=$this->dbHost")
+            . " " . escapeshellarg("--db-name=$this->dbName")
+            . " " . escapeshellarg("--db-user=$this->dbUser")
+            . " " . escapeshellarg("--backend-frontname=$this->adminUrl")
+            . " " . escapeshellarg("--admin-user=$this->adminUsername")
+            . " " . escapeshellarg("--admin-firstname=$this->adminFirstname")
+            . " " . escapeshellarg("--admin-lastname=$this->adminLastname")
+            . " " . escapeshellarg("--admin-email=$this->adminEmail")
+            . " " . escapeshellarg("--admin-password={$this->generateRandomString(20)}"); // Note: This password gets changed later in this script in updateAdminCredentials
 
         if (strlen($this->dbPassword)) {
-            $command .= " \
-            --db-password=$this->dbPassword";
+            $command .= " " . escapeshellarg("--db-password=$this->dbPassword");
         }
 
         $command .= $this->verbosityLevel;
@@ -366,8 +382,61 @@ class Deploy extends Command
         $this->env->log("Updating admin credentials.");
 
         // @codingStandardsIgnoreStart
+        // Old query for reference: "UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';"
+
+
         $this->database->executeDbQuery("UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';",
         ["sssss", $this->adminFirstname, $this->adminLastname, $this->adminEmail, $this->adminUsername, $this->generatePassword($this->adminPassword) ]);
+
+        $parameters = [""];
+        $query = "";
+        if (!empty($this->adminFirstname)) {
+            if (!empty($query)) {
+                $query .= ",";
+            }
+            $query .= " firstname = ? ";
+            $parameters[0] .= 's';
+            $parameters[] = $this->adminFirstname;
+        }
+        if (!empty($this->adminLastname)) {
+            if (!empty($query)) {
+                $query .= ",";
+            }
+            $query .= " lastname = ? ";
+            $parameters[0] .= 's';
+            $parameters[] = $this->adminLastname;
+        }
+        if (!empty($this->adminEmail)) {
+            if (!empty($query)) {
+                $query .= ",";
+            }
+            $query .= " email = ? ";
+            $parameters[0] .= 's';
+            $parameters[] = $this->adminEmail;
+        }
+        if (!empty($this->adminUsername)) {
+            if (!empty($query)) {
+                $query .= ",";
+            }
+            $query .= " username = ? ";
+            $parameters[0] .= 's';
+            $parameters[] = $this->adminUsername;
+        }
+        if (!empty($this->adminPassword)) {
+            if (!empty($query)) {
+                $query .= ",";
+            }
+            $query .= " password = ? ";
+            $parameters[0] .= 's';
+            $parameters[] = $this->generatePassword($this->adminPassword);
+        }
+        if (empty($query)) {
+            return;  // No variables set ; nothing to do
+        }
+        $this->env->log("Updating admin credentials.");
+        $query = "UPDATE admin_user SET" . $query . "  WHERE user_id = '1';";
+        $this->database->executeDbQuery($query, $parameters);
+
         // @codingStandardsIgnoreEnd
     }
 
@@ -516,7 +585,9 @@ class Deploy extends Command
             $config = $this->removeRedisConfiguration($config);
         }
 
-        $config['backend']['frontName'] = $this->adminUrl;
+        if (!empty($this->adminUrl)) {
+            $config['backend']['frontName'] = $this->adminUrl;
+        }
 
         $config['resource']['default_setup']['connection'] = 'default';
 
@@ -546,30 +617,41 @@ class Deploy extends Command
     }
 
     /**
-     * Generates Hash from a new Salt and the admin password using default Magento settings
-     * @param string $password This is the plaintext password to be hashed
-     * @return string The hash:salt:version
+     * Generates admin password using default Magento settings
+     * @param int $length the length of the random string
+     * @return string
      */
-    private function generatePassword($password)
+    private static function generateRandomString(int $length)
     {
-        $saltLenght = 32;
-        $charsLowers = 'abcdefghijklmnopqrstuvwxyz';
-        $charsUppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charsDigits = '0123456789';
-        $randomStr = '';
+        $charsLowers = "abcdefghijklmnopqrstuvwxyz";
+        $charsUppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        $charsDigits = "0123456789";
         $chars = $charsLowers . $charsUppers . $charsDigits;
-
-        // use openssl lib
-        for ($i = 0, $lc = strlen($chars) - 1; $i < $saltLenght; $i++) {
+        $output = "";
+        $lc = strlen($chars) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            /*
             $bytes = openssl_random_pseudo_bytes(PHP_INT_SIZE);
             $hex = bin2hex($bytes); // hex() doubles the length of the string
             $rand = abs(hexdec($hex) % $lc); // random integer from 0 to $lc
-            $randomStr .= $chars[$rand]; // random character in $chars
+            */
+            $rand = random_int(0, $lc);
+            $output .= $chars[$rand]; // random character in $chars
         }
-        $salt = $randomStr;
+        return $output;
+    }
+
+    /**
+     * Generates salt and hash for the admin password using default Magento settings
+     *  @param string $password The password we will generate a hash of
+     *  @return string The hash + salt + version
+     */
+    private function generatePassword(string $password)
+    {
+        $saltLength = 32;
+        $salt = static::generateRandomString($saltLength);
         $version = 1;
         $hash = hash('sha256', $salt . $password);
-
         return implode(
             ':',
             [
@@ -921,5 +1003,19 @@ class Deploy extends Command
         }
 
         return $config;
+    }
+
+    /**
+     * Send Password Reset Email for the admin user.
+     * We need to do this for environments that don't have the ADMIN_PASSWORD variable set so that the admin has
+     * a way to log in.
+     */
+    private function sendPasswordResetEmail()
+    {
+        if ( !$this->isInstalling || empty($this->env) || empty($this->adminEmail || !empty($this->adminPassword))) {
+            return;
+        }
+        $this->env->log("Sending password reset email to Admin $this->adminUsername at $this->adminEmail");
+        $this->env->execute("vendor/bin/m2-ece-send-password-reset-email");
     }
 }
