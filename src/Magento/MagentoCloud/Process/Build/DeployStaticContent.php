@@ -71,7 +71,7 @@ class DeployStaticContent implements ProcessInterface
         $configFile = MAGENTO_ROOT . 'app/etc/config.php';
         if (!$this->file->isExists($configFile) || $this->buildConfig->get(BuildConfig::BUILD_OPT_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
-            $this->environment->setStaticDeployInBuild(false);
+            $this->environment->removeFlagStaticContentInBuild();
             return;
         }
 
@@ -92,7 +92,7 @@ class DeployStaticContent implements ProcessInterface
 
         if (count($stores) === 0 && count($websites) === 0) {
             $this->logger->info('Skipping static content deploy. No stores/website/locales found in config.php');
-            $this->environment->setStaticDeployInBuild(false);
+            $this->environment->removeFlagStaticContentInBuild();
 
             return;
         }
@@ -138,7 +138,7 @@ class DeployStaticContent implements ProcessInterface
                 $threads
             ));
 
-            $this->environment->setStaticDeployInBuild(true);
+            $this->environment->setFlagStaticDeployInBuild();
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), 5);
         }

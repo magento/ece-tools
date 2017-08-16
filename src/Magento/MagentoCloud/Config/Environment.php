@@ -139,17 +139,35 @@ class Environment
             : self::MAGENTO_PRODUCTION_MODE;
     }
 
-    public function setStaticDeployInBuild($flag)
+    /**
+     * Sets flag that static content was generated in build phase.
+     *
+     * @return void
+     */
+    public function setFlagStaticDeployInBuild()
     {
-        if ($flag) {
-            $this->logger->info('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-            $this->file->touch(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        } elseif ($this->isStaticDeployInBuild()) {
+        $this->logger->info('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        $this->file->touch(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+    }
+
+    /**
+     * Removes flag that static content was generated in build phase.
+     *
+     * @return void
+     */
+    public function removeFlagStaticContentInBuild()
+    {
+        if (!$this->isStaticDeployInBuild()) {
             $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
             $this->file->deleteFile(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
         }
     }
 
+    /**
+     * Checks if static content generates during build process.
+     *
+     * @return bool
+     */
     public function isStaticDeployInBuild()
     {
         return $this->file->isExists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
