@@ -13,6 +13,8 @@ use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
+use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -109,16 +111,16 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     private function createLogger(string $name): \Closure
     {
         return function () use ($name) {
-            $formatter = new \Monolog\Formatter\LineFormatter();
+            $formatter = new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n");
             $formatter->allowInlineLineBreaks(true);
             $formatter->ignoreEmptyContextAndExtra();
 
             return $this->makeWith(\Monolog\Logger::class, [
                 'name' => $name,
                 'handlers' => [
-                    (new \Monolog\Handler\StreamHandler(MAGENTO_ROOT . 'var/log/cloud_build.log'))
+                    (new StreamHandler(MAGENTO_ROOT . 'var/log/cloud_build.log'))
                         ->setFormatter($formatter),
-                    (new \Monolog\Handler\StreamHandler('php://stdout'))
+                    (new StreamHandler('php://stdout'))
                         ->setFormatter($formatter),
                 ],
             ]);
