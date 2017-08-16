@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
+use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
@@ -88,9 +89,21 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     /**
      * @inheritdoc
      */
-    public function get(string $abstract, array $params = [])
+    public function get($id)
     {
-        return $this->makeWith($abstract, $params);
+        if ($this->has($id)) {
+            return $this->resolve($id);
+        }
+
+        throw new \Exception('Class was not found');
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function has($id)
+    {
+        return $this->bound($id);
     }
 
     /**

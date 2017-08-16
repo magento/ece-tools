@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
-use Magento\MagentoCloud\Container\ContainerInterface;
+use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
