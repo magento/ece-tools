@@ -111,6 +111,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         return function () use ($name) {
             $formatter = new \Monolog\Formatter\LineFormatter();
             $formatter->allowInlineLineBreaks(true);
+            $formatter->ignoreEmptyContextAndExtra();
 
             return $this->makeWith(\Monolog\Logger::class, [
                 'name' => $name,
