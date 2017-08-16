@@ -91,11 +91,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
      */
     public function get($id)
     {
-        if ($this->has($id)) {
-            return $this->resolve($id);
-        }
-
-        throw new \Exception('Class was not found');
+        return $this->resolve($id);
     }
 
     /**
