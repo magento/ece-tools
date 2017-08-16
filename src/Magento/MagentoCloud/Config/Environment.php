@@ -157,7 +157,7 @@ class Environment
      */
     public function removeFlagStaticContentInBuild()
     {
-        if (!$this->isStaticDeployInBuild()) {
+        if ($this->isStaticDeployInBuild()) {
             $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
             $this->file->deleteFile(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
         }
