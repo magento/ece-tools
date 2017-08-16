@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -30,24 +29,17 @@ class Environment
     private $logger;
 
     /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
      * @var File
      */
     private $file;
 
     /**
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
      * @param File $file
      */
-    public function __construct(LoggerInterface $logger, ShellInterface $shell, File $file)
+    public function __construct(LoggerInterface $logger, File $file)
     {
         $this->logger = $logger;
-        $this->shell = $shell;
         $this->file = $file;
     }
 
