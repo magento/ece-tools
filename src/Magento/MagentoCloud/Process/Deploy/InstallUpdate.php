@@ -298,7 +298,7 @@ class InstallUpdate implements ProcessInterface
 
         try {
             /* Enable maintenance mode */
-            $this->logger->info('Enabling Maintenance mode.');
+            $this->logger->notice('Enabling Maintenance mode.');
             $this->shell->execute("php ./bin/magento maintenance:enable {$this->environment->getVerbosityLevel()}");
 
             $this->logger->info('Running setup upgrade.');
@@ -310,7 +310,7 @@ class InstallUpdate implements ProcessInterface
             $this->shell->execute(
                 "php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}"
             );
-            $this->logger->info('Maintenance mode is disabled.');
+            $this->logger->notice('Maintenance mode is disabled.');
         } catch (\RuntimeException $e) {
             //Rollback required by database
             throw new \RuntimeException($e->getMessage(), 6);

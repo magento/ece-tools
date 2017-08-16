@@ -95,7 +95,7 @@ class DeployStaticContent implements ProcessInterface
     {
         $this->shell->execute('touch ' . MAGENTO_ROOT . 'pub/static/deployed_version.txt');
         /* Enable maintenance mode */
-        $this->logger->info('Enabling Maintenance mode.');
+        $this->logger->notice('Enabling Maintenance mode.');
         $this->shell->execute("php ./bin/magento maintenance:enable {$this->environment->getVerbosityLevel()}");
 
         /* Generate static assets */
