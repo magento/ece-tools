@@ -112,7 +112,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     {
         return function () use ($name) {
             $formatter = new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n");
-            $formatter->allowInlineLineBreaks(true);
+            $formatter->allowInlineLineBreaks();
             $formatter->ignoreEmptyContextAndExtra();
 
             return $this->makeWith(\Monolog\Logger::class, [
