@@ -313,7 +313,7 @@ class Deploy extends Command
 
         $command =
             "php ./bin/magento setup:install"
-            . " " . escapeshellarg(" --session-save=db")
+            . " " . escapeshellarg("--session-save=db")
             . " " . escapeshellarg("--cleanup-database")
             . " " . escapeshellarg("--currency=$this->defaultCurrency")
             . " " . escapeshellarg("--base-url=$urlUnsecure")
