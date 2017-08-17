@@ -82,7 +82,6 @@ class Deploy extends Command
     public function __construct()
     {
         $this->loadEnvironmentData();
-        $this->createDatabaseConnection();
         parent::__construct();
     }
 
@@ -153,6 +152,7 @@ class Deploy extends Command
         $this->dbUser = $relationships["database"][0]["username"];
         $this->dbPassword = $relationships["database"][0]["password"];
 
+        $this->createDatabaseConnection();  // Note: We have to create the database here, after we get the $relationships values, but before isInstalled which uses the database
         $this->isInstalling = !$this->isInstalled();
 
         /* Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
