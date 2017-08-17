@@ -54,7 +54,9 @@ class Build extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
+            $this->logger->info('Start build process');
             $this->process->execute();
+            $this->logger->info('End build process');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
