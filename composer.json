@@ -32,7 +32,7 @@
     "test": [
       "phpunit -c phpunit.xml.dist",
       "phpcs src --standard=phpcs-ruleset.xml -p -n",
-      "phpmd src/Magento/MagentoCloud xml phpmd-ruleset.xml"
+      "phpmd src xml phpmd-ruleset.xml"
     ]
   },
   "prefer-stable": true
