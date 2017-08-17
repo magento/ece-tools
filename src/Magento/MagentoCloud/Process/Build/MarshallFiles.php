@@ -36,6 +36,7 @@ class MarshallFiles implements ProcessInterface
     /**
      * @param ShellInterface $shell
      * @param File $file
+     * @param LoggerInterface $logger
      */
     public function __construct(
         ShellInterface $shell,

@@ -69,6 +69,7 @@ class PreDeploy implements ProcessInterface
     }
 
     /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @inheritdoc
      */
     public function execute()

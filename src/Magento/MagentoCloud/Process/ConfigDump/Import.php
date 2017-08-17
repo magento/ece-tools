@@ -65,6 +65,7 @@ class Import implements ProcessInterface
     }
 
     /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * {@inheritdoc}
      * @throws \RuntimeException
      */

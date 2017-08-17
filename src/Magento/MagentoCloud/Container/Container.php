@@ -19,6 +19,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Container extends \Illuminate\Container\Container implements ContainerInterface
 {

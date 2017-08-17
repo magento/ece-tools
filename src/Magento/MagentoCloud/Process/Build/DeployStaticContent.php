@@ -64,6 +64,7 @@ class DeployStaticContent implements ProcessInterface
     }
 
     /**
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @inheritdoc
      */
     public function execute()
@@ -81,6 +82,12 @@ class DeployStaticContent implements ProcessInterface
         $flattenedConfig = $this->flatten($config);
         $websites = $this->filter($flattenedConfig, 'scopes/websites', false);
         $stores = $this->filter($flattenedConfig, 'scopes/stores', false);
+        if (count($stores) === 0 && count($websites) === 0) {
+            $this->logger->info('Skipping static content deploy. No stores/website/locales found in config.php');
+            $this->environment->removeFlagStaticContentInBuild();
+
+            return;
+        }
 
         $locales = [];
         $locales = array_merge($locales, $this->filter($flattenedConfig, 'general/locale/code'));
@@ -91,27 +98,7 @@ class DeployStaticContent implements ProcessInterface
         $locales[] = 'en_US';
         $locales = array_unique($locales);
 
-        if (count($stores) === 0 && count($websites) === 0) {
-            $this->logger->info('Skipping static content deploy. No stores/website/locales found in config.php');
-            $this->environment->removeFlagStaticContentInBuild();
-
-            return;
-        }
-
         $SCDLocales = implode(' ', $locales);
-
-        $excludeThemesOptions = '';
-        if ($this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES)) {
-            $themes = preg_split(
-                "/[,]+/",
-                $this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES)
-            );
-            if (count($themes) > 1) {
-                $excludeThemesOptions = '--exclude-theme=' . implode(' --exclude-theme=', $themes);
-            } elseif (count($themes) === 1) {
-                $excludeThemesOptions = '--exclude-theme=' . $themes[0];
-            }
-        }
 
         $threads = (int)$this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_THREADS, 0);
 
@@ -119,6 +106,7 @@ class DeployStaticContent implements ProcessInterface
             $logMessage = $SCDLocales
                 ? 'Generating static content for locales: ' . $SCDLocales
                 : 'Generating static content.';
+            $excludeThemesOptions = $this->getExcludeThemesOptions();
             $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : '';
             $logMessage .= $threads ? "\nUsing $threads Threads" : '';
 
@@ -143,6 +131,27 @@ class DeployStaticContent implements ProcessInterface
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), 5);
         }
+    }
+
+    /**
+     * @return string
+     */
+    private function getExcludeThemesOptions()
+    {
+        $excludeThemesOptions = '';
+        if ($this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES)) {
+            $themes = preg_split(
+                "/[,]+/",
+                $this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES)
+            );
+            if (count($themes) > 1) {
+                $excludeThemesOptions = '--exclude-theme=' . implode(' --exclude-theme=', $themes);
+            } elseif (count($themes) === 1) {
+                $excludeThemesOptions = '--exclude-theme=' . $themes[0];
+            }
+        }
+
+        return $excludeThemesOptions;
     }
 
     /**
