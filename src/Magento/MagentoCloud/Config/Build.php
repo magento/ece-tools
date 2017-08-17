@@ -7,6 +7,9 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
+/**
+ * Class Build.
+ */
 class Build
 {
     const BUILD_OPT_SKIP_DI_COMPILATION = 'skip_di_compilation';

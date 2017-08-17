@@ -72,6 +72,7 @@ class DeployStaticContent implements ProcessInterface
         if (!$this->file->isExists($configFile) || $this->buildConfig->get(BuildConfig::BUILD_OPT_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
             $this->environment->removeFlagStaticContentInBuild();
+
             return;
         }
 
@@ -106,9 +107,9 @@ class DeployStaticContent implements ProcessInterface
                 $this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_EXCLUDE_THEMES)
             );
             if (count($themes) > 1) {
-                $excludeThemesOptions = "--exclude-theme=" . implode(' --exclude-theme=', $themes);
+                $excludeThemesOptions = '--exclude-theme=' . implode(' --exclude-theme=', $themes);
             } elseif (count($themes) === 1) {
-                $excludeThemesOptions = "--exclude-theme=" . $themes[0];
+                $excludeThemesOptions = '--exclude-theme=' . $themes[0];
             }
         }
 
@@ -116,10 +117,10 @@ class DeployStaticContent implements ProcessInterface
 
         try {
             $logMessage = $SCDLocales
-                ? "Generating static content for locales: $SCDLocales"
+                ? 'Generating static content for locales: ' . $SCDLocales
                 : 'Generating static content.';
             $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : '';
-            $logMessage .= $threads ? "\nUsing $threads Threads" : "";
+            $logMessage .= $threads ? "\nUsing $threads Threads" : '';
 
             $this->logger->info($logMessage);
 

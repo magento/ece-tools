@@ -48,9 +48,6 @@ class CopySampleData implements ProcessInterface
         }
 
         $this->logger->info('Sample data media found. Marshalling to pub/media.');
-        $this->file->copyDirectory(
-            $sampleDataDir,
-            MAGENTO_ROOT . '/pub/media'
-        );
+        $this->file->copyDirectory($sampleDataDir, MAGENTO_ROOT . '/pub/media');
     }
 }

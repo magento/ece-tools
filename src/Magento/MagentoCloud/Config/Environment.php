@@ -21,6 +21,8 @@ class Environment
 
     const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
 
+    const CLOUD_MODE_ENTERPRISE = 'enterprise';
+
     public $writableDirs = ['var', 'app/etc', 'pub/media'];
 
     /**
@@ -160,7 +162,7 @@ class Environment
      *
      * @return bool
      */
-    public function isStaticDeployInBuild()
+    public function isStaticDeployInBuild(): bool
     {
         return $this->file->isExists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
     }
@@ -206,7 +208,7 @@ class Environment
             $staticDeployThreads = (int)$var['STATIC_CONTENT_THREADS'];
         } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['MAGENTO_CLOUD_MODE']) && $_ENV['MAGENTO_CLOUD_MODE'] === 'enterprise') {
+        } elseif (isset($_ENV['MAGENTO_CLOUD_MODE']) && $_ENV['MAGENTO_CLOUD_MODE'] === static::CLOUD_MODE_ENTERPRISE) {
             $staticDeployThreads = 3;
         }
 
@@ -227,7 +229,10 @@ class Environment
         return isset($var['CLEAN_STATIC_FILES']) && $var['CLEAN_STATIC_FILES'] == 'disabled' ? false : true;
     }
 
-    public function getStaticDeployExcludeThemes()
+    /**
+     * @return array
+     */
+    public function getStaticDeployExcludeThemes(): array
     {
         $var = $this->getVariables();
 
@@ -239,76 +244,112 @@ class Environment
         return $this->getRelationship('database')[0]['host'];
     }
 
-    public function getDbName()
+    /**
+     * @return string
+     */
+    public function getDbName(): string
     {
         return $this->getRelationship('database')[0]['path'];
     }
 
-    public function getDbUser()
+    /**
+     * @return string
+     */
+    public function getDbUser(): string
     {
         return $this->getRelationship('database')[0]['username'];
     }
 
-    public function getDbPassword()
+    /**
+     * @return string
+     */
+    public function getDbPassword(): string
     {
         return $this->getRelationship('database')[0]['password'];
     }
 
-    public function getAdminUsername()
+    /**
+     * @return string
+     */
+    public function getAdminUsername(): string
     {
         $var = $this->getVariables();
 
         return isset($var['ADMIN_USERNAME']) ? $var['ADMIN_USERNAME'] : 'admin';
     }
 
-    public function getAdminFirstname()
+    /**
+     * @return string
+     */
+    public function getAdminFirstname(): string
     {
         $var = $this->getVariables();
 
         return isset($var['ADMIN_FIRSTNAME']) ? $var['ADMIN_FIRSTNAME'] : 'John';
     }
 
-    public function getAdminLastname()
+    /**
+     * @return string
+     */
+    public function getAdminLastname(): string
     {
         $var = $this->getVariables();
 
         return isset($var['ADMIN_LASTNAME']) ? $var['ADMIN_LASTNAME'] : 'Doe';
     }
 
-    public function getAdminEmail()
+    /**
+     * @return string
+     */
+    public function getAdminEmail(): string
     {
         $var = $this->getVariables();
 
         return isset($var['ADMIN_EMAIL']) ? $var['ADMIN_EMAIL'] : 'john@example.com';
     }
 
-    public function getAdminPassword()
+    /**
+     * @return string
+     */
+    public function getAdminPassword(): string
     {
         $var = $this->getVariables();
 
         return isset($var['ADMIN_PASSWORD']) ? $var['ADMIN_PASSWORD'] : 'admin12';
     }
 
-    public function getAdminUrl()
+    /**
+     * @return string
+     */
+    public function getAdminUrl(): string
     {
         $var = $this->getVariables();
 
         return isset($var['ADMIN_URL']) ? $var['ADMIN_URL'] : 'admin';
     }
 
-    public function isUpdateUrlsEnabled()
+    /**
+     * @return bool
+     */
+    public function isUpdateUrlsEnabled(): bool
     {
         $var = $this->getVariables();
 
         return isset($var['UPDATE_URLS']) && $var['UPDATE_URLS'] == 'disabled' ? false : true;
     }
 
-    public function getDefaultCurrency()
+    /**
+     * @return string
+     */
+    public function getDefaultCurrency(): string
     {
         return 'USD';
     }
 
-    public function isMasterBranch()
+    /**
+     * @return bool
+     */
+    public function isMasterBranch(): bool
     {
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);

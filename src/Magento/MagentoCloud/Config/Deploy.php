@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class Deploy.
+ */
 class Deploy
 {
     /**
@@ -108,7 +111,7 @@ class Deploy
      *
      * @return string The path to configuration file
      */
-    public function getConfigFilePath()
+    public function getConfigFilePath(): string
     {
         return MAGENTO_ROOT . 'app/etc/env.php';
     }
