@@ -40,6 +40,7 @@ class PreBuild implements ProcessInterface
      * @param BuildConfig $buildConfig
      * @param Environment $environment
      * @param LoggerInterface $logger
+     * @param ComponentInfo $componentInfo
      */
     public function __construct(
         BuildConfig $buildConfig,

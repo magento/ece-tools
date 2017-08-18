@@ -44,6 +44,8 @@ class CopySampleData implements ProcessInterface
         $sampleDataDir = MAGENTO_ROOT . 'vendor/magento/sample-data-media';
 
         if (!$this->file->isExists($sampleDataDir)) {
+            $this->logger->info('Sample data media was not found. Skipping.');
+
             return;
         }
 

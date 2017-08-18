@@ -66,7 +66,7 @@ class CompileDi implements ProcessInterface
         if ($this->file->isExists($configFile)) {
             if (!$this->buildConfig->get(BuildConfig::BUILD_OPT_SKIP_DI_COMPILATION)) {
                 $this->logger->info('Running DI compilation');
-                $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel} ");
+                $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
             } else {
                 $this->logger->info('Skip running DI compilation');
             }
