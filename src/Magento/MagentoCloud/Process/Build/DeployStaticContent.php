@@ -64,7 +64,6 @@ class DeployStaticContent implements ProcessInterface
     }
 
     /**
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @inheritdoc
      */
     public function execute()
@@ -89,23 +88,11 @@ class DeployStaticContent implements ProcessInterface
             return;
         }
 
-        $locales = [];
-        $locales = array_merge($locales, $this->filter($flattenedConfig, 'general/locale/code'));
-        $locales = array_merge(
-            $locales,
-            $this->filter($flattenedConfig, 'admin_user/locale/code', false)
-        );
-        $locales[] = 'en_US';
-        $locales = array_unique($locales);
-
-        $SCDLocales = implode(' ', $locales);
-
+        $locales = $this->getLocales($flattenedConfig);
         $threads = (int)$this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_THREADS, 0);
 
         try {
-            $logMessage = $SCDLocales
-                ? 'Generating static content for locales: ' . $SCDLocales
-                : 'Generating static content.';
+            $logMessage = 'Generating static content for locales: ' . implode(' ', $locales);
             $excludeThemesOptions = $this->getExcludeThemesOptions();
             $logMessage .= $excludeThemesOptions ? "\nExcluding Themes: $excludeThemesOptions" : '';
             $logMessage .= $threads ? "\nUsing $threads Threads" : '';
@@ -196,5 +183,25 @@ class DeployStaticContent implements ProcessInterface
         }
 
         return array_unique(array_values($filteredResult));
+    }
+
+    /**
+     * Collects locales for static content deployment
+     *
+     * @param array $flattenedConfig
+     * @return array
+     */
+    private function getLocales($flattenedConfig): array
+    {
+        $locales = [$this->environment->getAdminLocale()];
+        $locales = array_merge($locales, $this->filter($flattenedConfig, 'general/locale/code'));
+        $locales = array_merge(
+            $locales,
+            $this->filter($flattenedConfig, 'admin_user/locale/code', false)
+        );
+        $locales[] = 'en_US';
+        $locales = array_unique($locales);
+
+        return $locales;
     }
 }
