@@ -69,21 +69,21 @@ class SetMode implements ProcessInterface
     public function execute()
     {
         $mode = $this->env->getApplicationMode();
-        $this->logger->info("Set Magento application mode to '{$mode}'");
+        $this->logger->info(sprintf("Set Magento application mode to '%s'", $mode));
 
         /* Enable application mode */
         if ($mode == Environment::MAGENTO_PRODUCTION_MODE) {
-            $this->logger->info("Enable production mode");
             $configFileName = $this->deployConfig->getConfigFilePath();
             $config = include $configFileName;
             $config['MAGE_MODE'] = 'production';
             $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
             $this->file->filePutContents($configFileName, $updatedConfig);
         } else {
-            $this->logger->info('Enable developer mode');
-            $this->shell->execute(
-                "php ./bin/magento deploy:mode:set " . Environment::MAGENTO_DEVELOPER_MODE . $this->env->getVerbosityLevel()
-            );
+            $this->shell->execute(sprintf(
+                "php ./bin/magento deploy:mode:set %s %s",
+                Environment::MAGENTO_DEVELOPER_MODE,
+                $this->env->getVerbosityLevel()
+            ));
         }
     }
 }
