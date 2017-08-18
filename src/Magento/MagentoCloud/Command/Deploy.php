@@ -1011,7 +1011,7 @@ class Deploy extends Command
         if ( !$this->isInstalling || empty($this->env) || empty($this->adminEmail || !empty($this->adminPassword))) {
             return;
         }
-        $this->env->log("Sending password reset email to Admin $this->adminUsername at $this->adminEmail");
+        $this->env->log("Sending password reset email to admin user \"{$this->adminUsername}\" at $this->adminEmail");
         $this->env->execute("vendor/bin/m2-ece-send-password-reset-email");
     }
 }
