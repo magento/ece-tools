@@ -58,9 +58,9 @@ class Deploy extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->notice('Starting deploy.');
+            $this->logger->info('Starting deploy.');
             $this->process->execute();
-            $this->logger->notice('Deployment complete.');
+            $this->logger->info('Deployment completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 

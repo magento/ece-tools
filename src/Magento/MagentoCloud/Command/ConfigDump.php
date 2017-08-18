@@ -29,11 +29,12 @@ class ConfigDump extends Command
 
     /**
      * @param ProcessInterface $process
+     * @param LoggerInterface $logger
      */
-    public function __construct(LoggerInterface $logger, ProcessInterface $process)
+    public function __construct(ProcessInterface $process, LoggerInterface $logger)
     {
-        $this->logger = $logger;
         $this->process = $process;
+        $this->logger = $logger;
 
         parent::__construct();
     }
@@ -55,7 +56,9 @@ class ConfigDump extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         try {
+            $this->logger->info('Starting dump.');
             $this->process->execute();
+            $this->logger->info('Dump completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 

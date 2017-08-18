@@ -27,6 +27,10 @@ class Build extends Command
      */
     private $logger;
 
+    /**
+     * @param ProcessInterface $process
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         ProcessInterface $process,
         LoggerInterface $logger
@@ -54,9 +58,9 @@ class Build extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->info('Start build process');
+            $this->logger->info('Starting build.');
             $this->process->execute();
-            $this->logger->info('End build process');
+            $this->logger->info('Building completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
