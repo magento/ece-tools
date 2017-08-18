@@ -230,13 +230,13 @@ class Environment
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getStaticDeployExcludeThemes(): array
+    public function getStaticDeployExcludeThemes(): string
     {
         $var = $this->getVariables();
 
-        return isset($var['STATIC_CONTENT_EXCLUDE_THEMES']) ? $var['STATIC_CONTENT_EXCLUDE_THEMES'] : [];
+        return isset($var['STATIC_CONTENT_EXCLUDE_THEMES']) ? $var['STATIC_CONTENT_EXCLUDE_THEMES'] : '';
     }
 
     public function getDbHost()

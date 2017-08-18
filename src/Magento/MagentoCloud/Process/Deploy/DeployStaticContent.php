@@ -47,6 +47,7 @@ class DeployStaticContent implements ProcessInterface
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param Adapter $adapter
+     * @param StaticContentCleaner $staticContentCleaner
      */
     public function __construct(
         Environment $environment,
@@ -71,9 +72,10 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Application mode is ' . $this->environment->getApplicationMode());
+        $applicationMode = $this->environment->getApplicationMode();
+        $this->logger->info('Application mode is ' . $applicationMode);
 
-        if ($this->environment->getApplicationMode() == Environment::MAGENTO_PRODUCTION_MODE) {
+        if ($applicationMode == Environment::MAGENTO_PRODUCTION_MODE) {
             /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
             if ($this->environment->isDeployStaticContent()) {
                 $this->deployStaticContent();
