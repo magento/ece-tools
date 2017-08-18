@@ -102,10 +102,11 @@ class DeployStaticContent implements ProcessInterface
             $parallelCommands = '';
             foreach ($locales as $locale) {
                 $parallelCommands .= sprintf(
-                    "php ./bin/magento setup:static-content:deploy -f %s %s %s\n",
+                    "php ./bin/magento setup:static-content:deploy -f %s %s %s --jobs=%d\n",
                     $excludeThemesOptions,
                     $locale,
-                    $this->buildConfig->getVerbosityLevel()
+                    $this->buildConfig->getVerbosityLevel(),
+                    (int)$this->buildConfig->get(BuildConfig::BUILD_OPT_SCD_JOBS, 4)
                 );
             }
             $this->shell->execute(sprintf(

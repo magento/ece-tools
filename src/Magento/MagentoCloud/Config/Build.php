@@ -16,6 +16,7 @@ class Build
     const BUILD_OPT_SKIP_DI_CLEARING = 'skip_di_clearing';
     const BUILD_OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
     const BUILD_OPT_SCD_THREADS = 'scd_threads';
+    const BUILD_OPT_SCD_JOBS = 'scd_jobs';
     const BUILD_OPT_SKIP_SCD = 'skip_scd';
 
     /**
