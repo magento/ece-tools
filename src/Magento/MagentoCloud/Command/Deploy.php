@@ -384,10 +384,6 @@ class Deploy extends Command
         // @codingStandardsIgnoreStart
         // Old query for reference: "UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';"
 
-
-        $this->database->executeDbQuery("UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';",
-        ["sssss", $this->adminFirstname, $this->adminLastname, $this->adminEmail, $this->adminUsername, $this->generatePassword($this->adminPassword) ]);
-
         $parameters = [""];
         $query = "";
         if (!empty($this->adminFirstname)) {
