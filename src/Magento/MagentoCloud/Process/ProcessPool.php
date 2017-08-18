@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process;
 
+/**
+ * @inheritdoc
+ */
 class ProcessPool implements ProcessInterface
 {
     /**
