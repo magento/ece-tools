@@ -241,7 +241,18 @@ class Deploy extends Command
         $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : ($this->isInstalling ? "Changeme" : "");
         /*   Note: We are going to have the onboarding process set the ADMIN_EMAIL variables to the email address specified during
          * the project creation.  This will let us do the reset password for the new installs. */
-        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : ($this->isInstalling ? "changeme@127.0.0.1" : "");
+        if (isset($var["ADMIN_EMAIL"])) {
+            $this->adminEmail = $var["ADMIN_EMAIL"];
+        } else {
+            if ($this->isInstalling) {
+                // Note: not relying on bin/magento because it might not be working at this point.
+                $this->env->execute('touch ' . realpath(Environment::MAGENTO_ROOT . 'var') . '.maintenance.flag' );
+                throw new \RuntimeException("ADMIN_EMAIL not set during install!  We need this variable set to send the password reset email.  Please set ADMIN_EMAIL and retry deploy.");
+            } else {
+                $this->adminEmail = "";
+            }
+        }
+        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : ($this->isInstalling ? "changeme@example.com" : "");
         /* Note: ADMIN_URL should be set durring the onboarding process also.  They should have generated a random one for us to use. */
         //$this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin_" . $this->generateRandomString(8) : "");
         /* Note: We are defaulting to "admin" for now, but will change it to the above random admin URL at some point */
