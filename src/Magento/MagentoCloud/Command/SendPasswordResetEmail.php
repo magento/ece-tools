@@ -64,5 +64,4 @@ class SendPasswordResetEmail extends Command
             ->setDescription('Sends the password reset email to the admin user.');
         parent::configure();
     }
-
 }

@@ -152,7 +152,7 @@ class Deploy extends Command
         $this->dbUser = $relationships["database"][0]["username"];
         $this->dbPassword = $relationships["database"][0]["password"];
 
-        $this->createDatabaseConnection();  // Note: We have to create the database here, after we get the $relationships values, but before isInstalled which uses the database
+        $this->createDatabaseConnection();  // Note: We have to create the database here, after we get the $relationships values, but before isInstalled() which uses the database
         $this->isInstalling = !$this->isInstalled();
 
         /* Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
@@ -639,8 +639,8 @@ class Deploy extends Command
 
     /**
      * Generates salt and hash for the admin password using default Magento settings
-     *  @param string $password The password we will generate a hash of
-     *  @return string The hash + salt + version
+     * @param string $password The password we will generate a hash of
+     * @return string The hash + salt + version
      */
     private function generatePassword(string $password)
     {
@@ -1008,7 +1008,7 @@ class Deploy extends Command
      */
     private function sendPasswordResetEmail()
     {
-        if ( !$this->isInstalling || empty($this->env) || empty($this->adminEmail || !empty($this->adminPassword))) {
+        if (!$this->isInstalling || empty($this->env) || empty($this->adminEmail || !empty($this->adminPassword))) {
             return;
         }
         $this->env->log("Sending password reset email to admin user \"{$this->adminUsername}\" at $this->adminEmail");
