@@ -155,7 +155,7 @@ class Deploy extends Command
         $this->createDatabaseConnection();  // Note: We have to create the database here, after we get the $relationships values, but before isInstalled() which uses the database
         $this->isInstalling = !$this->isInstalled();
 
-        /* Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
+        /* Note: Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
         $this->loadEnvironmentDataForAdmin($var);
 
         $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
@@ -244,6 +244,7 @@ class Deploy extends Command
         $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : ($this->isInstalling ? "changeme@127.0.0.1" : "");
         /* Note: ADMIN_URL should be set durring the onboarding process also.  They should have generated a random one for us to use. */
         //$this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin_" . $this->generateRandomString(8) : "");
+        /* Note: We are defaulting to "admin" for now, but will change it to the above random admin URL at some point */
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin" : "");
     }
 
@@ -379,61 +380,30 @@ class Deploy extends Command
      */
     private function updateAdminCredentials()
     {
-        $this->env->log("Updating admin credentials.");
-
-        // @codingStandardsIgnoreStart
         // Old query for reference: "UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';"
-
         $parameters = [""];
         $query = "";
-        if (!empty($this->adminFirstname)) {
-            if (!empty($query)) {
-                $query .= ",";
+        $addColumnValueToBeUpdated = function ($value, &$query, $columnName, $valueType, &$parameters) {
+            if (!empty($value)) {
+                if (!empty($query)) {
+                    $query .= ",";
+                }
+                $query .= " $columnName = ? ";
+                $parameters[0] .= $valueType;
+                $parameters[] = $value;
             }
-            $query .= " firstname = ? ";
-            $parameters[0] .= 's';
-            $parameters[] = $this->adminFirstname;
-        }
-        if (!empty($this->adminLastname)) {
-            if (!empty($query)) {
-                $query .= ",";
-            }
-            $query .= " lastname = ? ";
-            $parameters[0] .= 's';
-            $parameters[] = $this->adminLastname;
-        }
-        if (!empty($this->adminEmail)) {
-            if (!empty($query)) {
-                $query .= ",";
-            }
-            $query .= " email = ? ";
-            $parameters[0] .= 's';
-            $parameters[] = $this->adminEmail;
-        }
-        if (!empty($this->adminUsername)) {
-            if (!empty($query)) {
-                $query .= ",";
-            }
-            $query .= " username = ? ";
-            $parameters[0] .= 's';
-            $parameters[] = $this->adminUsername;
-        }
-        if (!empty($this->adminPassword)) {
-            if (!empty($query)) {
-                $query .= ",";
-            }
-            $query .= " password = ? ";
-            $parameters[0] .= 's';
-            $parameters[] = $this->generatePassword($this->adminPassword);
-        }
+        };
+        $addColumnValueToBeUpdated($this->adminFirstname, $query, "firstname", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminLastname, $query, "lastname", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminEmail, $query, "email", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminUsername, $query, "username", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminPassword, $query, "password", "s", $parameters);
         if (empty($query)) {
             return;  // No variables set ; nothing to do
         }
         $this->env->log("Updating admin credentials.");
         $query = "UPDATE admin_user SET" . $query . "  WHERE user_id = '1';";
         $this->database->executeDbQuery($query, $parameters);
-
-        // @codingStandardsIgnoreEnd
     }
 
     /**
