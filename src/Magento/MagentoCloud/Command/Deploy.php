@@ -244,7 +244,7 @@ class Deploy extends Command
         if (isset($var["ADMIN_EMAIL"])) {
             $this->adminEmail = $var["ADMIN_EMAIL"];
         } else {
-            if ($this->isInstalling && empty($this->adminPassword)) {
+            if ($this->isInstalling && empty($var["ADMIN_PASSWORD"])) {
                 // Note: not relying on bin/magento because it might not be working at this point.
                 $this->env->execute('touch ' . realpath(Environment::MAGENTO_ROOT . 'var') . '.maintenance.flag' );
                 throw new \RuntimeException("ADMIN_EMAIL not set during install!  We need this variable set to send the password reset email.  Please set ADMIN_EMAIL and retry deploy.");
