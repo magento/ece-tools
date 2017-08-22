@@ -394,21 +394,21 @@ class Deploy extends Command
         // Old query for reference: "UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';"
         $parameters = [""];
         $query = "";
-        $addColumnValueToBeUpdated = function ($value, &$query, $columnName, $valueType, &$parameters) {
+        $addColumnValueToBeUpdated = function ($value, &$query, $columnName, $valueType, &$parameters, $value2 = null) {
             if (!empty($value)) {
                 if (!empty($query)) {
                     $query .= ",";
                 }
                 $query .= " $columnName = ? ";
                 $parameters[0] .= $valueType;
-                $parameters[] = $value;
+                $parameters[] = $value2 ?: $value;
             }
         };
         $addColumnValueToBeUpdated($this->adminFirstname, $query, "firstname", "s", $parameters);
         $addColumnValueToBeUpdated($this->adminLastname, $query, "lastname", "s", $parameters);
         $addColumnValueToBeUpdated($this->adminEmail, $query, "email", "s", $parameters);
         $addColumnValueToBeUpdated($this->adminUsername, $query, "username", "s", $parameters);
-        $addColumnValueToBeUpdated($this->generatePassword($this->adminPassword), $query, "password", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminPassword, $query, "password", "s", $parameters, $this->generatePassword($this->adminPassword));
         if (empty($query)) {
             return;  // No variables set ; nothing to do
         }
