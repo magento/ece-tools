@@ -246,7 +246,7 @@ class Deploy extends Command
         } else {
             if ($this->isInstalling && empty($var["ADMIN_PASSWORD"])) {
                 // Note: not relying on bin/magento because it might not be working at this point.
-                $this->env->execute('touch ' . realpath(Environment::MAGENTO_ROOT . 'var') . '/.maintenance.flag' );
+                $this->env->execute('touch ' . realpath(Environment::MAGENTO_ROOT . 'var') . '/.maintenance.flag');
                 throw new \RuntimeException("ADMIN_EMAIL not set during install!  We need this variable set to send the password reset email.  Please set ADMIN_EMAIL and retry deploy.");
             } else {
                 $this->adminEmail = "";
@@ -408,7 +408,7 @@ class Deploy extends Command
         $addColumnValueToBeUpdated($this->adminLastname, $query, "lastname", "s", $parameters);
         $addColumnValueToBeUpdated($this->adminEmail, $query, "email", "s", $parameters);
         $addColumnValueToBeUpdated($this->adminUsername, $query, "username", "s", $parameters);
-        $addColumnValueToBeUpdated($this->adminPassword, $query, "password", "s", $parameters);
+        $addColumnValueToBeUpdated($this->generatePassword($this->adminPassword), $query, "password", "s", $parameters);
         if (empty($query)) {
             return;  // No variables set ; nothing to do
         }
