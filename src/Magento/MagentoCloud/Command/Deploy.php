@@ -991,7 +991,7 @@ class Deploy extends Command
      */
     private function sendPasswordResetEmail()
     {
-        if (!$this->isInstalling || empty($this->env) || empty($this->adminEmail || !empty($this->env->getVariables()["ADMIN_PASSWORD"]))) {
+        if (!$this->isInstalling || empty($this->env) || empty($this->adminEmail) || !empty($this->env->getVariables()["ADMIN_PASSWORD"])) {
             return;
         }
         $this->env->log("Sending password reset email to admin user \"{$this->adminUsername}\" at $this->adminEmail");
