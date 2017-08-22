@@ -230,11 +230,13 @@ class Deploy extends Command
         /* We no longer set default username/password.  If we are installing, we will use random username/password.*/
         $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "";
         $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "";
-        if ($this->isInstalling && (empty($this->adminUsername) && empty($this->adminPassword))) {
+        if ($this->isInstalling && empty($this->adminUsername)) {
             // TODO: We want to have a random username , but because the username is not sent in the reset password email, the new admin has no way of knowing what it is at the moment.
             //       We may either make a custom email template to do this, or find a different way to do this.  Then, we can use random a username.
             //$this->adminUsername = "admin-" . $this->generateRandomString(6);
             $this->adminUsername = "admin";
+        }
+        if ($this->isInstalling && empty($this->adminPassword)) {
             $this->adminPassword = $this->generateRandomString(20);
         }
         $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : ($this->isInstalling ? "Changeme" : "");
@@ -253,7 +255,7 @@ class Deploy extends Command
             }
         }
         $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : ($this->isInstalling ? "changeme@example.com" : "");
-        /* Note: ADMIN_URL should be set durring the onboarding process also.  They should have generated a random one for us to use. */
+        /* Note: ADMIN_URL should be set during the onboarding process also.  They should have generated a random one for us to use. */
         //$this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin_" . $this->generateRandomString(8) : "");
         /* Note: We are defaulting to "admin" for now, but will change it to the above random admin URL at some point */
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin" : "");
