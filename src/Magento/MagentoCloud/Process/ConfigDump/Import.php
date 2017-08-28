@@ -1,22 +1,41 @@
 <?php
 /**
- * Copyright © 2016 Magento. All rights reserved.
+ * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+namespace Magento\MagentoCloud\Process\ConfigDump;
 
-namespace Magento\MagentoCloud\Command;
-
-use Magento\MagentoCloud\Environment;
-use Magento\MagentoCloud\Database;
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellInterface;
+use Psr\Log\LoggerInterface;
 
 /**
- * CLI command for dumping SCD related config.
+ * @inheritdoc
  */
-class SCDConfigDump extends Command
+class Import implements ProcessInterface
 {
+    /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @var File $file
+     */
+    private $file;
+
     private $requiredConfigKeys = [
         'modules',
         'scopes',
@@ -32,53 +51,31 @@ class SCDConfigDump extends Command
     ];
 
     /**
-     * @var Environment
+     * @param Environment $environment
+     * @param ShellInterface $shell
+     * @param LoggerInterface $logger
+     * @param File $file
      */
-    private $env;
-    /** @var Database|null This our connection to the database we use to execute queries. */
-    private $database;
-
-    public function __construct()
+    public function __construct(Environment $environment, ShellInterface $shell, LoggerInterface $logger, File $file)
     {
-        $this->env = new Environment();
-        $this->createDatabaseConnection();
-        parent::__construct();
+        $this->environment = $environment;
+        $this->shell = $shell;
+        $this->logger = $logger;
+        $this->file = $file;
     }
 
     /**
-     * Create the database connection;
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * {@inheritdoc}
+     * @throws \RuntimeException
      */
-    private function createDatabaseConnection()
-    {
-        $relationships = $this->env->getRelationships();
-        $dbHost = $relationships["database"][0]["host"];
-        $dbName = $relationships["database"][0]["path"];
-        $dbUser = $relationships["database"][0]["username"];
-        $dbPassword = $relationships["database"][0]["password"];
-        $this->database = new Database($dbHost, $dbUser, $dbPassword, $dbName);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function configure()
-    {
-        $this->setName('dump')
-            ->setDescription('Dump static content');
-
-        parent::configure();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute()
     {
         try {
-            $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
-            $this->env->execute("php bin/magento app:config:dump");
+            $configFile = MAGENTO_ROOT . 'app/etc/config.php';
+            $this->shell->execute("php bin/magento app:config:dump");
 
-            if (file_exists($configFile)) {
+            if ($this->file->isExists($configFile)) {
                 $oldConfig = include $configFile;
                 $newConfig = [];
 
@@ -117,24 +114,19 @@ class SCDConfigDump extends Command
                     unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
                 }
                 //locales for admin user
-                $output = $this->database->executeDbQuery(
-                    'SELECT DISTINCT interface_locale FROM admin_user',
-                    [],
-                    MYSQLI_NUM
-                );
-                $output = array_map(function ($arrayin) {
-                    return $arrayin[0];
-                }, $output);
-                $newConfig['admin_user']['locale']['code'] = $output;
-                $updatedConfig = '<?php'  . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
-                file_put_contents($configFile, $updatedConfig);
-                $this->env->execute('php bin/magento app:config:import -n');
+                $newConfig['admin_user']['locale']['code'] =
+                    $this->executeDbQuery('SELECT DISTINCT interface_locale FROM admin_user');
+
+                $updatedConfig = '<?php' . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
+                $this->file->filePutContents($configFile, $updatedConfig);
+                $this->shell->execute('php bin/magento app:config:import -n');
             } else {
-                $this->env->log('No config file');
+                $this->logger->info('No config file');
             }
         } catch (\RuntimeException $e) {
-            $this->env->log('Something went wrong in running app:config:dump');
-            $this->env->log($e->getTraceAsString());
+            $this->logger->error('Something went wrong in running app:config:dump');
+
+            throw $e;
         }
     }
 
@@ -148,6 +140,26 @@ class SCDConfigDump extends Command
             $data = &$data[$key];
         }
         $data = $val;
+
         return $out;
+    }
+
+    /**
+     * Executes database query
+     *
+     * @param string $query
+     * $query must be completed, finished with semicolon (;)
+     * @return string
+     */
+    private function executeDbQuery($query)
+    {
+        $relationships = $this->environment->getRelationships();
+        $dbHost = $relationships["database"][0]["host"];
+        $dbName = $relationships["database"][0]["path"];
+        $dbUser = $relationships["database"][0]["username"];
+        $dbPassword = $relationships["database"][0]["password"];
+        $password = strlen($dbPassword) ? sprintf('-p%s', $dbPassword) : '';
+
+        return $this->shell->execute("mysql --skip-column-names -u $dbUser -h $dbHost -e \"$query\" $password $dbName");
     }
 }
