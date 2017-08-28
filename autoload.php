@@ -1,6 +1,7 @@
 <?php
 
 define('MAGENTO_ROOT', __DIR__ . '/../../../');
+define('BP', __DIR__);
 
 /**
  * This hack is to prevent Composer crash when

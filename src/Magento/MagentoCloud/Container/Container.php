@@ -40,6 +40,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\DB\Adapter::class);
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
+        $this->singleton(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
 
         /**
          * Contextual binding.
