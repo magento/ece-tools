@@ -61,7 +61,6 @@ class BackupToInitDirectory implements ProcessInterface
     {
         if ($this->file->isExists(Environment::REGENERATE_FLAG)) {
             $this->logger->info('Removing .regenerate flag');
-
             $this->file->deleteFile(Environment::REGENERATE_FLAG);
         }
 
@@ -89,7 +88,7 @@ class BackupToInitDirectory implements ProcessInterface
             $this->shell->execute(sprintf('mkdir -p init/%s', $dir));
             $this->shell->execute(sprintf('mkdir -p %s', $dir));
 
-            if (count(scandir(MAGENTO_ROOT . $dir)) > 2) {
+            if (count($this->file->scanDir(MAGENTO_ROOT . $dir)) > 2) {
                 $this->shell->execute(
                     sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir)
                 );

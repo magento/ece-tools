@@ -8,8 +8,7 @@ define('BP', __DIR__);
  * NonComposerComponentRegistration.php was moved from
  * app/etc during writable directories mounting.
  */
-if (
-    !file_exists(MAGENTO_ROOT . '/app/etc/NonComposerComponentRegistration.php') &&
+if (!file_exists(MAGENTO_ROOT . '/app/etc/NonComposerComponentRegistration.php') &&
     file_exists(MAGENTO_ROOT . '/init/app/etc/NonComposerComponentRegistration.php')
 ) {
     copy(
