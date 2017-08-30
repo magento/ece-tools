@@ -129,7 +129,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             return $this->makeWith(\Monolog\Logger::class, [
                 'name' => $name,
                 'handlers' => [
-                    (new StreamHandler($magentoRoot . 'var/log/cloud_build.log'))
+                    (new StreamHandler($magentoRoot . '/var/log/cloud_build.log'))
                         ->setFormatter($formatter),
                     (new StreamHandler('php://stdout'))
                         ->setFormatter($formatter),
