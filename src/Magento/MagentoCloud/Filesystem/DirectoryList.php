@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
+/**
+ * Directory path configurations.
+ */
 class DirectoryList
 {
     /**
@@ -12,6 +15,9 @@ class DirectoryList
      */
     const PATH = 'path';
 
+    /**
+     * Directory codes.
+     */
     const ROOT = 'root';
     const MAGENTO_ROOT = 'magento_root';
 
@@ -43,12 +49,20 @@ class DirectoryList
      */
     public function getPath(string $code): string
     {
-        if (!array_key_exists($code, $this->directories)) {
+        $root = $this->getRoot();
+        $directories = $this->getDirectories();
+
+        if (!array_key_exists($code, $directories)) {
             throw  new \RuntimeException("Code {$code} is not registered");
         }
 
-        $root = $this->getRoot();
-        $path = $this->directories[$code][self::PATH];
+        if (!array_key_exists(static::PATH, $directories[$code])) {
+            throw new \RuntimeException(
+                sprintf('Config var "%s" does not exists', static::PATH)
+            );
+        }
+
+        $path = $directories[$code][self::PATH];
         $normalizedPath = $root . ($root && $path ? DIRECTORY_SEPARATOR : '') . $path;
 
         return realpath($normalizedPath);
@@ -60,6 +74,14 @@ class DirectoryList
     public function getRoot(): string
     {
         return $this->root;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDirectories(): array
+    {
+        return $this->directories;
     }
 
     /**

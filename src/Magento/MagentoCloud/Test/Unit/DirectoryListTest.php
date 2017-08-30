@@ -23,7 +23,10 @@ class DirectoryListTest extends TestCase
      */
     protected function setUp()
     {
-        $this->directoryList = new DirectoryList(BP);
+        $this->directoryList = new DirectoryList(
+            __DIR__,
+            ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
+        );
     }
 
     /**
@@ -34,8 +37,8 @@ class DirectoryListTest extends TestCase
     public function testGetPath(string $code, string $expected)
     {
         $this->assertSame(
-            $this->directoryList->getPath($code),
-            $expected
+            $expected,
+            $this->directoryList->getPath($code)
         );
     }
 
@@ -45,8 +48,15 @@ class DirectoryListTest extends TestCase
     public function getPathDataProvider(): array
     {
         return [
-            'root' => [DirectoryList::ROOT, BP],
-            'magento root' => [DirectoryList::MAGENTO_ROOT, realpath(BP . '/../../../')],
+            'root' => [DirectoryList::ROOT, __DIR__],
+            'magento root' => [
+                DirectoryList::MAGENTO_ROOT,
+                realpath(__DIR__ . '/../../../'),
+            ],
+            'test var' => [
+                'test_var',
+                realpath(__DIR__ . '/_files/test/var'),
+            ],
         ];
     }
 
@@ -59,19 +69,28 @@ class DirectoryListTest extends TestCase
         $this->directoryList->getPath('some_code');
     }
 
+    /**
+     * @expectedExceptionMessage Config var "path" does not exists
+     * @expectedException \RuntimeException
+     */
+    public function testGetPathWithEmptyPathException()
+    {
+        $this->directoryList->getPath('empty_path');
+    }
+
     public function testGetRoot()
     {
         $this->assertSame(
-            $this->directoryList->getRoot(),
-            BP
+            __DIR__,
+            $this->directoryList->getRoot()
         );
     }
 
     public function testGetMagentoRoot()
     {
         $this->assertSame(
-            $this->directoryList->getMagentoRoot(),
-            realpath(BP . '/../../../')
+            realpath(__DIR__ . '/../../../'),
+            $this->directoryList->getMagentoRoot()
         );
     }
 }

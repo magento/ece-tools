@@ -3,9 +3,7 @@
 
 require_once __DIR__ . '/autoload.php';
 
-$application = new \Magento\MagentoCloud\Application(
-    new \Magento\MagentoCloud\Container\Container()
-);
+$application = \Magento\MagentoCloud\App\Bootstrap::create()->createApplication();
 $application->setDefaultCommand('deploy');
 $application->run();
 
