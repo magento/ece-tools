@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud;
 
+use Composer\Composer;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
@@ -22,12 +23,16 @@ class Application extends \Symfony\Component\Console\Application
 
     /**
      * @param ContainerInterface $container
+     * @param Composer $composer
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(ContainerInterface $container, Composer $composer)
     {
         $this->container = $container;
 
-        parent::__construct('Magento ECE Tools');
+        parent::__construct(
+            $composer->getPackage()->getPrettyName(),
+            $composer->getPackage()->getPrettyVersion()
+        );
     }
 
     /**
