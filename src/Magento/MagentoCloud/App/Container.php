@@ -105,14 +105,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     }
 
     /**
-     * @inheritdoc
-     */
-    public function has($id)
-    {
-        return $this->bound($id);
-    }
-
-    /**
      * @param string $name
      * @return \Closure
      */
