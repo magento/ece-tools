@@ -99,6 +99,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     'processes' => [
                         $this->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->make(DeployProcess\PreDeploy\CleanFileCache::class),
+                        $this->make(DeployProcess\PreDeploy\ProcessStaticContent::class),
+                        $this->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                     ],
                 ]);
             });

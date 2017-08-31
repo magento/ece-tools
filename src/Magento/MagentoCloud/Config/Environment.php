@@ -70,7 +70,7 @@ class Environment
      */
     public function getRoutes()
     {
-        return $this->get('MAGENTO_CLOUD_ROUTES');
+        return $this->get('MAGENTO_CLOUD_ROUTES', []);
     }
 
     /**
