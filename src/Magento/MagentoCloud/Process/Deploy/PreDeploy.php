@@ -50,16 +50,23 @@ class PreDeploy implements ProcessInterface
     private $staticContentCleaner;
 
     /**
-     * @param Environment $env
+     * @var ProcessInterface
+     */
+    private $process;
+
+    /**
      * @param LoggerInterface $logger
+     * @param ProcessInterface $process
+     * @param Environment $env
      * @param ShellInterface $shell
      * @param File $file
      * @param ComponentInfo $componentInfo
      * @param StaticContentCleaner $staticContentCleaner
      */
     public function __construct(
-        Environment $env,
         LoggerInterface $logger,
+        ProcessInterface $process,
+        Environment $env,
         ShellInterface $shell,
         File $file,
         ComponentInfo $componentInfo,
@@ -71,6 +78,7 @@ class PreDeploy implements ProcessInterface
         $this->file = $file;
         $this->componentInfo = $componentInfo;
         $this->staticContentCleaner = $staticContentCleaner;
+        $this->process = $process;
     }
 
     /**
@@ -78,9 +86,8 @@ class PreDeploy implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Starting deploy. ' . $this->componentInfo->get());
-        $this->clearRedisCache();
-        $this->clearFilesCache();
+        $this->logger->info('Starting predeploy. ' . $this->componentInfo->get());
+        $this->process->execute();
 
         /**
          * Handle case where static content is deployed during build hook:
@@ -126,38 +133,6 @@ class PreDeploy implements ProcessInterface
         }
         $this->shell->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
         $this->logger->info(sprintf('Copied directory: %s', $dir));
-    }
-
-    /**
-     * Clears redis cache if redis enabled and configuration exists in MAGENTO_CLOUD_RELATIONSHIPS env variable
-     *
-     * @return void
-     */
-    private function clearRedisCache()
-    {
-        $redis = $this->env->getRelationship('redis');
-
-        if (count($redis) > 0) {
-            $redisHost = $redis[0]['host'];
-            $redisPort = $redis[0]['port'];
-            $redisCacheDb = '1'; // Matches \Magento\MagentoCloud\Command\Deploy::$redisCacheDb
-            $this->logger->info('Clearing redis cache');
-            $this->shell->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushdb");
-        }
-    }
-
-    /**
-     * Clears var/cache directory if such directory exists
-     *
-     * @return void
-     */
-    private function clearFilesCache()
-    {
-        $fileCacheDir = MAGENTO_ROOT . '/var/cache';
-        if ($this->file->isExists($fileCacheDir)) {
-            $this->logger->info('Clearing var/cache directory');
-            $this->shell->execute("rm -rf $fileCacheDir");
-        }
     }
 
     /**
