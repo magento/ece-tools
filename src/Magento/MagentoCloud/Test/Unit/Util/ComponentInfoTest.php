@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Composer\Composer;
-use Composer\Factory;
 use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
@@ -15,18 +14,11 @@ use Magento\MagentoCloud\Util\ComponentInfo;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class ComponentInfoTest extends TestCase
 {
-    /**
-     * @var Factory|Mock
-     */
-    private $composerFactoryMock;
-
-    /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
-
     /**
      * @var Composer|Mock
      */
@@ -42,22 +34,16 @@ class ComponentInfoTest extends TestCase
      */
     private $componentInfo;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
-        $this->composerFactoryMock = $this->createMock(Factory::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->composerMock = $this->createMock(Composer::class);
         $this->composerRepositoryMock = $this->getMockBuilder(RepositoryInterface::class)
             ->getMockForAbstractClass();
         $lockerMock = $this->createMock(Locker::class);
 
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('/path/to/root');
-        $this->composerFactoryMock->expects($this->once())
-            ->method('createComposer')
-            ->with($this->anything(), '/path/to/root/composer.json')
-            ->willReturn($this->composerMock);
         $this->composerMock->expects($this->once())
             ->method('getLocker')
             ->willReturn($lockerMock);
@@ -66,8 +52,7 @@ class ComponentInfoTest extends TestCase
             ->willReturn($this->composerRepositoryMock);
 
         $this->componentInfo = new ComponentInfo(
-            $this->composerFactoryMock,
-            $this->directoryListMock
+            $this->composerMock
         );
     }
 

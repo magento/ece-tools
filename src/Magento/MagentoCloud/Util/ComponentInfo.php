@@ -6,10 +6,7 @@
 namespace Magento\MagentoCloud\Util;
 
 use Composer\Composer;
-use Composer\Factory;
-use Composer\IO\BufferIO;
 use Composer\Package\PackageInterface;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 
 class ComponentInfo
 {
@@ -19,17 +16,12 @@ class ComponentInfo
     private $composer;
 
     /**
-     * @param Factory $composerFactory
-     * @param DirectoryList $directoryList
+     * @param Composer $composer
      */
     public function __construct(
-        Factory $composerFactory,
-        DirectoryList $directoryList
+        \Composer\Composer $composer
     ) {
-        $this->composer = $composerFactory->createComposer(
-            new BufferIO(),
-            $directoryList->getMagentoRoot() . '/composer.json'
-        );
+        $this->composer = $composer;
     }
 
     /**
@@ -38,7 +30,7 @@ class ComponentInfo
      * @param array $packages The array of packages names
      * @return string
      */
-    public function get(array $packages = ['magento/ece-tools', 'magento/magento2-base']) : string
+    public function get(array $packages = ['magento/ece-tools', 'magento/magento2-base']): string
     {
         $repository = $this->composer->getLocker()->getLockedRepository();
 

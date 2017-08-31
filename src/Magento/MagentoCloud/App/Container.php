@@ -13,7 +13,6 @@ use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
-use Magento\MagentoCloud\Util\ComponentInfo;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
@@ -44,12 +43,11 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\DB\Adapter::class);
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
-        $this->singleton(
-            \Psr\Log\LoggerInterface::class,
-            $this->createLogger('default')
-        );
-        $this->singleton(ComponentInfo::class);
-        $this->singleton(\Composer\Factory::class);
+        $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
+        $this->singleton(\Magento\MagentoCloud\Util\ComponentInfo::class);
+        $this->singleton(\Composer\Composer::class, function () {
+            return \Composer\Factory::create(new \Composer\IO\BufferIO());
+        });
 
         /**
          * Contextual binding.
