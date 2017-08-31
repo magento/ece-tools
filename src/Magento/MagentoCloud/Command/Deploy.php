@@ -341,23 +341,14 @@ class Deploy extends Command
     }
 
     /**
-    * Import deployment config if present
+    * Import deployment config - To be made obsolete by MAGETWO-71890
     *
     * @return void
     */
     public function importDeploymentConfig()
     {
-        $configFile = $this->getSharedConfigFilePath();
-        $config = include $configFile;
-        unset($config['modules']);
-
-        // Test for deployment config
-        if (count($config) > 0) {
-            $this->env->log("Importing deployment config");
-            $this->env->execute("php ./bin/magento app:config:import {$this->verbosityLevel}");
-        } else {
-            $this->env->log("No deployment config present to import");
-        }
+        $this->env->log("Importing deployment config");
+        $this->env->execute("php ./bin/magento app:config:import {$this->verbosityLevel}");
     }
 
     /**
