@@ -427,8 +427,6 @@ class Deploy extends Command
      */
     private function setupUpgrade()
     {
-        $this->env->log("Saving disabled modules.");
-
         if (file_exists(Environment::REGENERATE_FLAG)) {
             $this->env->log("Removing .regenerate flag");
             unlink(Environment::REGENERATE_FLAG);
