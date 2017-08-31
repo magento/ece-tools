@@ -51,7 +51,7 @@ class DirectoryListTest extends TestCase
             'root' => [DirectoryList::ROOT, __DIR__],
             'magento root' => [
                 DirectoryList::MAGENTO_ROOT,
-                __DIR__ . '/../../../',
+                __DIR__ . '/../../..',
             ],
             'test var' => [
                 'test_var',
@@ -89,7 +89,7 @@ class DirectoryListTest extends TestCase
     public function testGetMagentoRoot()
     {
         $this->assertSame(
-            __DIR__ . '/../../../',
+            __DIR__ . '/../../..',
             $this->directoryList->getMagentoRoot()
         );
     }

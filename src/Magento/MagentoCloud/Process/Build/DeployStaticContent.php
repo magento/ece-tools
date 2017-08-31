@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -43,24 +44,32 @@ class DeployStaticContent implements ProcessInterface
     private $environment;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param BuildConfig $buildConfig
      * @param File $file
      * @param Environment $environment
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         ShellInterface $shell,
         LoggerInterface $logger,
         BuildConfig $buildConfig,
         File $file,
-        Environment $environment
+        Environment $environment,
+        DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->shell = $shell;
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -68,7 +77,8 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = MAGENTO_ROOT . 'app/etc/config.php';
+        $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
+
         if (!$this->file->isExists($configFile) || $this->buildConfig->get(BuildConfig::BUILD_OPT_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
             $this->environment->removeFlagStaticContentInBuild();

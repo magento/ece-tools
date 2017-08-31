@@ -150,7 +150,7 @@ class Environment
     {
         $this->logger->info('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
         $this->file->touch(
-            $this->directoryList->getMagentoRoot() . Environment::STATIC_CONTENT_DEPLOY_FLAG
+            $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
         );
     }
 
@@ -164,7 +164,7 @@ class Environment
         if ($this->isStaticDeployInBuild()) {
             $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
             $this->file->deleteFile(
-                $this->directoryList->getMagentoRoot() . Environment::STATIC_CONTENT_DEPLOY_FLAG
+                $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
             );
         }
     }
@@ -177,7 +177,7 @@ class Environment
     public function isStaticDeployInBuild(): bool
     {
         return $this->file->isExists(
-            $this->directoryList->getMagentoRoot() . Environment::STATIC_CONTENT_DEPLOY_FLAG
+            $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
         );
     }
 
