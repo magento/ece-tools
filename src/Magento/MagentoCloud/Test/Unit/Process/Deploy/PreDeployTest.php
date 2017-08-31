@@ -72,4 +72,9 @@ class PreDeployTest extends TestCase
             $this->staticContentCleanerMock
         );
     }
+
+    public function testExecute()
+    {
+        $this->markTestIncomplete();
+    }
 }
