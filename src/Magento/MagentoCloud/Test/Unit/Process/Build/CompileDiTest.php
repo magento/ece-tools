@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\CompileDi;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -43,6 +44,11 @@ class CompileDiTest extends TestCase
     private $buildConfigMock;
 
     /**
+     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $directoryListMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -57,12 +63,20 @@ class CompileDiTest extends TestCase
         $this->buildConfigMock = $this->getMockBuilder(Build::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->directoryListMock->expects($this->any())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
 
         $this->process = new CompileDi(
             $this->loggerMock,
             $this->shellMock,
             $this->fileMock,
-            $this->buildConfigMock
+            $this->buildConfigMock,
+            $this->directoryListMock
         );
     }
 
@@ -73,7 +87,7 @@ class CompileDiTest extends TestCase
             ->willReturn('-vvv');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(MAGENTO_ROOT . 'app/etc/config.php')
+            ->with('magento_root/app/etc/config.php')
             ->willReturn(true);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
@@ -96,7 +110,7 @@ class CompileDiTest extends TestCase
             ->willReturn('-vvv');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(MAGENTO_ROOT . 'app/etc/config.php')
+            ->with('magento_root/app/etc/config.php')
             ->willReturn(true);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
@@ -123,7 +137,7 @@ class CompileDiTest extends TestCase
             ->willReturn('-vvv');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(MAGENTO_ROOT . 'app/etc/config.php')
+            ->with('magento_root/app/etc/config.php')
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')

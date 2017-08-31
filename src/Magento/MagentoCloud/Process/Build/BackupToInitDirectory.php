@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -41,17 +42,28 @@ class BackupToInitDirectory implements ProcessInterface
     private $environment;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param File $file
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param Environment $environment
      */
-    public function __construct(File $file, LoggerInterface $logger, ShellInterface $shell, Environment $environment)
-    {
+    public function __construct(
+        File $file,
+        LoggerInterface $logger,
+        ShellInterface $shell,
+        Environment $environment,
+        DirectoryList $directoryList
+    ) {
         $this->file = $file;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->environment = $environment;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -64,6 +76,8 @@ class BackupToInitDirectory implements ProcessInterface
             $this->file->deleteFile(Environment::REGENERATE_FLAG);
         }
 
+        $magentoRoot = $this->directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR;
+
         if ($this->environment->isStaticDeployInBuild()) {
             $this->logger->info('Moving static content to init directory');
             $this->shell->execute('mkdir -p ./init/pub/');
@@ -75,8 +89,8 @@ class BackupToInitDirectory implements ProcessInterface
             $this->shell->execute('cp -R ./pub/static/ ./init/pub/static');
 
             $this->file->copy(
-                MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+                $magentoRoot . Environment::STATIC_CONTENT_DEPLOY_FLAG,
+                $magentoRoot . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
             );
         } else {
             $this->logger->info('No file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
@@ -88,7 +102,7 @@ class BackupToInitDirectory implements ProcessInterface
             $this->shell->execute(sprintf('mkdir -p init/%s', $dir));
             $this->shell->execute(sprintf('mkdir -p %s', $dir));
 
-            if (count($this->file->scanDir(MAGENTO_ROOT . $dir)) > 2) {
+            if (count($this->file->scanDir($magentoRoot . $dir)) > 2) {
                 $this->shell->execute(
                     sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir)
                 );

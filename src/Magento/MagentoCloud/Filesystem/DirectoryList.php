@@ -65,7 +65,7 @@ class DirectoryList
         $path = $directories[$code][self::PATH];
         $normalizedPath = $root . ($root && $path ? DIRECTORY_SEPARATOR : '') . $path;
 
-        return realpath($normalizedPath);
+        return $normalizedPath;
     }
 
     /**
@@ -102,7 +102,7 @@ class DirectoryList
             /*
              * Magento application's vendor folder.
              */
-            static::MAGENTO_ROOT => [static::PATH => '/../../../'],
+            static::MAGENTO_ROOT => [static::PATH => '../../..'],
         ];
     }
 }

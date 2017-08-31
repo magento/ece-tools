@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
 
@@ -36,13 +37,20 @@ class Environment
     private $file;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
+     * @param DirectoryList $directoryList
      */
-    public function __construct(LoggerInterface $logger, File $file)
+    public function __construct(LoggerInterface $logger, File $file, DirectoryList $directoryList)
     {
         $this->logger = $logger;
         $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -81,7 +89,7 @@ class Environment
      * @param string $key
      * @return array
      */
-    public function getRelationship($key)
+    public function getRelationship(string $key)
     {
         $relationships = $this->getRelationships();
 
@@ -141,7 +149,9 @@ class Environment
     public function setFlagStaticDeployInBuild()
     {
         $this->logger->info('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->file->touch(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        $this->file->touch(
+            $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+        );
     }
 
     /**
@@ -153,7 +163,9 @@ class Environment
     {
         if ($this->isStaticDeployInBuild()) {
             $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-            $this->file->deleteFile(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            $this->file->deleteFile(
+                $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+            );
         }
     }
 
@@ -164,7 +176,9 @@ class Environment
      */
     public function isStaticDeployInBuild(): bool
     {
-        return $this->file->isExists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        return $this->file->isExists(
+            $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+        );
     }
 
     /**
@@ -241,7 +255,7 @@ class Environment
 
     public function getDbHost()
     {
-        return $this->getRelationship('database')[0]['host'];
+        return $this->getRelationship('database')[0]['host'] ?? '';
     }
 
     /**
@@ -249,7 +263,7 @@ class Environment
      */
     public function getDbName(): string
     {
-        return $this->getRelationship('database')[0]['path'];
+        return $this->getRelationship('database')[0]['path'] ?? '';
     }
 
     /**
@@ -257,7 +271,7 @@ class Environment
      */
     public function getDbUser(): string
     {
-        return $this->getRelationship('database')[0]['username'];
+        return $this->getRelationship('database')[0]['username'] ?? '';
     }
 
     /**
@@ -265,7 +279,7 @@ class Environment
      */
     public function getDbPassword(): string
     {
-        return $this->getRelationship('database')[0]['password'];
+        return $this->getRelationship('database')[0]['password'] ?? '';
     }
 
     /**

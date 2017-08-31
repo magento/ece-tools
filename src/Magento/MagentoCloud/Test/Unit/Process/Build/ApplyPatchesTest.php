@@ -60,4 +60,19 @@ class ApplyPatchesTest extends TestCase
 
         $this->process->execute();
     }
+
+    public function testExecuteWithoutPatches()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Applying patches.');
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Patching was failed. Skipping.');
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new \Exception('Patching failed.'));
+
+        $this->process->execute();
+    }
 }
