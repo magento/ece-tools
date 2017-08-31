@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\BackupToInitDirectory;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -43,6 +44,11 @@ class BackupToInitDirectoryTest extends TestCase
     private $environmentMock;
 
     /**
+     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $directoryListMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -57,12 +63,20 @@ class BackupToInitDirectoryTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->directoryListMock->expects($this->any())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
 
         $this->process = new BackupToInitDirectory(
             $this->fileMock,
             $this->loggerMock,
             $this->shellMock,
-            $this->environmentMock
+            $this->environmentMock,
+            $this->directoryListMock
         );
     }
 
@@ -102,8 +116,8 @@ class BackupToInitDirectoryTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('copy')
             ->with(
-                MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+                'magento_root' . DIRECTORY_SEPARATOR . Environment::STATIC_CONTENT_DEPLOY_FLAG,
+                'magento_root' . DIRECTORY_SEPARATOR . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
             );
         $this->environmentMock->expects($this->once())
             ->method('getWritableDirectories')
@@ -149,8 +163,8 @@ class BackupToInitDirectoryTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('copy')
             ->with(
-                MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                MAGENTO_ROOT . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+                'magento_root' . DIRECTORY_SEPARATOR . Environment::STATIC_CONTENT_DEPLOY_FLAG,
+                'magento_root' . DIRECTORY_SEPARATOR . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
             );
         $this->environmentMock->expects($this->once())
             ->method('getWritableDirectories')

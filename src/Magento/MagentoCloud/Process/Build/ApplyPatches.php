@@ -40,6 +40,11 @@ class ApplyPatches implements ProcessInterface
     public function execute()
     {
         $this->logger->info('Applying patches.');
-        $this->shell->execute('php vendor/bin/m2-apply-patches');
+
+        try {
+            $this->shell->execute('php vendor/bin/m2-apply-patches');
+        } catch (\Exception $exception) {
+            $this->logger->warning('Patching was failed. Skipping.');
+        }
     }
 }

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -25,15 +26,23 @@ class CopySampleData implements ProcessInterface
     private $file;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
-        File $file
+        File $file,
+        DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -41,7 +50,8 @@ class CopySampleData implements ProcessInterface
      */
     public function execute()
     {
-        $sampleDataDir = MAGENTO_ROOT . 'vendor/magento/sample-data-media';
+        $magentoRoot = $this->directoryList->getMagentoRoot();
+        $sampleDataDir = $magentoRoot . '/vendor/magento/sample-data-media';
 
         if (!$this->file->isExists($sampleDataDir)) {
             $this->logger->info('Sample data media was not found. Skipping.');
@@ -50,6 +60,6 @@ class CopySampleData implements ProcessInterface
         }
 
         $this->logger->info('Sample data media found. Marshalling to pub/media.');
-        $this->file->copyDirectory($sampleDataDir, MAGENTO_ROOT . '/pub/media');
+        $this->file->copyDirectory($sampleDataDir, $magentoRoot . '/pub/media');
     }
 }
