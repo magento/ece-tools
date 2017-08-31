@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Util;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -27,21 +28,33 @@ class StaticContentCleaner
     private $file;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param File $file
+     * @param DirectoryList $directoryList
      */
-    public function __construct(LoggerInterface $logger, ShellInterface $shell, File $file)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        ShellInterface $shell,
+        File $file,
+        DirectoryList $directoryList
+    ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     public function clean()
     {
+        $magentoRoot = $this->directoryList->getMagentoRoot();
         // atomic move within pub/static directory
-        $staticContentLocation = $this->file->getRealPath(MAGENTO_ROOT . 'pub/static/') . '/';
+        $staticContentLocation = $this->file->getRealPath($magentoRoot . '/pub/static/') . '/';
         $timestamp = time();
         $oldStaticContentLocation = $staticContentLocation . 'old_static_content_' . $timestamp;
 
@@ -70,7 +83,7 @@ class StaticContentCleaner
         $this->logger->info("Removing $oldStaticContentLocation in the background");
         $this->shell->backgroundExecute("rm -rf $oldStaticContentLocation");
 
-        $preprocessedLocation = $this->file->getRealPath(MAGENTO_ROOT . 'var') . '/view_preprocessed';
+        $preprocessedLocation = $this->file->getRealPath($magentoRoot . '/var') . '/view_preprocessed';
 
         if ($this->file->isExists($preprocessedLocation)) {
             $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;

@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy;
 use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\DB\Adapter;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -50,6 +51,11 @@ class InstallUpdate implements ProcessInterface
     private $adapter;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @var PasswordGenerator
      */
     private $passwordGenerator;
@@ -69,6 +75,7 @@ class InstallUpdate implements ProcessInterface
      * @param Environment $environment
      * @param Adapter $adapter
      * @param PasswordGenerator $passwordGenerator
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
@@ -77,7 +84,8 @@ class InstallUpdate implements ProcessInterface
         DeployConfig $deployConfig,
         Environment $environment,
         Adapter $adapter,
-        PasswordGenerator $passwordGenerator
+        PasswordGenerator $passwordGenerator,
+        DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
@@ -86,6 +94,7 @@ class InstallUpdate implements ProcessInterface
         $this->environment = $environment;
         $this->adapter = $adapter;
         $this->passwordGenerator = $passwordGenerator;
+        $this->directoryList = $directoryList;
     }
 
     public function execute()
@@ -388,7 +397,7 @@ class InstallUpdate implements ProcessInterface
                 'save' => 'redis',
                 'redis' => [
                     'host' => $redisConfig[0]['host'],
-                    'port' =>  $redisConfig[0]['port'],
+                    'port' => $redisConfig[0]['port'],
                     'database' => 0,
                 ],
             ];
@@ -460,7 +469,7 @@ class InstallUpdate implements ProcessInterface
      */
     private function getConfigFilePath()
     {
-        return MAGENTO_ROOT . 'app/etc/env.php';
+        return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
     }
 
     /**

@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\ConfigDump;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -36,6 +37,11 @@ class Import implements ProcessInterface
      */
     private $file;
 
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
     private $requiredConfigKeys = [
         'modules',
         'scopes',
@@ -55,13 +61,20 @@ class Import implements ProcessInterface
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param File $file
+     * @param DirectoryList $directoryList
      */
-    public function __construct(Environment $environment, ShellInterface $shell, LoggerInterface $logger, File $file)
-    {
+    public function __construct(
+        Environment $environment,
+        ShellInterface $shell,
+        LoggerInterface $logger,
+        File $file,
+        DirectoryList $directoryList
+    ) {
         $this->environment = $environment;
         $this->shell = $shell;
         $this->logger = $logger;
         $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -72,7 +85,7 @@ class Import implements ProcessInterface
     public function execute()
     {
         try {
-            $configFile = MAGENTO_ROOT . 'app/etc/config.php';
+            $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
             $this->shell->execute("php bin/magento app:config:dump");
 
             if ($this->file->isExists($configFile)) {

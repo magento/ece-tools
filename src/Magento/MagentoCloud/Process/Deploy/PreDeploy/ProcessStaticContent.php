@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -46,12 +47,18 @@ class ProcessStaticContent implements ProcessInterface
     private $buildDirCopier;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param Environment $env
      * @param StaticContentCleaner $staticContentCleaner
      * @param File $file
      * @param BuildDirCopier $buildDirCopier
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
@@ -59,7 +66,8 @@ class ProcessStaticContent implements ProcessInterface
         Environment $env,
         StaticContentCleaner $staticContentCleaner,
         File $file,
-        BuildDirCopier $buildDirCopier
+        BuildDirCopier $buildDirCopier,
+        DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
@@ -67,6 +75,7 @@ class ProcessStaticContent implements ProcessInterface
         $this->staticContentCleaner = $staticContentCleaner;
         $this->file = $file;
         $this->buildDirCopier = $buildDirCopier;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -101,9 +110,11 @@ class ProcessStaticContent implements ProcessInterface
      */
     private function symlinkStaticContent()
     {
+        $magentoRoot = $this->directoryList->getMagentoRoot();
+
         // Symlink pub/static/* to init/pub/static/*
-        $staticContentLocation = $this->file->getRealPath(MAGENTO_ROOT . 'pub/static') . '/';
-        $buildDir = $this->file->getRealPath(MAGENTO_ROOT . 'init') . '/';
+        $staticContentLocation = $this->file->getRealPath($magentoRoot . '/pub/static') . '/';
+        $buildDir = $this->file->getRealPath($magentoRoot . '/init') . '/';
         if ($this->file->isExists($buildDir . 'pub/static')) {
             $dir = new \DirectoryIterator($buildDir . 'pub/static');
             foreach ($dir as $fileInfo) {

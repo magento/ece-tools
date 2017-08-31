@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Build;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
@@ -19,11 +20,18 @@ class Reader implements ReaderInterface
     private $file;
 
     /**
-     * @param File $file
+     * @var DirectoryList
      */
-    public function __construct(File $file)
+    private $directoryList;
+
+    /**
+     * @param File $file
+     * @param DirectoryList $directoryList
+     */
+    public function __construct(File $file, DirectoryList $directoryList)
     {
         $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -31,7 +39,7 @@ class Reader implements ReaderInterface
      */
     public function read(): array
     {
-        $fileName = MAGENTO_ROOT . '/build_options.ini';
+        $fileName = $this->directoryList->getMagentoRoot() . '/build_options.ini';
 
         return $this->file->isExists($fileName) ? $this->file->parseIni($fileName) : [];
     }

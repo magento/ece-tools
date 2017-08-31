@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Adapter;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
@@ -43,24 +44,32 @@ class DeployStaticContent implements ProcessInterface
     private $staticContentCleaner;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param Environment $environment
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param Adapter $adapter
      * @param StaticContentCleaner $staticContentCleaner
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         Environment $environment,
         ShellInterface $shell,
         LoggerInterface $logger,
         Adapter $adapter,
-        StaticContentCleaner $staticContentCleaner
+        StaticContentCleaner $staticContentCleaner,
+        DirectoryList $directoryList
     ) {
         $this->environment = $environment;
         $this->shell = $shell;
         $this->logger = $logger;
         $this->adapter = $adapter;
         $this->staticContentCleaner = $staticContentCleaner;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -95,7 +104,9 @@ class DeployStaticContent implements ProcessInterface
 
     private function generateFreshStaticContent()
     {
-        $this->shell->execute('touch ' . MAGENTO_ROOT . 'pub/static/deployed_version.txt');
+        $this->shell->execute(
+            'touch ' . $this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt'
+        );
         /* Enable maintenance mode */
         $this->logger->notice('Enabling Maintenance mode.');
         $this->shell->execute("php ./bin/magento maintenance:enable {$this->environment->getVerbosityLevel()}");
