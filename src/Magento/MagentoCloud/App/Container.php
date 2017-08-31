@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
+use Magento\MagentoCloud\Util\ComponentInfo;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
@@ -47,6 +48,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             \Psr\Log\LoggerInterface::class,
             $this->createLogger('default')
         );
+        $this->singleton(ComponentInfo::class);
+        $this->singleton(\Composer\Factory::class);
 
         /**
          * Contextual binding.

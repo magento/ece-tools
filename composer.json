@@ -13,7 +13,8 @@
     "illuminate/container": "^5.5",
     "psr/log": "^1.0",
     "psr/container": "^1.0",
-    "composer/composer": "@stable"
+    "composer/composer": "@stable",
+    "php-mock/php-mock-phpunit": "^2.0"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.2.0",

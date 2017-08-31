@@ -5,63 +5,55 @@
  */
 namespace Magento\MagentoCloud\Util;
 
+use Composer\Composer;
+use Composer\Factory;
+use Composer\IO\BufferIO;
+use Composer\Package\PackageInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+
 class ComponentInfo
 {
     /**
-     * @var ComponentVersion
+     * @var Composer
      */
-    private $componentVersion;
+    private $composer;
 
     /**
-     * @param ComponentVersion $componentVersion
+     * @param Factory $composerFactory
+     * @param DirectoryList $directoryList
      */
     public function __construct(
-        ComponentVersion $componentVersion
+        Factory $composerFactory,
+        DirectoryList $directoryList
     ) {
-        $this->componentVersion = $componentVersion;
+        $this->composer = $composerFactory->createComposer(
+            new BufferIO(),
+            $directoryList->getMagentoRoot() . '/composer.json'
+        );
     }
 
     /**
      * Returns info about versions of given components
      *
-     * @param array $components The array of components
-     * ```php
-     *    [
-     *       'component-name',
-     *       [
-     *           'vendor' => 'some-vendor'
-     *           'name' => 'some-name'
-     *       ],
-     *       [
-     *           'vendor' => 'some-another-vendor'
-     *           'name' => 'some-name'
-     *       ]
-     *    ]
-     * ```
+     * @param array $packages The array of packages names
      * @return string
      */
-    public function get(array $components = ['ece-tools', 'magento2-base']) : string
+    public function get(array $packages = ['magento/ece-tools', 'magento/magento2-base']) : string
     {
-        $versions = [];
-        foreach ($components as $component) {
-            $version = false;
-            if (is_array($component)
-                && isset($component['name'], $component['vendor'])
-            ) {
-                $version = $this->componentVersion->get($component['name'], $component['vendor']);
-            } elseif (is_string($component)) {
-                $version = $this->componentVersion->get($component);
-            }
+        $repository = $this->composer->getLocker()->getLockedRepository();
 
-            if ($version) {
+        $versions = [];
+        foreach ($packages as $packageName) {
+            $package = $repository->findPackage($packageName, '*');
+            if ($package instanceof PackageInterface) {
                 $versions[] = sprintf(
                     '%s version: %s',
-                    $component,
-                    $version
+                    $package->getPrettyName(),
+                    $package->getPrettyVersion()
                 );
             }
         }
 
-        return '(' . implode(',', $versions) . ')';
+        return '(' . implode(', ', $versions) . ')';
     }
 }
