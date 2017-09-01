@@ -70,16 +70,16 @@ class StaticContentSymlink
         $magentoRoot = $this->directoryList->getMagentoRoot();
 
         // Symlink pub/static/* to init/pub/static/*
-        $staticContentLocation = $this->file->getRealPath($magentoRoot . '/pub/static') . '/';
-        $buildDir = $this->file->getRealPath($magentoRoot . '/init') . '/';
-        if ($this->file->isExists($buildDir . 'pub/static')) {
-            $dir = new \DirectoryIterator($buildDir . 'pub/static');
+        $staticContentLocation = $this->file->getRealPath($magentoRoot . '/pub/static');
+        $buildDir = $this->file->getRealPath($magentoRoot . '/init/pub/static');
+        if ($this->file->isExists($buildDir)) {
+            $dir = new \DirectoryIterator($buildDir);
             foreach ($dir as $fileInfo) {
                 if ($fileInfo->isDot()) {
                     continue;
                 }
 
-                $fromDir = $buildDir . 'pub/static/' . $fileInfo->getFilename();
+                $fromDir = $buildDir . '/' . $fileInfo->getFilename();
                 $toDir = $staticContentLocation . '/' . $fileInfo->getFilename();
 
                 try {

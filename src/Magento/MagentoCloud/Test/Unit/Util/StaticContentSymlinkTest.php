@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Util;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\StaticContentSymlink;
 use PHPUnit\Framework\TestCase;
@@ -67,9 +68,9 @@ class StaticContentSymlinkTest extends TestCase
 
     public function testCreate()
     {
-        $root = '/path/to/root';
-        $staticContentLocation = '/path/to/root/pub/static/';
-        $buildDir = '/path/to/root/init/';
+        $root = __DIR__ . '/_files';
+        $staticContentLocation = $root . '/pub/static';
+        $buildDir = $root . '/init/pub/static';
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -77,13 +78,107 @@ class StaticContentSymlinkTest extends TestCase
         $this->fileMock->expects($this->exactly(2))
             ->method('getRealPath')
             ->withConsecutive(
-                [$root . '/pub/static'],
-                [$root . '/init']
+                [$staticContentLocation],
+                [$buildDir]
             )
             ->willReturnOnConsecutiveCalls(
                 $staticContentLocation,
                 $buildDir
             );
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($buildDir)
+            ->willReturn(true);
+
+        $this->fileMock->expects($this->exactly(2))
+            ->method('symlink')
+            ->withConsecutive(
+                [$buildDir . '/config.php'],
+                [$buildDir . '/frontend']
+            )
+            ->willReturn(true);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                [sprintf('Create symlink %s/config.php => %s/config.php', $staticContentLocation, $buildDir)],
+                [sprintf('Create symlink %s/frontend => %s/frontend', $staticContentLocation, $buildDir)]
+            )
+            ->willReturn(true);
+
+        $this->staticContentSymlink->create();
+    }
+
+    public function testCreateWithSymlinkException()
+    {
+        $root = __DIR__ . '/_files';
+        $staticContentLocation = $root . '/pub/static';
+        $buildDir = $root . '/init/pub/static';
+
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($root);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('getRealPath')
+            ->withConsecutive(
+                [$staticContentLocation],
+                [$buildDir]
+            )
+            ->willReturnOnConsecutiveCalls(
+                $staticContentLocation,
+                $buildDir
+            );
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($buildDir)
+            ->willReturn(true);
+
+        $this->fileMock->expects($this->exactly(2))
+            ->method('symlink')
+            ->withConsecutive(
+                [$buildDir . '/config.php'],
+                [$buildDir . '/frontend']
+            )
+            ->willThrowException(new FileSystemException('Can\'t create symlink'));
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('error')
+            ->withConsecutive(
+                ['Can\'t create symlink'],
+                ['Can\'t create symlink']
+            );
+
+        $this->staticContentSymlink->create();
+    }
+
+    public function testCreateBuildDirNotExists()
+    {
+        $root = __DIR__ . '/_files';
+        $staticContentLocation = $root . '/pub/static';
+        $buildDir = $root . '/init/pub/static';
+
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($root);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('getRealPath')
+            ->withConsecutive(
+                [$staticContentLocation],
+                [$buildDir]
+            )
+            ->willReturnOnConsecutiveCalls(
+                $staticContentLocation,
+                $buildDir
+            );
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($buildDir)
+            ->willReturn(false);
+
+        $this->fileMock->expects($this->never())
+            ->method('symlink');
+        $this->loggerMock->expects($this->never())
+            ->method('info');
 
         $this->staticContentSymlink->create();
     }
