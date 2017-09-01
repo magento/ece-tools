@@ -231,9 +231,7 @@ class Environment
 
     public function getAdminLocale(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_LOCALE']) ? $var['ADMIN_LOCALE'] : 'en_US';
+        return $this->getVariables()['ADMIN_LOCALE'] ?? 'en_US';
     }
 
     public function doCleanStaticFiles(): bool
@@ -248,9 +246,7 @@ class Environment
      */
     public function getStaticDeployExcludeThemes(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['STATIC_CONTENT_EXCLUDE_THEMES']) ? $var['STATIC_CONTENT_EXCLUDE_THEMES'] : '';
+        return $this->getVariables()['STATIC_CONTENT_EXCLUDE_THEMES'] ?? '';
     }
 
     public function getDbHost()
@@ -287,9 +283,7 @@ class Environment
      */
     public function getAdminUsername(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_USERNAME']) ? $var['ADMIN_USERNAME'] : 'admin';
+        return $this->getVariables()['ADMIN_USERNAME'] ?? 'admin';
     }
 
     /**
@@ -297,9 +291,7 @@ class Environment
      */
     public function getAdminFirstname(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_FIRSTNAME']) ? $var['ADMIN_FIRSTNAME'] : 'John';
+        return $this->getVariables()['ADMIN_FIRSTNAME'] ?? 'John';
     }
 
     /**
@@ -307,9 +299,7 @@ class Environment
      */
     public function getAdminLastname(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_LASTNAME']) ? $var['ADMIN_LASTNAME'] : 'Doe';
+        return $this->getVariables()['ADMIN_LASTNAME'] ?? 'Doe';
     }
 
     /**
@@ -317,9 +307,7 @@ class Environment
      */
     public function getAdminEmail(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_EMAIL']) ? $var['ADMIN_EMAIL'] : 'john@example.com';
+        return $this->getVariables()['ADMIN_EMAIL'] ?? 'john@example.com';
     }
 
     /**
@@ -327,9 +315,7 @@ class Environment
      */
     public function getAdminPassword(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_PASSWORD']) ? $var['ADMIN_PASSWORD'] : 'admin12';
+        return $this->getVariables()['ADMIN_PASSWORD'] ?? 'admin12';
     }
 
     /**
@@ -337,9 +323,7 @@ class Environment
      */
     public function getAdminUrl(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_URL']) ? $var['ADMIN_URL'] : 'admin';
+        return $this->getVariables()['ADMIN_URL'] ?? 'admin';
     }
 
     /**
