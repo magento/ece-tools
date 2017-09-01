@@ -19,7 +19,7 @@ class ComponentInfo
      * @param Composer $composer
      */
     public function __construct(
-        \Composer\Composer $composer
+        Composer $composer
     ) {
         $this->composer = $composer;
     }

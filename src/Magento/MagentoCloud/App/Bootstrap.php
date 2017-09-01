@@ -5,8 +5,6 @@
  */
 namespace Magento\MagentoCloud\App;
 
-use Composer\Factory;
-use Composer\IO\BufferIO;
 use Magento\MagentoCloud\Application;
 
 class Bootstrap
@@ -51,10 +49,8 @@ class Bootstrap
     public function createApplication()
     {
         $config = $this->server[static::INIT_PARAM_DIRS_CONFIG] ?? [];
+        $container = new Container($this->root, $config);
 
-        return new Application(
-            new Container($this->root, $config),
-            Factory::create(new BufferIO())
-        );
+        return new Application($container);
     }
 }

@@ -23,11 +23,11 @@ class Application extends \Symfony\Component\Console\Application
 
     /**
      * @param ContainerInterface $container
-     * @param Composer $composer
      */
-    public function __construct(ContainerInterface $container, Composer $composer)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
+        $composer = $container->get(Composer::class);
 
         parent::__construct(
             $composer->getPackage()->getPrettyName(),
