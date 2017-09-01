@@ -9,7 +9,6 @@ use Composer\Composer;
 use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Util\ComponentInfo;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
