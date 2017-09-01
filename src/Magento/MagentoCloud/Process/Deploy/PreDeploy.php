@@ -40,8 +40,8 @@ class PreDeploy implements ProcessInterface
         ComponentInfo $componentInfo
     ) {
         $this->logger = $logger;
-        $this->componentInfo = $componentInfo;
         $this->process = $process;
+        $this->componentInfo = $componentInfo;
     }
 
     /**

@@ -5,12 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ComponentInfo;
-use Magento\MagentoCloud\Util\StaticContentCleaner;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -18,24 +15,9 @@ use Psr\Log\LoggerInterface;
 class PreDeployTest extends TestCase
 {
     /**
-     * @var ShellInterface|Mock
-     */
-    private $shellMock;
-
-    /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
-
-    /**
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
-
-    /**
-     * @var File|Mock
-     */
-    private $fileMock;
 
     /**
      * @var ComponentInfo|Mock
@@ -43,9 +25,9 @@ class PreDeployTest extends TestCase
     private $componentInfoMock;
 
     /**
-     * @var StaticContentCleaner|Mock
+     * @var ProcessInterface|Mock
      */
-    private $staticContentCleanerMock;
+    private $processMock;
 
     /**
      * @var PreDeploy
@@ -54,27 +36,30 @@ class PreDeployTest extends TestCase
 
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->environmentMock = $this->createMock(Environment::class);
-        $this->fileMock = $this->createMock(File::class);
         $this->componentInfoMock = $this->createMock(ComponentInfo::class);
-        $this->staticContentCleanerMock = $this->createMock(StaticContentCleaner::class);
+        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
+            ->getMockForAbstractClass();
 
         $this->process = new PreDeploy(
-            $this->environmentMock,
             $this->loggerMock,
-            $this->shellMock,
-            $this->fileMock,
-            $this->componentInfoMock,
-            $this->staticContentCleanerMock
+            $this->processMock,
+            $this->componentInfoMock
         );
     }
 
     public function testExecute()
     {
-        $this->markTestIncomplete();
+        $this->componentInfoMock->expects($this->once())
+            ->method('get')
+            ->willReturn('(components info)');
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Starting predeploy. (components info)');
+        $this->processMock->expects($this->once())
+            ->method('execute');
+
+        $this->process->execute();
     }
 }

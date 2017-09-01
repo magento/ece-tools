@@ -109,6 +109,15 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     ],
                 ]);
             });
+        $this->when(DeployProcess\DeployStaticContent::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->get(DeployProcess\DeployStaticContent\GenerateFresh::class),
+                    ],
+                ]);
+            });
         $this->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);

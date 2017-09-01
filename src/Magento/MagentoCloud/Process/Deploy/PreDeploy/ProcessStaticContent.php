@@ -6,13 +6,10 @@
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
+use Magento\MagentoCloud\Util\StaticContentSymlink;
 use Psr\Log\LoggerInterface;
 
 class ProcessStaticContent implements ProcessInterface
@@ -28,54 +25,39 @@ class ProcessStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
      * @var StaticContentCleaner
      */
     private $staticContentCleaner;
 
-    /**
-     * @var File
-     */
-    private $file;
     /**
      * @var BuildDirCopier
      */
     private $buildDirCopier;
 
     /**
-     * @var DirectoryList
+     * @var StaticContentSymlink
      */
-    private $directoryList;
+    private $staticContentSymlink;
 
     /**
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
      * @param Environment $env
      * @param StaticContentCleaner $staticContentCleaner
-     * @param File $file
+     * @param StaticContentSymlink $staticContentSymlink
      * @param BuildDirCopier $buildDirCopier
-     * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellInterface $shell,
         Environment $env,
         StaticContentCleaner $staticContentCleaner,
-        File $file,
-        BuildDirCopier $buildDirCopier,
-        DirectoryList $directoryList
+        StaticContentSymlink $staticContentSymlink,
+        BuildDirCopier $buildDirCopier
     ) {
         $this->logger = $logger;
-        $this->shell = $shell;
         $this->env = $env;
         $this->staticContentCleaner = $staticContentCleaner;
-        $this->file = $file;
         $this->buildDirCopier = $buildDirCopier;
-        $this->directoryList = $directoryList;
+        $this->staticContentSymlink = $staticContentSymlink;
     }
 
     /**
@@ -91,48 +73,15 @@ class ProcessStaticContent implements ProcessInterface
             return;
         }
 
-        $this->logger->info("Static content deployment was performed during build hook");
+        $this->logger->info('Static content deployment was performed during build hook');
         $this->staticContentCleaner->clean();
 
         if ($this->env->isStaticContentSymlinkOn()) {
-            $this->logger->info("Symlinking static content from pub/static to init/pub/static");
-            $this->symlinkStaticContent();
+            $this->logger->info('Symlinking static content from pub/static to init/pub/static');
+            $this->staticContentSymlink->create();
         } else {
             $this->logger->info('Copying static content from init/pub/static to pub/static');
             $this->buildDirCopier->copy('pub/static');
-        }
-    }
-
-    /**
-     * Creates symlinks for static content pub/static => init/pub/static
-     *
-     * @return void
-     */
-    private function symlinkStaticContent()
-    {
-        $magentoRoot = $this->directoryList->getMagentoRoot();
-
-        // Symlink pub/static/* to init/pub/static/*
-        $staticContentLocation = $this->file->getRealPath($magentoRoot . '/pub/static') . '/';
-        $buildDir = $this->file->getRealPath($magentoRoot . '/init') . '/';
-        if ($this->file->isExists($buildDir . 'pub/static')) {
-            $dir = new \DirectoryIterator($buildDir . 'pub/static');
-            foreach ($dir as $fileInfo) {
-                if ($fileInfo->isDot()) {
-                    continue;
-                }
-
-                $fromDir = $buildDir . 'pub/static/' . $fileInfo->getFilename();
-                $toDir = $staticContentLocation . '/' . $fileInfo->getFilename();
-
-                try {
-                    if ($this->file->symlink($fromDir, $toDir)) {
-                        $this->logger->info(sprintf('Create symlink %s => %s', $toDir, $fromDir));
-                    }
-                } catch (FileSystemException $e) {
-                    $this->logger->error($e->getMessage());
-                }
-            }
         }
     }
 }
