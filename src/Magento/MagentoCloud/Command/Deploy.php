@@ -950,7 +950,14 @@ class Deploy extends Command
         if (!$this->isInstalling || empty($this->env) || empty($this->adminEmail) || !empty($this->env->getVariables()["ADMIN_PASSWORD"])) {
             return;
         }
-        $this->env->log("Sending password reset email to admin user \"{$this->adminUsername}\" at $this->adminEmail");
-        $this->env->execute("vendor/bin/m2-ece-send-password-reset-email");
+        /* TODO: Instead of calling our own command to do it, we will wait until a reset command gets added to Magento core
+         * // $this->env->log("Sending password reset email to admin user \"{$this->adminUsername}\" at $this->adminEmail");
+         * // $this->env->execute("vendor/bin/m2-ece-send-password-reset-email");
+         * Note: For now, we will just email the random password to them.
+         * Note: This is not as secure, because they might not change the password that was sent in clear-text email.
+         */
+        $adminurl = $this->urls['secure'][''] . '/' . $this->adminUrl;
+        $this->env->log("Emailing random password to admin user \"{$this->adminUsername}\" at $this->adminEmail");
+        mail($this->adminEmail, "Magento Cloud Admin Password", "Your username is {$this->adminUsername} .Your random password is {$this->adminPassword} .  You can login here: {$adminurl} .  Please change your passwords. ");
     }
 }
