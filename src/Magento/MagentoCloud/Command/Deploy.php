@@ -344,7 +344,7 @@ class Deploy extends Command
             . " " . escapeshellarg("--admin-firstname=$this->adminFirstname")
             . " " . escapeshellarg("--admin-lastname=$this->adminLastname")
             . " " . escapeshellarg("--admin-email=$this->adminEmail")
-            . " " . escapeshellarg("--admin-password={${Password::generateRandomString(20)}}"); // Note: This password gets changed later in this script in updateAdminCredentials
+            . " " . escapeshellarg("--admin-password=" . Password::generateRandomString(20)); // Note: This password gets changed later in this script in updateAdminCredentials
 
         if (strlen($this->dbPassword)) {
             $command .= " " . escapeshellarg("--db-password=$this->dbPassword");
