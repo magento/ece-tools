@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
 use Magento\MagentoCloud\Database;
+use Magento\MagentoCloud\Password;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -233,11 +234,11 @@ class Deploy extends Command
         if ($this->isInstalling && empty($this->adminUsername)) {
             // TODO: We want to have a random username , but because the username is not sent in the reset password email, the new admin has no way of knowing what it is at the moment.
             //       We may either make a custom email template to do this, or find a different way to do this.  Then, we can use random a username.
-            //$this->adminUsername = "admin-" . $this->generateRandomString(6);
+            //$this->adminUsername = "admin-" . Password::generateRandomString(6);
             $this->adminUsername = "admin";
         }
         if ($this->isInstalling && empty($this->adminPassword)) {
-            $this->adminPassword = $this->generateRandomString(20);
+            $this->adminPassword = Password::generateRandomString(20);
         }
         $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : ($this->isInstalling ? "Changeme" : "");
         $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : ($this->isInstalling ? "Changeme" : "");
@@ -257,7 +258,7 @@ class Deploy extends Command
         }
         $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : ($this->isInstalling ? "changeme@example.com" : "");
         /* Note: ADMIN_URL should be set during the onboarding process also.  They should have generated a random one for us to use. */
-        //$this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin_" . $this->generateRandomString(8) : "");
+        //$this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin_" . Password::generateRandomString(8) : "");
         /* Note: We are defaulting to "admin" for now, but will change it to the above random admin URL at some point */
         $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin" : "");
     }
@@ -343,7 +344,7 @@ class Deploy extends Command
             . " " . escapeshellarg("--admin-firstname=$this->adminFirstname")
             . " " . escapeshellarg("--admin-lastname=$this->adminLastname")
             . " " . escapeshellarg("--admin-email=$this->adminEmail")
-            . " " . escapeshellarg("--admin-password={$this->generateRandomString(20)}"); // Note: This password gets changed later in this script in updateAdminCredentials
+            . " " . escapeshellarg("--admin-password={${Password::generateRandomString(20)}}"); // Note: This password gets changed later in this script in updateAdminCredentials
 
         if (strlen($this->dbPassword)) {
             $command .= " " . escapeshellarg("--db-password=$this->dbPassword");
@@ -411,7 +412,7 @@ class Deploy extends Command
         $addColumnValueToBeUpdated($this->adminLastname, $query, "lastname", "s", $parameters);
         $addColumnValueToBeUpdated($this->adminEmail, $query, "email", "s", $parameters);
         $addColumnValueToBeUpdated($this->adminUsername, $query, "username", "s", $parameters);
-        $addColumnValueToBeUpdated($this->adminPassword, $query, "password", "s", $parameters, $this->generatePassword($this->adminPassword));
+        $addColumnValueToBeUpdated($this->adminPassword, $query, "password", "s", $parameters, Password::generatePassword($this->adminPassword));
         if (empty($query)) {
             return;  // No variables set ; nothing to do
         }
@@ -429,13 +430,13 @@ class Deploy extends Command
         if ($this->solrHost !== null && $this->solrPort !== null && $this->solrPath !== null && $this->solrHost !== null) {
           // @codingStandardsIgnoreStart
             $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_hostname' AND scope_id = '0';",
-                ["s", $this->generatePassword($this->solrHost)]);
+                ["s", $this->solrHost]);
             $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_port' AND scope_id = '0';",
-                ["s", $this->generatePassword($this->solrPort)]);
+                ["s", $this->solrPort]);
             $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_username' AND scope_id = '0';",
-                ["s", $this->generatePassword($this->solrScheme)]);
+                ["s", $this->solrScheme]);
             $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_path' AND scope_id = '0';",
-                ["s", $this->generatePassword($this->solrPath)]);
+                ["s", $this->solrPath]);
           // @codingStandardsIgnoreEnd
         }
     }
@@ -594,52 +595,6 @@ class Deploy extends Command
         }
 
         return $config;
-    }
-
-    /**
-     * Generates admin password using default Magento settings
-     * @param int $length the length of the random string
-     * @return string
-     */
-    private static function generateRandomString(int $length)
-    {
-        $charsLowers = "abcdefghijklmnopqrstuvwxyz";
-        $charsUppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        $charsDigits = "0123456789";
-        $chars = $charsLowers . $charsUppers . $charsDigits;
-        $output = "";
-        $lc = strlen($chars) - 1;
-        for ($i = 0; $i < $length; $i++) {
-            /*
-            $bytes = openssl_random_pseudo_bytes(PHP_INT_SIZE);
-            $hex = bin2hex($bytes); // hex() doubles the length of the string
-            $rand = abs(hexdec($hex) % $lc); // random integer from 0 to $lc
-            */
-            $rand = random_int(0, $lc);
-            $output .= $chars[$rand]; // random character in $chars
-        }
-        return $output;
-    }
-
-    /**
-     * Generates salt and hash for the admin password using default Magento settings
-     * @param string $password The password we will generate a hash of
-     * @return string The hash + salt + version
-     */
-    private function generatePassword(string $password)
-    {
-        $saltLength = 32;
-        $salt = static::generateRandomString($saltLength);
-        $version = 1;
-        $hash = hash('sha256', $salt . $password);
-        return implode(
-            ':',
-            [
-                $hash,
-                $salt,
-                $version
-            ]
-        );
     }
 
     /**
