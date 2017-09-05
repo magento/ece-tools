@@ -956,8 +956,8 @@ class Deploy extends Command
          * Note: For now, we will just email the random password to them.
          * Note: This is not as secure, because they might not change the password that was sent in clear-text email.
          */
-        $adminurl = $this->urls['secure'][''] . '/' . $this->adminUrl;
+        $adminurl = $this->urls['secure'][''] . $this->adminUrl;
         $this->env->log("Emailing random password to admin user \"{$this->adminUsername}\" at $this->adminEmail");
-        mail($this->adminEmail, "Magento Cloud Admin Password", "Your username is {$this->adminUsername} .Your random password is {$this->adminPassword} .  You can login here: {$adminurl} .  Please change your passwords. ");
+        mail($this->adminEmail, "Magento Cloud Admin Password", "Your username is {$this->adminUsername} .Your random password is {$this->adminPassword} .  You can log in here: {$adminurl} .  Please change this password after you log in. ");
     }
 }
