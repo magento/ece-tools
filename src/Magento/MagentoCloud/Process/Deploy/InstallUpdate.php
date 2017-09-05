@@ -178,6 +178,7 @@ class InstallUpdate implements ProcessInterface
 
         $this->setSecureAdmin();
         $this->updateConfig();
+        $this->importDeploymentConfig();
     }
 
     /**
@@ -194,15 +195,29 @@ class InstallUpdate implements ProcessInterface
 
     /**
      * Update secure admin
+     *
+     * @return void
      */
     private function setSecureAdmin()
     {
         $this->logger->info('Setting secure admin');
+        $secPath = 'web/secure/use_in_adminhtml';
+        if (empty($this->executeDbQuery("SELECT * FROM core_config_data WHERE path='$secPath';"))) {
+            $this->executeDbQuery("INSERT INTO core_config_data (scope, scope_id, path, value) VALUES('default', '0', '$secPath', '1');");
+        } else {
+            $this->executeDbQuery("UPDATE core_config_data SET value = '1' WHERE path = '$secPath';");
+        }
+    }
 
-        $command =
-            "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
-        $command .= $this->environment->getVerbosityLevel();
-        $this->shell->execute($command);
+    /**
+    * Import deployment config - To be made obsolete by MAGETWO-71890
+    *
+    * @return void
+    */
+    private function importDeploymentConfig()
+    {
+        $this->logger->info("Importing deployment config");
+        $this->shell->execute("php ./bin/magento app:config:import");
     }
 
     private function updateConfig()
