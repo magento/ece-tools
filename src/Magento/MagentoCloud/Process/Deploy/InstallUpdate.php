@@ -62,12 +62,12 @@ class InstallUpdate implements ProcessInterface
     private $urls = ['unsecure' => [], 'secure' => []];
 
     /**
-     * @param LoggerInterface $logger
-     * @param ShellInterface $shell
-     * @param File $file
-     * @param DeployConfig $deployConfig
-     * @param Environment $environment
-     * @param Adapter $adapter
+     * @param LoggerInterface   $logger
+     * @param ShellInterface    $shell
+     * @param File              $file
+     * @param DeployConfig      $deployConfig
+     * @param Environment       $environment
+     * @param Adapter           $adapter
      * @param PasswordGenerator $passwordGenerator
      */
     public function __construct(
@@ -210,10 +210,10 @@ class InstallUpdate implements ProcessInterface
     }
 
     /**
-    * Import deployment config - To be made obsolete by MAGETWO-71890
-    *
-    * @return void
-    */
+     * Import deployment config - To be made obsolete by MAGETWO-71890
+     *
+     * @return void
+     */
     private function importDeploymentConfig()
     {
         $this->logger->info("Importing deployment config");
@@ -422,7 +422,7 @@ class InstallUpdate implements ProcessInterface
     /**
      * Remove AMQP configuration from env.php
      *
-     * @param array $config
+     * @param  array $config
      * @return array
      */
     private function removeAmqpConfig(array $config)
@@ -443,7 +443,7 @@ class InstallUpdate implements ProcessInterface
     /**
      * Clears configuration from redis usages.
      *
-     * @param array $config An array of application configuration
+     * @param  array $config An array of application configuration
      * @return array
      */
     private function removeRedisConfiguration($config)
@@ -481,7 +481,7 @@ class InstallUpdate implements ProcessInterface
     /**
      * Executes database query
      *
-     * @param string $query
+     * @param  string $query
      * $query must be completed, finished with semicolon (;)
      * @return mixed
      */
