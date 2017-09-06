@@ -958,6 +958,6 @@ class Deploy extends Command
          */
         $adminurl = $this->urls['secure'][''] . $this->adminUrl;
         $this->env->log("Emailing random password to admin user \"{$this->adminUsername}\" at $this->adminEmail");
-        mail($this->adminEmail, "Magento Cloud Admin Password", "Your username is {$this->adminUsername} .Your random password is {$this->adminPassword} .  You can log in here: {$adminurl} .  Please change this password after you log in. ");
+        mail($this->adminEmail, "Magento Commerce Cloud - Admin Password", "Your Magento Admin username is {$this->adminUsername} . Your temporary random password is {$this->adminPassword} .  Your Magento Admin URL is: {$adminurl} .  Please log in and change this password. ");
     }
 }
