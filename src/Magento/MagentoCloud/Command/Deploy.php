@@ -953,11 +953,10 @@ class Deploy extends Command
         /* TODO: Instead of calling our own command to do it, we will wait until a reset command gets added to Magento core
          * // $this->env->log("Sending password reset email to admin user \"{$this->adminUsername}\" at $this->adminEmail");
          * // $this->env->execute("vendor/bin/m2-ece-send-password-reset-email");
-         * Note: For now, we will just email the random password to them.
-         * Note: This is not as secure, because they might not change the password that was sent in clear-text email.
+         * Note: For now, we will just email them the admin URL where they can manually click "Forgot your password" to get a password reset email.
          */
         $adminurl = $this->urls['secure'][''] . $this->adminUrl;
-        $this->env->log("Emailing random password to admin user \"{$this->adminUsername}\" at $this->adminEmail");
-        mail($this->adminEmail, "Magento Commerce Cloud - Admin Password", "Your Magento Admin username is {$this->adminUsername} . Your temporary random password is {$this->adminPassword} .  Your Magento Admin URL is: {$adminurl} .  Please log in and change this password. ");
+        $this->env->log("Emailing admin URL to admin user \"{$this->adminUsername}\" at $this->adminEmail");
+        mail($this->adminEmail, "Your Magento Admin username is {$this->adminUsername} .  Your Magento Admin URL is: {$adminurl} .  Please open that URL and click on \"Forgot your password\".  You will need to enter your email address which is {$this->adminUsername} . \nFor more information, please read http://devdocs.magento.com/guides/v2.2/cloud/onboarding/onboarding-tasks.html .");
     }
 }
