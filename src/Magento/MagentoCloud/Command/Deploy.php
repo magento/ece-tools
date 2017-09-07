@@ -957,6 +957,6 @@ class Deploy extends Command
          */
         $adminurl = $this->urls['secure'][''] . $this->adminUrl;
         $this->env->log("Emailing admin URL to admin user \"{$this->adminUsername}\" at $this->adminEmail");
-        mail($this->adminEmail, "Your Magento Admin username is {$this->adminUsername} .  Your Magento Admin URL is: {$adminurl} .  Please open that URL and click on \"Forgot your password\".  You will need to enter your email address which is {$this->adminUsername} . \nFor more information, please read http://devdocs.magento.com/guides/v2.2/cloud/onboarding/onboarding-tasks.html .");
+        mail($this->adminEmail, "Magento Commerce Cloud - Admin URL", "Your Magento Admin username is {$this->adminUsername} .  Your Magento Admin URL is: {$adminurl} .  Please open that URL and click on \"Forgot your password\".  You will need to enter your email address which is {$this->adminUsername} . \nFor more information, please read http://devdocs.magento.com/guides/v2.2/cloud/onboarding/onboarding-tasks.html .");
     }
 }
