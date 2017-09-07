@@ -815,7 +815,7 @@ class Deploy extends Command
             $this->env->execute("rm -rf $fileCacheDir");
         }
 
-        $mountedDirectories = ['app/etc', 'pub/media'];
+        $mountedDirectories = ['app/etc', 'pub/media', 'var/log'];
 
         $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
 
