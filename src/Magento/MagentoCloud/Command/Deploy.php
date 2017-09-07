@@ -501,15 +501,15 @@ class Deploy extends Command
 
         if ($this->redisHost !== null && $this->redisPort !== null) {
             $this->env->log("Updating env.php Redis cache configuration.");
-            $config['cache'] = $this->getRedisCacheConfiguration();
-            $config['session'] = [
-                'save' => 'redis',
-                'redis' => [
-                    'host' => $this->redisHost,
-                    'port' => $this->redisPort,
-                    'database' => $this->redisSessionDb
-                ]
-            ];
+            if (empty($config['cache'])) {
+                $config['cache'] = $this->getRedisCacheConfiguration();
+            } else {
+                $config['cache'] = array_replace_recursive($config['cache'], $this->getRedisCacheConfiguration());
+            }
+            $config['session']['save'] = "redis";
+            $config['session']['redis']['host'] = $this->redisHost;
+            $config['session']['redis']['port'] = $this->redisPort;
+            $config['session']['redis']['database'] = $this->redisSessionDb;
         } else {
             $config = $this->removeRedisConfiguration($config);
         }
