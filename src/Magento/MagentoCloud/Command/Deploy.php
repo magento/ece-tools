@@ -961,8 +961,8 @@ class Deploy extends Command
             $this->adminEmail,
             "Magento Commerce Cloud - Admin URL",
             "Welcome to Magento Commerce (Cloud)!\n"
-                . "To properly log into your provisioned Magento installation Admin panel, you need to change your Admin password. To update your password, click this link to access the Admin Panel: `{$adminurl}` . When the page opens, click the \"Forgot your password\" link. You should receive a password update email at `{$this->adminEmail}` . Just in case, check your spam box if you don't see the email immediately.\n"
-                . "After the password is updated, you can login with the username `{$this->adminUsername}` and the new password.\n"
+                . "To properly log into your provisioned Magento installation Admin panel, you need to change your Admin password. To update your password, click this link to access the Admin Panel: {$adminurl} . When the page opens, click the \"Forgot your password\" link. You should receive a password update email at {$this->adminEmail} . Just in case, check your spam box if you don't see the email immediately.\n"
+                . "After the password is updated, you can login with the username {$this->adminUsername} and the new password.\n"
                 . "Need help? Please see http://devdocs.magento.com/guides/v2.2/cloud/onboarding/onboarding-tasks.html\n"
                 . "Thank you,\n"
                 . "Magento Commerce (Cloud)\n",
