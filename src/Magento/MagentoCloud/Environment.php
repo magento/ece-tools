@@ -25,7 +25,7 @@ class Environment
      */
     const DEPLOY_LOG = self::MAGENTO_ROOT . 'var/log/cloud.log';
 
-    public $writableDirs = ['var', 'app/etc', 'pub/media'];
+    private $writableDirs = ['var', 'app/etc', 'pub/media'];
 
     /**
      * @var LoggerInterface

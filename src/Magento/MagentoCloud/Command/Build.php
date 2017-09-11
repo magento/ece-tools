@@ -109,7 +109,7 @@ class Build extends Command
         }
 
         $this->env->log("Copying writable directories to temp directory.");
-        foreach ($this->env->writableDirs as $dir) {
+        foreach ($this->env->getWritableDirs() as $dir) {
             $this->env->execute(sprintf('mkdir -p init/%s', $dir));
             $this->env->execute(sprintf('mkdir -p %s', $dir));
 
