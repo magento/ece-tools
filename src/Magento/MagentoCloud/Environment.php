@@ -28,6 +28,13 @@ class Environment
     private $writableDirs = ['var', 'app/etc', 'pub/media'];
 
     /**
+     * Directories to be restored after build phase.
+     *
+     * @var array
+     */
+    private $recoverableDirs = ['app/etc', 'pub/media', 'var/log'];
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -252,5 +259,13 @@ class Environment
     public function getWritableDirs()
     {
         return $this->writableDirs;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRecoverableDirs()
+    {
+        return $this->recoverableDirs;
     }
 }

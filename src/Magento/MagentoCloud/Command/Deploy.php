@@ -796,14 +796,11 @@ class Deploy extends Command
      */
     private function preDeploy()
     {
-        $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
-
-        foreach ($this->env->getWritableDirs() as $dir) {
+        foreach ($this->env->getRecoverableDirs() as $dir) {
             $this->copyFromBuildDir($dir);
         }
 
-        // Restore mounted directories
-        $this->env->log("Copying writable directories back.");
+        $this->env->log('Recoverable directories was copied back');
 
         $this->env->log($this->env->startingMessage("pre-deploy"));
         // Clear redis and file caches
@@ -823,6 +820,8 @@ class Deploy extends Command
         if (file_exists($fileCacheDir)) {
             $this->env->execute("rm -rf $fileCacheDir");
         }
+
+        $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
 
         /**
          * Handle case where static content is deployed during build hook:
