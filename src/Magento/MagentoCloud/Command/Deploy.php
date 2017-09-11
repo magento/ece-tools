@@ -815,7 +815,7 @@ class Deploy extends Command
             $this->env->execute("rm -rf $fileCacheDir");
         }
 
-        $mountedDirectories = ['app/etc', 'pub/media', 'var/log'];
+        $mountedDirectories = ['app/etc', 'pub/media', 'var'];
 
         $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
 
@@ -875,6 +875,9 @@ class Deploy extends Command
     private function copyFromBuildDir($dir)
     {
         $fullPathDir = Environment::MAGENTO_ROOT . $dir;
+
+        $this->env->log('Copying ' . $fullPathDir);
+
         if (!file_exists($fullPathDir)) {
             mkdir($fullPathDir);
             $this->env->log(sprintf('Created directory: %s', $dir));
