@@ -798,12 +798,12 @@ class Deploy extends Command
     {
         $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
 
-        // Restore mounted directories
-        $this->env->log("Copying writable directories back.");
-
         foreach ($this->env->getWritableDirs() as $dir) {
             $this->copyFromBuildDir($dir);
         }
+
+        // Restore mounted directories
+        $this->env->log("Copying writable directories back.");
 
         $this->env->log($this->env->startingMessage("pre-deploy"));
         // Clear redis and file caches
