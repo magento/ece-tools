@@ -256,7 +256,6 @@ class Deploy extends Command
                 $this->adminEmail = "";
             }
         }
-        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : ($this->isInstalling ? "changeme@example.com" : "");
         /* Note: ADMIN_URL should be set during the onboarding process also.  They should have generated a random one for us to use. */
         //$this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin_" . Password::generateRandomString(8) : "");
         /* Note: We are defaulting to "admin" for now, but will change it to the above random admin URL at some point */
