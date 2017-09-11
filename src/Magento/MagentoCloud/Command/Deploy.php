@@ -815,8 +815,6 @@ class Deploy extends Command
             $this->env->execute("rm -rf $fileCacheDir");
         }
 
-        $mountedDirectories = ['app/etc', 'pub/media', 'var'];
-
         $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
 
         /**
@@ -858,7 +856,7 @@ class Deploy extends Command
         // Restore mounted directories
         $this->env->log("Copying writable directories back.");
 
-        foreach ($mountedDirectories as $dir) {
+        foreach ($this->env->getWritableDirs() as $dir) {
             $this->copyFromBuildDir($dir);
         }
 

@@ -23,7 +23,7 @@ class Environment
     /**
      * Deploy log file.
      */
-    const DEPLOY_LOG = self::MAGENTO_ROOT . 'var/log/cloud_deploy.log';
+    const DEPLOY_LOG = self::MAGENTO_ROOT . 'var/log/cloud.log';
 
     public $writableDirs = ['var', 'app/etc', 'pub/media'];
 
@@ -244,5 +244,13 @@ class Environment
             $message .= ")";
         }
         return $message;
+    }
+
+    /**
+     * @return array
+     */
+    public function getWritableDirs()
+    {
+        return $this->writableDirs;
     }
 }
