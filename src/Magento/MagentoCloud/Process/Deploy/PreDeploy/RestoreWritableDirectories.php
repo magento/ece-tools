@@ -29,18 +29,26 @@ class RestoreWritableDirectories implements ProcessInterface
     private $buildDirCopier;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
      * @param BuildDirCopier $buildDirCopier
+     * @param Environment $environment
      */
     public function __construct(
         LoggerInterface $logger,
         File $file,
-        BuildDirCopier $buildDirCopier
+        BuildDirCopier $buildDirCopier,
+        Environment $environment
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->buildDirCopier = $buildDirCopier;
+        $this->environment = $environment;
     }
 
     /**
@@ -50,12 +58,12 @@ class RestoreWritableDirectories implements ProcessInterface
      */
     public function execute()
     {
-        // Restore mounted directories
-        $this->logger->info('Copying writable directories back.');
-        $mountedDirectories = ['app/etc', 'pub/media'];
-        foreach ($mountedDirectories as $dir) {
+        foreach ($this->environment->getRecoverableDirectories() as $dir) {
             $this->buildDirCopier->copy($dir);
         }
+
+        // Restore mounted directories
+        $this->logger->info('Recoverable directories were copied back.');
 
         if ($this->file->isExists(Environment::REGENERATE_FLAG)) {
             $this->logger->info('Removing var/.regenerate flag');
