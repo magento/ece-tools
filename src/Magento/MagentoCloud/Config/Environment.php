@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
 
@@ -36,13 +37,20 @@ class Environment
     private $file;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
+     * @param DirectoryList $directoryList
      */
-    public function __construct(LoggerInterface $logger, File $file)
+    public function __construct(LoggerInterface $logger, File $file, DirectoryList $directoryList)
     {
         $this->logger = $logger;
         $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -62,7 +70,7 @@ class Environment
      */
     public function getRoutes()
     {
-        return $this->get('MAGENTO_CLOUD_ROUTES');
+        return $this->get('MAGENTO_CLOUD_ROUTES', []);
     }
 
     /**
@@ -81,7 +89,7 @@ class Environment
      * @param string $key
      * @return array
      */
-    public function getRelationship($key)
+    public function getRelationship(string $key)
     {
         $relationships = $this->getRelationships();
 
@@ -141,7 +149,9 @@ class Environment
     public function setFlagStaticDeployInBuild()
     {
         $this->logger->info('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->file->touch(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        $this->file->touch(
+            $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+        );
     }
 
     /**
@@ -153,7 +163,9 @@ class Environment
     {
         if ($this->isStaticDeployInBuild()) {
             $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-            $this->file->deleteFile(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            $this->file->deleteFile(
+                $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+            );
         }
     }
 
@@ -164,7 +176,9 @@ class Environment
      */
     public function isStaticDeployInBuild(): bool
     {
-        return $this->file->isExists(MAGENTO_ROOT . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        return $this->file->isExists(
+            $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+        );
     }
 
     /**
@@ -217,9 +231,7 @@ class Environment
 
     public function getAdminLocale(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_LOCALE']) ? $var['ADMIN_LOCALE'] : 'en_US';
+        return $this->getVariables()['ADMIN_LOCALE'] ?? 'en_US';
     }
 
     public function doCleanStaticFiles(): bool
@@ -234,14 +246,12 @@ class Environment
      */
     public function getStaticDeployExcludeThemes(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['STATIC_CONTENT_EXCLUDE_THEMES']) ? $var['STATIC_CONTENT_EXCLUDE_THEMES'] : '';
+        return $this->getVariables()['STATIC_CONTENT_EXCLUDE_THEMES'] ?? '';
     }
 
     public function getDbHost()
     {
-        return $this->getRelationship('database')[0]['host'];
+        return $this->getRelationship('database')[0]['host'] ?? '';
     }
 
     /**
@@ -249,7 +259,7 @@ class Environment
      */
     public function getDbName(): string
     {
-        return $this->getRelationship('database')[0]['path'];
+        return $this->getRelationship('database')[0]['path'] ?? '';
     }
 
     /**
@@ -257,7 +267,7 @@ class Environment
      */
     public function getDbUser(): string
     {
-        return $this->getRelationship('database')[0]['username'];
+        return $this->getRelationship('database')[0]['username'] ?? '';
     }
 
     /**
@@ -265,7 +275,7 @@ class Environment
      */
     public function getDbPassword(): string
     {
-        return $this->getRelationship('database')[0]['password'];
+        return $this->getRelationship('database')[0]['password'] ?? '';
     }
 
     /**
@@ -273,9 +283,7 @@ class Environment
      */
     public function getAdminUsername(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_USERNAME']) ? $var['ADMIN_USERNAME'] : 'admin';
+        return $this->getVariables()['ADMIN_USERNAME'] ?? 'admin';
     }
 
     /**
@@ -283,9 +291,7 @@ class Environment
      */
     public function getAdminFirstname(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_FIRSTNAME']) ? $var['ADMIN_FIRSTNAME'] : 'John';
+        return $this->getVariables()['ADMIN_FIRSTNAME'] ?? 'John';
     }
 
     /**
@@ -293,9 +299,7 @@ class Environment
      */
     public function getAdminLastname(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_LASTNAME']) ? $var['ADMIN_LASTNAME'] : 'Doe';
+        return $this->getVariables()['ADMIN_LASTNAME'] ?? 'Doe';
     }
 
     /**
@@ -303,9 +307,7 @@ class Environment
      */
     public function getAdminEmail(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_EMAIL']) ? $var['ADMIN_EMAIL'] : 'john@example.com';
+        return $this->getVariables()['ADMIN_EMAIL'] ?? 'john@example.com';
     }
 
     /**
@@ -313,9 +315,7 @@ class Environment
      */
     public function getAdminPassword(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_PASSWORD']) ? $var['ADMIN_PASSWORD'] : 'admin12';
+        return $this->getVariables()['ADMIN_PASSWORD'] ?? 'admin12';
     }
 
     /**
@@ -323,9 +323,7 @@ class Environment
      */
     public function getAdminUrl(): string
     {
-        $var = $this->getVariables();
-
-        return isset($var['ADMIN_URL']) ? $var['ADMIN_URL'] : 'admin';
+        return $this->getVariables()['ADMIN_URL'] ?? 'admin';
     }
 
     /**

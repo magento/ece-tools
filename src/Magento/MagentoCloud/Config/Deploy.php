@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\DB\Adapter;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -41,24 +42,32 @@ class Deploy
     private $file;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param Environment $environment
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param Adapter $adapter
      * @param File $file
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
         ShellInterface $shell,
         Adapter $adapter,
-        File $file
+        File $file,
+        DirectoryList $directoryList
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->adapter = $adapter;
         $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -113,6 +122,6 @@ class Deploy
      */
     public function getConfigFilePath(): string
     {
-        return MAGENTO_ROOT . 'app/etc/env.php';
+        return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
     }
 }

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\Build\MarshallFiles;
@@ -38,6 +39,11 @@ class MarshallFilesTest extends TestCase
     private $fileMock;
 
     /**
+     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $directoryListMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -49,11 +55,18 @@ class MarshallFilesTest extends TestCase
         $this->fileMock = $this->getMockBuilder(File::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
 
         $this->process = new MarshallFiles(
             $this->shellMock,
             $this->loggerMock,
-            $this->fileMock
+            $this->fileMock,
+            $this->directoryListMock
         );
     }
 
@@ -69,12 +82,12 @@ class MarshallFilesTest extends TestCase
         $this->fileMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
-                [MAGENTO_ROOT . 'app/etc/di.xml', MAGENTO_ROOT . 'app/di.xml'],
-                [MAGENTO_ROOT . 'app/etc/enterprise/di.xml', MAGENTO_ROOT . 'app/enterprise/di.xml']
+                ['magento_root/app/etc/di.xml', 'magento_root/app/di.xml'],
+                ['magento_root/app/etc/enterprise/di.xml', 'magento_root/app/enterprise/di.xml']
             );
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(MAGENTO_ROOT . 'app/enterprise')
+            ->with('magento_root/app/enterprise')
             ->willReturn(true);
 
         $this->process->execute();
@@ -92,16 +105,16 @@ class MarshallFilesTest extends TestCase
         $this->fileMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
-                [MAGENTO_ROOT . 'app/etc/di.xml', MAGENTO_ROOT . 'app/di.xml'],
-                [MAGENTO_ROOT . 'app/etc/enterprise/di.xml', MAGENTO_ROOT . 'app/enterprise/di.xml']
+                ['magento_root/app/etc/di.xml', 'magento_root/app/di.xml'],
+                ['magento_root/app/etc/enterprise/di.xml', 'magento_root/app/enterprise/di.xml']
             );
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(MAGENTO_ROOT . 'app/enterprise')
+            ->with('magento_root/app/enterprise')
             ->willReturn(false);
         $this->fileMock->expects($this->once())
             ->method('createDirectory')
-            ->with(MAGENTO_ROOT . 'app/enterprise', 0777);
+            ->with('magento_root/app/enterprise', 0777);
 
         $this->process->execute();
     }

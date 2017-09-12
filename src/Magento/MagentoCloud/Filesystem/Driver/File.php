@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * Class File
+ *
  * @package Magento\Framework\Filesystem\Driver
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  */
@@ -27,6 +28,7 @@ class File
         if ($warning && $warning['type'] == E_WARNING) {
             return 'Warning!' . $warning['message'];
         }
+
         return null;
     }
 
@@ -37,13 +39,14 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isExists($path) : bool
+    public function isExists($path): bool
     {
         clearstatcache();
         $result = @file_exists($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -61,6 +64,7 @@ class File
         if (!$result) {
             $this->fileSystemException('Cannot gather stats! %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -78,6 +82,7 @@ class File
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -88,13 +93,14 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isFile($path) : bool
+    public function isFile($path): bool
     {
         clearstatcache();
         $result = @is_file($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -105,13 +111,14 @@ class File
      * @return bool
      * @throws FileSystemException
      */
-    public function isDirectory($path) : bool
+    public function isDirectory($path): bool
     {
         clearstatcache();
         $result = @is_dir($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -131,6 +138,7 @@ class File
         if (false === $result) {
             $this->fileSystemException('Cannot read contents from file "%1" %2', [$path, $this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -167,6 +175,7 @@ class File
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -219,6 +228,7 @@ class File
                 $this->fileSystemException('Directory "%1" cannot be created %2', [$path, $this->getWarningMessage()]);
             }
         }
+
         return $result;
     }
 
@@ -240,6 +250,7 @@ class File
                 $result[] = $file->getPathname();
             }
             sort($result);
+
             return $result;
         } catch (\Exception $e) {
             throw new FileSystemException($e->getMessage(), $e);
@@ -259,6 +270,7 @@ class File
         clearstatcache();
         $globPattern = rtrim($path, '/') . '/' . ltrim($pattern, '/');
         $result = glob($globPattern, GLOB_BRACE);
+
         return is_array($result) ? $result : [];
     }
 
@@ -279,6 +291,7 @@ class File
                 [$oldPath, $newPath, $this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -299,7 +312,7 @@ class File
                 [
                     $source,
                     $destination,
-                    $this->getWarningMessage()
+                    $this->getWarningMessage(),
                 ]
             );
         }
@@ -311,7 +324,7 @@ class File
      * Copy directory recursively.
      *
      * @param string $source The path of source folder
-     * @param string $destination  The path of destination folder
+     * @param string $destination The path of destination folder
      */
     public function copyDirectory($source, $destination)
     {
@@ -348,10 +361,11 @@ class File
                 [
                     $source,
                     $destination,
-                    $this->getWarningMessage()
+                    $this->getWarningMessage(),
                 ]
             );
         }
+
         return $result;
     }
 
@@ -368,6 +382,7 @@ class File
         if (!$result) {
             $this->fileSystemException('The file "%1" cannot be deleted %2', [$path, $this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -397,6 +412,7 @@ class File
                 [$path, $this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -417,6 +433,7 @@ class File
                 [$path, $this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -464,6 +481,7 @@ class File
                 );
             }
         }
+
         return $result;
     }
 
@@ -488,6 +506,7 @@ class File
                 [$path, $this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -509,6 +528,7 @@ class File
                 [$path, $this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -526,6 +546,7 @@ class File
         if (!$result) {
             $this->fileSystemException('File "%1" cannot be opened %2', [$path, $this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -544,6 +565,7 @@ class File
         if (false === $result) {
             $this->fileSystemException('File cannot be read %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -561,6 +583,7 @@ class File
         if ($result === false) {
             $this->fileSystemException('File cannot be read %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -581,6 +604,7 @@ class File
         if ($result === null) {
             $this->fileSystemException('Wrong CSV handle %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -597,6 +621,7 @@ class File
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -615,6 +640,7 @@ class File
         if ($result === -1) {
             $this->fileSystemException('Error occurred during execution of fileSeek %1', [$this->getWarningMessage()]);
         }
+
         return $result;
     }
 
@@ -645,6 +671,7 @@ class File
                 [$this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -713,6 +740,7 @@ class File
     {
         /**
          * Security enhancement for CSV data processing by Excel-like applications.
+         *
          * @see https://bugzilla.mozilla.org/show_bug.cgi?id=1054702
          *
          * @var $value string
@@ -733,6 +761,7 @@ class File
                 [$this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -752,6 +781,7 @@ class File
                 [$this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -772,6 +802,7 @@ class File
                 [$this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -791,6 +822,7 @@ class File
                 [$this->getWarningMessage()]
             );
         }
+
         return $result;
     }
 
@@ -827,6 +859,7 @@ class File
         } else {
             $result = $path;
         }
+
         return $result;
     }
 
@@ -865,6 +898,7 @@ class File
         } catch (\Exception $e) {
             throw new FileSystemException($e->getMessage(), $e);
         }
+
         return $result;
     }
 
@@ -903,6 +937,18 @@ class File
             }
             $realPath[] = $pathPart;
         }
+
         return implode(DIRECTORY_SEPARATOR, $realPath);
+    }
+
+    public function scanDir(string $path)
+    {
+        clearstatcache();
+        $result = @scandir($path);
+        if (false === $result) {
+            $this->fileSystemException('Cannot read contents from path "%1" %2', [$path, $this->getWarningMessage()]);
+        }
+
+        return $result;
     }
 }

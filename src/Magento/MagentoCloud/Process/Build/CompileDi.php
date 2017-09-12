@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -37,21 +38,29 @@ class CompileDi implements ProcessInterface
     private $file;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param File $file
      * @param BuildConfig $buildConfig
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
         File $file,
-        BuildConfig $buildConfig
+        BuildConfig $buildConfig,
+        DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->file = $file;
         $this->buildConfig = $buildConfig;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -60,7 +69,7 @@ class CompileDi implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = MAGENTO_ROOT . 'app/etc/config.php';
+        $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
 
         if ($this->file->isExists($configFile)) {

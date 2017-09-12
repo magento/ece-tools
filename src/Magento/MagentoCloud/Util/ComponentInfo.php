@@ -5,88 +5,47 @@
  */
 namespace Magento\MagentoCloud\Util;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Composer\Composer;
+use Composer\Package\PackageInterface;
 
 class ComponentInfo
 {
     /**
-     * We only want to look up each component version once since it shouldn't change
+     * @var Composer
+     */
+    private $composer;
+
+    /**
+     * @param Composer $composer
+     */
+    public function __construct(
+        Composer $composer
+    ) {
+        $this->composer = $composer;
+    }
+
+    /**
+     * Returns info about versions of given components
      *
-     * @var array
+     * @param array $packages The array of packages names
+     * @return string
      */
-    private $componentVersions = [];
-
-    /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @param File $file
-     */
-    public function __construct(File $file)
+    public function get(array $packages = ['magento/ece-tools', 'magento/magento2-base']): string
     {
-        $this->file = $file;
-    }
+        $repository = $this->composer->getLocker()->getLockedRepository();
 
-    public function get()
-    {
-        $components = ['ece-tools', 'magento2-base'];
-        $message = '';
-
-        $first = true;
-        foreach ($components as $component) {
-            if ($this->hasVersionOfComponent($component)) {
-                if ($first) {
-                    $first = false;
-                    $message .= " (";
-                } else {
-                    $message .= ", ";
-                }
-                $message .= $component . " version: " . $this->versionOfComponent($component);
+        $versions = [];
+        foreach ($packages as $packageName) {
+            $package = $repository->findPackage($packageName, '*');
+            if ($package instanceof PackageInterface) {
+                $versions[] = sprintf(
+                    '%s version: %s',
+                    $package->getPrettyName(),
+                    $package->getPrettyVersion()
+                );
             }
         }
-        if (!$first) {
-            $message .= ")";
-        }
 
-        return $message;
-    }
-
-    private function getVersionOfComponent($component)
-    {
-        $composerJsonPath = MAGENTO_ROOT . "/vendor/magento/" . $component . "/composer.json";
-        $version = null;
-        try {
-            if ($this->file->isExists($composerJsonPath)) {
-                $jsonData = json_decode(file_get_contents($composerJsonPath), true);
-                if (array_key_exists("version", $jsonData)) {
-                    $version = $jsonData["version"];
-                }
-            }
-        } catch (\Exception $e) {
-            // If we get an exception (or error), we don't worry because we just won't use the version.
-            // Note: We could use Throwable to catch them both, but that only works in PHP >= 7
-        } catch (\Error $e) {  // Note: this only works PHP >= 7
-        }
-        $this->componentVersions[$component] = $version;
-    }
-
-    private function versionOfComponent($component)
-    {
-        if (!array_key_exists($component, $this->componentVersions)) {
-            $this->getVersionOfComponent($component);
-        }
-
-        return $this->componentVersions[$component];
-    }
-
-    private function hasVersionOfComponent($component)
-    {
-        if (!array_key_exists($component, $this->componentVersions)) {
-            $this->getVersionOfComponent($component);
-        }
-
-        return !is_null($this->componentVersions[$component]);
+        return '(' . implode(', ', $versions) . ')';
     }
 }

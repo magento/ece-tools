@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Container;
+namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
@@ -23,15 +23,18 @@ use Psr\Container\ContainerInterface;
  */
 class Container extends \Illuminate\Container\Container implements ContainerInterface
 {
-    public function __construct()
+    /**
+     * @param string $root
+     * @param array $config
+     */
+    public function __construct(string $root, array $config)
     {
+        $this->singleton(\Magento\MagentoCloud\Filesystem\DirectoryList::class, function () use ($root, $config) {
+            return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $config);
+        });
         /**
          * Interface to implementation binding.
          */
-        $this->singleton(
-            \Psr\Log\LoggerInterface::class,
-            $this->createLogger('default')
-        );
         $this->singleton(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
             \Magento\MagentoCloud\Shell\Shell::class
@@ -40,6 +43,16 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\DB\Adapter::class);
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
+        $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
+        $this->singleton(\Magento\MagentoCloud\Util\ComponentInfo::class);
+        $this->singleton(\Composer\Composer::class, function () {
+            $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
+
+            return \Composer\Factory::create(
+                new \Composer\IO\BufferIO(),
+                $directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR . 'composer.json'
+            );
+        });
 
         /**
          * Contextual binding.
@@ -84,6 +97,27 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     ],
                 ]);
             });
+        $this->when(DeployProcess\PreDeploy::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\PreDeploy\CleanRedisCache::class),
+                        $this->make(DeployProcess\PreDeploy\CleanFileCache::class),
+                        $this->make(DeployProcess\PreDeploy\ProcessStaticContent::class),
+                        $this->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\DeployStaticContent::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->get(DeployProcess\DeployStaticContent\GenerateFresh::class),
+                    ],
+                ]);
+            });
         $this->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
@@ -98,14 +132,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     }
 
     /**
-     * @inheritdoc
-     */
-    public function has($id)
-    {
-        return $this->bound($id);
-    }
-
-    /**
      * @param string $name
      * @return \Closure
      */
@@ -116,10 +142,13 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             $formatter->allowInlineLineBreaks();
             $formatter->ignoreEmptyContextAndExtra();
 
+            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)
+                ->getMagentoRoot();
+
             return $this->makeWith(\Monolog\Logger::class, [
                 'name' => $name,
                 'handlers' => [
-                    (new StreamHandler(MAGENTO_ROOT . 'var/log/cloud_build.log'))
+                    (new StreamHandler($magentoRoot . '/var/log/cloud_build.log'))
                         ->setFormatter($formatter),
                     (new StreamHandler('php://stdout'))
                         ->setFormatter($formatter),

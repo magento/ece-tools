@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Shell;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,11 +19,18 @@ class Shell implements ShellInterface
     private $logger;
 
     /**
-     * @param LoggerInterface $logger
+     * @var DirectoryList
      */
-    public function __construct(LoggerInterface $logger)
+    private $directoryList;
+
+    /**
+     * @param LoggerInterface $logger
+     * @param DirectoryList $directoryList
+     */
+    public function __construct(LoggerInterface $logger, DirectoryList $directoryList)
     {
         $this->logger = $logger;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -32,7 +40,11 @@ class Shell implements ShellInterface
     {
         $this->logger->info('Command: ' . $command);
 
-        $rootPathCommand = sprintf('cd %s && %s', MAGENTO_ROOT, $command);
+        $rootPathCommand = sprintf(
+            'cd %s && %s',
+            $this->directoryList->getMagentoRoot(),
+            $command
+        );
 
         exec(
             $rootPathCommand,

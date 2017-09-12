@@ -1,11 +1,12 @@
 #!/usr/bin/env php
 <?php
-
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
 require_once __DIR__ . '/autoload.php';
 
-$application = new \Magento\MagentoCloud\Application(
-    new \Magento\MagentoCloud\Container\Container()
-);
+$application = \Magento\MagentoCloud\App\Bootstrap::create()->createApplication();
 $application->setDefaultCommand('deploy');
 $application->run();
 
