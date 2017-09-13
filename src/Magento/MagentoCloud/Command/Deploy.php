@@ -341,10 +341,10 @@ class Deploy extends Command
     }
 
     /**
-    * Import deployment config - To be made obsolete by MAGETWO-71890
-    *
-    * @return void
-    */
+     * Import deployment config - To be made obsolete by MAGETWO-71890
+     *
+     * @return void
+     */
     public function importDeploymentConfig()
     {
         $this->env->log("Importing deployment config");
