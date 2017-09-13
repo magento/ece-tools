@@ -43,10 +43,7 @@ class Password
              /* http://docs.magento.com/m2/ee/user_guide/stores/admin-signin.html
               *	An Admin password must be seven or more characters long, and include both letters and numbers.
               */
-            if (
-                ( preg_match('/.*[A-Za-z].*/', $password) )
-                && ( preg_match('/.*[\d].*/', $password) )
-            ) {
+            if ((preg_match('/.*[A-Za-z].*/', $password)) && ( preg_match('/.*[\d].*/', $password))) {
                 return $password;
             }
         }
