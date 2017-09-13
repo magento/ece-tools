@@ -12,7 +12,7 @@ namespace Magento\MagentoCloud;
 class Password
 {
     /**
-     * Generates admin password using default Magento settings
+     * Generates a random string at the desired length
      * @param int $length the length of the random string
      * @return string
      */
@@ -30,6 +30,25 @@ class Password
         }
         return $output;
     }
+
+    /**
+     * Generates an admin password using default Magento settings
+     * @param int $length the length of the random string
+     * @return string
+     */
+    public static function generateRandomPassword(int $length = 20) : string
+    {
+        while (true) {
+            $password = self::generateRandomString($length);
+             /* http://docs.magento.com/m2/ee/user_guide/stores/admin-signin.html
+              *	An Admin password must be seven or more characters long, and include both letters and numbers.
+              */
+            if ((preg_match('/.*[A-Za-z].*/', $password)) && ( preg_match('/.*[\d].*/', $password))) {
+                return $password;
+            }
+        }
+    }
+
 
     /**
      * Generates salt and hash for the admin password using default Magento settings

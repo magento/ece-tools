@@ -238,7 +238,7 @@ class Deploy extends Command
             $this->adminUsername = "admin";
         }
         if ($this->isInstalling && empty($this->adminPassword)) {
-            $this->adminPassword = Password::generateRandomString(20);
+            $this->adminPassword = Password::generateRandomPassword();
         }
         $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : ($this->isInstalling ? "Changeme" : "");
         $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : ($this->isInstalling ? "Changeme" : "");
@@ -343,7 +343,7 @@ class Deploy extends Command
             . " " . escapeshellarg("--admin-firstname=$this->adminFirstname")
             . " " . escapeshellarg("--admin-lastname=$this->adminLastname")
             . " " . escapeshellarg("--admin-email=$this->adminEmail")
-            . " " . escapeshellarg("--admin-password=" . Password::generateRandomString(20)); // Note: This password gets changed later in this script in updateAdminCredentials
+            . " " . escapeshellarg("--admin-password=" . Password::generateRandomPassword()); // Note: This password gets changed later in this script in updateAdminCredentials
 
         if (strlen($this->dbPassword)) {
             $command .= " " . escapeshellarg("--db-password=$this->dbPassword");
