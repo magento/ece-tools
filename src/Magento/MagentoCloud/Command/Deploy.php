@@ -28,6 +28,18 @@ class Deploy extends Command
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
 
+    /**
+     * default strategy for static content deployment
+     */
+    const SCD_DEFAULT_STRATEGY = 'quick';
+
+    /**
+     * List of possible strategies for static content deploy
+     *
+     * @var array
+     */
+    private $scdStrategies = ['standard', 'quick', 'compact'];
+
     private $urls = ['unsecure' => [], 'secure' => []];
 
     private $defaultCurrency = 'USD';
@@ -702,16 +714,34 @@ class Deploy extends Command
         $locales = implode(' ', $this->getLocales());
         $logMessage = $locales ? "Generating static content for locales: $locales" : "Generating static content.";
         $this->env->log($logMessage);
+        $strategy = $this->getScdStrategy();
+        $this->env->log('Strategy for generating static content is ' . $strategy);
 
-        // @codingStandardsIgnoreStart
+
+        $baseCommand = 'php ./bin/magento setup:static-content:deploy  -f';
         $this->env->execute(
-            "php ./bin/magento setup:static-content:deploy  -f $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
+            "$baseCommand $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel} $strategy"
         );
-        // @codingStandardsIgnoreEnd
 
         /* Disable maintenance mode */
         $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
         $this->env->log("Maintenance mode is disabled.");
+    }
+
+    /**
+     * Return strategy option for static content deployment.
+     * Value is retrieved from SCD_STRATEGY magento environment variable, otherwise used default one
+     *
+     * @return string
+     */
+    private function getScdStrategy()
+    {
+        $var = $this->env->getVariables();
+        $strategy = self::SCD_DEFAULT_STRATEGY;
+        if (isset($var['SCD_STRATEGY']) && in_array($var['SCD_STRATEGY'], $this->scdStrategies)) {
+            $strategy = $var['SCD_STRATEGY'];
+        }
+        return '-s ' . $strategy;
     }
 
 
