@@ -31,10 +31,14 @@ class RestoreWritableDirectoriesTest extends TestCase
     private $buildDirCopierMock;
 
     /**
+     * @var Environment|Mock
+     */
+    private $environmentMock;
+
+    /**
      * @var RestoreWritableDirectories
      */
     private $process;
-
 
     protected function setUp()
     {
@@ -42,11 +46,15 @@ class RestoreWritableDirectoriesTest extends TestCase
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->buildDirCopierMock = $this->createMock(BuildDirCopier::class);
+        $this->environmentMock = $this->getMockBuilder(Environment::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->process = new RestoreWritableDirectories(
             $this->loggerMock,
             $this->fileMock,
-            $this->buildDirCopierMock
+            $this->buildDirCopierMock,
+            $this->environmentMock
         );
     }
 
@@ -59,6 +67,9 @@ class RestoreWritableDirectoriesTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('deleteFile')
             ->with(Environment::REGENERATE_FLAG);
+        $this->environmentMock->expects($this->once())
+            ->method('getRecoverableDirectories')
+            ->willReturn(['app/etc', 'pub/media']);
         $this->buildDirCopierMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
@@ -68,7 +79,7 @@ class RestoreWritableDirectoriesTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Copying writable directories back.'],
+                ['Recoverable directories were copied back.'],
                 ['Removing var/.regenerate flag']
             );
 
@@ -83,6 +94,9 @@ class RestoreWritableDirectoriesTest extends TestCase
             ->willReturn(false);
         $this->fileMock->expects($this->never())
             ->method('deleteFile');
+        $this->environmentMock->expects($this->once())
+            ->method('getRecoverableDirectories')
+            ->willReturn(['app/etc', 'pub/media']);
         $this->buildDirCopierMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
@@ -91,7 +105,7 @@ class RestoreWritableDirectoriesTest extends TestCase
             );
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Copying writable directories back.');
+            ->with('Recoverable directories were copied back.');
 
         $this->process->execute();
     }

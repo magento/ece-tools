@@ -138,10 +138,10 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
+                        $this->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                         $this->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->make(DeployProcess\PreDeploy\ProcessStaticContent::class),
-                        $this->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                     ],
                 ]);
             });
@@ -184,7 +184,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             return $this->makeWith(\Monolog\Logger::class, [
                 'name' => $name,
                 'handlers' => [
-                    (new StreamHandler($magentoRoot . '/var/log/cloud_build.log'))
+                    (new StreamHandler($magentoRoot . '/var/log/cloud.log'))
                         ->setFormatter($formatter),
                     (new StreamHandler('php://stdout'))
                         ->setFormatter($formatter),

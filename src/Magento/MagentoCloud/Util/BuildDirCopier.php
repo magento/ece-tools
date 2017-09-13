@@ -56,7 +56,7 @@ class BuildDirCopier
      */
     public function copy($dir)
     {
-        $fullPathDir = $this->directoryList->getMagentoRoot() . $dir;
+        $fullPathDir = $this->directoryList->getMagentoRoot() . '/' . $dir;
         if (!$this->file->isExists($fullPathDir)) {
             $this->file->createDirectory($fullPathDir);
             $this->logger->info(sprintf('Created directory: %s', $dir));
