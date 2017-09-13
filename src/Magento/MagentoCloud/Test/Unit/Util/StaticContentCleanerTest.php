@@ -87,8 +87,8 @@ class StaticContentCleanerTest extends TestCase
         $renameExpects
     ) {
         $magentoRoot = '/magento/';
-        $pubStatic = $magentoRoot . 'pub/static';
-        $var = $magentoRoot . 'var';
+        $pubStatic = $magentoRoot . '/pub/static';
+        $var = $magentoRoot . '/var';
         $varPreprocessed = $var . '/view_preprocessed';
         $time = 123456;
         $oldStaticContentLocation = $pubStatic . '/old_static_content_' . $time . '/';

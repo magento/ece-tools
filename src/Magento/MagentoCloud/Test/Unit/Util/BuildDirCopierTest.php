@@ -59,7 +59,7 @@ class BuildDirCopierTest extends TestCase
 
     public function testCopy()
     {
-        $rootDir = '/path/to/root/';
+        $rootDir = '/path/to/root';
         $dir = 'dir';
 
         $this->directoryListMock->expects($this->once())
@@ -67,7 +67,7 @@ class BuildDirCopierTest extends TestCase
             ->willReturn($rootDir);
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with($rootDir . $dir)
+            ->with($rootDir . '/' . $dir)
             ->willReturn(true);
         $this->fileMock->expects($this->never())
             ->method('createDirectory');
@@ -83,7 +83,7 @@ class BuildDirCopierTest extends TestCase
 
     public function testCopyDirectoryNotExist()
     {
-        $rootDir = '/path/to/root/';
+        $rootDir = '/path/to/root';
         $dir = 'not-exist-dir';
 
         $this->directoryListMock->expects($this->once())
@@ -91,11 +91,11 @@ class BuildDirCopierTest extends TestCase
             ->willReturn($rootDir);
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with($rootDir . $dir)
+            ->with($rootDir . '/' . $dir)
             ->willReturn(false);
         $this->fileMock->expects($this->once())
             ->method('createDirectory')
-            ->with($rootDir . $dir);
+            ->with($rootDir . '/' . $dir);
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('/bin/bash -c "shopt -s dotglob; cp -R ./init/not-exist-dir/* not-exist-dir/ || true"');

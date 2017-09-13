@@ -26,6 +26,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     /**
      * @param string $root
      * @param array $config
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function __construct(string $root, array $config)
     {
@@ -88,6 +90,40 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     ],
                 ]);
             });
+        $this->when(DeployProcess\InstallUpdate\Install::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        DeployProcess\InstallUpdate\Install\Setup::class,
+                        DeployProcess\InstallUpdate\Install\SecureAdmin::class,
+                        DeployProcess\InstallUpdate\ConfigUpdate::class
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\InstallUpdate\Update::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class)
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\InstallUpdate\ConfigUpdate::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\EnvPhp::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\AdminCredentials::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
+                    ],
+                ]);
+            });
         $this->when(ConfigDump::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -102,10 +138,10 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
+                        $this->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                         $this->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->make(DeployProcess\PreDeploy\ProcessStaticContent::class),
-                        $this->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                     ],
                 ]);
             });
@@ -148,7 +184,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             return $this->makeWith(\Monolog\Logger::class, [
                 'name' => $name,
                 'handlers' => [
-                    (new StreamHandler($magentoRoot . '/var/log/cloud_build.log'))
+                    (new StreamHandler($magentoRoot . '/var/log/cloud.log'))
                         ->setFormatter($formatter),
                     (new StreamHandler('php://stdout'))
                         ->setFormatter($formatter),
