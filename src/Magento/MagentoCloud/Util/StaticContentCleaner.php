@@ -54,7 +54,7 @@ class StaticContentCleaner
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
         // atomic move within pub/static directory
-        $staticContentLocation = $this->file->getRealPath($magentoRoot . 'pub/static') . '/';
+        $staticContentLocation = $this->file->getRealPath($magentoRoot . '/pub/static') . '/';
         $timestamp = time();
         $oldStaticContentLocation = $staticContentLocation . 'old_static_content_' . $timestamp . '/';
 
@@ -76,7 +76,7 @@ class StaticContentCleaner
         $this->shell->backgroundExecute('rm -rf ' . $oldStaticContentLocation);
 
         // Clean view_preprocessed directory
-        $preprocessedLocation = $this->file->getRealPath($magentoRoot . 'var') . '/view_preprocessed';
+        $preprocessedLocation = $this->file->getRealPath($magentoRoot . '/var') . '/view_preprocessed';
         if ($this->file->isExists($preprocessedLocation)) {
             $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
             $this->logger->info('Rename ' . $preprocessedLocation . ' to ' . $oldPreprocessedLocation);

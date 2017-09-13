@@ -24,7 +24,19 @@ class Environment
 
     const CLOUD_MODE_ENTERPRISE = 'enterprise';
 
-    public $writableDirs = ['var', 'app/etc', 'pub/media'];
+    /**
+     * Writable directories.
+     *
+     * @var array
+     */
+    private $writableDirs = ['var', 'app/etc', 'pub/media'];
+
+    /**
+     * Directories to be restores before deploy.
+     *
+     * @var array
+     */
+    private $recoverableDirs = ['var/log', 'app/etc', 'pub/media'];
 
     /**
      * @var LoggerInterface
@@ -189,6 +201,16 @@ class Environment
     public function getWritableDirectories(): array
     {
         return $this->writableDirs;
+    }
+
+    /**
+     * Retrieves recoverable directories.
+     *
+     * @return array
+     */
+    public function getRecoverableDirectories(): array
+    {
+        return $this->recoverableDirs;
     }
 
     public function isDeployStaticContent(): bool
