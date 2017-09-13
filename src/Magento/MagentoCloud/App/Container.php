@@ -26,6 +26,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     /**
      * @param string $root
      * @param array $config
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function __construct(string $root, array $config)
     {
@@ -85,6 +87,40 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate::class),
                         $this->make(DeployProcess\DeployStaticContent::class),
                         $this->make(DeployProcess\DisableGoogleAnalytics::class),
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\InstallUpdate\Install::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        DeployProcess\InstallUpdate\Install\Setup::class,
+                        DeployProcess\InstallUpdate\Install\SecureAdmin::class,
+                        DeployProcess\InstallUpdate\ConfigUpdate::class
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\InstallUpdate\Update::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class)
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\InstallUpdate\ConfigUpdate::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\EnvPhp::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\AdminCredentials::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
                     ],
                 ]);
             });
