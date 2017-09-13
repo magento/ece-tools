@@ -57,11 +57,6 @@ class Deploy extends Command
     private $redisSessionDb = '0';
     private $redisCacheDb = '1'; // Value hard-coded in pre-deploy.php
 
-    private $solrHost;
-    private $solrPath;
-    private $solrPort;
-    private $solrScheme;
-
     private $isMasterBranch = null;
     private $magentoApplicationMode;
     private $cleanStaticViewFiles;
@@ -199,13 +194,6 @@ class Deploy extends Command
         if (isset($relationships['redis']) && count($relationships['redis']) > 0) {
             $this->redisHost = $relationships['redis'][0]['host'];
             $this->redisPort = $relationships['redis'][0]['port'];
-        }
-
-        if (isset($relationships["solr"]) && count($relationships['solr']) > 0) {
-            $this->solrHost = $relationships["solr"][0]["host"];
-            $this->solrPath = $relationships["solr"][0]["path"];
-            $this->solrPort = $relationships["solr"][0]["port"];
-            $this->solrScheme = $relationships["solr"][0]["scheme"];
         }
 
         if (isset($relationships["mq"]) && count($relationships['mq']) > 0) {
@@ -385,7 +373,6 @@ class Deploy extends Command
         $this->env->log("Updating configuration from environment variables.");
         $this->updateConfiguration();
         $this->updateAdminCredentials();
-        $this->updateSolrConfiguration();
         $this->updateUrls();
     }
 
@@ -421,23 +408,57 @@ class Deploy extends Command
     }
 
     /**
-     * Update SOLR configuration
+     * Returns SOLR configuration
+     *
+     * @param array $config Solr connection configuration
+     * @return array
      */
-    private function updateSolrConfiguration()
+    private function getSolrConfiguration(array $config)
     {
         $this->env->log("Updating SOLR configuration.");
-        if ($this->solrHost !== null && $this->solrPort !== null && $this->solrPath !== null && $this->solrHost !== null) {
-          // @codingStandardsIgnoreStart
-            $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_hostname' AND scope_id = '0';",
-                ["s", $this->solrHost]);
-            $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_port' AND scope_id = '0';",
-                ["s", $this->solrPort]);
-            $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_username' AND scope_id = '0';",
-                ["s", $this->solrScheme]);
-            $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_path' AND scope_id = '0';",
-                ["s", $this->solrPath]);
-          // @codingStandardsIgnoreEnd
+        return [
+            'engine' => 'solr',
+            'solr_server_hostname' => $config['host'],
+            'solr_server_port' => $config['port'],
+            'solr_server_username' => $config['scheme'],
+            'solr_server_path' => $config['path'],
+        ];
+    }
+
+    /**
+     * Returns ElasticSearch configuration
+     *
+     * @param array $config Elasticsearch connection configuration
+     * @return array
+     */
+    private function getElasticSearchConfiguration(array $config)
+    {
+        $this->env->log("Updating elasticsearch configuration.");
+        return [
+            'engine' => 'elasticsearch',
+            'elasticsearch_server_hostname' => $config['host'],
+            'elasticsearch_server_port' => $config['port'],
+        ];
+    }
+
+    /**
+     * Returns search engine configuration depends on relationships
+     *
+     * @return array
+     */
+    private function getSearchEngineConfiguration()
+    {
+        $relationships = $this->env->getRelationships();
+
+        if (isset($relationships['elasticsearch'])) {
+            $searchConfig = $this->getElasticSearchConfiguration($relationships['elasticsearch'][0]);
+        } else if (isset($relationships['solr'])) {
+            $searchConfig = $this->getSolrConfiguration($relationships['solr'][0]);
+        } else {
+            $searchConfig = ['engine' => 'mysql'];
         }
+
+        return $searchConfig;
     }
 
     /**
@@ -562,6 +583,11 @@ class Deploy extends Command
         } else {
             $config = $this->removeRedisConfiguration($config);
         }
+
+        $config['system']['default']['catalog']['search'] = array_replace_recursive(
+            $config['system']['default']['catalog']['search'] ?? [],
+            $this->getSearchEngineConfiguration()
+        );
 
         if (!empty($this->adminUrl)) {
             $config['backend']['frontName'] = $this->adminUrl;
