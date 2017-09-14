@@ -47,6 +47,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
         $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
         $this->singleton(\Magento\MagentoCloud\Util\ComponentInfo::class);
+        $this->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
         $this->singleton(\Composer\Composer::class, function () {
             $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
 

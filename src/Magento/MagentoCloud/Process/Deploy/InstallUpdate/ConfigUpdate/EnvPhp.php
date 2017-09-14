@@ -6,9 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Util\ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 class EnvPhp implements ProcessInterface
@@ -17,37 +16,31 @@ class EnvPhp implements ProcessInterface
      * @var Environment
      */
     private $environment;
-    /**
-     * @var File
-     */
-    private $file;
+
     /**
      * @var LoggerInterface
      */
     private $logger;
+
     /**
-     * @var DirectoryList
+     * @var ConfigWriter
      */
-    private $directoryList;
+    private $configWriter;
 
     /**
      * @param Environment $environment
-     * @param File $file
+     * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
-     * @param DirectoryList $directoryList
      */
     public function __construct(
         Environment $environment,
-        File $file,
-        LoggerInterface $logger,
-        DirectoryList $directoryList
+        ConfigWriter $configWriter,
+        LoggerInterface $logger
     ) {
         $this->environment = $environment;
-        $this->file = $file;
         $this->logger = $logger;
-        $this->directoryList = $directoryList;
+        $this->configWriter = $configWriter;
     }
-
 
     /**
      * @inheritdoc
@@ -56,9 +49,7 @@ class EnvPhp implements ProcessInterface
     {
         $this->logger->info('Updating env.php configuration.');
 
-        $configFileName = $this->getConfigFilePath();
-
-        $config = include $configFileName;
+        $config = include $this->configWriter->getConfigPath();
 
         $config['db']['connection']['default']['username'] = $this->environment->getDbUser();
         $config['db']['connection']['default']['host'] = $this->environment->getDbHost();
@@ -115,9 +106,7 @@ class EnvPhp implements ProcessInterface
         $config['backend']['frontName'] = $this->environment->getAdminUrl();
         $config['resource']['default_setup']['connection'] = 'default';
 
-        $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-
-        file_put_contents($configFileName, $updatedConfig);
+        $this->configWriter->write($config);
     }
 
     /**
@@ -140,8 +129,6 @@ class EnvPhp implements ProcessInterface
 
         return $config;
     }
-
-
 
     /**
      * Clears configuration from redis usages.
@@ -169,15 +156,5 @@ class EnvPhp implements ProcessInterface
         }
 
         return $config;
-    }
-
-    /**
-     * Return full path to environment configuration file.
-     *
-     * @return string The path to configuration file
-     */
-    private function getConfigFilePath()
-    {
-        return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
     }
 }
