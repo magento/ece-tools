@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ConfigWriter;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Psr\Log\LoggerInterface;
 
 class EnvPhp implements ProcessInterface
@@ -28,18 +29,26 @@ class EnvPhp implements ProcessInterface
     private $configWriter;
 
     /**
+     * @var DeployConfig
+     */
+    private $deployConfig;
+
+    /**
      * @param Environment $environment
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
+     * @param DeployConfig $deployConfig
      */
     public function __construct(
         Environment $environment,
         ConfigWriter $configWriter,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DeployConfig $deployConfig
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
         $this->configWriter = $configWriter;
+        $this->deployConfig = $deployConfig;
     }
 
     /**
@@ -49,7 +58,7 @@ class EnvPhp implements ProcessInterface
     {
         $this->logger->info('Updating env.php configuration.');
 
-        $config = include $this->configWriter->getConfigPath();
+        $config = include $this->deployConfig->getConfigFilePath();
 
         $config['db']['connection']['default']['username'] = $this->environment->getDbUser();
         $config['db']['connection']['default']['host'] = $this->environment->getDbHost();

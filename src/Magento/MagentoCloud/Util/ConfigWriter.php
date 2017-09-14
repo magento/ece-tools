@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Util;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 
 class ConfigWriter
@@ -16,20 +16,20 @@ class ConfigWriter
     private $file;
 
     /**
-     * @var DirectoryList
+     * @var DeployConfig
      */
-    private $directoryList;
+    private $deployConfig;
 
     /**
      * @param File $file
-     * @param DirectoryList $directoryList
+     * @param DeployConfig $deployConfig
      */
     public function __construct(
         File $file,
-        DirectoryList $directoryList
+        DeployConfig $deployConfig
     ) {
         $this->file = $file;
-        $this->directoryList = $directoryList;
+        $this->deployConfig = $deployConfig;
     }
 
     /**
@@ -41,7 +41,7 @@ class ConfigWriter
     public function write(array $config, $configPath = null)
     {
         if ($configPath === null) {
-            $configPath = $this->getConfigPath();
+            $configPath = $this->deployConfig->getConfigFilePath();
         }
 
         $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($config, true) . ';';
@@ -58,7 +58,7 @@ class ConfigWriter
     public function update(array $config, $configPath = null)
     {
         if ($configPath === null) {
-            $configPath = $this->getConfigPath();
+            $configPath = $this->deployConfig->getConfigFilePath();
         }
 
         $oldConfig = include $configPath;
@@ -67,15 +67,5 @@ class ConfigWriter
         $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($updatedConfig, true) . ';';
 
         $this->file->filePutContents($configPath, $updatedConfig);
-    }
-
-    /**
-     * Returns path to environment configuration file.
-     *
-     * @return string
-     */
-    public function getConfigPath()
-    {
-        return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
     }
 }
