@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -32,11 +31,6 @@ class BackupToInitDirectory implements ProcessInterface
     private $logger;
 
     /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
      * @var Environment
      */
     private $environment;
@@ -49,19 +43,17 @@ class BackupToInitDirectory implements ProcessInterface
     /**
      * @param File $file
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
      * @param Environment $environment
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         File $file,
         LoggerInterface $logger,
-        ShellInterface $shell,
         Environment $environment,
         DirectoryList $directoryList
     ) {
         $this->file = $file;
         $this->logger = $logger;
-        $this->shell = $shell;
         $this->environment = $environment;
         $this->directoryList = $directoryList;
     }
@@ -71,22 +63,26 @@ class BackupToInitDirectory implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->file->isExists(Environment::REGENERATE_FLAG)) {
+        $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
+
+        if ($this->file->isExists($magentoRoot . Environment::REGENERATE_FLAG)) {
             $this->logger->info('Removing .regenerate flag');
-            $this->file->deleteFile(Environment::REGENERATE_FLAG);
+            $this->file->deleteFile($magentoRoot .Environment::REGENERATE_FLAG);
         }
 
-        $magentoRoot = $this->directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR;
-
         if ($this->environment->isStaticDeployInBuild()) {
-            $this->logger->info('Moving static content to init directory');
-            $this->shell->execute('mkdir -p ./init/pub/');
+            $initPub = $magentoRoot . 'init/pub/';
+            $initPubStatic = $initPub . 'static/';
+            $originalPubStatic = $magentoRoot . 'pub/static/';
 
-            if ($this->file->isExists('./init/pub/static')) {
+            $this->logger->info('Moving static content to init directory');
+            $this->file->createDirectory($initPub);
+
+            if ($this->file->isExists($initPubStatic)) {
                 $this->logger->info('Remove ./init/pub/static');
-                $this->file->deleteFile('./init/pub/static');
+                $this->file->deleteDirectory($initPubStatic);
             }
-            $this->shell->execute('cp -R ./pub/static/ ./init/pub/static');
+            $this->file->copyDirectory($originalPubStatic, $initPubStatic);
 
             $this->file->copy(
                 $magentoRoot . Environment::STATIC_CONTENT_DEPLOY_FLAG,
@@ -99,15 +95,16 @@ class BackupToInitDirectory implements ProcessInterface
         $this->logger->info('Copying writable directories to temp directory.');
 
         foreach ($this->environment->getWritableDirectories() as $dir) {
-            $this->shell->execute(sprintf('mkdir -p init/%s', $dir));
-            $this->shell->execute(sprintf('mkdir -p %s', $dir));
+            $originalDir = $magentoRoot . $dir;
+            $initDir = $magentoRoot . 'init/' . $dir;
 
-            if (count($this->file->scanDir($magentoRoot . $dir)) > 2) {
-                $this->shell->execute(
-                    sprintf('/bin/bash -c "shopt -s dotglob; cp -R %s/* ./init/%s/"', $dir, $dir)
-                );
-                $this->shell->execute(sprintf('rm -rf %s', $dir));
-                $this->shell->execute(sprintf('mkdir -p %s', $dir));
+            $this->file->createDirectory($initDir);
+            $this->file->createDirectory($originalDir);
+
+            if (count($this->file->scanDir($originalDir)) > 2) {
+                $this->file->copyDirectory($originalDir, $initDir);
+                $this->file->deleteDirectory($originalDir);
+                $this->file->createDirectory($originalDir);
             }
         }
     }
