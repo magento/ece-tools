@@ -16,15 +16,9 @@ use Psr\Log\LoggerInterface;
 class Deploy
 {
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
-
     /**
      * @var ConnectionInterface
      */
@@ -41,20 +35,17 @@ class Deploy
     private $directoryList;
 
     /**
-     * @param Environment $environment
      * @param LoggerInterface $logger
      * @param ConnectionInterface $connection
      * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        Environment $environment,
         LoggerInterface $logger,
         ConnectionInterface $connection,
         File $file,
         DirectoryList $directoryList
     ) {
-        $this->environment = $environment;
         $this->logger = $logger;
         $this->connection = $connection;
         $this->file = $file;
@@ -73,40 +64,43 @@ class Deploy
      */
     public function isInstalled(): bool
     {
-        $configFile = $this->getConfigFilePath();
-        $isInstalled = false;
-
         $this->logger->info('Checking if db exists and has tables');
-
         $output = $this->connection->select('SHOW TABLES');
-
         $this->logger->info('Output: ', var_export($output, true));
 
-        if (is_array($output) && count($output) > 1) {
-            if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
-                throw new \Exception('Missing either core_config_data or setup_module table', 5);
-            } elseif ($this->file->isExists($configFile)) {
-                $data = include $configFile;
-
-                if (isset($data['install']) && isset($data['install']['date'])) {
-                    $this->logger->info('Magento was installed on ' . $data['install']['date']);
-                    $isInstalled = true;
-                } else {
-                    $config['install']['date'] = date('r');
-                    $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-                    $this->file->filePutContents($configFile, $updatedConfig);
-                    $isInstalled = true;
-                }
-            } else {
-                $this->file->touch($configFile);
-                $config['install']['date'] = date('r');
-                $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-                $this->file->filePutContents($configFile, $updatedConfig);
-                $isInstalled = true;
-            }
+        if (!is_array($output) || count($output) <= 1) {
+            return false;
         }
 
-        return $isInstalled;
+        if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
+            throw new \Exception('Missing either core_config_data or setup_module table', 5);
+        }
+
+        $configPath = $this->getConfigFilePath();
+
+        if (!$this->file->isExists($configPath)) {
+            $this->updateConfig($configPath);
+
+            return true;
+        }
+
+        $data = include $configPath;
+        if (isset($data['install']['date'])) {
+            $this->logger->info('Magento was installed on ' . $data['install']['date']);
+
+            return true;
+        }
+
+        $this->updateConfig($configPath);
+
+        return true;
+    }
+
+    private function updateConfig(string $configFile)
+    {
+        $config['install']['date'] = date('r');
+        $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
+        $this->file->filePutContents($configFile, $updatedConfig);
     }
 
     /**
