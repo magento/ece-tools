@@ -45,10 +45,10 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 $directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR . 'composer.json'
             );
         });
-        $this->bind(\Illuminate\Database\ConnectionInterface::class, function () {
+        $this->bind(\Magento\MagentoCloud\DB\ConnectionInterface::class, function () {
             $environment = $this->get(\Magento\MagentoCloud\Config\Environment::class);
 
-            return new \Illuminate\Database\Connection(
+            return new \Magento\MagentoCloud\DB\Connection(
                 new \PDO(
                     sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
                     $environment->getDbUser(),
