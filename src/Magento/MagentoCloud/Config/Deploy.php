@@ -5,10 +5,9 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\DB\Adapter;
+use Illuminate\Database\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,14 +26,9 @@ class Deploy
     private $logger;
 
     /**
-     * @var ShellInterface
+     * @var ConnectionInterface
      */
-    private $shell;
-
-    /**
-     * @var Adapter
-     */
-    private $adapter;
+    private $connection;
 
     /**
      * @var File
@@ -49,23 +43,20 @@ class Deploy
     /**
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
-     * @param Adapter $adapter
+     * @param ConnectionInterface $connection
      * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        ShellInterface $shell,
-        Adapter $adapter,
+        ConnectionInterface $connection,
         File $file,
         DirectoryList $directoryList
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->shell = $shell;
-        $this->adapter = $adapter;
+        $this->connection = $connection;
         $this->file = $file;
         $this->directoryList = $directoryList;
     }
@@ -73,20 +64,23 @@ class Deploy
     /**
      * Verifies is Magento installed based on install date in env.php
      *
+     * 1. from environment variables check if db exists and has tables
+     * 2. check if core_config_data and setup_module tables exist
+     * 3. check install date
+     *
      * @return bool
      * @throws \Exception
      */
-    public function isInstalled()
+    public function isInstalled(): bool
     {
         $configFile = $this->getConfigFilePath();
         $isInstalled = false;
 
-        //1. from environment variables check if db exists and has tables
-        //2. check if core_config_data and setup_module tables exist
-        //3. check install date
-
         $this->logger->info('Checking if db exists and has tables');
-        $output = $this->adapter->execute('SHOW TABLES');
+
+        $output = $this->connection->select('SHOW TABLES');
+
+        $this->logger->info('Output: ', var_export($output, true));
 
         if (is_array($output) && count($output) > 1) {
             if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
@@ -104,7 +98,7 @@ class Deploy
                     $isInstalled = true;
                 }
             } else {
-                $this->shell->execute('touch ' . $configFile);
+                $this->file->touch($configFile);
                 $config['install']['date'] = date('r');
                 $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
                 $this->file->filePutContents($configFile, $updatedConfig);

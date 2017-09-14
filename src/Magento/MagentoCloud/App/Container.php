@@ -29,8 +29,30 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
      */
     public function __construct(string $root, array $config)
     {
+        /**
+         * Instance configuration.
+         */
         $this->singleton(\Magento\MagentoCloud\Filesystem\DirectoryList::class, function () use ($root, $config) {
             return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $config);
+        });
+        $this->singleton(\Composer\Composer::class, function () {
+            $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
+
+            return \Composer\Factory::create(
+                new \Composer\IO\BufferIO(),
+                $directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR . 'composer.json'
+            );
+        });
+        $this->bind(\Illuminate\Database\ConnectionInterface::class, function () {
+            $environement = $this->get(\Magento\MagentoCloud\Config\Environment::class);
+
+            return new \Illuminate\Database\Connection(
+                new \PDO(
+                    sprintf('mysql:dbname=%s;host=%s', $environement->getDbName(), $environement->getDbHost()),
+                    $environement->getDbUser(),
+                    $environement->getDbPassword()
+                )
+            );
         });
         /**
          * Interface to implementation binding.
@@ -45,14 +67,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
         $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
         $this->singleton(\Magento\MagentoCloud\Util\ComponentInfo::class);
-        $this->singleton(\Composer\Composer::class, function () {
-            $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
-
-            return \Composer\Factory::create(
-                new \Composer\IO\BufferIO(),
-                $directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR . 'composer.json'
-            );
-        });
 
         /**
          * Contextual binding.
