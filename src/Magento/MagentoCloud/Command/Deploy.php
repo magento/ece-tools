@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Environment;
 use Magento\MagentoCloud\Database;
+use Magento\MagentoCloud\Password;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -70,6 +71,7 @@ class Deploy extends Command
     private $doDeployStaticContent;
 
     private $verbosityLevel;
+    private $isInstalling;
     /** @var Database|null This our connection to the database we use to execute queries. */
     private $database;
 
@@ -81,7 +83,6 @@ class Deploy extends Command
     public function __construct()
     {
         $this->loadEnvironmentData();
-        $this->createDatabaseConnection();
         parent::__construct();
     }
 
@@ -107,13 +108,16 @@ class Deploy extends Command
         $this->env->log("Starting deploy.");
         $this->createConfigIfNotYetExist();
         $this->processMagentoMode();
-        if (!$this->isInstalled()) {
+        if ($this->isInstalling) {
             $this->installMagento();
         } else {
             $this->updateMagento();
         }
         $this->staticContentDeploy();
         $this->disableGoogleAnalytics();
+        if ($this->isInstalling) {
+            $this->sendPasswordResetEmail();
+        }
         $this->env->log("Deployment complete.");
     }
 
@@ -122,7 +126,7 @@ class Deploy extends Command
      */
     private function createConfigIfNotYetExist()
     {
-        $configFile = $this->getConfigFilePath();
+        $configFile = $this->getEnvConfigFilePath();
         if (file_exists($configFile)) {
             return;
         }
@@ -149,9 +153,13 @@ class Deploy extends Command
         $this->dbUser = $relationships["database"][0]["username"];
         $this->dbPassword = $relationships["database"][0]["password"];
 
-        /* Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
+        $this->createDatabaseConnection();  // Note: We have to create the database here, after we get the $relationships values, but before isInstalled() which uses the database
+        $this->isInstalling = !$this->isInstalled();
+
+        /* Note: Moved the admin variables to their own function to help with MAGECLOUD-115 and MAGECLOUD-894 */
         $this->loadEnvironmentDataForAdmin($var);
 
+        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
         $this->cleanStaticViewFiles = isset($var["CLEAN_STATIC_FILES"]) && $var["CLEAN_STATIC_FILES"] == 'disabled'
             ? false : true;
         $this->staticDeployExcludeThemes = isset($var["STATIC_CONTENT_EXCLUDE_THEMES"])
@@ -213,7 +221,6 @@ class Deploy extends Command
 
     /**
      * Load the admin settings from the environment.
-     * TODO: This logic will change once I'm done with MAGECLOUD-115/MAGERCLOUD-894
      * @param array $var
      */
     private function loadEnvironmentDataForAdmin($var = null)
@@ -221,13 +228,38 @@ class Deploy extends Command
         if (is_null($var)) {
             $var = $this->env->getVariables();
         }
-        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "admin";
-        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : "John";
-        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : "Doe";
-        $this->adminEmail = isset($var["ADMIN_EMAIL"]) ? $var["ADMIN_EMAIL"] : "john@example.com";
-        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "admin12";
-        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : "admin";
-        $this->enableUpdateUrls = isset($var["UPDATE_URLS"]) && $var["UPDATE_URLS"] == 'disabled' ? false : true;
+        /* We no longer set default username/password.  If we are installing, we will use random username/password.*/
+        $this->adminUsername = isset($var["ADMIN_USERNAME"]) ? $var["ADMIN_USERNAME"] : "";
+        $this->adminPassword = isset($var["ADMIN_PASSWORD"]) ? $var["ADMIN_PASSWORD"] : "";
+        if ($this->isInstalling && empty($this->adminUsername)) {
+            // TODO: We want to have a random username , but because the username is not sent in the reset password email, the new admin has no way of knowing what it is at the moment.
+            //       We may either make a custom email template to do this, or find a different way to do this.  Then, we can use random a username.
+            //$this->adminUsername = "admin-" . Password::generateRandomString(6);
+            $this->adminUsername = "admin";
+        }
+        if ($this->isInstalling && empty($this->adminPassword)) {
+            $this->adminPassword = Password::generateRandomPassword();
+        }
+        $this->adminFirstname = isset($var["ADMIN_FIRSTNAME"]) ? $var["ADMIN_FIRSTNAME"] : ($this->isInstalling ? "Changeme" : "");
+        $this->adminLastname = isset($var["ADMIN_LASTNAME"]) ? $var["ADMIN_LASTNAME"] : ($this->isInstalling ? "Changeme" : "");
+        /*   Note: We are going to have the onboarding process set the ADMIN_EMAIL variables to the email address specified during
+         * the project creation.  This will let us do the reset password for the new installs. */
+        if (isset($var["ADMIN_EMAIL"])) {
+            $this->adminEmail = $var["ADMIN_EMAIL"];
+        } else {
+            if ($this->isInstalling /* && empty($var["ADMIN_PASSWORD"])*/) {
+                // Note: I didn't want to throw exception here if ADMIN_PASSWORD is set... but bin/magento setup:install fails if --admin-email is blank, so it's better to die with a useful error message
+                // Note: not relying on bin/magento because it might not be working at this point.
+                $this->env->execute('touch ' . realpath(Environment::MAGENTO_ROOT . 'var') . '/.maintenance.flag');
+                throw new \RuntimeException("ADMIN_EMAIL not set during install!  We need this variable set to send the password reset email.  Please set ADMIN_EMAIL and retry deploy.");
+            } else {
+                $this->adminEmail = "";
+            }
+        }
+        /* Note: ADMIN_URL should be set during the onboarding process also.  They should have generated a random one for us to use. */
+        //$this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin_" . Password::generateRandomString(8) : "");
+        /* Note: We are defaulting to "admin" for now, but will change it to the above random admin URL at some point */
+        $this->adminUrl = isset($var["ADMIN_URL"]) ? $var["ADMIN_URL"] : ($this->isInstalling ? "admin" : "");
     }
 
     /**
@@ -238,7 +270,6 @@ class Deploy extends Command
         $this->database = new Database($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
     }
 
-
     /**
      * Verifies is Magento installed based on install date in env.php
      *
@@ -246,7 +277,7 @@ class Deploy extends Command
      */
     public function isInstalled()
     {
-        $configFile = $this->getConfigFilePath();
+        $configFile = $this->getEnvConfigFilePath();
         $installed = false;
 
         //1. from environment variables check if db exists and has tables
@@ -295,27 +326,26 @@ class Deploy extends Command
         $urlSecure = $this->urls['secure'][''];
 
         $command =
-            "php ./bin/magento setup:install \
-            --session-save=db \
-            --cleanup-database \
-            --currency=$this->defaultCurrency \
-            --base-url=$urlUnsecure \
-            --base-url-secure=$urlSecure \
-            --language=$this->adminLocale \
-            --timezone=America/Los_Angeles \
-            --db-host=$this->dbHost \
-            --db-name=$this->dbName \
-            --db-user=$this->dbUser \
-            --backend-frontname=$this->adminUrl \
-            --admin-user=$this->adminUsername \
-            --admin-firstname=$this->adminFirstname \
-            --admin-lastname=$this->adminLastname \
-            --admin-email=$this->adminEmail \
-            --admin-password=$this->adminPassword";
+            "php ./bin/magento setup:install"
+            . " " . escapeshellarg("--session-save=db")
+            . " " . escapeshellarg("--cleanup-database")
+            . " " . escapeshellarg("--currency=$this->defaultCurrency")
+            . " " . escapeshellarg("--base-url=$urlUnsecure")
+            . " " . escapeshellarg("--base-url-secure=$urlSecure")
+            . " " . escapeshellarg("--language=$this->adminLocale")
+            . " " . escapeshellarg("--timezone=America/Los_Angeles")
+            . " " . escapeshellarg("--db-host=$this->dbHost")
+            . " " . escapeshellarg("--db-name=$this->dbName")
+            . " " . escapeshellarg("--db-user=$this->dbUser")
+            . " " . escapeshellarg("--backend-frontname=$this->adminUrl")
+            . " " . escapeshellarg("--admin-user=$this->adminUsername")
+            . " " . escapeshellarg("--admin-firstname=$this->adminFirstname")
+            . " " . escapeshellarg("--admin-lastname=$this->adminLastname")
+            . " " . escapeshellarg("--admin-email=$this->adminEmail")
+            . " " . escapeshellarg("--admin-password=" . Password::generateRandomPassword()); // Note: This password gets changed later in this script in updateAdminCredentials
 
         if (strlen($this->dbPassword)) {
-            $command .= " \
-            --db-password=$this->dbPassword";
+            $command .= " " . escapeshellarg("--db-password=$this->dbPassword");
         }
 
         $command .= $this->verbosityLevel;
@@ -324,6 +354,7 @@ class Deploy extends Command
 
         $this->setSecureAdmin();
         $this->updateConfig();
+        $this->importDeploymentConfig();
     }
 
     /**
@@ -332,10 +363,23 @@ class Deploy extends Command
     public function setSecureAdmin()
     {
         $this->env->log("Setting secure admin");
-        $command =
-            "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
-        $command .= $this->verbosityLevel;
-        $this->env->execute($command);
+        $secPath = 'web/secure/use_in_adminhtml';
+        if (empty($this->database->executeDbQuery("SELECT * FROM core_config_data WHERE path='$secPath';", [], MYSQLI_ASSOC))) {
+            $this->database->executeDbQuery("INSERT INTO core_config_data (scope, scope_id, path, value) VALUES('default', '0', '$secPath', '1');");
+        } else {
+            $this->database->executeDbQuery("UPDATE core_config_data SET value = '1' WHERE path = '$secPath';");
+        }
+    }
+
+    /**
+     * Import deployment config - To be made obsolete by MAGETWO-71890
+     *
+     * @return void
+     */
+    public function importDeploymentConfig()
+    {
+        $this->env->log("Importing deployment config");
+        $this->env->execute("php ./bin/magento app:config:import {$this->verbosityLevel}");
     }
 
     /**
@@ -363,12 +407,30 @@ class Deploy extends Command
      */
     private function updateAdminCredentials()
     {
+        // Old query for reference: "UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';"
+        $parameters = [""];
+        $query = "";
+        $addColumnValueToBeUpdated = function ($value, &$query, $columnName, $valueType, &$parameters, $value2 = null) {
+            if (!empty($value)) {
+                if (!empty($query)) {
+                    $query .= ",";
+                }
+                $query .= " $columnName = ? ";
+                $parameters[0] .= $valueType;
+                $parameters[] = $value2 ?: $value;
+            }
+        };
+        $addColumnValueToBeUpdated($this->adminFirstname, $query, "firstname", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminLastname, $query, "lastname", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminEmail, $query, "email", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminUsername, $query, "username", "s", $parameters);
+        $addColumnValueToBeUpdated($this->adminPassword, $query, "password", "s", $parameters, Password::generatePassword($this->adminPassword));
+        if (empty($query)) {
+            return;  // No variables set ; nothing to do
+        }
         $this->env->log("Updating admin credentials.");
-
-        // @codingStandardsIgnoreStart
-        $this->database->executeDbQuery("UPDATE admin_user SET firstname = ?, lastname = ?, email = ?, username = ?, password = ? WHERE user_id = '1';",
-        ["sssss", $this->adminFirstname, $this->adminLastname, $this->adminEmail, $this->adminUsername, $this->generatePassword($this->adminPassword) ]);
-        // @codingStandardsIgnoreEnd
+        $query = "UPDATE admin_user SET" . $query . "  WHERE user_id = '1';";
+        $this->database->executeDbQuery($query, $parameters);
     }
 
     /**
@@ -380,13 +442,13 @@ class Deploy extends Command
         if ($this->solrHost !== null && $this->solrPort !== null && $this->solrPath !== null && $this->solrHost !== null) {
           // @codingStandardsIgnoreStart
             $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_hostname' AND scope_id = '0';",
-                ["s", $this->generatePassword($this->solrHost)]);
+                ["s", $this->solrHost]);
             $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_port' AND scope_id = '0';",
-                ["s", $this->generatePassword($this->solrPort)]);
+                ["s", $this->solrPort]);
             $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_username' AND scope_id = '0';",
-                ["s", $this->generatePassword($this->solrScheme)]);
+                ["s", $this->solrScheme]);
             $this->database->executeDbQuery("UPDATE core_config_data SET value = ? WHERE path = 'catalog/search/solr_server_path' AND scope_id = '0';",
-                ["s", $this->generatePassword($this->solrPath)]);
+                ["s", $this->solrPath]);
           // @codingStandardsIgnoreEnd
         }
     }
@@ -427,8 +489,6 @@ class Deploy extends Command
      */
     private function setupUpgrade()
     {
-        $this->env->log("Saving disabled modules.");
-
         if (file_exists(Environment::REGENERATE_FLAG)) {
             $this->env->log("Removing .regenerate flag");
             unlink(Environment::REGENERATE_FLAG);
@@ -475,7 +535,7 @@ class Deploy extends Command
     {
         $this->env->log("Updating env.php database configuration.");
 
-        $configFileName = $this->getConfigFilePath();
+        $configFileName = $this->getEnvConfigFilePath();
 
         $config = include $configFileName;
 
@@ -503,20 +563,22 @@ class Deploy extends Command
 
         if ($this->redisHost !== null && $this->redisPort !== null) {
             $this->env->log("Updating env.php Redis cache configuration.");
-            $config['cache'] = $this->getRedisCacheConfiguration();
-            $config['session'] = [
-                'save' => 'redis',
-                'redis' => [
-                    'host' => $this->redisHost,
-                    'port' => $this->redisPort,
-                    'database' => $this->redisSessionDb
-                ]
-            ];
+            if (empty($config['cache'])) {
+                $config['cache'] = $this->getRedisCacheConfiguration();
+            } else {
+                $config['cache'] = array_replace_recursive($config['cache'], $this->getRedisCacheConfiguration());
+            }
+            $config['session']['save'] = "redis";
+            $config['session']['redis']['host'] = $this->redisHost;
+            $config['session']['redis']['port'] = $this->redisPort;
+            $config['session']['redis']['database'] = $this->redisSessionDb;
         } else {
             $config = $this->removeRedisConfiguration($config);
         }
 
-        $config['backend']['frontName'] = $this->adminUrl;
+        if (!empty($this->adminUrl)) {
+            $config['backend']['frontName'] = $this->adminUrl;
+        }
 
         $config['resource']['default_setup']['connection'] = 'default';
 
@@ -543,41 +605,6 @@ class Deploy extends Command
         }
 
         return $config;
-    }
-
-    /**
-     * Generates Hash from a new Salt and the admin password using default Magento settings
-     * @param string $password This is the plaintext password to be hashed
-     * @return string The hash:salt:version
-     */
-    private function generatePassword($password)
-    {
-        $saltLenght = 32;
-        $charsLowers = 'abcdefghijklmnopqrstuvwxyz';
-        $charsUppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        $charsDigits = '0123456789';
-        $randomStr = '';
-        $chars = $charsLowers . $charsUppers . $charsDigits;
-
-        // use openssl lib
-        for ($i = 0, $lc = strlen($chars) - 1; $i < $saltLenght; $i++) {
-            $bytes = openssl_random_pseudo_bytes(PHP_INT_SIZE);
-            $hex = bin2hex($bytes); // hex() doubles the length of the string
-            $rand = abs(hexdec($hex) % $lc); // random integer from 0 to $lc
-            $randomStr .= $chars[$rand]; // random character in $chars
-        }
-        $salt = $randomStr;
-        $version = 1;
-        $hash = hash('sha256', $salt . $password);
-
-        return implode(
-            ':',
-            [
-                $hash,
-                $salt,
-                $version
-            ]
-        );
     }
 
     /**
@@ -638,7 +665,7 @@ class Deploy extends Command
              * and made it run after production mode is enabled to work around the bug with the read only
              */
             $this->env->log("Enable production mode");
-            $configFileName = $this->getConfigFilePath();
+            $configFileName = $this->getEnvConfigFilePath();
             $config = include $configFileName;
             $config['MAGE_MODE'] = 'production';
             $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
@@ -890,9 +917,19 @@ class Deploy extends Command
      *
      * @return string The path to configuration file
      */
-    private function getConfigFilePath()
+    private function getEnvConfigFilePath()
     {
         return Environment::MAGENTO_ROOT . 'app/etc/env.php';
+    }
+
+    /**
+     * Return full path to shared configuration file.
+     *
+     * @return string The path to configuration file
+     */
+    private function getSharedConfigFilePath()
+    {
+        return Environment::MAGENTO_ROOT . 'app/etc/config.php';
     }
 
     /**
@@ -921,5 +958,35 @@ class Deploy extends Command
         }
 
         return $config;
+    }
+
+    /**
+     * Send Password Reset Email for the admin user.
+     * We need to do this for environments that don't have the ADMIN_PASSWORD variable set so that the admin has
+     * a way to log in.
+     */
+    private function sendPasswordResetEmail()
+    {
+        if (!$this->isInstalling || empty($this->env) || empty($this->adminEmail) || !empty($this->env->getVariables()["ADMIN_PASSWORD"])) {
+            return;
+        }
+        /* TODO: Instead of calling our own command to do it, we will wait until a reset command gets added to Magento core
+         * // $this->env->log("Sending password reset email to admin user \"{$this->adminUsername}\" at $this->adminEmail");
+         * // $this->env->execute("vendor/bin/m2-ece-send-password-reset-email");
+         * Note: For now, we will just email them the admin URL where they can manually click "Forgot your password" to get a password reset email.
+         */
+        $adminurl = $this->urls['secure'][''] . $this->adminUrl;
+        $this->env->log("Emailing admin URL to admin user \"{$this->adminUsername}\" at $this->adminEmail");
+        mail(
+            $this->adminEmail,
+            "Magento Commerce Cloud - Admin URL",
+            "Welcome to Magento Commerce (Cloud)!\n"
+                . "To properly log into your provisioned Magento installation Admin panel, you need to change your Admin password. To update your password, click this link to access the Admin Panel: {$adminurl} . When the page opens, click the \"Forgot your password\" link. You should receive a password update email at {$this->adminEmail} . Just in case, check your spam box if you don't see the email immediately.\n"
+                . "After the password is updated, you can login with the username {$this->adminUsername} and the new password.\n"
+                . "Need help? Please see http://devdocs.magento.com/guides/v2.2/cloud/onboarding/onboarding-tasks.html\n"
+                . "Thank you,\n"
+                . "Magento Commerce (Cloud)\n",
+            "From: Magento Cloud <accounts@magento.cloud>"
+        );
     }
 }
