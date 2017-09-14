@@ -46,13 +46,13 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             );
         });
         $this->bind(\Illuminate\Database\ConnectionInterface::class, function () {
-            $environement = $this->get(\Magento\MagentoCloud\Config\Environment::class);
+            $environment = $this->get(\Magento\MagentoCloud\Config\Environment::class);
 
             return new \Illuminate\Database\Connection(
                 new \PDO(
-                    sprintf('mysql:dbname=%s;host=%s', $environement->getDbName(), $environement->getDbHost()),
-                    $environement->getDbUser(),
-                    $environement->getDbPassword()
+                    sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
+                    $environment->getDbUser(),
+                    $environment->getDbPassword()
                 )
             );
         });
