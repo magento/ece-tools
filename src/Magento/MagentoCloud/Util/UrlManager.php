@@ -59,7 +59,7 @@ class UrlManager
         $routes = $this->environment->getRoutes();
 
         foreach ($routes as $key => $val) {
-            if ($val["type"] !== "upstream") {
+            if ($val['type'] !== 'upstream') {
                 continue;
             }
 
@@ -81,7 +81,7 @@ class UrlManager
             $this->urls['secure'] = $this->urls['unsecure'];
         }
 
-        $this->logger->info(sprintf("Routes: %s", var_export($this->urls, true)));
+        $this->logger->info(sprintf('Routes: %s', var_export($this->urls, true)));
 
         return $this->urls;
     }
