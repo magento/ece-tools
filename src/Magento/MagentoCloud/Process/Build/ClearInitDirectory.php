@@ -6,7 +6,8 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -15,9 +16,14 @@ use Psr\Log\LoggerInterface;
 class ClearInitDirectory implements ProcessInterface
 {
     /**
-     * @var ShellInterface
+     * @var File
      */
-    private $shell;
+    private $file;
+
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
 
     /**
      * @var LoggerInterface
@@ -25,12 +31,17 @@ class ClearInitDirectory implements ProcessInterface
     private $logger;
 
     /**
-     * @param ShellInterface $shell
+     * @param File $file
+     * @param DirectoryList $directoryList
      * @param LoggerInterface $logger
      */
-    public function __construct(ShellInterface $shell, LoggerInterface $logger)
-    {
-        $this->shell = $shell;
+    public function __construct(
+        File $file,
+        DirectoryList $directoryList,
+        LoggerInterface $logger
+    ) {
+        $this->file = $file;
+        $this->directoryList = $directoryList;
         $this->logger = $logger;
     }
 
@@ -39,8 +50,9 @@ class ClearInitDirectory implements ProcessInterface
      */
     public function execute()
     {
+        $magentoRoot = $this->directoryList->getMagentoRoot();
         $this->logger->info('Clearing temporary directory.');
-        $this->shell->execute('rm -rf ../init/*');
-        $this->shell->execute('rm -rf app/etc/env.php');
+        $this->file->deleteDirectory($magentoRoot . '/init/');
+        $this->file->deleteFile($magentoRoot . '/app/etc/env.php');
     }
 }

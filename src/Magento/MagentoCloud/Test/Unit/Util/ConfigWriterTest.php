@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Util\ConfigWriter;
 use PHPUnit\Framework\TestCase;
@@ -19,9 +19,9 @@ class ConfigWriterTest extends TestCase
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DeployConfig|Mock
      */
-    private $directoryListMock;
+    private $deployConfigMock;
 
     /**
      * @var ConfigWriter
@@ -32,19 +32,19 @@ class ConfigWriterTest extends TestCase
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->deployConfigMock = $this->createMock(DeployConfig::class);
 
         $this->configWriter = new ConfigWriter(
             $this->fileMock,
-            $this->directoryListMock
+            $this->deployConfigMock
         );
     }
 
     public function testWrite()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/_files');
+        $this->deployConfigMock->expects($this->once())
+            ->method('getConfigFilePath')
+            ->willReturn(__DIR__ . '/_files/app/etc/env.php');
 
         $config = ['test' => 'value'];
 
@@ -57,8 +57,8 @@ class ConfigWriterTest extends TestCase
 
     public function testWriteWithConfigPath()
     {
-        $this->directoryListMock->expects($this->never())
-            ->method('getMagentoRoot');
+        $this->deployConfigMock->expects($this->never())
+            ->method('getConfigFilePath');
 
         $config = ['test' => 'value'];
 
@@ -71,9 +71,9 @@ class ConfigWriterTest extends TestCase
 
     public function testUpdate()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/_files');
+        $this->deployConfigMock->expects($this->once())
+            ->method('getConfigFilePath')
+            ->willReturn(__DIR__ . '/_files/app/etc/env.php');
 
         $config = ['test' => 'value'];
 
@@ -89,8 +89,8 @@ class ConfigWriterTest extends TestCase
 
     public function testUpdateWithConfigPath()
     {
-        $this->directoryListMock->expects($this->never())
-            ->method('getMagentoRoot');
+        $this->deployConfigMock->expects($this->never())
+            ->method('getConfigFilePath');
 
         $config = ['test' => 'value'];
 
@@ -102,17 +102,5 @@ class ConfigWriterTest extends TestCase
             );
 
         $this->configWriter->update($config, __DIR__ . '/_files/app/etc/config.php');
-    }
-
-    public function testGetConfigPath()
-    {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/_files');
-
-        $this->assertEquals(
-            __DIR__ . '/_files/app/etc/env.php',
-            $this->configWriter->getConfigPath()
-        );
     }
 }
