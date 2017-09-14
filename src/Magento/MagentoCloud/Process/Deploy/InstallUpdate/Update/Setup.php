@@ -88,6 +88,4 @@ class Setup implements ProcessInterface
             $this->file->deleteFile(Environment::REGENERATE_FLAG);
         }
     }
-
-
 }
