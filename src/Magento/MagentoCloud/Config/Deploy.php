@@ -65,8 +65,10 @@ class Deploy
     public function isInstalled(): bool
     {
         $this->logger->info('Checking if db exists and has tables');
-        $output = $this->connection->select('SHOW TABLES');
-        $this->logger->info('Output: ', var_export($output, true));
+        $output = $this->connection->getPdo()
+            ->query('SHOW TABLES')
+            ->fetchAll(\PDO::FETCH_COLUMN);
+        $this->logger->info('Output: ' . var_export($output, true));
 
         if (!is_array($output) || count($output) <= 1) {
             return false;
