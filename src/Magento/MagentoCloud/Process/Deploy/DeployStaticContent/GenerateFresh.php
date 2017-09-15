@@ -100,11 +100,15 @@ class GenerateFresh implements ProcessInterface
         $logMessage = $locales ? "Generating static content for locales: $locales" : "Generating static content.";
         $this->logger->notice($logMessage);
 
-        // @codingStandardsIgnoreStart
         $this->shell->execute(
-            "php ./bin/magento setup:static-content:deploy  -f $jobsOption $excludeThemesOptions $locales {$this->environment->getVerbosityLevel()}"
+            'php ./bin/magento setup:static-content:deploy  -f ' .
+            implode(' ', [
+                $jobsOption,
+                $excludeThemesOptions,
+                $locales,
+                $this->environment->getVerbosityLevel()
+            ])
         );
-        // @codingStandardsIgnoreEnd
 
         /* Disable maintenance mode */
         $this->shell->execute("php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}");
