@@ -52,8 +52,12 @@ class ClearInitDirectory implements ProcessInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
         $envPhpPath = $magentoRoot . '/app/etc/env.php';
+        $initPath = $magentoRoot . '/init/';
         $this->logger->info('Clearing temporary directory.');
-        $this->file->clearDirectory($magentoRoot . '/init/');
+
+        if ($this->file->isExists($initPath)) {
+            $this->file->clearDirectory($initPath);
+        }
 
         if ($this->file->isExists($envPhpPath)) {
             $this->file->deleteFile($envPhpPath);
