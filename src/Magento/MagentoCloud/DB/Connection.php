@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
+use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,18 +24,23 @@ class Connection implements ConnectionInterface
     private $logger;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @var int
      */
     private $fetchMode = \PDO::FETCH_ASSOC;
 
     /**
-     * @param \PDO $pdo
      * @param LoggerInterface $logger
+     * @param Environment $environment
      */
-    public function __construct(\PDO $pdo, LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, Environment $environment)
     {
-        $this->pdo = $pdo;
         $this->logger = $logger;
+        $this->environment = $environment;
     }
 
     /**
@@ -61,7 +67,7 @@ class Connection implements ConnectionInterface
     public function affectingQuery(string $query, array $bindings = []): int
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->pdo->prepare($query);
+            $statement = $this->getPdo()->prepare($query);
 
             $this->bindValues($statement, $bindings);
 
@@ -77,7 +83,7 @@ class Connection implements ConnectionInterface
     public function select(string $query, array $bindings = []): array
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->pdo->prepare($query);
+            $statement = $this->getPdo()->prepare($query);
 
             $this->bindValues($statement, $bindings);
 
@@ -98,7 +104,7 @@ class Connection implements ConnectionInterface
         $query = 'SHOW TABLES';
 
         return $this->run($query, [], function () use ($query) {
-            $statement = $this->pdo->prepare($query);
+            $statement = $this->getPdo()->prepare($query);
             $statement->execute();
 
             return $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
@@ -124,6 +130,16 @@ class Connection implements ConnectionInterface
      */
     public function getPdo(): \PDO
     {
+        if (null === $this->pdo) {
+            $environment = $this->environment;
+
+            $this->pdo = new \PDO(
+                sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
+                $environment->getDbUser(),
+                $environment->getDbPassword()
+            );
+        }
+
         return $this->pdo;
     }
 

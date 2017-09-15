@@ -42,7 +42,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
 
             return \Composer\Factory::create(
                 new \Composer\IO\BufferIO(),
-                $directoryList->getMagentoRoot() .  '/composer.json'
+                $directoryList->getMagentoRoot() . '/composer.json'
             );
         });
         /**
@@ -105,7 +105,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
-                        $this->make(DeployProcess\InstallUpdate\Install\ImportDeploymentConfig::class)
+                        $this->make(DeployProcess\InstallUpdate\Install\ImportDeploymentConfig::class),
                     ],
                 ]);
             });
@@ -165,17 +165,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
-        $this->when(\Magento\MagentoCloud\DB\Connection::class)
-            ->needs(\PDO::class)
-            ->give(function () {
-                $environment = $this->get(\Magento\MagentoCloud\Config\Environment::class);
-
-                return new \PDO(
-                    sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
-                    $environment->getDbUser(),
-                    $environment->getDbPassword()
-                );
-            });
     }
 
     /**
