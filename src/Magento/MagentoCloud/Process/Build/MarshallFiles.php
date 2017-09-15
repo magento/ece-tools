@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,11 +18,6 @@ use Psr\Log\LoggerInterface;
  */
 class MarshallFiles implements ProcessInterface
 {
-    /**
-     * @var ShellInterface
-     */
-    private $shell;
-
     /**
      * @var File
      */
@@ -40,18 +34,15 @@ class MarshallFiles implements ProcessInterface
     private $directoryList;
 
     /**
-     * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        ShellInterface $shell,
         LoggerInterface $logger,
         File $file,
         DirectoryList $directoryList
     ) {
-        $this->shell = $shell;
         $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
@@ -62,11 +53,11 @@ class MarshallFiles implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute('rm -rf generated/code/*');
-        $this->shell->execute('rm -rf generated/metadata/*');
-        $this->shell->execute('rm -rf var/cache');
-
         $magentoRoot = $this->directoryList->getMagentoRoot();
+
+        $this->file->clearDirectory($magentoRoot . '/generated/code/');
+        $this->file->clearDirectory($magentoRoot . '/var/metadata/');
+        $this->file->deleteDirectory($magentoRoot . '/var/cache/');
 
         try {
             $this->file->copy(
