@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 class BuildDirCopier
@@ -23,29 +22,21 @@ class BuildDirCopier
     private $logger;
 
     /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
      * @var File
      */
     private $file;
 
     /**
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
      * @param DirectoryList $directoryList
      * @param File $file
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellInterface $shell,
         DirectoryList $directoryList,
         File $file
     ) {
         $this->logger = $logger;
-        $this->shell = $shell;
         $this->directoryList = $directoryList;
         $this->file = $file;
     }
@@ -56,12 +47,15 @@ class BuildDirCopier
      */
     public function copy($dir)
     {
-        $fullPathDir = $this->directoryList->getMagentoRoot() . '/' . $dir;
-        if (!$this->file->isExists($fullPathDir)) {
-            $this->file->createDirectory($fullPathDir);
+        $magentoRoot = $this->directoryList->getMagentoRoot();
+        $originalDir = $magentoRoot . '/' . $dir;
+        $initDir = $magentoRoot . '/init/' . $dir;
+        if (!$this->file->isExists($originalDir)) {
+            $this->file->createDirectory($originalDir);
             $this->logger->info(sprintf('Created directory: %s', $dir));
         }
-        $this->shell->execute(sprintf('/bin/bash -c "shopt -s dotglob; cp -R ./init/%s/* %s/ || true"', $dir, $dir));
+
+        $this->file->copyDirectory($initDir, $originalDir);
         $this->logger->info(sprintf('Copied directory: %s', $dir));
     }
 }
