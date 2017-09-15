@@ -53,7 +53,13 @@ class ClearInitDirectoryTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @param bool $isExists
+     * @param int $clearDirectory
+     * @param int $deleteFile
+     * @dataProvider executeDataProvider
+     */
+    public function testExecute($isExists, $clearDirectory, $deleteFile)
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -61,15 +67,32 @@ class ClearInitDirectoryTest extends TestCase
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
+        $this->fileMock->expects($this->exactly(2))
+            ->method('isExists')
+            ->willReturnMap([
+                ['magento_root/init/', $isExists],
+                ['magento_root/app/etc/env.php', $isExists]
+            ]);
+        $this->fileMock->expects($this->exactly($clearDirectory))
             ->method('clearDirectory')
             ->with('magento_root/init/')
             ->willReturn(true);
-        $this->fileMock->expects($this->once())
+        $this->fileMock->expects($this->exactly($deleteFile))
             ->method('deleteFile')
             ->with('magento_root/app/etc/env.php')
             ->willReturn(true);
 
         $this->process->execute();
+    }
+
+    /**
+     * @return array
+     */
+    public function executeDataProvider()
+    {
+        return [
+            ['isExists' => true, 'clearDirectory' => 1, 'deleteFile' => 1],
+            ['isExists' => false, 'clearDirectory' => 0, 'deleteFile' => 0],
+        ];
     }
 }

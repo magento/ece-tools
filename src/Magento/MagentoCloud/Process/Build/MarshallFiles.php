@@ -7,9 +7,7 @@ namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * Marshalls required files.
@@ -24,26 +22,18 @@ class MarshallFiles implements ProcessInterface
     private $file;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @var DirectoryList
      */
     private $directoryList;
 
     /**
-     * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        LoggerInterface $logger,
         File $file,
         DirectoryList $directoryList
     ) {
-        $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
     }
@@ -54,7 +44,7 @@ class MarshallFiles implements ProcessInterface
     public function execute()
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
-
+        $enterpriseFolder = $magentoRoot . '/app/enterprise';
         $generatedCode = $magentoRoot . '/generated/code/';
         $generatedMetadata = $magentoRoot . '/generated/metadata/';
         $varCache = $magentoRoot . '/var/cache/';
@@ -71,24 +61,18 @@ class MarshallFiles implements ProcessInterface
             $this->file->deleteDirectory($varCache);
         }
 
-        try {
-            $this->file->copy(
-                $magentoRoot . '/app/etc/di.xml',
-                $magentoRoot . '/app/di.xml'
-            );
+        $this->file->copy(
+            $magentoRoot . '/app/etc/di.xml',
+            $magentoRoot . '/app/di.xml'
+        );
 
-            $enterpriseFolder = $magentoRoot . '/app/enterprise';
-
-            if (!$this->file->isExists($enterpriseFolder)) {
-                $this->file->createDirectory($enterpriseFolder, 0777);
-            }
-
-            $this->file->copy(
-                $magentoRoot . '/app/etc/enterprise/di.xml',
-                $magentoRoot . '/app/enterprise/di.xml'
-            );
-        } catch (FileSystemException $e) {
-            $this->logger->warning($e->getMessage());
+        if (!$this->file->isExists($enterpriseFolder)) {
+            $this->file->createDirectory($enterpriseFolder, 0777);
         }
+
+        $this->file->copy(
+            $magentoRoot . '/app/etc/enterprise/di.xml',
+            $magentoRoot . '/app/enterprise/di.xml'
+        );
     }
 }

@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\PasswordGenerator;
-use Magento\MagentoCloud\DB\Adapter;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\AdminCredentials;
 use Magento\MagentoCloud\Config\Environment;
 
@@ -28,9 +28,9 @@ class AdminCredentialsTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var Adapter|\PHPUnit_Framework_MockObject_MockObject
+     * @var ConnectionInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $adapterMock;
+    private $connectionMock;
 
     /**
      * @var PasswordGenerator|\PHPUnit_Framework_MockObject_MockObject
@@ -49,14 +49,15 @@ class AdminCredentialsTest extends TestCase
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
+        $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
+            ->getMockForAbstractClass();
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->adapterMock = $this->createMock(Adapter::class);
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
 
         $this->adminCredentials = new AdminCredentials(
             $this->loggerMock,
+            $this->connectionMock,
             $this->environmentMock,
-            $this->adapterMock,
             $this->passwordGeneratorMock
         );
     }
@@ -69,6 +70,9 @@ class AdminCredentialsTest extends TestCase
         $lastName = 'Doe';
         $email = 'JohnDoe@example.com';
         $userName = 'admin';
+
+        $query = 'UPDATE `admin_user` SET `firstname` = ?, `lastname` = ?, `email` = ?, `username` = ?, `password` = ?'
+            . ' WHERE `user_id` = 1';
 
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -92,12 +96,11 @@ class AdminCredentialsTest extends TestCase
             ->method('generate')
             ->with($adminPassword)
             ->willReturn($generatedPassword);
-        $this->adapterMock->expects($this->once())
-            ->method('execute')
+        $this->connectionMock->expects($this->once())
+            ->method('affectingQuery')
             ->with(
-                "update admin_user set firstname = '" . $firstName . "', lastname = '" . $lastName
-                . "', email = '" . $email . "', username = '" . $userName . "', password='" . $generatedPassword
-                . "' where user_id = '1';"
+                $query,
+                [$firstName, $lastName, $email, $userName, $generatedPassword]
             );
 
         $this->adminCredentials->execute();
