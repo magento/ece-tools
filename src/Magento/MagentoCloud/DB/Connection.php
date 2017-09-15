@@ -40,10 +40,8 @@ class Connection implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function query(
-        string $query,
-        array $bindings = []
-    ): bool {
+    public function query(string $query, array $bindings = []): bool
+    {
         return $this->run($query, $bindings, function ($query, $bindings) {
             $statement = $this->pdo->prepare($query);
 
@@ -60,10 +58,24 @@ class Connection implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function select(
-        string $query,
-        array $bindings = []
-    ): array {
+    public function affectingQuery(string $query, array $bindings = []): int
+    {
+        return $this->run($query, $bindings, function ($query, $bindings) {
+            $statement = $this->pdo->prepare($query);
+
+            $this->bindValues($statement, $bindings);
+
+            $statement->execute();
+
+            return $statement->rowCount();
+        });
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function select(string $query, array $bindings = []): array
+    {
         return $this->run($query, $bindings, function ($query, $bindings) {
             $statement = $this->pdo->prepare($query);
 
@@ -124,6 +136,10 @@ class Connection implements ConnectionInterface
     private function run(string $query, array $bindings, \Closure $closure)
     {
         $this->logger->info('Query: ' . $query);
+
+        if ($bindings) {
+            $this->logger->info('Query bindings: ' . var_export($bindings, true));
+        }
 
         return $closure($query, $bindings);
     }

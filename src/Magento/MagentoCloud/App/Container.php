@@ -42,7 +42,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
 
             return \Composer\Factory::create(
                 new \Composer\IO\BufferIO(),
-                $directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR . 'composer.json'
+                $directoryList->getMagentoRoot() .  '/composer.json'
             );
         });
         /**
