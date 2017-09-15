@@ -425,6 +425,10 @@ class File
      */
     public function clearDirectory($path)
     {
+        if (!$this->isExists($path)) {
+            return true;
+        }
+
         $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
         $iterator = new \FilesystemIterator($path, $flags);
         /** @var \FilesystemIterator $entity */
