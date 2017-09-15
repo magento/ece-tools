@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Adapter;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -38,6 +39,11 @@ class GenerateFresh implements ProcessInterface
     private $adapter;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @var DirectoryList
      */
     private $directoryList;
@@ -47,6 +53,7 @@ class GenerateFresh implements ProcessInterface
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param Adapter $adapter
+     * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
@@ -54,20 +61,20 @@ class GenerateFresh implements ProcessInterface
         LoggerInterface $logger,
         Environment $environment,
         Adapter $adapter,
+        File $file,
         DirectoryList $directoryList
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
         $this->environment = $environment;
         $this->adapter = $adapter;
+        $this->file = $file;
         $this->directoryList = $directoryList;
     }
 
     public function execute()
     {
-        $this->shell->execute(
-            'touch ' . $this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt'
-        );
+        $this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt');
         /* Enable maintenance mode */
         $this->logger->notice('Enabling Maintenance mode.');
         $this->shell->execute("php ./bin/magento maintenance:enable {$this->environment->getVerbosityLevel()}");
