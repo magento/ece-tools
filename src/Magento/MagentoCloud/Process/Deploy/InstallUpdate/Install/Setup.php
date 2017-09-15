@@ -74,9 +74,10 @@ class Setup implements ProcessInterface
             --admin-email={$this->environment->getAdminEmail()} \
             --admin-password={$this->environment->getAdminPassword()}";
 
-        if (strlen($this->environment->getDbPassword())) {
+        $dbPassword = $this->environment->getDbPassword();
+        if (strlen($dbPassword)) {
             $command .= " \
-            --db-password={$this->environment->getDbPassword()}";
+            --db-password={$dbPassword}";
         }
 
         $command .= $this->environment->getVerbosityLevel();

@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Class Adapter.
+ *
+ * @deprecated
+ * @see ConnectionInterface
  */
 class Adapter
 {
@@ -36,10 +39,9 @@ class Adapter
     /**
      * Execute the query.
      *
-     * TODO: Use MySQL Adapter.
-     *
      * @param string $query
      * @return string
+     * @deprecated
      */
     public function execute(string $query)
     {

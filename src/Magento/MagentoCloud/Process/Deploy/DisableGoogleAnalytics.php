@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\DB\Adapter;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -16,9 +16,9 @@ use Psr\Log\LoggerInterface;
 class DisableGoogleAnalytics implements ProcessInterface
 {
     /**
-     * @var Adapter
+     * @var ConnectionInterface
      */
-    private $adapter;
+    private $connection;
 
     /**
      * @var LoggerInterface
@@ -31,13 +31,13 @@ class DisableGoogleAnalytics implements ProcessInterface
     private $environment;
 
     /**
-     * @param Adapter $adapter
+     * @param ConnectionInterface $connection
      * @param LoggerInterface $logger
      * @param Environment $environment
      */
-    public function __construct(Adapter $adapter, LoggerInterface $logger, Environment $environment)
+    public function __construct(ConnectionInterface $connection, LoggerInterface $logger, Environment $environment)
     {
-        $this->adapter = $adapter;
+        $this->connection = $connection;
         $this->logger = $logger;
         $this->environment = $environment;
     }
@@ -49,7 +49,9 @@ class DisableGoogleAnalytics implements ProcessInterface
     {
         if (!$this->environment->isMasterBranch()) {
             $this->logger->info('Disabling Google Analytics');
-            $this->adapter->execute("update core_config_data set value = 0 where path = 'google/analytics/active';");
+            $this->connection->affectingQuery(
+                "UPDATE `core_config_data` SET `value` = 0 WHERE `path` = 'google/analytics/active'"
+            );
         }
     }
 }

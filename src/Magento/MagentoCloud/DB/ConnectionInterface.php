@@ -13,11 +13,22 @@ namespace Magento\MagentoCloud\DB;
 interface ConnectionInterface
 {
     /**
+     * Read queries.
+     *
      * @param string $query
      * @param array $bindings
      * @return bool
      */
     public function query(string $query, array $bindings = []): bool;
+
+    /**
+     * State changing queries.
+     *
+     * @param string $query
+     * @param array $bindings
+     * @return int
+     */
+    public function affectingQuery(string $query, array $bindings = []): int;
 
     /**
      * @param string $query

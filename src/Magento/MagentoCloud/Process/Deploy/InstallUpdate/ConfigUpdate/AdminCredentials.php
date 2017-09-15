@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Util\PasswordGenerator;
-use Magento\MagentoCloud\DB\Adapter;
 
 class AdminCredentials implements ProcessInterface
 {
@@ -24,32 +24,33 @@ class AdminCredentials implements ProcessInterface
     private $environment;
 
     /**
-     * @var Adapter
-     */
-    private $adapter;
-
-    /**
      * @var PasswordGenerator
      */
     private $passwordGenerator;
 
     /**
+     * @var ConnectionInterface
+     */
+    private $connection;
+
+    /**
      * @param LoggerInterface $logger
+     * @param ConnectionInterface $connection
      * @param Environment $environment
-     * @param Adapter $adapter
      * @param PasswordGenerator $passwordGenerator
      */
     public function __construct(
         LoggerInterface $logger,
+        ConnectionInterface $connection,
         Environment $environment,
-        Adapter $adapter,
         PasswordGenerator $passwordGenerator
     ) {
         $this->logger = $logger;
+        $this->connection = $connection;
         $this->environment = $environment;
-        $this->adapter = $adapter;
         $this->passwordGenerator = $passwordGenerator;
     }
+
     /**
      * @inheritdoc
      */
@@ -61,16 +62,18 @@ class AdminCredentials implements ProcessInterface
             $this->environment->getAdminPassword()
         );
 
-        $query = sprintf(
-            "update admin_user set firstname = '%s', lastname = '%s', email = '%s', username = '%s', password='%s'" .
-            " where user_id = '1';",
-            $this->environment->getAdminFirstname(),
-            $this->environment->getAdminLastname(),
-            $this->environment->getAdminEmail(),
-            $this->environment->getAdminUsername(),
-            $password
-        );
+        $query = 'UPDATE `admin_user` SET `firstname` = ?, `lastname` = ?, `email` = ?, `username` = ?, `password` = ?'
+            . ' WHERE `user_id` = 1';
 
-        $this->adapter->execute($query);
+        $this->connection->affectingQuery(
+            $query,
+            [
+                $this->environment->getAdminFirstname(),
+                $this->environment->getAdminLastname(),
+                $this->environment->getAdminEmail(),
+                $this->environment->getAdminUsername(),
+                $password,
+            ]
+        );
     }
 }
