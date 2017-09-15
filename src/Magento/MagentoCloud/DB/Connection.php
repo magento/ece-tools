@@ -40,9 +40,21 @@ class Connection implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function getPdo(): \PDO
-    {
-        return $this->pdo;
+    public function query(
+        string $query,
+        array $bindings = []
+    ): bool {
+        return $this->run($query, $bindings, function ($query, $bindings) {
+            $statement = $this->pdo->prepare($query);
+
+            $this->bindValues($statement, $bindings);
+
+            $statement->setFetchMode(
+                $this->fetchMode
+            );
+
+            return $statement->execute();
+        });
     }
 
     /**
@@ -50,11 +62,10 @@ class Connection implements ConnectionInterface
      */
     public function select(
         string $query,
-        array $bindings = [],
-        int $fetchMode = \PDO::FETCH_ASSOC
+        array $bindings = []
     ): array {
         return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->getPdo()->prepare($query);
+            $statement = $this->pdo->prepare($query);
 
             $this->bindValues($statement, $bindings);
 
@@ -75,7 +86,7 @@ class Connection implements ConnectionInterface
         $query = 'SHOW TABLES';
 
         return $this->run($query, [], function () use ($query) {
-            $statement = $this->getPdo()->prepare($query);
+            $statement = $this->pdo->prepare($query);
             $statement->execute();
 
             return $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
@@ -94,6 +105,14 @@ class Connection implements ConnectionInterface
                 is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR
             );
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getPdo(): \PDO
+    {
+        return $this->pdo;
     }
 
     /**

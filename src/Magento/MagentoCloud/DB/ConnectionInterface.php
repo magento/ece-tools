@@ -5,20 +5,26 @@
  */
 namespace Magento\MagentoCloud\DB;
 
+/**
+ * Interface ConnectionInterface
+ *
+ * @package Magento\MagentoCloud\DB
+ */
 interface ConnectionInterface
 {
     /**
-     * @return \PDO
+     * @param string $query
+     * @param array $bindings
+     * @return bool
      */
-    public function getPdo(): \PDO;
+    public function query(string $query, array $bindings = []): bool;
 
     /**
      * @param string $query
      * @param array $bindings
-     * @param int $fetchMode
      * @return array
      */
-    public function select(string $query, array $bindings = [], int $fetchMode = \PDO::FETCH_ASSOC): array;
+    public function select(string $query, array $bindings = []): array;
 
     /**
      * @return array
@@ -31,4 +37,9 @@ interface ConnectionInterface
      * @return mixed
      */
     public function bindValues(\PDOStatement $statement, array $bindings);
+
+    /**
+     * @return \PDO
+     */
+    public function getPdo(): \PDO;
 }
