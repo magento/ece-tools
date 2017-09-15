@@ -8,18 +8,12 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanFileCache;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 class CleanFileCacheTest extends TestCase
 {
-    /**
-     * @var ShellInterface|Mock
-     */
-    private $shellMock;
-
     /**
      * @var LoggerInterface|Mock
      */
@@ -42,8 +36,6 @@ class CleanFileCacheTest extends TestCase
 
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
@@ -51,7 +43,6 @@ class CleanFileCacheTest extends TestCase
 
         $this->process = new CleanFileCache(
             $this->loggerMock,
-            $this->shellMock,
             $this->directoryListMock,
             $this->fileMock
         );
@@ -66,12 +57,13 @@ class CleanFileCacheTest extends TestCase
             ->method('isExists')
             ->with('/path/to/root/var/cache')
             ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('deleteDirectory')
+            ->with('/path/to/root/var/cache')
+            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Clearing var/cache directory');
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->with('rm -rf /path/to/root/var/cache');
 
         $this->process->execute();
     }
@@ -85,10 +77,10 @@ class CleanFileCacheTest extends TestCase
             ->method('isExists')
             ->with('/path/to/root/var/cache')
             ->willReturn(false);
+        $this->fileMock->expects($this->never())
+            ->method('deleteDirectory');
         $this->loggerMock->expects($this->never())
             ->method('info');
-        $this->shellMock->expects($this->never())
-            ->method('execute');
 
         $this->process->execute();
     }
