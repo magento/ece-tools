@@ -62,7 +62,7 @@ class ClearInitDirectoryTest extends TestCase
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
-            ->method('deleteDirectory')
+            ->method('clearDirectory')
             ->with('magento_root/init/')
             ->willReturn(true);
         $this->fileMock->expects($this->once())
