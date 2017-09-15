@@ -39,6 +39,8 @@ class ConnectionTest extends TestCase
      */
     protected function setUp()
     {
+        $this->markTestSkipped();
+
         $this->pdoMock = $this->getMockBuilder(\PDO::class)
             ->disableOriginalConstructor()
             ->getMock();
