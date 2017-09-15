@@ -5,9 +5,22 @@
  */
 namespace Magento\MagentoCloud\DB;
 
+use Psr\Log\LoggerInterface;
+
+/**
+ * @inheritdoc
+ */
 class Connection implements ConnectionInterface
 {
+    /**
+     * @var \PDO
+     */
     private $pdo;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     /**
      * @var int
@@ -16,10 +29,12 @@ class Connection implements ConnectionInterface
 
     /**
      * @param \PDO $pdo
+     * @param LoggerInterface $logger
      */
-    public function __construct(\PDO $pdo)
+    public function __construct(\PDO $pdo, LoggerInterface $logger)
     {
         $this->pdo = $pdo;
+        $this->logger = $logger;
     }
 
     /**
@@ -38,16 +53,18 @@ class Connection implements ConnectionInterface
         array $bindings = [],
         int $fetchMode = \PDO::FETCH_ASSOC
     ): array {
-        $statement = $this->getPdo()->prepare($query);
+        return $this->run($query, $bindings, function ($query, $bindings) {
+            $statement = $this->getPdo()->prepare($query);
 
-        $this->bindValues($statement, $bindings);
+            $this->bindValues($statement, $bindings);
 
-        $statement->setFetchMode(
-            $this->fetchMode
-        );
-        $statement->execute();
+            $statement->setFetchMode(
+                $this->fetchMode
+            );
+            $statement->execute();
 
-        return $statement->fetchAll();
+            return $statement->fetchAll();
+        });
     }
 
     /**
@@ -55,10 +72,14 @@ class Connection implements ConnectionInterface
      */
     public function listTables(): array
     {
-        $statement = $this->getPdo()->prepare('SHOW TABLES');
-        $statement->execute();
+        $query = 'SHOW TABLES';
 
-        return $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+        return $this->run($query, [], function () use ($query) {
+            $statement = $this->getPdo()->prepare($query);
+            $statement->execute();
+
+            return $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+        });
     }
 
     /**
@@ -68,9 +89,23 @@ class Connection implements ConnectionInterface
     {
         foreach ($bindings as $key => $value) {
             $statement->bindValue(
-                is_string($key) ? $key : $key + 1, $value,
+                is_string($key) ? $key : $key + 1,
+                $value,
                 is_int($value) ? \PDO::PARAM_INT : \PDO::PARAM_STR
             );
         }
+    }
+
+    /**
+     * @param string $query
+     * @param array $bindings
+     * @param \Closure $closure
+     * @return mixed
+     */
+    private function run(string $query, array $bindings, \Closure $closure)
+    {
+        $this->logger->info('Query: ' . $query);
+
+        return $closure($query, $bindings);
     }
 }

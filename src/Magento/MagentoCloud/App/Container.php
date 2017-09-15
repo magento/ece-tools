@@ -45,17 +45,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 $directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR . 'composer.json'
             );
         });
-        $this->bind(\Magento\MagentoCloud\DB\ConnectionInterface::class, function () {
-            $environment = $this->get(\Magento\MagentoCloud\Config\Environment::class);
-
-            return new \Magento\MagentoCloud\DB\Connection(
-                new \PDO(
-                    sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
-                    $environment->getDbUser(),
-                    $environment->getDbPassword()
-                )
-            );
-        });
         /**
          * Interface to implementation binding.
          */
@@ -70,7 +59,10 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
         $this->singleton(\Magento\MagentoCloud\Util\ComponentInfo::class);
         $this->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
-
+        $this->bind(
+            \Magento\MagentoCloud\DB\ConnectionInterface::class,
+            \Magento\MagentoCloud\DB\Connection::class
+        );
         /**
          * Contextual binding.
          */
@@ -112,7 +104,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     'processes' => [
                         DeployProcess\InstallUpdate\Install\Setup::class,
                         DeployProcess\InstallUpdate\Install\SecureAdmin::class,
-                        DeployProcess\InstallUpdate\ConfigUpdate::class
+                        DeployProcess\InstallUpdate\ConfigUpdate::class,
                     ],
                 ]);
             });
@@ -123,7 +115,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     'processes' => [
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
                         $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
-                        $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class)
+                        $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class),
                     ],
                 ]);
             });
@@ -135,7 +127,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\EnvPhp::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\AdminCredentials::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
-                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
                     ],
                 ]);
             });
@@ -172,6 +164,17 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
+        $this->when(\Magento\MagentoCloud\DB\Connection::class)
+            ->needs(\PDO::class)
+            ->give(function () {
+                $environment = $this->get(\Magento\MagentoCloud\Config\Environment::class);
+
+                return new \PDO(
+                    sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
+                    $environment->getDbUser(),
+                    $environment->getDbPassword()
+                );
+            });
     }
 
     /**
