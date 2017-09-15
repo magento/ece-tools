@@ -19,7 +19,7 @@ class AdminCredentials implements ProcessInterface
     private $logger;
 
     /**
-     * @var EnvPhp
+     * @var Environment
      */
     private $environment;
 
