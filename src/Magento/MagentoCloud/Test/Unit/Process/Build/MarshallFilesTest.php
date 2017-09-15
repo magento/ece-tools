@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\Build\MarshallFiles;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -22,11 +21,6 @@ class MarshallFilesTest extends TestCase
      * @var MarshallFiles
      */
     private $process;
-
-    /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $shellMock;
 
     /**
      * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
@@ -48,8 +42,6 @@ class MarshallFilesTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->fileMock = $this->getMockBuilder(File::class)
@@ -63,7 +55,6 @@ class MarshallFilesTest extends TestCase
             ->willReturn('magento_root');
 
         $this->process = new MarshallFiles(
-            $this->shellMock,
             $this->loggerMock,
             $this->fileMock,
             $this->directoryListMock
@@ -72,13 +63,17 @@ class MarshallFilesTest extends TestCase
 
     public function testExecute()
     {
-        $this->shellMock->expects($this->exactly(3))
-            ->method('execute')
+        $this->fileMock->expects($this->exactly(2))
+            ->method('clearDirectory')
             ->withConsecutive(
-                ['rm -rf generated/code/*'],
-                ['rm -rf generated/metadata/*'],
-                ['rm -rf var/cache']
-            );
+                ['magento_root/generated/code/'],
+                ['magento_root/var/metadata/']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('deleteDirectory')
+            ->with('magento_root/var/cache/')
+            ->willReturn(true);
         $this->fileMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
@@ -95,13 +90,17 @@ class MarshallFilesTest extends TestCase
 
     public function testExecuteNoEnterpriseFolder()
     {
-        $this->shellMock->expects($this->exactly(3))
-            ->method('execute')
+        $this->fileMock->expects($this->exactly(2))
+            ->method('clearDirectory')
             ->withConsecutive(
-                ['rm -rf generated/code/*'],
-                ['rm -rf generated/metadata/*'],
-                ['rm -rf var/cache']
-            );
+                ['magento_root/generated/code/'],
+                ['magento_root/var/metadata/']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('deleteDirectory')
+            ->with('magento_root/var/cache/')
+            ->willReturn(true);
         $this->fileMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
@@ -121,13 +120,17 @@ class MarshallFilesTest extends TestCase
 
     public function testExecuteWithException()
     {
-        $this->shellMock->expects($this->exactly(3))
-            ->method('execute')
+        $this->fileMock->expects($this->exactly(2))
+            ->method('clearDirectory')
             ->withConsecutive(
-                ['rm -rf generated/code/*'],
-                ['rm -rf generated/metadata/*'],
-                ['rm -rf var/cache']
-            );
+                ['magento_root/generated/code/'],
+                ['magento_root/var/metadata/']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('deleteDirectory')
+            ->with('magento_root/var/cache/')
+            ->willReturn(true);
         $this->fileMock->expects($this->any())
             ->method('copy')
             ->willThrowException(new FileSystemException('Some exception'));
