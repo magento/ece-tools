@@ -49,7 +49,7 @@ class Connection implements ConnectionInterface
     public function query(string $query, array $bindings = []): bool
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->pdo->prepare($query);
+            $statement = $this->getPdo()->prepare($query);
 
             $this->bindValues($statement, $bindings);
 
