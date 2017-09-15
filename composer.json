@@ -11,7 +11,6 @@
     "monolog/monolog": "^1.17",
     "symfony/console": "^2.6",
     "illuminate/container": "^5.5",
-    "illuminate/database": "^5.5",
     "psr/log": "^1.0",
     "psr/container": "^1.0",
     "composer/composer": "@stable"
