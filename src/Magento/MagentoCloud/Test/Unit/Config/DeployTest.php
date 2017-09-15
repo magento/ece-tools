@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
-use Illuminate\Database\ConnectionInterface;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
@@ -40,19 +40,9 @@ class DeployTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var \PDO|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $pdoMock;
-
-    /**
      * @var Deploy
      */
     private $deploy;
-
-    /**
-     * @var \PDOStatement|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $queryMock;
 
     /**
      * @inheritdoc
@@ -62,24 +52,9 @@ class DeployTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
-            ->setMethods(['getPdo'])
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->pdoMock = $this->getMockBuilder(\PDO::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->queryMock = $this->getMockBuilder(\PDOStatement::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->connectionMock->expects($this->any())
-            ->method('getPdo')
-            ->willReturn($this->pdoMock);
-        $this->pdoMock->expects($this->any())
-            ->method('query')
-            ->with('SHOW TABLES')
-            ->willReturn($this->queryMock);
 
         $this->deploy = new Deploy(
             $this->loggerMock,
@@ -98,9 +73,8 @@ class DeployTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Checking if db exists and has tables');
-        $this->queryMock->expects($this->once())
-            ->method('fetchAll')
-            ->with(\PDO::FETCH_COLUMN)
+        $this->connectionMock->expects($this->once())
+            ->method('listTables')
             ->willReturn($tables);
         $this->fileMock->expects($this->never())
             ->method('filePutContents');
@@ -113,7 +87,7 @@ class DeployTest extends TestCase
      */
     public function tablesCountDataProvider(): array
     {
-        return [[''], [['table1']]];
+        return [[['']], [['table1']]];
     }
 
     /**
@@ -127,9 +101,8 @@ class DeployTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Checking if db exists and has tables');
-        $this->queryMock->expects($this->once())
-            ->method('fetchAll')
-            ->with(\PDO::FETCH_COLUMN)
+        $this->connectionMock->expects($this->once())
+            ->method('listTables')
             ->willReturn($tables);
         $this->fileMock->expects($this->never())
             ->method('filePutContents');
@@ -159,9 +132,8 @@ class DeployTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Checking if db exists and has tables');
-        $this->queryMock->expects($this->once())
-            ->method('fetchAll')
-            ->with(\PDO::FETCH_COLUMN)
+        $this->connectionMock->expects($this->once())
+            ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -195,9 +167,8 @@ class DeployTest extends TestCase
                 ['Checking if db exists and has tables'],
                 ['Magento was installed on ' . $date]
             );
-        $this->queryMock->expects($this->once())
-            ->method('fetchAll')
-            ->with(\PDO::FETCH_COLUMN)
+        $this->connectionMock->expects($this->once())
+            ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -223,9 +194,8 @@ class DeployTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Checking if db exists and has tables');
-        $this->queryMock->expects($this->once())
-            ->method('fetchAll')
-            ->with(\PDO::FETCH_COLUMN)
+        $this->connectionMock->expects($this->once())
+            ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')

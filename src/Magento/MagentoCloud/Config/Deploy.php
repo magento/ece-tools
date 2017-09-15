@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Illuminate\Database\ConnectionInterface;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
@@ -67,9 +67,7 @@ class Deploy
     {
         $this->logger->info('Checking if db exists and has tables');
 
-        /** @var \PDO $pdo */
-        $pdo = $this->connection->getPdo();
-        $output = $pdo->query('SHOW TABLES')->fetchAll(\PDO::FETCH_COLUMN);
+        $output = $this->connection->listTables();
 
         if (!is_array($output) || count($output) <= 1) {
             return false;
