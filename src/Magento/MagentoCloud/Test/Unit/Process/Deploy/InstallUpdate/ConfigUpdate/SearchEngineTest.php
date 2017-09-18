@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
-use Magento\MagentoCloud\Util\ConfigWriter;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -25,9 +25,9 @@ class SearchEngineTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var DeployConfig|Mock
      */
-    private $configWriterMock;
+    private $deployCongigMock;
 
     /**
      * @var SearchEngine
@@ -37,13 +37,13 @@ class SearchEngineTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->configWriterMock = $this->createMock(ConfigWriter::class);
+        $this->deployCongigMock = $this->createMock(DeployConfig::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->process = new SearchEngine(
             $this->environmentMock,
             $this->loggerMock,
-            $this->configWriterMock
+            $this->deployCongigMock
         );
     }
 

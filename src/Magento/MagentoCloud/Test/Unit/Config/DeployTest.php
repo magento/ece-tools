@@ -135,7 +135,7 @@ class DeployTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
-        $this->directoryListMock->expects($this->once())
+        $this->directoryListMock->expects($this->exactly(2))
             ->method('getMagentoRoot')
             ->willReturn($pathRoot);
         $this->fileMock->expects($this->once())
@@ -150,7 +150,7 @@ class DeployTest extends TestCase
 
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
-            ->with($configPath, '<?php' . "\n" . 'return ' . var_export($config, true) . ';');
+            ->with($configPath, '<?php' . PHP_EOL . 'return ' . var_export($config, true) . ';');
 
         $this->assertTrue($this->deploy->isInstalled());
     }

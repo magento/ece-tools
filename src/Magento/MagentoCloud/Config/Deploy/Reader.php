@@ -3,15 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Config\Build;
+namespace Magento\MagentoCloud\Config\Deploy;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
-/**
- * @inheritdoc
- */
 class Reader implements ReaderInterface
 {
     /**
@@ -35,13 +32,16 @@ class Reader implements ReaderInterface
     }
 
     /**
-     * @inheritdoc
+     * @return array
      */
     public function read(): array
     {
-        $fileName = $this->getPath();
+        $configPath = $this->getPath();
+        if (!$this->file->isExists($configPath)) {
+            return [];
+        }
 
-        return $this->file->isExists($fileName) ? $this->file->parseIni($fileName) : [];
+        return include $configPath;
     }
 
     /**
@@ -49,6 +49,6 @@ class Reader implements ReaderInterface
      */
     public function getPath(): string
     {
-        return $this->directoryList->getMagentoRoot() . '/build_options.ini';
+        return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
     }
 }
