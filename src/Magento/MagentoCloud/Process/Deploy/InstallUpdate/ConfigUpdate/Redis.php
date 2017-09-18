@@ -7,8 +7,8 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\ConfigWriter;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 class Redis implements ProcessInterface
@@ -29,26 +29,26 @@ class Redis implements ProcessInterface
     private $configWriter;
 
     /**
-     * @var DeployConfig
+     * @var ConfigReader
      */
-    private $deployConfig;
+    private $configReader;
 
     /**
      * @param Environment $environment
+     * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
-     * @param DeployConfig $deployConfig
      */
     public function __construct(
         Environment $environment,
+        ConfigReader $configReader,
         ConfigWriter $configWriter,
-        LoggerInterface $logger,
-        DeployConfig $deployConfig
+        LoggerInterface $logger
     ) {
         $this->environment = $environment;
-        $this->logger = $logger;
+        $this->configReader = $configReader;
         $this->configWriter = $configWriter;
-        $this->deployConfig = $deployConfig;
+        $this->logger = $logger;
     }
 
     /**
@@ -57,7 +57,7 @@ class Redis implements ProcessInterface
     public function execute()
     {
         $redisConfig = $this->environment->getRelationship('redis');
-        $config = $this->deployConfig->getConfig();
+        $config = $this->configReader->read();
 
         if (count($redisConfig)) {
             $this->logger->info('Updating env.php Redis cache configuration.');
@@ -90,7 +90,7 @@ class Redis implements ProcessInterface
         $config['backend']['frontName'] = $this->environment->getAdminUrl();
         $config['resource']['default_setup']['connection'] = 'default';
 
-        $this->configWriter->write($config);
+        $this->configWriter->update($config);
     }
 
     /**

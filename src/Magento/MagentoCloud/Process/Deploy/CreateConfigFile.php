@@ -6,8 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Deploy\Writer as DeployConfigWriter;
 
 /**
  * @inheritdoc
@@ -15,23 +14,16 @@ use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 class CreateConfigFile implements ProcessInterface
 {
     /**
-     * @var File
+     * @var DeployConfigWriter
      */
-    private $file;
+    private $deploymentConfigWriter;
 
     /**
-     * @var DeployConfig
+     * @param DeployConfigWriter $deploymentConfigWriter
      */
-    private $deployConfig;
-
-    /**
-     * @param DeployConfig $deployConfig
-     * @param File $file
-     */
-    public function __construct(DeployConfig $deployConfig, File $file)
+    public function __construct(DeployConfigWriter $deploymentConfigWriter)
     {
-        $this->deployConfig = $deployConfig;
-        $this->file = $file;
+        $this->deploymentConfigWriter = $deploymentConfigWriter;
     }
 
     /**
@@ -39,13 +31,6 @@ class CreateConfigFile implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = $this->deployConfig->getConfigFilePath();
-
-        if ($this->file->isExists($configFile)) {
-            return;
-        }
-
-        $updatedConfig = '<?php' . "\n" . 'return array();';
-        $this->file->filePutContents($configFile, $updatedConfig);
+        $this->deploymentConfigWriter->update([]);
     }
 }

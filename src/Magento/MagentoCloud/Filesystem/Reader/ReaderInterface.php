@@ -14,4 +14,9 @@ interface ReaderInterface
      * @return array
      */
     public function read(): array;
+
+    /**
+     * @return string
+     */
+    public function getPath(): string;
 }
