@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Util\ConfigWriter;
 use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Psr\Log\LoggerInterface;
 
-class EnvPhp implements ProcessInterface
+class Redis implements ProcessInterface
 {
     /**
      * @var Environment
@@ -56,34 +56,9 @@ class EnvPhp implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Updating env.php configuration.');
-
-        $config = include $this->deployConfig->getConfigFilePath();
-
-        $config['db']['connection']['default']['username'] = $this->environment->getDbUser();
-        $config['db']['connection']['default']['host'] = $this->environment->getDbHost();
-        $config['db']['connection']['default']['dbname'] = $this->environment->getDbName();
-        $config['db']['connection']['default']['password'] = $this->environment->getDbPassword();
-
-        $config['db']['connection']['indexer']['username'] = $this->environment->getDbUser();
-        $config['db']['connection']['indexer']['host'] = $this->environment->getDbHost();
-        $config['db']['connection']['indexer']['dbname'] = $this->environment->getDbName();
-        $config['db']['connection']['indexer']['password'] = $this->environment->getDbPassword();
-
-        $mqConfig = $this->environment->getRelationship('mq');
-        if (count($mqConfig)) {
-            $amqpConfig = $mqConfig[0];
-            $config['queue']['amqp']['host'] = $amqpConfig['host'];
-            $config['queue']['amqp']['port'] = $amqpConfig['port'];
-            $config['queue']['amqp']['user'] = $amqpConfig['username'];
-            $config['queue']['amqp']['password'] = $amqpConfig['password'];
-            $config['queue']['amqp']['virtualhost'] = '/';
-            $config['queue']['amqp']['ssl'] = '';
-        } else {
-            $config = $this->removeAmqpConfig($config);
-        }
-
         $redisConfig = $this->environment->getRelationship('redis');
+        $config = $this->deployConfig->getConfig();
+
         if (count($redisConfig)) {
             $this->logger->info('Updating env.php Redis cache configuration.');
             $redisCache = [
@@ -116,27 +91,6 @@ class EnvPhp implements ProcessInterface
         $config['resource']['default_setup']['connection'] = 'default';
 
         $this->configWriter->write($config);
-    }
-
-    /**
-     * Remove AMQP configuration from env.php
-     *
-     * @param array $config
-     * @return array
-     */
-    private function removeAmqpConfig(array $config)
-    {
-        $this->logger->info('Removing AMQP configuration from env.php.');
-
-        if (isset($config['queue']['amqp'])) {
-            if (count($config['queue']) > 1) {
-                unset($config['queue']['amqp']);
-            } else {
-                unset($config['queue']);
-            }
-        }
-
-        return $config;
     }
 
     /**

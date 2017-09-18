@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Config;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -77,31 +78,16 @@ class Deploy
             throw new \Exception('Missing either core_config_data or setup_module table', 5);
         }
 
-        $configPath = $this->getConfigFilePath();
-
-        if (!$this->file->isExists($configPath)) {
-            $this->updateConfig($configPath);
-
-            return true;
+        try {
+            $data = $this->getConfig();
+            if (isset($data['install']['date'])) {
+                $this->logger->info('Magento was installed on ' . $data['install']['date']);
+            }
+        } catch (FileSystemException $e) {
+            $this->write(['install' => ['date' => date('r')]]);
         }
-
-        $data = include $configPath;
-        if (isset($data['install']['date'])) {
-            $this->logger->info('Magento was installed on ' . $data['install']['date']);
-
-            return true;
-        }
-
-        $this->updateConfig($configPath);
 
         return true;
-    }
-
-    private function updateConfig(string $configFile)
-    {
-        $config['install']['date'] = date('r');
-        $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-        $this->file->filePutContents($configFile, $updatedConfig);
     }
 
     /**
@@ -112,5 +98,54 @@ class Deploy
     public function getConfigFilePath(): string
     {
         return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
+    }
+
+    /**
+     * Returns environment configuration.
+     *
+     * @return array
+     * @throws FileSystemException If configuration file not found
+     */
+    public function getConfig()
+    {
+        $configPath = $this->getConfigFilePath();
+        if (!$this->file->isExists($configPath)) {
+            throw new FileSystemException(
+                sprintf('Configuration file: %s not exists', $configPath)
+            );
+        }
+
+        return include $configPath;
+    }
+
+    /**
+     * Updates existence configuration.
+     *
+     * @param array $config
+     */
+    public function update(array $config)
+    {
+        try {
+            $oldConfig = $this->getConfig();
+        } catch (FileSystemException $e) {
+            $oldConfig = [];
+        }
+
+        $updatedConfig = array_replace_recursive($oldConfig, $config);
+        $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($updatedConfig, true) . ';';
+
+        $this->file->filePutContents($this->getConfigFilePath(), $updatedConfig);
+    }
+
+    /**
+     * Writes given configuration to file.
+     *
+     * @param array $config
+     */
+    public function write(array $config)
+    {
+        $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($config, true) . ';';
+
+        $this->file->filePutContents($this->getConfigFilePath(), $updatedConfig);
     }
 }

@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\ConfigWriter;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Psr\Log\LoggerInterface;
 
 class SearchEngine implements ProcessInterface
@@ -23,18 +23,23 @@ class SearchEngine implements ProcessInterface
     private $logger;
 
     /**
-     * @var ConfigWriter
+     * @var DeployConfig
      */
-    private $configWriter;
+    private $deployConfig;
 
+    /**
+     * @param Environment $environment
+     * @param LoggerInterface $logger
+     * @param DeployConfig $deployConfig
+     */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        ConfigWriter $configWriter
+        DeployConfig $deployConfig
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->configWriter = $configWriter;
+        $this->deployConfig = $deployConfig;
     }
 
     /**
@@ -58,7 +63,7 @@ class SearchEngine implements ProcessInterface
 
         $this->logger->info("Set search engine to: " . $searchConfig['engine']);
 
-        $this->configWriter->update($searchConfig);
+        $this->deployConfig->update($searchConfig);
     }
 
     /**
