@@ -7,8 +7,8 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\ConfigWriter;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 class Amqp implements ProcessInterface
@@ -29,26 +29,26 @@ class Amqp implements ProcessInterface
     private $configWriter;
 
     /**
-     * @var DeployConfig
+     * @var ConfigReader
      */
-    private $deployConfig;
+    private $configReader;
 
     /**
      * @param Environment $environment
+     * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
-     * @param DeployConfig $deployConfig
      */
     public function __construct(
         Environment $environment,
+        ConfigReader $configReader,
         ConfigWriter $configWriter,
-        LoggerInterface $logger,
-        DeployConfig $deployConfig
+        LoggerInterface $logger
     ) {
         $this->environment = $environment;
-        $this->logger = $logger;
+        $this->configReader = $configReader;
         $this->configWriter = $configWriter;
-        $this->deployConfig = $deployConfig;
+        $this->logger = $logger;
     }
 
     /**
@@ -57,7 +57,7 @@ class Amqp implements ProcessInterface
     public function execute()
     {
         $mqConfig = $this->environment->getRelationship('mq');
-        $config = $this->deployConfig->getConfig();
+        $config = $this->configReader->read();
 
         if (count($mqConfig)) {
             $this->logger->info('Updating env.php AMQP configuration.');

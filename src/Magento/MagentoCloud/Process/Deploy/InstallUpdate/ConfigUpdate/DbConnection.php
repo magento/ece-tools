@@ -7,8 +7,8 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\ConfigWriter;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 class DbConnection implements ProcessInterface
@@ -29,26 +29,26 @@ class DbConnection implements ProcessInterface
     private $configWriter;
 
     /**
-     * @var DeployConfig
+     * @var ConfigReader
      */
-    private $deployConfig;
+    private $configReader;
 
     /**
      * @param Environment $environment
+     * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
-     * @param DeployConfig $deployConfig
      */
     public function __construct(
         Environment $environment,
+        ConfigReader $configReader,
         ConfigWriter $configWriter,
-        LoggerInterface $logger,
-        DeployConfig $deployConfig
+        LoggerInterface $logger
     ) {
         $this->environment = $environment;
-        $this->logger = $logger;
+        $this->configReader = $configReader;
         $this->configWriter = $configWriter;
-        $this->deployConfig = $deployConfig;
+        $this->logger = $logger;
     }
 
     /**
@@ -58,7 +58,7 @@ class DbConnection implements ProcessInterface
     {
         $this->logger->info('Updating env.php DB connection configuration.');
 
-        $config = $this->deployConfig->getConfig();
+        $config = $this->configReader->read();
 
         $config['db']['connection']['default']['username'] = $this->environment->getDbUser();
         $config['db']['connection']['default']['host'] = $this->environment->getDbHost();
