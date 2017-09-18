@@ -72,7 +72,7 @@ class Amqp implements ProcessInterface
             $config = $this->removeAmqpConfig($config);
         }
 
-        $this->configWriter->update($config);
+        $this->configWriter->write($config);
     }
 
     /**
@@ -83,9 +83,9 @@ class Amqp implements ProcessInterface
      */
     private function removeAmqpConfig(array $config)
     {
-        $this->logger->info('Removing AMQP configuration from env.php.');
-
         if (isset($config['queue']['amqp'])) {
+            $this->logger->info('Removing AMQP configuration from env.php.');
+
             if (count($config['queue']) > 1) {
                 unset($config['queue']['amqp']);
             } else {
