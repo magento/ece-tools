@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
 
 class SearchEngine implements ProcessInterface
@@ -23,23 +23,23 @@ class SearchEngine implements ProcessInterface
     private $logger;
 
     /**
-     * @var DeployConfig
+     * @var Writer
      */
-    private $deployConfig;
+    private $writer;
 
     /**
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param DeployConfig $deployConfig
+     * @param Writer $writer
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        DeployConfig $deployConfig
+        Writer $writer
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->deployConfig = $deployConfig;
+        $this->writer = $writer;
     }
 
     /**
@@ -61,9 +61,9 @@ class SearchEngine implements ProcessInterface
             $searchConfig = ['engine' => 'mysql'];
         }
 
-        $this->logger->info("Set search engine to: " . $searchConfig['engine']);
+        $this->logger->info('Set search engine to: ' . $searchConfig['engine']);
 
-        $this->deployConfig->update($searchConfig);
+        $this->writer->update($searchConfig);
     }
 
     /**
@@ -74,7 +74,6 @@ class SearchEngine implements ProcessInterface
      */
     private function getSolrConfiguration(array $config)
     {
-        $this->logger->info("Updating SOLR configuration.");
         return [
             'engine' => 'solr',
             'solr_server_hostname' => $config['host'],
