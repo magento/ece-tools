@@ -6,9 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Deploy\Writer as DeployConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -18,9 +17,9 @@ use Psr\Log\LoggerInterface;
 class SetMode implements ProcessInterface
 {
     /**
-     * @var DeployConfig
+     * @var DeployConfigWriter
      */
-    private $deployConfig;
+    private $deployConfigWriter;
 
     /**
      * @var LoggerInterface
@@ -33,11 +32,6 @@ class SetMode implements ProcessInterface
     private $shell;
 
     /**
-     * @var File
-     */
-    private $file;
-
-    /**
      * @var Environment
      */
     private $env;
@@ -46,21 +40,18 @@ class SetMode implements ProcessInterface
      * @param Environment $env
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
-     * @param File $file
-     * @param DeployConfig $deployConfig
+     * @param DeployConfigWriter $deployConfigWriter
      */
     public function __construct(
         Environment $env,
         LoggerInterface $logger,
         ShellInterface $shell,
-        File $file,
-        DeployConfig $deployConfig
+        DeployConfigWriter $deployConfigWriter
     ) {
         $this->env = $env;
         $this->logger = $logger;
         $this->shell = $shell;
-        $this->file = $file;
-        $this->deployConfig = $deployConfig;
+        $this->deployConfigWriter = $deployConfigWriter;
     }
 
     /**
@@ -73,11 +64,7 @@ class SetMode implements ProcessInterface
 
         /* Enable application mode */
         if ($mode == Environment::MAGENTO_PRODUCTION_MODE) {
-            $configFileName = $this->deployConfig->getConfigFilePath();
-            $config = include $configFileName;
-            $config['MAGE_MODE'] = 'production';
-            $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-            $this->file->filePutContents($configFileName, $updatedConfig);
+            $this->deployConfigWriter->update(['MAGE_MODE' => 'production']);
         } else {
             $this->shell->execute(sprintf(
                 "php ./bin/magento deploy:mode:set %s %s",

@@ -13,7 +13,6 @@ class UrlManager
     const MAGIC_ROUTE = '{default}';
 
     const PREFIX_SECURE = 'https://';
-
     const PREFIX_UNSECURE = 'http://';
 
     /**
@@ -85,7 +84,6 @@ class UrlManager
 
         return $this->urls;
     }
-
 
     public function getSecureUrls()
     {

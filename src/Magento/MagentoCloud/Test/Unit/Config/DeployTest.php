@@ -49,6 +49,7 @@ class DeployTest extends TestCase
      */
     protected function setUp()
     {
+        $this->markTestSkipped();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)

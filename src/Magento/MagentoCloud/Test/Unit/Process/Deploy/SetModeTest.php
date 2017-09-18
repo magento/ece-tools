@@ -5,9 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Deploy\Writer as DeployConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\SetMode;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -37,14 +36,9 @@ class SetModeTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var File|Mock
+     * @var DeployConfigWriter|Mock
      */
-    private $fileMock;
-
-    /**
-     * @var DeployConfig|Mock
-     */
-    private $deployConfigMock;
+    private $deployConfigWriterMock;
 
     protected function setUp()
     {
@@ -53,22 +47,19 @@ class SetModeTest extends TestCase
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->fileMock = $this->createMock(File::class);
-        $this->deployConfigMock = $this->createMock(DeployConfig::class);
+        $this->deployConfigWriterMock = $this->createMock(DeployConfigWriter::class);
 
         $this->process = new SetMode(
             $this->environmentMock,
             $this->loggerMock,
             $this->shellMock,
-            $this->fileMock,
-            $this->deployConfigMock
+            $this->deployConfigWriterMock
         );
     }
 
     public function testExecute()
     {
         $mode = Environment::MAGENTO_PRODUCTION_MODE;
-        $configFile = __DIR__ . '/_files/config.php';
 
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
@@ -76,15 +67,9 @@ class SetModeTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->willReturn(sprintf("Set Magento application mode to '%s'", $mode));
-        $this->deployConfigMock->expects($this->once())
-            ->method('getConfigFilePath')
-            ->willReturn($configFile);
-        $this->fileMock->expects($this->once())
-            ->method('filePutContents')
-            ->with(
-                $configFile,
-                "<?php\nreturn array (\n  'modules' => \n  array (\n  ),\n  'MAGE_MODE' => 'production',\n);"
-            );
+        $this->deployConfigWriterMock->expects($this->once())
+            ->method('update')
+            ->with(['MAGE_MODE' => 'production']);
 
         $this->process->execute();
     }
