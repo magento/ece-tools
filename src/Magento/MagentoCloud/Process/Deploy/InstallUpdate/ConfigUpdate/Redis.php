@@ -90,7 +90,7 @@ class Redis implements ProcessInterface
         $config['backend']['frontName'] = $this->environment->getAdminUrl();
         $config['resource']['default_setup']['connection'] = 'default';
 
-        $this->configWriter->update($config);
+        $this->configWriter->write($config);
     }
 
     /**
