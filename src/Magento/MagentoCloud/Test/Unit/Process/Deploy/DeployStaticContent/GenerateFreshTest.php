@@ -162,7 +162,7 @@ class GenerateFreshTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('touch')
             ->with('magento_root/pub/static/deployed_version.txt');
-        $this->loggerMock->method('notice')
+        $this->loggerMock->method('info')
             ->withConsecutive(
                 ['Enabling Maintenance mode'],
                 ['Extracting locales'],

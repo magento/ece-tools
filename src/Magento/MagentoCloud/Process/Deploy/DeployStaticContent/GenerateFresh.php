@@ -78,9 +78,9 @@ class GenerateFresh implements ProcessInterface
     public function execute()
     {
         $this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt');
-        $this->logger->notice('Enabling Maintenance mode');
+        $this->logger->info('Enabling Maintenance mode');
         $this->shell->execute("php ./bin/magento maintenance:enable {$this->environment->getVerbosityLevel()}");
-        $this->logger->notice('Extracting locales');
+        $this->logger->info('Extracting locales');
 
         $excludeThemesOptions = $this->getExcludeThemesOptions();
         $jobsOption = $this->environment->getStaticDeployThreadsCount()
@@ -89,7 +89,7 @@ class GenerateFresh implements ProcessInterface
         $locales = implode(' ', $this->getLocales());
         $logMessage = $locales ? "Generating static content for locales: $locales" : 'Generating static content';
 
-        $this->logger->notice($logMessage);
+        $this->logger->info($logMessage);
 
         $this->shell->execute(
             'php ./bin/magento setup:static-content:deploy -f ' .
@@ -102,7 +102,7 @@ class GenerateFresh implements ProcessInterface
         );
 
         $this->shell->execute("php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}");
-        $this->logger->notice('Maintenance mode is disabled.');
+        $this->logger->info('Maintenance mode is disabled.');
     }
 
     /**
