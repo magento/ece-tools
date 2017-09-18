@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 class ConfigWriter
 {
@@ -61,7 +62,11 @@ class ConfigWriter
             $configPath = $this->deployConfig->getConfigFilePath();
         }
 
-        $oldConfig = include $configPath;
+        try {
+            $oldConfig = $this->deployConfig->getConfig();
+        } catch (FileSystemException $e) {
+            $oldConfig = [];
+        }
 
         $updatedConfig = array_replace_recursive($oldConfig, $config);
         $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($updatedConfig, true) . ';';

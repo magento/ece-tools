@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Config;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -85,7 +86,7 @@ class Deploy
             return true;
         }
 
-        $data = include $configPath;
+        $data = $this->getConfig();
         if (isset($data['install']['date'])) {
             $this->logger->info('Magento was installed on ' . $data['install']['date']);
 
@@ -112,5 +113,23 @@ class Deploy
     public function getConfigFilePath(): string
     {
         return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
+    }
+
+    /**
+     * Returns environment configuration.
+     *
+     * @return array
+     * @throws FileSystemException If configuration file not found
+     */
+    public function getConfig()
+    {
+        $configPath = $this->getConfigFilePath();
+        if (!$this->file->isExists($configPath)) {
+            throw new FileSystemException(
+                sprintf('Configuration file: %s not exists', $configPath)
+            );
+        }
+
+        return include $configPath;
     }
 }
