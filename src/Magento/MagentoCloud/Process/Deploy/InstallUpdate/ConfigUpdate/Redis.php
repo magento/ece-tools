@@ -69,12 +69,17 @@ class Redis implements ProcessInterface
                     'database' => 1,
                 ],
             ];
-            $config['cache'] = [
+            $cacheConfig = [
                 'frontend' => [
                     'default' => $redisCache,
                     'page_cache' => $redisCache,
                 ],
             ];
+
+            $config['cache'] = empty($config['cache'])
+                ? $cacheConfig
+                : array_replace_recursive($config['cache'], $cacheConfig);
+
             $config['session'] = [
                 'save' => 'redis',
                 'redis' => [
