@@ -125,7 +125,9 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
-                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\EnvPhp::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\AdminCredentials::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
