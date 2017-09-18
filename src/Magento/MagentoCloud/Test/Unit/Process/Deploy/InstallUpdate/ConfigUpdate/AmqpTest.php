@@ -61,6 +61,9 @@ class AmqpTest extends TestCase
         );
     }
 
+    /**
+     * @return void
+     */
     public function testExecuteWithoutAmqp()
     {
         $config = ['some config'];
@@ -78,5 +81,144 @@ class AmqpTest extends TestCase
             ->method('info');
 
         $this->amqp->execute();
+    }
+
+    /**
+     * @param array $config
+     * @return void
+     * @dataProvider executeAddUpdateDataProvider
+     */
+    public function testExecuteAddUpdate(array $config)
+    {
+        $amqpConfig = [[
+            'host' => 'localhost',
+            'port' => '777',
+            'username' => 'login',
+            'password' => 'pswd'
+        ]];
+        $resultConfig = [
+            'some config',
+            'queue' => [
+                'amqp' => [
+                    'host' => 'localhost',
+                    'port' => '777',
+                    'user' => 'login',
+                    'password' => 'pswd',
+                    'virtualhost' => '/',
+                    'ssl' => '',
+                ]
+            ],
+        ];
+
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with('mq')
+            ->willReturn($amqpConfig);
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn($config);
+        $this->configWriterMock->expects($this->once())
+            ->method('write')
+            ->with($resultConfig);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating env.php AMQP configuration.');
+
+        $this->amqp->execute();
+    }
+
+    /**
+     * @return array
+     */
+    public function executeAddUpdateDataProvider(): array
+    {
+        return [
+            [['some config']],
+            [[
+                'some config',
+                'queue' => [
+                    'amqp' => [
+                        'host' => 'some-host',
+                        'port' => '888',
+                        'user' => 'mylogin',
+                        'password' => 'mysqwwd',
+                        'virtualhost' => 'virtualhost',
+                        'ssl' => '1',
+                    ]
+                ],
+            ]]
+        ];
+    }
+
+    /**
+     * @param array $config
+     * @param array $expectedConfig
+     * @return void
+     * @dataProvider executeRemoveAmqpDataProvider
+     */
+    public function testExecuteRemoveAmqp(array $config, array $expectedConfig)
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with('mq')
+            ->willReturn([]);
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn($config);
+        $this->configWriterMock->expects($this->once())
+            ->method('write')
+            ->with($expectedConfig);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Removing AMQP configuration from env.php.');
+
+        $this->amqp->execute();
+    }
+
+    /**
+     * @return array
+     */
+    public function executeRemoveAmqpDataProvider(): array
+    {
+        return [
+            [
+                'config' => [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'localhost',
+                            'port' => '777',
+                            'user' => 'login',
+                            'password' => 'pswd',
+                            'virtualhost' => '/',
+                            'ssl' => '',
+                        ]
+                    ],
+                ],
+                'expectedConfig' => ['some config',]
+            ],
+            [
+                'config' => [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'localhost',
+                            'port' => '777',
+                            'user' => 'login',
+                            'password' => 'pswd',
+                            'virtualhost' => '/',
+                            'ssl' => '',
+                        ],
+                        'someQueue' => ['some queue config']
+                    ],
+                ],
+                'expectedConfig' => [
+                    'some config',
+                    'queue' => [
+                        'someQueue' => ['some queue config']
+                    ]
+                ]
+            ]
+        ];
     }
 }
