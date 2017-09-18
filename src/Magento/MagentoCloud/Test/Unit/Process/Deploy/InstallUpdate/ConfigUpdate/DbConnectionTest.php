@@ -92,7 +92,12 @@ class DbConnectionTest extends TestCase
 
                         ]
                     ]
-                ]
+                ],
+                'resource' => [
+                    'default_setup' => [
+                        'connection' => 'default',
+                    ],
+                ],
             ]);
 
         $this->process->execute();

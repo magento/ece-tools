@@ -119,14 +119,6 @@ class RedisTest extends TestCase
                         'database' => 0,
                     ],
                 ],
-                'backend' => [
-                    'frontName' => 'admin',
-                ],
-                'resource' => [
-                    'default_setup' => [
-                        'connection' => 'default',
-                    ],
-                ],
             ]);
 
         $this->process->execute();
@@ -185,14 +177,6 @@ class RedisTest extends TestCase
                 ],
                 'session' => [
                     'save' => 'db',
-                ],
-                'backend' => [
-                    'frontName' => 'admin',
-                ],
-                'resource' => [
-                    'default_setup' => [
-                        'connection' => 'default',
-                    ],
                 ],
             ]);
 
