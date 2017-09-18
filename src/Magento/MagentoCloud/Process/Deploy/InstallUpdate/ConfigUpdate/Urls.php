@@ -6,11 +6,14 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\DB\Adapter;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class Urls implements ProcessInterface
 {
     /**
@@ -19,9 +22,9 @@ class Urls implements ProcessInterface
     private $environment;
 
     /**
-     * @var Adapter
+     * @var ConnectionInterface
      */
-    private $adapter;
+    private $connection;
 
     /**
      * @var LoggerInterface
@@ -35,18 +38,18 @@ class Urls implements ProcessInterface
 
     /**
      * @param Environment $environment
-     * @param Adapter $adapter
+     * @param ConnectionInterface $connection
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
      */
     public function __construct(
         Environment $environment,
-        Adapter $adapter,
+        ConnectionInterface $connection,
         LoggerInterface $logger,
         UrlManager $urlManager
     ) {
         $this->environment = $environment;
-        $this->adapter = $adapter;
+        $this->connection = $connection;
         $this->logger = $logger;
         $this->urlManager = $urlManager;
     }
@@ -58,26 +61,44 @@ class Urls implements ProcessInterface
     {
         if (!$this->environment->isUpdateUrlsEnabled()) {
             $this->logger->info('Skipping URL updates');
+
             return;
         }
 
-        $this->logger->info('Updating secure and unsecure URLs.');
+        $this->logger->info('Updating secure and unsecure URLs');
 
         foreach ($this->urlManager->getUrls() as $urlType => $urls) {
             foreach ($urls as $route => $url) {
-                $prefix = 'unsecure' === $urlType ? UrlManager::PREFIX_UNSECURE : UrlManager::PREFIX_SECURE;
-                if (!strlen($route)) {
-                    // @codingStandardsIgnoreStart
-                    $this->adapter->execute("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and scope_id = '0';");
-                    // @codingStandardsIgnoreEnd
-                    continue;
-                }
-                $likeKey = $prefix . $route . '%';
-                $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
-                // @codingStandardsIgnoreStart
-                $this->adapter->execute("update core_config_data set value = '$url' where path = 'web/$urlType/base_url' and (value like '$likeKey' or value like '$likeKeyParsed');");
-                // @codingStandardsIgnoreEnd
+                $this->update($urlType, $url, $route);
             }
         }
+    }
+
+    /**
+     * Updates core config with new URLs.
+     *
+     * @param string $urlType
+     * @param string $url
+     * @param string $route
+     */
+    private function update(string $urlType, string $url, string $route)
+    {
+        $prefix = 'unsecure' === $urlType ? UrlManager::PREFIX_UNSECURE : UrlManager::PREFIX_SECURE;
+        if (!strlen($route)) {
+            // @codingStandardsIgnoreStart
+            $this->connection->affectingQuery(
+                "UPDATE `core_config_data` SET `value` = '$url' WHERE `path` = 'web/$urlType/base_url' AND `scope_id` = '0'"
+            );
+
+            // @codingStandardsIgnoreEnd
+            return;
+        }
+        $likeKey = $prefix . $route . '%';
+        $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
+        // @codingStandardsIgnoreStart
+        $this->connection->affectingQuery(
+            "UPDATE `core_config_data` SET `value` = '$url' WHERE `path` = 'web/$urlType/base_url' AND (`value` LIKE '$likeKey' OR `value` LIKE '$likeKeyParsed')"
+        );
+        // @codingStandardsIgnoreEnd
     }
 }
