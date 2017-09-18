@@ -5,11 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Config\Deploy\Writer as DeployConfigWriter;
+use Magento\MagentoCloud\Process\Deploy\CreateConfigFile;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Process\Deploy\CreateConfigFile;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 
 class CreateConfigFileTest extends TestCase
 {
@@ -19,66 +18,27 @@ class CreateConfigFileTest extends TestCase
     private $process;
 
     /**
-     * @var File|Mock
+     * @var DeployConfigWriter|Mock
      */
-    private $fileMock;
-
-    /**
-     * @var DeployConfig|Mock
-     */
-    private $deployConfigMock;
+    private $deployConfigWriterMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->fileMock = $this->createMock(File::class);
-        $this->deployConfigMock = $this->createMock(DeployConfig::class);
+        $this->deployConfigWriterMock = $this->createMock(DeployConfigWriter::class);
 
         $this->process = new CreateConfigFile(
-            $this->deployConfigMock,
-            $this->fileMock
+            $this->deployConfigWriterMock
         );
-
-        parent::setUp();
     }
 
-    public function testConfigFileNotExists()
+    public function testExecute()
     {
-        $configFile = 'path/to/non-exists-file';
-
-        $this->deployConfigMock->expects($this->once())
-            ->method('getConfigFilePath')
-            ->willReturn($configFile);
-
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with($configFile)
-            ->willReturn(false);
-
-        $this->fileMock->expects($this->once())
-            ->method('filePutContents')
-            ->with($configFile, '<?php' . "\n" . 'return array();');
-
-        $this->process->execute();
-    }
-
-    public function testConfigFileExists()
-    {
-        $configFile = 'path/to/exists-file';
-
-        $this->deployConfigMock->expects($this->once())
-            ->method('getConfigFilePath')
-            ->willReturn($configFile);
-
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with($configFile)
-            ->willReturn(true);
-
-        $this->fileMock->expects($this->never())
-            ->method('filePutContents');
+        $this->deployConfigWriterMock->expects($this->once())
+            ->method('update')
+            ->willReturn([]);
 
         $this->process->execute();
     }
