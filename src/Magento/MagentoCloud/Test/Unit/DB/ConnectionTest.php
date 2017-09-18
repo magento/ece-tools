@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\DB;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Connection;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -35,12 +36,15 @@ class ConnectionTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var Environment
+     */
+    private $environmentMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->markTestSkipped();
-
         $this->pdoMock = $this->getMockBuilder(\PDO::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -49,15 +53,23 @@ class ConnectionTest extends TestCase
         $this->statementMock = $this->getMockBuilder(\PDOStatement::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->environmentMock = $this->getMockBuilder(Environment::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->pdoMock->expects($this->any())
             ->method('prepare')
             ->willReturn($this->statementMock);
 
         $this->connection = new Connection(
-            $this->pdoMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->environmentMock
         );
+
+        $reflection = new \ReflectionClass(get_class($this->connection));
+        $property = $reflection->getProperty('pdo');
+        $property->setAccessible(true);
+        $property->setValue($this->connection, $this->pdoMock);
     }
 
     public function testSelect()
