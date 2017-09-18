@@ -6,11 +6,10 @@
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Deploy;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,24 +19,24 @@ class DeployTest extends TestCase
     use \phpmock\phpunit\PHPMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var ConnectionInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ConnectionInterface|Mock
      */
     private $connectionMock;
 
     /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     * @var Deploy\Reader|Mock
      */
-    private $fileMock;
+    private $readerMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var Deploy\Writer|Mock
      */
-    private $directoryListMock;
+    private $writerMock;
 
     /**
      * @var Deploy
@@ -49,19 +48,18 @@ class DeployTest extends TestCase
      */
     protected function setUp()
     {
-        $this->markTestSkipped();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
             ->getMockForAbstractClass();
-        $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->readerMock = $this->createMock(Deploy\Reader::class);
+        $this->writerMock = $this->createMock(Deploy\Writer::class);
 
         $this->deploy = new Deploy(
             $this->loggerMock,
             $this->connectionMock,
-            $this->fileMock,
-            $this->directoryListMock
+            $this->readerMock,
+            $this->writerMock
         );
     }
 
@@ -77,8 +75,8 @@ class DeployTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('listTables')
             ->willReturn($tables);
-        $this->fileMock->expects($this->never())
-            ->method('filePutContents');
+        $this->writerMock->expects($this->never())
+            ->method('update');
 
         $this->assertFalse($this->deploy->isInstalled());
     }
@@ -105,8 +103,8 @@ class DeployTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('listTables')
             ->willReturn($tables);
-        $this->fileMock->expects($this->never())
-            ->method('filePutContents');
+        $this->writerMock->expects($this->never())
+            ->method('update');
 
         $this->deploy->isInstalled();
     }
@@ -123,12 +121,10 @@ class DeployTest extends TestCase
         ];
     }
 
-    public function testIsInstalledConfigFileIsNotExists()
+    public function testIsInstalledConfigFileIsNotExistsOrEmpty()
     {
         $date = 'Wed, 13 Sep 2017 13:41:32 +0000';
         $config['install']['date'] = $date;
-        $pathRoot = '/magento';
-        $configPath = $pathRoot . '/app/etc/env.php';
 
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -136,22 +132,17 @@ class DeployTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
-        $this->directoryListMock->expects($this->exactly(2))
-            ->method('getMagentoRoot')
-            ->willReturn($pathRoot);
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with($configPath)
-            ->willReturn(false);
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+        $this->writerMock->expects($this->once())
+            ->method('update')
+            ->with($config);
 
         $dateMock = $this->getFunctionMock('Magento\MagentoCloud\Config', 'date');
         $dateMock->expects($this->once())
             ->with('r')
             ->willReturn($date);
-
-        $this->fileMock->expects($this->once())
-            ->method('filePutContents')
-            ->with($configPath, '<?php' . PHP_EOL . 'return ' . var_export($config, true) . ';');
 
         $this->assertTrue($this->deploy->isInstalled());
     }
@@ -159,8 +150,7 @@ class DeployTest extends TestCase
     public function testIsInstalledConfigFileWithDate()
     {
         $date = 'Wed, 12 Sep 2017 10:40:30 +0000';
-        $pathRoot = __DIR__ . '/_file/Deploy/with_date';
-        $configPath = $pathRoot . '/app/etc/env.php';
+        $config = ['install' => ['date' => $date]];
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -171,49 +161,11 @@ class DeployTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn($pathRoot);
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with($configPath)
-            ->willReturn(true);
-
-        $this->fileMock->expects($this->never())
-            ->method('filePutContents');
-
-        $this->assertTrue($this->deploy->isInstalled());
-    }
-
-    public function testIsInstalledConfigFileWithoutDate()
-    {
-        $date = 'Wed, 12 Sep 2017 11:45:35 +0000';
-        $config['install']['date'] = $date;
-        $pathRoot = __DIR__ . '/_file/Deploy/without_date';
-        $configPath = $pathRoot . '/app/etc/env.php';
-
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Checking if db exists and has tables');
-        $this->connectionMock->expects($this->once())
-            ->method('listTables')
-            ->willReturn(['core_config_data', 'setup_module']);
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn($pathRoot);
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with($configPath)
-            ->willReturn(true);
-
-        $dateMock = $this->getFunctionMock('Magento\MagentoCloud\Config', 'date');
-        $dateMock->expects($this->once())
-            ->with('r')
-            ->willReturn($date);
-
-        $this->fileMock->expects($this->once())
-            ->method('filePutContents')
-            ->with($configPath, '<?php' . "\n" . 'return ' . var_export($config, true) . ';');
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn($config);
+        $this->writerMock->expects($this->never())
+            ->method('update');
 
         $this->assertTrue($this->deploy->isInstalled());
     }

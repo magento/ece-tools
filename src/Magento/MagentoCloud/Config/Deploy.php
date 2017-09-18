@@ -84,7 +84,7 @@ class Deploy
             return true;
         }
 
-        $this->writer->write(['install' => ['date' => date('r')]]);
+        $this->writer->update(['install' => ['date' => date('r')]]);
 
         return true;
     }
