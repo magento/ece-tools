@@ -10,7 +10,6 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 
 class Writer
 {
-
     /**
      * @var Reader
      */
