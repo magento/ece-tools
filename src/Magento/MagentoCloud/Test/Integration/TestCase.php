@@ -46,13 +46,13 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
                 $link
             ));
             shell_exec(sprintf(
-                "cd %s && composer install",
-                $this->tmpDir
-            ));
-            shell_exec(sprintf(
                 "cp -rf %s %s",
                 $this->etcDir . '/auth.json.dist',
                 $this->tmpDir . '/app/etc/auth.json'
+            ));
+            shell_exec(sprintf(
+                "cd %s && composer install",
+                $this->tmpDir
             ));
         }
 
