@@ -3,8 +3,8 @@
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
   "version": "2002.0",
   "license": [
-      "OSL-3.0",
-      "AFL-3.0"
+    "OSL-3.0",
+    "AFL-3.0"
   ],
   "require": {
     "php": "^7.0",
@@ -22,8 +22,11 @@
     "phpmd/phpmd": "@stable",
     "php-mock/php-mock-phpunit": "^2.0"
   },
-  "bin":[
-    "m2-ece-build", "m2-ece-deploy", "m2-ece-scd-dump", "bin/ece-tools"
+  "bin": [
+    "m2-ece-build",
+    "m2-ece-deploy",
+    "m2-ece-scd-dump",
+    "bin/ece-tools"
   ],
   "autoload": {
     "psr-4": {
@@ -32,11 +35,11 @@
   },
   "scripts": {
     "test": [
-      "phpunit --testsuite Unit",
-      "phpunit --testsuite Integration",
       "phpcs src --standard=phpcs-ruleset.xml -p -n",
-      "phpmd src xml phpmd-ruleset.xml"
+      "phpmd src xml phpmd-ruleset.xml",
+      "phpunit --testsuite Unit"
     ]
   },
+  "process-timeout": 600,
   "prefer-stable": true
 }

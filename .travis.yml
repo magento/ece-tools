@@ -17,4 +17,8 @@ cache:
 install: composer install --no-interaction --prefer-dist
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
-script: composer test
+script:
+  - vendor/bin/phpcs src --standard=phpcs-ruleset.xml -p -n
+  - vendor/bin/phpmd src xml phpmd-ruleset.xml
+  - vendor/bin/phpunit --testsuite Unit
+  - vendor/bin/phpunit --testsuite Integration
