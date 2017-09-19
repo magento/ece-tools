@@ -24,6 +24,8 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      */
     private $application;
 
+    abstract public function test();
+
     /**
      * @inheritdoc
      */
@@ -34,7 +36,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
         $configFile = $this->getConfigFile();
 
-        $this->tmpDir = BP . '/tests/integration/tmp/sandbox-' . md5(sha1_file($configFile));
+        $this->tmpDir = BP . '/tests/integration/tmp/sandbox-' . md5_file($configFile);
         $link = 'https://github.com/magento/magento-cloud';
 
         if (!is_dir($this->tmpDir)) {

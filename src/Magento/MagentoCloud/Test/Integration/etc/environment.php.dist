@@ -5,8 +5,8 @@ return [
         'database' => [
             0 => [
                 'host' => '127.0.0.1',
-                'path' => 'magento2',
-                'password' => '1234',
+                'path' => 'integration_tests',
+                'password' => '',
                 'username' => 'root',
                 'port' => '3306',
             ],

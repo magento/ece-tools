@@ -14,6 +14,9 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class AcceptanceTest extends TestCase
 {
+    /**
+     * @inheritdoc
+     */
     public function test()
     {
         $application = $this->getApplication();
