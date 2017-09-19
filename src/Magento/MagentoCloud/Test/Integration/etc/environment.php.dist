@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'relationships' => [
+        'database' => [
+            0 => [
+                'host' => '127.0.0.1',
+                'path' => 'magento2',
+                'password' => '1234',
+                'username' => 'root',
+                'port' => '3306',
+            ],
+        ],
+    ],
+    'routes' => [
+        'http://localhost/' => [
+            'type' => 'upstream',
+            'original_url' => 'http://{default}',
+        ],
+        'https://localhost/' => [
+            'type' => 'upstream',
+            'original_url' => 'https://{default}',
+        ],
+    ],
+    'variables' => [
+
+    ],
+];

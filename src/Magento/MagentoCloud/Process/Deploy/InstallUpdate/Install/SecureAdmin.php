@@ -47,6 +47,10 @@ class SecureAdmin implements ProcessInterface
         $command = "php ./bin/magento config:set web/secure/use_in_adminhtml 1";
         $command .= $this->environment->getVerbosityLevel();
 
-        $this->shell->execute($command);
+        try {
+            $this->shell->execute($command);
+        } catch (\Exception $exception) {
+            $this->logger->warning($exception->getMessage());
+        }
     }
 }

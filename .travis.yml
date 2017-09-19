@@ -1,5 +1,7 @@
 sudo: false
 dist: trusty
+services:
+  - mysql
 
 language: php
 php:
@@ -13,4 +15,6 @@ cache:
   directories:
     - $HOME/.composer/cache
 install: composer install --no-interaction --prefer-dist
+before_install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
 script: composer test

@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<phpunit bootstrap="autoload.php" colors="true" beStrictAboutTestsThatDoNotTestAnything="false">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="http://schema.phpunit.de/6.1/phpunit.xsd"
+         colors="true"
+         columns="max"
+         bootstrap="autoload.php"
+         beStrictAboutTestsThatDoNotTestAnything="false"
+>
     <testsuites>
-        <testsuite name="Default Test Suite">
-            <directory>src</directory>
+        <testsuite name="Unit">
+            <directory suffix="Test.php">src/*/*/Test/Unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory suffix="Test.php">src/*/*/Test/Integration</directory>
         </testsuite>
     </testsuites>
 

@@ -32,7 +32,8 @@
   },
   "scripts": {
     "test": [
-      "phpunit src",
+      "phpunit --testsuite Unit",
+      "phpunit --testsuite Integration",
       "phpcs src --standard=phpcs-ruleset.xml -p -n",
       "phpmd src xml phpmd-ruleset.xml"
     ]

@@ -91,15 +91,30 @@ class GenerateFresh implements ProcessInterface
 
         $this->logger->info($logMessage);
 
-        $this->shell->execute(
-            'php ./bin/magento setup:static-content:deploy -f ' .
-            implode(' ', [
-                $jobsOption,
-                $excludeThemesOptions,
-                $locales,
-                $this->environment->getVerbosityLevel(),
-            ])
-        );
+        try {
+            $this->shell->execute(
+                'php ./bin/magento setup:static-content:deploy -f ' .
+                implode(' ', [
+                    $jobsOption,
+                    $excludeThemesOptions,
+                    $locales,
+                    $this->environment->getVerbosityLevel(),
+                ])
+            );
+        } catch (\Exception $exception) {
+            /**
+             * Hack for M2.1 support
+             */
+            $this->shell->execute(
+                'php ./bin/magento setup:static-content:deploy ' .
+                implode(' ', [
+                    $jobsOption,
+                    $excludeThemesOptions,
+                    $locales,
+                    $this->environment->getVerbosityLevel(),
+                ])
+            );
+        }
 
         $this->shell->execute("php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}");
         $this->logger->info('Maintenance mode is disabled.');

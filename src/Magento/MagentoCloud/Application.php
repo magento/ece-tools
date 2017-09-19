@@ -22,16 +22,21 @@ class Application extends \Symfony\Component\Console\Application
     private $container;
 
     /**
+     * @var Composer
+     */
+    private $composer;
+
+    /**
      * @param ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $composer = $container->get(Composer::class);
+        $this->composer = $container->get(Composer::class);
 
         parent::__construct(
-            $composer->getPackage()->getPrettyName(),
-            $composer->getPackage()->getPrettyVersion()
+            $this->composer->getPackage()->getPrettyName(),
+            $this->composer->getPackage()->getPrettyVersion()
         );
     }
 
@@ -48,5 +53,18 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(ConfigDump::class),
             ]
         );
+    }
+
+    /**
+     * @return ContainerInterface
+     */
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
+    public function getComposer()
+    {
+        $this->composer;
     }
 }
