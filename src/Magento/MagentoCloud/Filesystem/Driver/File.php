@@ -417,6 +417,33 @@ class File
     }
 
     /**
+     * Recursive clear directory
+     *
+     * @param string $path
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function clearDirectory($path)
+    {
+        if (!$this->isExists($path)) {
+            return true;
+        }
+
+        $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
+        $iterator = new \FilesystemIterator($path, $flags);
+        /** @var \FilesystemIterator $entity */
+        foreach ($iterator as $entity) {
+            if ($entity->isDir()) {
+                $this->deleteDirectory($entity->getPathname());
+            } else {
+                $this->deleteFile($entity->getPathname());
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Change permissions of given path
      *
      * @param string $path

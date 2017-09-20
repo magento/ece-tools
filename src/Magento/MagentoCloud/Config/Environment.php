@@ -24,19 +24,8 @@ class Environment
 
     const CLOUD_MODE_ENTERPRISE = 'enterprise';
 
-    /**
-     * Writable directories.
-     *
-     * @var array
-     */
-    private $writableDirs = ['var', 'app/etc', 'pub/media'];
-
-    /**
-     * Directories to be restores before deploy.
-     *
-     * @var array
-     */
-    private $recoverableDirs = ['var/log', 'app/etc', 'pub/media'];
+    const VAL_ENABLED = 'enabled';
+    const VAL_DISABLED = 'disabled';
 
     /**
      * @var LoggerInterface
@@ -143,6 +132,9 @@ class Environment
         return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
     }
 
+    /**
+     * @return string
+     */
     public function getApplicationMode(): string
     {
         $var = $this->getVariables();
@@ -160,9 +152,9 @@ class Environment
      */
     public function setFlagStaticDeployInBuild()
     {
-        $this->logger->info('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        $this->logger->info('Setting flag file ' . static::STATIC_CONTENT_DEPLOY_FLAG);
         $this->file->touch(
-            $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+            $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
         );
     }
 
@@ -174,9 +166,9 @@ class Environment
     public function removeFlagStaticContentInBuild()
     {
         if ($this->isStaticDeployInBuild()) {
-            $this->logger->info('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            $this->logger->info('Removing flag file ' . static::STATIC_CONTENT_DEPLOY_FLAG);
             $this->file->deleteFile(
-                $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+                $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
             );
         }
     }
@@ -189,7 +181,7 @@ class Environment
     public function isStaticDeployInBuild(): bool
     {
         return $this->file->isExists(
-            $this->directoryList->getMagentoRoot() . '/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+            $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
         );
     }
 
@@ -200,7 +192,7 @@ class Environment
      */
     public function getWritableDirectories(): array
     {
-        return $this->writableDirs;
+        return ['var', 'app/etc', 'pub/media'];
     }
 
     /**
@@ -210,9 +202,12 @@ class Environment
      */
     public function getRecoverableDirectories(): array
     {
-        return $this->recoverableDirs;
+        return ['var/log', 'app/etc', 'pub/media'];
     }
 
+    /**
+     * @return bool
+     */
     public function isDeployStaticContent(): bool
     {
         $var = $this->getVariables();
@@ -232,6 +227,9 @@ class Environment
         return $flag;
     }
 
+    /**
+     * @return int
+     */
     public function getStaticDeployThreadsCount(): int
     {
         /**
@@ -251,16 +249,22 @@ class Environment
         return $staticDeployThreads;
     }
 
+    /**
+     * @return string
+     */
     public function getAdminLocale(): string
     {
         return $this->getVariables()['ADMIN_LOCALE'] ?? 'en_US';
     }
 
+    /**
+     * @return bool
+     */
     public function doCleanStaticFiles(): bool
     {
         $var = $this->getVariables();
 
-        return isset($var['CLEAN_STATIC_FILES']) && $var['CLEAN_STATIC_FILES'] == 'disabled' ? false : true;
+        return !(isset($var['CLEAN_STATIC_FILES']) && $var['CLEAN_STATIC_FILES'] === static::VAL_DISABLED);
     }
 
     /**
@@ -271,6 +275,9 @@ class Environment
         return $this->getVariables()['STATIC_CONTENT_EXCLUDE_THEMES'] ?? '';
     }
 
+    /**
+     * @return string|float
+     */
     public function getDbHost()
     {
         return $this->getRelationship('database')[0]['host'] ?? '';

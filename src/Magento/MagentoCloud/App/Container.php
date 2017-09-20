@@ -26,11 +26,24 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     /**
      * @param string $root
      * @param array $config
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function __construct(string $root, array $config)
     {
+        /**
+         * Instance configuration.
+         */
         $this->singleton(\Magento\MagentoCloud\Filesystem\DirectoryList::class, function () use ($root, $config) {
             return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $config);
+        });
+        $this->singleton(\Composer\Composer::class, function () {
+            $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
+
+            return \Composer\Factory::create(
+                new \Composer\IO\BufferIO(),
+                $directoryList->getMagentoRoot() . '/composer.json'
+            );
         });
         /**
          * Interface to implementation binding.
@@ -40,20 +53,15 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             \Magento\MagentoCloud\Shell\Shell::class
         );
         $this->singleton(\Magento\MagentoCloud\Config\Environment::class);
-        $this->singleton(\Magento\MagentoCloud\DB\Adapter::class);
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
         $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
         $this->singleton(\Magento\MagentoCloud\Util\ComponentInfo::class);
-        $this->singleton(\Composer\Composer::class, function () {
-            $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
-
-            return \Composer\Factory::create(
-                new \Composer\IO\BufferIO(),
-                $directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR . 'composer.json'
-            );
-        });
-
+        $this->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
+        $this->singleton(
+            \Magento\MagentoCloud\DB\ConnectionInterface::class,
+            \Magento\MagentoCloud\DB\Connection::class
+        );
         /**
          * Contextual binding.
          */
@@ -85,6 +93,44 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate::class),
                         $this->make(DeployProcess\DeployStaticContent::class),
                         $this->make(DeployProcess\DisableGoogleAnalytics::class),
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\InstallUpdate\Install::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\ImportDeploymentConfig::class),
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\InstallUpdate\Update::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class),
+                    ],
+                ]);
+            });
+        $this->when(DeployProcess\InstallUpdate\ConfigUpdate::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\AdminCredentials::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\EnvConfiguration::class),
                     ],
                 ]);
             });

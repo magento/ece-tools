@@ -5,10 +5,9 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\DB\Adapter;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Config\Deploy\Reader;
+use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -17,111 +16,76 @@ use Psr\Log\LoggerInterface;
 class Deploy
 {
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var ShellInterface
+     * @var ConnectionInterface
      */
-    private $shell;
+    private $connection;
 
     /**
-     * @var Adapter
+     * @var Reader
      */
-    private $adapter;
+    private $reader;
 
     /**
-     * @var File
+     * @var Writer
      */
-    private $file;
+    private $writer;
 
     /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
-     * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
-     * @param Adapter $adapter
-     * @param File $file
-     * @param DirectoryList $directoryList
+     * @param ConnectionInterface $connection
+     * @param Reader $reader
+     * @param Writer $writer
      */
     public function __construct(
-        Environment $environment,
         LoggerInterface $logger,
-        ShellInterface $shell,
-        Adapter $adapter,
-        File $file,
-        DirectoryList $directoryList
+        ConnectionInterface $connection,
+        Reader $reader,
+        Writer $writer
     ) {
-        $this->environment = $environment;
         $this->logger = $logger;
-        $this->shell = $shell;
-        $this->adapter = $adapter;
-        $this->file = $file;
-        $this->directoryList = $directoryList;
+        $this->connection = $connection;
+        $this->reader = $reader;
+        $this->writer = $writer;
     }
 
     /**
      * Verifies is Magento installed based on install date in env.php
      *
+     * 1. from environment variables check if db exists and has tables
+     * 2. check if core_config_data and setup_module tables exist
+     * 3. check install date
+     *
      * @return bool
      * @throws \Exception
      */
-    public function isInstalled()
+    public function isInstalled(): bool
     {
-        $configFile = $this->getConfigFilePath();
-        $isInstalled = false;
-
-        //1. from environment variables check if db exists and has tables
-        //2. check if core_config_data and setup_module tables exist
-        //3. check install date
-
         $this->logger->info('Checking if db exists and has tables');
-        $output = $this->adapter->execute('SHOW TABLES');
 
-        if (is_array($output) && count($output) > 1) {
-            if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
-                throw new \Exception('Missing either core_config_data or setup_module table', 5);
-            } elseif ($this->file->isExists($configFile)) {
-                $data = include $configFile;
+        $output = $this->connection->listTables();
 
-                if (isset($data['install']) && isset($data['install']['date'])) {
-                    $this->logger->info('Magento was installed on ' . $data['install']['date']);
-                    $isInstalled = true;
-                } else {
-                    $config['install']['date'] = date('r');
-                    $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-                    $this->file->filePutContents($configFile, $updatedConfig);
-                    $isInstalled = true;
-                }
-            } else {
-                $this->shell->execute('touch ' . $configFile);
-                $config['install']['date'] = date('r');
-                $updatedConfig = '<?php' . "\n" . 'return ' . var_export($config, true) . ';';
-                $this->file->filePutContents($configFile, $updatedConfig);
-                $isInstalled = true;
-            }
+        if (!is_array($output) || count($output) <= 1) {
+            return false;
         }
 
-        return $isInstalled;
-    }
+        if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
+            throw new \Exception('Missing either core_config_data or setup_module table', 5);
+        }
 
-    /**
-     * Return full path to environment configuration file.
-     *
-     * @return string The path to configuration file
-     */
-    public function getConfigFilePath(): string
-    {
-        return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
+        $data = $this->reader->read();
+        if (isset($data['install']['date'])) {
+            $this->logger->info('Magento was installed on ' . $data['install']['date']);
+
+            return true;
+        }
+
+        $this->writer->update(['install' => ['date' => date('r')]]);
+
+        return true;
     }
 }

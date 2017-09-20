@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -15,11 +14,6 @@ use Psr\Log\LoggerInterface;
 
 class BuildDirCopierTest extends TestCase
 {
-    /**
-     * @var ShellInterface|Mock
-     */
-    private $shellMock;
-
     /**
      * @var LoggerInterface|Mock
      */
@@ -42,8 +36,6 @@ class BuildDirCopierTest extends TestCase
 
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
@@ -51,7 +43,6 @@ class BuildDirCopierTest extends TestCase
 
         $this->copier = new BuildDirCopier(
             $this->loggerMock,
-            $this->shellMock,
             $this->directoryListMock,
             $this->fileMock
         );
@@ -71,9 +62,10 @@ class BuildDirCopierTest extends TestCase
             ->willReturn(true);
         $this->fileMock->expects($this->never())
             ->method('createDirectory');
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->with('/bin/bash -c "shopt -s dotglob; cp -R ./init/dir/* dir/ || true"');
+        $this->fileMock->expects($this->once())
+            ->method('copyDirectory')
+            ->with($rootDir . '/init/' .$dir, $rootDir . '/' .$dir)
+            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Copied directory: dir');
@@ -96,14 +88,15 @@ class BuildDirCopierTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('createDirectory')
             ->with($rootDir . '/' . $dir);
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->with('/bin/bash -c "shopt -s dotglob; cp -R ./init/not-exist-dir/* not-exist-dir/ || true"');
+        $this->fileMock->expects($this->once())
+            ->method('copyDirectory')
+            ->with($rootDir . '/init/' .$dir, $rootDir . '/' .$dir)
+            ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Created directory: not-exist-dir'],
-                ['Copied directory: not-exist-dir']
+                ['Created directory: ' . $dir],
+                ['Copied directory: ' . $dir]
             );
 
         $this->copier->copy($dir);

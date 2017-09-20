@@ -39,8 +39,16 @@ class Reader implements ReaderInterface
      */
     public function read(): array
     {
-        $fileName = $this->directoryList->getMagentoRoot() . '/build_options.ini';
+        $fileName = $this->getPath();
 
         return $this->file->isExists($fileName) ? $this->file->parseIni($fileName) : [];
+    }
+
+    /**
+     * @return string
+     */
+    public function getPath(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/build_options.ini';
     }
 }

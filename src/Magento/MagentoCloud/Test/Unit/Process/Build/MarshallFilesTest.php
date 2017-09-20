@@ -7,11 +7,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\Build\MarshallFiles;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -22,16 +19,6 @@ class MarshallFilesTest extends TestCase
      * @var MarshallFiles
      */
     private $process;
-
-    /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $shellMock;
-
-    /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $loggerMock;
 
     /**
      * @var File|\PHPUnit_Framework_MockObject_MockObject
@@ -48,10 +35,6 @@ class MarshallFilesTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
         $this->fileMock = $this->getMockBuilder(File::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -63,78 +46,66 @@ class MarshallFilesTest extends TestCase
             ->willReturn('magento_root');
 
         $this->process = new MarshallFiles(
-            $this->shellMock,
-            $this->loggerMock,
             $this->fileMock,
             $this->directoryListMock
         );
     }
 
-    public function testExecute()
+    /**
+     * @param bool $isExist
+     * @param int $clearDirectory
+     * @param int $deleteDirectory
+     * @param int $createDirectory
+     * @dataProvider executeDataProvider
+     */
+    public function testExecute($isExist, $clearDirectory, $deleteDirectory, $createDirectory)
     {
-        $this->shellMock->expects($this->exactly(3))
-            ->method('execute')
+        $enterpriseFolder = 'magento_root/app/enterprise';
+        $generatedCode = 'magento_root/generated/code/';
+        $generatedMetadata = 'magento_root/generated/metadata/';
+        $varCache = 'magento_root/var/cache/';
+
+        $this->fileMock->expects($this->exactly($clearDirectory))
+            ->method('clearDirectory')
             ->withConsecutive(
-                ['rm -rf generated/code/*'],
-                ['rm -rf generated/metadata/*'],
-                ['rm -rf var/cache']
-            );
-        $this->fileMock->expects($this->exactly(2))
-            ->method('copy')
-            ->withConsecutive(
-                ['magento_root/app/etc/di.xml', 'magento_root/app/di.xml'],
-                ['magento_root/app/etc/enterprise/di.xml', 'magento_root/app/enterprise/di.xml']
-            );
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/app/enterprise')
+                [$generatedCode],
+                [$generatedMetadata]
+            )
             ->willReturn(true);
-
-        $this->process->execute();
-    }
-
-    public function testExecuteNoEnterpriseFolder()
-    {
-        $this->shellMock->expects($this->exactly(3))
-            ->method('execute')
-            ->withConsecutive(
-                ['rm -rf generated/code/*'],
-                ['rm -rf generated/metadata/*'],
-                ['rm -rf var/cache']
-            );
+        $this->fileMock->expects($this->exactly($deleteDirectory))
+            ->method('deleteDirectory')
+            ->with($varCache)
+            ->willReturn(true);
+        $this->fileMock->expects($this->exactly($createDirectory))
+            ->method('createDirectory')
+            ->with($enterpriseFolder, 0777)
+            ->willReturn(true);
         $this->fileMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
                 ['magento_root/app/etc/di.xml', 'magento_root/app/di.xml'],
                 ['magento_root/app/etc/enterprise/di.xml', 'magento_root/app/enterprise/di.xml']
             );
-        $this->fileMock->expects($this->once())
+        $this->fileMock->expects($this->exactly(4))
             ->method('isExists')
-            ->with('magento_root/app/enterprise')
-            ->willReturn(false);
-        $this->fileMock->expects($this->once())
-            ->method('createDirectory')
-            ->with('magento_root/app/enterprise', 0777);
+            ->willReturnMap([
+                [$generatedCode, $isExist],
+                [$generatedMetadata, $isExist],
+                [$varCache, $isExist],
+                [$enterpriseFolder, $isExist],
+            ]);
 
         $this->process->execute();
     }
 
-    public function testExecuteWithException()
+    /**
+     * @return array
+     */
+    public function executeDataProvider()
     {
-        $this->shellMock->expects($this->exactly(3))
-            ->method('execute')
-            ->withConsecutive(
-                ['rm -rf generated/code/*'],
-                ['rm -rf generated/metadata/*'],
-                ['rm -rf var/cache']
-            );
-        $this->fileMock->expects($this->any())
-            ->method('copy')
-            ->willThrowException(new FileSystemException('Some exception'));
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('Some exception');
-
-        $this->process->execute();
+        return [
+            ['isExist' => true, 'clearDirectory' => 2, 'deleteDirectory' => 1, 'createDirectory' => 0],
+            ['isExist' => false, 'clearDirectory' => 0, 'deleteDirectory' => 0, 'createDirectory' => 1]
+        ];
     }
 }

@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\BackupToInitDirectory;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -34,11 +33,6 @@ class BackupToInitDirectoryTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $shellMock;
-
-    /**
      * @var Environment|\PHPUnit_Framework_MockObject_MockObject
      */
     private $environmentMock;
@@ -58,8 +52,6 @@ class BackupToInitDirectoryTest extends TestCase
             ->getMock();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -67,14 +59,13 @@ class BackupToInitDirectoryTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->directoryListMock->expects($this->any())
+        $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
 
         $this->process = new BackupToInitDirectory(
             $this->fileMock,
             $this->loggerMock,
-            $this->shellMock,
             $this->environmentMock,
             $this->directoryListMock
         );
@@ -82,12 +73,47 @@ class BackupToInitDirectoryTest extends TestCase
 
     public function testProcess()
     {
-        $this->fileMock->method('isExists')
+        $this->fileMock->expects($this->exactly(2))
+            ->method('isExists')
             ->willReturnMap([
-                [Environment::REGENERATE_FLAG, true],
-                ['./init/pub/static', true],
+                ['magento_root/' . Environment::REGENERATE_FLAG, true],
+                ['magento_root/init/pub/static/', true],
             ]);
-        $this->loggerMock->method('notice')
+        $this->fileMock->expects($this->once())
+            ->method('deleteFile')
+            ->with('magento_root/' . Environment::REGENERATE_FLAG)
+            ->willReturn(true);
+        $this->fileMock->expects($this->exactly(4))
+            ->method('createDirectory')
+            ->withConsecutive(
+                ['magento_root/init/pub/'],
+                ['magento_root/init/some_dir'],
+                ['magento_root/some_dir'],
+                ['magento_root/some_dir']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('deleteDirectory')
+            ->withConsecutive(
+                ['magento_root/init/pub/static/'],
+                ['magento_root/some_dir']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('copyDirectory')
+            ->withConsecutive(
+                ['magento_root/pub/static/', 'magento_root/init/pub/static/'],
+                ['magento_root/some_dir', 'magento_root/init/some_dir']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('copy')
+            ->with(
+                'magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG,
+                'magento_root/init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+            );
+        $this->loggerMock->expects($this->exactly(4))
+            ->method('info')
             ->withConsecutive(
                 ['Removing .regenerate flag'],
                 ['Moving static content to init directory'],
@@ -97,28 +123,6 @@ class BackupToInitDirectoryTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('isStaticDeployInBuild')
             ->willReturn(true);
-        $this->shellMock->expects($this->any())
-            ->method('execute')
-            ->withConsecutive(
-                ['mkdir -p ./init/pub/'],
-                ['cp -R ./pub/static/ ./init/pub/static'],
-                ['mkdir -p init/some_dir'],
-                ['mkdir -p some_dir'],
-                ['/bin/bash -c "shopt -s dotglob; cp -R some_dir/* ./init/some_dir/"'],
-                ['rm -rf some_dir'],
-                ['mkdir -p some_dir']
-            );
-        $this->fileMock->method('deleteFile')
-            ->withConsecutive(
-                [Environment::REGENERATE_FLAG],
-                ['./init/pub/static']
-            );
-        $this->fileMock->expects($this->once())
-            ->method('copy')
-            ->with(
-                'magento_root' . DIRECTORY_SEPARATOR . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                'magento_root' . DIRECTORY_SEPARATOR . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
-            );
         $this->environmentMock->expects($this->once())
             ->method('getWritableDirectories')
             ->willReturn(['some_dir']);
@@ -131,12 +135,46 @@ class BackupToInitDirectoryTest extends TestCase
 
     public function testProcessNoRegenerateFile()
     {
-        $this->fileMock->method('isExists')
+        $this->fileMock->expects($this->exactly(2))
+            ->method('isExists')
             ->willReturnMap([
-                [Environment::REGENERATE_FLAG, false],
-                ['./init/pub/static', true],
+                ['magento_root/' . Environment::REGENERATE_FLAG, false],
+                ['magento_root/init/pub/static/', true],
             ]);
-        $this->loggerMock->method('notice')
+        $this->fileMock->expects($this->never())
+            ->method('deleteFile')
+            ->with('magento_root/' . Environment::REGENERATE_FLAG);
+        $this->fileMock->expects($this->exactly(4))
+            ->method('createDirectory')
+            ->withConsecutive(
+                ['magento_root/init/pub/'],
+                ['magento_root/init/some_dir'],
+                ['magento_root/some_dir'],
+                ['magento_root/some_dir']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('deleteDirectory')
+            ->withConsecutive(
+                ['magento_root/init/pub/static/'],
+                ['magento_root/some_dir']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('copyDirectory')
+            ->withConsecutive(
+                ['magento_root/pub/static/', 'magento_root/init/pub/static/'],
+                ['magento_root/some_dir', 'magento_root/init/some_dir']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('copy')
+            ->with(
+                'magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG,
+                'magento_root/init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+            );
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('info')
             ->withConsecutive(
                 ['Moving static content to init directory'],
                 ['Remove ./init/pub/static'],
@@ -145,27 +183,6 @@ class BackupToInitDirectoryTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('isStaticDeployInBuild')
             ->willReturn(true);
-        $this->shellMock->expects($this->any())
-            ->method('execute')
-            ->withConsecutive(
-                ['mkdir -p ./init/pub/'],
-                ['cp -R ./pub/static/ ./init/pub/static'],
-                ['mkdir -p init/some_dir'],
-                ['mkdir -p some_dir'],
-                ['/bin/bash -c "shopt -s dotglob; cp -R some_dir/* ./init/some_dir/"'],
-                ['rm -rf some_dir'],
-                ['mkdir -p some_dir']
-            );
-        $this->fileMock->method('deleteFile')
-            ->withConsecutive(
-                ['./init/pub/static']
-            );
-        $this->fileMock->expects($this->once())
-            ->method('copy')
-            ->with(
-                'magento_root' . DIRECTORY_SEPARATOR . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                'magento_root' . DIRECTORY_SEPARATOR . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
-            );
         $this->environmentMock->expects($this->once())
             ->method('getWritableDirectories')
             ->willReturn(['some_dir']);
@@ -178,12 +195,34 @@ class BackupToInitDirectoryTest extends TestCase
 
     public function testProcessNoStaticDeployInBuild()
     {
-        $this->fileMock->method('isExists')
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
             ->willReturnMap([
-                [Environment::REGENERATE_FLAG, false],
-                ['./init/pub/static', true],
+                ['magento_root/' . Environment::REGENERATE_FLAG, false]
             ]);
-        $this->loggerMock->method('notice')
+        $this->fileMock->expects($this->never())
+            ->method('deleteFile')
+            ->with('magento_root/' . Environment::REGENERATE_FLAG);
+        $this->fileMock->expects($this->exactly(3))
+            ->method('createDirectory')
+            ->withConsecutive(
+                ['magento_root/init/some_dir'],
+                ['magento_root/some_dir'],
+                ['magento_root/some_dir']
+            )
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('deleteDirectory')
+            ->with('magento_root/some_dir')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('copyDirectory')
+            ->with('magento_root/some_dir', 'magento_root/init/some_dir')
+            ->willReturn(true);
+        $this->fileMock->expects($this->never())
+            ->method('copy');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
             ->withConsecutive(
                 ['No file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG],
                 ['Copying writable directories to temp directory.']
@@ -191,19 +230,6 @@ class BackupToInitDirectoryTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('isStaticDeployInBuild')
             ->willReturn(false);
-        $this->shellMock->expects($this->any())
-            ->method('execute')
-            ->withConsecutive(
-                ['mkdir -p init/some_dir'],
-                ['mkdir -p some_dir'],
-                ['/bin/bash -c "shopt -s dotglob; cp -R some_dir/* ./init/some_dir/"'],
-                ['rm -rf some_dir'],
-                ['mkdir -p some_dir']
-            );
-        $this->fileMock->expects($this->never())
-            ->method('deleteFile');
-        $this->fileMock->expects($this->never())
-            ->method('copy');
         $this->environmentMock->expects($this->once())
             ->method('getWritableDirectories')
             ->willReturn(['some_dir']);
@@ -216,12 +242,24 @@ class BackupToInitDirectoryTest extends TestCase
 
     public function testProcessNoWritableDirs()
     {
-        $this->fileMock->method('isExists')
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
             ->willReturnMap([
-                [Environment::REGENERATE_FLAG, false],
-                ['./init/pub/static', true],
+                ['magento_root/' . Environment::REGENERATE_FLAG, false]
             ]);
-        $this->loggerMock->method('notice')
+        $this->fileMock->expects($this->never())
+            ->method('deleteFile')
+            ->with('magento_root/' . Environment::REGENERATE_FLAG);
+        $this->fileMock->expects($this->never())
+            ->method('createDirectory');
+        $this->fileMock->expects($this->never())
+            ->method('deleteDirectory');
+        $this->fileMock->expects($this->never())
+            ->method('copyDirectory');
+        $this->fileMock->expects($this->never())
+            ->method('copy');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
             ->withConsecutive(
                 ['No file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG],
                 ['Copying writable directories to temp directory.']
@@ -229,12 +267,6 @@ class BackupToInitDirectoryTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('isStaticDeployInBuild')
             ->willReturn(false);
-        $this->shellMock->expects($this->never())
-            ->method('execute');
-        $this->fileMock->expects($this->never())
-            ->method('deleteFile');
-        $this->fileMock->expects($this->never())
-            ->method('copy');
         $this->environmentMock->expects($this->once())
             ->method('getWritableDirectories')
             ->willReturn([]);

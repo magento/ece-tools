@@ -5,29 +5,17 @@
  */
 namespace Magento\MagentoCloud\Util;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 class StaticContentSymlink
 {
     /**
-     * @var Environment
-     */
-    private $env;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
-
-    /**
-     * @var ShellInterface
-     */
-    private $shell;
 
     /**
      * @var File
@@ -41,21 +29,15 @@ class StaticContentSymlink
 
     /**
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
-     * @param Environment $env
      * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellInterface $shell,
-        Environment $env,
         File $file,
         DirectoryList $directoryList
     ) {
         $this->logger = $logger;
-        $this->shell = $shell;
-        $this->env = $env;
         $this->file = $file;
         $this->directoryList = $directoryList;
     }
