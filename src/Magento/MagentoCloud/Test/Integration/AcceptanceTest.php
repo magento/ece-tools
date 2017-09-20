@@ -47,10 +47,11 @@ class AcceptanceTest extends TestCase
             'default configuration' => [
                 'environment' => [],
             ],
-            'verbosity vvv' => [
+            'verbosity vvv, disabled sc symlinks ' => [
                 'environment' => [
                     'variables' => [
                         'VERBOSE_COMMANDS' => Environment::VAL_ENABLED,
+                        'STATIC_CONTENT_SYMLINK' => Environment::VAL_DISABLED,
                     ],
                 ],
             ],

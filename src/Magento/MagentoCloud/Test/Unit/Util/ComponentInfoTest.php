@@ -9,6 +9,7 @@ use Composer\Composer;
 use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
+use Composer\Semver\Comparator;
 use Magento\MagentoCloud\Util\ComponentInfo;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -18,6 +19,11 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
  */
 class ComponentInfoTest extends TestCase
 {
+    /**
+     * @var ComponentInfo
+     */
+    private $componentInfo;
+
     /**
      * @var Composer|Mock
      */
@@ -29,9 +35,9 @@ class ComponentInfoTest extends TestCase
     private $composerRepositoryMock;
 
     /**
-     * @var ComponentInfo
+     * @var Comparator|Mock
      */
-    private $componentInfo;
+    private $comparatorMock;
 
     /**
      * @inheritdoc
@@ -42,6 +48,9 @@ class ComponentInfoTest extends TestCase
         $this->composerRepositoryMock = $this->getMockBuilder(RepositoryInterface::class)
             ->getMockForAbstractClass();
         $lockerMock = $this->createMock(Locker::class);
+        $this->comparatorMock = $this->getMockBuilder(Comparator::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->composerMock->expects($this->once())
             ->method('getLocker')
@@ -51,7 +60,8 @@ class ComponentInfoTest extends TestCase
             ->willReturn($this->composerRepositoryMock);
 
         $this->componentInfo = new ComponentInfo(
-            $this->composerMock
+            $this->composerMock,
+            $this->comparatorMock
         );
     }
 

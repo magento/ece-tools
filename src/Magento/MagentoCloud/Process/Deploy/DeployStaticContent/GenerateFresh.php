@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Util\ComponentInfo;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -49,6 +50,11 @@ class GenerateFresh implements ProcessInterface
     private $directoryList;
 
     /**
+     * @var ComponentInfo
+     */
+    private $componentInfo;
+
+    /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param Environment $environment
@@ -62,7 +68,8 @@ class GenerateFresh implements ProcessInterface
         Environment $environment,
         ConnectionInterface $connection,
         File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        ComponentInfo $componentInfo
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
@@ -70,6 +77,7 @@ class GenerateFresh implements ProcessInterface
         $this->connection = $connection;
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->componentInfo = $componentInfo;
     }
 
     /**
@@ -91,30 +99,23 @@ class GenerateFresh implements ProcessInterface
 
         $this->logger->info($logMessage);
 
-        try {
-            $this->shell->execute(
-                'php ./bin/magento setup:static-content:deploy -f ' .
-                implode(' ', [
-                    $jobsOption,
-                    $excludeThemesOptions,
-                    $locales,
-                    $this->environment->getVerbosityLevel(),
-                ])
-            );
-        } catch (\Exception $exception) {
-            /**
-             * Hack for M2.1 support
-             */
-            $this->shell->execute(
-                'php ./bin/magento setup:static-content:deploy ' .
-                implode(' ', [
-                    $jobsOption,
-                    $excludeThemesOptions,
-                    $locales,
-                    $this->environment->getVerbosityLevel(),
-                ])
-            );
+        $deployParams = [];
+
+        if ($this->componentInfo->hasMagentoVersion('2.2')) {
+            $deployParams[] = '-f';
         }
+
+        $deployParams = array_merge($deployParams, [
+            $jobsOption,
+            $excludeThemesOptions,
+            $locales,
+            $this->environment->getVerbosityLevel(),
+        ]);
+
+        $this->shell->execute(
+            'php ./bin/magento setup:static-content:deploy ' .
+            implode(' ', $deployParams)
+        );
 
         $this->shell->execute("php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}");
         $this->logger->info('Maintenance mode is disabled.');
