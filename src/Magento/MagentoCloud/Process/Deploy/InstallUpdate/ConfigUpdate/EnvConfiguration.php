@@ -47,8 +47,12 @@ class EnvConfiguration implements ProcessInterface
      */
     public function execute()
     {
+        $adminUrl = $this->environment->getAdminUrl();
+        if (empty($adminUrl)) {
+            return;
+        }
         $this->logger->info('Updating env.php backend front name.');
-        $config['backend']['frontName'] = $this->environment->getAdminUrl();
+        $config['backend']['frontName'] = $adminUrl;
         $this->configWriter->update($config);
     }
 }

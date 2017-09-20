@@ -93,7 +93,7 @@ class AdminCredentialsTest extends TestCase
             ->method('getAdminUsername')
             ->willReturn($userName);
         $this->passwordGeneratorMock->expects($this->once())
-            ->method('generate')
+            ->method('generateSaltAndHash')
             ->with($adminPassword)
             ->willReturn($generatedPassword);
         $this->connectionMock->expects($this->once())

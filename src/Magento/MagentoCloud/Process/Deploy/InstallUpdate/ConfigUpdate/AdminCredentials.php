@@ -56,24 +56,34 @@ class AdminCredentials implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Updating admin credentials.');
-
-        $password = $this->passwordGenerator->generate(
-            $this->environment->getAdminPassword()
-        );
-
+        /* Old query for reference:
         $query = 'UPDATE `admin_user` SET `firstname` = ?, `lastname` = ?, `email` = ?, `username` = ?, `password` = ?'
             . ' WHERE `user_id` = 1';
+        */
 
-        $this->connection->affectingQuery(
-            $query,
-            [
-                $this->environment->getAdminFirstname(),
-                $this->environment->getAdminLastname(),
-                $this->environment->getAdminEmail(),
-                $this->environment->getAdminUsername(),
-                $password,
-            ]
-        );
+        $parameters = [];
+        $query = "";
+        $addColumnValueToBeUpdated = function (&$query, &$parameters, $columnName, $value, $value2 = null) {
+            if (empty($value)) {
+                return;
+            }
+            if (!empty($query)) {
+                $query .= ",";
+            }
+            $query .= " $columnName = ?";
+            $parameters[] = $value2 ?? $value;
+        };
+        $addColumnValueToBeUpdated($query, $parameters, "`firstname`", $this->environment->getAdminFirstname());
+        $addColumnValueToBeUpdated($query, $parameters, "`lastname`", $this->environment->getAdminLastname());
+        $addColumnValueToBeUpdated($query, $parameters, "`email`", $this->environment->getAdminEmail());
+        $addColumnValueToBeUpdated($query, $parameters, "`username`", $this->environment->getAdminUsername());
+        $adminPassword = $this->environment->getAdminPassword();
+        $addColumnValueToBeUpdated($query, $parameters, "`password`", $adminPassword, empty($adminPassword) ? null : $this->passwordGenerator->generateSaltAndHash($adminPassword));
+        if (empty($query)) {
+            return;  // No variables set ; nothing to do
+        }
+        $this->logger->info('Updating admin credentials.');
+        $query = "UPDATE `admin_user` SET" . $query . " WHERE `user_id` = 1";
+        $this->connection->affectingQuery($query, $parameters);
     }
 }

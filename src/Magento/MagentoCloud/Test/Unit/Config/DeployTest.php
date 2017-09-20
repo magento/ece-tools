@@ -78,7 +78,7 @@ class DeployTest extends TestCase
         $this->writerMock->expects($this->never())
             ->method('update');
 
-        $this->assertFalse($this->deploy->isInstalled());
+        $this->assertFalse($this->invokeArgsOnMethodUsingReflection($this->deploy, "isInstalled"));
     }
 
     /**
@@ -106,7 +106,7 @@ class DeployTest extends TestCase
         $this->writerMock->expects($this->never())
             ->method('update');
 
-        $this->deploy->isInstalled();
+        $this->invokeArgsOnMethodUsingReflection($this->deploy, "isInstalled");
     }
 
     /**
@@ -144,7 +144,7 @@ class DeployTest extends TestCase
             ->with('r')
             ->willReturn($date);
 
-        $this->assertTrue($this->deploy->isInstalled());
+        $this->assertTrue($this->invokeArgsOnMethodUsingReflection($this->deploy, "isInstalled"));
     }
 
     public function testIsInstalledConfigFileWithDate()
@@ -167,6 +167,14 @@ class DeployTest extends TestCase
         $this->writerMock->expects($this->never())
             ->method('update');
 
-        $this->assertTrue($this->deploy->isInstalled());
+        $this->assertTrue($this->invokeArgsOnMethodUsingReflection($this->deploy, "isInstalled"));
+    }
+
+    private function invokeArgsOnMethodUsingReflection(&$object, $methodName, array $parameters = [])
+    {
+        $reflection = new \ReflectionClass(get_class($object));
+        $method = $reflection->getMethod($methodName);
+        $method->setAccessible(true);
+        return $method->invokeArgs($object, $parameters);
     }
 }
