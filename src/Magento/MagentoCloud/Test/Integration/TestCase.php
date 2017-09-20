@@ -64,7 +64,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             $environment
         );
 
-        $_ENV = array_merge($_ENV, [
+        $_ENV = array_replace($_ENV, [
             'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode($environment['variables'])),
             'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode($environment['relationships'])),
             'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode($environment['routes'])),
@@ -112,13 +112,32 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             $authFile = $this->getConfigFile('auth.json');
             $buildConfig = $this->getConfigFile('build_options.ini');
 
+            $authMap = [
+                'REPO_USERNAME' => 'http-basic.repo.magento.com.username',
+                'REPO_PASSWORD' => 'http-basic.repo.magento.com.password',
+                'CONNECT20_USERNAME' => 'http-basic.connect20-qa01.magedevteam.com.username',
+                'CONNECT20_PASSWORD' => 'http-basic.connect20-qa01.magedevteam.com.password',
+            ];
+
+            foreach ($authMap as $envName => $configPath) {
+                if (empty($_ENV[$envName])) {
+                    continue;
+                }
+
+                shell_exec(sprintf(
+                    "cd %s && composer config %s %s",
+                    $configPath,
+                    $_ENV[$envName]
+                ));
+            }
+
             shell_exec(sprintf(
                 "cd %s && git clone %s . ",
                 $sandboxDir,
                 'https://github.com/magento/magento-cloud'
             ));
             shell_exec(sprintf(
-                "cp -rf %s %s",
+                "cp -n %s %s",
                 $authFile,
                 $sandboxDir . '/auth.json'
             ));
