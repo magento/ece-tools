@@ -102,6 +102,6 @@ class Deploy
         if (is_null($this->isinstalling)) {
             $this->isinstalling = ! $this->isInstalled();
         }
-        return $this->isnstalling;
+        return $this->isinstalling;
     }
 }
