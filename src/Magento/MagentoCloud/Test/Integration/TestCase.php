@@ -119,7 +119,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
                 'CONNECT20_PASSWORD' => 'http-basic.connect20-qa01.magedevteam.com.password',
                 'GH_TOKEN' => 'github-oauth.github.com'
             ];
-
+die(var_dump(getenv()));
             foreach ($authMap as $envName => $configPath) {
                 $envValue = getenv($envName);
 
