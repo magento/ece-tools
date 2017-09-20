@@ -239,8 +239,8 @@ class Build extends Command
         if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
             $this->env->execute('rm -rf generated/code/*');
             $this->env->execute('rm -rf generated/metadata/*');
+            $this->env->execute('rm -rf var/cache');
         }
-        $this->env->execute('rm -rf var/cache');
 
         copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
         $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
