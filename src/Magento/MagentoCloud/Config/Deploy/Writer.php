@@ -60,8 +60,7 @@ class Writer
     public function update(array $config)
     {
         $updatedConfig = array_replace_recursive($this->reader->read(), $config);
-        $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($updatedConfig, true) . ';';
 
-        $this->file->filePutContents($this->reader->getPath(), $updatedConfig);
+        $this->write($updatedConfig);
     }
 }

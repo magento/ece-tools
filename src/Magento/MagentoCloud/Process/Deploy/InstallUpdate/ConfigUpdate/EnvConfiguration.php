@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
-class DbConnection implements ProcessInterface
+class EnvConfiguration implements ProcessInterface
 {
     /**
      * @var Environment
@@ -47,20 +47,8 @@ class DbConnection implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Updating env.php DB connection configuration.');
-
-        $config['db']['connection']['default']['username'] = $this->environment->getDbUser();
-        $config['db']['connection']['default']['host'] = $this->environment->getDbHost();
-        $config['db']['connection']['default']['dbname'] = $this->environment->getDbName();
-        $config['db']['connection']['default']['password'] = $this->environment->getDbPassword();
-
-        $config['db']['connection']['indexer']['username'] = $this->environment->getDbUser();
-        $config['db']['connection']['indexer']['host'] = $this->environment->getDbHost();
-        $config['db']['connection']['indexer']['dbname'] = $this->environment->getDbName();
-        $config['db']['connection']['indexer']['password'] = $this->environment->getDbPassword();
-
-        $config['resource']['default_setup']['connection'] = 'default';
-
+        $this->logger->info('Updating env.php backend front name.');
+        $config['backend']['frontName'] = $this->environment->getAdminUrl();
         $this->configWriter->update($config);
     }
 }
