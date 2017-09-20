@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Config\Environment;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -15,11 +16,12 @@ use Symfony\Component\Console\Tester\CommandTester;
 class AcceptanceTest extends TestCase
 {
     /**
-     * @inheritdoc
+     * @param array $environment
+     * @dataProvider dataProvider
      */
-    public function test()
+    public function test(array $environment)
     {
-        $application = $this->getApplication();
+        $application = $this->createApplication($environment);
 
         $commandTester = new CommandTester(
             $application->get(Build::NAME)
@@ -34,5 +36,24 @@ class AcceptanceTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
+    }
+
+    /**
+     * @return array
+     */
+    public function dataProvider(): array
+    {
+        return [
+            'default configuration' => [
+                'environment' => [],
+            ],
+            'verbosity vvv' => [
+                'environment' => [
+                    'variables' => [
+                        'VERBOSE_COMMANDS' => Environment::VAL_ENABLED,
+                    ],
+                ],
+            ],
+        ];
     }
 }

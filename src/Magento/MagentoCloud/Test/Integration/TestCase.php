@@ -7,24 +7,17 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\App\Bootstrap;
 use Magento\MagentoCloud\Application;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 
 /**
  * @inheritdoc
  */
 abstract class TestCase extends \PHPUnit\Framework\TestCase
 {
-    private $env;
-
-    private $tmpDir;
-
-    private $etcDir;
-
     /**
-     * @var Application
+     * @var array
      */
-    private $application;
-
-    abstract public function test();
+    private $env;
 
     /**
      * @inheritdoc
@@ -32,54 +25,14 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     protected function setUp()
     {
         $this->env = $_ENV;
-        $this->etcDir = __DIR__ . '/etc';
 
-        $configFile = $this->getConfigFile();
-
-        $this->tmpDir = BP . '/tests/integration/tmp/sandbox-' . md5_file($configFile);
-        $link = 'https://github.com/magento/magento-cloud';
-
-        if (!is_dir($this->tmpDir)) {
-            mkdir($this->tmpDir, 0777, true);
-
-            shell_exec(sprintf(
-                "cd %s && git clone %s . ",
-                $this->tmpDir,
-                $link
-            ));
-            shell_exec(sprintf(
-                "cp -rf %s %s",
-                $this->etcDir . '/auth.json.dist',
-                $this->tmpDir . '/auth.json'
-            ));
-            shell_exec(sprintf(
-                "cd %s && composer install",
-                $this->tmpDir
-            ));
-        }
+        $sandboxDir = $this->deploySandbox();
 
         shell_exec(sprintf(
             "cp -rf %s %s",
-            $this->etcDir . '/config.php.dist',
-            $this->tmpDir . '/app/etc/config.php'
+            $this->getConfigFile('config.php'),
+            $sandboxDir . '/app/etc/config.php'
         ));
-
-        $server[\Magento\MagentoCloud\App\Bootstrap::INIT_PARAM_DIRS_CONFIG] = [
-            \Magento\MagentoCloud\Filesystem\DirectoryList::MAGENTO_ROOT => [
-                \Magento\MagentoCloud\Filesystem\DirectoryList::PATH => '',
-            ],
-        ];
-
-        $environment = require_once $configFile;
-
-        $_ENV = array_merge($_ENV, [
-            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode($environment['variables'])),
-            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode($environment['relationships'])),
-            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode($environment['routes'])),
-        ]);
-
-        $this->application = Bootstrap::create($this->tmpDir, $server)
-            ->createApplication();
     }
 
     /**
@@ -87,13 +40,15 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
      */
     protected function tearDown()
     {
+        $sandboxDir = $this->getSandboxDir();
+
         shell_exec(sprintf(
             "cd %s && php bin/magento setup:uninstall -n",
-            $this->tmpDir
+            $sandboxDir
         ));
         shell_exec(sprintf(
             "cd %s && rm -rf init",
-            $this->tmpDir
+            $sandboxDir
         ));
 
         $_ENV = $this->env;
@@ -102,18 +57,36 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
     /**
      * @return Application
      */
-    protected function getApplication(): Application
+    protected function createApplication(array $environment): Application
     {
-        return $this->application;
+        $environment = array_replace_recursive(
+            require $this->getConfigFile('environment.php'),
+            $environment
+        );
+
+        $_ENV = array_merge($_ENV, [
+            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode($environment['variables'])),
+            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode($environment['relationships'])),
+            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode($environment['routes'])),
+        ]);
+
+        $server[Bootstrap::INIT_PARAM_DIRS_CONFIG] = [
+            DirectoryList::MAGENTO_ROOT => [
+                DirectoryList::PATH => '',
+            ],
+        ];
+
+        return Bootstrap::create($this->getSandboxDir(), $server)->createApplication();
     }
 
     /**
+     * @param string $file
      * @return string
      * @throws \Exception
      */
-    private function getConfigFile(): string
+    private function getConfigFile(string $file): string
     {
-        $configFile = $this->etcDir . '/environment.php';
+        $configFile = __DIR__ . '/etc/' . $file;
 
         if (@file_exists($configFile)) {
             return $configFile;
@@ -124,5 +97,52 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         }
 
         throw new \Exception('Config can not be found');
+    }
+
+    /**
+     * @return string
+     */
+    private function deploySandbox(): string
+    {
+        $sandboxDir = $this->getSandboxDir();
+
+        if (!is_dir($sandboxDir)) {
+            mkdir($sandboxDir, 0777, true);
+
+            $authFile = $this->getConfigFile('auth.json');
+            $buildConfig = $this->getConfigFile('build_options.ini');
+
+            shell_exec(sprintf(
+                "cd %s && git clone %s . ",
+                $sandboxDir,
+                'https://github.com/magento/magento-cloud'
+            ));
+            shell_exec(sprintf(
+                "cp -rf %s %s",
+                $authFile,
+                $sandboxDir . '/auth.json'
+            ));
+            shell_exec(sprintf(
+                "cp -rf %s %s",
+                $buildConfig,
+                $sandboxDir . '/build_options.ini'
+            ));
+            shell_exec(sprintf(
+                "cd %s && composer install",
+                $sandboxDir
+            ));
+        }
+
+        return $sandboxDir;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSandboxDir(): string
+    {
+        $environmentFile = $this->getConfigFile('environment.php');
+
+        return BP . '/tests/integration/tmp/sandbox-' . md5_file($environmentFile);
     }
 }

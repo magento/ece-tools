@@ -35,9 +35,9 @@
   },
   "scripts": {
     "test": [
-      "phpcs src --standard=phpcs-ruleset.xml -p -n",
-      "phpmd src xml phpmd-ruleset.xml",
-      "phpunit --testsuite Unit"
+      "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
+      "phpmd src xml tests/static/phpmd-ruleset.xml",
+      "phpunit --configuration tests/unit/phpunit.xml.dist"
     ]
   },
   "process-timeout": 600,

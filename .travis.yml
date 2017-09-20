@@ -2,7 +2,6 @@ sudo: false
 dist: trusty
 services:
   - mysql
-
 language: php
 php:
   - 7.0
@@ -26,7 +25,7 @@ install: composer install --no-interaction --prefer-dist
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
 script:
-  - if [ $TEST_SUITE == "static" ]; then phpcs src --standard=phpcs-ruleset.xml -p -n; fi
-  - if [ $TEST_SUITE == "static" ]; then phpmd src xml phpmd-ruleset.xml; fi
-  - if [ $TEST_SUITE == "unit" ]; then phpunit --testsuite Unit; fi
-  - if [ $TEST_SUITE == "integration" ]; then phpunit --testsuite Integration; fi
+  - if [ $TEST_SUITE == "static" ]; then phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n; fi
+  - if [ $TEST_SUITE == "static" ]; then phpmd src xml tests/static/phpmd-ruleset.xml; fi
+  - if [ $TEST_SUITE == "unit" ]; then phpunit --configuration tests/unit/phpunit.xml.dist; fi
+  - if [ $TEST_SUITE == "integration" ]; then phpunit --configuration tests/integration/phpunit.xml.dist; fi
