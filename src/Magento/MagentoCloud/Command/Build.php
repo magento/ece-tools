@@ -20,7 +20,6 @@ class Build extends Command
      * Options for build_options.ini
      */
     const BUILD_OPT_SKIP_DI_COMPILATION = 'skip_di_compilation';
-    const BUILD_OPT_SKIP_DI_CLEARING = 'skip_di_clearing';
     const BUILD_OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
     const BUILD_OPT_SCD_THREADS = 'scd_threads';
     const BUILD_OPT_SKIP_SCD = 'skip_scd';
@@ -237,8 +236,10 @@ class Build extends Command
      */
     private function marshallingFiles()
     {
-        $this->env->execute('rm -rf generated/code/*');
-        $this->env->execute('rm -rf generated/metadata/*');
+        if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
+            $this->env->execute('rm -rf generated/code/*');
+            $this->env->execute('rm -rf generated/metadata/*');
+        }
         $this->env->execute('rm -rf var/cache');
 
         copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
