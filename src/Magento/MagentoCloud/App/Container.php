@@ -94,6 +94,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate::class),
                         $this->make(DeployProcess\DeployStaticContent::class),
                         $this->make(DeployProcess\DisableGoogleAnalytics::class),
+                        $this->make(DeployProcess\SendPasswordResetEmail::class),
                     ],
                 ]);
             });
