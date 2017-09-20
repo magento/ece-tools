@@ -121,6 +121,8 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             ];
 
             foreach ($authMap as $envName => $configPath) {
+                echo $envName . ' was ' . !empty($_ENV[$envName]) ? 'found' : 'not found';
+
                 if (empty($_ENV[$envName])) {
                     continue;
                 }
