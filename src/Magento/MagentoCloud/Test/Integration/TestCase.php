@@ -117,9 +117,9 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
                 'REPO_PASSWORD' => 'http-basic.repo.magento.com.password',
                 'CONNECT20_USERNAME' => 'http-basic.connect20-qa01.magedevteam.com.username',
                 'CONNECT20_PASSWORD' => 'http-basic.connect20-qa01.magedevteam.com.password',
-                'GH_TOKEN' => 'github-oauth.github.com'
+                '$GH_TOKEN' => 'github-oauth.github.com'
             ];
-die(var_dump(getenv()));
+
             foreach ($authMap as $envName => $configPath) {
                 $envValue = getenv($envName);
 
