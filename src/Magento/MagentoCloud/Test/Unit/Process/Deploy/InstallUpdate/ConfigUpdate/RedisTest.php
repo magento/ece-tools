@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Redis;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Psr\Log\LoggerInterface;
@@ -22,6 +23,11 @@ class RedisTest extends TestCase
      * @var Environment|Mock
      */
     private $environmentMock;
+
+    /**
+     * @var EnvironmentAdmin|Mock
+     */
+    private $environmentAdminMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -49,7 +55,11 @@ class RedisTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->setMethods(['getRelationships', 'getAdminUrl'])
+            ->setMethods(['getRelationships'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->environmentAdminMock = $this->getMockBuilder(EnvironmentAdmin::class)
+            ->setMethods(['getAdminUrl'])
             ->disableOriginalConstructor()
             ->getMock();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
@@ -80,7 +90,7 @@ class RedisTest extends TestCase
                     ]
                 ],
             ]);
-        $this->environmentMock->expects($this->any())
+        $this->environmentAdminMock->expects($this->any())
             ->method('getAdminUrl')
             ->willReturn('admin');
 
@@ -132,7 +142,7 @@ class RedisTest extends TestCase
         $this->environmentMock->expects($this->any())
             ->method('getRelationships')
             ->willReturn([]);
-        $this->environmentMock->expects($this->any())
+        $this->environmentAdminMock->expects($this->any())
             ->method('getAdminUrl')
             ->willReturn('admin');
 

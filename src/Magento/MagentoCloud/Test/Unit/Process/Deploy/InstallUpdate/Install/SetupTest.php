@@ -6,6 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\PasswordGenerator;
@@ -32,6 +34,11 @@ class SetupTest extends TestCase
     private $environmentMock;
 
     /**
+     * @var EnvironmentAdmin|Mock
+     */
+    private $environmentAdminMock;
+
+    /**
      * @var UrlManager|Mock
      */
     private $urlManagerMock;
@@ -40,6 +47,11 @@ class SetupTest extends TestCase
      * @var PasswordGenerator|Mock
      */
     private $passwordGeneratorMock;
+
+    /**
+     * @var DeployConfig|Mock
+     */
+    private $deployConfigMock;
 
     /**
      * @var Setup
@@ -60,11 +72,18 @@ class SetupTest extends TestCase
         $this->passwordGeneratorMock = $this->getMockBuilder(PasswordGenerator::class)
             ->setMethods(['generateRandomString'])
             ->getMockForAbstractClass();
-
+        $this->deployConfigMock = $this->getMockBuilder(DeployConfig::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->environmentAdminMock = $this->getMockBuilder(EnvironmentAdmin::class)
+            ->setConstructorArgs([$this->loggerMock, $this->deployConfigMock, $this->passwordGeneratorMock, $this->environmentMock])
+            ->setMethods()
+            ->getMock();
         $this->process = new Setup(
             $this->loggerMock,
             $this->urlManagerMock,
             $this->environmentMock,
+            $this->environmentAdminMock,
             $this->shellMock,
             $this->passwordGeneratorMock
         );

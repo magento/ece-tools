@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -30,6 +31,11 @@ class Setup implements ProcessInterface
     private $environment;
 
     /**
+     * @var EnvironmentAdmin
+     */
+    private $environmentAdmin;
+
+    /**
      * @var ShellInterface
      */
     private $shell;
@@ -43,12 +49,14 @@ class Setup implements ProcessInterface
         LoggerInterface $logger,
         UrlManager $urlManager,
         Environment $environment,
+        EnvironmentAdmin $environmentAdmin,
         ShellInterface $shell,
         PasswordGenerator $passwordGenerator
     ) {
         $this->logger = $logger;
         $this->urlManager = $urlManager;
         $this->environment = $environment;
+        $this->environmentAdmin = $environmentAdmin;
         $this->shell = $shell;
         $this->passwordGenerator = $passwordGenerator;
     }
@@ -70,16 +78,16 @@ class Setup implements ProcessInterface
             . " " . escapeshellarg("--currency={$this->environment->getDefaultCurrency()}")
             . " " . escapeshellarg("--base-url=$urlUnsecure")
             . " " . escapeshellarg("--base-url-secure=$urlSecure")
-            . " " . escapeshellarg("--language={$this->environment->getAdminLocale()}")
+            . " " . escapeshellarg("--language={$this->environmentAdmin->getAdminLocale()}")
             . " " . escapeshellarg("--timezone=America/Los_Angeles")
             . " " . escapeshellarg("--db-host={$this->environment->getDbHost()}")
             . " " . escapeshellarg("--db-name={$this->environment->getDbName()}")
             . " " . escapeshellarg("--db-user={$this->environment->getDbUser()}")
-            . " " . escapeshellarg("--backend-frontname={$this->environment->getAdminUrl()}")
-            . " " . escapeshellarg("--admin-user={$this->environment->getAdminUsername()}")
-            . " " . escapeshellarg("--admin-firstname={$this->environment->getAdminFirstname()}")
-            . " " . escapeshellarg("--admin-lastname={$this->environment->getAdminLastname()}")
-            . " " . escapeshellarg("--admin-email={$this->environment->getAdminEmail()}")
+            . " " . escapeshellarg("--backend-frontname={$this->environmentAdmin->getAdminUrl()}")
+            . " " . escapeshellarg("--admin-user={$this->environmentAdmin->getAdminUsername()}")
+            . " " . escapeshellarg("--admin-firstname={$this->environmentAdmin->getAdminFirstname()}")
+            . " " . escapeshellarg("--admin-lastname={$this->environmentAdmin->getAdminLastname()}")
+            . " " . escapeshellarg("--admin-email={$this->environmentAdmin->getAdminEmail()}")
             . " " . escapeshellarg("--admin-password={$this->passwordGenerator->generateRandomPassword()}"); // Note: This password gets changed later in updateAdminCredentials
 
         $dbPassword = $this->environment->getDbPassword();

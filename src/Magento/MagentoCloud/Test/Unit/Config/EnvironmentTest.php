@@ -78,9 +78,7 @@ class EnvironmentTest extends TestCase
         $this->environment = new Environment(
             $this->loggerMock,
             $this->fileMock,
-            $this->directoryListMock,
-            $this->deployConfig,
-            $this->passwordGenerator
+            $this->directoryListMock
         );
     }
 

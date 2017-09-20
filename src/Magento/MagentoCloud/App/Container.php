@@ -53,6 +53,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             \Magento\MagentoCloud\Shell\Shell::class
         );
         $this->singleton(\Magento\MagentoCloud\Config\Environment::class);
+        $this->singleton(\Magento\MagentoCloud\Config\EnvironmentAdmin::class);
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
         $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));

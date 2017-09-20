@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent;
@@ -44,11 +45,16 @@ class DeployStaticContentTest extends TestCase
      * @var Build|\PHPUnit_Framework_MockObject_MockObject
      */
     private $buildConfigMock;
-
+    
     /**
      * @var Environment|\PHPUnit_Framework_MockObject_MockObject
      */
     private $environmentMock;
+
+    /**
+     * @var EnvironmentAdmin|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $environmentAdminMock;
 
     /**
      * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
@@ -78,6 +84,9 @@ class DeployStaticContentTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->environmentAdminMock = $this->getMockBuilder(EnvironmentAdmin::class)
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -94,6 +103,7 @@ class DeployStaticContentTest extends TestCase
             $this->buildConfigMock,
             $this->fileMock,
             $this->environmentMock,
+            $this->environmentAdminMock,
             $this->directoryListMock,
             $this->arrayManagerMock
         );

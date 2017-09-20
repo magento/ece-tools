@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 
 class AdminCredentials implements ProcessInterface
@@ -19,9 +19,9 @@ class AdminCredentials implements ProcessInterface
     private $logger;
 
     /**
-     * @var Environment
+     * @var EnvironmentAdmin
      */
-    private $environment;
+    private $environmentAdmin;
 
     /**
      * @var PasswordGenerator
@@ -36,18 +36,18 @@ class AdminCredentials implements ProcessInterface
     /**
      * @param LoggerInterface $logger
      * @param ConnectionInterface $connection
-     * @param Environment $environment
+     * @param EnvironmentAdmin $environmentAdmin
      * @param PasswordGenerator $passwordGenerator
      */
     public function __construct(
         LoggerInterface $logger,
         ConnectionInterface $connection,
-        Environment $environment,
+        EnvironmentAdmin $environmentAdmin,
         PasswordGenerator $passwordGenerator
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
-        $this->environment = $environment;
+        $this->environmentAdmin = $environmentAdmin;
         $this->passwordGenerator = $passwordGenerator;
     }
 
@@ -73,11 +73,11 @@ class AdminCredentials implements ProcessInterface
             $query .= " $columnName = ?";
             $parameters[] = $value2 ?? $value;
         };
-        $addColumnValueToBeUpdated($query, $parameters, "`firstname`", $this->environment->getAdminFirstname());
-        $addColumnValueToBeUpdated($query, $parameters, "`lastname`", $this->environment->getAdminLastname());
-        $addColumnValueToBeUpdated($query, $parameters, "`email`", $this->environment->getAdminEmail());
-        $addColumnValueToBeUpdated($query, $parameters, "`username`", $this->environment->getAdminUsername());
-        $adminPassword = $this->environment->getAdminPassword();
+        $addColumnValueToBeUpdated($query, $parameters, "`firstname`", $this->environmentAdmin->getAdminFirstname());
+        $addColumnValueToBeUpdated($query, $parameters, "`lastname`", $this->environmentAdmin->getAdminLastname());
+        $addColumnValueToBeUpdated($query, $parameters, "`email`", $this->environmentAdmin->getAdminEmail());
+        $addColumnValueToBeUpdated($query, $parameters, "`username`", $this->environmentAdmin->getAdminUsername());
+        $adminPassword = $this->environmentAdmin->getAdminPassword();
         $addColumnValueToBeUpdated($query, $parameters, "`password`", $adminPassword, empty($adminPassword) ? null : $this->passwordGenerator->generateSaltAndHash($adminPassword));
         if (empty($query)) {
             return;  // No variables set ; nothing to do
