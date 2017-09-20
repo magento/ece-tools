@@ -19,7 +19,6 @@ class Build extends Command
     /**
      * Options for build_options.ini
      */
-    const BUILD_OPT_SKIP_DI_COMPILATION = 'skip_di_compilation';
     const BUILD_OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
     const BUILD_OPT_SCD_THREADS = 'scd_threads';
     const BUILD_OPT_SKIP_SCD = 'skip_scd';
@@ -236,11 +235,9 @@ class Build extends Command
      */
     private function marshallingFiles()
     {
-        if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
-            $this->env->execute('rm -rf generated/code/*');
-            $this->env->execute('rm -rf generated/metadata/*');
-            $this->env->execute('rm -rf var/cache');
-        }
+        $this->env->execute('rm -rf generated/code/*');
+        $this->env->execute('rm -rf generated/metadata/*');
+        $this->env->execute('rm -rf var/cache');
 
         copy(Environment::MAGENTO_ROOT . 'app/etc/di.xml', Environment::MAGENTO_ROOT . 'app/di.xml');
         $enterpriseFolder = Environment::MAGENTO_ROOT . 'app/enterprise';
@@ -277,12 +274,8 @@ class Build extends Command
     {
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
         if (file_exists($configFile)) {
-            if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
-                $this->env->log("Running DI compilation");
-                $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
-            } else {
-                $this->env->log("Skip running DI compilation");
-            }
+            $this->env->log("Running DI compilation");
+            $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
         } else {
             $this->env->log(
                 "Missing config.php, please run the following commands "
