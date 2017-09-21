@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Util\PackageManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -50,7 +50,7 @@ class GenerateFresh implements ProcessInterface
     private $directoryList;
 
     /**
-     * @var ComponentInfo
+     * @var PackageManager
      */
     private $componentInfo;
 
@@ -69,7 +69,7 @@ class GenerateFresh implements ProcessInterface
         ConnectionInterface $connection,
         File $file,
         DirectoryList $directoryList,
-        ComponentInfo $componentInfo
+        PackageManager $componentInfo
     ) {
         $this->shell = $shell;
         $this->logger = $logger;

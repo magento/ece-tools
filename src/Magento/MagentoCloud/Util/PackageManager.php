@@ -9,7 +9,7 @@ use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Composer\Semver\Comparator;
 
-class ComponentInfo
+class PackageManager
 {
     /**
      * @var Composer

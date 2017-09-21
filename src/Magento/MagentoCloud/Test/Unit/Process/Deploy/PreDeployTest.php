@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Process\Deploy\PreDeploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Util\PackageManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -20,7 +20,7 @@ class PreDeployTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ComponentInfo|Mock
+     * @var PackageManager|Mock
      */
     private $componentInfoMock;
 
@@ -38,7 +38,7 @@ class PreDeployTest extends TestCase
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->componentInfoMock = $this->createMock(ComponentInfo::class);
+        $this->componentInfoMock = $this->createMock(PackageManager::class);
         $this->processMock = $this->getMockBuilder(ProcessInterface::class)
             ->getMockForAbstractClass();
 

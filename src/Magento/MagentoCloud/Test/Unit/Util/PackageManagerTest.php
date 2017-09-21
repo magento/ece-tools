@@ -10,19 +10,19 @@ use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
 use Composer\Semver\Comparator;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Util\PackageManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
  */
-class ComponentInfoTest extends TestCase
+class PackageManagerTest extends TestCase
 {
     /**
-     * @var ComponentInfo
+     * @var PackageManager
      */
-    private $componentInfo;
+    private $packageManager;
 
     /**
      * @var Composer|Mock
@@ -59,7 +59,7 @@ class ComponentInfoTest extends TestCase
             ->method('getLockedRepository')
             ->willReturn($this->composerRepositoryMock);
 
-        $this->componentInfo = new ComponentInfo(
+        $this->packageManager = new PackageManager(
             $this->composerMock,
             $this->comparatorMock
         );
@@ -98,7 +98,7 @@ class ComponentInfoTest extends TestCase
 
         $this->assertEquals(
             '(magento/ece-tools version: v1.0.0, magento/magento2-base version: v2.0.0)',
-            $this->componentInfo->get()
+            $this->packageManager->get()
         );
     }
 
@@ -126,7 +126,7 @@ class ComponentInfoTest extends TestCase
 
         $this->assertEquals(
             '(vendor/package1 version: v1.0.0)',
-            $this->componentInfo->get(['vendor/package1', 'vendor/not-exists-package'])
+            $this->packageManager->get(['vendor/package1', 'vendor/not-exists-package'])
         );
     }
 }

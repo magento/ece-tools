@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Util\PackageManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -32,7 +32,7 @@ class PreBuild implements ProcessInterface
     private $logger;
 
     /**
-     * @var ComponentInfo
+     * @var PackageManager
      */
     private $componentInfo;
 
@@ -40,13 +40,13 @@ class PreBuild implements ProcessInterface
      * @param BuildConfig $buildConfig
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param ComponentInfo $componentInfo
+     * @param PackageManager $componentInfo
      */
     public function __construct(
         BuildConfig $buildConfig,
         Environment $environment,
         LoggerInterface $logger,
-        ComponentInfo $componentInfo
+        PackageManager $componentInfo
     ) {
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;

@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\GenerateFresh;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Util\PackageManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -56,7 +56,7 @@ class GenerateFreshTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var ComponentInfo|\PHPUnit_Framework_MockObject_MockObject
+     * @var PackageManager|\PHPUnit_Framework_MockObject_MockObject
      */
     private $componentInfoMock;
 
@@ -80,7 +80,7 @@ class GenerateFreshTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->componentInfoMock = $this->getMockBuilder(ComponentInfo::class)
+        $this->componentInfoMock = $this->getMockBuilder(PackageManager::class)
             ->disableOriginalConstructor()
             ->getMock();
 

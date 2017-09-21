@@ -56,7 +56,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
         $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
-        $this->singleton(\Magento\MagentoCloud\Util\ComponentInfo::class);
+        $this->singleton(\Magento\MagentoCloud\Util\PackageManager::class);
         $this->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
         $this->singleton(
             \Magento\MagentoCloud\DB\ConnectionInterface::class,
