@@ -150,6 +150,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             $buildFile,
             $sandboxDir . '/build_options.ini'
         ));
+        shell_exec('composer config --list');
         shell_exec(sprintf(
             "cd %s && composer install",
             $sandboxDir
