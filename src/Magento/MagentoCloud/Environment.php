@@ -23,9 +23,16 @@ class Environment
     /**
      * Deploy log file.
      */
-    const DEPLOY_LOG = self::MAGENTO_ROOT . 'var/log/cloud_deploy.log';
+    const DEPLOY_LOG = self::MAGENTO_ROOT . 'var/log/cloud.log';
 
-    public $writableDirs = ['var', 'app/etc', 'pub/media'];
+    private $writableDirs = ['var', 'app/etc', 'pub/media'];
+
+    /**
+     * Directories to be restored after build phase.
+     *
+     * @var array
+     */
+    private $recoverableDirs = ['app/etc', 'pub/media', 'var/log'];
 
     /**
      * @var LoggerInterface
@@ -244,5 +251,21 @@ class Environment
             $message .= ")";
         }
         return $message;
+    }
+
+    /**
+     * @return array
+     */
+    public function getWritableDirs()
+    {
+        return $this->writableDirs;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRecoverableDirs()
+    {
+        return $this->recoverableDirs;
     }
 }

@@ -851,6 +851,12 @@ class Deploy extends Command
      */
     private function preDeploy()
     {
+        foreach ($this->env->getRecoverableDirs() as $dir) {
+            $this->copyFromBuildDir($dir);
+        }
+
+        $this->env->log('Recoverable directories was copied back');
+
         $this->env->log($this->env->startingMessage("pre-deploy"));
         // Clear redis and file caches
         $relationships = $this->env->getRelationships();
@@ -869,8 +875,6 @@ class Deploy extends Command
         if (file_exists($fileCacheDir)) {
             $this->env->execute("rm -rf $fileCacheDir");
         }
-
-        $mountedDirectories = ['app/etc', 'pub/media'];
 
         $buildDir = realpath(Environment::MAGENTO_ROOT . 'init') . '/';
 
@@ -910,13 +914,6 @@ class Deploy extends Command
             }
         }
 
-        // Restore mounted directories
-        $this->env->log("Copying writable directories back.");
-
-        foreach ($mountedDirectories as $dir) {
-            $this->copyFromBuildDir($dir);
-        }
-
         if (file_exists(Environment::REGENERATE_FLAG)) {
             $this->env->log("Removing var/.regenerate flag");
             unlink(Environment::REGENERATE_FLAG);
@@ -930,6 +927,9 @@ class Deploy extends Command
     private function copyFromBuildDir($dir)
     {
         $fullPathDir = Environment::MAGENTO_ROOT . $dir;
+
+        $this->env->log('Copying ' . $fullPathDir);
+
         if (!file_exists($fullPathDir)) {
             mkdir($fullPathDir);
             $this->env->log(sprintf('Created directory: %s', $dir));
