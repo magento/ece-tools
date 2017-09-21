@@ -52,7 +52,7 @@ class GenerateFresh implements ProcessInterface
     /**
      * @var PackageManager
      */
-    private $componentInfo;
+    private $packageManager;
 
     /**
      * @param ShellInterface $shell
@@ -61,6 +61,7 @@ class GenerateFresh implements ProcessInterface
      * @param ConnectionInterface $connection
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param PackageManager $packageManager
      */
     public function __construct(
         ShellInterface $shell,
@@ -69,7 +70,7 @@ class GenerateFresh implements ProcessInterface
         ConnectionInterface $connection,
         File $file,
         DirectoryList $directoryList,
-        PackageManager $componentInfo
+        PackageManager $packageManager
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
@@ -77,7 +78,7 @@ class GenerateFresh implements ProcessInterface
         $this->connection = $connection;
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->componentInfo = $componentInfo;
+        $this->packageManager = $packageManager;
     }
 
     /**
@@ -101,7 +102,7 @@ class GenerateFresh implements ProcessInterface
 
         $deployParams = [];
 
-        if ($this->componentInfo->hasMagentoVersion('2.2')) {
+        if ($this->packageManager->hasMagentoVersion('2.2')) {
             $deployParams[] = '-f';
         }
 

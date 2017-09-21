@@ -34,24 +34,24 @@ class PreBuild implements ProcessInterface
     /**
      * @var PackageManager
      */
-    private $componentInfo;
+    private $packageManager;
 
     /**
      * @param BuildConfig $buildConfig
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param PackageManager $componentInfo
+     * @param PackageManager $packageManager
      */
     public function __construct(
         BuildConfig $buildConfig,
         Environment $environment,
         LoggerInterface $logger,
-        PackageManager $componentInfo
+        PackageManager $packageManager
     ) {
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->componentInfo = $componentInfo;
+        $this->packageManager = $packageManager;
     }
 
     /**
@@ -63,6 +63,6 @@ class PreBuild implements ProcessInterface
 
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
         $this->environment->removeFlagStaticContentInBuild();
-        $this->logger->info('Starting build. ' . $this->componentInfo->get());
+        $this->logger->info('Starting build. ' . $this->packageManager->get());
     }
 }

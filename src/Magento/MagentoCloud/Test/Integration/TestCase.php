@@ -101,64 +101,82 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
 
     /**
      * @return string
+     * @throws \Exception
      */
     private function deploySandbox(): string
     {
         $sandboxDir = $this->getSandboxDir();
 
-        if (!is_dir($sandboxDir)) {
-            mkdir($sandboxDir, 0777, true);
+        if (is_dir($sandboxDir)) {
+            return $sandboxDir;
+        }
 
-            $authFile = $this->getConfigFile('auth.json');
-            $buildConfig = $this->getConfigFile('build_options.ini');
+        mkdir($sandboxDir, 0777, true);
 
-            $authMap = [
-                'REPO_USERNAME' => 'http-basic.repo.magento.com.username',
-                'REPO_PASSWORD' => 'http-basic.repo.magento.com.password',
-                'CONNECT20_USERNAME' => 'http-basic.connect20-qa01.magedevteam.com.username',
-                'CONNECT20_PASSWORD' => 'http-basic.connect20-qa01.magedevteam.com.password',
-                'GH_TOKEN' => 'github-oauth.github.com'
-            ];
+        $authFile = $this->getConfigFile('auth.json');
+        $buildConfig = $this->getConfigFile('build_options.ini');
 
-            foreach ($authMap as $envName => $configPath) {
-                $envValue = getenv($envName);
+        $authMap = [
+            'REPO_USERNAME' => 'http-basic.repo.magento.com.username',
+            'REPO_PASSWORD' => 'http-basic.repo.magento.com.password',
+            'CONNECT20_USERNAME' => 'http-basic.connect20-qa01.magedevteam.com.username',
+            'CONNECT20_PASSWORD' => 'http-basic.connect20-qa01.magedevteam.com.password',
+            'GH_TOKEN' => 'github-oauth.github.com',
+        ];
 
-                if (false === $envValue) {
-                    continue;
-                }
+        foreach ($authMap as $envName => $configPath) {
+            $envValue = getenv($envName);
 
-                shell_exec(sprintf(
-                    "cd %s && composer config %s %s",
-                    $configPath,
-                    $_ENV[$envName]
-                ));
+            if (false === $envValue) {
+                continue;
             }
 
             shell_exec(sprintf(
+                "cd %s && composer config %s %s",
+                $configPath,
+                $_ENV[$envName]
+            ));
+        }
+
+        $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
+
+        if ($deployConfig['type'] === 'git') {
+            shell_exec(sprintf(
                 "cd %s && git clone %s . ",
                 $sandboxDir,
-                'https://github.com/magento/magento-cloud'
+                $deployConfig['types']['git']['repo']
             ));
             shell_exec(sprintf(
                 "cd %s && git checkout -b %s",
                 $sandboxDir,
-                '2.1.9'
+                $deployConfig['types']['git']['version']
             ));
+        } elseif ($deployConfig['type'] === 'project') {
             shell_exec(sprintf(
-                "cp -n %s %s",
-                $authFile,
-                $sandboxDir . '/auth.json'
+                "cd %s && composer create-project --no-dev --repository-url=%s %s . %s",
+                $sandboxDir,
+                $deployConfig['types']['project']['repo'],
+                $deployConfig['types']['project']['name'],
+                $deployConfig['types']['project']['version']
             ));
-            shell_exec(sprintf(
-                "cp -rf %s %s",
-                $buildConfig,
-                $sandboxDir . '/build_options.ini'
-            ));
-            shell_exec(sprintf(
-                "cd %s && composer install",
-                $sandboxDir
-            ));
+        } else {
+            throw new \Exception('Wrong deploy type');
         }
+
+        shell_exec(sprintf(
+            "cp -n %s %s",
+            $authFile,
+            $sandboxDir . '/auth.json'
+        ));
+        shell_exec(sprintf(
+            "cp -rf %s %s",
+            $buildConfig,
+            $sandboxDir . '/build_options.ini'
+        ));
+        shell_exec(sprintf(
+            "cd %s && composer install",
+            $sandboxDir
+        ));
 
         return $sandboxDir;
     }

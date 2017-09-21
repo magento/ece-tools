@@ -58,7 +58,7 @@ class GenerateFreshTest extends TestCase
     /**
      * @var PackageManager|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $componentInfoMock;
+    private $packageManagerMock;
 
     /**
      * @inheritdoc
@@ -80,7 +80,7 @@ class GenerateFreshTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->componentInfoMock = $this->getMockBuilder(PackageManager::class)
+        $this->packageManagerMock = $this->getMockBuilder(PackageManager::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -91,7 +91,7 @@ class GenerateFreshTest extends TestCase
             $this->connectionMock,
             $this->fileMock,
             $this->directoryListMock,
-            $this->componentInfoMock
+            $this->packageManagerMock
         );
     }
 
@@ -126,7 +126,7 @@ class GenerateFreshTest extends TestCase
             );
         $this->environmentMock->method('getVerbosityLevel')
             ->willReturn(' -vvv ');
-        $this->componentInfoMock->method('hasMagentoVersion')
+        $this->packageManagerMock->method('hasMagentoVersion')
             ->with('2.2')
             ->willReturn(true);
 
@@ -164,7 +164,7 @@ class GenerateFreshTest extends TestCase
             );
         $this->environmentMock->method('getVerbosityLevel')
             ->willReturn(' -vvv ');
-        $this->componentInfoMock->method('hasMagentoVersion')
+        $this->packageManagerMock->method('hasMagentoVersion')
             ->with('2.2')
             ->willReturn(true);
 
@@ -204,7 +204,7 @@ class GenerateFreshTest extends TestCase
             ->willReturn(' -vvv ');
         $this->environmentMock->method('getStaticDeployExcludeThemes')
             ->willReturn('en_GB');
-        $this->componentInfoMock->method('hasMagentoVersion')
+        $this->packageManagerMock->method('hasMagentoVersion')
             ->with('2.2')
             ->willReturn(true);
 

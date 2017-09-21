@@ -40,7 +40,7 @@ class PreBuildTest extends TestCase
     /**
      * @var PackageManager|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $componentInfoMock;
+    private $packageManagerMock;
 
     /**
      * @inheritdoc
@@ -55,7 +55,7 @@ class PreBuildTest extends TestCase
             ->getMock();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->componentInfoMock = $this->getMockBuilder(PackageManager::class)
+        $this->packageManagerMock = $this->getMockBuilder(PackageManager::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -63,7 +63,7 @@ class PreBuildTest extends TestCase
             $this->buildConfigMock,
             $this->environmentMock,
             $this->loggerMock,
-            $this->componentInfoMock
+            $this->packageManagerMock
         );
     }
 
@@ -85,7 +85,7 @@ class PreBuildTest extends TestCase
             );
         $this->environmentMock->expects($this->once())
             ->method('removeFlagStaticContentInBuild');
-        $this->componentInfoMock->expects($this->once())
+        $this->packageManagerMock->expects($this->once())
             ->method('get')
             ->willReturn('Some info.');
 

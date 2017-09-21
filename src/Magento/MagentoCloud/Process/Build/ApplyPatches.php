@@ -33,16 +33,16 @@ class ApplyPatches implements ProcessInterface
     /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
-     * @param PackageManager $componentInfo
+     * @param PackageManager $packageManager
      */
     public function __construct(
         ShellInterface $shell,
         LoggerInterface $logger,
-        PackageManager $componentInfo
+        PackageManager $packageManager
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
-        $this->packageManager = $componentInfo;
+        $this->packageManager = $packageManager;
     }
 
     /**

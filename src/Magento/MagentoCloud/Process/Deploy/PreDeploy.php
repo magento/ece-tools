@@ -22,7 +22,7 @@ class PreDeploy implements ProcessInterface
     /**
      * @var PackageManager
      */
-    private $componentInfo;
+    private $packageManager;
 
     /**
      * @var ProcessInterface
@@ -32,16 +32,16 @@ class PreDeploy implements ProcessInterface
     /**
      * @param LoggerInterface $logger
      * @param ProcessInterface $process
-     * @param PackageManager $componentInfo
+     * @param PackageManager $packageManager
      */
     public function __construct(
         LoggerInterface $logger,
         ProcessInterface $process,
-        PackageManager $componentInfo
+        PackageManager $packageManager
     ) {
         $this->logger = $logger;
         $this->process = $process;
-        $this->componentInfo = $componentInfo;
+        $this->packageManager = $packageManager;
     }
 
     /**
@@ -49,7 +49,7 @@ class PreDeploy implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Starting predeploy. ' . $this->componentInfo->get());
+        $this->logger->info('Starting predeploy. ' . $this->packageManager->get());
         $this->process->execute();
     }
 }

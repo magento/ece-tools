@@ -22,7 +22,7 @@ class PreDeployTest extends TestCase
     /**
      * @var PackageManager|Mock
      */
-    private $componentInfoMock;
+    private $packageManagerMock;
 
     /**
      * @var ProcessInterface|Mock
@@ -34,24 +34,27 @@ class PreDeployTest extends TestCase
      */
     private $process;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->componentInfoMock = $this->createMock(PackageManager::class);
+        $this->packageManagerMock = $this->createMock(PackageManager::class);
         $this->processMock = $this->getMockBuilder(ProcessInterface::class)
             ->getMockForAbstractClass();
 
         $this->process = new PreDeploy(
             $this->loggerMock,
             $this->processMock,
-            $this->componentInfoMock
+            $this->packageManagerMock
         );
     }
 
     public function testExecute()
     {
-        $this->componentInfoMock->expects($this->once())
+        $this->packageManagerMock->expects($this->once())
             ->method('get')
             ->willReturn('(components info)');
         $this->loggerMock->expects($this->once())
