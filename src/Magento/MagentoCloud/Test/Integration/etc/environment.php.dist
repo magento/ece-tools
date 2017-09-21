@@ -38,6 +38,6 @@ return [
             ],
 
         ],
-        'type' => 'project',
+        'type' => 'git',
     ],
 ];
