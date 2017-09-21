@@ -19,8 +19,6 @@ class Build extends Command
     /**
      * Options for build_options.ini
      */
-    const BUILD_OPT_SKIP_DI_COMPILATION = 'skip_di_compilation';
-    const BUILD_OPT_SKIP_DI_CLEARING = 'skip_di_clearing';
     const BUILD_OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
     const BUILD_OPT_SCD_THREADS = 'scd_threads';
     const BUILD_OPT_SKIP_SCD = 'skip_scd';
@@ -276,12 +274,8 @@ class Build extends Command
     {
         $configFile = Environment::MAGENTO_ROOT . 'app/etc/config.php';
         if (file_exists($configFile)) {
-            if (!$this->getBuildOption(self::BUILD_OPT_SKIP_DI_COMPILATION)) {
-                $this->env->log("Running DI compilation");
-                $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
-            } else {
-                $this->env->log("Skip running DI compilation");
-            }
+            $this->env->log("Running DI compilation");
+            $this->env->execute("php ./bin/magento setup:di:compile {$this->verbosityLevel} ");
         } else {
             $this->env->log(
                 "Missing config.php, please run the following commands "
