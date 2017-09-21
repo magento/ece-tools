@@ -221,7 +221,8 @@ class Build extends Command
                 $strategy = $this->getScdStrategy();
                 $this->env->log('Strategy for generating static content is ' . $strategy);
 
-                $baseCommand = implode(' ',
+                $baseCommand = implode(
+                    ' ',
                     [
                         'php ./bin/magento setup:static-content:deploy -f',
                         $excludeThemesOptions,
