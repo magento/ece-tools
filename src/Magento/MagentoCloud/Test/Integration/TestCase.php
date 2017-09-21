@@ -114,30 +114,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         mkdir($sandboxDir, 0777, true);
 
         $authFile = $this->getConfigFile('auth.json');
-        $buildConfig = $this->getConfigFile('build_options.ini');
-
-        $authMap = [
-            'REPO_USERNAME' => 'http-basic.repo.magento.com.username',
-            'REPO_PASSWORD' => 'http-basic.repo.magento.com.password',
-            'CONNECT20_USERNAME' => 'http-basic.connect20-qa01.magedevteam.com.username',
-            'CONNECT20_PASSWORD' => 'http-basic.connect20-qa01.magedevteam.com.password',
-            'GH_TOKEN' => 'github-oauth.github.com',
-        ];
-
-        foreach ($authMap as $envName => $configPath) {
-            $envValue = getenv($envName);
-
-            if (false === $envValue) {
-                continue;
-            }
-
-            shell_exec(sprintf(
-                "cd %s && composer config %s %s",
-                $configPath,
-                $_ENV[$envName]
-            ));
-        }
-
+        $buildFile = $this->getConfigFile('build_options.ini');
         $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
 
         if ($deployConfig['type'] === 'git') {
@@ -170,7 +147,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         ));
         shell_exec(sprintf(
             "cp -rf %s %s",
-            $buildConfig,
+            $buildFile,
             $sandboxDir . '/build_options.ini'
         ));
         shell_exec(sprintf(
