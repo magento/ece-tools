@@ -31,7 +31,7 @@ class Deploy extends Command
     /**
      * default strategy for static content deployment
      */
-    const SCD_DEFAULT_STRATEGY = 'quick';
+    const SCD_DEFAULT_STRATEGY = 'compact';
 
     /**
      * List of possible strategies for static content deploy
