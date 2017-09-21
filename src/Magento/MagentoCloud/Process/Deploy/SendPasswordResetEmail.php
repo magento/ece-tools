@@ -86,7 +86,7 @@ class SendPasswordResetEmail implements ProcessInterface
     public function execute()
     {
         $urls = $this->urlManager->getUrls();
-        if (!$this->deployConfig->isInstalling() || empty($this->environment->getAdminEmail()) || !empty($this->environment->getVariables()["ADMIN_PASSWORD"])) {
+        if (!$this->deployConfig->isInstalling() || empty($this->environmentAdmin->getAdminEmail()) || !empty($this->environment->getVariables()["ADMIN_PASSWORD"])) {
             return;
         }
         /* TODO: Instead of calling our own command to do it, we will wait until a reset command gets added to Magento core
