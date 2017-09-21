@@ -117,7 +117,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
                 'REPO_PASSWORD' => 'http-basic.repo.magento.com.password',
                 'CONNECT20_USERNAME' => 'http-basic.connect20-qa01.magedevteam.com.username',
                 'CONNECT20_PASSWORD' => 'http-basic.connect20-qa01.magedevteam.com.password',
-                '$GH_TOKEN' => 'github-oauth.github.com'
+                'GH_TOKEN' => 'github-oauth.github.com'
             ];
 
             foreach ($authMap as $envName => $configPath) {
@@ -137,12 +137,12 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             shell_exec(sprintf(
                 "cd %s && git clone %s . ",
                 $sandboxDir,
-                'https://github.com/magento/magento-cloud-template'
+                'https://github.com/magento/magento-cloud'
             ));
             shell_exec(sprintf(
                 "cd %s && git checkout -b %s",
                 $sandboxDir,
-                '2.2'
+                '2.1.9'
             ));
             shell_exec(sprintf(
                 "cp -n %s %s",
