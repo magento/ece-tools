@@ -21,14 +21,16 @@ cache:
   apt: true
   directories:
     - $HOME/.composer/cache
-install: composer install --no-interaction --prefer-dist
-before_install:
-  - mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
+install:
+  - if [ -n "$GH_TOKEN" ]; then composer config -g github-oauth.github.com ${GH_TOKEN}; fi;
   - if [ -n "$REPO_USERNAME" ]; then composer config -g http-basic.repo.magento.com.username ${REPO_USERNAME}; fi;
   - if [ -n "$REPO_PASSWORD" ]; then composer config -g http-basic.repo.magento.com.password ${REPO_PASSWORD}; fi;
   - if [ -n "$CONNECT20_USERNAME" ]; then composer config -g http-basic.connect20-qa01.magedevteam.com.username ${CONNECT20_USERNAME}; fi;
   - if [ -n "$CONNECT20_PASSWORD" ]; then composer config -g http-basic.connect20-qa01.magedevteam.com.password ${CONNECT20_PASSWORD}; fi;
-  - if [ -n "$GH_TOKEN" ]; then composer config -g github-oauth.github.com ${GH_TOKEN}; fi;
+  - composer config --list
+  - composer install --no-interaction --prefer-dist
+before_install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
 script:
   - if [ $TEST_SUITE == "static" ]; then phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n; fi;
   - if [ $TEST_SUITE == "static" ]; then phpmd src xml tests/static/phpmd-ruleset.xml; fi;

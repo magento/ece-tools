@@ -117,8 +117,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $buildFile = $this->getConfigFile('build_options.ini');
         $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
 
-        shell_exec('composer config --list');
-
         if ($deployConfig['type'] === 'git') {
             shell_exec(sprintf(
                 "cd %s && git clone %s . ",
@@ -152,7 +150,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             $buildFile,
             $sandboxDir . '/build_options.ini'
         ));
-        shell_exec('composer config --list');
         shell_exec(sprintf(
             "cd %s && composer install -n",
             $sandboxDir
