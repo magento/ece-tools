@@ -89,38 +89,12 @@ class CompileDiTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(true);
-        $this->buildConfigMock->expects($this->once())
-            ->method('get')
-            ->with(Build::BUILD_OPT_SKIP_DI_COMPILATION)
-            ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Running DI compilation');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./bin/magento setup:di:compile -vvv');
-
-        $this->process->execute();
-    }
-
-    public function testExecuteSkipCompilation()
-    {
-        $this->buildConfigMock->expects($this->once())
-            ->method('getVerbosityLevel')
-            ->willReturn('-vvv');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/app/etc/config.php')
-            ->willReturn(true);
-        $this->buildConfigMock->expects($this->once())
-            ->method('get')
-            ->with(Build::BUILD_OPT_SKIP_DI_COMPILATION)
-            ->willReturn(true);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Skip running DI compilation');
-        $this->shellMock->expects($this->never())
-            ->method('execute');
 
         $this->process->execute();
     }
