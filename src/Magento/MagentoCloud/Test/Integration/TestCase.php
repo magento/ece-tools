@@ -29,7 +29,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         $sandboxDir = $this->deploySandbox();
 
         shell_exec(sprintf(
-            "cp -rf %s %s",
+            "cp -f %s %s",
             $this->getConfigFile('config.php'),
             $sandboxDir . '/app/etc/config.php'
         ));
@@ -146,7 +146,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
             $sandboxDir . '/auth.json'
         ));
         shell_exec(sprintf(
-            "cp -rf %s %s",
+            "cp -f %s %s",
             $buildFile,
             $sandboxDir . '/build_options.ini'
         ));

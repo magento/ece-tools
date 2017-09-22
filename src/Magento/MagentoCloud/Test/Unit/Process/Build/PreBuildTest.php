@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 use Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\Build\PreBuild;
-use Magento\MagentoCloud\Util\PackageManager;
+use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -38,7 +38,7 @@ class PreBuildTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var PackageManager|\PHPUnit_Framework_MockObject_MockObject
+     * @var Manager|\PHPUnit_Framework_MockObject_MockObject
      */
     private $packageManagerMock;
 
@@ -55,7 +55,7 @@ class PreBuildTest extends TestCase
             ->getMock();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->packageManagerMock = $this->getMockBuilder(PackageManager::class)
+        $this->packageManagerMock = $this->getMockBuilder(Manager::class)
             ->disableOriginalConstructor()
             ->getMock();
 

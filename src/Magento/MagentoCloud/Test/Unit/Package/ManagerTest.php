@@ -3,24 +3,23 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Util;
+namespace Magento\MagentoCloud\Test\Unit\Package;
 
 use Composer\Composer;
 use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
-use Composer\Semver\Comparator;
-use Magento\MagentoCloud\Util\PackageManager;
+use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
  */
-class PackageManagerTest extends TestCase
+class ManagerTest extends TestCase
 {
     /**
-     * @var PackageManager
+     * @var Manager
      */
     private $packageManager;
 
@@ -35,11 +34,6 @@ class PackageManagerTest extends TestCase
     private $composerRepositoryMock;
 
     /**
-     * @var Comparator|Mock
-     */
-    private $comparatorMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -48,9 +42,6 @@ class PackageManagerTest extends TestCase
         $this->composerRepositoryMock = $this->getMockBuilder(RepositoryInterface::class)
             ->getMockForAbstractClass();
         $lockerMock = $this->createMock(Locker::class);
-        $this->comparatorMock = $this->getMockBuilder(Comparator::class)
-            ->disableOriginalConstructor()
-            ->getMock();
 
         $this->composerMock->expects($this->once())
             ->method('getLocker')
@@ -59,9 +50,8 @@ class PackageManagerTest extends TestCase
             ->method('getLockedRepository')
             ->willReturn($this->composerRepositoryMock);
 
-        $this->packageManager = new PackageManager(
-            $this->composerMock,
-            $this->comparatorMock
+        $this->packageManager = new Manager(
+            $this->composerMock
         );
     }
 

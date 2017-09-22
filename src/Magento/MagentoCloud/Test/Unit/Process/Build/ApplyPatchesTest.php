@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Build\ApplyPatches;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Util\PackageManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -33,9 +33,9 @@ class ApplyPatchesTest extends TestCase
     private $shellMock;
 
     /**
-     * @var PackageManager|Mock
+     * @var MagentoVersion|Mock
      */
-    private $packageManagerMock;
+    private $magentoVersionMock;
 
     /**
      * @inheritdoc
@@ -46,14 +46,14 @@ class ApplyPatchesTest extends TestCase
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
-        $this->packageManagerMock = $this->getMockBuilder(PackageManager::class)
+        $this->magentoVersionMock = $this->getMockBuilder(MagentoVersion::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $this->process = new ApplyPatches(
             $this->shellMock,
             $this->loggerMock,
-            $this->packageManagerMock
+            $this->magentoVersionMock
         );
 
         parent::setUp();
@@ -67,7 +67,7 @@ class ApplyPatchesTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php vendor/bin/m2-apply-patches');
-        $this->packageManagerMock->method('hasMagentoVersion')
+        $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn(true);
 
@@ -79,7 +79,7 @@ class ApplyPatchesTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Applying patches.');
-        $this->packageManagerMock->method('hasMagentoVersion')
+        $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn(true);
         $this->loggerMock->expects($this->once())

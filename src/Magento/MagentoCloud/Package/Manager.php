@@ -3,13 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Util;
+namespace Magento\MagentoCloud\Package;
 
 use Composer\Composer;
 use Composer\Package\PackageInterface;
-use Composer\Semver\Comparator;
+use Composer\Repository\RepositoryInterface;
 
-class PackageManager
+class Manager
 {
     /**
      * @var Composer
@@ -17,20 +17,18 @@ class PackageManager
     private $composer;
 
     /**
-     * @var Comparator
+     * @var RepositoryInterface
      */
-    private $comparator;
+    private $repository;
 
     /**
      * @param Composer $composer
-     * @param Comparator $comparator
      */
     public function __construct(
-        Composer $composer,
-        Comparator $comparator
+        Composer $composer
     ) {
         $this->composer = $composer;
-        $this->comparator = $comparator;
+        $this->repository = $composer->getLocker()->getLockedRepository();
     }
 
     /**
@@ -41,11 +39,9 @@ class PackageManager
      */
     public function get(array $packages = ['magento/ece-tools', 'magento/magento2-base']): string
     {
-        $repository = $this->composer->getLocker()->getLockedRepository();
-
         $versions = [];
         foreach ($packages as $packageName) {
-            $package = $repository->findPackage($packageName, '*');
+            $package = $this->repository->findPackage($packageName, '*');
             if ($package instanceof PackageInterface) {
                 $versions[] = sprintf(
                     '%s version: %s',
@@ -64,27 +60,14 @@ class PackageManager
      * @return PackageInterface
      * @throws \Exception
      */
-    public function getPackage(string $packageName, string $version = '*')
+    public function getPackage(string $packageName, string $version = '*'): PackageInterface
     {
-        $repository = $this->composer->getLocker()->getLockedRepository();
-        $package = $repository->findPackage($packageName, $version);
+        $package = $this->repository->findPackage($packageName, $version);
 
         if (!$package instanceof PackageInterface) {
             throw new \Exception('Package was not found');
         }
 
         return $package;
-    }
-
-    /**
-     * @param string $version
-     * @param string $operator
-     * @return bool
-     */
-    public function hasMagentoVersion(string $version, $operator = '>='): bool
-    {
-        $package = $this->getPackage('magento/magento2-base');
-
-        return $this->comparator::compare($package->getVersion(), $operator, $version);
     }
 }

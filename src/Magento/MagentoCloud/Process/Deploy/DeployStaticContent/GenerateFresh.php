@@ -8,10 +8,10 @@ namespace Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Util\PackageManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -50,9 +50,9 @@ class GenerateFresh implements ProcessInterface
     private $directoryList;
 
     /**
-     * @var PackageManager
+     * @var MagentoVersion
      */
-    private $packageManager;
+    private $magentoVersion;
 
     /**
      * @param ShellInterface $shell
@@ -61,7 +61,7 @@ class GenerateFresh implements ProcessInterface
      * @param ConnectionInterface $connection
      * @param File $file
      * @param DirectoryList $directoryList
-     * @param PackageManager $packageManager
+     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         ShellInterface $shell,
@@ -70,7 +70,7 @@ class GenerateFresh implements ProcessInterface
         ConnectionInterface $connection,
         File $file,
         DirectoryList $directoryList,
-        PackageManager $packageManager
+        MagentoVersion $magentoVersion
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
@@ -78,7 +78,7 @@ class GenerateFresh implements ProcessInterface
         $this->connection = $connection;
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->packageManager = $packageManager;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -102,7 +102,7 @@ class GenerateFresh implements ProcessInterface
 
         $deployParams = [];
 
-        if ($this->packageManager->hasMagentoVersion('2.2')) {
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
             $deployParams[] = '-f';
         }
 
