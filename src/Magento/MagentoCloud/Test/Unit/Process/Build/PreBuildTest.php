@@ -86,7 +86,7 @@ class PreBuildTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('removeFlagStaticContentInBuild');
         $this->packageManagerMock->expects($this->once())
-            ->method('get')
+            ->method('getPrettyInfo')
             ->willReturn('Some info.');
 
         $this->process->execute();

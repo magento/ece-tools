@@ -35,7 +35,7 @@ class MagentoVersion
      */
     public function isGreaterOrEqual(string $version): bool
     {
-        $package = $this->manager->getPackage('magento/magento2-base');
+        $package = $this->manager->get('magento/magento2-base');
 
         return $this->comparator::compare($package->getVersion(), '>=', $version);
     }

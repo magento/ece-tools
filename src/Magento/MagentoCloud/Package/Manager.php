@@ -37,7 +37,7 @@ class Manager
      * @param array $packages The array of packages names
      * @return string
      */
-    public function get(array $packages = ['magento/ece-tools', 'magento/magento2-base']): string
+    public function getPrettyInfo(array $packages = ['magento/ece-tools', 'magento/magento2-base']): string
     {
         $versions = [];
         foreach ($packages as $packageName) {
@@ -60,7 +60,7 @@ class Manager
      * @return PackageInterface
      * @throws \Exception
      */
-    public function getPackage(string $packageName, string $version = '*'): PackageInterface
+    public function get(string $packageName, string $version = '*'): PackageInterface
     {
         $package = $this->repository->findPackage($packageName, $version);
 

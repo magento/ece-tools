@@ -49,7 +49,7 @@ class PreDeploy implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Starting predeploy. ' . $this->packageManager->get());
+        $this->logger->info('Starting pre-deploy. ' . $this->packageManager->getPrettyInfo());
         $this->process->execute();
     }
 }

@@ -88,7 +88,7 @@ class ManagerTest extends TestCase
 
         $this->assertEquals(
             '(magento/ece-tools version: v1.0.0, magento/magento2-base version: v2.0.0)',
-            $this->packageManager->get()
+            $this->packageManager->getPrettyInfo()
         );
     }
 
@@ -116,7 +116,7 @@ class ManagerTest extends TestCase
 
         $this->assertEquals(
             '(vendor/package1 version: v1.0.0)',
-            $this->packageManager->get(['vendor/package1', 'vendor/not-exists-package'])
+            $this->packageManager->getPrettyInfo(['vendor/package1', 'vendor/not-exists-package'])
         );
     }
 }

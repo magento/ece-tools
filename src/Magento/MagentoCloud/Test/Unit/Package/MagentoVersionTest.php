@@ -56,7 +56,7 @@ class MagentoVersionTest extends TestCase
      */
     public function testIsGreaterOrEqual(string $version, string $packageVersion, bool $expected)
     {
-        $this->managerMock->method('getPackage')
+        $this->managerMock->method('get')
             ->with('magento/magento2-base')
             ->willReturn($this->packageMock);
         $this->packageMock->expects($this->once())
