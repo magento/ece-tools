@@ -207,7 +207,7 @@ class Build extends Command
 
                 $parallelCommands = "";
                 $strategy = $this->getScdStrategy();
-                $logMessage .= $strategy
+                $logMessage = $strategy
                     ? 'Strategy for generating static content is ' . $strategy
                     : 'Default strategy is used for generating static content';
                 $this->env->log($logMessage);
