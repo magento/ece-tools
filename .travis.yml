@@ -22,11 +22,7 @@ cache:
   directories:
     - $HOME/.composer/cache
 install:
-  - composer config -g -a github-oauth.github.com "$GH_TOKEN"
-  - composer config -g -a http-basic.repo.magento.com "$REPO_USERNAME" "$REPO_PASSWORD"
-  - composer config -g -a http-basic.connect20-qa01.magedevteam.com "$CONNECT20_USERNAME" "$CONNECT20_PASSWORD"
-  - composer config --list
-  - composer install --no-interaction --prefer-dist
+  - composer install --no-interaction
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
 script:
