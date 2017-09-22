@@ -1,6 +1,7 @@
 sudo: false
 dist: trusty
-
+services:
+  - mysql
 language: php
 php:
   - 7.0
@@ -8,9 +9,24 @@ php:
 env:
   global:
     - COMPOSER_BIN_DIR=~/bin
+  matrix:
+    - TEST_SUITE=static
+    - TEST_SUITE=unit
+    - TEST_SUITE=integration
+matrix:
+  exclude:
+    - php: 7.1
+      env: TEST_SUITE=integration
 cache:
   apt: true
   directories:
     - $HOME/.composer/cache
-install: composer install --no-interaction --prefer-dist
-script: composer test
+install:
+  - composer install --no-interaction
+before_install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
+script:
+  - if [ $TEST_SUITE == "static" ]; then phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n; fi;
+  - if [ $TEST_SUITE == "static" ]; then phpmd src xml tests/static/phpmd-ruleset.xml; fi;
+  - if [ $TEST_SUITE == "unit" ]; then phpunit --configuration tests/unit/phpunit.xml.dist; fi;
+  - if [ $TEST_SUITE == "integration" ]; then phpunit --configuration tests/integration/phpunit.xml.dist; fi;

@@ -17,6 +17,8 @@ use Magento\MagentoCloud\Process\ProcessInterface;
  */
 class Deploy extends Command
 {
+    const NAME = 'deploy';
+
     /**
      * @var ProcessInterface
      */
@@ -44,7 +46,7 @@ class Deploy extends Command
      */
     protected function configure()
     {
-        $this->setName('deploy')
+        $this->setName(static::NAME)
             ->setDescription('Deploys application');
 
         parent::configure();

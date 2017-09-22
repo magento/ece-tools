@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -49,12 +50,18 @@ class GenerateFresh implements ProcessInterface
     private $directoryList;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param ConnectionInterface $connection
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         ShellInterface $shell,
@@ -62,7 +69,8 @@ class GenerateFresh implements ProcessInterface
         Environment $environment,
         ConnectionInterface $connection,
         File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        MagentoVersion $magentoVersion
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
@@ -70,6 +78,7 @@ class GenerateFresh implements ProcessInterface
         $this->connection = $connection;
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -91,14 +100,22 @@ class GenerateFresh implements ProcessInterface
 
         $this->logger->info($logMessage);
 
+        $deployParams = [];
+
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $deployParams[] = '-f';
+        }
+
+        $deployParams = array_merge($deployParams, [
+            $jobsOption,
+            $excludeThemesOptions,
+            $locales,
+            $this->environment->getVerbosityLevel(),
+        ]);
+
         $this->shell->execute(
-            'php ./bin/magento setup:static-content:deploy -f ' .
-            implode(' ', [
-                $jobsOption,
-                $excludeThemesOptions,
-                $locales,
-                $this->environment->getVerbosityLevel(),
-            ])
+            'php ./bin/magento setup:static-content:deploy ' .
+            implode(' ', $deployParams)
         );
 
         $this->shell->execute("php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}");

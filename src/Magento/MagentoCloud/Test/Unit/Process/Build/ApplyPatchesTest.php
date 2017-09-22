@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Build\ApplyPatches;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -32,6 +33,11 @@ class ApplyPatchesTest extends TestCase
     private $shellMock;
 
     /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -40,10 +46,14 @@ class ApplyPatchesTest extends TestCase
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
+        $this->magentoVersionMock = $this->getMockBuilder(MagentoVersion::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->process = new ApplyPatches(
             $this->shellMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->magentoVersionMock
         );
 
         parent::setUp();
@@ -57,6 +67,9 @@ class ApplyPatchesTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php vendor/bin/m2-apply-patches');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
 
         $this->process->execute();
     }
@@ -66,6 +79,9 @@ class ApplyPatchesTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Applying patches.');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('warning')
             ->with('Patching was failed. Skipping.');

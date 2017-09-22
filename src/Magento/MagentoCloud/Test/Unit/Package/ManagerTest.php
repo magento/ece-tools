@@ -3,21 +3,26 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Util;
+namespace Magento\MagentoCloud\Test\Unit\Package;
 
 use Composer\Composer;
 use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
  */
-class ComponentInfoTest extends TestCase
+class ManagerTest extends TestCase
 {
+    /**
+     * @var Manager
+     */
+    private $packageManager;
+
     /**
      * @var Composer|Mock
      */
@@ -27,11 +32,6 @@ class ComponentInfoTest extends TestCase
      * @var RepositoryInterface|Mock
      */
     private $composerRepositoryMock;
-
-    /**
-     * @var ComponentInfo
-     */
-    private $componentInfo;
 
     /**
      * @inheritdoc
@@ -50,7 +50,7 @@ class ComponentInfoTest extends TestCase
             ->method('getLockedRepository')
             ->willReturn($this->composerRepositoryMock);
 
-        $this->componentInfo = new ComponentInfo(
+        $this->packageManager = new Manager(
             $this->composerMock
         );
     }
@@ -88,7 +88,7 @@ class ComponentInfoTest extends TestCase
 
         $this->assertEquals(
             '(magento/ece-tools version: v1.0.0, magento/magento2-base version: v2.0.0)',
-            $this->componentInfo->get()
+            $this->packageManager->getPrettyInfo()
         );
     }
 
@@ -116,7 +116,7 @@ class ComponentInfoTest extends TestCase
 
         $this->assertEquals(
             '(vendor/package1 version: v1.0.0)',
-            $this->componentInfo->get(['vendor/package1', 'vendor/not-exists-package'])
+            $this->packageManager->getPrettyInfo(['vendor/package1', 'vendor/not-exists-package'])
         );
     }
 }

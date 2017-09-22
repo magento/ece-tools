@@ -56,7 +56,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
         $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
-        $this->singleton(\Magento\MagentoCloud\Util\ComponentInfo::class);
+        $this->singleton(\Magento\MagentoCloud\Package\Manager::class);
+        $this->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
         $this->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
         $this->singleton(
             \Magento\MagentoCloud\DB\ConnectionInterface::class,
@@ -104,7 +105,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
-                        $this->make(DeployProcess\InstallUpdate\Install\ImportDeploymentConfig::class),
                     ],
                 ]);
             });

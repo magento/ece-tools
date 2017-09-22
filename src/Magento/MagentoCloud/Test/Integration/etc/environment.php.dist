@@ -1,0 +1,43 @@
+<?php
+
+return [
+    'relationships' => [
+        'database' => [
+            0 => [
+                'host' => '127.0.0.1',
+                'path' => 'integration_tests',
+                'password' => '',
+                'username' => 'root',
+                'port' => '3306',
+            ],
+        ],
+    ],
+    'routes' => [
+        'http://localhost/' => [
+            'type' => 'upstream',
+            'original_url' => 'http://{default}',
+        ],
+        'https://localhost/' => [
+            'type' => 'upstream',
+            'original_url' => 'https://{default}',
+        ],
+    ],
+    'variables' => [
+
+    ],
+    'deploy' => [
+        'types' => [
+            'git' => [
+                'repo' => 'https://github.com/magento/magento-cloud',
+                'version' => '2.1.9',
+            ],
+            'project' => [
+                'repo' => 'https://connect20-qa01.magedevteam.com/',
+                'name' => 'magento/project-enterprise-edition',
+                'version' => '2.2',
+            ],
+
+        ],
+        'type' => 'git',
+    ],
+];

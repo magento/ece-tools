@@ -9,8 +9,10 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\GenerateFresh;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -55,6 +57,11 @@ class GenerateFreshTest extends TestCase
     private $directoryListMock;
 
     /**
+     * @var MagentoVersion|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $magentoVersionMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -74,6 +81,9 @@ class GenerateFreshTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->magentoVersionMock = $this->getMockBuilder(MagentoVersion::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->process = new GenerateFresh(
             $this->shellMock,
@@ -81,7 +91,8 @@ class GenerateFreshTest extends TestCase
             $this->environmentMock,
             $this->connectionMock,
             $this->fileMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->magentoVersionMock
         );
     }
 
@@ -116,6 +127,9 @@ class GenerateFreshTest extends TestCase
             );
         $this->environmentMock->method('getVerbosityLevel')
             ->willReturn(' -vvv ');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
 
         $this->process->execute();
     }
@@ -151,6 +165,9 @@ class GenerateFreshTest extends TestCase
             );
         $this->environmentMock->method('getVerbosityLevel')
             ->willReturn(' -vvv ');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
 
         $this->process->execute();
     }
@@ -188,6 +205,9 @@ class GenerateFreshTest extends TestCase
             ->willReturn(' -vvv ');
         $this->environmentMock->method('getStaticDeployExcludeThemes')
             ->willReturn('en_GB');
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
 
         $this->process->execute();
     }

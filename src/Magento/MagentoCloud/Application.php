@@ -27,11 +27,10 @@ class Application extends \Symfony\Component\Console\Application
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $composer = $container->get(Composer::class);
 
         parent::__construct(
-            $composer->getPackage()->getPrettyName(),
-            $composer->getPackage()->getPrettyVersion()
+            $container->get(Composer::class)->getPackage()->getPrettyName(),
+            $container->get(Composer::class)->getPackage()->getPrettyVersion()
         );
     }
 

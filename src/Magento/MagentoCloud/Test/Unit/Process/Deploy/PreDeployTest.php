@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Process\Deploy\PreDeploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -20,9 +20,9 @@ class PreDeployTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ComponentInfo|Mock
+     * @var Manager|Mock
      */
-    private $componentInfoMock;
+    private $packageManagerMock;
 
     /**
      * @var ProcessInterface|Mock
@@ -34,29 +34,32 @@ class PreDeployTest extends TestCase
      */
     private $process;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->componentInfoMock = $this->createMock(ComponentInfo::class);
+        $this->packageManagerMock = $this->createMock(Manager::class);
         $this->processMock = $this->getMockBuilder(ProcessInterface::class)
             ->getMockForAbstractClass();
 
         $this->process = new PreDeploy(
             $this->loggerMock,
             $this->processMock,
-            $this->componentInfoMock
+            $this->packageManagerMock
         );
     }
 
     public function testExecute()
     {
-        $this->componentInfoMock->expects($this->once())
-            ->method('get')
+        $this->packageManagerMock->expects($this->once())
+            ->method('getPrettyInfo')
             ->willReturn('(components info)');
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Starting predeploy. (components info)');
+            ->with('Starting pre-deploy. (components info)');
         $this->processMock->expects($this->once())
             ->method('execute');
 

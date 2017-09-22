@@ -17,6 +17,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class Build extends Command
 {
+    const NAME = 'build';
+
     /**
      * @var ProcessInterface
      */
@@ -46,7 +48,7 @@ class Build extends Command
      */
     protected function configure()
     {
-        $this->setName('build')
+        $this->setName(static::NAME)
             ->setDescription('Builds application');
 
         parent::configure();

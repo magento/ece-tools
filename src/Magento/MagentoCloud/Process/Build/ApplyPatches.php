@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -25,13 +26,23 @@ class ApplyPatches implements ProcessInterface
     private $logger;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
+     * @param MagentoVersion $magentoVersion
      */
-    public function __construct(ShellInterface $shell, LoggerInterface $logger)
-    {
+    public function __construct(
+        ShellInterface $shell,
+        LoggerInterface $logger,
+        MagentoVersion $magentoVersion
+    ) {
         $this->shell = $shell;
         $this->logger = $logger;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -42,7 +53,9 @@ class ApplyPatches implements ProcessInterface
         $this->logger->info('Applying patches.');
 
         try {
-            $this->shell->execute('php vendor/bin/m2-apply-patches');
+            if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+                $this->shell->execute('php vendor/bin/m2-apply-patches');
+            }
         } catch (\Exception $exception) {
             $this->logger->warning('Patching was failed. Skipping.');
         }

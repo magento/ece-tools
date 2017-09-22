@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 use Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\Build\PreBuild;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -38,9 +38,9 @@ class PreBuildTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ComponentInfo|\PHPUnit_Framework_MockObject_MockObject
+     * @var Manager|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $componentInfoMock;
+    private $packageManagerMock;
 
     /**
      * @inheritdoc
@@ -55,7 +55,7 @@ class PreBuildTest extends TestCase
             ->getMock();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->componentInfoMock = $this->getMockBuilder(ComponentInfo::class)
+        $this->packageManagerMock = $this->getMockBuilder(Manager::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -63,7 +63,7 @@ class PreBuildTest extends TestCase
             $this->buildConfigMock,
             $this->environmentMock,
             $this->loggerMock,
-            $this->componentInfoMock
+            $this->packageManagerMock
         );
     }
 
@@ -85,8 +85,8 @@ class PreBuildTest extends TestCase
             );
         $this->environmentMock->expects($this->once())
             ->method('removeFlagStaticContentInBuild');
-        $this->componentInfoMock->expects($this->once())
-            ->method('get')
+        $this->packageManagerMock->expects($this->once())
+            ->method('getPrettyInfo')
             ->willReturn('Some info.');
 
         $this->process->execute();

@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
-use Magento\MagentoCloud\Util\ComponentInfo;
+use Magento\MagentoCloud\Package\Manager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -32,26 +32,26 @@ class PreBuild implements ProcessInterface
     private $logger;
 
     /**
-     * @var ComponentInfo
+     * @var Manager
      */
-    private $componentInfo;
+    private $packageManager;
 
     /**
      * @param BuildConfig $buildConfig
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param ComponentInfo $componentInfo
+     * @param Manager $packageManager
      */
     public function __construct(
         BuildConfig $buildConfig,
         Environment $environment,
         LoggerInterface $logger,
-        ComponentInfo $componentInfo
+        Manager $packageManager
     ) {
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->componentInfo = $componentInfo;
+        $this->packageManager = $packageManager;
     }
 
     /**
@@ -63,6 +63,6 @@ class PreBuild implements ProcessInterface
 
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
         $this->environment->removeFlagStaticContentInBuild();
-        $this->logger->info('Starting build. ' . $this->componentInfo->get());
+        $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }
 }
