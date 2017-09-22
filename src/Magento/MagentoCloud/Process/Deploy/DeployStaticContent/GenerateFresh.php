@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -34,6 +35,11 @@ class GenerateFresh implements ProcessInterface
     private $environment;
 
     /**
+     * @var EnvironmentAdmin
+     */
+    private $environmentAdmin;
+
+    /**
      * @var ConnectionInterface
      */
     private $connection;
@@ -52,6 +58,7 @@ class GenerateFresh implements ProcessInterface
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param Environment $environment
+     * @param EnvironmentAdmin $environmentAdmin
      * @param ConnectionInterface $connection
      * @param File $file
      * @param DirectoryList $directoryList
@@ -60,6 +67,7 @@ class GenerateFresh implements ProcessInterface
         ShellInterface $shell,
         LoggerInterface $logger,
         Environment $environment,
+        EnvironmentAdmin $environmentAdmin,
         ConnectionInterface $connection,
         File $file,
         DirectoryList $directoryList
@@ -67,6 +75,7 @@ class GenerateFresh implements ProcessInterface
         $this->shell = $shell;
         $this->logger = $logger;
         $this->environment = $environment;
+        $this->environmentAdmin = $environmentAdmin;
         $this->connection = $connection;
         $this->file = $file;
         $this->directoryList = $directoryList;
@@ -126,8 +135,8 @@ class GenerateFresh implements ProcessInterface
 
         $locales = array_column($output, 'value');
 
-        if (!in_array($this->environment->getAdminLocale(), $locales)) {
-            $locales[] = $this->environment->getAdminLocale();
+        if (!in_array($this->environmentAdmin->getAdminLocale(), $locales)) {
+            $locales[] = $this->environmentAdmin->getAdminLocale();
         }
 
         return $locales;

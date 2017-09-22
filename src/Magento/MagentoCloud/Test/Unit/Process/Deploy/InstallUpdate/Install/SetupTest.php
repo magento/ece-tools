@@ -6,8 +6,11 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -31,9 +34,24 @@ class SetupTest extends TestCase
     private $environmentMock;
 
     /**
+     * @var EnvironmentAdmin|Mock
+     */
+    private $environmentAdminMock;
+
+    /**
      * @var UrlManager|Mock
      */
     private $urlManagerMock;
+
+    /**
+     * @var PasswordGenerator|Mock
+     */
+    private $passwordGeneratorMock;
+
+    /**
+     * @var DeployConfig|Mock
+     */
+    private $deployConfigMock;
 
     /**
      * @var Setup
@@ -51,17 +69,47 @@ class SetupTest extends TestCase
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-
+        $this->passwordGeneratorMock = $this->getMockBuilder(PasswordGenerator::class)
+            ->setMethods(['generateRandomString'])
+            ->getMockForAbstractClass();
+        $this->deployConfigMock = $this->getMockBuilder(DeployConfig::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->environmentAdminMock = $this->getMockBuilder(EnvironmentAdmin::class)
+            ->setConstructorArgs([$this->loggerMock, $this->deployConfigMock, $this->passwordGeneratorMock, $this->environmentMock])
+            ->setMethods()
+            ->getMock();
         $this->process = new Setup(
             $this->loggerMock,
             $this->urlManagerMock,
             $this->environmentMock,
-            $this->shellMock
+            $this->environmentAdminMock,
+            $this->shellMock,
+            $this->passwordGeneratorMock
         );
     }
 
     public function testExecute()
     {
+
+        //ARRANGE
+        $defaultCurrency = "USD";
+        $urlUnsecure = "http://unsecure.url";
+        $urlSecure = "https://secure.url";
+        $adminLocale = "fr_FR";
+        $timeZone = "America/Los_Angeles";
+        $dbHost = "localhost";
+        $dbName = "magento";
+        $dbUser = "user";
+        $adminUrl = "admin_url";
+        $adminUsername = "admin";
+        $adminFirstname = "Firstname";
+        $adminLastname = "Lastname";
+        $adminEmail = "john@example.com";
+        $adminPassword = "QoAav7ESLd1xvB5oT8hj";
+        $randomlyGeneratedPassword = "vB5oT8hjQoAav7ESLd1x";
+        $dbPassword = "password";
+        $verbosityLevel = " -v";
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Installing Magento.');
@@ -90,35 +138,46 @@ class SetupTest extends TestCase
         $this->environmentMock->expects($this->any())
             ->method('getVariables')
             ->willReturn([
-                'ADMIN_URL' => 'admin_url',
-                'ADMIN_LOCALE' => 'fr_FR',
-                'ADMIN_FIRSTNAME' => 'Firstname',
-                'ADMIN_LASTNAME' => 'Lastname',
+                'ADMIN_URL' => $adminUrl,
+                'ADMIN_LOCALE' => $adminLocale,
+                'ADMIN_FIRSTNAME' => $adminFirstname,
+                'ADMIN_LASTNAME' => $adminLastname,
+                'ADMIN_USERNAME' => $adminUsername,
+                'ADMIN_PASSWORD' => $adminPassword,
+                'ADMIN_EMAIL' => $adminEmail,
             ]);
+        $this->passwordGeneratorMock->expects($this->any())
+            ->method('generateRandomString')
+            ->willReturn($randomlyGeneratedPassword);
 
+        //ASSERT
+        $command =
+            "php ./bin/magento setup:install"
+            . " " . "--session-save=db"
+            . " " . "--cleanup-database"
+            . " " . escapeshellarg("--currency={$defaultCurrency}")
+            . " " . escapeshellarg("--base-url={$urlUnsecure}")
+            . " " . escapeshellarg("--base-url-secure={$urlSecure}")
+            . " " . escapeshellarg("--language={$adminLocale}")
+            . " " . escapeshellarg("--timezone={$timeZone}")
+            . " " . escapeshellarg("--db-host={$dbHost}")
+            . " " . escapeshellarg("--db-name={$dbName}")
+            . " " . escapeshellarg("--db-user={$dbUser}")
+            . " " . escapeshellarg("--backend-frontname={$adminUrl}")
+            . " " . escapeshellarg("--admin-user={$adminUsername}")
+            . " " . escapeshellarg("--admin-firstname={$adminFirstname}")
+            . " " . escapeshellarg("--admin-lastname={$adminLastname}")
+            . " " . escapeshellarg("--admin-email={$adminEmail}")
+            . " " . escapeshellarg("--admin-password={$randomlyGeneratedPassword}"); // Note: This password gets changed later in updateAdminCredentials
+        if (strlen($dbPassword)) {
+            $command .= " " . escapeshellarg("--db-password={$dbPassword}");
+        }
+        $command .= $verbosityLevel;
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with(
-                "php ./bin/magento setup:install \
-            --session-save=db \
-            --cleanup-database \
-            --currency=USD \
-            --base-url=http://unsecure.url \
-            --base-url-secure=https://secure.url \
-            --language=fr_FR \
-            --timezone=America/Los_Angeles \
-            --db-host=localhost \
-            --db-name=magento \
-            --db-user=user \
-            --backend-frontname=admin_url \
-            --admin-user=admin \
-            --admin-firstname=Firstname \
-            --admin-lastname=Lastname \
-            --admin-email=john@example.com \
-            --admin-password=admin12 \
-            --db-password=password -v"
-            );
+            ->with($command);
 
+        //ACT
         $this->process->execute();
     }
 }

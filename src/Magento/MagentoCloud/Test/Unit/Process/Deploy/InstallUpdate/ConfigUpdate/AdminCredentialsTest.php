@@ -10,7 +10,7 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\AdminCredentials;
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 
 /**
  * @inheritdoc
@@ -23,9 +23,9 @@ class AdminCredentialsTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
+     * @var EnvironmentAdmin|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $environmentMock;
+    private $environmentAdminMock;
 
     /**
      * @var ConnectionInterface|\PHPUnit_Framework_MockObject_MockObject
@@ -51,13 +51,13 @@ class AdminCredentialsTest extends TestCase
             ->getMockForAbstractClass();
         $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
             ->getMockForAbstractClass();
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->environmentAdminMock = $this->createMock(EnvironmentAdmin::class);
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
 
         $this->adminCredentials = new AdminCredentials(
             $this->loggerMock,
             $this->connectionMock,
-            $this->environmentMock,
+            $this->environmentAdminMock,
             $this->passwordGeneratorMock
         );
     }
@@ -77,23 +77,23 @@ class AdminCredentialsTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating admin credentials.');
-        $this->environmentMock->expects($this->once())
+        $this->environmentAdminMock->expects($this->once())
             ->method('getAdminPassword')
             ->willReturn($adminPassword);
-        $this->environmentMock->expects($this->once())
+        $this->environmentAdminMock->expects($this->once())
             ->method('getAdminFirstname')
             ->willReturn($firstName);
-        $this->environmentMock->expects($this->once())
+        $this->environmentAdminMock->expects($this->once())
             ->method('getAdminLastname')
             ->willReturn($lastName);
-        $this->environmentMock->expects($this->once())
+        $this->environmentAdminMock->expects($this->once())
             ->method('getAdminEmail')
             ->willReturn($email);
-        $this->environmentMock->expects($this->once())
+        $this->environmentAdminMock->expects($this->once())
             ->method('getAdminUsername')
             ->willReturn($userName);
         $this->passwordGeneratorMock->expects($this->once())
-            ->method('generate')
+            ->method('generateSaltAndHash')
             ->with($adminPassword)
             ->willReturn($generatedPassword);
         $this->connectionMock->expects($this->once())

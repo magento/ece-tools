@@ -7,16 +7,16 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\EnvConfiguration;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 class EnvConfigurationTest extends TestCase
 {
     /**
-     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
+     * @var EnvironmentAdmin|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $environmentMock;
+    private $environmentAdminMock;
 
     /**
      * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
@@ -38,13 +38,13 @@ class EnvConfigurationTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->environmentAdminMock = $this->createMock(EnvironmentAdmin::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
 
         $this->envConfiguration = new EnvConfiguration(
-            $this->environmentMock,
+            $this->environmentAdminMock,
             $this->configWriterMock,
             $this->loggerMock
         );
@@ -59,7 +59,7 @@ class EnvConfigurationTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php backend front name.');
-        $this->environmentMock->expects($this->once())
+        $this->environmentAdminMock->expects($this->once())
             ->method('getAdminUrl')
             ->willReturn($frontName);
         $this->configWriterMock->expects($this->once())

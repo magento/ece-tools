@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -38,6 +39,12 @@ class GenerateFreshTest extends TestCase
      * @var Environment|\PHPUnit_Framework_MockObject_MockObject
      */
     private $environmentMock;
+
+    /**
+     * @var EnvironmentAdmin|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $environmentAdminMock;
+
 
     /**
      * @var ConnectionInterface|\PHPUnit_Framework_MockObject_MockObject
@@ -74,11 +81,15 @@ class GenerateFreshTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->environmentAdminMock = $this->getMockBuilder(EnvironmentAdmin::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->process = new GenerateFresh(
             $this->shellMock,
             $this->loggerMock,
             $this->environmentMock,
+            $this->environmentAdminMock,
             $this->connectionMock,
             $this->fileMock,
             $this->directoryListMock
@@ -105,7 +116,7 @@ class GenerateFreshTest extends TestCase
                 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
                 . 'UNION SELECT interface_locale FROM admin_user'
             )->willReturn([['value' => 'en_GB']]);
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentAdminMock->expects($this->exactly(2))
             ->method('getAdminLocale')
             ->willReturn('fr_FR');
         $this->shellMock->method('execute')
@@ -140,7 +151,7 @@ class GenerateFreshTest extends TestCase
                 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
                 . 'UNION SELECT interface_locale FROM admin_user'
             )->willReturn([]);
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentAdminMock->expects($this->exactly(2))
             ->method('getAdminLocale')
             ->willReturn('fr_FR');
         $this->shellMock->method('execute')
@@ -175,7 +186,7 @@ class GenerateFreshTest extends TestCase
                 'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
                 . 'UNION SELECT interface_locale FROM admin_user'
             )->willReturn([['value' => 'en_GB']]);
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentAdminMock->expects($this->exactly(2))
             ->method('getAdminLocale')
             ->willReturn('fr_FR');
         $this->shellMock->method('execute')

@@ -56,8 +56,8 @@ class InstallUpdateTest extends TestCase
     public function testExecuteInstall()
     {
         $this->deployConfigMock->expects($this->once())
-            ->method('isInstalled')
-            ->willReturn(false);
+            ->method('isInstalling')
+            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting install.');
@@ -72,8 +72,8 @@ class InstallUpdateTest extends TestCase
     public function testExecuteUpdate()
     {
         $this->deployConfigMock->expects($this->once())
-            ->method('isInstalled')
-            ->willReturn(true);
+            ->method('isInstalling')
+            ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting update.');

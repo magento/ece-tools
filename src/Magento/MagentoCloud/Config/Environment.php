@@ -250,14 +250,6 @@ class Environment
     }
 
     /**
-     * @return string
-     */
-    public function getAdminLocale(): string
-    {
-        return $this->getVariables()['ADMIN_LOCALE'] ?? 'en_US';
-    }
-
-    /**
      * @return bool
      */
     public function doCleanStaticFiles(): bool
@@ -305,54 +297,6 @@ class Environment
     public function getDbPassword(): string
     {
         return $this->getRelationship('database')[0]['password'] ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getAdminUsername(): string
-    {
-        return $this->getVariables()['ADMIN_USERNAME'] ?? 'admin';
-    }
-
-    /**
-     * @return string
-     */
-    public function getAdminFirstname(): string
-    {
-        return $this->getVariables()['ADMIN_FIRSTNAME'] ?? 'John';
-    }
-
-    /**
-     * @return string
-     */
-    public function getAdminLastname(): string
-    {
-        return $this->getVariables()['ADMIN_LASTNAME'] ?? 'Doe';
-    }
-
-    /**
-     * @return string
-     */
-    public function getAdminEmail(): string
-    {
-        return $this->getVariables()['ADMIN_EMAIL'] ?? 'john@example.com';
-    }
-
-    /**
-     * @return string
-     */
-    public function getAdminPassword(): string
-    {
-        return $this->getVariables()['ADMIN_PASSWORD'] ?? 'admin12';
-    }
-
-    /**
-     * @return string
-     */
-    public function getAdminUrl(): string
-    {
-        return $this->getVariables()['ADMIN_URL'] ?? 'admin';
     }
 
     /**

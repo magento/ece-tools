@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -45,6 +46,12 @@ class DeployStaticContent implements ProcessInterface
     private $environment;
 
     /**
+     * @var EnvironmentAdmin
+     */
+    private $environmentAdmin;
+
+
+    /**
      * @var DirectoryList
      */
     private $directoryList;
@@ -60,6 +67,7 @@ class DeployStaticContent implements ProcessInterface
      * @param BuildConfig $buildConfig
      * @param File $file
      * @param Environment $environment
+     * @param EnvironmentAdmin $environmentAdmin
      * @param DirectoryList $directoryList
      * @param ArrayManager $arrayManager
      */
@@ -69,6 +77,7 @@ class DeployStaticContent implements ProcessInterface
         BuildConfig $buildConfig,
         File $file,
         Environment $environment,
+        EnvironmentAdmin $environmentAdmin,
         DirectoryList $directoryList,
         ArrayManager $arrayManager
     ) {
@@ -77,6 +86,7 @@ class DeployStaticContent implements ProcessInterface
         $this->shell = $shell;
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;
+        $this->environmentAdmin = $environmentAdmin;
         $this->directoryList = $directoryList;
         $this->arrayManager = $arrayManager;
     }
@@ -168,7 +178,7 @@ class DeployStaticContent implements ProcessInterface
      */
     private function getLocales($flattenedConfig): array
     {
-        $locales = [$this->environment->getAdminLocale()];
+        $locales = [$this->environmentAdmin->getAdminLocale()];
         $locales = array_merge($locales, $this->arrayManager->filter($flattenedConfig, 'general/locale/code'));
         $locales = array_merge(
             $locales,

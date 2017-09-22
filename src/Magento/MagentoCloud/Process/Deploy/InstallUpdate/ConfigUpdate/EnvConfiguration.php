@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\EnvironmentAdmin;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
@@ -13,9 +13,9 @@ use Psr\Log\LoggerInterface;
 class EnvConfiguration implements ProcessInterface
 {
     /**
-     * @var Environment
+     * @var EnvironmentAdmin
      */
-    private $environment;
+    private $environmentAdmin;
 
     /**
      * @var LoggerInterface
@@ -28,16 +28,16 @@ class EnvConfiguration implements ProcessInterface
     private $configWriter;
 
     /**
-     * @param Environment $environment
+     * @param EnvironmentAdmin $environmentAdmin
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
      */
     public function __construct(
-        Environment $environment,
+        EnvironmentAdmin $environmentAdmin,
         ConfigWriter $configWriter,
         LoggerInterface $logger
     ) {
-        $this->environment = $environment;
+        $this->environmentAdmin = $environmentAdmin;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
     }
@@ -47,8 +47,12 @@ class EnvConfiguration implements ProcessInterface
      */
     public function execute()
     {
+        $adminUrl = $this->environmentAdmin->getAdminUrl();
+        if (empty($adminUrl)) {
+            return;
+        }
         $this->logger->info('Updating env.php backend front name.');
-        $config['backend']['frontName'] = $this->environment->getAdminUrl();
+        $config['backend']['frontName'] = $adminUrl;
         $this->configWriter->update($config);
     }
 }

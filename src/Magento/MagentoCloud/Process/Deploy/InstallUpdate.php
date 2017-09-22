@@ -55,7 +55,7 @@ class InstallUpdate implements ProcessInterface
 
     public function execute()
     {
-        if (!$this->deployConfig->isInstalled()) {
+        if ($this->deployConfig->isInstalling()) {
             $this->logger->info('Starting install.');
             $this->installProcess->execute();
         } else {

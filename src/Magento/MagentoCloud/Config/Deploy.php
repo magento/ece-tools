@@ -63,7 +63,7 @@ class Deploy
      * @return bool
      * @throws \Exception
      */
-    public function isInstalled(): bool
+    private function isInstalled(): bool
     {
         $this->logger->info('Checking if db exists and has tables');
 
@@ -87,5 +87,21 @@ class Deploy
         $this->writer->update(['install' => ['date' => date('r')]]);
 
         return true;
+    }
+
+    private $isinstalling = null;
+
+    /**
+     * Is the current deployment being installed?  True if yes, false if already installed in previous deployment.
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function isInstalling()
+    {
+        if (is_null($this->isinstalling)) {
+            $this->isinstalling = ! $this->isInstalled();
+        }
+        return $this->isinstalling;
     }
 }

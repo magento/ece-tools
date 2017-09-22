@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Util\PasswordGenerator;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -37,6 +39,16 @@ class EnvironmentTest extends TestCase
     private $directoryListMock;
 
     /**
+     * @var DeployConfig|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $deployConfig;
+
+    /**
+     * @var PasswordGenerator|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $passwordGenerator;
+
+    /**
      * @var array
      */
     private $environmentData;
@@ -55,6 +67,13 @@ class EnvironmentTest extends TestCase
         $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->deployConfig = $this->getMockBuilder(DeployConfig::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->passwordGenerator = $this->getMockBuilder(PasswordGenerator::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
 
         $this->environment = new Environment(
             $this->loggerMock,
