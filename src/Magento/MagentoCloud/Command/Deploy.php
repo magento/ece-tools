@@ -742,15 +742,32 @@ class Deploy extends Command
         $logMessage = $locales ? "Generating static content for locales: $locales" : "Generating static content.";
         $this->env->log($logMessage);
 
-        // @codingStandardsIgnoreStart
+        $strategy = $this->getScdStrategy();
+        $logMessage = $strategy
+            ? 'Strategy for generating static content is ' . $strategy
+            : 'Default strategy is used for generating static content';
+        $this->env->log($logMessage);
+
+        $baseCommand = 'php ./bin/magento setup:static-content:deploy  -f';
         $this->env->execute(
-            "php ./bin/magento setup:static-content:deploy  -f $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel}"
+            "$baseCommand $jobsOption $excludeThemesOptions $locales {$this->verbosityLevel} $strategy"
         );
-        // @codingStandardsIgnoreEnd
 
         /* Disable maintenance mode */
         $this->env->execute("php ./bin/magento maintenance:disable {$this->verbosityLevel}");
         $this->env->log("Maintenance mode is disabled.");
+    }
+
+    /**
+     * Return strategy option for static content deployment.
+     * Value is retrieved from SCD_STRATEGY magento environment variable, otherwise returns empty string
+     *
+     * @return string
+     */
+    private function getScdStrategy()
+    {
+        $var = $this->env->getVariables();
+        return !empty($var['SCD_STRATEGY']) ? '-s ' . $var['SCD_STRATEGY'] : '';
     }
 
 

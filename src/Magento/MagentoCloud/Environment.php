@@ -33,6 +33,13 @@ class Environment
     private $logger;
 
     /**
+     * List of variables from MagentoCloud environment variable
+     *
+     * @var array
+     */
+    private $variables;
+
+    /**
      * @param LoggerInterface $logger
      */
     public function __construct(LoggerInterface $logger = null)
@@ -76,7 +83,10 @@ class Environment
      */
     public function getVariables()
     {
-        return json_decode(base64_decode($_ENV["MAGENTO_CLOUD_VARIABLES"]), true);
+        if (!$this->variables) {
+            $this->variables = json_decode(base64_decode($_ENV["MAGENTO_CLOUD_VARIABLES"]), true);
+        }
+        return $this->variables;
     }
 
     /**

@@ -22,6 +22,7 @@ class Build extends Command
     const BUILD_OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
     const BUILD_OPT_SCD_THREADS = 'scd_threads';
     const BUILD_OPT_SKIP_SCD = 'skip_scd';
+    const BUILD_OPT_SCD_STRATEGY = 'scd_strategy';
 
     /**
      * @var Environment
@@ -203,10 +204,25 @@ class Build extends Command
                 $this->env->log($logMessage);
 
                 $parallelCommands = "";
+                $strategy = $this->getScdStrategy();
+                $logMessage = $strategy
+                    ? 'Strategy for generating static content is ' . $strategy
+                    : 'Default strategy is used for generating static content';
+                $this->env->log($logMessage);
+
+                $baseCommand = implode(
+                    ' ',
+                    [
+                        'php ./bin/magento setup:static-content:deploy -f',
+                        $excludeThemesOptions,
+                        '%s',
+                        $this->verbosityLevel,
+                        $strategy
+                    ]
+                );
+
                 foreach ($locales as $locale) {
-                    // @codingStandardsIgnoreStart
-                    $parallelCommands .= "php ./bin/magento setup:static-content:deploy -f $excludeThemesOptions $locale {$this->verbosityLevel}" . '\n';
-                    // @codingStandardsIgnoreEnd
+                    $parallelCommands .= sprintf($baseCommand, $locale) . '\n';
                 }
                 $this->env->execute("printf '$parallelCommands' | xargs -I CMD -P " . (int)$threads . " bash -c CMD");
 
@@ -219,6 +235,18 @@ class Build extends Command
         } else {
             $this->env->log("Skipping static content deploy");
         }
+    }
+
+    /**
+     * Return strategy option for static content deployment.
+     * Value is retrieved from 'scd_strategy' build options, otherwise returns empty string
+     *
+     * @return string
+     */
+    private function getScdStrategy()
+    {
+        $strategy = $this->getBuildOption(self::BUILD_OPT_SCD_STRATEGY);
+        return $strategy ? '-s ' . $strategy : '';
     }
 
     /**
