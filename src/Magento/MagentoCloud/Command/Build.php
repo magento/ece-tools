@@ -27,18 +27,6 @@ class Build extends Command
     const BUILD_OPT_SCD_STRATEGY = 'scd_strategy';
 
     /**
-     * default strategy for static content deployment
-     */
-    const SCD_DEFAULT_STRATEGY = 'compact';
-
-    /**
-     * List of possible strategies for static content deploy
-     *
-     * @var array
-     */
-    private $scdStrategies = ['standard', 'quick', 'compact'];
-
-    /**
      * @var Environment
      */
     private $env;
@@ -219,7 +207,10 @@ class Build extends Command
 
                 $parallelCommands = "";
                 $strategy = $this->getScdStrategy();
-                $this->env->log('Strategy for generating static content is ' . $strategy);
+                $logMessage .= $strategy
+                    ? 'Strategy for generating static content is ' . $strategy
+                    : 'Default strategy is used for generating static content';
+                $this->env->log($logMessage);
 
                 $baseCommand = implode(
                     ' ',
@@ -250,17 +241,14 @@ class Build extends Command
 
     /**
      * Return strategy option for static content deployment.
-     * Value is retrieved from 'scd_strategy' build options, otherwise used default one
+     * Value is retrieved from 'scd_strategy' build options, otherwise returns empty string
      *
      * @return string
      */
     private function getScdStrategy()
     {
         $strategy = $this->getBuildOption(self::BUILD_OPT_SCD_STRATEGY);
-        if (!$strategy || !in_array($strategy, $this->scdStrategies)) {
-            $strategy = self::SCD_DEFAULT_STRATEGY;
-        }
-        return '-s ' . $strategy;
+        return $strategy ? '-s ' . $strategy : '';
     }
 
     /**
