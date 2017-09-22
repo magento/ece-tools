@@ -49,6 +49,7 @@ class EnvConfiguration implements ProcessInterface
     {
         $adminUrl = $this->environmentAdmin->getAdminUrl();
         if (empty($adminUrl)) {
+            $this->logger->info('Not updating env.php backend front name.  (ADMIN_URL not set)');
             return;
         }
         $this->logger->info('Updating env.php backend front name.');

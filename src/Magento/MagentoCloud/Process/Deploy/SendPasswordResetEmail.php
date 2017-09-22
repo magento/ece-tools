@@ -89,12 +89,7 @@ class SendPasswordResetEmail implements ProcessInterface
         if (!$this->deployConfig->isInstalling() || empty($this->environmentAdmin->getAdminEmail()) || !empty($this->environment->getVariables()["ADMIN_PASSWORD"])) {
             return;
         }
-        /* TODO: Instead of calling our own command to do it, we will wait until a reset command gets added to Magento core
-         * // $this->env->log("Sending password reset email to admin user \"{$this->adminUsername}\" at $this->adminEmail");
-         * // $this->env->execute("vendor/bin/m2-ece-send-password-reset-email");
-         * Note: For now, we will just email them the admin URL where they can manually click "Forgot your password" to get a password reset email.
-         */
-        $adminurl = $urls['secure'][''] . $this->environmentAdmin->getAdminUrl();
+        $adminUrl = $urls['secure'][''] . $this->environmentAdmin->getAdminUrl();
         $adminEmail = $this->environmentAdmin->getAdminEmail();
         $adminUsername = $this->environmentAdmin->getAdminUsername();
         $this->logger->info("Emailing admin URL to admin user \"{$adminUsername}\" at $adminEmail");
@@ -102,7 +97,7 @@ class SendPasswordResetEmail implements ProcessInterface
             $adminEmail,
             "Magento Commerce Cloud - Admin URL",
             "Welcome to Magento Commerce (Cloud)!\n"
-                . "To properly log into your provisioned Magento installation Admin panel, you need to change your Admin password. To update your password, click this link to access the Admin Panel: {$adminurl} . When the page opens, click the \"Forgot your password\" link. You should receive a password update email at {$adminEmail} . Just in case, check your spam box if you don't see the email immediately.\n"
+                . "To properly log into your provisioned Magento installation Admin panel, you need to change your Admin password. To update your password, click this link to access the Admin Panel: {$adminUrl} . When the page opens, click the \"Forgot your password\" link. You should receive a password update email at {$adminEmail} . Just in case, check your spam box if you don't see the email immediately.\n"
                 . "After the password is updated, you can login with the username {$adminUsername} and the new password.\n"
                 . "Need help? Please see http://devdocs.magento.com/guides/v2.2/cloud/onboarding/onboarding-tasks.html\n"
                 . "Thank you,\n"
