@@ -10,7 +10,7 @@ case $TEST_SUITE in
     integration)
         cd tests/integration/etc
 
-        touch composer.json && echo '{}' >> composer.json
+        touch composer.json && echo "{}" > composer.json
         test -n "$GH_TOKEN" && composer config -a -n github-oauth.github.com "$GH_TOKEN" || true
         composer config -a -n http-basic.repo.magento.com "$REPO_USERNAME" "$REPO_PASSWORD"
         composer config -a -n http-basic.connect20-qa01.magedevteam.com "$CONNECT20_USERNAME" "$CONNECT20_PASSWORD"

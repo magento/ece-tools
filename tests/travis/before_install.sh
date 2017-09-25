@@ -10,8 +10,8 @@ case $TEST_SUITE in
     integration)
         mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
 
-        composer config -a -n github-oauth.github.com "$GH_TOKEN"
-        composer config -a -n http-basic.repo.magento.com "$REPO_USERNAME" "$REPO_PASSWORD"
-        composer config -a -n http-basic.connect20-qa01.magedevteam.com "$CONNECT20_USERNAME" "$CONNECT20_PASSWORD"
+        composer config -a -n -g github-oauth.github.com "$GH_TOKEN"
+        composer config -a -n -g http-basic.repo.magento.com "$REPO_USERNAME" "$REPO_PASSWORD"
+        composer config -a -n -g http-basic.connect20-qa01.magedevteam.com "$CONNECT20_USERNAME" "$CONNECT20_PASSWORD"
         ;;
 esac
