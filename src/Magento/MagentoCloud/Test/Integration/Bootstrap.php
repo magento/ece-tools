@@ -78,10 +78,11 @@ class Bootstrap
                 $projectConfig = $deployConfig['types'][static::DEPLOY_TYPE_PROJECT];
 
                 shell_exec(sprintf(
-                    'cd %s && composer create-project --no-dev --repository-url=%s %s . %s',
+                    'composer create-project --no-dev --repository-url=%s %s %s %s',
                     $sandboxDir,
                     $projectConfig['repo'],
                     $projectConfig['name'],
+                    $sandboxDir,
                     $projectConfig['version']
                 ));
                 break;

@@ -19,8 +19,6 @@ matrix:
       env: TEST_SUITE=integration
 cache:
   apt: true
-  directories:
-    - $HOME/.composer/cache
 before_install: ./tests/travis/before_install.sh
 install: composer install --no-interaction
 before_script: ./tests/travis/before_script.sh
