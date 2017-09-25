@@ -3,9 +3,12 @@
 # Copyright © Magento, Inc. All rights reserved.
 # See COPYING.txt for license details.
 
+echo "==> set"
 set -e
+echo "==> set error handler"
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
+echo "==> switch"
 case $TEST_SUITE in
     integration)
         cd tests/integration/etc
