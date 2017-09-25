@@ -25,6 +25,7 @@ before_install: ./tests/travis/before_install.sh
 install: composer install --no-interaction
 before_script: ./tests/travis/before_script.sh
 script:
+  - composer config --list
   - if [ $TEST_SUITE == "static" ]; then phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n; fi;
   - if [ $TEST_SUITE == "static" ]; then phpmd src xml tests/static/phpmd-ruleset.xml; fi;
   - if [ $TEST_SUITE == "unit" ]; then phpunit --configuration tests/unit/phpunit.xml.dist; fi;
