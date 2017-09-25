@@ -45,7 +45,6 @@ class Bootstrap
             return;
         }
 
-        $authFile = $this->getConfigFile('auth.json');
         $buildFile = $this->getConfigFile('build_options.ini');
         $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
         $deployType = getenv('DEPLOY_TYPE')
@@ -90,11 +89,6 @@ class Bootstrap
                 throw new \Exception('Wrong deploy type');
         }
 
-        shell_exec(sprintf(
-            'cp -n %s %s',
-            $authFile,
-            $sandboxDir . '/auth.json'
-        ));
         shell_exec(sprintf(
             'cp -f %s %s',
             $buildFile,
