@@ -3,10 +3,10 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
+namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
-use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Util\PasswordGenerator;
@@ -58,22 +58,37 @@ class AdminCredentials implements ProcessInterface
     {
         $this->logger->info('Updating admin credentials.');
 
-        $password = $this->passwordGenerator->generate(
-            $this->environment->getAdminPassword()
-        );
+        $data = ['`email`' => $this->environment->getAdminEmail()];
 
-        $query = 'UPDATE `admin_user` SET `firstname` = ?, `lastname` = ?, `email` = ?, `username` = ?, `password` = ?'
-            . ' WHERE `user_id` = 1';
+        if ($this->environment->getAdminFirstname()) {
+            $data['`firstname`'] = $this->environment->getAdminFirstname();
+        }
+
+        if ($this->environment->getAdminLastname()) {
+            $data['`lastname`'] = $this->environment->getAdminFirstname();
+        }
+
+        if ($this->environment->getAdminUsername()) {
+            $data['`username`'] = $this->environment->getAdminUsername();
+        }
+
+        if ($this->environment->getAdminPassword()) {
+            $data['`password`'] = $this->passwordGenerator->generate(
+                $this->environment->getAdminPassword()
+            );
+        }
+
+        $fields = array_map(
+            function ($key) {
+                return $key . ' = ?';
+            },
+            array_keys($data)
+        );
+        $query = 'UPDATE `admin_user` SET ' . implode(', ', $fields) . ' WHERE `user_id` = 1';
 
         $this->connection->affectingQuery(
             $query,
-            [
-                $this->environment->getAdminFirstname(),
-                $this->environment->getAdminLastname(),
-                $this->environment->getAdminEmail(),
-                $this->environment->getAdminUsername(),
-                $password,
-            ]
+            array_values($data)
         );
     }
 }
