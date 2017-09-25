@@ -79,7 +79,6 @@ class Bootstrap
 
                 shell_exec(sprintf(
                     'composer create-project --no-dev --repository-url=%s %s %s %s',
-                    $sandboxDir,
                     $projectConfig['repo'],
                     $projectConfig['name'],
                     $sandboxDir,
