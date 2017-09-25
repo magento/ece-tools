@@ -25,7 +25,6 @@ install:
   - composer install --no-interaction
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
-  - tests/travis/before_install.sh
 before_script: tests/travis/before_script.sh
 script:
   - if [ $TEST_SUITE == "static" ]; then phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n; fi;
