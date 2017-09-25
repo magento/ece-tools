@@ -28,8 +28,8 @@ return [
     'deploy' => [
         'types' => [
             'git' => [
-                'repo' => 'https://github.com/magento/magento-cloud-template',
-                'version' => '2.2',
+                'repo' => 'https://github.com/magento/magento-cloud',
+                'version' => '2.1.9',
             ],
             'project' => [
                 'repo' => 'https://connect20-qa01.magedevteam.com/',
@@ -38,6 +38,6 @@ return [
             ],
 
         ],
-        'type' => 'project',
+        'type' => 'git',
     ],
 ];
