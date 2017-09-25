@@ -48,7 +48,9 @@ class Bootstrap
         $authFile = $this->getConfigFile('auth.json');
         $buildFile = $this->getConfigFile('build_options.ini');
         $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
-        $deployType = getenv('DEPLOY_TYPE') ?? $deployConfig[static::DEPLOY_TYPE];
+        $deployType = getenv('DEPLOY_TYPE')
+            ? getenv('DEPLOY_TYPE')
+            : $deployConfig[static::DEPLOY_TYPE];
 
         if (!$deployType || !array_key_exists($deployType, $deployConfig['types'])) {
             throw new \Exception(
@@ -137,7 +139,9 @@ class Bootstrap
     public function getSandboxDir(): string
     {
         $environmentFile = $this->getConfigFile('environment.php');
-        $sandboxKey = getenv('SANDBOX_KEY') ?? md5_file($environmentFile);
+        $sandboxKey = getenv('SANDBOX_KEY')
+            ? getenv('SANDBOX_KEY')
+            : md5_file($environmentFile);
 
         return ECE_BP . '/tests/integration/tmp/sandbox-' . $sandboxKey;
     }

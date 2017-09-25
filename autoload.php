@@ -6,9 +6,8 @@
 define('ECE_BP', __DIR__);
 
 /**
- * This hack is to prevent Composer crash when
- * NonComposerComponentRegistration.php was moved from
- * app/etc during writable directories mounting.
+ * This hack is to prevent Composer crash when 'NonComposerComponentRegistration.php'
+ * was moved from app/etc during writable directories mounting.
  */
 $magentoRoot = __DIR__ . '/../../../';
 
