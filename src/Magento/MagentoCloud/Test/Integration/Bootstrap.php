@@ -63,41 +63,51 @@ class Bootstrap
             case static::DEPLOY_TYPE_GIT:
                 $gitConfig = $deployConfig['types'][static::DEPLOY_TYPE_GIT];
 
-                shell_exec(sprintf(
-                    'cd %s && git clone %s .',
-                    $sandboxDir,
-                    $gitConfig['repo']
-                ));
-                shell_exec(sprintf(
-                    'cd %s && git checkout -b %s',
-                    $sandboxDir,
-                    $gitConfig['version']
-                ));
+                $this->execute(
+                    sprintf(
+                        'cd %s && git clone %s .',
+                        $sandboxDir,
+                        $gitConfig['repo']
+                    )
+                );
+                $this->execute(
+                    sprintf(
+                        'cd %s && git checkout -b %s',
+                        $sandboxDir,
+                        $gitConfig['version']
+                    )
+                );
                 break;
             case static::DEPLOY_TYPE_PROJECT:
                 $projectConfig = $deployConfig['types'][static::DEPLOY_TYPE_PROJECT];
 
-                shell_exec(sprintf(
-                    'composer create-project --no-dev --repository-url=%s %s %s %s',
-                    $projectConfig['repo'],
-                    $projectConfig['name'],
-                    $sandboxDir,
-                    $projectConfig['version']
-                ));
+                $this->execute(
+                    sprintf(
+                        'composer create-project --no-dev --repository-url=%s %s %s %s',
+                        $projectConfig['repo'],
+                        $projectConfig['name'],
+                        $sandboxDir,
+                        $projectConfig['version']
+                    )
+                );
                 break;
             default:
                 throw new \Exception('Wrong deploy type');
         }
 
-        shell_exec(sprintf(
-            'cp -f %s %s',
-            $buildFile,
-            $sandboxDir . '/build_options.ini'
-        ));
-        shell_exec(sprintf(
-            'cd %s && composer install -n',
-            $sandboxDir
-        ));
+        $this->execute(
+            sprintf(
+                'cp -f %s %s',
+                $buildFile,
+                $sandboxDir . '/build_options.ini'
+            )
+        );
+        $this->execute(
+            sprintf(
+                'composer install -n -d %s',
+                $sandboxDir
+            )
+        );
     }
 
     /**
@@ -160,5 +170,20 @@ class Bootstrap
         throw new \Exception(
             sprintf('Config file %s can not be found', $file)
         );
+    }
+
+    /**
+     * @param string $command
+     * @return string
+     */
+    private function execute(string $command)
+    {
+        exec($command, $output, $status);
+
+        if ($status !== 0) {
+            throw new \RuntimeException("Command $command returned code $status", $status);
+        }
+
+        return $output;
     }
 }
