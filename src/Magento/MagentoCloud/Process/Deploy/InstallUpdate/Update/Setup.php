@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -37,16 +38,30 @@ class Setup implements ProcessInterface
      */
     private $file;
 
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @param LoggerInterface $logger
+     * @param Environment $environment
+     * @param ShellInterface $shell
+     * @param File $file
+     * @param DirectoryList $directoryList
+     */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         ShellInterface $shell,
-        File $file
+        File $file,
+        DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->shell = $shell;
         $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -83,9 +98,11 @@ class Setup implements ProcessInterface
      */
     private function removeRegenerateFlag()
     {
-        if ($this->file->isExists(Environment::REGENERATE_FLAG)) {
+        $magentoRoot = $this->directoryList->getMagentoRoot();
+
+        if ($this->file->isExists($magentoRoot . '/' . Environment::REGENERATE_FLAG)) {
             $this->logger->info('Removing .regenerate flag');
-            $this->file->deleteFile(Environment::REGENERATE_FLAG);
+            $this->file->deleteFile($magentoRoot . '/' . Environment::REGENERATE_FLAG);
         }
     }
 }

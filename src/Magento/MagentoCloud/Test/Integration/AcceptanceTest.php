@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Config\Environment;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -16,12 +17,41 @@ use Symfony\Component\Console\Tester\CommandTester;
 class AcceptanceTest extends TestCase
 {
     /**
+     * @inheritdoc
+     */
+    protected function setUp()
+    {
+        shell_exec(sprintf(
+            "cp -f %s %s",
+            Bootstrap::create()->getConfigFile('config.php'),
+            Bootstrap::create()->getSandboxDir() . '/app/etc/config.php'
+        ));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function tearDown()
+    {
+        $sandboxDir = Bootstrap::create()->getSandboxDir();
+
+        shell_exec(sprintf(
+            "cd %s && php bin/magento setup:uninstall -n",
+            $sandboxDir
+        ));
+        shell_exec(sprintf(
+            "cd %s && rm -rf init",
+            $sandboxDir
+        ));
+    }
+
+    /**
      * @param array $environment
      * @dataProvider dataProvider
      */
     public function test(array $environment)
     {
-        $application = $this->createApplication($environment);
+        $application = Bootstrap::create()->createApplication($environment);
 
         $commandTester = new CommandTester(
             $application->get(Build::NAME)
@@ -47,10 +77,11 @@ class AcceptanceTest extends TestCase
             'default configuration' => [
                 'environment' => [],
             ],
-            'disabled static content symlinks ' => [
+            'disabled static content symlinks 3 jobs' => [
                 'environment' => [
                     'variables' => [
                         'STATIC_CONTENT_SYMLINK' => Environment::VAL_DISABLED,
+                        'STATIC_CONTENT_THREADS' => 3,
                     ],
                 ],
             ],
