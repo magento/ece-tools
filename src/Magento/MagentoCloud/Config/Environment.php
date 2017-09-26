@@ -15,7 +15,7 @@ use Psr\Log\LoggerInterface;
 class Environment
 {
     const STATIC_CONTENT_DEPLOY_FLAG = '.static_content_deploy';
-    const REGENERATE_FLAG = MAGENTO_ROOT . 'var/.regenerate';
+    const REGENERATE_FLAG = 'var/.regenerate';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
