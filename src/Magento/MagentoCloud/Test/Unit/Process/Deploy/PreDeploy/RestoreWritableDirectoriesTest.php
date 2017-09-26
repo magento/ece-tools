@@ -55,9 +55,7 @@ class RestoreWritableDirectoriesTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->process = new RestoreWritableDirectories(
             $this->loggerMock,

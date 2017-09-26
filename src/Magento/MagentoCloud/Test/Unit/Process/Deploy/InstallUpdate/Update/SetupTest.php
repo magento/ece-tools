@@ -52,9 +52,7 @@ class SetupTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->process = new Setup(
             $this->loggerMock,
