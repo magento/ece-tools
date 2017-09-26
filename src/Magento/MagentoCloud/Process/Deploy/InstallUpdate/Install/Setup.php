@@ -73,27 +73,29 @@ class Setup implements ProcessInterface
         $command =
             'php ./bin/magento setup:install'
             . ' --session-save=db --cleanup-database'
-            . ' --currency=' . $this->environment->getDefaultCurrency()
-            . ' --base-url=' . $urlUnsecure
-            . ' --base-url-secure=' . $urlSecure
-            . ' --language=' . $this->environment->getAdminLocale()
+            . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
+            . ' --base-url=' . escapeshellarg($urlUnsecure)
+            . ' --base-url-secure=' . escapeshellarg($urlSecure)
+            . ' --language=' . escapeshellarg($this->environment->getAdminLocale())
             . ' --timezone=America/Los_Angeles'
-            . ' --db-host=' . $this->environment->getDbHost()
-            . ' --db-name=' . $this->environment->getDbName()
-            . ' --db-user=' . $this->environment->getDbUser()
-            . ' --backend-frontname=' . $this->environment->getAdminUrl()
-            . ' --admin-user=' . $this->environment->getAdminUsername()
-            . ' --admin-firstname=' . (empty($this->environment->getAdminFirstname())
-                ? 'Changeme': $this->environment->getAdminFirstname())
-            . ' --admin-lastname=' . (empty($this->environment->getAdminLastname())
-                ? 'Changeme': $this->environment->getAdminLastname())
-            . ' --admin-email=' . $this->environment->getAdminEmail()
-            . ' --admin-password=' . (empty($this->environment->getAdminPassword())
-                ? $this->passwordGenerator->generateRandomPassword() : $this->environment->getAdminPassword());
+            . ' --db-host=' . escapeshellarg($this->environment->getDbHost())
+            . ' --db-name=' . escapeshellarg($this->environment->getDbName())
+            . ' --db-user=' . escapeshellarg($this->environment->getDbUser())
+            . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
+                ? $this->environment->getAdminUrl() : Environment::DEFAULT_ADMIN_URL)
+            . ' --admin-user=' . escapeshellarg($this->environment->getAdminUsername()
+                ? $this->environment->getAdminUsername() : Environment::DEFAULT_ADMIN_NAME)
+            . ' --admin-firstname=' . escapeshellarg($this->environment->getAdminFirstname()
+                ? $this->environment->getAdminFirstname() : Environment::DEFAULT_ADMIN_FIRSTNAME)
+            . ' --admin-lastname=' . escapeshellarg($this->environment->getAdminLastname()
+                ? $this->environment->getAdminLastname() : Environment::DEFAULT_ADMIN_LASTNAME)
+            . ' --admin-email=' . escapeshellarg($this->environment->getAdminEmail())
+            . ' --admin-password=' . escapeshellarg($this->environment->getAdminPassword()
+                ? $this->environment->getAdminPassword() : $this->passwordGenerator->generateRandomPassword());
 
         $dbPassword = $this->environment->getDbPassword();
         if (strlen($dbPassword)) {
-            $command = '--db-password=' . $dbPassword;
+            $command .= ' --db-password=' . escapeshellarg($dbPassword);
         }
 
         $command .= $this->environment->getVerbosityLevel();

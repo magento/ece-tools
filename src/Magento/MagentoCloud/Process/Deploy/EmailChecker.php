@@ -39,7 +39,8 @@ class EmailChecker implements ProcessInterface
     public function execute()
     {
         if (!$this->environment->getAdminEmail()) {
-            $message = 'ADMIN_EMAIL not set during install!  We need this variable set to send the password reset email.'
+            $message = 'ADMIN_EMAIL not set during install!'
+                . '  We need this variable set to send the password reset email.'
                 . ' Please set ADMIN_EMAIL and retry deploy.';
 
             $this->logger->error($message);

@@ -3,13 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
+namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\DB\ConnectionInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\AdminCredentials;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\AdminCredentials;
 use Magento\MagentoCloud\Config\Environment;
 
 /**
@@ -71,36 +71,36 @@ class AdminCredentialsTest extends TestCase
         $email = 'JohnDoe@example.com';
         $userName = 'admin';
 
-        $query = 'UPDATE `admin_user` SET `firstname` = ?, `lastname` = ?, `email` = ?, `username` = ?, `password` = ?'
+        $query = 'UPDATE `admin_user` SET `email` = ?, `firstname` = ?, `lastname` = ?, `username` = ?, `password` = ?'
             . ' WHERE `user_id` = 1';
 
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating admin credentials.');
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminPassword')
             ->willReturn($adminPassword);
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminFirstname')
             ->willReturn($firstName);
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminLastname')
             ->willReturn($lastName);
         $this->environmentMock->expects($this->once())
             ->method('getAdminEmail')
             ->willReturn($email);
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminUsername')
             ->willReturn($userName);
         $this->passwordGeneratorMock->expects($this->once())
-            ->method('generate')
+            ->method('generateSaltAndHash')
             ->with($adminPassword)
             ->willReturn($generatedPassword);
         $this->connectionMock->expects($this->once())
             ->method('affectingQuery')
             ->with(
                 $query,
-                [$firstName, $lastName, $email, $userName, $generatedPassword]
+                [$email, $firstName, $lastName, $userName, $generatedPassword]
             );
 
         $this->adminCredentials->execute();

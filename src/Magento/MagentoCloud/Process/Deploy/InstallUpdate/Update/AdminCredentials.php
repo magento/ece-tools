@@ -65,7 +65,7 @@ class AdminCredentials implements ProcessInterface
         }
 
         if ($this->environment->getAdminLastname()) {
-            $data['`lastname`'] = $this->environment->getAdminFirstname();
+            $data['`lastname`'] = $this->environment->getAdminLastname();
         }
 
         if ($this->environment->getAdminUsername()) {
@@ -73,7 +73,7 @@ class AdminCredentials implements ProcessInterface
         }
 
         if ($this->environment->getAdminPassword()) {
-            $data['`password`'] = $this->passwordGenerator->generate(
+            $data['`password`'] = $this->passwordGenerator->generateSaltAndHash(
                 $this->environment->getAdminPassword()
             );
         }

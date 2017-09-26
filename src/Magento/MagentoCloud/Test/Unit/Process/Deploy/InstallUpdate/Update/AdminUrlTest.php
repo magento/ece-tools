@@ -3,15 +3,15 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
+namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\EnvConfiguration;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\AdminUrl;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
-class EnvConfigurationTest extends TestCase
+class AdminUrlTest extends TestCase
 {
     /**
      * @var Environment|\PHPUnit_Framework_MockObject_MockObject
@@ -29,7 +29,7 @@ class EnvConfigurationTest extends TestCase
     private $configWriterMock;
 
     /**
-     * @var EnvConfiguration
+     * @var AdminUrl
      */
     private $envConfiguration;
 
@@ -43,7 +43,7 @@ class EnvConfigurationTest extends TestCase
             ->getMockForAbstractClass();
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
 
-        $this->envConfiguration = new EnvConfiguration(
+        $this->envConfiguration = new AdminUrl(
             $this->environmentMock,
             $this->configWriterMock,
             $this->loggerMock
@@ -65,6 +65,23 @@ class EnvConfigurationTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['backend' => ['frontName' => $frontName]]);
+
+        $this->envConfiguration->execute();
+    }
+
+    /**
+     * @return void
+     */
+    public function testExecuteNoChange()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminUrl')
+            ->willReturn('');
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Not updating env.php backend front name. (ADMIN_URL not set)');
+        $this->configWriterMock->expects($this->never())
+            ->method('update');
 
         $this->envConfiguration->execute();
     }

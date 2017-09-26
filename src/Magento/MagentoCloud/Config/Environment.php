@@ -27,6 +27,11 @@ class Environment
     const VAL_ENABLED = 'enabled';
     const VAL_DISABLED = 'disabled';
 
+    const DEFAULT_ADMIN_URL = 'admin';
+    const DEFAULT_ADMIN_NAME = 'admin';
+    const DEFAULT_ADMIN_FIRSTNAME = 'Changeme';
+    const DEFAULT_ADMIN_LASTNAME = 'Changeme';
+
     /**
      * @var LoggerInterface
      */
@@ -312,7 +317,7 @@ class Environment
      */
     public function getAdminUsername(): string
     {
-        return $this->getVariables()['ADMIN_USERNAME'] ?? 'admin';
+        return $this->getVariables()['ADMIN_USERNAME'] ?? '';
     }
 
     /**
@@ -352,7 +357,7 @@ class Environment
      */
     public function getAdminUrl(): string
     {
-        return $this->getVariables()['ADMIN_URL'] ?? 'admin';
+        return $this->getVariables()['ADMIN_URL'] ?? '';
     }
 
     /**
