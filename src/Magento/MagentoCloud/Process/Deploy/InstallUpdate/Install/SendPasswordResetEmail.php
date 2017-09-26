@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
-use Magento\MagentoCloud\DB\ConnectionInterface;
 
 class SendPasswordResetEmail implements ProcessInterface
 {
@@ -29,27 +28,18 @@ class SendPasswordResetEmail implements ProcessInterface
     private $urlManager;
 
     /**
-     * @var ConnectionInterface
-     */
-    private $connection;
-
-    /**
-     * SendPasswordResetEmail constructor.
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param UrlManager $urlManager
-     * @param ConnectionInterface $connection
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
-        UrlManager $urlManager,
-        ConnectionInterface $connection
+        UrlManager $urlManager
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->urlManager = $urlManager;
-        $this->connection = $connection;
     }
 
     /**
