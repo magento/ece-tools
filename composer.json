@@ -21,7 +21,8 @@
     "squizlabs/php_codesniffer": " ^3.0",
     "doctrine/instantiator": "1.0.5",
     "phpmd/phpmd": "@stable",
-    "php-mock/php-mock-phpunit": "^2.0"
+    "php-mock/php-mock-phpunit": "^2.0",
+    "phpunit/php-code-coverage": "^5.2"
   },
   "bin": [
     "m2-ece-build",
@@ -39,8 +40,8 @@
       "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
       "phpmd src xml tests/static/phpmd-ruleset.xml",
       "phpunit --configuration tests/unit/phpunit.xml.dist"
-    ]
+    ],
+    "test-coverage": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-html tests/unit/tmp/coverage"
   },
-  "process-timeout": 600,
   "prefer-stable": true
 }
