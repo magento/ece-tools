@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\RestoreWritableDirectories;
 use Magento\MagentoCloud\Util\BuildDirCopier;
@@ -15,6 +16,11 @@ use Psr\Log\LoggerInterface;
 
 class RestoreWritableDirectoriesTest extends TestCase
 {
+    /**
+     * @var RestoreWritableDirectories
+     */
+    private $process;
+
     /**
      * @var File|Mock
      */
@@ -36,9 +42,9 @@ class RestoreWritableDirectoriesTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var RestoreWritableDirectories
+     * @var DirectoryList|Mock
      */
-    private $process;
+    private $directoryListMock;
 
     protected function setUp()
     {
@@ -49,24 +55,28 @@ class RestoreWritableDirectoriesTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->process = new RestoreWritableDirectories(
             $this->loggerMock,
             $this->fileMock,
             $this->buildDirCopierMock,
-            $this->environmentMock
+            $this->environmentMock,
+            $this->directoryListMock
         );
     }
 
     public function testExecute()
     {
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(Environment::REGENERATE_FLAG)
+            ->with('magento_root/' . Environment::REGENERATE_FLAG)
             ->willReturn(true);
         $this->fileMock->expects($this->once())
             ->method('deleteFile')
-            ->with(Environment::REGENERATE_FLAG);
+            ->with('magento_root/' . Environment::REGENERATE_FLAG);
         $this->environmentMock->expects($this->once())
             ->method('getRecoverableDirectories')
             ->willReturn(['app/etc', 'pub/media']);
@@ -88,9 +98,11 @@ class RestoreWritableDirectoriesTest extends TestCase
 
     public function testExecuteFlagNotExists()
     {
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(Environment::REGENERATE_FLAG)
+            ->with('magento_root/' . Environment::REGENERATE_FLAG)
             ->willReturn(false);
         $this->fileMock->expects($this->never())
             ->method('deleteFile');
