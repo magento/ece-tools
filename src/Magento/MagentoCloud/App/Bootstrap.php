@@ -7,6 +7,11 @@ namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Application;
 
+/**
+ * Class Bootstrap.
+ *
+ * @codeCoverageIgnore
+ */
 class Bootstrap
 {
     /**
