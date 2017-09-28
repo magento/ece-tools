@@ -70,9 +70,11 @@ class MarshallFiles implements ProcessInterface
             $this->file->createDirectory($enterpriseFolder, 0777);
         }
 
-        $this->file->copy(
-            $magentoRoot . '/app/etc/enterprise/di.xml',
-            $magentoRoot . '/app/enterprise/di.xml'
-        );
+        if ($this->file->isExists($magentoRoot . '/app/etc/enterprise/di.xml')) {
+            $this->file->copy(
+                $magentoRoot . '/app/etc/enterprise/di.xml',
+                $magentoRoot . '/app/enterprise/di.xml'
+            );
+        }
     }
 }
