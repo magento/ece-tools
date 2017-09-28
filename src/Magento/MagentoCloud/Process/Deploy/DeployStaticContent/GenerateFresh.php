@@ -111,11 +111,12 @@ class GenerateFresh implements ProcessInterface
             $excludeThemesOptions,
             $locales,
             $this->environment->getVerbosityLevel(),
+            $this->environment->getScdStrategy()
         ]);
 
         $this->shell->execute(
             'php ./bin/magento setup:static-content:deploy ' .
-            implode(' ', $deployParams)
+            implode(' ', array_filter($deployParams))
         );
 
         $this->shell->execute("php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}");

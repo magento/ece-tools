@@ -19,6 +19,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
+ * @codeCoverageIgnore
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Container extends \Illuminate\Container\Container implements ContainerInterface
@@ -167,6 +168,15 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
+        $this->when(BuildProcess\DeployStaticContent::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->get(BuildProcess\DeployStaticContent\GenerateFresh::class),
+                    ],
+                ]);
+            });
     }
 
     /**

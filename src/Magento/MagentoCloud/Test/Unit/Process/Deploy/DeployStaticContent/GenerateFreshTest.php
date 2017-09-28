@@ -122,7 +122,7 @@ class GenerateFreshTest extends TestCase
         $this->shellMock->method('execute')
             ->withConsecutive(
                 ['php ./bin/magento maintenance:enable  -vvv '],
-                ['php ./bin/magento setup:static-content:deploy -f   en_GB fr_FR  -vvv '],
+                ['php ./bin/magento setup:static-content:deploy -f en_GB fr_FR  -vvv  -s compact'],
                 ['php ./bin/magento maintenance:disable  -vvv ']
             );
         $this->environmentMock->method('getVerbosityLevel')
@@ -130,6 +130,8 @@ class GenerateFreshTest extends TestCase
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn(true);
+        $this->environmentMock->method('getScdStrategy')
+            ->willReturn('-s compact');
 
         $this->process->execute();
     }
@@ -160,7 +162,7 @@ class GenerateFreshTest extends TestCase
         $this->shellMock->method('execute')
             ->withConsecutive(
                 ['php ./bin/magento maintenance:enable  -vvv '],
-                ['php ./bin/magento setup:static-content:deploy -f   fr_FR  -vvv '],
+                ['php ./bin/magento setup:static-content:deploy -f fr_FR  -vvv  -s compact'],
                 ['php ./bin/magento maintenance:disable  -vvv ']
             );
         $this->environmentMock->method('getVerbosityLevel')
@@ -168,6 +170,8 @@ class GenerateFreshTest extends TestCase
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn(true);
+        $this->environmentMock->method('getScdStrategy')
+            ->willReturn('-s compact');
 
         $this->process->execute();
     }
@@ -198,7 +202,7 @@ class GenerateFreshTest extends TestCase
         $this->shellMock->method('execute')
             ->withConsecutive(
                 ['php ./bin/magento maintenance:enable  -vvv '],
-                ['php ./bin/magento setup:static-content:deploy -f  --exclude-theme=en_GB en_GB fr_FR  -vvv '],
+                ['php ./bin/magento setup:static-content:deploy -f --exclude-theme=en_GB en_GB fr_FR  -vvv '],
                 ['php ./bin/magento maintenance:disable  -vvv ']
             );
         $this->environmentMock->method('getVerbosityLevel')
@@ -208,6 +212,8 @@ class GenerateFreshTest extends TestCase
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn(true);
+        $this->environmentMock->method('getScdStrategy')
+            ->willReturn('');
 
         $this->process->execute();
     }
