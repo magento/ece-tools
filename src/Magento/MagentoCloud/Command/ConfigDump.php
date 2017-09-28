@@ -17,6 +17,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ConfigDump extends Command
 {
+    const NAME = 'dump';
+
     /**
      * @var LoggerInterface
      */
@@ -44,7 +46,7 @@ class ConfigDump extends Command
      */
     protected function configure()
     {
-        $this->setName('dump')
+        $this->setName(static::NAME)
             ->setDescription('Dump static content');
 
         parent::configure();

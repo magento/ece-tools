@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Filesystem;
 
 /**
  * Filesystem exception
+ * @codeCoverageIgnore
  */
 class FileSystemException extends \Exception
 {
