@@ -80,7 +80,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->make(BuildProcess\DeployStaticContent::class),
                         $this->make(BuildProcess\ClearInitDirectory::class),
-                        $this->make(BuildProcess\BackupToInitDirectory::class),
+                        $this->make(BuildProcess\BackupData::class),
                     ],
                 ]);
             });

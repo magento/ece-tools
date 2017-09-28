@@ -17,14 +17,20 @@ use Symfony\Component\Console\Tester\CommandTester;
 class AcceptanceTest extends TestCase
 {
     /**
+     * @var Bootstrap
+     */
+    private $bootstrap;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
+        $this->bootstrap = Bootstrap::create();
+
         shell_exec(sprintf(
-            "cp -f %s %s",
-            Bootstrap::create()->getConfigFile('config.php'),
-            Bootstrap::create()->getSandboxDir() . '/app/etc/config.php'
+            "cd %s && rm -rf init",
+            $this->bootstrap->getSandboxDir()
         ));
     }
 
@@ -33,25 +39,25 @@ class AcceptanceTest extends TestCase
      */
     protected function tearDown()
     {
-        $sandboxDir = Bootstrap::create()->getSandboxDir();
-
         shell_exec(sprintf(
             "cd %s && php bin/magento setup:uninstall -n",
-            $sandboxDir
-        ));
-        shell_exec(sprintf(
-            "cd %s && rm -rf init",
-            $sandboxDir
+            $this->bootstrap->getSandboxDir()
         ));
     }
 
     /**
      * @param array $environment
-     * @dataProvider dataProvider
+     * @dataProvider defaultDataProvider
      */
-    public function test(array $environment)
+    public function testDefault(array $environment)
     {
-        $application = Bootstrap::create()->createApplication($environment);
+        $application = $this->bootstrap->createApplication($environment);
+
+        shell_exec(sprintf(
+            "cp -f %s %s",
+            $this->bootstrap->getConfigFile('config.php'),
+            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
+        ));
 
         $commandTester = new CommandTester(
             $application->get(Build::NAME)
@@ -71,7 +77,7 @@ class AcceptanceTest extends TestCase
     /**
      * @return array
      */
-    public function dataProvider(): array
+    public function defaultDataProvider(): array
     {
         return [
             'default configuration' => [
@@ -84,6 +90,47 @@ class AcceptanceTest extends TestCase
                         'STATIC_CONTENT_THREADS' => 3,
                     ],
                 ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array $environment
+     * @dataProvider deployInBuildDataProvider
+     */
+    public function testDeployInBuild(array $environment)
+    {
+        $application = $this->bootstrap->createApplication($environment);
+
+        shell_exec(sprintf(
+            "cp -f %s %s",
+            __DIR__ . '/_files/config_scd_in_build.php',
+            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
+        ));
+
+        $commandTester = new CommandTester(
+            $application->get(Build::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+
+        $commandTester = new CommandTester(
+            $application->get(Deploy::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+    }
+
+    /**
+     * @return array
+     */
+    public function deployInBuildDataProvider(): array
+    {
+        return [
+            'default configuration' => [
+                'environment' => [],
             ],
         ];
     }

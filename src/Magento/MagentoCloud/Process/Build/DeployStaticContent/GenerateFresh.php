@@ -86,7 +86,7 @@ class GenerateFresh implements ProcessInterface
     public function execute()
     {
         $locales = $this->getLocales();
-        $threads = (int)$this->buildConfig->get(BuildConfig::OPT_SCD_THREADS, 0);
+        $threads = (int)$this->buildConfig->get(BuildConfig::OPT_SCD_THREADS, 1);
 
         try {
             $logMessage = 'Generating static content for locales: ' . implode(' ', $locales);
@@ -125,7 +125,6 @@ class GenerateFresh implements ProcessInterface
             throw new \Exception($e->getMessage(), 5);
         }
     }
-
 
     /**
      * @return string

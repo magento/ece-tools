@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
  *
  * {@inheritdoc}
  */
-class BackupToInitDirectory implements ProcessInterface
+class BackupData implements ProcessInterface
 {
     /**
      * @var File
@@ -67,7 +67,7 @@ class BackupToInitDirectory implements ProcessInterface
 
         if ($this->file->isExists($magentoRoot . Environment::REGENERATE_FLAG)) {
             $this->logger->info('Removing .regenerate flag');
-            $this->file->deleteFile($magentoRoot .Environment::REGENERATE_FLAG);
+            $this->file->deleteFile($magentoRoot . Environment::REGENERATE_FLAG);
         }
 
         if ($this->environment->isStaticDeployInBuild()) {
@@ -82,8 +82,9 @@ class BackupToInitDirectory implements ProcessInterface
                 $this->logger->info('Remove ./init/pub/static');
                 $this->file->deleteDirectory($initPubStatic);
             }
-            $this->file->copyDirectory($originalPubStatic, $initPubStatic);
 
+            $this->file->createDirectory($initPubStatic);
+            $this->file->copyDirectory($originalPubStatic, $initPubStatic);
             $this->file->copy(
                 $magentoRoot . Environment::STATIC_CONTENT_DEPLOY_FLAG,
                 $magentoRoot . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG

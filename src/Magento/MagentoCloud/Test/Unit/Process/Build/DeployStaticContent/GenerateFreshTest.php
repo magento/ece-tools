@@ -88,7 +88,7 @@ class GenerateFreshTest extends TestCase
     {
         $this->buildConfigMock->method('get')
             ->willReturnMap([
-                [BuildConfig::OPT_SCD_THREADS, 0, 3],
+                [BuildConfig::OPT_SCD_THREADS, 1, 3],
             ]);
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn(__DIR__ . '/_files/');
