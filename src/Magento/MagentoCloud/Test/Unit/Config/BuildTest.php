@@ -65,18 +65,4 @@ class BuildTest extends TestCase
             $this->build->getVerbosityLevel()
         );
     }
-
-    public function testGetScdStrategy()
-    {
-        $this->readerMock->expects($this->once())
-            ->method('read')
-            ->willReturn([
-                Build::OPT_SCD_STRATEGY => 'quick',
-            ]);
-
-        $this->assertSame(
-            '-s quick',
-            $this->build->getScdStrategy()
-        );
-    }
 }

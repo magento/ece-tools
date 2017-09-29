@@ -101,77 +101,18 @@ class GenerateTest extends TestCase
                 ['Generating static content for locales: en_GB fr_FR'],
                 ['Maintenance mode is disabled.']
             );
-        $this->environmentMock->expects($this->exactly(2))
-            ->method('getAdminLocale')
-            ->willReturn('fr_FR');
-        $this->shellMock->method('execute')
+        $this->commandMock->expects($this->once())
+            ->method('create')
+            ->willReturn('php ./bin/magento static:content:deploy:command');
+        $this->shellMock->expects($this->exactly(3))
+            ->method('execute')
             ->withConsecutive(
                 ['php ./bin/magento maintenance:enable  -vvv '],
-                ['php ./bin/magento setup:static-content:deploy -f en_GB fr_FR  -vvv  -s compact'],
+                ['php ./bin/magento static:content:deploy:command'],
                 ['php ./bin/magento maintenance:disable  -vvv ']
             );
         $this->environmentMock->method('getVerbosityLevel')
             ->willReturn(' -vvv ');
-
-        $this->process->execute();
-    }
-
-    public function testExecuteEmptyLocales()
-    {
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('touch')
-            ->with('magento_root/pub/static/deployed_version.txt');
-        $this->loggerMock->method('notice')
-            ->withConsecutive(
-                ['Enabling Maintenance mode'],
-                ['Extracting locales'],
-                ['Generating static content for locales: fr_FR'],
-                ['Maintenance mode is disabled.']
-            );
-        $this->environmentMock->expects($this->exactly(2))
-            ->method('getAdminLocale')
-            ->willReturn('fr_FR');
-        $this->shellMock->method('execute')
-            ->withConsecutive(
-                ['php ./bin/magento maintenance:enable  -vvv '],
-                ['php ./bin/magento setup:static-content:deploy -f fr_FR  -vvv  -s compact'],
-                ['php ./bin/magento maintenance:disable  -vvv ']
-            );
-        $this->environmentMock->method('getVerbosityLevel')
-            ->willReturn(' -vvv ');
-
-        $this->process->execute();
-    }
-
-    public function testExecuteExcludedThemes()
-    {
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('touch')
-            ->with('magento_root/pub/static/deployed_version.txt');
-        $this->loggerMock->method('info')
-            ->withConsecutive(
-                ['Enabling Maintenance mode'],
-                ['Extracting locales'],
-                ['Generating static content for locales: en_GB fr_FR'],
-                ['Maintenance mode is disabled.']
-            );
-        $this->environmentMock->expects($this->exactly(2))
-            ->method('getAdminLocale')
-            ->willReturn('fr_FR');
-        $this->shellMock->method('execute')
-            ->withConsecutive(
-                ['php ./bin/magento maintenance:enable  -vvv '],
-                ['php ./bin/magento setup:static-content:deploy -f --exclude-theme=en_GB en_GB fr_FR  -vvv '],
-                ['php ./bin/magento maintenance:disable  -vvv ']
-            );
-        $this->environmentMock->method('getVerbosityLevel')
-            ->willReturn(' -vvv ');
-        $this->environmentMock->method('getStaticDeployExcludeThemes')
-            ->willReturn('en_GB');
 
         $this->process->execute();
     }

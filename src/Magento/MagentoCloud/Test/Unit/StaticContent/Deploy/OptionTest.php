@@ -149,7 +149,7 @@ class OptionTest extends TestCase
                 ['value' => 'fr_FR'],
                 ['value' => 'de_DE'],
             ]);
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentMock->expects($this->exactly(1))
             ->method('getAdminLocale')
             ->willReturn('fr_FR');
 
