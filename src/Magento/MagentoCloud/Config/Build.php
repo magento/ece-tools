@@ -38,8 +38,8 @@ class Build
 
     /**
      * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * @param string|null $default
+     * @return string|null
      */
     public function get(string $key, $default = null)
     {
@@ -56,15 +56,5 @@ class Build
     public function getVerbosityLevel(): string
     {
         return $this->get(static::OPT_VERBOSE_COMMANDS) === 'enabled' ? ' -vv ' : '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getScdStrategy(): string
-    {
-        $strategy = $this->get(static::OPT_SCD_STRATEGY);
-
-        return $strategy ? '-s ' . $strategy : '';
     }
 }

@@ -6,60 +6,60 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\GenerateFresh;
+use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\StaticContent\Deploy\Option;
+use Magento\MagentoCloud\StaticContent\Command;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
-class GenerateFreshTest extends TestCase
+class GenerateTest extends TestCase
 {
     /**
-     * @var GenerateFresh|\PHPUnit_Framework_MockObject_MockObject
+     * @var Generate
      */
     private $process;
 
     /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ShellInterface|Mock
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
+     * @var Environment|Mock
      */
     private $environmentMock;
 
     /**
-     * @var ConnectionInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $connectionMock;
-
-    /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     * @var File|Mock
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var DirectoryList|Mock
      */
     private $directoryListMock;
 
     /**
-     * @var MagentoVersion|\PHPUnit_Framework_MockObject_MockObject
+     * @var Command|Mock
      */
-    private $magentoVersionMock;
+    private $commandMock;
+
+    /**
+     * @var Option|Mock
+     */
+    private $deployOption;
 
     /**
      * @inheritdoc
@@ -70,29 +70,20 @@ class GenerateFreshTest extends TestCase
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
-            ->getMockForAbstractClass();
-        $this->fileMock = $this->getMockBuilder(File::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->magentoVersionMock = $this->getMockBuilder(MagentoVersion::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->fileMock = $this->createMock(File::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->environmentMock = $this->createMock(Environment::class);
+        $this->commandMock = $this->createMock(Command::class);
+        $this->deployOption = $this->createMock(Option::class);
 
-        $this->process = new GenerateFresh(
+        $this->process = new Generate(
             $this->shellMock,
             $this->loggerMock,
             $this->environmentMock,
-            $this->connectionMock,
             $this->fileMock,
             $this->directoryListMock,
-            $this->magentoVersionMock
+            $this->commandMock,
+            $this->deployOption
         );
     }
 
@@ -110,12 +101,6 @@ class GenerateFreshTest extends TestCase
                 ['Generating static content for locales: en_GB fr_FR'],
                 ['Maintenance mode is disabled.']
             );
-        $this->connectionMock->expects($this->once())
-            ->method('select')
-            ->with(
-                'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
-                . 'UNION SELECT interface_locale FROM admin_user'
-            )->willReturn([['value' => 'en_GB']]);
         $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminLocale')
             ->willReturn('fr_FR');
@@ -127,11 +112,6 @@ class GenerateFreshTest extends TestCase
             );
         $this->environmentMock->method('getVerbosityLevel')
             ->willReturn(' -vvv ');
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-        $this->environmentMock->method('getScdStrategy')
-            ->willReturn('-s compact');
 
         $this->process->execute();
     }
@@ -150,12 +130,6 @@ class GenerateFreshTest extends TestCase
                 ['Generating static content for locales: fr_FR'],
                 ['Maintenance mode is disabled.']
             );
-        $this->connectionMock->expects($this->once())
-            ->method('select')
-            ->with(
-                'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
-                . 'UNION SELECT interface_locale FROM admin_user'
-            )->willReturn([]);
         $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminLocale')
             ->willReturn('fr_FR');
@@ -167,11 +141,6 @@ class GenerateFreshTest extends TestCase
             );
         $this->environmentMock->method('getVerbosityLevel')
             ->willReturn(' -vvv ');
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-        $this->environmentMock->method('getScdStrategy')
-            ->willReturn('-s compact');
 
         $this->process->execute();
     }
@@ -190,12 +159,6 @@ class GenerateFreshTest extends TestCase
                 ['Generating static content for locales: en_GB fr_FR'],
                 ['Maintenance mode is disabled.']
             );
-        $this->connectionMock->expects($this->once())
-            ->method('select')
-            ->with(
-                'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' '
-                . 'UNION SELECT interface_locale FROM admin_user'
-            )->willReturn([['value' => 'en_GB']]);
         $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminLocale')
             ->willReturn('fr_FR');
@@ -209,11 +172,6 @@ class GenerateFreshTest extends TestCase
             ->willReturn(' -vvv ');
         $this->environmentMock->method('getStaticDeployExcludeThemes')
             ->willReturn('en_GB');
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-        $this->environmentMock->method('getScdStrategy')
-            ->willReturn('');
 
         $this->process->execute();
     }

@@ -161,7 +161,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
-                        $this->get(DeployProcess\DeployStaticContent\GenerateFresh::class),
+                        $this->get(DeployProcess\DeployStaticContent\Generate::class),
                     ],
                 ]);
             });
@@ -173,7 +173,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
-                        $this->get(BuildProcess\DeployStaticContent\GenerateFresh::class),
+                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
                     ],
                 ]);
             });

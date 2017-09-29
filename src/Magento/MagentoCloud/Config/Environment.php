@@ -130,6 +130,18 @@ class Environment
     }
 
     /**
+     * Returns variable value if such variable exists otherwise return $default
+     *
+     * @param string $name
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getVariable($name, $default = null)
+    {
+        return $this->getVariables()[$name] ?? $default;
+    }
+
+    /**
      * Checks that static content symlink is on.
      *
      * If STATIC_CONTENT_SYMLINK == disabled return false
@@ -294,7 +306,7 @@ class Environment
      */
     public function getStaticDeployExcludeThemes(): string
     {
-        return $this->getVariables()['STATIC_CONTENT_EXCLUDE_THEMES'] ?? '';
+        return $this->getVariable('STATIC_CONTENT_EXCLUDE_THEMES', '');
     }
 
     /**
@@ -402,15 +414,5 @@ class Environment
     {
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
-    }
-
-    /**
-     * @return string
-     */
-    public function getScdStrategy(): string
-    {
-        $var = $this->getVariables();
-
-        return !empty($var[static::VAR_SCD_STRATEGY]) ? '-s ' . $var[static::VAR_SCD_STRATEGY] : '';
     }
 }
