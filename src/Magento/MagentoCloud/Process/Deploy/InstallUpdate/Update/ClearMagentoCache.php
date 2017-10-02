@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
-class ClearCache implements ProcessInterface
+class ClearMagentoCache implements ProcessInterface
 {
     /**
      * @var LoggerInterface
