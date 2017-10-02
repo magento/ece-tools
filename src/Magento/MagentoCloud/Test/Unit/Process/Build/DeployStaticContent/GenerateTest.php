@@ -9,7 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Build\Option;
-use Magento\MagentoCloud\StaticContent\Command;
+use Magento\MagentoCloud\StaticContent\CommandFactory;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -40,9 +40,9 @@ class GenerateTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var Command|Mock
+     * @var CommandFactory|Mock
      */
-    private $commandMock;
+    private $commandFactoryMock;
 
     /**
      * @var Option|Mock
@@ -57,14 +57,14 @@ class GenerateTest extends TestCase
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->commandMock = $this->createMock(Command::class);
+        $this->commandFactoryMock = $this->createMock(CommandFactory::class);
         $this->optionMock = $this->createMock(Option::class);
 
         $this->process = new Generate(
             $this->shellMock,
             $this->loggerMock,
             $this->environmentMock,
-            $this->commandMock,
+            $this->commandFactoryMock,
             $this->optionMock
         );
     }
@@ -81,7 +81,7 @@ class GenerateTest extends TestCase
             ->withConsecutive(
                 ["Generating static content for locales: ua_UA fr_FR es_ES en_US\nUsing 3 Threads"]
             );
-        $this->commandMock->expects($this->once())
+        $this->commandFactoryMock->expects($this->once())
             ->method('createParallel')
             ->with($this->optionMock)
             ->willReturn('some parallel command');

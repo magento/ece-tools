@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
-use Magento\MagentoCloud\StaticContent\Command;
+use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -13,13 +13,13 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class CommandTest extends TestCase
 {
     /**
-     * @var Command
+     * @var CommandFactory
      */
-    private $command;
+    private $commandFactory;
 
     public function setUp()
     {
-        $this->command = new Command();
+        $this->commandFactory = new CommandFactory();
     }
 
     /**
@@ -31,7 +31,7 @@ class CommandTest extends TestCase
     {
         $this->assertEquals(
             $expected,
-            $this->command->create($this->createOption($optionConfig))
+            $this->commandFactory->create($this->createOption($optionConfig))
         );
     }
 
@@ -44,7 +44,7 @@ class CommandTest extends TestCase
     {
         $this->assertEquals(
             $expected,
-            $this->command->createParallel($this->createOption($optionConfig))
+            $this->commandFactory->createParallel($this->createOption($optionConfig))
         );
     }
 

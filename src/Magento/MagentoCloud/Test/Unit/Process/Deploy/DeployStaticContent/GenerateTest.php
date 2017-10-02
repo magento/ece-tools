@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
-use Magento\MagentoCloud\StaticContent\Command;
+use Magento\MagentoCloud\StaticContent\CommandFactory;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -52,9 +52,9 @@ class GenerateTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var Command|Mock
+     * @var CommandFactory|Mock
      */
-    private $commandMock;
+    private $commandFactoryMock;
 
     /**
      * @var Option|Mock
@@ -73,7 +73,7 @@ class GenerateTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->commandMock = $this->createMock(Command::class);
+        $this->commandFactoryMock = $this->createMock(CommandFactory::class);
         $this->deployOption = $this->createMock(Option::class);
 
         $this->process = new Generate(
@@ -82,7 +82,7 @@ class GenerateTest extends TestCase
             $this->environmentMock,
             $this->fileMock,
             $this->directoryListMock,
-            $this->commandMock,
+            $this->commandFactoryMock,
             $this->deployOption
         );
     }
@@ -101,7 +101,7 @@ class GenerateTest extends TestCase
                 ['Generating static content for locales: en_GB fr_FR'],
                 ['Maintenance mode is disabled.']
             );
-        $this->commandMock->expects($this->once())
+        $this->commandFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn('php ./bin/magento static:content:deploy:command');
         $this->shellMock->expects($this->exactly(3))

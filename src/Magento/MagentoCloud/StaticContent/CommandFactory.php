@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\StaticContent;
 /**
  * Creates static deploy command
  */
-class Command
+class CommandFactory
 {
     /**
      * Creates static deploy command based on given options
@@ -34,11 +34,11 @@ class Command
     }
 
     /**
-     * This method should be removed after replacing xargs with --jobs parameter in build phase
+     * Creates static deploy command for running in parallel for xargs command
      *
      * @param OptionInterface $option
      * @return string
-     * @deprecated
+     * @deprecated This method should be removed after replacing xargs with --jobs parameter in build phase
      */
     public function createParallel(OptionInterface $option): string
     {

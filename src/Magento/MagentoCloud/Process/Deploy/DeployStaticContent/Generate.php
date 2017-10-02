@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\StaticContent\Command;
+use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Psr\Log\LoggerInterface;
 
@@ -45,9 +45,10 @@ class Generate implements ProcessInterface
     private $directoryList;
 
     /**
-     * @var Command
+     * @var CommandFactory
      */
-    private $scdCommand;
+    private $commandFactory;
+
     /**
      * @var Option
      */
@@ -59,7 +60,7 @@ class Generate implements ProcessInterface
      * @param Environment $environment
      * @param File $file
      * @param DirectoryList $directoryList
-     * @param Command $scdCommand
+     * @param CommandFactory $commandFactory
      * @param Option $deployOption
      */
     public function __construct(
@@ -68,7 +69,7 @@ class Generate implements ProcessInterface
         Environment $environment,
         File $file,
         DirectoryList $directoryList,
-        Command $scdCommand,
+        CommandFactory $commandFactory,
         Option $deployOption
     ) {
         $this->shell = $shell;
@@ -76,7 +77,7 @@ class Generate implements ProcessInterface
         $this->environment = $environment;
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->scdCommand = $scdCommand;
+        $this->commandFactory = $commandFactory;
         $this->deployOption = $deployOption;
     }
 
@@ -96,7 +97,7 @@ class Generate implements ProcessInterface
 
         $this->logger->info($logMessage);
 
-        $command = $this->scdCommand->create($this->deployOption);
+        $command = $this->commandFactory->create($this->deployOption);
 
         $this->shell->execute($command);
 

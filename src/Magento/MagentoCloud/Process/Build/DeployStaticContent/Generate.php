@@ -9,7 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Build\Option;
-use Magento\MagentoCloud\StaticContent\Command;
+use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -32,9 +32,9 @@ class Generate implements ProcessInterface
     private $environment;
 
     /**
-     * @var Command
+     * @var CommandFactory
      */
-    private $scdCommand;
+    private $commandFactory;
 
     /**
      * @var Option
@@ -45,20 +45,20 @@ class Generate implements ProcessInterface
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param Environment $environment
-     * @param Command $scdCommand
+     * @param CommandFactory $commandFactory
      * @param Option $buildOption
      */
     public function __construct(
         ShellInterface $shell,
         LoggerInterface $logger,
         Environment $environment,
-        Command $scdCommand,
+        CommandFactory $commandFactory,
         Option $buildOption
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
         $this->environment = $environment;
-        $this->scdCommand = $scdCommand;
+        $this->commandFactory = $commandFactory;
         $this->buildOption = $buildOption;
     }
 
@@ -84,7 +84,7 @@ class Generate implements ProcessInterface
 
             $this->logger->info($logMessage);
 
-            $parallelCommands = $this->scdCommand->createParallel($this->buildOption);
+            $parallelCommands = $this->commandFactory->createParallel($this->buildOption);
 
             $this->shell->execute(sprintf(
                 "printf '%s' | xargs -I CMD -P %d bash -c CMD",
