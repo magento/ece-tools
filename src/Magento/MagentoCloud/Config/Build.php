@@ -12,9 +12,11 @@ use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
  */
 class Build
 {
-    const BUILD_OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
-    const BUILD_OPT_SCD_THREADS = 'scd_threads';
-    const BUILD_OPT_SKIP_SCD = 'skip_scd';
+    const OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
+    const OPT_SCD_THREADS = 'scd_threads';
+    const OPT_SKIP_SCD = 'skip_scd';
+    const OPT_SCD_STRATEGY = 'SCD_STRATEGY';
+    const OPT_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
 
     /**
      * @var ReaderInterface
@@ -36,8 +38,8 @@ class Build
 
     /**
      * @param string $key
-     * @param mixed $default
-     * @return mixed
+     * @param string|null $default
+     * @return string|null
      */
     public function get(string $key, $default = null)
     {
@@ -53,6 +55,6 @@ class Build
      */
     public function getVerbosityLevel(): string
     {
-        return $this->get('VERBOSE_COMMANDS') === 'enabled' ? ' -vv ' : '';
+        return $this->get(static::OPT_VERBOSE_COMMANDS) === 'enabled' ? ' -vv ' : '';
     }
 }

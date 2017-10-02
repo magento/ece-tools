@@ -28,6 +28,11 @@ class Environment
     const VAL_DISABLED = 'disabled';
 
     /**
+     * Let's keep variable names same for both phases.
+     */
+    const VAR_SCD_STRATEGY = Build::OPT_SCD_STRATEGY;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -43,6 +48,11 @@ class Environment
     private $directoryList;
 
     /**
+     * @var array
+     */
+    private $data = [];
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
@@ -56,8 +66,8 @@ class Environment
 
     /**
      * @param string $key
-     * @param mixed $default
-     * @return array
+     * @param string|int|null $default
+     * @return array|string|int|null
      */
     public function get(string $key, $default = null)
     {
@@ -69,19 +79,27 @@ class Environment
      *
      * @return mixed
      */
-    public function getRoutes()
+    public function getRoutes(): array
     {
-        return $this->get('MAGENTO_CLOUD_ROUTES', []);
+        if (isset($this->data['routes'])) {
+            return $this->data['routes'];
+        }
+
+        return $this->data['routes'] = $this->get('MAGENTO_CLOUD_ROUTES', []);
     }
 
     /**
      * Get relationships information from MagentoCloud environment variable.
      *
-     * @return mixed
+     * @return array
      */
-    public function getRelationships()
+    public function getRelationships(): array
     {
-        return $this->get('MAGENTO_CLOUD_RELATIONSHIPS');
+        if (isset($this->data['relationships'])) {
+            return $this->data['relationships'];
+        }
+
+        return $this->data['relationships'] = $this->get('MAGENTO_CLOUD_RELATIONSHIPS', []);
     }
 
     /**
@@ -100,11 +118,27 @@ class Environment
     /**
      * Get custom variables from MagentoCloud environment variable.
      *
+     * @return array
+     */
+    public function getVariables(): array
+    {
+        if (isset($this->data['variables'])) {
+            return $this->data['variables'];
+        }
+
+        return $this->data['variables'] = $this->get('MAGENTO_CLOUD_VARIABLES', []);
+    }
+
+    /**
+     * Returns variable value if such variable exists otherwise return $default
+     *
+     * @param string $name
+     * @param mixed $default
      * @return mixed
      */
-    public function getVariables()
+    public function getVariable($name, $default = null)
     {
-        return $this->get('MAGENTO_CLOUD_VARIABLES');
+        return $this->getVariables()[$name] ?? $default;
     }
 
     /**
@@ -272,7 +306,7 @@ class Environment
      */
     public function getStaticDeployExcludeThemes(): string
     {
-        return $this->getVariables()['STATIC_CONTENT_EXCLUDE_THEMES'] ?? '';
+        return $this->getVariable('STATIC_CONTENT_EXCLUDE_THEMES', '');
     }
 
     /**
