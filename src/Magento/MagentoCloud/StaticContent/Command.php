@@ -5,24 +5,14 @@
  */
 namespace Magento\MagentoCloud\StaticContent;
 
-use Magento\MagentoCloud\Config\Environment;
-
+/**
+ * Creates static deploy command
+ */
 class Command
 {
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
-     * @param Environment $environment
-     */
-    public function __construct(Environment $environment)
-    {
-        $this->environment = $environment;
-    }
-
-    /**
+     * Creates static deploy command based on given options
+     *
      * @param OptionInterface $option
      * @return string
      */
@@ -56,7 +46,7 @@ class Command
 
         $parallelCommands = '';
         foreach ($option->getLocales() as $locale) {
-            $parallelCommands .= $command . ' ' . $locale . "\n";
+            $parallelCommands .= $command . ' ' . $locale . PHP_EOL;
         }
 
         return $parallelCommands;
@@ -86,9 +76,9 @@ class Command
             $command .= ' -s ' . $strategy;
         }
 
-        $verbosityLevel = $this->environment->getVerbosityLevel();
+        $verbosityLevel = $option->getVerbosityLevel();
         if ($verbosityLevel) {
-            $command .= $verbosityLevel;
+            $command .= ' ' . $verbosityLevel;
         }
 
         return $command;

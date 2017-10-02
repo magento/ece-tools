@@ -10,6 +10,9 @@ use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 
+/**
+ * Options for static deploy command in build process
+ */
 class Option implements OptionInterface
 {
     /**

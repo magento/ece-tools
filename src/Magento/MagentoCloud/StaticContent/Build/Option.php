@@ -12,6 +12,9 @@ use Magento\MagentoCloud\StaticContent\OptionInterface;
 use Magento\MagentoCloud\Util\ArrayManager;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 
+/**
+ * Options for static deploy command in deploy process
+ */
 class Option implements OptionInterface
 {
     /**
@@ -95,15 +98,7 @@ class Option implements OptionInterface
     }
 
     /**
-     * Collects locales for static content deployment
-     *
-     * @return array List of locales.
-     * ```php
-     * [
-     *     'en_US',
-     *     'fr_FR'
-     * ]
-     * ```
+     * @inheritdoc
      */
     public function getLocales(): array
     {
