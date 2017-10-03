@@ -86,13 +86,14 @@ class MarshallFilesTest extends TestCase
                 ['magento_root/app/etc/di.xml', 'magento_root/app/di.xml'],
                 ['magento_root/app/etc/enterprise/di.xml', 'magento_root/app/enterprise/di.xml']
             );
-        $this->fileMock->expects($this->exactly(4))
+        $this->fileMock->expects($this->exactly(5))
             ->method('isExists')
             ->willReturnMap([
                 [$generatedCode, $isExist],
                 [$generatedMetadata, $isExist],
                 [$varCache, $isExist],
                 [$enterpriseFolder, $isExist],
+                ['magento_root/app/etc/enterprise/di.xml', true],
             ]);
 
         $this->process->execute();
@@ -105,7 +106,7 @@ class MarshallFilesTest extends TestCase
     {
         return [
             ['isExist' => true, 'clearDirectory' => 2, 'deleteDirectory' => 1, 'createDirectory' => 0],
-            ['isExist' => false, 'clearDirectory' => 0, 'deleteDirectory' => 0, 'createDirectory' => 1]
+            ['isExist' => false, 'clearDirectory' => 0, 'deleteDirectory' => 0, 'createDirectory' => 1],
         ];
     }
 }

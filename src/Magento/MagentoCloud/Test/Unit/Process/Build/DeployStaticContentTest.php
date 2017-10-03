@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ArrayManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -24,11 +24,6 @@ class DeployStaticContentTest extends TestCase
      * @var DeployStaticContent
      */
     private $process;
-
-    /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $shellMock;
 
     /**
      * @var File|\PHPUnit_Framework_MockObject_MockObject
@@ -61,12 +56,15 @@ class DeployStaticContentTest extends TestCase
     private $arrayManagerMock;
 
     /**
+     * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $processMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->buildConfigMock = $this->getMockBuilder(Build::class)
@@ -84,19 +82,56 @@ class DeployStaticContentTest extends TestCase
         $this->arrayManagerMock = $this->getMockBuilder(ArrayManager::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
 
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn(__DIR__ . '/_files');
 
         $this->process = new DeployStaticContent(
-            $this->shellMock,
             $this->loggerMock,
             $this->buildConfigMock,
             $this->fileMock,
             $this->environmentMock,
             $this->directoryListMock,
-            $this->arrayManagerMock
+            $this->arrayManagerMock,
+            $this->processMock
         );
+    }
+
+
+    public function testExecute()
+    {
+        $flattenConfig = [
+            'scopes' => [
+                'websites' => [],
+                'stores' => [],
+            ],
+        ];
+
+        $this->fileMock->method('isExists')
+            ->with(__DIR__ . '/_files/app/etc/config.php')
+            ->willReturn(true);
+        $this->buildConfigMock->expects($this->once())
+            ->method('get')
+            ->with(Build::OPT_SKIP_SCD)
+            ->willReturn(false);
+        $this->arrayManagerMock->method('flatten')
+            ->willReturn([
+                'scopes' => [
+                    'websites' => [],
+                    'stores' => [],
+                ],
+            ]);
+        $this->arrayManagerMock->expects($this->exactly(2))
+            ->method('filter')
+            ->willReturnMap([
+                [$flattenConfig, 'scopes/websites', false, ['websites1']],
+                [$flattenConfig, 'scopes/stores', false, ['store1']],
+            ]);
+        $this->processMock->expects($this->once())
+            ->method('execute');
+
+        $this->process->execute();
     }
 
     public function testExecuteWithoutStores()
@@ -113,10 +148,8 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(true);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
-            ->with(Build::BUILD_OPT_SKIP_SCD)
+            ->with(Build::OPT_SKIP_SCD)
             ->willReturn(false);
-        $this->shellMock->expects($this->never())
-            ->method('execute');
         $this->arrayManagerMock->method('flatten')
             ->willReturn([
                 'scopes' => [
@@ -130,7 +163,7 @@ class DeployStaticContentTest extends TestCase
                 [$flattenConfig, 'scopes/websites', false],
                 [$flattenConfig, 'scopes/stores', false]
             )->willReturn([]);
-        $this->shellMock->expects($this->never())
+        $this->processMock->expects($this->never())
             ->method('execute');
 
         $this->process->execute();
@@ -143,7 +176,7 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(false);
         $this->buildConfigMock->expects($this->never())
             ->method('get');
-        $this->shellMock->expects($this->never())
+        $this->processMock->expects($this->never())
             ->method('execute');
 
         $this->process->execute();
@@ -156,9 +189,9 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(true);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
-            ->with(Build::BUILD_OPT_SKIP_SCD)
+            ->with(Build::OPT_SKIP_SCD)
             ->willReturn(true);
-        $this->shellMock->expects($this->never())
+        $this->processMock->expects($this->never())
             ->method('execute');
 
         $this->process->execute();

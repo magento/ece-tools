@@ -8,17 +8,17 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Process\Build\BackupToInitDirectory;
+use Magento\MagentoCloud\Process\Build\BackupData;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
-class BackupToInitDirectoryTest extends TestCase
+class BackupDataTest extends TestCase
 {
     /**
-     * @var BackupToInitDirectory
+     * @var BackupData
      */
     private $process;
 
@@ -63,7 +63,7 @@ class BackupToInitDirectoryTest extends TestCase
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
 
-        $this->process = new BackupToInitDirectory(
+        $this->process = new BackupData(
             $this->fileMock,
             $this->loggerMock,
             $this->environmentMock,
@@ -83,10 +83,11 @@ class BackupToInitDirectoryTest extends TestCase
             ->method('deleteFile')
             ->with('magento_root/' . Environment::REGENERATE_FLAG)
             ->willReturn(true);
-        $this->fileMock->expects($this->exactly(4))
+        $this->fileMock->expects($this->exactly(5))
             ->method('createDirectory')
             ->withConsecutive(
                 ['magento_root/init/pub/'],
+                ['magento_root/init/pub/static/'],
                 ['magento_root/init/some_dir'],
                 ['magento_root/some_dir'],
                 ['magento_root/some_dir']
@@ -144,10 +145,11 @@ class BackupToInitDirectoryTest extends TestCase
         $this->fileMock->expects($this->never())
             ->method('deleteFile')
             ->with('magento_root/' . Environment::REGENERATE_FLAG);
-        $this->fileMock->expects($this->exactly(4))
+        $this->fileMock->expects($this->exactly(5))
             ->method('createDirectory')
             ->withConsecutive(
                 ['magento_root/init/pub/'],
+                ['magento_root/init/pub/static/'],
                 ['magento_root/init/some_dir'],
                 ['magento_root/some_dir'],
                 ['magento_root/some_dir']
@@ -198,7 +200,7 @@ class BackupToInitDirectoryTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->willReturnMap([
-                ['magento_root/' . Environment::REGENERATE_FLAG, false]
+                ['magento_root/' . Environment::REGENERATE_FLAG, false],
             ]);
         $this->fileMock->expects($this->never())
             ->method('deleteFile')
@@ -245,7 +247,7 @@ class BackupToInitDirectoryTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->willReturnMap([
-                ['magento_root/' . Environment::REGENERATE_FLAG, false]
+                ['magento_root/' . Environment::REGENERATE_FLAG, false],
             ]);
         $this->fileMock->expects($this->never())
             ->method('deleteFile')

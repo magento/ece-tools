@@ -19,6 +19,7 @@ use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
+ * @codeCoverageIgnore
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Container extends \Illuminate\Container\Container implements ContainerInterface
@@ -79,7 +80,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->make(BuildProcess\DeployStaticContent::class),
                         $this->make(BuildProcess\ClearInitDirectory::class),
-                        $this->make(BuildProcess\BackupToInitDirectory::class),
+                        $this->make(BuildProcess\BackupData::class),
                     ],
                 ]);
             });
@@ -162,13 +163,22 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
-                        $this->get(DeployProcess\DeployStaticContent\GenerateFresh::class),
+                        $this->get(DeployProcess\DeployStaticContent\Generate::class),
                     ],
                 ]);
             });
         $this->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
+        $this->when(BuildProcess\DeployStaticContent::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
+                    ],
+                ]);
+            });
     }
 
     /**

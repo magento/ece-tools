@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
@@ -34,21 +35,29 @@ class RestoreWritableDirectories implements ProcessInterface
     private $environment;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
      * @param BuildDirCopier $buildDirCopier
      * @param Environment $environment
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
         File $file,
         BuildDirCopier $buildDirCopier,
-        Environment $environment
+        Environment $environment,
+        DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->buildDirCopier = $buildDirCopier;
         $this->environment = $environment;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -65,9 +74,11 @@ class RestoreWritableDirectories implements ProcessInterface
         // Restore mounted directories
         $this->logger->info('Recoverable directories were copied back.');
 
-        if ($this->file->isExists(Environment::REGENERATE_FLAG)) {
+        $magentoRoot = $this->directoryList->getMagentoRoot();
+
+        if ($this->file->isExists($magentoRoot . '/' . Environment::REGENERATE_FLAG)) {
             $this->logger->info('Removing var/.regenerate flag');
-            $this->file->deleteFile(Environment::REGENERATE_FLAG);
+            $this->file->deleteFile($magentoRoot . '/' . Environment::REGENERATE_FLAG);
         }
     }
 }

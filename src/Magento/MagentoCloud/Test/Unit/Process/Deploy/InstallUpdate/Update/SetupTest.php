@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -15,6 +16,11 @@ use Psr\Log\LoggerInterface;
 
 class SetupTest extends TestCase
 {
+    /**
+     * @var Setup
+     */
+    private $process;
+
     /**
      * @var Environment|Mock
      */
@@ -36,9 +42,9 @@ class SetupTest extends TestCase
     private $shellMock;
 
     /**
-     * @var Setup
+     * @var DirectoryList|Mock
      */
-    private $process;
+    private $directoryListMock;
 
     protected function setUp()
     {
@@ -46,27 +52,31 @@ class SetupTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->process = new Setup(
             $this->loggerMock,
             $this->environmentMock,
             $this->shellMock,
-            $this->fileMock
+            $this->fileMock,
+            $this->directoryListMock
         );
     }
 
     public function testExecute()
     {
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->environmentMock->expects($this->once())
             ->method('getVerbosityLevel')
             ->willReturn('-v');
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->with(Environment::REGENERATE_FLAG)
+            ->with('magento_root/' . Environment::REGENERATE_FLAG)
             ->willReturn(true);
         $this->fileMock->expects($this->exactly(2))
             ->method('deleteFile')
-            ->with(Environment::REGENERATE_FLAG);
+            ->with('magento_root/' . Environment::REGENERATE_FLAG);
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(

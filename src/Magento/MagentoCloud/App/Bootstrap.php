@@ -7,6 +7,11 @@ namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Application;
 
+/**
+ * Class Bootstrap.
+ *
+ * @codeCoverageIgnore
+ */
 class Bootstrap
 {
     /**
@@ -36,9 +41,9 @@ class Bootstrap
      * @param array $server
      * @return Bootstrap
      */
-    public static function create(string $root = BP, array $server = [])
+    public static function create(string $root = ECE_BP, array $server = [])
     {
-        $server = $server + $_SERVER;
+        $server = array_replace($_SERVER, $server);
 
         return new self($root, $server);
     }

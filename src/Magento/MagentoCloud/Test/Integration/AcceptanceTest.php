@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Config\Environment;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -16,12 +17,47 @@ use Symfony\Component\Console\Tester\CommandTester;
 class AcceptanceTest extends TestCase
 {
     /**
-     * @param array $environment
-     * @dataProvider dataProvider
+     * @var Bootstrap
      */
-    public function test(array $environment)
+    private $bootstrap;
+
+    /**
+     * @inheritdoc
+     */
+    protected function setUp()
     {
-        $application = $this->createApplication($environment);
+        $this->bootstrap = Bootstrap::create();
+
+        shell_exec(sprintf(
+            "cd %s && rm -rf init",
+            $this->bootstrap->getSandboxDir()
+        ));
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function tearDown()
+    {
+        shell_exec(sprintf(
+            "cd %s && php bin/magento setup:uninstall -n",
+            $this->bootstrap->getSandboxDir()
+        ));
+    }
+
+    /**
+     * @param array $environment
+     * @dataProvider defaultDataProvider
+     */
+    public function testDefault(array $environment)
+    {
+        $application = $this->bootstrap->createApplication($environment);
+
+        shell_exec(sprintf(
+            "cp -f %s %s",
+            $this->bootstrap->getConfigFile('config.php'),
+            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
+        ));
 
         $commandTester = new CommandTester(
             $application->get(Build::NAME)
@@ -41,18 +77,60 @@ class AcceptanceTest extends TestCase
     /**
      * @return array
      */
-    public function dataProvider(): array
+    public function defaultDataProvider(): array
     {
         return [
             'default configuration' => [
                 'environment' => [],
             ],
-            'disabled static content symlinks ' => [
+            'disabled static content symlinks 3 jobs' => [
                 'environment' => [
                     'variables' => [
                         'STATIC_CONTENT_SYMLINK' => Environment::VAL_DISABLED,
+                        'STATIC_CONTENT_THREADS' => 3,
                     ],
                 ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array $environment
+     * @dataProvider deployInBuildDataProvider
+     */
+    public function testDeployInBuild(array $environment)
+    {
+        $application = $this->bootstrap->createApplication($environment);
+
+        shell_exec(sprintf(
+            "cp -f %s %s",
+            __DIR__ . '/_files/config_scd_in_build.php',
+            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
+        ));
+
+        $commandTester = new CommandTester(
+            $application->get(Build::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+
+        $commandTester = new CommandTester(
+            $application->get(Deploy::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+    }
+
+    /**
+     * @return array
+     */
+    public function deployInBuildDataProvider(): array
+    {
+        return [
+            'default configuration' => [
+                'environment' => [],
             ],
         ];
     }
