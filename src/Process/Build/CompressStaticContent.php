@@ -53,7 +53,7 @@ class CompressStaticContent implements ProcessInterface
      */
     private static $compressionCommand
         = "find pub/static -type f -name '*.js' -or -name '*.css' -or -name '*.svg'"
-        . " | xargs -P2 gzip --keep";
+        . " | xargs -n100 -P16 gzip -1 --keep";
 
     /**
      * @param LoggerInterface $logger
