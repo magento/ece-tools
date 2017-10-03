@@ -51,7 +51,7 @@ class CompressStaticContent implements ProcessInterface
     /**
      * @var string
      */
-    private static $compressionCommand = 'echo "Hello, world!"';
+    private static $compressionCommand = 'echo "Hello, world!" && grep -c ^processor /proc/cpuinfo';
 
     /**
      * @param LoggerInterface $logger
