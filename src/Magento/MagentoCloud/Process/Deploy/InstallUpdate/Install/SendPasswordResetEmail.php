@@ -49,12 +49,10 @@ class SendPasswordResetEmail implements ProcessInterface
     {
         if (!$this->environment->getAdminPassword()) {
             $urls = $this->urlManager->getUrls();
-            $adminUrl = $urls['secure'][''] . ($this->environment->getAdminUrl()
-                    ? $this->environment->getAdminUrl() : Environment::DEFAULT_ADMIN_URL);
+            $adminUrl = $urls['secure'][''] . ($this->environment->getAdminUrl() ?: Environment::DEFAULT_ADMIN_URL);
             $adminEmail = $this->environment->getAdminEmail();
-            $adminUsername = $this->environment->getAdminUsername()
-                ? $this->environment->getAdminUsername() : Environment::DEFAULT_ADMIN_NAME;
-            $this->logger->info("Emailing admin URL to admin user \"{$adminUsername}\" at $adminEmail");
+            $adminUsername = $this->environment->getAdminUsername() ?: Environment::DEFAULT_ADMIN_NAME;
+            $this->logger->info('Emailing admin URL to admin user ' . $adminUsername . ' at ' . $adminEmail);
             mail(
                 $adminEmail,
                 "Magento Commerce Cloud - Admin URL",
