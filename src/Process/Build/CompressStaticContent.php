@@ -43,6 +43,14 @@ class CompressStaticContent implements ProcessInterface
      */
     private $directoryList;
 
+    /**
+     * @var string
+     */
+    private static $timeoutCommand = 'timeout -k 30 300 ';
+
+    /**
+     * @var string
+     */
     private static $compressionCommand = 'echo "Hello, world!"';
 
     /**
@@ -72,7 +80,7 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $compressionCommand = self::$compressionCommand;
+        $compressionCommand = self::$timeoutCommand . self::$compressionCommand;
 
         $startTime = microtime(true);
         $this->shell->execute($compressionCommand);
