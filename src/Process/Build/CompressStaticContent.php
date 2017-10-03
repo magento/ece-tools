@@ -78,7 +78,7 @@ class CompressStaticContent implements ProcessInterface
         $this->shell->execute($compressionCommand);
         $endTime = microtime(true);
 
-        $duration = $startTime - $endTime;
+        $duration = $endTime - $startTime;
         $this->logger->info("Static content compression took $duration seconds.",
             ['command' => $compressionCommand]);
     }
