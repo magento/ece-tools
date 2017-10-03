@@ -133,11 +133,11 @@ class Environment
      * @param string $name Variable to evaluate
      * @return bool
      */
-    public function environmentVarDisabled($name): bool
+    public function isVariableDisabled($name): bool
     {
         $var = $this->getVariables();
 
-        return (isset($var[$name]) && $var[$name] == 'disabled') ? true : false;
+        return (isset($var[$name]) && $var[$name] === 'disabled') ? true : false;
     }
 
     /**
@@ -227,7 +227,7 @@ class Environment
          * Can use environment variable to always disable.
          * Default is to deploy static content if it was not deployed in the build step.
          */
-        if ($this->environmentVarDisabled('DO_DEPLOY_STATIC_CONTENT')) {
+        if ($this->isVariableDisabled('DO_DEPLOY_STATIC_CONTENT')) {
             $this->logger->info("Static content deploy disabled by environment variable");
             return false;
         }
@@ -437,12 +437,12 @@ class Environment
     }
 
      /**
-     * Symlink directory Contents
-     *
-     * @param string $target path to be linked.
-     * @param string $link path to symlink relative to app root.
-     * @result void
-     */
+      * Symlink directory Contents
+      *
+      * @param string $target path to be linked.
+      * @param string $link path to symlink relative to app root.
+      * @result void
+      */
     public function symlinkDirectoryContents(string $target, string $link)
     {
         foreach ($this->file->readDirectory($target) as $item) {

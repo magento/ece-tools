@@ -267,6 +267,27 @@ class EnvironmentTest extends TestCase
         $this->assertSame($flagState, $this->environment->hasFlag($path));
     }
 
+    public function isVariableDisabledProvider()
+    {
+        return [
+            ['name' => 'SOME_ENV_VAR', 'value' => 'disabled', 'result' => true],
+            ['name' => 'SOME_ENV_VAR', 'value' => 'enabled', 'result' => false],
+            ['name' => 'SOME_ENV_VAR', 'value' => '', 'result' => false],
+        ];
+    }
+
+    /**
+     * @dataProvider isVariableDisabledProvider
+     */
+    public function testIsVariableDisabled($name, $value, $result)
+    {
+        $this->setVariables([
+            $name => $value,
+        ]);
+
+        $this->assertSame($result, $this->environment->isVariableDisabled($name));
+    }
+
     /**
      * @dataProvider flagDataProvider
      */

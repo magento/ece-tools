@@ -105,7 +105,7 @@ class RestoreFromBuild implements ProcessInterface
                 }
 
                 // Symlink top level to backup dir when environment override is not present
-                if (!$this->environment->environmentVarDisabled('STATIC_CONTENT_SYMLINK')) {
+                if (!$this->environment->isVariableDisabled('STATIC_CONTENT_SYMLINK')) {
                     $this->cleaner->backgroundClearDirectory($top);
                     $this->environment->symlinkDirectoryContents($backup, $top);
                     continue;
