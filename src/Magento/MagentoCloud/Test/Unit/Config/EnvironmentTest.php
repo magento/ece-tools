@@ -345,4 +345,50 @@ class EnvironmentTest extends TestCase
 
         $this->assertSame($result, $this->environment->clearFlag($path));
     }
+
+    public function symlinkContentsProvider()
+    {
+        return [
+            [
+                'target' => 'some/dir',
+                'contents' => ['thing1', 'thing2'],
+                'link' => 'another/path',
+                'symlinkResult' => true
+            ],
+            [
+                'target' => 'some/dir',
+                'contents' => ['thing1', 'thing2'],
+                'link' => 'another/path',
+                'symlinkResult' => false
+            ],
+            [
+                'target' => 'some/dir',
+                'contents' => [],
+                'link' => 'another/path',
+                'symlinkResult' => false
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider symlinkContentsProvider
+     */
+    public function testSymlinkDirectoryContents($target, $contents, $link, $symlinkResult)
+    {
+        $this->fileMock->expects($this->once())
+            ->method('readDirectory')
+            ->with($target)
+            ->willReturn($contents);
+        $this->fileMock->expects($this->exactly(count($contents)))
+            ->method('symlink')
+            ->willReturn($symlinkResult);
+        if ($symlinkResult) {
+            $this->loggerMock->expects($this->exactly(count($contents)))
+                ->method('info')
+                ->withConsecutive(...(array_map(function ($thing) use ($target, $link) {
+                        return ["Symlinked $link/$thing to $target/$thing"];
+                }, $contents)));
+        }
+        $this->environment->symlinkDirectoryContents($target, $link);
+    }
 }

@@ -436,7 +436,7 @@ class Environment
         return false;
     }
 
-    /**
+     /**
      * Symlink directory Contents
      *
      * @param string $target path to be linked.
@@ -445,13 +445,9 @@ class Environment
      */
     public function symlinkDirectoryContents(string $target, string $link)
     {
-        foreach (new \DirectoryIterator($target) as $fileInfo) {
-            $name = $fileInfo->getFilename();
-            if ($fileInfo->isDot()) {
-                continue;
-            }
-            $targetFile = $target . '/' . $name;
-            $linkFile = $link . '/' . $name;
+        foreach ($this->file->readDirectory($target) as $item) {
+            $targetFile = "$target/$item";
+            $linkFile = "$link/$item";
             if ($this->file->symlink($targetFile, $linkFile)) {
                 $this->logger->info("Symlinked $linkFile to $targetFile");
             }
