@@ -46,12 +46,14 @@ class CompressStaticContent implements ProcessInterface
     /**
      * @var string
      */
-    private static $timeoutCommand = 'timeout -k 30 300 ';
+    private static $timeoutCommand = "timeout -k 30 300 bash -c ";
 
     /**
      * @var string
      */
-    private static $compressionCommand = 'echo "Hello, world!" && grep -c ^processor /proc/cpuinfo';
+    private static $compressionCommand
+        = "find pub/static -type f -name '*.js' -or -name '*.css' -or -name '*.svg'"
+        . " | xargs -P2 gzip --keep";
 
     /**
      * @param LoggerInterface $logger
@@ -80,7 +82,9 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $compressionCommand = self::$timeoutCommand . self::$compressionCommand;
+        $compressionCommand
+            = self::$timeoutCommand . '"'
+            . self::$compressionCommand . '"';
 
         $startTime = microtime(true);
         $this->shell->execute($compressionCommand);
