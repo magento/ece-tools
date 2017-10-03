@@ -89,7 +89,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
-                        $this->make(DeployProcess\EmailChecker::class),
                         $this->make(DeployProcess\PreDeploy::class),
                         $this->make(DeployProcess\CreateConfigFile::class),
                         $this->make(DeployProcess\SetMode::class),
@@ -104,10 +103,11 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\Install\EmailChecker::class),
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
-                        $this->make(DeployProcess\InstallUpdate\Install\SendPasswordResetEmail::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\PasswordResetEmail::class),
                     ],
                 ]);
             });

@@ -56,9 +56,11 @@ class AdminCredentials implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Updating admin credentials.');
+        $data = [];
 
-        $data = ['`email`' => $this->environment->getAdminEmail()];
+        if ($this->environment->getAdminEmail()) {
+            $data['`email`'] = $this->environment->getAdminEmail();
+        }
 
         if ($this->environment->getAdminFirstname()) {
             $data['`firstname`'] = $this->environment->getAdminFirstname();
@@ -77,6 +79,13 @@ class AdminCredentials implements ProcessInterface
                 $this->environment->getAdminPassword()
             );
         }
+
+        if (!$data) {
+            $this->logger->info('Updating admin credentials: nothing to update.');
+            return;
+        }
+
+        $this->logger->info('Updating admin credentials.');
 
         $fields = array_map(
             function ($key) {

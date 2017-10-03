@@ -3,13 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
+namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Environment;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Process\Deploy\EmailChecker;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\EmailChecker;
 
 /**
  * @inheritdoc

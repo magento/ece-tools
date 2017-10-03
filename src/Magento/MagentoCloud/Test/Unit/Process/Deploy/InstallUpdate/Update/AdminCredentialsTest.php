@@ -86,7 +86,7 @@ class AdminCredentialsTest extends TestCase
         $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminLastname')
             ->willReturn($lastName);
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminEmail')
             ->willReturn($email);
         $this->environmentMock->expects($this->exactly(2))
@@ -102,6 +102,34 @@ class AdminCredentialsTest extends TestCase
                 $query,
                 [$email, $firstName, $lastName, $userName, $generatedPassword]
             );
+
+        $this->adminCredentials->execute();
+    }
+
+    public function testExecuteWithoutChanges()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating admin credentials: nothing to update.');
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminPassword')
+            ->willReturn('');
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminFirstname')
+            ->willReturn('');
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminLastname')
+            ->willReturn('');
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminEmail')
+            ->willReturn('');
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminUsername')
+            ->willReturn('');
+        $this->passwordGeneratorMock->expects($this->never())
+            ->method('generateSaltAndHash');
+        $this->connectionMock->expects($this->never())
+            ->method('affectingQuery');
 
         $this->adminCredentials->execute();
     }
