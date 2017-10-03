@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Config\Build as BuildConfig;
 /**
  * @inheritdoc
  */
-class CompileDi implements ProcessInterface
+class CompressStaticContent implements ProcessInterface
 {
     /**
      * @var LoggerInterface
