@@ -371,21 +371,21 @@ class EnvironmentTest extends TestCase
     {
         return [
             [
-                'target' => 'some/dir',
-                'contents' => ['thing1', 'thing2'],
-                'link' => 'another/path',
+                'targetDir' => 'some/dir',
+                'contents' => ['/some/dir/thing1', '/some/dir/thing2'],
+                'linkDir' => 'another/path',
                 'symlinkResult' => true
             ],
             [
-                'target' => 'some/dir',
-                'contents' => ['thing1', 'thing2'],
-                'link' => 'another/path',
+                'targetDir' => 'some/dir',
+                'contents' => ['/some/dir/thing1', '/some/dir/thing2'],
+                'linkDir' => 'another/path',
                 'symlinkResult' => false
             ],
             [
-                'target' => 'some/dir',
+                'targetDir' => 'some/dir',
                 'contents' => [],
-                'link' => 'another/path',
+                'linkDir' => 'another/path',
                 'symlinkResult' => false
             ],
         ];
@@ -394,11 +394,11 @@ class EnvironmentTest extends TestCase
     /**
      * @dataProvider symlinkContentsProvider
      */
-    public function testSymlinkDirectoryContents($target, $contents, $link, $symlinkResult)
+    public function testSymlinkDirectoryContents($targetDir, $contents, $linkDir, $symlinkResult)
     {
         $this->fileMock->expects($this->once())
             ->method('readDirectory')
-            ->with($target)
+            ->with($targetDir)
             ->willReturn($contents);
         $this->fileMock->expects($this->exactly(count($contents)))
             ->method('symlink')
@@ -406,10 +406,10 @@ class EnvironmentTest extends TestCase
         if ($symlinkResult) {
             $this->loggerMock->expects($this->exactly(count($contents)))
                 ->method('info')
-                ->withConsecutive(...(array_map(function ($thing) use ($target, $link) {
-                        return ["Symlinked $link/$thing to $target/$thing"];
+                ->withConsecutive(...(array_map(function ($thing) use ($targetDir, $linkDir) {
+                        return ["Symlinked $linkDir/" . basename($thing) . " to $thing"];
                 }, $contents)));
         }
-        $this->environment->symlinkDirectoryContents($target, $link);
+        $this->environment->symlinkDirectoryContents($targetDir, $linkDir);
     }
 }

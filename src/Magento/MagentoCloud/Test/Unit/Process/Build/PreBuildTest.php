@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Process\Build\PreBuild;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Util\BackgroundDirectoryCleaner;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -55,6 +56,11 @@ class PreBuildTest extends TestCase
     private $fileMock;
 
     /**
+     * @var BackgroundDirectoryCleaner|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $cleanerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -76,6 +82,9 @@ class PreBuildTest extends TestCase
         $this->fileMock = $this->getMockBuilder(File::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->cleanerMock = $this->getMockBuilder(BackgroundDirectoryCleaner::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->process = new PreBuild(
             $this->buildConfigMock,
@@ -83,7 +92,8 @@ class PreBuildTest extends TestCase
             $this->loggerMock,
             $this->packageManagerMock,
             $this->directoryListMock,
-            $this->fileMock
+            $this->fileMock,
+            $this->cleanerMock
         );
     }
 
@@ -103,9 +113,6 @@ class PreBuildTest extends TestCase
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('createDirectory')
-            ->with('magento_root/var/.cloud_flags');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -117,6 +124,12 @@ class PreBuildTest extends TestCase
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('Some info.');
+        $this->cleanerMock->expects($this->once())
+            ->method('backgroundDeleteDirectory')
+            ->with('magento_root/var/.cloud_flags');
+        $this->fileMock->expects($this->once())
+            ->method('createDirectory')
+            ->with('magento_root/var/.cloud_flags');
 
         $this->process->execute();
     }
