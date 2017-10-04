@@ -81,12 +81,13 @@ class RestoreFromBuild implements ProcessInterface
             $this->logger->info("Environment is ready for deployment. Aborting pre-start.");
             return;
         }
-        $this->logger->info('Restoring recoverable data from backup.');
-        $this->environment->setFlag(Environment::PRE_START_FLAG);
 
         $magentoRoot = $this->directoryList->getMagentoRoot();
         $paths = $this->environment->getRestorableDirectories();
         $backupDir = $this->directoryList->getPath('backup');
+
+        $this->logger->info('Restoring recoverable data from backup.');
+        $this->environment->setFlag(Environment::PRE_START_FLAG);
 
         foreach (array_values($paths) as $path) {
             $top = "$magentoRoot/$path";
