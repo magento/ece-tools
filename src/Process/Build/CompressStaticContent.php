@@ -6,6 +6,7 @@
 
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -46,7 +47,7 @@ class CompressStaticContent implements ProcessInterface
     /**
      * @var string
      */
-    private static $timeoutCommand = "timeout -k 30 300 bash -c ";
+    private static $timeoutCommand = "/usr/bin/timeout -k 30 300 /bin/bash -c ";
 
     /**
      * @var string
@@ -60,6 +61,7 @@ class CompressStaticContent implements ProcessInterface
      * @param ShellInterface  $shell
      * @param File            $file
      * @param BuildConfig     $buildConfig
+     * @param Environment     $environment
      * @param DirectoryList   $directoryList
      */
     public function __construct(
@@ -67,21 +69,31 @@ class CompressStaticContent implements ProcessInterface
         ShellInterface $shell,
         File $file,
         BuildConfig $buildConfig,
+        Environment $environment,
         DirectoryList $directoryList
     ) {
         $this->logger        = $logger;
         $this->shell         = $shell;
         $this->file          = $file;
         $this->buildConfig   = $buildConfig;
+        $this->environment   = $environment;
         $this->directoryList = $directoryList;
     }
 
     /**
-     * {@inheritdoc}
-     * @throws \RuntimeException
+     * {@inheritdoc
      */
     public function execute()
     {
+        // Only proceed if static content deployment has already run.
+        if (!$this->environment->isStaticDeployInBuild()) {
+            $this->logger->info(
+                "Skipping build-time static content compression "
+                . "because static content deployment hasn't happened yet.");
+
+            return false;
+        }
+
         $compressionCommand
             = self::$timeoutCommand . '"'
             . self::$compressionCommand . '"';
@@ -91,7 +103,8 @@ class CompressStaticContent implements ProcessInterface
         $endTime = microtime(true);
 
         $duration = $endTime - $startTime;
-        $this->logger->info("Static content compression took $duration seconds.",
+        $this->logger->info(
+            "Static content compression took $duration seconds.",
             ['command' => $compressionCommand]);
     }
 }
