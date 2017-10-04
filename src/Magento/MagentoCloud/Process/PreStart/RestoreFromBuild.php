@@ -85,6 +85,11 @@ class RestoreFromBuild implements ProcessInterface
         $magentoRoot = $this->directoryList->getMagentoRoot();
         $paths = $this->environment->getRestorableDirectories();
         $backupDir = $this->directoryList->getPath('backup');
+        $cloud_flags = "$magentoRoot/" . $paths['cloud_flags'];
+
+        if (!$this->file->isDirectory($cloud_flags)) {
+            $this->file->createDirectory($cloud_flags, Environment::DEFAULT_DIRECTORY_MODE);
+        }
 
         $this->logger->info('Restoring recoverable data from backup.');
         $this->environment->setFlag(Environment::PRE_START_FLAG);

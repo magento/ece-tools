@@ -44,7 +44,7 @@ class VerifyPreStart implements ProcessInterface
         if ($this->environment->hasFlag(Environment::PRE_START_FLAG)) {
             $this->logger->info("Error: pre-start flag still exists. This means pre-start operation did not complete"
                 . " successfully. Aborting deployment. Flag location: "
-                . $this->environment->getFullPath(Environment::PRE_START_FLAG));
+                . Environment::PRE_START_FLAG);
             $this->environment->setFlag(Environment::MAINTENANCE_FLAG);
             throw new \RuntimeException("PreStart flag still exists!");
         }

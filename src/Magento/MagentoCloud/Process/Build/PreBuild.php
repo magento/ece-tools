@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Util\BackgroundDirectoryCleaner;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -49,12 +50,18 @@ class PreBuild implements ProcessInterface
     private $file;
 
     /**
+     * @var BackgroundDirectoryCleaner
+     */
+    private $cleaner;
+
+    /**
      * @param BuildConfig $buildConfig
      * @param Environment $environment
      * @param LoggerInterface $logger
      * @param Manager $packageManager
      * @param DirectoryList $directoryList
      * @param File $file
+     * @param BackgroundDirectoryCleaner $cleaner
      */
     public function __construct(
         BuildConfig $buildConfig,
@@ -62,7 +69,8 @@ class PreBuild implements ProcessInterface
         LoggerInterface $logger,
         Manager $packageManager,
         DirectoryList $directoryList,
-        File $file
+        File $file,
+        BackgroundDirectoryCleaner $cleaner
     ) {
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;
@@ -70,6 +78,7 @@ class PreBuild implements ProcessInterface
         $this->packageManager = $packageManager;
         $this->directoryList = $directoryList;
         $this->file = $file;
+        $this->cleaner = $cleaner;
     }
 
     /**
@@ -79,9 +88,12 @@ class PreBuild implements ProcessInterface
     {
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
         $directories = $this->environment->getRestorableDirectories();
+        $cloud_flags = $this->directoryList->getMagentoRoot() . '/' . $directories['cloud_flags'];
 
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
-        $this->file->createDirectory($this->directoryList->getMagentoRoot() . '/' . $directories['cloud_flags']);
+
+        $this->cleaner->backgroundDeleteDirectory($cloud_flags);
+        $this->file->createDirectory($cloud_flags, Environment::DEFAULT_DIRECTORY_MODE);
         $this->environment->removeFlagStaticContentInBuild();
         $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }

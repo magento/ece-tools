@@ -443,13 +443,12 @@ class Environment
       * @param string $link path to symlink relative to app root.
       * @result void
       */
-    public function symlinkDirectoryContents(string $target, string $link)
+    public function symlinkDirectoryContents(string $targetDir, string $linkDir)
     {
-        foreach ($this->file->readDirectory($target) as $item) {
-            $targetFile = "$target/$item";
-            $linkFile = "$link/$item";
-            if ($this->file->symlink($targetFile, $linkFile)) {
-                $this->logger->info("Symlinked $linkFile to $targetFile");
+        foreach ($this->file->readDirectory($targetDir) as $target) {
+            $link = "$linkDir/". basename($target);
+            if ($this->file->symlink($target, $link)) {
+                $this->logger->info("Symlinked $link to $target");
             }
         }
     }
