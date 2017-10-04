@@ -120,7 +120,7 @@ class CompressStaticContent implements ProcessInterface
         $compressionCommand = self::$compressionCommand;
 
         if ($verbose) {
-            $compressionCommand .= " -lv";
+            $compressionCommand .= " -v";
         }
 
         $compressionCommand
