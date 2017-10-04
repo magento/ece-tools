@@ -108,7 +108,10 @@ class CompressStaticContent implements ProcessInterface
         $duration = $endTime - $startTime;
         $this->logger->info(
             "Static content compression took $duration seconds.",
-            ['command' => $compressionCommand]);
+            [
+                'command' => $compressionCommand,
+                'verbosity' => $this->environment->getVerbosityLevel(),
+            ]);
     }
 
     /**
@@ -116,17 +119,14 @@ class CompressStaticContent implements ProcessInterface
      */
     private function getCompressionCommand() {
         $compressionCommand = self::$compressionCommand;
-        print $compressionCommand;
 
         if ($this->environment->getVerbosityLevel()) {
             $compressionCommand .= " -lv";
         }
-        print $compressionCommand;
 
         $compressionCommand
             = self::$timeoutCommand . '"'
             . $compressionCommand . '"';
-        print $compressionCommand;
 
         return $compressionCommand;
     }
