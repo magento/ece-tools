@@ -127,7 +127,7 @@ class EnvironmentTest extends TestCase
             'etc' => 'app/etc',
             'media' => 'pub/media',
             'log' => 'var/log',
-            'cloud_flags' => 'var/.cloud_flags'],
+            'cloud_flags' => 'var/cloud_flags'],
             $this->environment->getRestorableDirectories()
         );
     }

@@ -19,9 +19,9 @@ class Environment
     const REGENERATE_FLAG = 'var/.regenerate';
 
     // cloud specific flags
-    const STATIC_CONTENT_DEPLOY_FLAG = 'var/.cloud_flags/static_content_deploy';
-    const PRE_START_FLAG = 'var/.cloud_flags/prestart_in_progress';
-    const DEPLOY_READY_FLAG = 'var/.cloud_flags/deploy_ready';
+    const STATIC_CONTENT_DEPLOY_FLAG = 'var/cloud_flags/static_content_deploy';
+    const PRE_START_FLAG = 'var/cloud_flags/prestart_in_progress';
+    const DEPLOY_READY_FLAG = 'var/cloud_flags/deploy_ready';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
@@ -59,7 +59,7 @@ class Environment
         'etc' => 'app/etc',
         'media' => 'pub/media',
         'log' => 'var/log',
-        'cloud_flags' => 'var/.cloud_flags',
+        'cloud_flags' => 'var/cloud_flags',
     ];
 
     /**

@@ -85,10 +85,10 @@ class RestoreFromBuild implements ProcessInterface
         $magentoRoot = $this->directoryList->getMagentoRoot();
         $paths = $this->environment->getRestorableDirectories();
         $backupDir = $this->directoryList->getPath('backup');
-        $cloud_flags = "$magentoRoot/" . $paths['cloud_flags'];
+        $cloudFlagsDir = "$magentoRoot/" . $paths['cloud_flags'];
 
-        if (!$this->file->isDirectory($cloud_flags)) {
-            $this->file->createDirectory($cloud_flags, Environment::DEFAULT_DIRECTORY_MODE);
+        if (!$this->file->isDirectory($cloudFlagsDir)) {
+            $this->file->createDirectory($cloudFlagsDir, Environment::DEFAULT_DIRECTORY_MODE);
         }
 
         $this->logger->info('Restoring recoverable data from backup.');
@@ -98,7 +98,7 @@ class RestoreFromBuild implements ProcessInterface
             $top = "$magentoRoot/$path";
             $backup = "$backupDir/$path";
 
-            if ($path === $paths['static']) {
+            if (array_key_exists('static', $paths) && $paths['static'] === $path) {
                 // Copy backup to local storage and symlink top level to it
                 $localDir = $this->directoryList->getPath('local');
                 if ($this->file->isWritable($localDir)) {

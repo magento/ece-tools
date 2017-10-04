@@ -109,7 +109,7 @@ class PreBuildTest extends TestCase
             ->willReturn($verbosity);
         $this->environmentMock->expects($this->once())
             ->method('getRestorableDirectories')
-            ->willReturn(['cloud_flags' => 'var/.cloud_flags']);
+            ->willReturn(['cloud_flags' => 'var/cloud_flags']);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -126,10 +126,10 @@ class PreBuildTest extends TestCase
             ->willReturn('Some info.');
         $this->cleanerMock->expects($this->once())
             ->method('backgroundDeleteDirectory')
-            ->with('magento_root/var/.cloud_flags');
+            ->with('magento_root/var/cloud_flags');
         $this->fileMock->expects($this->once())
             ->method('createDirectory')
-            ->with('magento_root/var/.cloud_flags');
+            ->with('magento_root/var/cloud_flags');
 
         $this->process->execute();
     }

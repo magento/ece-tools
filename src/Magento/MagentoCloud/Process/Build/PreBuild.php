@@ -88,12 +88,12 @@ class PreBuild implements ProcessInterface
     {
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
         $directories = $this->environment->getRestorableDirectories();
-        $cloud_flags = $this->directoryList->getMagentoRoot() . '/' . $directories['cloud_flags'];
+        $cloudFlagsDir = $this->directoryList->getMagentoRoot() . '/' . $directories['cloud_flags'];
 
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
 
-        $this->cleaner->backgroundDeleteDirectory($cloud_flags);
-        $this->file->createDirectory($cloud_flags, Environment::DEFAULT_DIRECTORY_MODE);
+        $this->cleaner->backgroundDeleteDirectory($cloudFlagsDir);
+        $this->file->createDirectory($cloudFlagsDir, Environment::DEFAULT_DIRECTORY_MODE);
         $this->environment->removeFlagStaticContentInBuild();
         $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }
