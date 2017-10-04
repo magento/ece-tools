@@ -94,9 +94,7 @@ class CompressStaticContent implements ProcessInterface
             return false;
         }
 
-        $compressionCommand
-            = self::$timeoutCommand . '"'
-            . self::$compressionCommand . '"';
+        $compressionCommand = $this->getCompressionCommand();
 
         $startTime = microtime(true);
         $this->shell->execute($compressionCommand);
@@ -106,5 +104,22 @@ class CompressStaticContent implements ProcessInterface
         $this->logger->info(
             "Static content compression took $duration seconds.",
             ['command' => $compressionCommand]);
+    }
+
+    /**
+     * @return string
+     */
+    private function getCompressionCommand() {
+        $compressionCommand = self::$compressionCommand;
+
+        if ($this->environment->getVerbosityLevel()) {
+            $compressionCommand .= " -lv";
+        }
+
+        $compressionCommand
+            = self::$timeoutCommand . '"'
+            . $compressionCommand . '"';
+
+        return $compressionCommand;
     }
 }
