@@ -59,7 +59,7 @@ class CompressStaticContent implements ProcessInterface
      */
     private static $compressionCommand
         = "find pub/static -type f -name '*.js' -or -name '*.css' -or -name '*.svg'"
-        . " | xargs -n100 -P16 gzip -1 --keep";
+        . " | xargs -n100 -P16 gzip --keep";
 
     /**
      * @param LoggerInterface $logger
@@ -99,7 +99,7 @@ class CompressStaticContent implements ProcessInterface
             return false;
         }
 
-        $compressionCommand = $this->getCompressionCommand(true);
+        $compressionCommand = $this->getCompressionCommand();
 
         $startTime = microtime(true);
         $this->shell->execute($compressionCommand);
@@ -111,17 +111,29 @@ class CompressStaticContent implements ProcessInterface
             [
                 'command' => $compressionCommand,
             ]);
+
+        return true;
     }
 
     /**
+     * @param int  $compressionLevel
+     * @param bool $verbose
+     *
      * @return string
      */
-    private function getCompressionCommand($verbose = false) {
+    private function getCompressionCommand($compressionLevel = 1, $verbose = false) {
+        if (!is_int($compressionLevel) || $compressionLevel < 1 || $compressionLevel > 9) {
+            $this->info("Compression level was set to \"$compressionLevel\" but this is invalid. Using default compression level of \"1\".");
+            $compressionLevel = 1;
+        }
+
         $compressionCommand = self::$compressionCommand;
 
         if ($verbose) {
             $compressionCommand .= " -v";
         }
+
+        $compressionCommand .= " -$compressionLevel";
 
         $compressionCommand
             = self::$timeoutCommand . '"'
