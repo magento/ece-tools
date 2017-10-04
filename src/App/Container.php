@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\App;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -72,6 +74,16 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
+                        $this->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+                            'validators' => [
+                                ValidatorInterface::LEVEL_CRITICAL => [
+                                    $this->make(ConfigValidator\Build\ConfigFileExist::class)
+                                ],
+                                ValidatorInterface::LEVEL_WARNING => [
+                                    $this->make(ConfigValidator\Build\ConfigFileScd::class)
+                                ]
+                            ]
+                        ]),
                         $this->make(BuildProcess\PreBuild::class),
                         $this->make(BuildProcess\ApplyPatches::class),
                         $this->make(BuildProcess\MarshallFiles::class),
