@@ -45,6 +45,11 @@ class CompressStaticContent implements ProcessInterface
     private $directoryList;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @var string
      */
     private static $timeoutCommand = "/usr/bin/timeout -k 30 300 /bin/bash -c ";
@@ -111,14 +116,17 @@ class CompressStaticContent implements ProcessInterface
      */
     private function getCompressionCommand() {
         $compressionCommand = self::$compressionCommand;
+        print $compressionCommand;
 
         if ($this->environment->getVerbosityLevel()) {
             $compressionCommand .= " -lv";
         }
+        print $compressionCommand;
 
         $compressionCommand
             = self::$timeoutCommand . '"'
             . $compressionCommand . '"';
+        print $compressionCommand;
 
         return $compressionCommand;
     }
