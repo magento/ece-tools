@@ -71,25 +71,25 @@ class AdminCredentialsTest extends TestCase
         $email = 'JohnDoe@example.com';
         $userName = 'admin';
 
-        $query = 'UPDATE `admin_user` SET `email` = ?, `firstname` = ?, `lastname` = ?, `username` = ?, `password` = ?'
-            . ' WHERE `user_id` = 1';
+        $query = 'UPDATE `admin_user` SET `email` = ?, `username` = ?, `firstname` = ?, `lastname` = ?, `password` = ?'
+            . ' ORDER BY `user_id` ASC LIMIT 1';
 
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating admin credentials.');
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentMock->expects($this->once())
             ->method('getAdminPassword')
             ->willReturn($adminPassword);
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentMock->expects($this->once())
             ->method('getAdminFirstname')
             ->willReturn($firstName);
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentMock->expects($this->once())
             ->method('getAdminLastname')
             ->willReturn($lastName);
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentMock->expects($this->once())
             ->method('getAdminEmail')
             ->willReturn($email);
-        $this->environmentMock->expects($this->exactly(2))
+        $this->environmentMock->expects($this->once())
             ->method('getAdminUsername')
             ->willReturn($userName);
         $this->passwordGeneratorMock->expects($this->once())
@@ -100,8 +100,62 @@ class AdminCredentialsTest extends TestCase
             ->method('affectingQuery')
             ->with(
                 $query,
-                [$email, $firstName, $lastName, $userName, $generatedPassword]
+                [$email, $userName, $firstName, $lastName, $generatedPassword]
             );
+        $this->connectionMock->expects($this->exactly(2))
+            ->method('select')
+            ->willReturnMap([
+                ['SELECT 1 FROM `admin_user` WHERE `email` = ?', [$email], []],
+                ['SELECT 1 FROM `admin_user` WHERE `username` = ?', [$userName], []],
+            ]);
+
+        $this->adminCredentials->execute();
+    }
+
+    public function testExecuteEmailAndUsernameUsed()
+    {
+        $lastName = 'Doe';
+        $email = 'JohnDoe@example.com';
+        $userName = 'admin';
+
+        $query = 'UPDATE `admin_user` SET `lastname` = ? ORDER BY `user_id` ASC LIMIT 1';
+
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('info')
+            ->withConsecutive(
+                ['Some administrator already uses this email ' . $email],
+                ['Some administrator already uses this username ' . $userName],
+                ['Updating admin credentials.']
+            );
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminPassword')
+            ->willReturn('');
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminFirstname')
+            ->willReturn('');
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminLastname')
+            ->willReturn($lastName);
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminEmail')
+            ->willReturn($email);
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminUsername')
+            ->willReturn($userName);
+        $this->passwordGeneratorMock->expects($this->never())
+            ->method('generateSaltAndHash');
+        $this->connectionMock->expects($this->once())
+            ->method('affectingQuery')
+            ->with(
+                $query,
+                [$lastName]
+            );
+        $this->connectionMock->expects($this->exactly(2))
+            ->method('select')
+            ->willReturnMap([
+                ['SELECT 1 FROM `admin_user` WHERE `email` = ?', [$email], ['1']],
+                ['SELECT 1 FROM `admin_user` WHERE `username` = ?', [$userName], ['1']],
+            ]);
 
         $this->adminCredentials->execute();
     }
@@ -130,6 +184,8 @@ class AdminCredentialsTest extends TestCase
             ->method('generateSaltAndHash');
         $this->connectionMock->expects($this->never())
             ->method('affectingQuery');
+        $this->connectionMock->expects($this->never())
+            ->method('select');
 
         $this->adminCredentials->execute();
     }

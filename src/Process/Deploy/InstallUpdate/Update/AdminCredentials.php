@@ -58,26 +58,29 @@ class AdminCredentials implements ProcessInterface
     {
         $data = [];
 
-        if ($this->environment->getAdminEmail()) {
-            $data['`email`'] = $this->environment->getAdminEmail();
+        $adminEmail = $this->environment->getAdminEmail();
+        if ($adminEmail && !$this->isEmailUsed($adminEmail)) {
+            $data['`email`'] = $adminEmail;
         }
 
-        if ($this->environment->getAdminFirstname()) {
-            $data['`firstname`'] = $this->environment->getAdminFirstname();
+        $adminUserName = $this->environment->getAdminUsername();
+        if ($adminUserName && !$this->isUsernameUsed($adminUserName)) {
+            $data['`username`'] = $adminUserName;
         }
 
-        if ($this->environment->getAdminLastname()) {
-            $data['`lastname`'] = $this->environment->getAdminLastname();
+        $adminFirstName = $this->environment->getAdminFirstname();
+        if ($adminFirstName) {
+            $data['`firstname`'] = $adminFirstName;
         }
 
-        if ($this->environment->getAdminUsername()) {
-            $data['`username`'] = $this->environment->getAdminUsername();
+        $adminLastName = $this->environment->getAdminLastname();
+        if ($adminLastName) {
+            $data['`lastname`'] = $adminLastName;
         }
 
-        if ($this->environment->getAdminPassword()) {
-            $data['`password`'] = $this->passwordGenerator->generateSaltAndHash(
-                $this->environment->getAdminPassword()
-            );
+        $adminPassword = $this->environment->getAdminPassword();
+        if ($adminPassword) {
+            $data['`password`'] = $this->passwordGenerator->generateSaltAndHash($adminPassword);
         }
 
         if (!$data) {
@@ -93,11 +96,41 @@ class AdminCredentials implements ProcessInterface
             },
             array_keys($data)
         );
-        $query = 'UPDATE `admin_user` SET ' . implode(', ', $fields) . ' WHERE `user_id` = 1';
+            $query = 'UPDATE `admin_user` SET ' . implode(', ', $fields) . ' ORDER BY `user_id` ASC LIMIT 1';
 
         $this->connection->affectingQuery(
             $query,
             array_values($data)
         );
+    }
+
+    /**
+     * @param string $email
+     * @return bool
+     */
+    private function isEmailUsed(string $email): bool
+    {
+        $isUsed = count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `email` = ?', [$email])) > 0;
+
+        if ($isUsed) {
+            $this->logger->info('Some administrator already uses this email ' . $email);
+        }
+
+        return $isUsed;
+    }
+
+    /**
+     * @param string $username
+     * @return bool
+     */
+    private function isUsernameUsed(string $username): bool
+    {
+        $isUsed = count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `username` = ?', [$username])) > 0;
+
+        if ($isUsed) {
+            $this->logger->info('Some administrator already uses this username ' . $username);
+        }
+
+        return $isUsed;
     }
 }
