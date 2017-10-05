@@ -30,20 +30,27 @@ class ConfigFileScd implements ValidatorInterface
      * @var File
      */
     private $file;
+    /**
+     * @var Validator\ResultFactory
+     */
+    private $resultFactory;
 
     /**
      * @param ArrayManager $arrayManager
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param Validator\ResultFactory $resultFactory
      */
     public function __construct(
         ArrayManager $arrayManager,
         File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        Validator\ResultFactory $resultFactory
     ) {
         $this->directoryList = $directoryList;
         $this->arrayManager = $arrayManager;
         $this->file = $file;
+        $this->resultFactory = $resultFactory;
     }
 
     /**
@@ -51,7 +58,7 @@ class ConfigFileScd implements ValidatorInterface
      */
     public function run(): Validator\Result
     {
-        $result = new Validator\Result();
+        $result = $this->resultFactory->create();
 
         $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
         $config = $this->file->requireFile($configFile);

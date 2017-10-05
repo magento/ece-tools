@@ -26,15 +26,23 @@ class ConfigFileExist implements ValidatorInterface
     private $directoryList;
 
     /**
+     * @var Validator\ResultFactory
+     */
+    private $resultFactory;
+
+    /**
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param Validator\ResultFactory $resultFactory
      */
     public function __construct(
         File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        Validator\ResultFactory $resultFactory
     ) {
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->resultFactory = $resultFactory;
     }
 
     /**
@@ -44,7 +52,7 @@ class ConfigFileExist implements ValidatorInterface
      */
     public function run(): Validator\Result
     {
-        $result = new Validator\Result();
+        $result = $this->resultFactory->create();
 
         $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
 

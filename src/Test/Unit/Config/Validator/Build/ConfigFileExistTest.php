@@ -6,6 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileExist;
+use Magento\MagentoCloud\Config\Validator\Result;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
@@ -32,17 +34,27 @@ class ConfigFileTest extends TestCase
     private $directoryListMock;
 
     /**
+     * @var ResultFactory|Mock
+     */
+    private $resultFactoryMock;
+
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-
+        $this->resultFactoryMock = $this->createMock(ResultFactory::class);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn(new Result());
 
         $this->configFile = new ConfigFileExist(
             $this->fileMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->resultFactoryMock
         );
     }
 

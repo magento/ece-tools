@@ -18,16 +18,6 @@ class Result
     private $suggestion = '';
 
     /**
-     * @param string|null $error
-     */
-    public function __construct($error = null)
-    {
-        if ($error) {
-            $this->addError($error);
-        }
-    }
-
-    /**
      * Adds error to the list of errors
      *
      * @param string $error
