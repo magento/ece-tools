@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Config\Logger as LoggerConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 
-class LogPreparer
+class DeployPreparer
 {
     /**
      * @var LoggerConfig
@@ -64,6 +64,10 @@ class LogPreparer
         $buildLogContent = file_get_contents($buildLogPath);
 
         $buildLogIsApplied = $this->buildLogIsApplied($deployLogPath, $buildLogContent);
+
+        if (!$this->environment->isEnvironmentIdLabelExist()) {
+            $this->environment->syncEnvironmentId();
+        }
 
         if ($this->environment->hasEnvironmentChanged()) {
             $this->invalidateLogs();

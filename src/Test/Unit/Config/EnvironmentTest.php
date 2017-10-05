@@ -344,14 +344,14 @@ class EnvironmentTest extends TestCase
             [
                 'mageCloudEnv' => 'some_id',
                 'pathToEnvIdFile' => '/wrong/path/to/.env_id',
-                'expectedResult' => true,
+                'expectedResult' => false,
             ],
             /**
              * The environment variable identifier in the file does not equal
              * the environment variable MAGENTO_CLOUD_ENVIRONMENT
              */
             [
-                'mageCloudEnv' => 'wrong_some_id',
+                'mageCloudEnv' => 'other_some_id',
                 'pathToEnvIdFile' => $root,
                 'expectedResult' => true,
             ],

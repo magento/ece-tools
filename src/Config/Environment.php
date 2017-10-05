@@ -3,6 +3,7 @@
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
@@ -428,11 +429,11 @@ class Environment
     /**
      * @return bool
      */
-    public function hasEnvironmentChanged() : bool
+    public function hasEnvironmentChanged(): bool
     {
         $envIdPath = $this->getSavedEnvironmentIdPath();
         $environmentId = $this->getEnvironmentId();
-        if (!file_exists($envIdPath) || (file_get_contents($envIdPath) !== $environmentId)) {
+        if (file_exists($envIdPath) && (file_get_contents($envIdPath) !== $environmentId)) {
             return true;
         }
         return false;
@@ -455,5 +456,11 @@ class Environment
     private function getSavedEnvironmentIdPath(): string
     {
         return $this->directoryList->getMagentoRoot() . '/var/.env_id';
+    }
+
+    public function isEnvironmentIdLabelExist()
+    {
+        $envIdLabelPath = $this->getSavedEnvironmentIdPath();
+        return file_exists($envIdLabelPath);
     }
 }

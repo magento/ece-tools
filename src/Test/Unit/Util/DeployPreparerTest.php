@@ -9,15 +9,15 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Logger as LoggerConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Util\LogPreparer;
+use Magento\MagentoCloud\Util\DeployPreparer;
 use PHPUnit\Framework\TestCase;
 
-class LogPreparerTest extends TestCase
+class DeployPreparerTest extends TestCase
 {
     /**
-     * @var LogPreparer
+     * @var DeployPreparer
      */
-    private $logPreparer;
+    private $deployPreparer;
 
     /**
      * @var LoggerConfig|\PHPUnit_Framework_MockObject_MockObject
@@ -46,7 +46,7 @@ class LogPreparerTest extends TestCase
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->environmentMock = $this->createMock(Environment::class);
 
-        $this->logPreparer = new LogPreparer(
+        $this->deployPreparer = new DeployPreparer(
             $this->loggerConfigMock,
             $this->fileMock,
             $this->directoryListMock,
@@ -59,6 +59,7 @@ class LogPreparerTest extends TestCase
      * @param string $backupBuildLogBasename
      * @param bool $envIsChanged
      * @param $directoryListGetMagentoRootExpects
+     * @param $environmentIsEnvironmentIdLabelExistWillReturn
      * @param $environmentSyncEnvironmentIdExpects
      * @param $fileFilePutContentsExpects
      * @param $fileCreateDirectoryExpects
@@ -70,6 +71,7 @@ class LogPreparerTest extends TestCase
         string $backupBuildLogBasename,
         bool $envIsChanged,
         $directoryListGetMagentoRootExpects,
+        $environmentIsEnvironmentIdLabelExistWillReturn,
         $environmentSyncEnvironmentIdExpects,
         $fileFilePutContentsExpects,
         $fileCreateDirectoryExpects,
@@ -90,6 +92,9 @@ class LogPreparerTest extends TestCase
         $this->directoryListMock->expects($directoryListGetMagentoRootExpects)
             ->method('getMagentoRoot')
             ->willReturn('/fake/path/to/var/log');
+        $this->environmentMock->expects($this->once())
+            ->method('isEnvironmentIdLabelExist')
+            ->willReturn($environmentIsEnvironmentIdLabelExistWillReturn);
         $this->environmentMock->expects($environmentSyncEnvironmentIdExpects)
             ->method('syncEnvironmentId');
         $this->fileMock->expects($fileFilePutContentsExpects)
@@ -101,7 +106,7 @@ class LogPreparerTest extends TestCase
         $this->fileMock->expects($fileCopyExpects)
             ->method('copy')
             ->with($backupBuildLogPath, $deployLogPath);
-        $this->logPreparer->prepare();
+        $this->deployPreparer->prepare();
     }
 
     public function prepareDataProvider()
@@ -112,44 +117,44 @@ class LogPreparerTest extends TestCase
                 'backupBuildLogBasename' => 'cloud_applied.log',
                 'envIsChanged' => true,
                 'directoryListGetMagentoRootExpects' => $this->once(),
+                'environmentIsEnvironmentIdLabelExistWillReturn' => true,
                 'environmentSyncEnvironmentIdExpects' => $this->once(),
                 'fileFilePutContentsExpects' => $this->never(),
                 'fileCreateDirectoryExpects' => $this->never(),
                 'fileCopyExpects' => $this->never()
-
             ],
             [
                 'deployLogBasename' => 'cloud.log',
                 'backupBuildLogBasename' => 'cloud_applied.log',
                 'envIsChanged' => false,
                 'directoryListGetMagentoRootExpects' => $this->never(),
-                'environmentSyncEnvironmentIdExpects' => $this->never(),
+                'environmentIsEnvironmentIdLabelExistWillReturn' => false,
+                'environmentSyncEnvironmentIdExpects' => $this->once(),
                 'fileFilePutContentsExpects' => $this->never(),
                 'fileCreateDirectoryExpects' => $this->never(),
                 'fileCopyExpects' => $this->never()
-
             ],
             [
                 'deployLogBasename' => 'cloud.log',
                 'backupBuildLogBasename' => 'cloud_not_applied.log',
                 'envIsChanged' => false,
                 'directoryListGetMagentoRootExpects' => $this->never(),
+                'environmentIsEnvironmentIdLabelExistWillReturn' => true,
                 'environmentSyncEnvironmentIdExpects' => $this->never(),
                 'fileFilePutContentsExpects' => $this->once(),
                 'fileCreateDirectoryExpects' => $this->never(),
                 'fileCopyExpects' => $this->never()
-
             ],
             [
                 'deployLogBasename' => 'wrong_cloud.log',
                 'backupBuildLogBasename' => 'cloud_not_applied.log',
                 'envIsChanged' => true,
                 'directoryListGetMagentoRootExpects' => $this->once(),
+                'environmentIsEnvironmentIdLabelExistWillReturn' => true,
                 'environmentSyncEnvironmentIdExpects' => $this->once(),
                 'fileFilePutContentsExpects' => $this->never(),
                 'fileCreateDirectoryExpects' => $this->once(),
                 'fileCopyExpects' => $this->once()
-
             ],
         ];
     }
