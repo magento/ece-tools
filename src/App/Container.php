@@ -107,7 +107,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
-                        $this->make(DeployProcess\InstallUpdate\Install\PasswordResetEmail::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\ResetPassword::class),
                     ],
                 ]);
             });
@@ -117,7 +117,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
-                        $this->make(DeployProcess\InstallUpdate\Update\AdminUrl::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
                         $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
                         $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class),

@@ -6,30 +6,20 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Environment;
 
 class EmailChecker implements ProcessInterface
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
     /**
      * @var Environment
      */
     private $environment;
 
     /**
-     * @param LoggerInterface $logger
      * @param Environment $environment
      */
-    public function __construct(
-        LoggerInterface $logger,
-        Environment $environment
-    ) {
-        $this->logger = $logger;
+    public function __construct(Environment $environment)
+    {
         $this->environment = $environment;
     }
 
@@ -43,7 +33,6 @@ class EmailChecker implements ProcessInterface
                 . '  We need this variable set to send the password reset email.'
                 . ' Please set ADMIN_EMAIL and retry deploy.';
 
-            $this->logger->error($message);
             throw new \RuntimeException($message);
         }
     }

@@ -5,13 +5,13 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\AdminUrl;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\SetAdminUrl;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
-class AdminUrlTest extends TestCase
+class SetAdminUrlTest extends TestCase
 {
     /**
      * @var Environment|\PHPUnit_Framework_MockObject_MockObject
@@ -29,9 +29,9 @@ class AdminUrlTest extends TestCase
     private $configWriterMock;
 
     /**
-     * @var AdminUrl
+     * @var SetAdminUrl
      */
-    private $envConfiguration;
+    private $setAdminUrl;
 
     /**
      * @inheritdoc
@@ -43,7 +43,7 @@ class AdminUrlTest extends TestCase
             ->getMockForAbstractClass();
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
 
-        $this->envConfiguration = new AdminUrl(
+        $this->setAdminUrl = new SetAdminUrl(
             $this->environmentMock,
             $this->configWriterMock,
             $this->loggerMock
@@ -66,7 +66,7 @@ class AdminUrlTest extends TestCase
             ->method('update')
             ->with(['backend' => ['frontName' => $frontName]]);
 
-        $this->envConfiguration->execute();
+        $this->setAdminUrl->execute();
     }
 
     /**
@@ -83,6 +83,6 @@ class AdminUrlTest extends TestCase
         $this->configWriterMock->expects($this->never())
             ->method('update');
 
-        $this->envConfiguration->execute();
+        $this->setAdminUrl->execute();
     }
 }

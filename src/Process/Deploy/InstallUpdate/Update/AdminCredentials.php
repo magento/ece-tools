@@ -113,7 +113,7 @@ class AdminCredentials implements ProcessInterface
         $isUsed = count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `email` = ?', [$email])) > 0;
 
         if ($isUsed) {
-            $this->logger->info('Some administrator already uses this email ' . $email);
+            $this->logger->warning('Some administrator already uses this email ' . $email);
         }
 
         return $isUsed;
@@ -128,7 +128,7 @@ class AdminCredentials implements ProcessInterface
         $isUsed = count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `username` = ?', [$username])) > 0;
 
         if ($isUsed) {
-            $this->logger->info('Some administrator already uses this username ' . $username);
+            $this->logger->warning('Some administrator already uses this username ' . $username);
         }
 
         return $isUsed;

@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\PasswordResetEmail;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ResetPassword;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -17,7 +17,7 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 /**
  * @inheritdoc
  */
-class PasswordResetEmailTest extends TestCase
+class ResetPasswordTest extends TestCase
 {
     use \phpmock\phpunit\PHPMock;
 
@@ -52,9 +52,9 @@ class PasswordResetEmailTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var PasswordResetEmail
+     * @var ResetPassword
      */
-    private $passwordResetEmail;
+    private $resetPassword;
 
     /**
      * @inheritdoc
@@ -73,7 +73,7 @@ class PasswordResetEmailTest extends TestCase
             'mail'
         );
 
-        $this->passwordResetEmail = new PasswordResetEmail(
+        $this->resetPassword = new ResetPassword(
             $this->loggerMock,
             $this->environmentMock,
             $this->urlManagerMock,
@@ -106,7 +106,7 @@ class PasswordResetEmailTest extends TestCase
         $this->fileMock->expects($this->never())
             ->method('filePutContents');
 
-        $this->passwordResetEmail->execute();
+        $this->resetPassword->execute();
     }
 
     /**
@@ -171,7 +171,7 @@ class PasswordResetEmailTest extends TestCase
                 )
             );
 
-        $this->passwordResetEmail->execute();
+        $this->resetPassword->execute();
     }
 
     /**

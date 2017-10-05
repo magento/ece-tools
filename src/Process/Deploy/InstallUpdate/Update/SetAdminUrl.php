@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
-class AdminUrl implements ProcessInterface
+class SetAdminUrl implements ProcessInterface
 {
     /**
      * @var Environment

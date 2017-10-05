@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Environment;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\EmailChecker;
@@ -16,11 +15,6 @@ use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\EmailChecker;
  */
 class EmailCheckerTest extends TestCase
 {
-    /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
     /**
      * @var Environment|Mock
      */
@@ -36,11 +30,8 @@ class EmailCheckerTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
         $this->environmentMock = $this->createMock(Environment::class);
-
-        $this->emailChecker = new EmailChecker($this->loggerMock, $this->environmentMock);
+        $this->emailChecker = new EmailChecker($this->environmentMock);
     }
 
     /**
@@ -51,8 +42,6 @@ class EmailCheckerTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getAdminEmail')
             ->willReturn('admin@example.com');
-        $this->loggerMock->expects($this->never())
-            ->method('error');
 
         $this->emailChecker->execute();
     }
@@ -66,8 +55,6 @@ class EmailCheckerTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getAdminEmail')
             ->willReturn('');
-        $this->loggerMock->expects($this->once())
-            ->method('error');
 
         $this->emailChecker->execute();
     }
