@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Util\LogPreparer;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -32,6 +33,11 @@ class DeployTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var LogPreparer|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $logPreparer;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -40,15 +46,19 @@ class DeployTest extends TestCase
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
+        $this->logPreparer = $this->createMock(LogPreparer::class);
 
         $this->command = new Deploy(
             $this->processMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->logPreparer
         );
     }
 
     public function testExecute()
     {
+        $this->logPreparer->expects($this->once())
+            ->method('prepare');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -72,6 +82,8 @@ class DeployTest extends TestCase
      */
     public function testExecuteWithException()
     {
+        $this->logPreparer->expects($this->once())
+            ->method('prepare');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting deploy.');
