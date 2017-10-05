@@ -29,8 +29,8 @@ class Environment
 
     const DEFAULT_ADMIN_URL = 'admin';
     const DEFAULT_ADMIN_NAME = 'admin';
-    const DEFAULT_ADMIN_FIRSTNAME = 'Changeme';
-    const DEFAULT_ADMIN_LASTNAME = 'Changeme';
+    const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
+    const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
      * Let's keep variable names same for both phases.
