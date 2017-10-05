@@ -38,7 +38,7 @@ class ConfigFileExist implements ValidatorInterface
     }
 
     /**
-     * Checks if configuration file ROOT/app/etc/config.php is exists
+     * Checks if configuration file MAGENTO_ROOT/app/etc/config.php is exists
      *
      * {@inheritdoc}
      */
