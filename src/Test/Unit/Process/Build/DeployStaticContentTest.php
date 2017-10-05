@@ -85,7 +85,7 @@ class DeployStaticContentTest extends TestCase
             ->method('hasErrors')
             ->willReturn(false);
         $this->configFileScdMock->expects($this->once())
-            ->method('run')
+            ->method('validate')
             ->willReturn($resultMock);
         $this->processMock->expects($this->once())
             ->method('execute');
@@ -103,7 +103,7 @@ class DeployStaticContentTest extends TestCase
             ->method('getErrors')
             ->willReturn(['error']);
         $this->configFileScdMock->expects($this->once())
-            ->method('run')
+            ->method('validate')
             ->willReturn($resultMock);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
@@ -125,7 +125,7 @@ class DeployStaticContentTest extends TestCase
             ->with(Build::OPT_SKIP_SCD)
             ->willReturn(true);
         $this->configFileScdMock->expects($this->never())
-            ->method('run');
+            ->method('validate');
         $this->processMock->expects($this->never())
             ->method('execute');
 

@@ -45,7 +45,7 @@ class ValidateConfiguration implements ProcessInterface
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
             foreach ($validators as $validator) {
-                $result = $validator->run();
+                $result = $validator->validate();
 
                 if ($result->hasErrors()) {
                     $this->logger->log($level, implode(PHP_EOL, $result->getErrors()));
@@ -54,7 +54,7 @@ class ValidateConfiguration implements ProcessInterface
                         $this->logger->log($level, $result->getSuggestion());
                     }
 
-                    if ($level == ValidatorInterface::LEVEL_CRITICAL) {
+                    if ($level === ValidatorInterface::LEVEL_CRITICAL) {
                         throw new \RuntimeException('Please fix configuration with given recommendations');
                     }
                 }

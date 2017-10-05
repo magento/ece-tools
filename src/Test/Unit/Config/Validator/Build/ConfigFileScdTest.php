@@ -40,6 +40,11 @@ class ConfigFileScdTest extends TestCase
     private $resultFactoryMock;
 
     /**
+     * @var ArrayManager|Mock
+     */
+    private $arrayManagerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -47,12 +52,10 @@ class ConfigFileScdTest extends TestCase
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileMock = $this->createMock(File::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
-        $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn(new Result());
+        $this->arrayManagerMock = $this->createMock(ArrayManager::class);
 
         $this->configFileScd = new ConfigFileScd(
-            new ArrayManager(),
+            $this->arrayManagerMock,
             $this->fileMock,
             $this->directoryListMock,
             $this->resultFactoryMock
@@ -74,8 +77,25 @@ class ConfigFileScdTest extends TestCase
                     ]
                 ]
             ]);
+        $this->arrayManagerMock->expects($this->once())
+            ->method('flatten')
+            ->willReturn(['scopes/websites/key' => 'value']);
+        $this->arrayManagerMock->expects($this->exactly(2))
+            ->method('filter')
+            ->withConsecutive(
+                [['scopes/websites/key' => 'value'], 'scopes/websites', false],
+                [['scopes/websites/key' => 'value'], 'scopes/stores', false]
+            )
+            ->willReturnOnConsecutiveCalls(
+                ['scopes/websites/key' => 'value'],
+                []
+            );
+        $this->resultFactoryMock->expects($this->once())
+            ->method('create')
+            ->with([], '')
+            ->willReturn($this->createMock(Result::class));
 
-        $result = $this->configFileScd->run();
+        $result = $this->configFileScd->validate();
 
         $this->assertFalse($result->hasErrors());
     }
@@ -89,21 +109,32 @@ class ConfigFileScdTest extends TestCase
             ->method('requireFile')
             ->with('magento_root/app/etc/config.php')
             ->willReturn([]);
+        $this->arrayManagerMock->expects($this->once())
+            ->method('flatten')
+            ->with([])
+            ->willReturn([]);
+        $this->arrayManagerMock->expects($this->any())
+            ->method('filter')
+            ->with([])
+            ->willReturn([]);
+        $resultMock = $this->createMock(Result::class);
+        $resultMock->expects($this->once())
+            ->method('hasErrors')
+            ->willReturn(true);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('create')
+            ->with(
+                ['No stores/website/locales found in config.php'],
+                'To speed up deploy process please run the following commands' . PHP_EOL
+                . '1. bin/magento app:config:dump' . PHP_EOL
+                . '2. git add -f app/etc/config.php' . PHP_EOL
+                . '3. git commit -a -m \'updating config.php\'' . PHP_EOL
+                . '4. git push'
+            )
+            ->willReturn($resultMock);
 
-        $result = $this->configFileScd->run();
+        $result = $this->configFileScd->validate();
 
         $this->assertTrue($result->hasErrors());
-        $this->assertEquals(
-            ['No stores/website/locales found in config.php'],
-            $result->getErrors()
-        );
-        $this->assertEquals(
-            'To speed up deploy process please run the following commands' . PHP_EOL
-            . '1. bin/magento app:config:dump' . PHP_EOL
-            . '2. git add -f app/etc/config.php' . PHP_EOL
-            . '3. git commit -a -m \'updating config.php\'' . PHP_EOL
-            . '4. git push',
-            $result->getSuggestion()
-        );
     }
 }

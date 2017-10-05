@@ -18,13 +18,13 @@ class Result
     private $suggestion = '';
 
     /**
-     * Adds error to the list of errors
-     *
-     * @param string $error
+     * @param array $errors
+     * @param string $suggestion
      */
-    public function addError(string $error)
+    public function __construct(array $errors = [], string $suggestion = '')
     {
-        $this->errors[] = $error;
+        $this->errors = $errors;
+        $this->suggestion = $suggestion;
     }
 
     /**
@@ -53,13 +53,5 @@ class Result
     public function getSuggestion(): string
     {
         return $this->suggestion;
-    }
-
-    /**
-     * @param string $suggestion
-     */
-    public function setSuggestion(string $suggestion)
-    {
-        $this->suggestion = $suggestion;
     }
 }

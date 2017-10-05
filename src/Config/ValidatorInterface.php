@@ -16,5 +16,5 @@ interface ValidatorInterface
     /**
      * @return Validator\Result
      */
-    public function run(): Validator\Result;
+    public function validate(): Validator\Result;
 }

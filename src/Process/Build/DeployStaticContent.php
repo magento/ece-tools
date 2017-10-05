@@ -74,7 +74,7 @@ class DeployStaticContent implements ProcessInterface
             return;
         }
 
-        $validationResult = $this->configFileScdValidator->run();
+        $validationResult = $this->configFileScdValidator->validate();
 
         if ($validationResult->hasErrors()) {
             $this->logger->info('Skipping static content deploy. ' . implode(', ', $validationResult->getErrors()));

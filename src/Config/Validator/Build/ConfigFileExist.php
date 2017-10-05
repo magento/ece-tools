@@ -50,28 +50,26 @@ class ConfigFileExist implements ValidatorInterface
      *
      * {@inheritdoc}
      */
-    public function run(): Validator\Result
+    public function validate(): Validator\Result
     {
-        $result = $this->resultFactory->create();
-
+        $errors = [];
+        $suggestion = '';
         $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
 
         if (!$this->file->isExists($configFile)) {
-            $result->addError('File app/etc/config.php not exists');
-            $result->setSuggestion(
-                implode(
-                    PHP_EOL,
-                    [
-                        'Please run the following commands',
-                        '1. bin/magento module:enable --all',
-                        '2. git add -f app/etc/config.php',
-                        '3. git commit -a -m \'adding config.php\'',
-                        '4. git push'
-                    ]
-                )
+            $errors[] = 'File app/etc/config.php not exists';
+            $suggestion = implode(
+                PHP_EOL,
+                [
+                    'Please run the following commands',
+                    '1. bin/magento module:enable --all',
+                    '2. git add -f app/etc/config.php',
+                    '3. git commit -a -m \'adding config.php\'',
+                    '4. git push'
+                ]
             );
         }
 
-        return $result;
+        return $this->resultFactory->create($errors, $suggestion);
     }
 }

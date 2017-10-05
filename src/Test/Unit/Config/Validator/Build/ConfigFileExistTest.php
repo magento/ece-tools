@@ -16,7 +16,7 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 /**
  * @inheritdoc
  */
-class ConfigFileTest extends TestCase
+class ConfigFileExistTest extends TestCase
 {
     /**
      * @var ConfigFileExist
@@ -38,7 +38,6 @@ class ConfigFileTest extends TestCase
      */
     private $resultFactoryMock;
 
-
     /**
      * @inheritdoc
      */
@@ -47,9 +46,6 @@ class ConfigFileTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
-        $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn(new Result());
 
         $this->configFile = new ConfigFileExist(
             $this->fileMock,
@@ -67,8 +63,12 @@ class ConfigFileTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(true);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('create')
+            ->with([], '')
+            ->willReturn($this->createMock(Result::class));
 
-        $result = $this->configFile->run();
+        $result = $this->configFile->validate();
 
         $this->assertFalse($result->hasErrors());
     }
@@ -82,21 +82,24 @@ class ConfigFileTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(false);
+        $resultMock = $this->createMock(Result::class);
+        $resultMock->expects($this->once())
+            ->method('hasErrors')
+            ->willReturn(true);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('create')
+            ->with(
+                ['File app/etc/config.php not exists'],
+                'Please run the following commands' . PHP_EOL
+                . '1. bin/magento module:enable --all' . PHP_EOL
+                . '2. git add -f app/etc/config.php' . PHP_EOL
+                . '3. git commit -a -m \'adding config.php\'' . PHP_EOL
+                . '4. git push'
+            )
+            ->willReturn($resultMock);
 
-        $result = $this->configFile->run();
+        $result = $this->configFile->validate();
 
         $this->assertTrue($result->hasErrors());
-        $this->assertEquals(
-            ['File app/etc/config.php not exists'],
-            $result->getErrors()
-        );
-        $this->assertEquals(
-            'Please run the following commands' . PHP_EOL
-            . '1. bin/magento module:enable --all' . PHP_EOL
-            . '2. git add -f app/etc/config.php' . PHP_EOL
-            . '3. git commit -a -m \'adding config.php\'' . PHP_EOL
-            . '4. git push',
-            $result->getSuggestion()
-        );
     }
 }

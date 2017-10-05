@@ -56,10 +56,10 @@ class ConfigFileScd implements ValidatorInterface
     /**
      * @inheritdoc
      */
-    public function run(): Validator\Result
+    public function validate(): Validator\Result
     {
-        $result = $this->resultFactory->create();
-
+        $errors = [];
+        $suggestion = '';
         $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
         $config = $this->file->requireFile($configFile);
 
@@ -68,21 +68,19 @@ class ConfigFileScd implements ValidatorInterface
         $stores = $this->arrayManager->filter($flattenedConfig, 'scopes/stores', false);
 
         if (count($stores) === 0 && count($websites) === 0) {
-            $result->addError('No stores/website/locales found in config.php');
-            $result->setSuggestion(
-                implode(
-                    PHP_EOL,
-                    [
-                        'To speed up deploy process please run the following commands',
-                        '1. bin/magento app:config:dump',
-                        '2. git add -f app/etc/config.php',
-                        '3. git commit -a -m \'updating config.php\'',
-                        '4. git push'
-                    ]
-                )
+            $errors[] = 'No stores/website/locales found in config.php';
+            $suggestion = implode(
+                PHP_EOL,
+                [
+                    'To speed up deploy process please run the following commands',
+                    '1. bin/magento app:config:dump',
+                    '2. git add -f app/etc/config.php',
+                    '3. git commit -a -m \'updating config.php\'',
+                    '4. git push'
+                ]
             );
         }
 
-        return $result;
+        return $this->resultFactory->create($errors, $suggestion);
     }
 }

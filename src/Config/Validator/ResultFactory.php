@@ -13,10 +13,12 @@ class ResultFactory
     /**
      * Creates instance of Result object
      *
+     * @param array $errors
+     * @param string $suggestion
      * @return Result
      */
-    public function create()
+    public function create(array $errors = [], string $suggestion = '')
     {
-        return new Result();
+        return new Result($errors, $suggestion);
     }
 }
