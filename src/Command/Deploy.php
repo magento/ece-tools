@@ -6,6 +6,7 @@
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Util\LogPreparer;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,13 +31,23 @@ class Deploy extends Command
     private $logger;
 
     /**
+     * @var LogPreparer
+     */
+    private $logPreparer;
+
+    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
+     * @param LogPreparer $logPreparer
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
-    {
+    public function __construct(
+        ProcessInterface $process,
+        LoggerInterface $logger,
+        LogPreparer $logPreparer
+    ) {
         $this->process = $process;
         $this->logger = $logger;
+        $this->logPreparer = $logPreparer;
 
         parent::__construct();
     }
@@ -60,6 +71,7 @@ class Deploy extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
+            $this->logPreparer->prepare();
             $this->logger->info('Starting deploy.');
             $this->process->execute();
             $this->logger->info('Deployment completed.');

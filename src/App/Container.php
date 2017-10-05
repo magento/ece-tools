@@ -56,6 +56,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
+        $this->singleton(\Magento\MagentoCloud\Config\Logger::class);
         $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
         $this->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
@@ -194,17 +195,19 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     private function createLogger(string $name): \Closure
     {
         return function () use ($name) {
-            $formatter = new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n");
-            $formatter->allowInlineLineBreaks();
-            $formatter->ignoreEmptyContextAndExtra();
-
-            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)
-                ->getMagentoRoot();
+            /** @var \Magento\MagentoCloud\Config\Logger $loggerConfig */
+            $loggerConfig = $this->get(\Magento\MagentoCloud\Config\Logger::class);
+            $formatter = new LineFormatter(
+                $loggerConfig->getLineFormat(),
+                $loggerConfig->dateFormat(),
+                $loggerConfig->allowInlineLineBreaks(),
+                $loggerConfig->ignoreEmptyContextAndExtra()
+            );
 
             return $this->makeWith(\Monolog\Logger::class, [
                 'name' => $name,
                 'handlers' => [
-                    (new StreamHandler($magentoRoot . '/var/log/cloud.log'))
+                    (new StreamHandler($loggerConfig->getDeployLogPath()))
                         ->setFormatter($formatter),
                     (new StreamHandler('php://stdout'))
                         ->setFormatter($formatter),
