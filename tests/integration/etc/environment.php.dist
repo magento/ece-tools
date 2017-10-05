@@ -40,4 +40,5 @@ return [
         ],
         'type' => 'project',
     ],
+    'environment'=> 'magento-cloud-environment',
 ];
