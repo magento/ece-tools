@@ -47,8 +47,8 @@ class ValidateConfiguration implements ProcessInterface
             foreach ($validators as $validator) {
                 $result = $validator->validate();
 
-                if ($result->hasErrors()) {
-                    $this->logger->log($level, implode(PHP_EOL, $result->getErrors()));
+                if ($result->hasError()) {
+                    $this->logger->log($level, $result->getError());
 
                     if (!empty($result->getSuggestion())) {
                         $this->logger->log($level, $result->getSuggestion());

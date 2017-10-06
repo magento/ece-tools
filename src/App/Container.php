@@ -101,6 +101,13 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
+                        $this->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+                            'validators' => [
+                                ValidatorInterface::LEVEL_CRITICAL => [
+                                    $this->make(ConfigValidator\Deploy\AdminEmail::class)
+                                ],
+                            ]
+                        ]),
                         $this->make(DeployProcess\PreDeploy::class),
                         $this->make(DeployProcess\CreateConfigFile::class),
                         $this->make(DeployProcess\SetMode::class),
@@ -115,7 +122,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
-                        $this->make(DeployProcess\InstallUpdate\Install\EmailChecker::class),
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),

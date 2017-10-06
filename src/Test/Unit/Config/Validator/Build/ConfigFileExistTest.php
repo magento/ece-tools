@@ -65,12 +65,12 @@ class ConfigFileExistTest extends TestCase
             ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
-            ->with([], '')
+            ->with('', '')
             ->willReturn($this->createMock(Result::class));
 
         $result = $this->configFile->validate();
 
-        $this->assertFalse($result->hasErrors());
+        $this->assertFalse($result->hasError());
     }
 
     public function testRunFileNotExists()
@@ -84,12 +84,12 @@ class ConfigFileExistTest extends TestCase
             ->willReturn(false);
         $resultMock = $this->createMock(Result::class);
         $resultMock->expects($this->once())
-            ->method('hasErrors')
+            ->method('hasError')
             ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
-                ['File app/etc/config.php not exists'],
+                'File app/etc/config.php not exists',
                 'Please run the following commands' . PHP_EOL
                 . '1. bin/magento module:enable --all' . PHP_EOL
                 . '2. git add -f app/etc/config.php' . PHP_EOL
@@ -100,6 +100,6 @@ class ConfigFileExistTest extends TestCase
 
         $result = $this->configFile->validate();
 
-        $this->assertTrue($result->hasErrors());
+        $this->assertTrue($result->hasError());
     }
 }

@@ -92,12 +92,12 @@ class ConfigFileScdTest extends TestCase
             );
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
-            ->with([], '')
+            ->with('', '')
             ->willReturn($this->createMock(Result::class));
 
         $result = $this->configFileScd->validate();
 
-        $this->assertFalse($result->hasErrors());
+        $this->assertFalse($result->hasError());
     }
 
     public function testRunScdConfigNotExists()
@@ -119,12 +119,12 @@ class ConfigFileScdTest extends TestCase
             ->willReturn([]);
         $resultMock = $this->createMock(Result::class);
         $resultMock->expects($this->once())
-            ->method('hasErrors')
+            ->method('hasError')
             ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
-                ['No stores/website/locales found in config.php'],
+                'No stores/website/locales found in config.php',
                 'To speed up deploy process please run the following commands' . PHP_EOL
                 . '1. bin/magento app:config:dump' . PHP_EOL
                 . '2. git add -f app/etc/config.php' . PHP_EOL
@@ -135,6 +135,6 @@ class ConfigFileScdTest extends TestCase
 
         $result = $this->configFileScd->validate();
 
-        $this->assertTrue($result->hasErrors());
+        $this->assertTrue($result->hasError());
     }
 }

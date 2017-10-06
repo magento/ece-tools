@@ -82,7 +82,7 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(false);
         $resultMock = $this->createMock(Result::class);
         $resultMock->expects($this->once())
-            ->method('hasErrors')
+            ->method('hasError')
             ->willReturn(false);
         $this->configFileScdMock->expects($this->once())
             ->method('validate')
@@ -97,11 +97,11 @@ class DeployStaticContentTest extends TestCase
     {
         $resultMock = $this->createMock(Result::class);
         $resultMock->expects($this->once())
-            ->method('hasErrors')
+            ->method('hasError')
             ->willReturn(true);
         $resultMock->expects($this->once())
-            ->method('getErrors')
-            ->willReturn(['error']);
+            ->method('getError')
+            ->willReturn('error');
         $this->configFileScdMock->expects($this->once())
             ->method('validate')
             ->willReturn($resultMock);

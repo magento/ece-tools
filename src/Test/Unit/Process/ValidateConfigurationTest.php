@@ -52,11 +52,11 @@ class ValidateConfigurationTest extends TestCase
         $criticalValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $criticalResultMock = $this->createMock(Result::class);
         $criticalResultMock->expects($this->once())
-            ->method('hasErrors')
+            ->method('hasError')
             ->willReturn(true);
         $criticalResultMock->expects($this->once())
-            ->method('getErrors')
-            ->willReturn(['some error']);
+            ->method('getError')
+            ->willReturn('some error');
         $criticalResultMock->expects($this->any())
             ->method('getSuggestion')
             ->willReturn('some suggestion');

@@ -52,12 +52,10 @@ class ConfigFileExist implements ValidatorInterface
      */
     public function validate(): Validator\Result
     {
-        $errors = [];
-        $suggestion = '';
         $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
 
         if (!$this->file->isExists($configFile)) {
-            $errors[] = 'File app/etc/config.php not exists';
+            $error = 'File app/etc/config.php not exists';
             $suggestion = implode(
                 PHP_EOL,
                 [
@@ -70,6 +68,6 @@ class ConfigFileExist implements ValidatorInterface
             );
         }
 
-        return $this->resultFactory->create($errors, $suggestion);
+        return $this->resultFactory->create($error ?? '', $suggestion ?? '');
     }
 }

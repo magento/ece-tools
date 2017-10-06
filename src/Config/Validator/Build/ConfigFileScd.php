@@ -58,8 +58,6 @@ class ConfigFileScd implements ValidatorInterface
      */
     public function validate(): Validator\Result
     {
-        $errors = [];
-        $suggestion = '';
         $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
         $config = $this->file->requireFile($configFile);
 
@@ -68,7 +66,7 @@ class ConfigFileScd implements ValidatorInterface
         $stores = $this->arrayManager->filter($flattenedConfig, 'scopes/stores', false);
 
         if (count($stores) === 0 && count($websites) === 0) {
-            $errors[] = 'No stores/website/locales found in config.php';
+            $error = 'No stores/website/locales found in config.php';
             $suggestion = implode(
                 PHP_EOL,
                 [
@@ -81,6 +79,6 @@ class ConfigFileScd implements ValidatorInterface
             );
         }
 
-        return $this->resultFactory->create($errors, $suggestion);
+        return $this->resultFactory->create($error ?? '', $suggestion ?? '');
     }
 }

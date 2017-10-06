@@ -8,9 +8,9 @@ namespace Magento\MagentoCloud\Config\Validator;
 class Result
 {
     /**
-     * @var string[]
+     * @var string
      */
-    private $errors;
+    private $error;
 
     /**
      * @var string
@@ -18,12 +18,12 @@ class Result
     private $suggestion = '';
 
     /**
-     * @param array $errors
+     * @param string $error
      * @param string $suggestion
      */
-    public function __construct(array $errors = [], string $suggestion = '')
+    public function __construct(string $error = '', string $suggestion = '')
     {
-        $this->errors = $errors;
+        $this->error = $error;
         $this->suggestion = $suggestion;
     }
 
@@ -32,19 +32,19 @@ class Result
      *
      * @return bool
      */
-    public function hasErrors(): bool
+    public function hasError(): bool
     {
-        return (bool)count($this->errors);
+        return !empty($this->error);
     }
 
     /**
-     * Returns list of errors
+     * Returns error
      *
-     * @return string[]
+     * @return string
      */
-    public function getErrors(): array
+    public function getError(): string
     {
-        return $this->errors;
+        return $this->error;
     }
 
     /**
