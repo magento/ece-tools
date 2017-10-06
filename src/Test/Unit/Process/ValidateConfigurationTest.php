@@ -45,7 +45,7 @@ class ValidateConfigurationTest extends TestCase
 
     /**
      * @expectedException \RuntimeException
-     * @expectedExceptionMessage Please fix configuration with given recommendations
+     * @expectedExceptionMessage Please fix configuration with given suggestions
      */
     public function testExecuteWithCriticalError()
     {

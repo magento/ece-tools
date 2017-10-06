@@ -57,7 +57,7 @@ class ValidateConfiguration implements ProcessInterface
                     $this->logger->log($level, $message);
 
                     if ($level === ValidatorInterface::LEVEL_CRITICAL) {
-                        throw new \RuntimeException('Please fix configuration with given recommendations');
+                        throw new \RuntimeException('Please fix configuration with given suggestions');
                     }
                 }
             }
