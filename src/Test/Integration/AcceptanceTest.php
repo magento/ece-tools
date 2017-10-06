@@ -145,7 +145,7 @@ class AcceptanceTest extends TestCase
         $config = $this->bootstrap->mergeConfig($environment);
         $routes = $config->get('routes');
 
-        if ($config->has('skip_front_check')) {
+        if ($config->get('skip_front_check') === true) {
             return;
         }
 
