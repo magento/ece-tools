@@ -54,29 +54,17 @@ class DeployPreparer
     /**
      * Prepares the deploy log for further use.
      *
-     * @throws \RuntimeException
      * @return void
      */
     public function prepare()
     {
         $deployLogPath = $this->loggerConfig->getDeployLogPath();
         $buildLogPath = $this->loggerConfig->getBackupBuildLogPath();
-        $buildLogContent = file_get_contents($buildLogPath);
+        $buildLogContent = $this->file->fileGetContents($buildLogPath);
 
-        $buildLogIsApplied = $this->buildLogIsApplied($deployLogPath, $buildLogContent);
-
-        if (!$this->environment->isEnvironmentIdLabelExist()) {
-            $this->environment->syncEnvironmentId();
-        }
-
-        if ($this->environment->hasEnvironmentChanged()) {
-            $this->invalidateLogs();
-            $this->environment->syncEnvironmentId();
-        }
-
-        if (file_exists($deployLogPath) && !$buildLogIsApplied) {
+        if ($this->file->isExists($deployLogPath) && !$this->buildLogIsApplied($deployLogPath, $buildLogContent)) {
             $this->file->filePutContents($deployLogPath, $buildLogContent, FILE_APPEND);
-        } elseif (!$buildLogIsApplied) {
+        } else {
             $this->file->createDirectory(dirname($deployLogPath));
             $this->file->copy($buildLogPath, $deployLogPath);
         }
@@ -91,15 +79,6 @@ class DeployPreparer
      */
     private function buildLogIsApplied(string $deployLogPath, string $buildLogContent): bool
     {
-        if (!file_exists($deployLogPath)) {
-            return false;
-        }
-        return false !== strpos(file_get_contents($deployLogPath), $buildLogContent);
-    }
-
-    private function invalidateLogs()
-    {
-        $logDir = $this->directoryList->getMagentoRoot().'/var/log';
-        array_map('unlink', glob($logDir . '/*.log'));
+        return false !== strpos($this->file->fileGetContents($deployLogPath), $buildLogContent);
     }
 }

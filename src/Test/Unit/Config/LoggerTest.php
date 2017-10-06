@@ -27,51 +27,25 @@ class LoggerTest extends TestCase
     protected function setUp()
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->loggerConfig = new Logger($this->directoryListMock);
-    }
-
-    public function testGetLineFormat()
-    {
-        $this->assertSame(
-            "[%datetime%] %level_name%: %message% %context% %extra%\n",
-            $this->loggerConfig->getLineFormat()
-        );
-    }
-
-    public function testAllowInlineLineBreaks()
-    {
-        $this->assertTrue($this->loggerConfig->allowInlineLineBreaks());
-    }
-
-    public function testIgnoreEmptyContextAndExtra()
-    {
-        $this->assertTrue($this->loggerConfig->ignoreEmptyContextAndExtra());
-    }
-
-    public function testDateFormat()
-    {
-        $this->assertNull($this->loggerConfig->dateFormat());
     }
 
     public function testGetDeployLogPath()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->assertSame(
-            'magento_root/var/log/cloud.log',
-            $this->loggerConfig->getDeployLogPath()
-        );
+        $this->assertSame('magento_root/var/log/cloud.log', $this->loggerConfig->getDeployLogPath());
     }
 
     public function testGetBackupBuildLogPath()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->assertSame(
-            'magento_root/init/var/log/cloud.log',
-            $this->loggerConfig->getBackupBuildLogPath()
-        );
+        $this->assertSame('magento_root/init/var/log/cloud.log', $this->loggerConfig->getBackupBuildLogPath());
+    }
+
+    public function testGetLogger()
+    {
+        $logger = $this->loggerConfig->getLogger();
+        $this->assertInstanceOf(\Psr\Log\LoggerInterface::class, $logger);
     }
 }

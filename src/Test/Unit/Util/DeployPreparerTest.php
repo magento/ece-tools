@@ -55,106 +55,83 @@ class DeployPreparerTest extends TestCase
     }
 
     /**
-     * @param string $deployLogBasename
-     * @param string $backupBuildLogBasename
-     * @param bool $envIsChanged
-     * @param $directoryListGetMagentoRootExpects
-     * @param $environmentIsEnvironmentIdLabelExistWillReturn
-     * @param $environmentSyncEnvironmentIdExpects
+     * @param $fileFileGetContentsExpects
+     * @param $buildLogContent
+     * @param $deployLogContent
+     * @param $fileIsExistsWillReturn
      * @param $fileFilePutContentsExpects
      * @param $fileCreateDirectoryExpects
      * @param $fileCopyExpects
      * @dataProvider prepareDataProvider
      */
     public function testPrepare(
-        string $deployLogBasename,
-        string $backupBuildLogBasename,
-        bool $envIsChanged,
-        $directoryListGetMagentoRootExpects,
-        $environmentIsEnvironmentIdLabelExistWillReturn,
-        $environmentSyncEnvironmentIdExpects,
+        $fileFileGetContentsExpects,
+        $buildLogContent,
+        $deployLogContent,
+        $fileIsExistsWillReturn,
         $fileFilePutContentsExpects,
         $fileCreateDirectoryExpects,
         $fileCopyExpects
     ) {
-        $root = __DIR__ . '/_files';
-        $deployLogPath = $root . '/var/log/' . $deployLogBasename;
-        $backupBuildLogPath = $root . '/init/var/log/' . $backupBuildLogBasename;
+        $deployLogPath = 'path/to/deploy/cloud.log';
+        $backupBuildLogPath = 'path/to/backup/build/cloud.log';
         $this->loggerConfigMock->expects($this->once())
             ->method('getDeployLogPath')
             ->willReturn($deployLogPath);
         $this->loggerConfigMock->expects($this->once())
             ->method('getBackupBuildLogPath')
             ->willReturn($backupBuildLogPath);
-        $this->environmentMock->expects($this->once())
-            ->method('hasEnvironmentChanged')
-            ->willReturn($envIsChanged);
-        $this->directoryListMock->expects($directoryListGetMagentoRootExpects)
-            ->method('getMagentoRoot')
-            ->willReturn('/fake/path/to/var/log');
-        $this->environmentMock->expects($this->once())
-            ->method('isEnvironmentIdLabelExist')
-            ->willReturn($environmentIsEnvironmentIdLabelExistWillReturn);
-        $this->environmentMock->expects($environmentSyncEnvironmentIdExpects)
-            ->method('syncEnvironmentId');
+        $this->fileMock->expects($fileFileGetContentsExpects)
+            ->method('fileGetContents')
+            ->willReturnOnConsecutiveCalls($buildLogContent, $deployLogContent);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn($fileIsExistsWillReturn);
         $this->fileMock->expects($fileFilePutContentsExpects)
             ->method('filePutContents')
-            ->with($deployLogPath, 'not applied logs', FILE_APPEND);
+            ->with($deployLogPath, $buildLogContent, FILE_APPEND);
         $this->fileMock->expects($fileCreateDirectoryExpects)
             ->method('createDirectory')
             ->with(dirname($deployLogPath));
         $this->fileMock->expects($fileCopyExpects)
             ->method('copy')
             ->with($backupBuildLogPath, $deployLogPath);
+
         $this->deployPreparer->prepare();
     }
 
+    /**
+     * @return array
+     */
     public function prepareDataProvider()
     {
         return [
             [
-                'deployLogBasename' => 'cloud.log',
-                'backupBuildLogBasename' => 'cloud_applied.log',
-                'envIsChanged' => true,
-                'directoryListGetMagentoRootExpects' => $this->once(),
-                'environmentIsEnvironmentIdLabelExistWillReturn' => true,
-                'environmentSyncEnvironmentIdExpects' => $this->once(),
-                'fileFilePutContentsExpects' => $this->never(),
-                'fileCreateDirectoryExpects' => $this->never(),
-                'fileCopyExpects' => $this->never()
-            ],
-            [
-                'deployLogBasename' => 'cloud.log',
-                'backupBuildLogBasename' => 'cloud_applied.log',
-                'envIsChanged' => false,
-                'directoryListGetMagentoRootExpects' => $this->never(),
-                'environmentIsEnvironmentIdLabelExistWillReturn' => false,
-                'environmentSyncEnvironmentIdExpects' => $this->once(),
-                'fileFilePutContentsExpects' => $this->never(),
-                'fileCreateDirectoryExpects' => $this->never(),
-                'fileCopyExpects' => $this->never()
-            ],
-            [
-                'deployLogBasename' => 'cloud.log',
-                'backupBuildLogBasename' => 'cloud_not_applied.log',
-                'envIsChanged' => false,
-                'directoryListGetMagentoRootExpects' => $this->never(),
-                'environmentIsEnvironmentIdLabelExistWillReturn' => true,
-                'environmentSyncEnvironmentIdExpects' => $this->never(),
-                'fileFilePutContentsExpects' => $this->once(),
-                'fileCreateDirectoryExpects' => $this->never(),
-                'fileCopyExpects' => $this->never()
-            ],
-            [
-                'deployLogBasename' => 'wrong_cloud.log',
-                'backupBuildLogBasename' => 'cloud_not_applied.log',
-                'envIsChanged' => true,
-                'directoryListGetMagentoRootExpects' => $this->once(),
-                'environmentIsEnvironmentIdLabelExistWillReturn' => true,
-                'environmentSyncEnvironmentIdExpects' => $this->once(),
+                'fileFileGetContentsExpects' => $this->once(),
+                'buildLogContent' => 'build log is not applied',
+                'deployLogContent' => null,
+                'fileIsExistsWillReturn' => false,
                 'fileFilePutContentsExpects' => $this->never(),
                 'fileCreateDirectoryExpects' => $this->once(),
-                'fileCopyExpects' => $this->once()
+                'fileCopyExpects' => $this->once(),
+            ],
+            [
+                'fileFileGetContentsExpects' => $this->exactly(2),
+                'buildLogContent' => 'build log is applied',
+                'deployLogContent' => 'some logs build log is applied some logs',
+                'fileIsExistsWillReturn' => true,
+                'fileFilePutContentsExpects' => $this->never(),
+                'fileCreateDirectoryExpects' => $this->once(),
+                'fileCopyExpects' => $this->once(),
+            ],
+            [
+                'fileFileGetContentsExpects' => $this->exactly(2),
+                'buildLogContent' => 'build log is not applied',
+                'deployLogContent' => 'some logs build log is applied some logs',
+                'fileIsExistsWillReturn' => true,
+                'fileFilePutContentsExpects' => $this->once(),
+                'fileCreateDirectoryExpects' => $this->never(),
+                'fileCopyExpects' => $this->never(),
             ],
         ];
     }

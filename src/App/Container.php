@@ -13,8 +13,6 @@ use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -57,7 +55,11 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
         $this->singleton(\Magento\MagentoCloud\Config\Logger::class);
-        $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
+        $this->singleton(\Psr\Log\LoggerInterface::class, function () {
+            /** @var \Magento\MagentoCloud\Config\Logger; $loggerConfig */
+            $loggerConfig = $this->get(\Magento\MagentoCloud\Config\Logger::class);
+            return $loggerConfig->getLogger();
+        });
         $this->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
         $this->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
@@ -186,33 +188,5 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     public function get($id)
     {
         return $this->resolve($id);
-    }
-
-    /**
-     * @param string $name
-     * @return \Closure
-     */
-    private function createLogger(string $name): \Closure
-    {
-        return function () use ($name) {
-            /** @var \Magento\MagentoCloud\Config\Logger $loggerConfig */
-            $loggerConfig = $this->get(\Magento\MagentoCloud\Config\Logger::class);
-            $formatter = new LineFormatter(
-                $loggerConfig->getLineFormat(),
-                $loggerConfig->dateFormat(),
-                $loggerConfig->allowInlineLineBreaks(),
-                $loggerConfig->ignoreEmptyContextAndExtra()
-            );
-
-            return $this->makeWith(\Monolog\Logger::class, [
-                'name' => $name,
-                'handlers' => [
-                    (new StreamHandler($loggerConfig->getDeployLogPath()))
-                        ->setFormatter($formatter),
-                    (new StreamHandler('php://stdout'))
-                        ->setFormatter($formatter),
-                ],
-            ]);
-        };
     }
 }

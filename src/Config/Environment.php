@@ -413,54 +413,7 @@ class Environment
      */
     public function isMasterBranch(): bool
     {
-        $environmentId = $this->getEnvironmentId();
-        return !empty($environmentId)
-            && preg_match(self::GIT_MASTER_BRANCH_RE, $environmentId);
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getEnvironmentId()
-    {
-        return $_ENV['MAGENTO_CLOUD_ENVIRONMENT'] ?? null;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasEnvironmentChanged(): bool
-    {
-        $envIdPath = $this->getSavedEnvironmentIdPath();
-        $environmentId = $this->getEnvironmentId();
-        if (file_exists($envIdPath) && (file_get_contents($envIdPath) !== $environmentId)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * @return void
-     */
-    public function syncEnvironmentId()
-    {
-        $envIdPath = $this->getSavedEnvironmentIdPath();
-        $environmentId = $this->getEnvironmentId();
-        $this->file->createDirectory(dirname($envIdPath));
-        $this->file->filePutContents($envIdPath, $environmentId);
-    }
-
-    /**
-     * @return string
-     */
-    private function getSavedEnvironmentIdPath(): string
-    {
-        return $this->directoryList->getMagentoRoot() . '/var/.env_id';
-    }
-
-    public function isEnvironmentIdLabelExist()
-    {
-        $envIdLabelPath = $this->getSavedEnvironmentIdPath();
-        return file_exists($envIdLabelPath);
+        return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
+            && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
     }
 }

@@ -125,7 +125,6 @@ class Bootstrap
             'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode($environment['variables'])),
             'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode($environment['relationships'])),
             'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode($environment['routes'])),
-            'MAGENTO_CLOUD_ENVIRONMENT' => $environment['environment'],
         ]);
 
         $server[\Magento\MagentoCloud\App\Bootstrap::INIT_PARAM_DIRS_CONFIG] = [
