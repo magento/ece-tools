@@ -12,6 +12,11 @@ use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 
+/**
+ * Sends email with link to reset password.
+ *
+ * {@inheritdoc}
+ */
 class ResetPassword implements ProcessInterface
 {
     /**

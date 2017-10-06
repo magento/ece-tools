@@ -8,6 +8,11 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Environment;
 
+/**
+ * Validates presence of ADMIN_EMAIL environment variable.
+ *
+ * {@inheritdoc}
+ */
 class EmailChecker implements ProcessInterface
 {
     /**
