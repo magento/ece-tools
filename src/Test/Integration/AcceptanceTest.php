@@ -72,6 +72,12 @@ class AcceptanceTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
+
+        if (getenv('MAGENTO_HOST_NAME')) {
+            $pageContent = file_get_contents('http://' . getenv('MAGENTO_HOST_NAME'));
+
+            $this->assertContains('Home', $pageContent);
+        }
     }
 
     /**

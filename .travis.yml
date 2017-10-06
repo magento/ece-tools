@@ -1,5 +1,8 @@
-sudo: false
+sudo: required
 dist: trusty
+addons:
+  hosts:
+      - magento2.travis
 services:
   - mysql
 language: php
@@ -9,6 +12,8 @@ php:
 env:
   global:
     - COMPOSER_BIN_DIR=~/bin
+    - MAGENTO_HOST_NAME="magento2.travis"
+    - SANDBOX_KEY="travis"
   matrix:
     - TEST_SUITE=static
     - TEST_SUITE=unit
