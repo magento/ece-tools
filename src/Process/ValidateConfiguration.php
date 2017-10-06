@@ -23,7 +23,6 @@ class ValidateConfiguration implements ProcessInterface
     /**
      * @param LoggerInterface $logger
      * @param $validators
-     * @internal param $type
      */
     public function __construct(
         LoggerInterface $logger,
@@ -34,7 +33,8 @@ class ValidateConfiguration implements ProcessInterface
     }
 
     /**
-     * Executes the process.
+     * @inheritdoc
+     *
      * @return void
      * @throws \Exception
      */
@@ -48,11 +48,13 @@ class ValidateConfiguration implements ProcessInterface
                 $result = $validator->validate();
 
                 if ($result->hasError()) {
-                    $this->logger->log($level, $result->getError());
+                    $message = $result->getError();
 
                     if (!empty($result->getSuggestion())) {
-                        $this->logger->log($level, $result->getSuggestion());
+                        $message .= PHP_EOL . 'SUGGESTION:' . PHP_EOL .  $result->getSuggestion();
                     }
+
+                    $this->logger->log($level, $message);
 
                     if ($level === ValidatorInterface::LEVEL_CRITICAL) {
                         throw new \RuntimeException('Please fix configuration with given recommendations');

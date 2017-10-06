@@ -81,13 +81,9 @@ class ValidateConfigurationTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Validate configuration');
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('log')
-            ->withConsecutive(
-                ['critical', 'some error'],
-                ['critical', 'some suggestion']
-            );
-
+            ->with('critical', 'some error' . PHP_EOL . 'SUGGESTION:' . PHP_EOL . 'some suggestion');
 
         $process->execute();
     }
