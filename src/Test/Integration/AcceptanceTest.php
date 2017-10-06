@@ -72,12 +72,7 @@ class AcceptanceTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
-
-        if (getenv('MAGENTO_HOST_NAME')) {
-            $pageContent = file_get_contents('http://' . getenv('MAGENTO_HOST_NAME'));
-
-            $this->assertContains('Home', $pageContent);
-        }
+        $this->assertContentPresence($environment);
     }
 
     /**
@@ -127,6 +122,7 @@ class AcceptanceTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
+        $this->assertContentPresence($environment);
     }
 
     /**
@@ -139,5 +135,32 @@ class AcceptanceTest extends TestCase
                 'environment' => [],
             ],
         ];
+    }
+
+    /**
+     * @param array $environment
+     */
+    private function assertContentPresence(array $environment)
+    {
+        $config = $this->bootstrap->mergeConfig($environment);
+        $routes = $config->get('routes');
+
+        if ($config->has('skip_front_check')) {
+            return;
+        }
+
+        $defaultRoute = reset(array_keys($routes));
+        $pageContent = file_get_contents($defaultRoute);
+
+        $this->assertContains(
+            'Home Page',
+            $pageContent,
+            'Check "Home Page" phrase presence'
+        );
+        $this->assertContains(
+            'CMS homepage content goes here.',
+            $pageContent,
+            'Check "CMS homepage content goes here." phrase presence'
+        );
     }
 }

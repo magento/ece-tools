@@ -42,4 +42,5 @@ return [
         ],
         'type' => 'project',
     ],
+    'skip_front_check' => false,
 ];

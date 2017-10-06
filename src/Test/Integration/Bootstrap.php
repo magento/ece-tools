@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Integration;
 
+use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 
@@ -118,15 +119,18 @@ class Bootstrap
      */
     public function createApplication(array $environment): Application
     {
-        $environment = array_replace_recursive(
-            require $this->getConfigFile('environment.php'),
-            $environment
-        );
+        $environment = $this->mergeConfig($environment);
 
         $_ENV = array_replace($_ENV, [
-            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode($environment['variables'])),
-            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode($environment['relationships'])),
-            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode($environment['routes'])),
+            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(
+                $environment->get('variables', [])
+            )),
+            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode(
+                $environment->get('relationships', [])
+            )),
+            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
+                $environment->get('routes', [])
+            )),
         ]);
 
         $server[\Magento\MagentoCloud\App\Bootstrap::INIT_PARAM_DIRS_CONFIG] = [
@@ -137,6 +141,18 @@ class Bootstrap
 
         return \Magento\MagentoCloud\App\Bootstrap::create($this->getSandboxDir(), $server)
             ->createApplication();
+    }
+
+    /**
+     * @param array $environment
+     * @return Repository
+     */
+    public function mergeConfig(array $environment): Repository
+    {
+        return new Repository(array_replace_recursive(
+            require $this->getConfigFile('environment.php'),
+            $environment
+        ));
     }
 
     /**
