@@ -23,7 +23,7 @@ return [
         ],
     ],
     'variables' => [
-
+        'ADMIN_EMAIL' => 'admin@example.com',
     ],
     'deploy' => [
         'types' => [

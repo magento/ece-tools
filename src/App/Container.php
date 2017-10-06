@@ -115,9 +115,11 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\Install\EmailChecker::class),
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\ResetPassword::class),
                     ],
                 ]);
             });
@@ -127,7 +129,9 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
                         $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
                         $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class),
                     ],
                 ]);
@@ -140,10 +144,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
-                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\AdminCredentials::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
-                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\EnvConfiguration::class),
                     ],
                 ]);
             });
