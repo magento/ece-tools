@@ -41,7 +41,7 @@ class Bootstrap
     {
         $sandboxDir = $this->getSandboxDir();
 
-        if (is_dir($sandboxDir)) {
+        if (file_exists($sandboxDir . '/composer.lock')) {
             return;
         }
 
@@ -57,7 +57,9 @@ class Bootstrap
             );
         }
 
-        mkdir($sandboxDir, 0777, true);
+        if (!is_dir($sandboxDir)) {
+            mkdir($sandboxDir, 0777, true);
+        }
 
         switch ($deployConfig[static::DEPLOY_TYPE]) {
             case static::DEPLOY_TYPE_GIT:

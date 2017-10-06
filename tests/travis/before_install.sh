@@ -19,6 +19,7 @@ case $TEST_SUITE in
 
         # Install apache
         sudo apt-get update
+        mkdir ${TRAVIS_BUILD_DIR}/tests/integration/tmp/sandbox-${SANDBOX_KEY}
         sudo apt-get install apache2 libapache2-mod-fastcgi
         sudo cp ${TRAVIS_BUILD_DIR}/tests/travis/config/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/
 
