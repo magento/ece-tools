@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud;
 
 use Composer\Composer;
 use Magento\MagentoCloud\Command\Build;
+use Magento\MagentoCloud\Command\PreStart;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Psr\Container\ContainerInterface;
@@ -43,6 +44,7 @@ class Application extends \Symfony\Component\Console\Application
             parent::getDefaultCommands(),
             [
                 $this->container->get(Build::class),
+                $this->container->get(PreStart::class),
                 $this->container->get(Deploy::class),
                 $this->container->get(ConfigDump::class),
             ]

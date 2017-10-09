@@ -7,7 +7,8 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\StaticContentCleaner;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Util\BackgroundDirectoryCleaner;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -31,26 +32,34 @@ class DeployStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var StaticContentCleaner
+     * @var DirectoryList
      */
-    private $staticContentCleaner;
+    private $directoryList;
+
+    /**
+     * @var BackgroundDirectoryCleaner
+     */
+    private $cleaner;
 
     /**
      * @param ProcessInterface $process
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param StaticContentCleaner $staticContentCleaner
+     * @param DirectoryList $directoryList
+     * @param BackgroundDirectoryCleaner $cleaner
      */
     public function __construct(
         ProcessInterface $process,
         Environment $environment,
         LoggerInterface $logger,
-        StaticContentCleaner $staticContentCleaner
+        DirectoryList $directoryList,
+        BackgroundDirectoryCleaner $cleaner
     ) {
         $this->process = $process;
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->staticContentCleaner = $staticContentCleaner;
+        $this->directoryList = $directoryList;
+        $this->cleaner = $cleaner;
     }
 
     /**
@@ -71,12 +80,15 @@ class DeployStaticContent implements ProcessInterface
 
         /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
         if (!$this->environment->isDeployStaticContent()) {
+            $this->logger->info("Skipping static content deployment during deployment.");
             return;
         }
 
         // Clear old static content if necessary
         if ($this->environment->doCleanStaticFiles()) {
-            $this->staticContentCleaner->clean();
+            $magentoRoot = $this->directoryList->getMagentoRoot();
+            $this->cleaner->backgroundClearDirectory("$magentoRoot/pub/static");
+            $this->cleaner->backgroundDeleteDirectory("$magentoRoot/var/view_preprocessed");
         }
 
         $this->logger->info('Generating fresh static content');
