@@ -13,9 +13,9 @@ case $TEST_SUITE in
 
         mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
 
-        composer config -a -n -g github-oauth.github.com "$GH_TOKEN"
-        composer config -a -n -g http-basic.repo.magento.com "$REPO_USERNAME" "$REPO_PASSWORD"
-        composer config -a -n -g http-basic.connect20-qa01.magedevteam.com "$CONNECT20_USERNAME" "$CONNECT20_PASSWORD"
+        composer config -a -n -g github-oauth.github.com ${GH_TOKEN}
+        composer config -a -n -g http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
+        composer config -a -n -g http-basic.connect20-qa01.magedevteam.com ${CONNECT20_USERNAME} ${CONNECT20_PASSWORD}
 
         # Install apache
         sudo apt-get update
@@ -39,7 +39,5 @@ case $TEST_SUITE in
 
         phpenv config-rm xdebug.ini
         sudo service apache2 restart
-
-        /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :1 -screen 0 1280x1024x24
         ;;
 esac
