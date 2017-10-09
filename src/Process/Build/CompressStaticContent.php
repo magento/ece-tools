@@ -59,8 +59,8 @@ class CompressStaticContent implements ProcessInterface
      */
     private static $compressionCommand
         = "find pub/static -type f -size +300c"
-        . " -name '*.js' -or -name '*.css' -or -name '*.svg'"
-        . " -or -name '*.html' -or -name '*.htm'"
+        . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
+        . " -or -name '*.html' -or -name '*.htm' ')'"
         . " | xargs -n100 -P16 gzip --keep";
 
     /**
