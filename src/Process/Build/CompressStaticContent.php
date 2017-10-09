@@ -101,7 +101,7 @@ class CompressStaticContent implements ProcessInterface
             return false;
         }
 
-        $compressionCommand = $this->getCompressionCommand();
+        $compressionCommand = $this->getCompressionCommand(6);
 
         $startTime = microtime(true);
         $this->shell->execute($compressionCommand);
