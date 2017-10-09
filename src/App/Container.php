@@ -197,22 +197,18 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     private function createLogger(string $name): \Closure
     {
         return function () use ($name) {
-            $formatter = new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n");
-            $formatter->allowInlineLineBreaks();
-            $formatter->ignoreEmptyContextAndExtra();
-
-            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)
-                ->getMagentoRoot();
+            $formatter = new LineFormatter(
+                "[%datetime%] %level_name%: %message% %context% %extra%\n",
+                null,
+                true,
+                true
+            );
+            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)->getMagentoRoot();
             $logLevel = getenv('LOG_LEVEL') ?: Logger::DEBUG;
 
-            return $this->makeWith(\Monolog\Logger::class, [
-                'name' => $name,
-                'handlers' => [
-                    (new StreamHandler($magentoRoot . '/var/log/cloud.log', $logLevel))
-                        ->setFormatter($formatter),
-                    (new StreamHandler('php://stdout', $logLevel))
-                        ->setFormatter($formatter),
-                ],
+            return new Logger($name, [
+                (new StreamHandler($magentoRoot . '/var/log/cloud.log', $logLevel))->setFormatter($formatter),
+                (new StreamHandler('php://stdout', $logLevel))->setFormatter($formatter),
             ]);
         };
     }
