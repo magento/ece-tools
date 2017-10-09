@@ -40,7 +40,7 @@ class AcceptanceTest extends TestCase
     protected function tearDown()
     {
         shell_exec(sprintf(
-            "cd %s && php bin/magento setup:uninstall -n",
+            'cd %s && php bin/magento setup:uninstall -n',
             $this->bootstrap->getSandboxDir()
         ));
     }
@@ -54,7 +54,7 @@ class AcceptanceTest extends TestCase
         $application = $this->bootstrap->createApplication($environment);
 
         shell_exec(sprintf(
-            "cp -f %s %s",
+            'cp -f %s %s',
             $this->bootstrap->getConfigFile('config.php'),
             $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
         ));
@@ -104,7 +104,7 @@ class AcceptanceTest extends TestCase
         $application = $this->bootstrap->createApplication($environment);
 
         shell_exec(sprintf(
-            "cp -f %s %s",
+            'cp -f %s %s',
             __DIR__ . '/_files/config_scd_in_build.php',
             $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
         ));
@@ -163,42 +163,6 @@ class AcceptanceTest extends TestCase
             $pageContent,
             'Check "CMS homepage content goes here." phrase presence'
         );
-    }
-
-    /**
-     * @param array $environment
-     * @dataProvider upgradeDataProvider
-     */
-    public function testUpgrade(array $environment)
-    {
-        $this->markTestIncomplete();
-        $application = $this->bootstrap->createApplication($environment);
-        $config = $this->bootstrap->mergeConfig($environment);
-
-        if ($config->get('deploy.type') !== 'project') {
-            $this->markTestIncomplete('Only project upgrades');
-        }
-
-        shell_exec(sprintf(
-            "cp -f %s %s",
-            $this->bootstrap->getConfigFile('config.php'),
-            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
-        ));
-
-        $commandTester = new CommandTester(
-            $application->get(Build::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
-
-        $commandTester = new CommandTester(
-            $application->get(Deploy::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
-        $this->assertContentPresence($environment);
     }
 
     /**
