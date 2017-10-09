@@ -1,5 +1,7 @@
 <?php
 
+$baseUrl = getenv('MAGENTO_HOST_NAME') ?: 'localhost';
+
 return [
     'relationships' => [
         'database' => [
@@ -13,11 +15,11 @@ return [
         ],
     ],
     'routes' => [
-        'http://localhost/' => [
+        "http://{$baseUrl}/" => [
             'type' => 'upstream',
             'original_url' => 'http://{default}',
         ],
-        'https://localhost/' => [
+        "https://{$baseUrl}/" => [
             'type' => 'upstream',
             'original_url' => 'https://{default}',
         ],
@@ -40,4 +42,5 @@ return [
         ],
         'type' => 'project',
     ],
+    'skip_front_check' => false,
 ];

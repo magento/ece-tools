@@ -29,7 +29,7 @@ class AcceptanceTest extends TestCase
         $this->bootstrap = Bootstrap::create();
 
         shell_exec(sprintf(
-            "cd %s && rm -rf init",
+            'cd %s && rm -rf init',
             $this->bootstrap->getSandboxDir()
         ));
     }
@@ -40,7 +40,7 @@ class AcceptanceTest extends TestCase
     protected function tearDown()
     {
         shell_exec(sprintf(
-            "cd %s && php bin/magento setup:uninstall -n",
+            'cd %s && php bin/magento setup:uninstall -n',
             $this->bootstrap->getSandboxDir()
         ));
     }
@@ -54,7 +54,7 @@ class AcceptanceTest extends TestCase
         $application = $this->bootstrap->createApplication($environment);
 
         shell_exec(sprintf(
-            "cp -f %s %s",
+            'cp -f %s %s',
             $this->bootstrap->getConfigFile('config.php'),
             $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
         ));
@@ -72,6 +72,7 @@ class AcceptanceTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
+        $this->assertContentPresence($environment);
     }
 
     /**
@@ -103,7 +104,7 @@ class AcceptanceTest extends TestCase
         $application = $this->bootstrap->createApplication($environment);
 
         shell_exec(sprintf(
-            "cp -f %s %s",
+            'cp -f %s %s',
             __DIR__ . '/_files/config_scd_in_build.php',
             $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
         ));
@@ -121,12 +122,53 @@ class AcceptanceTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
+        $this->assertContentPresence($environment);
     }
 
     /**
      * @return array
      */
     public function deployInBuildDataProvider(): array
+    {
+        return [
+            'default configuration' => [
+                'environment' => [],
+            ],
+        ];
+    }
+
+    /**
+     * @param array $environment
+     */
+    private function assertContentPresence(array $environment)
+    {
+        $config = $this->bootstrap->mergeConfig($environment);
+        $routes = $config->get('routes');
+
+        if ($config->get('skip_front_check') === true || !$routes) {
+            return;
+        }
+
+        $routes = array_keys($routes);
+        $defaultRoute = reset($routes);
+        $pageContent = file_get_contents($defaultRoute);
+
+        $this->assertContains(
+            'Home Page',
+            $pageContent,
+            'Check "Home Page" phrase presence'
+        );
+        $this->assertContains(
+            'CMS homepage content goes here.',
+            $pageContent,
+            'Check "CMS homepage content goes here." phrase presence'
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function upgradeDataProvider(): array
     {
         return [
             'default configuration' => [

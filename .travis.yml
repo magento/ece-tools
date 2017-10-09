@@ -1,5 +1,8 @@
-sudo: false
+sudo: required
 dist: trusty
+addons:
+  hosts:
+      - magento2.travis
 services:
   - mysql
 language: php
@@ -9,6 +12,8 @@ php:
 env:
   global:
     - COMPOSER_BIN_DIR=~/bin
+    - MAGENTO_HOST_NAME="magento2.travis"
+    - SANDBOX_KEY="travis"
   matrix:
     - TEST_SUITE=static
     - TEST_SUITE=unit
@@ -27,4 +32,4 @@ script:
   - if [ $TEST_SUITE == "static" ]; then phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n; fi;
   - if [ $TEST_SUITE == "static" ]; then phpmd src xml tests/static/phpmd-ruleset.xml; fi;
   - if [ $TEST_SUITE == "unit" ]; then phpunit --configuration tests/unit/phpunit.xml.dist; fi;
-  - if [ $TEST_SUITE == "integration" ]; then phpunit --configuration tests/integration/phpunit.xml.dist; fi;
+  - if [ $TEST_SUITE == "integration" ]; then phpunit --verbose --configuration tests/integration/phpunit.xml.dist; fi;
