@@ -125,8 +125,9 @@ class CompressStaticContent implements ProcessInterface
      */
     private function getCompressionCommand($compressionLevel = 1, $verbose = false) {
         if (!is_int($compressionLevel) || $compressionLevel < 1 || $compressionLevel > 9) {
-            $this->logger->info("Compression level was set to \"$compressionLevel\" but this is invalid. Using default compression level of \"1\".");
-            $compressionLevel = 1;
+            $defaultCompressionLevel = 1;
+            $this->logger->info("Compression level was set to \"$compressionLevel\" but this is invalid. Using default compression level of \"$defaultCompressionLevel\".");
+            $compressionLevel = $defaultCompressionLevel;
         }
 
         $compressionCommand = self::$compressionCommand;
