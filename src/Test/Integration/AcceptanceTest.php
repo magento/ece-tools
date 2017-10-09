@@ -145,11 +145,12 @@ class AcceptanceTest extends TestCase
         $config = $this->bootstrap->mergeConfig($environment);
         $routes = $config->get('routes');
 
-        if ($config->get('skip_front_check') === true) {
+        if ($config->get('skip_front_check') === true || !$routes) {
             return;
         }
 
-        $defaultRoute = reset(array_keys($routes));
+        $routes = array_keys($routes);
+        $defaultRoute = reset($routes);
         $pageContent = file_get_contents($defaultRoute);
 
         $this->assertContains(
@@ -162,5 +163,53 @@ class AcceptanceTest extends TestCase
             $pageContent,
             'Check "CMS homepage content goes here." phrase presence'
         );
+    }
+
+    /**
+     * @param array $environment
+     * @dataProvider upgradeDataProvider
+     */
+    public function testUpgrade(array $environment)
+    {
+        $this->markTestIncomplete();
+        $application = $this->bootstrap->createApplication($environment);
+        $config = $this->bootstrap->mergeConfig($environment);
+
+        if ($config->get('deploy.type') !== 'project') {
+            $this->markTestIncomplete('Only project upgrades');
+        }
+
+        shell_exec(sprintf(
+            "cp -f %s %s",
+            $this->bootstrap->getConfigFile('config.php'),
+            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
+        ));
+
+        $commandTester = new CommandTester(
+            $application->get(Build::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+
+        $commandTester = new CommandTester(
+            $application->get(Deploy::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->assertContentPresence($environment);
+    }
+
+    /**
+     * @return array
+     */
+    public function upgradeDataProvider(): array
+    {
+        return [
+            'default configuration' => [
+                'environment' => [],
+            ],
+        ];
     }
 }
