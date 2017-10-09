@@ -29,7 +29,7 @@ class AcceptanceTest extends TestCase
         $this->bootstrap = Bootstrap::create();
 
         shell_exec(sprintf(
-            "cd %s && rm -rf init",
+            'cd %s && rm -rf init',
             $this->bootstrap->getSandboxDir()
         ));
     }

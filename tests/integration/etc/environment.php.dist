@@ -19,7 +19,7 @@ return [
             'type' => 'upstream',
             'original_url' => 'http://{default}',
         ],
-        "https://$baseUrl/" => [
+        "https://{$baseUrl}/" => [
             'type' => 'upstream',
             'original_url' => 'https://{default}',
         ],
