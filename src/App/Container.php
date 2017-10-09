@@ -81,8 +81,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(BuildProcess\CompileDi::class),
                         $this->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->make(BuildProcess\DeployStaticContent::class),
-                        $this->make(BuildProcess\ClearInitDirectory::class),
-                        $this->make(BuildProcess\BackupData::class),
+                        $this->make(BuildProcess\ClearBackupDirectory::class),
+                        $this->make(BuildProcess\CopyToBackupDirectory::class),
                     ],
                 ]);
             });
