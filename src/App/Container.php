@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -202,13 +203,14 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
 
             $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)
                 ->getMagentoRoot();
+            $logLevel = getenv('LOG_LEVEL') ?: Logger::DEBUG;
 
             return $this->makeWith(\Monolog\Logger::class, [
                 'name' => $name,
                 'handlers' => [
-                    (new StreamHandler($magentoRoot . '/var/log/cloud.log'))
+                    (new StreamHandler($magentoRoot . '/var/log/cloud.log', $logLevel))
                         ->setFormatter($formatter),
-                    (new StreamHandler('php://stdout'))
+                    (new StreamHandler('php://stdout', $logLevel))
                         ->setFormatter($formatter),
                 ],
             ]);
