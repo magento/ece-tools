@@ -28,6 +28,11 @@ class Environment
     const VAL_ENABLED = 'enabled';
     const VAL_DISABLED = 'disabled';
 
+    const DEFAULT_ADMIN_URL = 'admin';
+    const DEFAULT_ADMIN_NAME = 'admin';
+    const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
+    const DEFAULT_ADMIN_LASTNAME = 'Username';
+
     /**
      * Let's keep variable names same for both phases.
      */
@@ -347,7 +352,7 @@ class Environment
      */
     public function getAdminUsername(): string
     {
-        return $this->getVariables()['ADMIN_USERNAME'] ?? 'admin';
+        return $this->getVariables()['ADMIN_USERNAME'] ?? '';
     }
 
     /**
@@ -355,7 +360,7 @@ class Environment
      */
     public function getAdminFirstname(): string
     {
-        return $this->getVariables()['ADMIN_FIRSTNAME'] ?? 'John';
+        return $this->getVariables()['ADMIN_FIRSTNAME'] ?? '';
     }
 
     /**
@@ -363,7 +368,7 @@ class Environment
      */
     public function getAdminLastname(): string
     {
-        return $this->getVariables()['ADMIN_LASTNAME'] ?? 'Doe';
+        return $this->getVariables()['ADMIN_LASTNAME'] ?? '';
     }
 
     /**
@@ -371,7 +376,7 @@ class Environment
      */
     public function getAdminEmail(): string
     {
-        return $this->getVariables()['ADMIN_EMAIL'] ?? 'john@example.com';
+        return $this->getVariables()['ADMIN_EMAIL'] ?? '';
     }
 
     /**
@@ -379,7 +384,7 @@ class Environment
      */
     public function getAdminPassword(): string
     {
-        return $this->getVariables()['ADMIN_PASSWORD'] ?? 'admin12';
+        return $this->getVariables()['ADMIN_PASSWORD'] ?? '';
     }
 
     /**
@@ -387,7 +392,7 @@ class Environment
      */
     public function getAdminUrl(): string
     {
-        return $this->getVariables()['ADMIN_URL'] ?? 'admin';
+        return $this->getVariables()['ADMIN_URL'] ?? '';
     }
 
     /**
