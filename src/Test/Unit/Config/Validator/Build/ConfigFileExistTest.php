@@ -90,7 +90,7 @@ class ConfigFileExistTest extends TestCase
             ->method('create')
             ->with(
                 'File app/etc/config.php not exists',
-                'Please run the following commands' . PHP_EOL
+                'Please run the following commands:' . PHP_EOL
                 . '1. bin/magento module:enable --all' . PHP_EOL
                 . '2. git add -f app/etc/config.php' . PHP_EOL
                 . '3. git commit -a -m \'adding config.php\'' . PHP_EOL

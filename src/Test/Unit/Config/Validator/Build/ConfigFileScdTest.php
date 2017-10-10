@@ -125,7 +125,7 @@ class ConfigFileScdTest extends TestCase
             ->method('create')
             ->with(
                 'No stores/website/locales found in config.php',
-                'To speed up deploy process please run the following commands' . PHP_EOL
+                'To speed up the deploy process, please run the following commands:' . PHP_EOL
                 . '1. bin/magento app:config:dump' . PHP_EOL
                 . '2. git add -f app/etc/config.php' . PHP_EOL
                 . '3. git commit -a -m \'updating config.php\'' . PHP_EOL

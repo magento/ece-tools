@@ -70,7 +70,7 @@ class ConfigFileScd implements ValidatorInterface
             $suggestion = implode(
                 PHP_EOL,
                 [
-                    'To speed up deploy process please run the following commands',
+                    'To speed up the deploy process, please run the following commands:',
                     '1. bin/magento app:config:dump',
                     '2. git add -f app/etc/config.php',
                     '3. git commit -a -m \'updating config.php\'',

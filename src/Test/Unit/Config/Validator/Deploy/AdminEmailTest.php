@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\Deploy\AdminEmail;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -73,12 +73,11 @@ class AdminEmailTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
-                'ADMIN_EMAIL not set during install!',
-                'We need this variable set to send the password reset email. ' .
-                'Please set ADMIN_EMAIL and retry deploy.'
+                'The variable ADMIN_EMAIL was not set during the installation.' .
+                ' This variable is required to send the Admin password reset email.',
+                'Set an environment variable for ADMIN_EMAIL and retry deployment.'
             )
             ->willReturn($this->createMock(Result::class));
-
 
         $this->adminEmailValidator->validate();
     }

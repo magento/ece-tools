@@ -59,7 +59,7 @@ class ConfigFileExist implements ValidatorInterface
             $suggestion = implode(
                 PHP_EOL,
                 [
-                    'Please run the following commands',
+                    'Please run the following commands:',
                     '1. bin/magento module:enable --all',
                     '2. git add -f app/etc/config.php',
                     '3. git commit -a -m \'adding config.php\'',
