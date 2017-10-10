@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\DeployPreparer;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -33,11 +32,6 @@ class DeployTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var DeployPreparer|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $deployPreparerMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -46,25 +40,18 @@ class DeployTest extends TestCase
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->deployPreparerMock = $this->createMock(DeployPreparer::class);
 
         $this->command = new Deploy(
             $this->processMock,
-            $this->loggerMock,
-            $this->deployPreparerMock
+            $this->loggerMock
         );
     }
 
     public function testExecute()
     {
-        $this->deployPreparerMock->expects($this->once())
-            ->method('prepare');
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Starting deploy.'],
-                ['Deployment completed.']
-            );
+            ->with('Deployment completed.');
         $this->processMock->expects($this->once())
             ->method('execute');
 
@@ -82,11 +69,6 @@ class DeployTest extends TestCase
      */
     public function testExecuteWithException()
     {
-        $this->deployPreparerMock->expects($this->once())
-            ->method('prepare');
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Starting deploy.');
         $this->loggerMock->expects($this->once())
             ->method('critical')
             ->with('Some error');

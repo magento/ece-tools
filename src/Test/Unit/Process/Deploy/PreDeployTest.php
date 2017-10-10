@@ -147,8 +147,8 @@ class PreDeployTest extends TestCase
                 'buildPhaseLogContent' => 'the build phase log was not applied',
                 'deployLogContent' => 'some log the build phase log was applied some log',
                 'deployLogPathExists' => true,
-                'fileMockFilePutContentsExpects' => $this->never(),
-                'fileMockCopyExpects' => $this->once()
+                'fileMockFilePutContentsExpects' => $this->once(),
+                'fileMockCopyExpects' => $this->never()
             ]
         ];
     }
