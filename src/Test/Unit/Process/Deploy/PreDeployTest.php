@@ -95,7 +95,10 @@ class PreDeployTest extends TestCase
             ->willReturn($magento_root);
         $this->fileMock->expects($fileMockFileGetContentsExpects)
             ->method('fileGetContents')
-            ->withConsecutive($buildPhaseLogPath, $deployLogPath)
+            ->withConsecutive(
+                [$buildPhaseLogPath],
+                [$deployLogPath]
+            )
             ->willReturnOnConsecutiveCalls($buildPhaseLogContent, $deployLogContent);
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -114,8 +117,8 @@ class PreDeployTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                'Starting deploy.',
-                'Starting pre-deploy. (components info)'
+                ['Starting deploy.'],
+                ['Starting pre-deploy. (components info)']
             );
         $this->processMock->expects($this->once())
             ->method('execute');
