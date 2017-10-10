@@ -25,6 +25,11 @@ class Logger extends \Monolog\Logger
     const BACKUP_BUILD_PHASE_LOG_PATH = 'init/var/log/cloud.log';
 
     /**
+     * Path to the log dir
+     */
+    const LOG_DIR = 'var/log';
+
+    /**
      * @param DirectoryList $directoryList
      */
     public function __construct(DirectoryList $directoryList)

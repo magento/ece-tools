@@ -90,6 +90,7 @@ class PreDeploy implements ProcessInterface
         if ($this->file->isExists($deployLogPath) && !$this->buildLogIsApplied($deployLogPath, $buildPhaseLogContent)) {
             $this->file->filePutContents($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
         } else {
+            $this->file->createDirectory($magentoRoot . '/' . Logger::LOG_DIR);
             $this->file->copy($buildPhaseLogPath, $deployLogPath);
         }
     }
