@@ -90,7 +90,6 @@ class PreDeploy implements ProcessInterface
         if ($this->file->isExists($deployLogPath) && !$this->buildLogIsApplied($deployLogPath, $buildPhaseLogContent)) {
             $this->file->filePutContents($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
         } else {
-            $this->file->createDirectory(dirname($deployLogPath));
             $this->file->copy($buildPhaseLogPath, $deployLogPath);
         }
     }
