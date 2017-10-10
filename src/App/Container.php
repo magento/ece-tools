@@ -134,7 +134,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
                         $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
-                        $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\ClearMagentoCache::class),
                     ],
                 ]);
             });
