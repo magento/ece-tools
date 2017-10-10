@@ -73,9 +73,9 @@ class AdminEmailTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
-                'The variable ADMIN_EMAIL was not set during the installation.' .
-                ' This variable is required to send the Admin password reset email.',
-                'Set an environment variable for ADMIN_EMAIL and retry deployment.'
+                'The variable ADMIN_EMAIL was not set during the installation.',
+                'This variable is required to send the Admin password reset email.' .
+                ' Set an environment variable for ADMIN_EMAIL and retry deployment.'
             )
             ->willReturn($this->createMock(Result::class));
 
