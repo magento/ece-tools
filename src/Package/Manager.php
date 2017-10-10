@@ -70,4 +70,18 @@ class Manager
 
         return $package;
     }
+
+    /**
+     * Retrieve required packages from composer.json
+     *
+     * @return string[]
+     */
+    public function getRequiredPackageNames(): array
+    {
+        $packages = [];
+        foreach ($this->composer->getPackage()->getRequires() as $link) {
+            $packages[] = $link->getTarget();
+        }
+        return $packages;
+    }
 }
