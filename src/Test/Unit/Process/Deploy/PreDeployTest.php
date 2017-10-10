@@ -74,9 +74,8 @@ class PreDeployTest extends TestCase
      * @param $fileMockFileGetContentsExpects
      * @param $buildPhaseLogContent
      * @param $deployLogContent
-     * @param $deployLogPathExists
+     * @param $deployLogFileExists
      * @param $fileMockFilePutContentsExpects
-     * @param $fileMockCreateDirectoryExpects
      * @param $fileMockCopyExpects
      * @dataProvider executeDataProvider
      */
@@ -84,15 +83,13 @@ class PreDeployTest extends TestCase
         $fileMockFileGetContentsExpects,
         $buildPhaseLogContent,
         $deployLogContent,
-        $deployLogPathExists,
+        $deployLogFileExists,
         $fileMockFilePutContentsExpects,
-        $fileMockCreateDirectoryExpects,
         $fileMockCopyExpects
     ) {
         $magento_root = 'magento_root';
         $deployLogPath = $magento_root . '/' . Logger::DEPLOY_LOG_PATH;
         $buildPhaseLogPath = $magento_root . '/' . Logger::BACKUP_BUILD_PHASE_LOG_PATH;
-        $logDir = $magento_root . '/' . Logger::LOG_DIR;
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magento_root);
@@ -103,13 +100,10 @@ class PreDeployTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($deployLogPath)
-            ->willReturn($deployLogPathExists);
+            ->willReturn($deployLogFileExists);
         $this->fileMock->expects($fileMockFilePutContentsExpects)
             ->method('filePutContents')
             ->with($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
-        $this->fileMock->expects($fileMockCreateDirectoryExpects)
-            ->method('createDirectory')
-            ->with($logDir);
         $this->fileMock->expects($fileMockCopyExpects)
             ->method('copy')
             ->with($buildPhaseLogPath, $deployLogPath);
@@ -136,27 +130,24 @@ class PreDeployTest extends TestCase
                 'fileMockFileGetContentsExpects' => $this->once(),
                 'buildPhaseLogContent' => 'the build phase log was not applied',
                 'deployLogContent' => null,
-                'deployLogPathExists' => false,
+                'deployLogFileExists' => false,
                 'fileMockFilePutContentsExpects' => $this->never(),
-                'fileMockCreateDirectoryExpects' => $this->once(),
                 'fileMockCopyExpects' => $this->once()
             ],
             [
                 'fileMockFileGetContentsExpects' => $this->exactly(2),
                 'buildPhaseLogContent' => 'the build phase log was applied',
                 'deployLogContent' => 'some log the build phase log was applied some log',
-                'deployLogPathExists' => true,
+                'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => $this->never(),
-                'fileMockCreateDirectoryExpects' => $this->once(),
-                'fileMockCopyExpects' => $this->once()
+                'fileMockCopyExpects' => $this->never()
             ],
             [
                 'fileMockFileGetContentsExpects' => $this->exactly(2),
                 'buildPhaseLogContent' => 'the build phase log was not applied',
                 'deployLogContent' => 'some log the build phase log was applied some log',
-                'deployLogPathExists' => true,
+                'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => $this->once(),
-                'fileMockCreateDirectoryExpects' => $this->never(),
                 'fileMockCopyExpects' => $this->never()
             ]
         ];

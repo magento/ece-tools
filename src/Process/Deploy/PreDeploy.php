@@ -87,10 +87,11 @@ class PreDeploy implements ProcessInterface
         $buildPhaseLogPath = $magentoRoot . '/' . Logger::BACKUP_BUILD_PHASE_LOG_PATH;
         $buildPhaseLogContent = $this->file->fileGetContents($buildPhaseLogPath);
 
-        if ($this->file->isExists($deployLogPath) && !$this->buildLogIsApplied($deployLogPath, $buildPhaseLogContent)) {
+        $deployLogFileIsExists = $this->file->isExists($deployLogPath);
+
+        if ($deployLogFileIsExists && !$this->buildLogIsApplied($deployLogPath, $buildPhaseLogContent)) {
             $this->file->filePutContents($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
-        } else {
-            $this->file->createDirectory($magentoRoot . '/' . Logger::LOG_DIR);
+        } elseif (!$deployLogFileIsExists) {
             $this->file->copy($buildPhaseLogPath, $deployLogPath);
         }
     }
