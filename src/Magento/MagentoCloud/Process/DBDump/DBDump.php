@@ -53,7 +53,7 @@ class DBDump implements ProcessInterface
 
         // lock file has dual purpose, it creates a lock, so another DB backup process cannot be executed, as well as
         // serves as a log with the details of the db dump executed.
-        $lockFile = "{$timestamp}-dbsync.prod.lock";
+        $lockFile = "dbsync.prod.lock";
         $dbDumpAttemptFile = "{$timestamp}-prod-attempt.sql.gz";
         $dbDumpLatestFile = "{$timestamp}-prod-latest.sql.gz";
 
@@ -98,6 +98,8 @@ class DBDump implements ProcessInterface
             $this->log($fp, "Couldn't get the lock!");
         }
         fclose($fp);
+        $this->shell->execute("mv {$lockFile} {$temporaryDirectory}/{$timestamp}-{$lockFile}");
+
     }
 
     /**
