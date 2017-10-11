@@ -7,12 +7,8 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 
 /**
@@ -26,26 +22,6 @@ class CompressStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
-     * @var BuildConfig
-     */
-    private $buildConfig;
-
-    /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
      * @var Environment
      */
     private $environment;
@@ -56,28 +32,17 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
-     * @param LoggerInterface $logger
-     * @param ShellInterface  $shell
-     * @param File            $file
-     * @param BuildConfig     $buildConfig
-     * @param Environment     $environment
-     * @param DirectoryList   $directoryList
+     * @param LoggerInterface         $logger
+     * @param Environment             $environment
+     * @param StaticContentCompressor $staticContentCompressor
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellInterface $shell,
-        File $file,
-        BuildConfig $buildConfig,
         Environment $environment,
-        DirectoryList $directoryList,
         StaticContentCompressor $staticContentCompressor
     ) {
         $this->logger                  = $logger;
-        $this->shell                   = $shell;
-        $this->file                    = $file;
-        $this->buildConfig             = $buildConfig;
         $this->environment             = $environment;
-        $this->directoryList           = $directoryList;
         $this->staticContentCompressor = $staticContentCompressor;
     }
 
@@ -102,6 +67,7 @@ class CompressStaticContent implements ProcessInterface
         $duration = $endTime - $startTime;
         $this->logger->info(
             "Static content compression took $duration seconds.");
+
         return true;
     }
 }
