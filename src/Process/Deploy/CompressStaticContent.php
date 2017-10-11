@@ -4,7 +4,7 @@
  * See COPYING.txt for license details.
  */
 
-namespace Magento\MagentoCloud\Process\Build;
+namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -52,21 +52,21 @@ class CompressStaticContent implements ProcessInterface
     public function execute()
     {
         // Only proceed if static content deployment has already run.
-        if (!$this->environment->isStaticDeployInBuild()) {
+        if (!$this->environment->isDeployStaticContent()) {
             $this->logger->info(
-                "Skipping build-time static content compression "
-                . "because static content deployment hasn't happened.");
+                "Skipping deploy-time static content compression "
+                . "because isDeployStaticContent() is false.");
 
             return false;
         }
 
         $startTime = microtime(true);
-        $this->staticContentCompressor->compressStaticContent(6);
+        $this->staticContentCompressor->compressStaticContent(4);
         $endTime = microtime(true);
 
         $duration = $endTime - $startTime;
         $this->logger->info(
-            "Static content compression during the build phase "
+            "Static content compression during the deployment phase "
             . "took $duration seconds.");
 
         return true;

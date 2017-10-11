@@ -95,6 +95,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\SetMode::class),
                         $this->make(DeployProcess\InstallUpdate::class),
                         $this->make(DeployProcess\DeployStaticContent::class),
+                        $this->make(DeployProcess\CompressStaticContent::class),
                         $this->make(DeployProcess\DisableGoogleAnalytics::class),
                     ],
                 ]);
