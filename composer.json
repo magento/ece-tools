@@ -23,7 +23,7 @@
     "php-mock/php-mock-phpunit": "^2.0"
   },
   "bin":[
-    "m2-ece-build", "m2-ece-deploy", "m2-ece-scd-dump", "bin/ece-tools"
+    "m2-ece-build", "m2-ece-deploy", "m2-ece-scd-dump", "bin/ece-tools", "m2-ece-db-dump"
   ],
   "autoload": {
     "psr-4": {
