@@ -50,4 +50,26 @@ class ArrayManager
 
         return array_unique(array_values($filteredResult));
     }
+
+    /**
+     * @param array $original
+     * @param array $keys
+     * @param string|int $val
+     * @return array
+     */
+    public function nest(array $original, array $keys, $val): array
+    {
+        $data = &$original;
+
+        foreach ($keys as $key) {
+            if (!isset($data[$key])) {
+                $data[$key] = [];
+            }
+            $data = &$data[$key];
+        }
+
+        $data = $val;
+
+        return $original;
+    }
 }

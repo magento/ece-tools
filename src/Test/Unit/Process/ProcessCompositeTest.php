@@ -6,13 +6,13 @@
 namespace Magento\MagentoCloud\Test\Unit\Process;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Process\ProcessPool;
+use Magento\MagentoCloud\Process\ProcessComposite;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
-class ProcessPoolTest extends TestCase
+class ProcessCompositeTest extends TestCase
 {
     public function testExecute()
     {
@@ -23,7 +23,7 @@ class ProcessPoolTest extends TestCase
         $processBMock = clone $processMock;
         $processCMock = clone $processMock;
 
-        $processPool = new ProcessPool([
+        $processPool = new ProcessComposite([
             $processBMock,
             $processAMock,
             $processCMock,
