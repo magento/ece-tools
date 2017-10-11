@@ -87,12 +87,12 @@ class PreDeployTest extends TestCase
         $fileMockFilePutContentsExpects,
         $fileMockCopyExpects
     ) {
-        $magento_root = 'magento_root';
-        $deployLogPath = $magento_root . '/' . Logger::DEPLOY_LOG_PATH;
-        $buildPhaseLogPath = $magento_root . '/' . Logger::BACKUP_BUILD_PHASE_LOG_PATH;
+        $magentoRoot = 'magento_root';
+        $deployLogPath = $magentoRoot . '/' . Logger::DEPLOY_LOG_PATH;
+        $buildPhaseLogPath = $magentoRoot . '/' . Logger::BACKUP_BUILD_PHASE_LOG_PATH;
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
-            ->willReturn($magento_root);
+            ->willReturn($magentoRoot);
         $this->fileMock->expects($fileMockFileGetContentsExpects)
             ->method('fileGetContents')
             ->withConsecutive(

@@ -10,7 +10,7 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 
 /**
- * Class Logger
+ * @inheritdoc
  */
 class Logger extends \Monolog\Logger
 {
