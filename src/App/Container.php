@@ -108,6 +108,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\ConfigImport::class),
                         $this->make(DeployProcess\InstallUpdate\Install\ResetPassword::class),
                     ],
                 ]);

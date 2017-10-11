@@ -49,12 +49,13 @@ class SearchEngineTest extends TestCase
 
     public function testExecute()
     {
+        $config['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
             ->willReturn([]);
         $this->writerMock->expects($this->once())
             ->method('update')
-            ->with(['engine' => 'mysql']);
+            ->with($config);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -67,6 +68,12 @@ class SearchEngineTest extends TestCase
 
     public function testExecuteWithElasticSearch()
     {
+        $config['system']['default']['catalog']['search'] = [
+            'engine' => 'elasticsearch',
+            'elasticsearch_server_hostname' => 'localhost',
+            'elasticsearch_server_port' => 1234
+        ];
+
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
             ->willReturn(
@@ -81,11 +88,7 @@ class SearchEngineTest extends TestCase
             );
         $this->writerMock->expects($this->once())
             ->method('update')
-            ->with([
-                'engine' => 'elasticsearch',
-                'elasticsearch_server_hostname' => 'localhost',
-                'elasticsearch_server_port' => 1234
-            ]);
+            ->with($config);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -98,6 +101,13 @@ class SearchEngineTest extends TestCase
 
     public function testExecuteWithElasticSolr()
     {
+        $config['system']['default']['catalog']['search'] = [
+            'engine' => 'solr',
+            'solr_server_hostname' => 'localhost',
+            'solr_server_port' => 1234,
+            'solr_server_username' => 'scheme',
+            'solr_server_path' => 'path'
+        ];
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
             ->willReturn(
@@ -114,13 +124,7 @@ class SearchEngineTest extends TestCase
             );
         $this->writerMock->expects($this->once())
             ->method('update')
-            ->with([
-                'engine' => 'solr',
-                'solr_server_hostname' => 'localhost',
-                'solr_server_port' => 1234,
-                'solr_server_username' => 'scheme',
-                'solr_server_path' => 'path'
-            ]);
+            ->with($config);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
