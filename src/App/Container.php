@@ -6,11 +6,13 @@
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
+use Magento\MagentoCloud\Command\PreStart;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessPool;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
+use Magento\MagentoCloud\Process\PreStart as PreStartProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Monolog\Formatter\LineFormatter;
@@ -80,17 +82,29 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(BuildProcess\CompileDi::class),
                         $this->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->make(BuildProcess\DeployStaticContent::class),
-                        $this->make(BuildProcess\ClearInitDirectory::class),
-                        $this->make(BuildProcess\BackupData::class),
+                        $this->make(BuildProcess\ClearBackupDirectory::class),
+                        $this->make(BuildProcess\CopyToBackupDirectory::class),
                     ],
                 ]);
             });
+
+        $this->when(PreStart::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(PreStartProcess\RestoreFromBuild::class)
+                    ],
+                ]);
+            });
+
         $this->when(Deploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
-                        $this->make(DeployProcess\PreDeploy::class),
+                        $this->make(DeployProcess\VerifyPreStart::class),
+                        $this->make(DeployProcess\ClearEnvironmentCaches::class),
                         $this->make(DeployProcess\CreateConfigFile::class),
                         $this->make(DeployProcess\SetMode::class),
                         $this->make(DeployProcess\InstallUpdate::class),
@@ -121,7 +135,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
                         $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
-                        $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\ClearMagentoCache::class),
                     ],
                 ]);
             });
@@ -144,18 +158,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
                         $this->make(ConfigDumpProcess\Import::class),
-                    ],
-                ]);
-            });
-        $this->when(DeployProcess\PreDeploy::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
-                    'processes' => [
-                        $this->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
-                        $this->make(DeployProcess\PreDeploy\CleanRedisCache::class),
-                        $this->make(DeployProcess\PreDeploy\CleanFileCache::class),
-                        $this->make(DeployProcess\PreDeploy\ProcessStaticContent::class),
                     ],
                 ]);
             });

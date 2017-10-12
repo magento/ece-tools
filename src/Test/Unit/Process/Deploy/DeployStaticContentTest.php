@@ -6,9 +6,10 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Util\StaticContentCleaner;
+use Magento\MagentoCloud\Util\BackgroundDirectoryCleaner;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
@@ -40,9 +41,14 @@ class DeployStaticContentTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var StaticContentCleaner|Mock
+     * @var DirectoryList|Mock
      */
-    private $staticContentCleanerMock;
+    private $directoryListMock;
+
+    /**
+     * @var BackgroundDirectoryCleaner|Mock
+     */
+    private $cleanerMock;
 
     /**
      * @var ProcessInterface|Mock
@@ -59,7 +65,12 @@ class DeployStaticContentTest extends TestCase
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->staticContentCleanerMock = $this->createMock(StaticContentCleaner::class);
+        $this->cleanerMock = $this->getMockBuilder(BackgroundDirectoryCleaner::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->processMock = $this->getMockBuilder(ProcessInterface::class)
             ->getMockForAbstractClass();
 
@@ -67,7 +78,8 @@ class DeployStaticContentTest extends TestCase
             $this->processMock,
             $this->environmentMock,
             $this->loggerMock,
-            $this->staticContentCleanerMock
+            $this->directoryListMock,
+            $this->cleanerMock
         );
     }
 
@@ -88,8 +100,15 @@ class DeployStaticContentTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('doCleanStaticFiles')
             ->willReturn(true);
-        $this->staticContentCleanerMock->expects($this->once())
-            ->method('clean');
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->cleanerMock->expects($this->once())
+            ->method('backgroundClearDirectory')
+            ->with('magento_root/pub/static');
+        $this->cleanerMock->expects($this->once())
+            ->method('backgroundDeleteDirectory')
+            ->with('magento_root/var/view_preprocessed');
         $this->processMock->expects($this->once())
             ->method('execute');
 
@@ -110,11 +129,12 @@ class DeployStaticContentTest extends TestCase
                 ['Application mode is ' . Environment::MAGENTO_PRODUCTION_MODE],
                 ['Generating fresh static content']
             );
-        $this->environmentMock->expects($this->once())
-            ->method('doCleanStaticFiles')
-            ->willReturn(false);
-        $this->staticContentCleanerMock->expects($this->never())
-            ->method('clean');
+        $this->directoryListMock->expects($this->never())
+            ->method('getMagentoRoot');
+        $this->cleanerMock->expects($this->never())
+            ->method('backgroundClearDirectory');
+        $this->cleanerMock->expects($this->never())
+            ->method('backgroundDeleteDirectory');
         $this->processMock->expects($this->once())
             ->method('execute');
 
@@ -140,16 +160,23 @@ class DeployStaticContentTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
             ->willReturn(Environment::MAGENTO_PRODUCTION_MODE);
+
         $this->environmentMock->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(false);
-        $this->loggerMock->expects($this->once())
+
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Application mode is ' . Environment::MAGENTO_PRODUCTION_MODE]
+                ['Application mode is ' . Environment::MAGENTO_PRODUCTION_MODE],
+                ['Skipping static content deployment during deployment.']
             );
-        $this->environmentMock->expects($this->never())
-            ->method('doCleanStaticFiles');
+
+        $this->cleanerMock->expects($this->never())
+            ->method('backgroundClearDirectory');
+
+        $this->cleanerMock->expects($this->never())
+            ->method('backgroundDeleteDirectory');
 
         $this->process->execute();
     }

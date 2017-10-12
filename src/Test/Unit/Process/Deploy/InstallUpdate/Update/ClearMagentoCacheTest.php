@@ -6,13 +6,13 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\ClearCache;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\ClearMagentoCache;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
-class ClearCacheTest extends TestCase
+class ClearMagentoCacheTest extends TestCase
 {
     /**
      * @var Environment|Mock
@@ -30,7 +30,7 @@ class ClearCacheTest extends TestCase
     private $shellMock;
 
     /**
-     * @var ClearCache
+     * @var ClearMagentoCache
      */
     private $process;
 
@@ -40,7 +40,7 @@ class ClearCacheTest extends TestCase
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
-        $this->process = new ClearCache(
+        $this->process = new ClearMagentoCache(
             $this->loggerMock,
             $this->environmentMock,
             $this->shellMock

@@ -120,42 +120,26 @@ class EnvironmentTest extends TestCase
         ];
     }
 
-    public function testSetFlagStaticDeployInBuild()
+    public function testGetRestorableDirectories()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('touch')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-
-        $this->environment->setFlagStaticDeployInBuild();
+        $this->assertSame(
+            ['static' => 'pub/static',
+            'etc' => 'app/etc',
+            'media' => 'pub/media',
+            'log' => 'var/log',
+            'cloud_flags' => 'var/cloud_flags'],
+            $this->environment->getRestorableDirectories()
+        );
     }
 
-    public function testRemoveFlagStaticContentInBuild()
+    public function testIsDeployStaticContentEnabledByNoFlag()
     {
-        $this->directoryListMock->expects($this->exactly(2))
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)
-            ->willReturn(true);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->fileMock->expects($this->once())
-            ->method('deleteFile')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+        $this->setVariables([
+            'DO_DEPLOY_STATIC_CONTENT' => 'enabled',
+        ]);
 
-        $this->environment->removeFlagStaticContentInBuild();
-    }
-
-    public function testRemoveFlagStaticContentInBuildDisabled()
-    {
+        $this->loggerMock->expects($this->never())
+            ->method('info');
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -163,93 +147,46 @@ class EnvironmentTest extends TestCase
             ->method('isExists')
             ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)
             ->willReturn(false);
-        $this->loggerMock->expects($this->never())
-            ->method('info');
-        $this->fileMock->expects($this->never())
-            ->method('deleteFile');
 
-        $this->environment->removeFlagStaticContentInBuild();
+        $this->assertTrue($this->environment->isDeployStaticContent());
     }
 
-    public function testIsStaticDeployInBuild()
-    {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-
-        $this->environment->isStaticDeployInBuild();
-    }
-
-    public function testGetWritableDirectories()
-    {
-        $this->assertSame(
-            ['var', 'app/etc', 'pub/media'],
-            $this->environment->getWritableDirectories()
-        );
-    }
-
-    public function testGetRecoverableDirectories()
-    {
-        $this->assertSame(
-            ['var/log', 'app/etc', 'pub/media'],
-            $this->environment->getRecoverableDirectories()
-        );
-    }
-
-    public function testIsDeployStaticContent()
-    {
-        $this->setVariables([
-            'DO_DEPLOY_STATIC_CONTENT' => 'disabled',
-        ]);
-
-        $this->assertSame(
-            false,
-            $this->environment->isDeployStaticContent()
-        );
-    }
-
-    /**
-     * @param bool $isExists
-     * @dataProvider isDeployStaticContentToBeEnabledDataProvider
-     */
-    public function testIsDeployStaticContentToBeEnabled(bool $isExists)
+    public function testIsDeployStaticContentDisabledByFlag()
     {
         $this->setVariables([
             'DO_DEPLOY_STATIC_CONTENT' => 'enabled',
         ]);
 
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->willReturn($isExists);
+            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)
+            ->willReturn(true);
+
+        $this->assertFalse($this->environment->isDeployStaticContent());
+    }
+
+    public function testIsDeployStaticContentDisabledByEnv()
+    {
+        $this->setVariables([
+            'DO_DEPLOY_STATIC_CONTENT' => 'disabled',
+        ]);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . (!$isExists ? 'enabled' : 'disabled'));
+            ->with('Static content deploy disabled by environment variable');
 
-        $this->assertSame(
-            !$isExists,
-            $this->environment->isDeployStaticContent()
-        );
+        $this->assertFalse($this->environment->isDeployStaticContent());
     }
 
-    /**
-     * @return array
-     */
-    public function isDeployStaticContentToBeEnabledDataProvider(): array
-    {
-        return [
-            [true],
-            [false],
-        ];
-    }
-
-    /**
-     * @param string $variableValue
-     * @param bool $expected
-     * @dataProvider doCleanStaticFilesDataProvider
-     */
+     /**
+      * @param string $variableValue
+      * @param bool $expected
+      * @dataProvider doCleanStaticFilesDataProvider
+      */
     public function testDoCleanStaticFiles(string $variableValue, bool $expected)
     {
         $this->setVariables([
@@ -304,5 +241,175 @@ class EnvironmentTest extends TestCase
             'USD',
             $this->environment->getDefaultCurrency()
         );
+    }
+
+    public function flagDataProvider()
+    {
+        return [
+            ['path' => '.some_flag', 'flagState' => true],
+            ['path' => 'what/the/what/.some_flag', 'flagState' => false]
+        ];
+    }
+
+    /**
+     * @dataProvider flagDataProvider
+     */
+    public function testHasFlag($path, $flagState)
+    {
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with("magento_root/$path")
+            ->willReturn($flagState);
+
+        $this->assertSame($flagState, $this->environment->hasFlag($path));
+    }
+
+    public function isVariableDisabledProvider()
+    {
+        return [
+            ['name' => 'SOME_ENV_VAR', 'value' => 'disabled', 'result' => true],
+            ['name' => 'SOME_ENV_VAR', 'value' => 'enabled', 'result' => false],
+            ['name' => 'SOME_ENV_VAR', 'value' => '', 'result' => false],
+        ];
+    }
+
+    /**
+     * @dataProvider isVariableDisabledProvider
+     */
+    public function testIsVariableDisabled($name, $value, $result)
+    {
+        $this->setVariables([
+            $name => $value,
+        ]);
+
+        $this->assertSame($result, $this->environment->isVariableDisabled($name));
+    }
+
+    /**
+     * @dataProvider flagDataProvider
+     */
+    public function testSetFlag($path, $flagState)
+    {
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->fileMock->expects($this->once())
+            ->method('touch')
+            ->with("magento_root/$path")
+            ->willReturn($flagState);
+        if ($flagState) {
+            $this->loggerMock->expects($this->once())
+                ->method('info')
+                ->with("Set flag: magento_root/$path");
+        }
+
+        $this->assertSame($flagState, $this->environment->setFlag($path));
+    }
+
+    public function clearFlagDataProvider()
+    {
+        return [
+            [
+                'root' => 'magento_root',
+                'path' => '.some_flag',
+                'flag' => 'magento_root/.some_flag',
+                'flagState' => true,
+                'deleteResult' => true,
+                'logs' => ["Deleted flag: magento_root/.some_flag"],
+                'result' => true
+            ],
+            [
+                'root' => 'magento_root',
+                'path' => '.some_flag',
+                'flag' => 'magento_root/.some_flag',
+                'flagState' => false,
+                'deleteResult' => false,
+                'logs' => ["magento_root/.some_flag already removed"],
+                'result' => true
+            ],
+            [
+                'root' => 'magento_root',
+                'path' => '.some_flag',
+                'flag' => 'magento_root/.some_flag',
+                'flagState' => true,
+                'deleteResult' => false,
+                'logs' => [],
+                'result' => false
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider clearFlagDataProvider
+     */
+    public function testClearFlag($root, $path, $flag, $flagState, $deleteResult, $logs, $result)
+    {
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($root);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($flag)
+            ->willReturn($flagState);
+        if ($flagState) {
+            $this->fileMock->expects($this->once())
+                ->method('deleteFile')
+                ->with("$flag")
+                ->willReturn($deleteResult);
+        }
+        $this->loggerMock->expects($this->exactly(count($logs)))
+            ->method('info')
+            ->withConsecutive($logs);
+
+        $this->assertSame($result, $this->environment->clearFlag($path));
+    }
+
+    public function symlinkContentsProvider()
+    {
+        return [
+            [
+                'targetDir' => 'some/dir',
+                'contents' => ['/some/dir/thing1', '/some/dir/thing2'],
+                'linkDir' => 'another/path',
+                'symlinkResult' => true
+            ],
+            [
+                'targetDir' => 'some/dir',
+                'contents' => ['/some/dir/thing1', '/some/dir/thing2'],
+                'linkDir' => 'another/path',
+                'symlinkResult' => false
+            ],
+            [
+                'targetDir' => 'some/dir',
+                'contents' => [],
+                'linkDir' => 'another/path',
+                'symlinkResult' => false
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider symlinkContentsProvider
+     */
+    public function testSymlinkDirectoryContents($targetDir, $contents, $linkDir, $symlinkResult)
+    {
+        $this->fileMock->expects($this->once())
+            ->method('readDirectory')
+            ->with($targetDir)
+            ->willReturn($contents);
+        $this->fileMock->expects($this->exactly(count($contents)))
+            ->method('symlink')
+            ->willReturn($symlinkResult);
+        if ($symlinkResult) {
+            $this->loggerMock->expects($this->exactly(count($contents)))
+                ->method('info')
+                ->withConsecutive(...(array_map(function ($thing) use ($targetDir, $linkDir) {
+                        return ["Symlinked $linkDir/" . basename($thing) . " to $thing"];
+                }, $contents)));
+        }
+        $this->environment->symlinkDirectoryContents($targetDir, $linkDir);
     }
 }

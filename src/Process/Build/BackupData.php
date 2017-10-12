@@ -95,7 +95,7 @@ class BackupData implements ProcessInterface
 
         $this->logger->info('Copying writable directories to temp directory.');
 
-        foreach ($this->environment->getWritableDirectories() as $dir) {
+        foreach ($this->environment->getRestorableDirectories() as $dir) {
             $originalDir = $magentoRoot . $dir;
             $initDir = $magentoRoot . 'init/' . $dir;
 

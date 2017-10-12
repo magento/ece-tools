@@ -20,6 +20,8 @@ class DirectoryList
      */
     const ROOT = 'root';
     const MAGENTO_ROOT = 'magento_root';
+    const BACKUP = 'backup';
+    const LOCAL = 'local';
 
     /**
      * @var string
@@ -99,10 +101,9 @@ class DirectoryList
     {
         return [
             static::ROOT => [static::PATH => ''],
-            /*
-             * Magento application's vendor folder.
-             */
             static::MAGENTO_ROOT => [static::PATH => '../../..'],
+            static::BACKUP => [static::PATH => '../../../init'],
+            static::LOCAL => [static::PATH => '../../../local'],
         ];
     }
 }

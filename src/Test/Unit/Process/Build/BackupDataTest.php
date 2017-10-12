@@ -125,7 +125,7 @@ class BackupDataTest extends TestCase
             ->method('isStaticDeployInBuild')
             ->willReturn(true);
         $this->environmentMock->expects($this->once())
-            ->method('getWritableDirectories')
+            ->method('getRestorableDirectories')
             ->willReturn(['some_dir']);
         $this->fileMock->expects($this->once())
             ->method('scanDir')
@@ -186,7 +186,7 @@ class BackupDataTest extends TestCase
             ->method('isStaticDeployInBuild')
             ->willReturn(true);
         $this->environmentMock->expects($this->once())
-            ->method('getWritableDirectories')
+            ->method('getRestorableDirectories')
             ->willReturn(['some_dir']);
         $this->fileMock->expects($this->once())
             ->method('scanDir')
@@ -233,7 +233,7 @@ class BackupDataTest extends TestCase
             ->method('isStaticDeployInBuild')
             ->willReturn(false);
         $this->environmentMock->expects($this->once())
-            ->method('getWritableDirectories')
+            ->method('getRestorableDirectories')
             ->willReturn(['some_dir']);
         $this->fileMock->expects($this->once())
             ->method('scanDir')
@@ -270,7 +270,7 @@ class BackupDataTest extends TestCase
             ->method('isStaticDeployInBuild')
             ->willReturn(false);
         $this->environmentMock->expects($this->once())
-            ->method('getWritableDirectories')
+            ->method('getRestorableDirectories')
             ->willReturn([]);
         $this->fileMock->expects($this->never())
             ->method('scanDir');

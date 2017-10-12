@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Process\Build\ClearInitDirectory;
+use Magento\MagentoCloud\Process\Build\ClearBackupDirectory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
@@ -14,10 +14,10 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class ClearInitDirectoryTest extends TestCase
+class ClearBackupDirectoryTest extends TestCase
 {
     /**
-     * @var ClearInitDirectory
+     * @var ClearBackupDirectory
      */
     private $process;
 
@@ -46,7 +46,7 @@ class ClearInitDirectoryTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
-        $this->process = new ClearInitDirectory(
+        $this->process = new ClearBackupDirectory(
             $this->fileMock,
             $this->directoryListMock,
             $this->loggerMock
@@ -61,25 +61,38 @@ class ClearInitDirectoryTest extends TestCase
      */
     public function testExecute($isExists, $clearDirectory, $deleteFile)
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Clearing temporary directory.');
+        $magentoRoot = 'magento_root';
+        $backupDir = 'magento_root/init';
+        $envPhpPath = 'magento_root/app/etc/env.php';
+
+        if ($isExists) {
+            $this->loggerMock->expects($this->exactly(2))
+                ->method('info')
+                ->withConsecutive(
+                    ["Clearing backup directory: $backupDir"],
+                    ['Deleting env.php']
+                );
+        }
+        $this->directoryListMock->expects($this->once())
+            ->method('getPath')
+            ->with('backup')
+            ->willReturn($backupDir);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+            ->willReturn($magentoRoot);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->willReturnMap([
-                ['magento_root/init/', $isExists],
-                ['magento_root/app/etc/env.php', $isExists]
+                [$backupDir, $isExists],
+                [$envPhpPath, $isExists]
             ]);
         $this->fileMock->expects($this->exactly($clearDirectory))
             ->method('clearDirectory')
-            ->with('magento_root/init/')
+            ->with($backupDir)
             ->willReturn(true);
         $this->fileMock->expects($this->exactly($deleteFile))
             ->method('deleteFile')
-            ->with('magento_root/app/etc/env.php')
+            ->with($envPhpPath)
             ->willReturn(true);
 
         $this->process->execute();

@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class ClearInitDirectory implements ProcessInterface
+class ClearBackupDirectory implements ProcessInterface
 {
     /**
      * @var File
@@ -50,16 +50,16 @@ class ClearInitDirectory implements ProcessInterface
      */
     public function execute()
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot();
-        $envPhpPath = $magentoRoot . '/app/etc/env.php';
-        $initPath = $magentoRoot . '/init/';
-        $this->logger->info('Clearing temporary directory.');
+        $backupDir = $this->directoryList->getPath('backup');
+        $envPhpPath = $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
 
-        if ($this->file->isExists($initPath)) {
-            $this->file->clearDirectory($initPath);
+        if ($this->file->isExists($backupDir)) {
+            $this->logger->info("Clearing backup directory: $backupDir");
+            $this->file->clearDirectory($backupDir);
         }
 
         if ($this->file->isExists($envPhpPath)) {
+            $this->logger->info("Deleting env.php");
             $this->file->deleteFile($envPhpPath);
         }
     }

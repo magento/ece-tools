@@ -14,8 +14,14 @@ use Psr\Log\LoggerInterface;
  */
 class Environment
 {
-    const STATIC_CONTENT_DEPLOY_FLAG = '.static_content_deploy';
+    // core flags
+    const MAINTENANCE_FLAG = 'var/.maintenance.flag';
     const REGENERATE_FLAG = 'var/.regenerate';
+
+    // cloud specific flags
+    const STATIC_CONTENT_DEPLOY_FLAG = 'var/cloud_flags/static_content_deploy';
+    const PRE_START_FLAG = 'var/cloud_flags/prestart_in_progress';
+    const DEPLOY_READY_FLAG = 'var/cloud_flags/deploy_ready';
 
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
@@ -26,6 +32,10 @@ class Environment
 
     const VAL_ENABLED = 'enabled';
     const VAL_DISABLED = 'disabled';
+
+    const DEFAULT_DIRECTORY_MODE = 0755;
+    const DEFAULT_FILE_MODE = 0644;
+
 
     const DEFAULT_ADMIN_URL = 'admin';
     const DEFAULT_ADMIN_NAME = 'admin';
@@ -51,6 +61,17 @@ class Environment
      * @var DirectoryList
      */
     private $directoryList;
+
+    /**
+     * @var array
+     */
+    private $restorableDirectories = [
+        'static' => 'pub/static',
+        'etc' => 'app/etc',
+        'media' => 'pub/media',
+        'log' => 'var/log',
+        'cloud_flags' => 'var/cloud_flags',
+    ];
 
     /**
      * @var array
@@ -147,6 +168,19 @@ class Environment
     }
 
     /**
+     * Test if env var is set to disabled
+     *
+     * @param string $name Variable to evaluate
+     * @return bool
+     */
+    public function isVariableDisabled($name): bool
+    {
+        $var = $this->getVariables();
+
+        return (isset($var[$name]) && $var[$name] === 'disabled') ? true : false;
+    }
+
+    /**
      * Checks that static content symlink is on.
      *
      * If STATIC_CONTENT_SYMLINK == disabled return false
@@ -191,10 +225,7 @@ class Environment
      */
     public function setFlagStaticDeployInBuild()
     {
-        $this->logger->info('Setting flag file ' . static::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->file->touch(
-            $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-        );
+        $this->setFlag(static::STATIC_CONTENT_DEPLOY_FLAG);
     }
 
     /**
@@ -204,12 +235,7 @@ class Environment
      */
     public function removeFlagStaticContentInBuild()
     {
-        if ($this->isStaticDeployInBuild()) {
-            $this->logger->info('Removing flag file ' . static::STATIC_CONTENT_DEPLOY_FLAG);
-            $this->file->deleteFile(
-                $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-            );
-        }
+        $this->clearFlag(static::STATIC_CONTENT_DEPLOY_FLAG);
     }
 
     /**
@@ -219,29 +245,17 @@ class Environment
      */
     public function isStaticDeployInBuild(): bool
     {
-        return $this->file->isExists(
-            $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-        );
+        return $this->hasFlag(static::STATIC_CONTENT_DEPLOY_FLAG);
     }
 
     /**
-     * Retrieves writable directories.
+     * Retrieves restorable directories.
      *
      * @return array
      */
-    public function getWritableDirectories(): array
+    public function getRestorableDirectories(): array
     {
-        return ['var', 'app/etc', 'pub/media'];
-    }
-
-    /**
-     * Retrieves recoverable directories.
-     *
-     * @return array
-     */
-    public function getRecoverableDirectories(): array
-    {
-        return ['var/log', 'app/etc', 'pub/media'];
+        return $this->restorableDirectories;
     }
 
     /**
@@ -249,21 +263,15 @@ class Environment
      */
     public function isDeployStaticContent(): bool
     {
-        $var = $this->getVariables();
-
         /**
          * Can use environment variable to always disable.
          * Default is to deploy static content if it was not deployed in the build step.
          */
-        if (isset($var['DO_DEPLOY_STATIC_CONTENT']) && $var['DO_DEPLOY_STATIC_CONTENT'] == 'disabled') {
-            $flag = false;
-        } else {
-            $flag = !$this->isStaticDeployInBuild();
+        if ($this->isVariableDisabled('DO_DEPLOY_STATIC_CONTENT')) {
+            $this->logger->info("Static content deploy disabled by environment variable");
+            return false;
         }
-
-        $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . ($flag ? 'enabled' : 'disabled'));
-
-        return $flag;
+        return !$this->hasFlag(Environment::STATIC_CONTENT_DEPLOY_FLAG);
     }
 
     /**
@@ -419,5 +427,69 @@ class Environment
     {
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
+    }
+
+    /**
+     * Checks for presence of a flag
+     *
+     * @param string $path Path relative to app root
+     * @return bool
+     */
+    public function hasFlag(string $path): bool
+    {
+        return $this->file->isExists($this->directoryList->getMagentoRoot() . '/' . $path);
+    }
+
+    /**
+     * Sets a flag
+     *
+     * @param string $path relative to app root
+     * @return bool
+     */
+    public function setFlag($path): bool
+    {
+        $flag = $this->directoryList->getMagentoRoot() . '/' . $path;
+        if ($this->file->touch($flag)) {
+            $this->logger->info("Set flag: $flag");
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Clears a flag
+     *
+     * @param string $path Path relative to app root
+     * @return bool
+     */
+    public function clearFlag($path): bool
+    {
+        $flag = $this->directoryList->getMagentoRoot() . '/' . $path;
+        if (!$this->file->isExists($flag)) {
+            $this->logger->info("$flag already removed");
+            return true;
+        }
+        if ($this->file->deleteFile($flag)) {
+            $this->logger->info("Deleted flag: $flag");
+            return true;
+        }
+        return false;
+    }
+
+     /**
+      * Symlink directory Contents
+      *
+      * @param string $target path to be linked.
+      * @param string $link path to symlink relative to app root.
+      * @result void
+      */
+    public function symlinkDirectoryContents(string $targetDir, string $linkDir)
+    {
+        foreach ($this->file->readDirectory($targetDir) as $target) {
+            $link = "$linkDir/". basename($target);
+            if ($this->file->symlink($target, $link)) {
+                $this->logger->info("Symlinked $link to $target");
+            }
+        }
     }
 }
