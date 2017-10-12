@@ -32,6 +32,12 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
+     * Compression level to be used by gzip.
+     *
+     * Compression level 4 is just as fast as level 1 on modern processors due to reduced filesystem I/O.
+     * Level 4 is appropriate for when we must finish compression as fast as possible, such as in this site
+     * deploy phase that brings the site down.
+     *
      * @var int
      */
     private static $compressionLevel = 4;
@@ -54,7 +60,7 @@ class CompressStaticContent implements ProcessInterface
     /**
      * @return bool
      */
-    public function execute()
+    public function execute(): bool
     {
         // Only proceed if static content deployment has already run.
         if (!$this->environment->isDeployStaticContent()) {

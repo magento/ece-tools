@@ -24,6 +24,12 @@ class StaticContentCompressor
      */
     private $shell;
 
+
+    /**
+     * The target directory to be compressed relative to the Magento application folder.
+     */
+    const TARGET_DIR = "pub/static";
+
     /**
      * @var string
      */
@@ -33,7 +39,7 @@ class StaticContentCompressor
      * @var string
      */
     private static $compressionCommand
-        = "find pub/static -type f -size +300c"
+        = "find " . self::TARGET_DIR . " -type f -size +300c"
         . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
         . " -or -name '*.html' -or -name '*.htm' ')'"
         . " | xargs -n100 -P16 gzip --keep";
@@ -68,7 +74,6 @@ class StaticContentCompressor
     {
         $compressionCommand = $this->getCompressionCommand($compressionLevel);
         $this->shell->execute($compressionCommand);
-
         return true;
     }
 

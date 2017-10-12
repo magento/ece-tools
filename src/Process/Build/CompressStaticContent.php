@@ -32,6 +32,13 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
+     * Compression level to be used by gzip.
+     *
+     * Compression level 6 is the best trade-off between speed and compression strength.
+     * Level 6 obtains 99% of the compression ratio that level 9 does in 45% of the time.
+     * Level 6 is appropriate for when we can afford to wait a few extra seconds for better compression,
+     * such as in this site build phase.
+     *
      * @var int
      */
     private static $compressionLevel = 6;
@@ -54,7 +61,7 @@ class CompressStaticContent implements ProcessInterface
     /**
      * @return bool
      */
-    public function execute()
+    public function execute(): bool
     {
         // Only proceed if static content deployment has already run.
         if (!$this->environment->isStaticDeployInBuild()) {
