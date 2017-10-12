@@ -38,10 +38,8 @@ class CompressStaticContent implements ProcessInterface
      * Level 6 obtains 99% of the compression ratio that level 9 does in 45% of the time.
      * Level 6 is appropriate for when we can afford to wait a few extra seconds for better compression,
      * such as in this site build phase.
-     *
-     * @var int
      */
-    private static $compressionLevel = 6;
+    const COMPRESSION_LEVEL = 6;
 
     /**
      * @param LoggerInterface         $logger
@@ -74,7 +72,7 @@ class CompressStaticContent implements ProcessInterface
 
         $startTime = microtime(true);
         $this->staticContentCompressor->compressStaticContent(
-            self::$compressionLevel
+            static::COMPRESSION_LEVEL
         );
         $endTime = microtime(true);
 
@@ -82,7 +80,7 @@ class CompressStaticContent implements ProcessInterface
         $this->logger->info(
             "Static content compression during the build phase took $duration seconds.",
             [
-                'compressionLevel' => self::$compressionLevel,
+                'compressionLevel' => static::COMPRESSION_LEVEL,
             ]
         );
 

@@ -24,6 +24,10 @@ class StaticContentCompressor
      */
     private $shell;
 
+    /**
+     * @var string The last shell command executed by this object.
+     */
+    private $lastShellCommand;
 
     /**
      * The target directory to be compressed relative to the Magento application folder.
@@ -56,6 +60,10 @@ class StaticContentCompressor
         $this->shell  = $shell;
     }
 
+    public function getLastShellCommand() {
+        return $this->lastShellCommand;
+    }
+
     /**
      * Compress select files in the static content directory.
      *
@@ -74,6 +82,7 @@ class StaticContentCompressor
     {
         $compressionCommand = $this->getCompressionCommand($compressionLevel);
         $this->shell->execute($compressionCommand);
+        $this->lastShellCommand = $compressionCommand;
         return true;
     }
 

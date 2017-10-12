@@ -37,10 +37,8 @@ class CompressStaticContent implements ProcessInterface
      * Compression level 4 is just as fast as level 1 on modern processors due to reduced filesystem I/O.
      * Level 4 is appropriate for when we must finish compression as fast as possible, such as in this site
      * deploy phase that brings the site down.
-     *
-     * @var int
      */
-    private static $compressionLevel = 4;
+    const COMPRESSION_LEVEL = 4;
 
     /**
      * @param LoggerInterface         $logger
@@ -73,7 +71,7 @@ class CompressStaticContent implements ProcessInterface
 
         $startTime = microtime(true);
         $this->staticContentCompressor->compressStaticContent(
-            self::$compressionLevel
+            static::COMPRESSION_LEVEL
         );
         $endTime = microtime(true);
 
@@ -81,7 +79,7 @@ class CompressStaticContent implements ProcessInterface
         $this->logger->info(
             "Static content compression during the deployment phase took $duration seconds.",
             [
-                'compressionLevel' => self::$compressionLevel,
+                'compressionLevel' => static::COMPRESSION_LEVEL,
             ]
         );
 
