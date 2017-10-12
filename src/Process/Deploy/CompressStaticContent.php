@@ -32,6 +32,11 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
+     * @var int
+     */
+    private static $compressionLevel = 4;
+
+    /**
      * @param LoggerInterface         $logger
      * @param Environment             $environment
      * @param StaticContentCompressor $staticContentCompressor
@@ -61,12 +66,17 @@ class CompressStaticContent implements ProcessInterface
         }
 
         $startTime = microtime(true);
-        $this->staticContentCompressor->compressStaticContent(4);
+        $this->staticContentCompressor->compressStaticContent(
+            self::$compressionLevel
+        );
         $endTime = microtime(true);
 
         $duration = $endTime - $startTime;
         $this->logger->info(
-            "Static content compression during the deployment phase took $duration seconds."
+            "Static content compression during the deployment phase took $duration seconds.",
+            [
+                'compressionLevel' => self::$compressionLevel,
+            ]
         );
 
         return true;
