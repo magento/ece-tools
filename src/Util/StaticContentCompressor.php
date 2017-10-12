@@ -46,8 +46,8 @@ class StaticContentCompressor
         LoggerInterface $logger,
         ShellInterface $shell
     ) {
-        $this->logger        = $logger;
-        $this->shell         = $shell;
+        $this->logger = $logger;
+        $this->shell  = $shell;
     }
 
     /**
@@ -87,10 +87,12 @@ class StaticContentCompressor
 
         if (!is_int($compressionLevel)
             || $compressionLevel < 1
-            || $compressionLevel > 9
-        ) {
+            || $compressionLevel > 9) {
             $defaultCompressionLevel = 1;
-            $this->logger->info("Compression level was set to \"$compressionLevel\" but this is invalid. Using default compression level of \"$defaultCompressionLevel\".");
+            $this->logger->info(
+                "Compression level was \"$compressionLevel\" but this is invalid. Using default compression level"
+                . " of \"$defaultCompressionLevel\"."
+            );
             $compressionLevel = $defaultCompressionLevel;
         }
 
@@ -103,8 +105,7 @@ class StaticContentCompressor
         $compressionCommand .= " -$compressionLevel";
 
         $compressionCommand
-            = self::$timeoutCommand . '"'
-            . $compressionCommand . '"';
+            = self::$timeoutCommand . '"' . $compressionCommand . '"';
 
         return $compressionCommand;
     }
