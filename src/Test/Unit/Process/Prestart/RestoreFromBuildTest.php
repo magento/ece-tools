@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Build;
+namespace Magento\MagentoCloud\Test\Unit\Process\PreStart;
 
 use Magento\MagentoCloud\Process\PreStart\RestoreFromBuild;
 use Magento\MagentoCloud\Config\Environment;

@@ -64,6 +64,24 @@ class File
     }
 
     /**
+     * Tells whether the filename is a regular directory
+     *
+     * @param string $path
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function isDirectory($path): bool
+    {
+        clearstatcache();
+        $result = @is_dir($path);
+        if ($result === null) {
+            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
+
+    /**
      * Parse a configuration file.
      *
      * @param string $path
@@ -77,6 +95,24 @@ class File
         $result = @parse_ini_file($path, $processSections, $scannerMode);
         if (false === $result) {
             $this->fileSystemException('Cannot read contents from file "%1" %2', [$path, $this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Check if given path is writable
+     *
+     * @param string $path
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function isWritable($path)
+    {
+        clearstatcache();
+        $result = @is_writable($path);
+        if ($result === null) {
+            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
 
         return $result;
