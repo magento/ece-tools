@@ -17,6 +17,17 @@ use Magento\MagentoCloud\Util\StaticContentCompressor;
 class CompressStaticContent implements ProcessInterface
 {
     /**
+     * Compression level to be used by gzip.
+     *
+     * This should be an integer between 1 and 9, inclusive.
+     * Compression level 6 is the best trade-off between speed and compression strength.
+     * Level 6 obtains 99% of the compression ratio that level 9 does in 45% of the time.
+     * Level 6 is appropriate for when we can afford to wait a few extra seconds for better compression,
+     * such as in this site build phase.
+     */
+    const COMPRESSION_LEVEL = 6;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -30,16 +41,6 @@ class CompressStaticContent implements ProcessInterface
      * @var StaticContentCompressor
      */
     private $staticContentCompressor;
-
-    /**
-     * Compression level to be used by gzip.
-     *
-     * Compression level 6 is the best trade-off between speed and compression strength.
-     * Level 6 obtains 99% of the compression ratio that level 9 does in 45% of the time.
-     * Level 6 is appropriate for when we can afford to wait a few extra seconds for better compression,
-     * such as in this site build phase.
-     */
-    const COMPRESSION_LEVEL = 6;
 
     /**
      * @param LoggerInterface         $logger

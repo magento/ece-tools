@@ -15,6 +15,11 @@ use Psr\Log\LoggerInterface;
 class StaticContentCompressor
 {
     /**
+     * Target directory to be compressed relative to the Magento application folder.
+     */
+    const TARGET_DIR = "pub/static";
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -25,22 +30,17 @@ class StaticContentCompressor
     private $shell;
 
     /**
-     * @var string The last shell command executed by this object.
+     * @var string Last shell command that's been executed by this object.
      */
     private $lastShellCommand;
 
     /**
-     * The target directory to be compressed relative to the Magento application folder.
-     */
-    const TARGET_DIR = "pub/static";
-
-    /**
-     * @var string
+     * @var string The outer wrapper command that limits execution time and prevents hanging during deployment.
      */
     private static $timeoutCommand = "/usr/bin/timeout -k 30 300 /bin/bash -c ";
 
     /**
-     * @var string
+     * @var string The inner find/xargs/gzip command that compresses the content.
      */
     private static $compressionCommand
         = "find " . self::TARGET_DIR . " -type f -size +300c"
@@ -60,7 +60,11 @@ class StaticContentCompressor
         $this->shell  = $shell;
     }
 
-    public function getLastShellCommand() {
+    /**
+     * @return string Getter for the last shell command string.
+     */
+    public function getLastShellCommand(): string
+    {
         return $this->lastShellCommand;
     }
 
@@ -81,9 +85,24 @@ class StaticContentCompressor
     public function compressStaticContent(int $compressionLevel = 4): bool
     {
         $compressionCommand = $this->getCompressionCommand($compressionLevel);
-        $this->shell->execute($compressionCommand);
-        $this->lastShellCommand = $compressionCommand;
+        $this->shellExecute($compressionCommand);
+
         return true;
+    }
+
+
+    /**
+     * Decorator to run a shell command while recording what was run.
+     *
+     * @param string $command
+     *
+     * @return string
+     */
+    private function shellExecute(string $command)
+    {
+        $this->lastShellCommand = $command;
+
+        return $this->shell->execute($command);
     }
 
     /**
@@ -98,7 +117,6 @@ class StaticContentCompressor
         int $compressionLevel = 1,
         bool $verbose = false
     ): string {
-
         if (!is_int($compressionLevel)
             || $compressionLevel < 1
             || $compressionLevel > 9) {
