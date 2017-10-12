@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
+use Magento\MagentoCloud\Command\PreStart;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use PHPUnit\Framework\TestCase;
@@ -67,6 +68,13 @@ class AcceptanceTest extends TestCase
         $this->assertSame(0, $commandTester->getStatusCode());
 
         $commandTester = new CommandTester(
+            $application->get(PreStart::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+
+        $commandTester = new CommandTester(
             $application->get(Deploy::NAME)
         );
         $commandTester->execute([]);
@@ -110,6 +118,13 @@ class AcceptanceTest extends TestCase
 
         $commandTester = new CommandTester(
             $application->get(Build::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+
+        $commandTester = new CommandTester(
+            $application->get(PreStart::NAME)
         );
         $commandTester->execute([]);
 
