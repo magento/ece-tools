@@ -91,7 +91,8 @@ class Setup implements ProcessInterface
                 ? $this->environment->getAdminLastname() : Environment::DEFAULT_ADMIN_LASTNAME)
             . ' --admin-email=' . escapeshellarg($this->environment->getAdminEmail())
             . ' --admin-password=' . escapeshellarg($this->environment->getAdminPassword()
-                ? $this->environment->getAdminPassword() : $this->passwordGenerator->generateRandomPassword());
+                ? $this->environment->getAdminPassword() : $this->passwordGenerator->generateRandomPassword())
+            . ' --use-secure-admin=1';
 
         $dbPassword = $this->environment->getDbPassword();
         if (strlen($dbPassword)) {
