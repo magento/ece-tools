@@ -164,16 +164,4 @@ class AcceptanceTest extends TestCase
             'Check "CMS homepage content goes here." phrase presence'
         );
     }
-
-    /**
-     * @return array
-     */
-    public function upgradeDataProvider(): array
-    {
-        return [
-            'default configuration' => [
-                'environment' => [],
-            ],
-        ];
-    }
 }

@@ -86,7 +86,7 @@ class Bootstrap
 
                 $this->execute(
                     sprintf(
-                        'composer create-project --no-dev --repository-url=%s %s %s %s',
+                        'composer create-project --repository-url=%s %s %s %s',
                         $projectConfig['repo'],
                         $projectConfig['name'],
                         $sandboxDir,
@@ -98,19 +98,15 @@ class Bootstrap
                 throw new \Exception('Wrong deploy type');
         }
 
-        $this->execute(
-            sprintf(
-                'cp -f %s %s',
-                $buildFile,
-                $sandboxDir . '/build_options.ini'
-            )
-        );
-        $this->execute(
-            sprintf(
-                'composer install -n -d %s',
-                $sandboxDir
-            )
-        );
+        $this->execute(sprintf(
+            'cp -f %s %s',
+            $buildFile,
+            $sandboxDir . '/build_options.ini'
+        ));
+        $this->execute(sprintf(
+            'composer install -n -d %s --no-dev',
+            $sandboxDir
+        ));
     }
 
     /**
@@ -194,7 +190,7 @@ class Bootstrap
      * @param string $command
      * @return string
      */
-    private function execute(string $command)
+    public function execute(string $command)
     {
         exec($command, $output, $status);
 
