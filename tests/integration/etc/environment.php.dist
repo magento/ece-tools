@@ -1,0 +1,46 @@
+<?php
+
+$baseUrl = getenv('MAGENTO_HOST_NAME') ?: 'localhost';
+
+return [
+    'relationships' => [
+        'database' => [
+            0 => [
+                'host' => '127.0.0.1',
+                'path' => 'integration_tests',
+                'password' => '',
+                'username' => 'root',
+                'port' => '3306',
+            ],
+        ],
+    ],
+    'routes' => [
+        "http://{$baseUrl}/" => [
+            'type' => 'upstream',
+            'original_url' => 'http://{default}',
+        ],
+        "https://{$baseUrl}/" => [
+            'type' => 'upstream',
+            'original_url' => 'https://{default}',
+        ],
+    ],
+    'variables' => [
+        'ADMIN_EMAIL' => 'admin@example.com',
+    ],
+    'deploy' => [
+        'types' => [
+            'git' => [
+                'repo' => 'https://github.com/magento/magento-cloud',
+                'version' => '2.1.9',
+            ],
+            'project' => [
+                'repo' => 'https://repo.magento.com/',
+                'name' => 'magento/project-community-edition',
+                'version' => '^2.2',
+            ],
+
+        ],
+        'type' => 'project',
+    ],
+    'skip_front_check' => false,
+];
