@@ -78,6 +78,7 @@ class UpgradeTest extends TestCase
 
         $assertBuild();
         $assertDeploy();
+        $this->assertContentPresence();
 
         $this->bootstrap->execute(sprintf(
             'composer require magento/product-enterprise-edition %s -n -d %s',
@@ -88,6 +89,7 @@ class UpgradeTest extends TestCase
 
         $assertBuild();
         $assertDeploy();
+        $this->assertContentPresence();
     }
 
     /**
@@ -99,5 +101,30 @@ class UpgradeTest extends TestCase
             ['^2.1', '^2.2'],
             ['2.2.0', '^2.2'],
         ];
+    }
+
+    private function assertContentPresence()
+    {
+        $config = $this->bootstrap->mergeConfig([]);
+        $routes = $config->get('routes');
+
+        if ($config->get('skip_front_check') === true || !$routes) {
+            return;
+        }
+
+        $routes = array_keys($routes);
+        $defaultRoute = reset($routes);
+        $pageContent = file_get_contents($defaultRoute);
+
+        $this->assertContains(
+            'Home Page',
+            $pageContent,
+            'Check "Home Page" phrase presence'
+        );
+        $this->assertContains(
+            'CMS homepage content goes here.',
+            $pageContent,
+            'Check "CMS homepage content goes here." phrase presence'
+        );
     }
 }
