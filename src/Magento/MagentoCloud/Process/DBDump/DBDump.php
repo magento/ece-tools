@@ -98,7 +98,7 @@ class DBDump implements ProcessInterface
             $this->log($fp, "Couldn't get the lock!");
         }
         fclose($fp);
-        $this->shell->execute("mv {$lockFile} {$temporaryDirectory}/{$timestamp}-{$lockFile}");
+        $this->shell->execute("mv {$temporaryDirectory}/{$timestamp}-{$lockFile} {$lockFile}");
 
     }
 
