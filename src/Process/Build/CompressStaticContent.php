@@ -77,11 +77,12 @@ class CompressStaticContent implements ProcessInterface
         );
         $endTime = microtime(true);
 
+        $commandRun = $this->staticContentCompressor->getLastShellCommand();
         $duration = $endTime - $startTime;
         $this->logger->info(
             "Static content compression during the build phase took $duration seconds.",
             [
-                'compressionLevel' => static::COMPRESSION_LEVEL,
+                'commandRun' => $commandRun
             ]
         );
 
