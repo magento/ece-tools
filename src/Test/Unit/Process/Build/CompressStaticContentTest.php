@@ -13,7 +13,6 @@ use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
-
 /**
  * Unit test for build-time static content compressor.
  *
@@ -46,9 +45,9 @@ class CompressStaticContentTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
+        $this->loggerMock      = $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
         $this->environmentMock = $this->getMockBuilder(Environment::class)->getMock();
-        $this->compressorMock = $this->getMockBuilder(StaticContentCompressor::class)->getMock();
+        $this->compressorMock  = $this->getMockBuilder(StaticContentCompressor::class)->getMock();
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
