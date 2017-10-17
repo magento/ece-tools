@@ -45,14 +45,33 @@ class CompressStaticContentTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock      = $this->getMockBuilder(LoggerInterface::class)->getMockForAbstractClass();
-        $this->environmentMock = $this->getMockBuilder(Environment::class)->getMock();
-        $this->compressorMock  = $this->getMockBuilder(StaticContentCompressor::class)->getMock();
+        $this->loggerMock      = $this->getMockBuilder(LoggerInterface::class)
+            ->getMockForAbstractClass();
+        $this->environmentMock = $this->getMockBuilder(Environment::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->compressorMock  = $this->getMockBuilder(StaticContentCompressor::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->environmentMock,
             $this->compressorMock
         );
+    }
+
+    public function testExecute()
+    {
+        $this->environmentMock
+            ->expects($this->once())
+            ->method('isStaticDeployInBuild')
+            ->willReturn(true);
+
+        $this->process->execute();
+    }
+
+    public function testExecuteNoCompress()
+    {
     }
 }
