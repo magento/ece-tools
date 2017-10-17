@@ -6,11 +6,11 @@
 
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Process\Build\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 
