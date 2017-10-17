@@ -73,5 +73,11 @@ class CompressStaticContentTest extends TestCase
 
     public function testExecuteNoCompress()
     {
+        $this->environmentMock
+            ->expects($this->once())
+            ->method('isStaticDeployInBuild')
+            ->willReturn(false);
+
+        $this->assertNotTrue($this->process->execute());
     }
 }
