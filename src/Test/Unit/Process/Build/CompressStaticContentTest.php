@@ -70,7 +70,8 @@ class CompressStaticContentTest extends TestCase
 
         $this->compressorMock
             ->expects($this->once())
-            ->method('compressStaticContent');
+            ->method('compressStaticContent')
+            ->with($this->equalTo('6'));
 
         $this->assertTrue($this->process->execute());
     }
