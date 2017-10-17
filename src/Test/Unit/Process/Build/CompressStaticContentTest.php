@@ -68,7 +68,7 @@ class CompressStaticContentTest extends TestCase
             ->method('isStaticDeployInBuild')
             ->willReturn(true);
 
-        $this->process->execute();
+        $this->assertTrue($this->process->execute());
     }
 
     public function testExecuteNoCompress()
