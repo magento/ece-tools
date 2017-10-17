@@ -12,6 +12,10 @@ use Magento\MagentoCloud\Util\StaticContentCompressor;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * Unit test for static content compression.
+ * @package Magento\MagentoCloud\Test\Unit\Util
+ */
 class StaticContentCompressorTest extends TestCase
 {
     /**
