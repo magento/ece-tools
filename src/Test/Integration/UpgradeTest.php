@@ -26,6 +26,11 @@ class UpgradeTest extends TestCase
     protected function setUp()
     {
         $this->bootstrap = Bootstrap::create();
+
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento module:enable --all',
+            $this->bootstrap->getSandboxDir()
+        ));
     }
 
     /**
@@ -56,11 +61,6 @@ class UpgradeTest extends TestCase
             $this->markTestIncomplete('Git upgrades does not supported.');
         }
 
-        $this->bootstrap->execute(sprintf(
-            'cp -f %s %s',
-            $this->bootstrap->getConfigFile('config.php'),
-            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
-        ));
         $this->bootstrap->execute(sprintf(
             'composer require magento/product-enterprise-edition %s -n -d %s',
             $from,
