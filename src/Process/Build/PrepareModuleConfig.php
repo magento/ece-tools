@@ -86,11 +86,11 @@ class PrepareModuleConfig implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info("Reconciling installed modules with shared config.");
+        $this->logger->info('Reconciling installed modules with shared config.');
         $moduleConfig = $this->sharedConfig->get('modules');
 
         if (empty($moduleConfig)) {
-            $this->logger->info("Shared config file is missing module section. Updating with all installed modules.");
+            $this->logger->info('Shared config file is missing module section. Updating with all installed modules.');
             $this->shell->execute('php bin/magento module:enable --all');
             return;
         }
@@ -100,12 +100,12 @@ class PrepareModuleConfig implements ProcessInterface
         $newModules = array_filter(array_diff($thirdPartyModules, array_keys($moduleConfig)));
 
         if (empty($newModules)) {
-            $this->logger->info("All installed modules present in shared config.");
+            $this->logger->info('All installed modules present in shared config.');
             return;
         }
 
 
-        $this->logger->info("Enabling newly installed modules not found in shared config.");
+        $this->logger->info('Enabling newly installed modules not found in shared config.');
         $enableModules = join(" ", $newModules);
         $this->shell->execute("php bin/magento module:enable $enableModules");
     }

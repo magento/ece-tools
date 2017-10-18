@@ -1,6 +1,5 @@
 .idea
 vendor
-!/src/Test/Unit/Util/_files/vendor
 composer.phar
 phpunit.xml
 composer.lock

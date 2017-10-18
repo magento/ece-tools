@@ -43,10 +43,10 @@ class ReaderTest extends TestCase
     {
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/../_file/Shared');
+            ->willReturn(__DIR__ . '/_file');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(__DIR__ . '/../_file/Shared/app/etc/config.php')
+            ->with(__DIR__ . '/_file/app/etc/config.php')
             ->willReturn(true);
 
         $this->assertEquals(
@@ -64,10 +64,10 @@ class ReaderTest extends TestCase
     {
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/../_file/Shared');
+            ->willReturn(__DIR__ . '/_file');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(__DIR__ . '/../_file/Shared/app/etc/config.php')
+            ->with(__DIR__ . '/_file/app/etc/config.php')
             ->willReturn(false);
 
         $this->assertEquals(

@@ -44,7 +44,7 @@ class Reader implements ReaderInterface
             return [];
         }
 
-        return include $configPath;
+        return require $configPath;
     }
 
     /**

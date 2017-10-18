@@ -28,9 +28,7 @@ class SharedTest extends TestCase
      */
     protected function setUp()
     {
-        $this->readerMock = $this->getMockBuilder(Shared\Reader::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->readerMock = $this->createMock(Shared\Reader::class);
 
         $this->shared = new Shared(
             $this->readerMock

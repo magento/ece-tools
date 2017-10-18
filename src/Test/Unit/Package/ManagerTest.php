@@ -53,7 +53,6 @@ class ManagerTest extends TestCase
         $this->composerMock->expects($this->once())
             ->method('getLocker')
             ->willReturn($lockerMock);
-
         $lockerMock->expects($this->once())
             ->method('getLockedRepository')
             ->willReturn($this->repositoryMock);
@@ -156,14 +155,13 @@ class ManagerTest extends TestCase
     public function testGetRequiredPackageNames()
     {
         $linkMock = $this->createMock(Link::class);
+
         $linkMock->expects($this->once())
             ->method('getTarget')
             ->willReturn('some/random-package');
-
         $this->composerMock->expects($this->once())
             ->method('getPackage')
             ->willReturn($this->packageMock);
-
         $this->packageMock->expects($this->once())
             ->method('getRequires')
             ->willReturn([$linkMock]);
