@@ -17,6 +17,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class DBDump extends Command
 {
+    const NAME = 'db-dump';
+
     /**
      * @var LoggerInterface
      */
@@ -44,7 +46,7 @@ class DBDump extends Command
      */
     protected function configure()
     {
-        $this->setName('db-dump')
+        $this->setName(self::NAME)
             ->setDescription('creates backup of database');
 
         parent::configure();

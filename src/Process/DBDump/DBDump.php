@@ -101,7 +101,6 @@ class DBDump implements ProcessInterface
         fclose($fp);
         $this->shell->execute("mv {$temporaryDirectory}/{$lockFileAttemptFile} "
             . "{$temporaryDirectory}/{$lockFileLastestFile}");
-
     }
 
     /**
