@@ -51,8 +51,6 @@ class UpgradeTest extends TestCase
      */
     public function testDefault(string $from, string $to)
     {
-        $this->markTestIncomplete();
-
         $application = $this->bootstrap->createApplication([]);
         $sandboxDir = $this->bootstrap->getSandboxDir();
         $config = $this->bootstrap->mergeConfig([]);
