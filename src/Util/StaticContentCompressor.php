@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * Utility class for static content compression.
  */
 class StaticContentCompressor
 {
@@ -61,7 +61,9 @@ class StaticContentCompressor
     }
 
     /**
-     * @return string Getter for the last shell command string.
+     * Getter for the last shell command string.
+     *
+     * @return string
      */
     public function getLastShellCommand(): string
     {
@@ -96,7 +98,7 @@ class StaticContentCompressor
      *
      * @param string $command
      *
-     * @return string
+     * @return string|null Output from the shell command.
      */
     private function shellExecute(string $command)
     {

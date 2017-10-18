@@ -61,6 +61,9 @@ class CompressStaticContentTest extends TestCase
         );
     }
 
+    /**
+     * Test deploy-time compression.
+     */
     public function testExecute()
     {
         $this->environmentMock
@@ -76,6 +79,9 @@ class CompressStaticContentTest extends TestCase
         $this->assertTrue($this->process->execute());
     }
 
+    /**
+     * Test that deploy-time compression will fail appropriately.
+     */
     public function testExecuteNoCompress()
     {
         $this->environmentMock

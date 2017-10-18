@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 
 /**
- * @inheritdoc
+ * Compress static content at build time.
  */
 class CompressStaticContent implements ProcessInterface
 {
@@ -58,6 +58,8 @@ class CompressStaticContent implements ProcessInterface
     }
 
     /**
+     * Execute the build-time static content compression process.
+     *
      * @return bool
      */
     public function execute(): bool
