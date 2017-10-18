@@ -98,7 +98,6 @@ class UpgradeTest extends TestCase
     public function defaultDataProvider(): array
     {
         return [
-            ['^2.1', '^2.2'],
             ['2.2.0', '^2.2'],
         ];
     }
