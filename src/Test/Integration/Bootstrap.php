@@ -104,7 +104,7 @@ class Bootstrap
             $sandboxDir . '/build_options.ini'
         ));
         $this->execute(sprintf(
-            'composer install -n -d %s --no-dev',
+            'composer install -n -d %s --no-dev --no-progress',
             $sandboxDir
         ));
     }
