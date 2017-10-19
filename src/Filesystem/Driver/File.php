@@ -82,7 +82,6 @@ class File
         return $result;
     }
 
-
     /**
      * Create directory
      *

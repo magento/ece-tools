@@ -152,6 +152,22 @@ class ManagerTest extends TestCase
         $this->packageManager->get('some_package');
     }
 
+    public function testHas()
+    {
+        $this->repositoryMock->method('findPackage')
+            ->withConsecutive(
+                ['some_package', '*'],
+                ['some_package', '0.1']
+            )
+            ->willReturnOnConsecutiveCalls(
+                $this->packageMock,
+                null
+            );
+
+        $this->assertSame(true, $this->packageManager->has('some_package'));
+        $this->assertSame(false, $this->packageManager->has('some_package', '0.1'));
+    }
+
     public function testGetRequiredPackageNames()
     {
         $linkMock = $this->createMock(Link::class);

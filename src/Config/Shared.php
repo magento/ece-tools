@@ -34,7 +34,7 @@ class Shared
     /**
      * @param string $key
      * @param string|null $default
-     * @return string|null
+     * @return mixed|null
      */
     public function get(string $key, $default = null)
     {
