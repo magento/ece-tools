@@ -30,11 +30,6 @@ class StaticContentCompressor
     private $shell;
 
     /**
-     * @var string Last shell command that's been executed by this object.
-     */
-    private $lastShellCommand;
-
-    /**
      * @var string The outer wrapper command that limits execution time and prevents hanging during deployment.
      */
     private static $timeoutCommand = "/usr/bin/timeout -k 30 600 /bin/bash -c ";
@@ -61,16 +56,6 @@ class StaticContentCompressor
     }
 
     /**
-     * Getter for the last shell command string.
-     *
-     * @return string
-     */
-    public function getLastShellCommand(): string
-    {
-        return $this->lastShellCommand;
-    }
-
-    /**
      * Compress select files in the static content directory.
      *
      * Compression level 4 takes about as long as compression level 1.
@@ -90,7 +75,7 @@ class StaticContentCompressor
 
         $startTime = microtime(true);
         $this->shell->execute($compressionCommand);
-        $endTime = microtime(true);
+        $endTime  = microtime(true);
         $duration = $endTime - $startTime;
 
         if ($verbose) {
