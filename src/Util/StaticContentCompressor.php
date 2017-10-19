@@ -84,27 +84,25 @@ class StaticContentCompressor
      *
      * @return bool
      */
-    public function compressStaticContent(int $compressionLevel = 4): bool
+    public function compressStaticContent(int $compressionLevel = 4, bool $verbose = true): bool
     {
         $compressionCommand = $this->getCompressionCommand($compressionLevel);
-        $this->shellExecute($compressionCommand);
+
+        $startTime = microtime(true);
+        $this->shell->execute($compressionCommand);
+        $endTime = microtime(true);
+        $duration = $endTime - $startTime;
+
+        if ($verbose) {
+            $this->logger->info(
+                "Static content compression took $duration seconds.",
+                [
+                    'commandRun' => $compressionCommand
+                ]
+            );
+        }
 
         return true;
-    }
-
-
-    /**
-     * Decorator to run a shell command while recording what was run.
-     *
-     * @param string $command
-     *
-     * @return string|null Output from the shell command.
-     */
-    private function shellExecute(string $command)
-    {
-        $this->lastShellCommand = $command;
-
-        return $this->shell->execute($command);
     }
 
     /**
