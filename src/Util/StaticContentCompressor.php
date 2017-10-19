@@ -37,7 +37,7 @@ class StaticContentCompressor
     /**
      * @var string The outer wrapper command that limits execution time and prevents hanging during deployment.
      */
-    private static $timeoutCommand = "/usr/bin/timeout -k 30 300 /bin/bash -c ";
+    private static $timeoutCommand = "/usr/bin/timeout -k 30 600 /bin/bash -c ";
 
     /**
      * @var string The inner find/xargs/gzip command that compresses the content.
