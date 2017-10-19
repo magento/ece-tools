@@ -130,7 +130,7 @@ class StaticContentCompressor
             $compressionLevel = $defaultCompressionLevel;
         }
 
-        $compressionCommand = self::$compressionCommand;
+        $compressionCommand = static::$compressionCommand;
 
         if ($verbose) {
             $compressionCommand .= " -v";
@@ -139,7 +139,7 @@ class StaticContentCompressor
         $compressionCommand .= " -$compressionLevel";
 
         $compressionCommand
-            = self::$timeoutCommand . '"' . $compressionCommand . '"';
+            = static::$timeoutCommand . '"' . $compressionCommand . '"';
 
         return $compressionCommand;
     }
