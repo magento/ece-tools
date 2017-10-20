@@ -115,15 +115,6 @@ class UpgradeTest extends TestCase
         $defaultRoute = array_keys($routes)[0];
         $pageContent = file_get_contents($defaultRoute);
 
-        $this->assertContains(
-            'Home Page',
-            $pageContent,
-            'Check "Home Page" phrase presence'
-        );
-        $this->assertContains(
-            'CMS homepage content goes here.',
-            $pageContent,
-            'Check "CMS homepage content goes here." phrase presence'
-        );
+        $this->assertContains('Home Page', $pageContent, 'Check "Home Page" phrase presence');
     }
 }
