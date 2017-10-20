@@ -35,15 +35,6 @@ class StaticContentCompressor
     private static $timeoutCommand = "/usr/bin/timeout -k 30 600 /bin/bash -c ";
 
     /**
-     * @var string The inner find/xargs/gzip command that compresses the content.
-     */
-    private static $compressionCommand
-        = "find " . self::TARGET_DIR . " -type f -size +300c"
-        . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
-        . " -or -name '*.html' -or -name '*.htm' ')'"
-        . " | xargs -n100 -P16 gzip --keep";
-
-    /**
      * @param LoggerInterface $logger
      * @param ShellInterface  $shell
      */
@@ -91,7 +82,20 @@ class StaticContentCompressor
     }
 
     /**
-     * Get the string containing the shell command for compression.
+     * Return the inner find/xargs/gzip command that compresses the content.
+     *
+     * @return string
+     */
+    private static function innerCompressionCommand(): string
+    {
+        return "find " . escapeshellarg(static::TARGET_DIR) . " -type f -size +300c"
+            . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
+            . " -or -name '*.html' -or -name '*.htm' ')'"
+            . " | xargs -n100 -P16 gzip --keep";
+    }
+
+    /**
+     * Get the string containing the full shell command for compression.
      *
      * @param int  $compressionLevel
      * @param bool $verbose
@@ -114,7 +118,7 @@ class StaticContentCompressor
             $compressionLevel = $defaultCompressionLevel;
         }
 
-        $compressionCommand = static::$compressionCommand;
+        $compressionCommand = static::innerCompressionCommand();
 
         if ($verbose) {
             $compressionCommand .= " -v";
