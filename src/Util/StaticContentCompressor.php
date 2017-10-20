@@ -104,7 +104,8 @@ class StaticContentCompressor
     ): string {
         if (!is_int($compressionLevel)
             || $compressionLevel < 1
-            || $compressionLevel > 9) {
+            || $compressionLevel > 9
+        ) {
             $defaultCompressionLevel = 1;
             $this->logger->info(
                 "Compression level was \"$compressionLevel\" but this is invalid. Using default compression level"
@@ -120,7 +121,6 @@ class StaticContentCompressor
         }
 
         $compressionCommand .= " -$compressionLevel";
-
         $compressionCommand
             = static::$timeoutCommand . '"' . $compressionCommand . '"';
 
