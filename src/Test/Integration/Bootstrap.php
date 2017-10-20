@@ -48,9 +48,7 @@ class Bootstrap
 
         $buildFile = $this->getConfigFile('build_options.ini');
         $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
-        $deployType = getenv('DEPLOY_TYPE')
-            ? getenv('DEPLOY_TYPE')
-            : $deployConfig[static::DEPLOY_TYPE];
+        $deployType = getenv('DEPLOY_TYPE') ?: $deployConfig[static::DEPLOY_TYPE];
 
         if (!$deployType || !array_key_exists($deployType, $deployConfig['types'])) {
             throw new \Exception(
@@ -98,11 +96,17 @@ class Bootstrap
                 throw new \Exception('Wrong deploy type');
         }
 
+        /**
+         * Copying build options.
+         */
         $this->execute(sprintf(
             'cp -f %s %s',
             $buildFile,
             $sandboxDir . '/build_options.ini'
         ));
+        /**
+         * Install without dev dependencies.
+         */
         $this->execute(sprintf(
             'composer install -n -d %s --no-dev --no-progress',
             $sandboxDir
@@ -157,9 +161,7 @@ class Bootstrap
     public function getSandboxDir(): string
     {
         $environmentFile = $this->getConfigFile('environment.php');
-        $sandboxKey = getenv('SANDBOX_KEY')
-            ? getenv('SANDBOX_KEY')
-            : md5_file($environmentFile);
+        $sandboxKey = getenv('SANDBOX_KEY') ?: md5_file($environmentFile);
 
         return ECE_BP . '/tests/integration/tmp/sandbox-' . $sandboxKey;
     }

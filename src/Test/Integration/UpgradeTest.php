@@ -112,8 +112,7 @@ class UpgradeTest extends TestCase
             return;
         }
 
-        $routes = array_keys($routes);
-        $defaultRoute = reset($routes);
+        $defaultRoute = array_keys($routes)[0];
         $pageContent = file_get_contents($defaultRoute);
 
         $this->assertContains(
