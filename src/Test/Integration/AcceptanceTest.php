@@ -28,8 +28,8 @@ class AcceptanceTest extends TestCase
     {
         $this->bootstrap = Bootstrap::create();
 
-        shell_exec(sprintf(
-            'cd %s && rm -rf init',
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento module:enable --all',
             $this->bootstrap->getSandboxDir()
         ));
     }
@@ -39,7 +39,7 @@ class AcceptanceTest extends TestCase
      */
     protected function tearDown()
     {
-        shell_exec(sprintf(
+        $this->bootstrap->execute(sprintf(
             'cd %s && php bin/magento setup:uninstall -n',
             $this->bootstrap->getSandboxDir()
         ));
@@ -52,12 +52,6 @@ class AcceptanceTest extends TestCase
     public function testDefault(array $environment)
     {
         $application = $this->bootstrap->createApplication($environment);
-
-        shell_exec(sprintf(
-            'cp -f %s %s',
-            $this->bootstrap->getConfigFile('config.php'),
-            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
-        ));
 
         $commandTester = new CommandTester(
             $application->get(Build::NAME)
@@ -103,10 +97,14 @@ class AcceptanceTest extends TestCase
     {
         $application = $this->bootstrap->createApplication($environment);
 
-        shell_exec(sprintf(
+        $this->bootstrap->execute(sprintf(
             'cp -f %s %s',
             __DIR__ . '/_files/config_scd_in_build.php',
             $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
+        ));
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento module:enable --all',
+            $this->bootstrap->getSandboxDir()
         ));
 
         $commandTester = new CommandTester(
@@ -163,17 +161,5 @@ class AcceptanceTest extends TestCase
             $pageContent,
             'Check "CMS homepage content goes here." phrase presence'
         );
-    }
-
-    /**
-     * @return array
-     */
-    public function upgradeDataProvider(): array
-    {
-        return [
-            'default configuration' => [
-                'environment' => [],
-            ],
-        ];
     }
 }

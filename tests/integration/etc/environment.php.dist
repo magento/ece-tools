@@ -31,11 +31,11 @@ return [
         'types' => [
             'git' => [
                 'repo' => 'https://github.com/magento/magento-cloud',
-                'version' => '2.1.9',
+                'version' => '2.2.0',
             ],
             'project' => [
                 'repo' => 'https://repo.magento.com/',
-                'name' => 'magento/project-community-edition',
+                'name' => 'magento/project-enterprise-edition',
                 'version' => '^2.2',
             ],
 
