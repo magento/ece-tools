@@ -86,7 +86,7 @@ class StaticContentCompressor
      *
      * @return string
      */
-    private static function innerCompressionCommand(): string
+    private function innerCompressionCommand(): string
     {
         return "find " . escapeshellarg(static::TARGET_DIR) . " -type f -size +300c"
             . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
@@ -118,7 +118,7 @@ class StaticContentCompressor
             $compressionLevel = $defaultCompressionLevel;
         }
 
-        $compressionCommand = static::innerCompressionCommand();
+        $compressionCommand = $this->innerCompressionCommand();
 
         if ($verbose) {
             $compressionCommand .= " -v";
