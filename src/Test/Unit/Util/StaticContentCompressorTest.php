@@ -72,7 +72,6 @@ class StaticContentCompressorTest extends TestCase
             return $runningArray;
         };
 
-        // Ensure that the shell object is receiving the proper argument.
         $this->shellMock
             ->expects($this->exactly(1 + $maxLevel - $minLevel))
             ->method('execute')
