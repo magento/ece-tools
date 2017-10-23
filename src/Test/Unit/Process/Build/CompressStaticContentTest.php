@@ -67,7 +67,6 @@ class CompressStaticContentTest extends TestCase
             ->expects($this->once())
             ->method('isStaticDeployInBuild')
             ->willReturn(true);
-
         $this->compressorMock
             ->expects($this->once())
             ->method('compressStaticContent')
@@ -85,7 +84,6 @@ class CompressStaticContentTest extends TestCase
             ->expects($this->once())
             ->method('isStaticDeployInBuild')
             ->willReturn(false);
-
         $this->compressorMock
             ->expects($this->never())
             ->method('compressStaticContent');
