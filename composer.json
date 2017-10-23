@@ -24,6 +24,9 @@
     "phpunit/php-code-coverage": "^5.2",
     "illuminate/config": "^5.5"
   },
+  "replace": {
+    "magento/ece-tools": "*"
+  },
   "bin": [
     "m2-ece-build",
     "m2-ece-deploy",
