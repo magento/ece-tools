@@ -63,7 +63,7 @@ class CompressStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->environment->isDeployStaticContent()) {
-            $this->staticContentCompressor->compressStaticContent(
+            $this->staticContentCompressor->process(
                 static::COMPRESSION_LEVEL
             );
         } else {

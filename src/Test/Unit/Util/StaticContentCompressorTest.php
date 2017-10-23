@@ -78,7 +78,7 @@ class StaticContentCompressorTest extends TestCase
             ->withConsecutive(...$parameters());
 
         for ($i = $minLevel; $i <= $maxLevel; $i++) {
-            $this->staticContentCompressor->compressStaticContent($i);
+            $this->staticContentCompressor->process($i);
         }
     }
 }
