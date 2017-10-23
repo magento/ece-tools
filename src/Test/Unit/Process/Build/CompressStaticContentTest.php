@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Process\Build\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
+use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -33,6 +34,11 @@ class CompressStaticContentTest extends TestCase
     private $environmentMock;
 
     /**
+     * @var BuildConfig|Mock
+     */
+    private $buildConfigMock;
+
+    /**
      * @var StaticContentCompressor|Mock
      */
     private $compressorMock;
@@ -47,6 +53,9 @@ class CompressStaticContentTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->buildConfigMock = $this->getMockBuilder(BuildConfig::class)
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->compressorMock = $this->getMockBuilder(StaticContentCompressor::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -54,6 +63,7 @@ class CompressStaticContentTest extends TestCase
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->environmentMock,
+            $this->buildConfigMock,
             $this->compressorMock
         );
     }

@@ -64,7 +64,8 @@ class CompressStaticContent implements ProcessInterface
     {
         if ($this->environment->isDeployStaticContent()) {
             $this->staticContentCompressor->process(
-                static::COMPRESSION_LEVEL
+                static::COMPRESSION_LEVEL,
+                $this->environment->getVerbosityLevel()
             );
         } else {
             $this->logger->info(

@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 
@@ -37,6 +38,11 @@ class CompressStaticContent implements ProcessInterface
     private $environment;
 
     /**
+     * @var BuildConfig
+     */
+    private $buildConfig;
+
+    /**
      * @var StaticContentCompressor
      */
     private $staticContentCompressor;
@@ -44,15 +50,18 @@ class CompressStaticContent implements ProcessInterface
     /**
      * @param LoggerInterface         $logger
      * @param Environment             $environment
+     * @param BuildConfig             $buildConfig
      * @param StaticContentCompressor $staticContentCompressor
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
+        BuildConfig $buildConfig,
         StaticContentCompressor $staticContentCompressor
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
+        $this->buildConfig = $buildConfig;
         $this->staticContentCompressor = $staticContentCompressor;
     }
 
@@ -65,7 +74,8 @@ class CompressStaticContent implements ProcessInterface
     {
         if ($this->environment->isStaticDeployInBuild()) {
             $this->staticContentCompressor->process(
-                static::COMPRESSION_LEVEL
+                static::COMPRESSION_LEVEL,
+                $this->buildConfig->getVerbosityLevel()
             );
         } else {
             $this->logger->info(
