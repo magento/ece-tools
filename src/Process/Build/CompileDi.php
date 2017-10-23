@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -33,6 +34,11 @@ class CompileDi implements ProcessInterface
     private $buildConfig;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @var File
      */
     private $file;
@@ -47,6 +53,7 @@ class CompileDi implements ProcessInterface
      * @param ShellInterface $shell
      * @param File $file
      * @param BuildConfig $buildConfig
+     * @param Environment $environment,
      * @param DirectoryList $directoryList
      */
     public function __construct(
@@ -54,12 +61,14 @@ class CompileDi implements ProcessInterface
         ShellInterface $shell,
         File $file,
         BuildConfig $buildConfig,
+        Environment $environment,
         DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->file = $file;
         $this->buildConfig = $buildConfig;
+        $this->environment = $environment;
         $this->directoryList = $directoryList;
     }
 
@@ -73,8 +82,12 @@ class CompileDi implements ProcessInterface
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
 
         if ($this->file->isExists($configFile)) {
-            $this->logger->info('Running DI compilation');
-            $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
+            if ($this->environment->getVariable('APPLICATION_MODE') === $this->environment::MAGENTO_PRODUCTION_MODE) {
+                $this->logger->info('Running DI compilation');
+                $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
+            } else {
+                $this->logger->info('Not production mode. Skipping DI compilation');
+            }
         } else {
             $this->logger->info(
                 "Missing config.php, please run the following commands "
