@@ -48,7 +48,7 @@ class StaticContentCompressor
         ShellInterface $shell
     ) {
         $this->logger = $logger;
-        $this->shell  = $shell;
+        $this->shell = $shell;
     }
 
     /**
@@ -71,7 +71,7 @@ class StaticContentCompressor
 
         $startTime = microtime(true);
         $this->shell->execute($compressionCommand);
-        $endTime  = microtime(true);
+        $endTime = microtime(true);
         $duration = $endTime - $startTime;
 
         if ($verbose) {

@@ -51,8 +51,8 @@ class CompressStaticContent implements ProcessInterface
         Environment $environment,
         StaticContentCompressor $staticContentCompressor
     ) {
-        $this->logger                  = $logger;
-        $this->environment             = $environment;
+        $this->logger = $logger;
+        $this->environment = $environment;
         $this->staticContentCompressor = $staticContentCompressor;
     }
 

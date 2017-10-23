@@ -41,7 +41,7 @@ class StaticContentCompressorTest extends TestCase
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->shellMock  = $this->getMockBuilder(ShellInterface::class)
+        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
 
         $this->staticContentCompressor = new StaticContentCompressor(

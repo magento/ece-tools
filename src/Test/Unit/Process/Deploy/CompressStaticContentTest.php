@@ -45,12 +45,12 @@ class CompressStaticContentTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock      = $this->getMockBuilder(LoggerInterface::class)
+        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->compressorMock  = $this->getMockBuilder(StaticContentCompressor::class)
+        $this->compressorMock = $this->getMockBuilder(StaticContentCompressor::class)
             ->disableOriginalConstructor()
             ->getMock();
 
