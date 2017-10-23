@@ -16,7 +16,7 @@ class StaticContentCompressor
     /**
      * Target directory to be compressed relative to the Magento application folder.
      */
-    const TARGET_DIR = "pub/static";
+    const TARGET_DIR = 'pub/static';
 
     /**
      * Default gzip compression level if not otherwise specified.
@@ -36,7 +36,7 @@ class StaticContentCompressor
     /**
      * @var string The outer wrapper command that limits execution time and prevents hanging during deployment.
      */
-    private static $timeoutCommand = "/usr/bin/timeout -k 30 600 /bin/bash -c ";
+    private static $timeoutCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c ';
 
     /**
      * @param LoggerInterface $logger
