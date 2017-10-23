@@ -128,8 +128,7 @@ class StaticContentCompressor
         }
 
         $compressionCommand .= " -$compressionLevel";
-        $compressionCommand
-            = static::$timeoutCommand . '"' . $compressionCommand . '"';
+        $compressionCommand = static::$timeoutCommand . '"' . $compressionCommand . '"';
 
         return $compressionCommand;
     }
