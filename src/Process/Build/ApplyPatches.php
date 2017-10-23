@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -26,23 +26,23 @@ class ApplyPatches implements ProcessInterface
     private $logger;
 
     /**
-     * @var MagentoVersion
+     * @var PackageManager
      */
-    private $magentoVersion;
+    private $packageManager;
 
     /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
-     * @param MagentoVersion $magentoVersion
+     * @param PackageManager $packageManager
      */
     public function __construct(
         ShellInterface $shell,
         LoggerInterface $logger,
-        MagentoVersion $magentoVersion
+        PackageManager $packageManager
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
-        $this->magentoVersion = $magentoVersion;
+        $this->packageManager = $packageManager;
     }
 
     /**
@@ -52,12 +52,12 @@ class ApplyPatches implements ProcessInterface
     {
         $this->logger->info('Applying patches.');
 
-        try {
-            if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
-                $this->shell->execute('php vendor/bin/m2-apply-patches');
-            }
-        } catch (\Exception $exception) {
-            $this->logger->warning('Patching was failed. Skipping.');
+        if (!$this->packageManager->has('magento/ece-patches')) {
+            $this->logger->warning('Package with patches was not found.');
+
+            return;
         }
+
+        $this->shell->execute('php ./vendor/bin/m2-apply-patches');
     }
 }

@@ -70,4 +70,14 @@ class Manager
 
         return $package;
     }
+
+    /**
+     * @param string $packageName
+     * @param string $version
+     * @return bool
+     */
+    public function has(string $packageName, string $version = '*'): bool
+    {
+        return $this->repository->findPackage($packageName, $version) instanceof PackageInterface;
+    }
 }
