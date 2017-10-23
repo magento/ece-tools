@@ -66,7 +66,8 @@ class CompressStaticContent implements ProcessInterface
         // Only proceed if static content deployment has already run.
         if (!$this->environment->isDeployStaticContent()) {
             $this->logger->info(
-                "Skipping deploy-time static content compression because isDeployStaticContent() is false."
+                "Skipping deploy-time static content compression because it's either already happened or"
+                . " static content deployment is disabled is false."
             );
             return;
         }
