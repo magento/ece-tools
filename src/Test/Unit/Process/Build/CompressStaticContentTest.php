@@ -79,7 +79,7 @@ class CompressStaticContentTest extends TestCase
             ->willReturn(true);
         $this->compressorMock
             ->expects($this->once())
-            ->method('compressStaticContent')
+            ->method('process')
             ->with($this->equalTo('6'));
 
         $this->process->execute();
@@ -96,7 +96,7 @@ class CompressStaticContentTest extends TestCase
             ->willReturn(false);
         $this->compressorMock
             ->expects($this->never())
-            ->method('compressStaticContent');
+            ->method('process');
 
         $this->process->execute();
     }
