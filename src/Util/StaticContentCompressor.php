@@ -107,8 +107,7 @@ class StaticContentCompressor
      * @return string
      */
     private function getCompressionCommand(
-        int $compressionLevel = 1,
-        bool $verbose = false
+        int $compressionLevel = 1
     ): string {
         if (!is_int($compressionLevel)
             || $compressionLevel < 1
@@ -122,11 +121,6 @@ class StaticContentCompressor
         }
 
         $compressionCommand = $this->innerCompressionCommand();
-
-        if ($verbose) {
-            $compressionCommand .= " -v";
-        }
-
         $compressionCommand .= " -$compressionLevel";
         $compressionCommand = static::$timeoutCommand . '"' . $compressionCommand . '"';
 
