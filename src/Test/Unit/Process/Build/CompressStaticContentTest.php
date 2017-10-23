@@ -14,8 +14,6 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * Unit test for build-time static content compressor.
- *
- * @package Magento\MagentoCloud\Test\Unit\Process\Build
  */
 class CompressStaticContentTest extends TestCase
 {
