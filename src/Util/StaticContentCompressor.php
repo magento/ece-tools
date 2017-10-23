@@ -20,6 +20,11 @@ class StaticContentCompressor
     const TARGET_DIR = "pub/static";
 
     /**
+     * Default gzip compression level if not otherwise specified.
+     */
+    const DEFAULT_COMPRESSION_LEVEL = 1;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -110,12 +115,11 @@ class StaticContentCompressor
             || $compressionLevel < 1
             || $compressionLevel > 9
         ) {
-            $defaultCompressionLevel = 1;
             $this->logger->info(
                 "Compression level was \"$compressionLevel\" but this is invalid. Using default compression level"
-                . " of \"$defaultCompressionLevel\"."
+                . ' of "' . static::DEFAULT_COMPRESSION_LEVEL . '".'
             );
-            $compressionLevel = $defaultCompressionLevel;
+            $compressionLevel = static::DEFAULT_COMPRESSION_LEVEL;
         }
 
         $compressionCommand = $this->innerCompressionCommand();
