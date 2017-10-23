@@ -55,18 +55,34 @@ class StaticContentCompressorTest extends TestCase
      */
     public function testCompression()
     {
+        $minLevel = 1;
+        $maxLevel = 9;
+
+        // Create the list of parameters to be expected on each invocation.
+        $parameters = function () use ($minLevel, $maxLevel) {
+            $runningArray = [];
+            for ($i = $minLevel; $i <= $maxLevel; $i++) {
+                $runningArray[] = [
+                    $this->logicalAnd(
+                        $this->stringContains('gzip --keep'),
+                        $this->stringContains('xargs'),
+                        $this->stringContains($this->staticContentCompressor::TARGET_DIR),
+                        $this->stringContains("-$i")
+                    )
+                ];
+            }
+
+            return $runningArray;
+        };
+
         // Ensure that the shell object is receiving the proper argument.
         $this->shellMock
-            ->expects($this->once())
+            ->expects($this->exactly(1 + $maxLevel - $minLevel))
             ->method('execute')
-            ->with(
-                $this->logicalAnd(
-                    $this->stringContains('gzip --keep'),
-                    $this->stringContains('xargs'),
-                    $this->stringContains($this->staticContentCompressor::TARGET_DIR)
-                )
-            );
+            ->withConsecutive(...$parameters());
 
-        $this->staticContentCompressor->compressStaticContent();
+        for ($i = $minLevel; $i <= $maxLevel; $i++) {
+            $this->staticContentCompressor->compressStaticContent($i);
+        }
     }
 }
