@@ -76,7 +76,7 @@ class CompressStaticContentTest extends TestCase
             ->method('compressStaticContent')
             ->with($this->equalTo('6'));
 
-        $this->assertTrue($this->process->execute());
+        $this->process->execute();
     }
 
     /**
@@ -93,6 +93,6 @@ class CompressStaticContentTest extends TestCase
             ->expects($this->never())
             ->method('compressStaticContent');
 
-        $this->assertNotTrue($this->process->execute());
+        $this->process->execute();
     }
 }

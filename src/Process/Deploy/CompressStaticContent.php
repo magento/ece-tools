@@ -59,23 +59,20 @@ class CompressStaticContent implements ProcessInterface
     /**
      * Execute the deploy-time static content compression process.
      *
-     * @return bool
+     * @return void
      */
-    public function execute(): bool
+    public function execute()
     {
         // Only proceed if static content deployment has already run.
         if (!$this->environment->isDeployStaticContent()) {
             $this->logger->info(
                 "Skipping deploy-time static content compression because isDeployStaticContent() is false."
             );
-
-            return false;
+            return;
         }
 
         $this->staticContentCompressor->compressStaticContent(
             static::COMPRESSION_LEVEL
         );
-
-        return true;
     }
 }
