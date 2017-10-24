@@ -62,8 +62,8 @@ class SearchEngine implements ProcessInterface
         }
 
         $this->logger->info('Set search engine to: ' . $searchConfig['engine']);
-
-        $this->writer->update($searchConfig);
+        $config['system']['default']['catalog']['search'] = $searchConfig;
+        $this->writer->update($config);
     }
 
     /**

@@ -144,6 +144,7 @@ class SetupTest extends TestCase
                 . ' --backend-frontname=\'' . $adminUrlExpected . '\' --admin-user=\'' . $adminNameExpected . '\''
                 . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
                 . '\' --admin-email=\'admin@example.com\' --admin-password=\'' . $adminPasswordExpected . '\''
+                . ' --use-secure-admin=1'
                 . ' --db-password=\'password\' -v'
             );
 
