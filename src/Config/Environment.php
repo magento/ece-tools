@@ -241,7 +241,7 @@ class Environment
      */
     public function getRecoverableDirectories(): array
     {
-        return ['var/log', 'app/etc', 'pub/media'];
+        return ['var/log', 'var/view_preprocessed', 'app/etc', 'pub/media'];
     }
 
     /**

@@ -76,7 +76,8 @@ class DeployStaticContent implements ProcessInterface
 
         // Clear old static content if necessary
         if ($this->environment->doCleanStaticFiles()) {
-            $this->staticContentCleaner->clean();
+            $this->staticContentCleaner->cleanPubStatic();
+            $this->staticContentCleaner->cleanViewPreprocessed();
         }
 
         $this->logger->info('Generating fresh static content');

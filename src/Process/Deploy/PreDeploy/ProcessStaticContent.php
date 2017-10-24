@@ -74,7 +74,7 @@ class ProcessStaticContent implements ProcessInterface
         }
 
         $this->logger->info('Static content deployment was performed during build hook');
-        $this->staticContentCleaner->clean();
+        $this->staticContentCleaner->cleanPubStatic();
 
         if ($this->env->isStaticContentSymlinkOn()) {
             $this->logger->info('Symlinking static content from pub/static to init/pub/static');
