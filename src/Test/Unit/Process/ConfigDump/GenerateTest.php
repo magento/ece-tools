@@ -3,12 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump\Export;
+namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Process\ConfigDump\Export\Generate;
+use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Process\ConfigDump\Generate;
 use Magento\MagentoCloud\Util\ArrayManager;
 use PHPUnit\Framework\TestCase;
 
@@ -28,9 +28,9 @@ class GenerateTest extends TestCase
     private $connectionMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var FileList|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $directoryListMock;
+    private $fileListMock;
 
     /**
      * @var File|\PHPUnit_Framework_MockObject_MockObject
@@ -48,13 +48,13 @@ class GenerateTest extends TestCase
     protected function setUp()
     {
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createMock(File::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
 
         $this->process = new Generate(
             $this->connectionMock,
-            $this->directoryListMock,
+            $this->fileListMock,
             $this->fileMock,
             $this->arrayManagerMock,
             ['modules']
@@ -75,8 +75,8 @@ class GenerateTest extends TestCase
             ],
         ];
 
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/_files');
+        $this->fileListMock->method('getConfig')
+            ->willReturn(__DIR__ . '/_files/app/etc/config.php');
         $this->arrayManagerMock->method('nest')
             ->willReturnOnConsecutiveCalls(
                 [

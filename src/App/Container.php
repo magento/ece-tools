@@ -65,6 +65,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             \Magento\MagentoCloud\DB\ConnectionInterface::class,
             \Magento\MagentoCloud\DB\Connection::class
         );
+        $this->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
         /**
          * Contextual binding.
          */
@@ -144,6 +145,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 return $this->make(ProcessComposite::class, [
                     'processes' => [
                         $this->make(ConfigDumpProcess\Export::class),
+                        $this->make(ConfigDumpProcess\Generate::class),
+                        $this->make(ConfigDumpProcess\Import::class),
                     ],
                 ]);
             });
@@ -152,11 +155,11 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->make(ProcessComposite::class, [
                     'processes' => [
-                        $this->make(ConfigDumpProcess\Export\Generate::class),
+                        $this->make(ConfigDumpProcess\Generate::class),
                     ],
                 ]);
             });
-        $this->when(ConfigDumpProcess\Export\Generate::class)
+        $this->when(ConfigDumpProcess\Generate::class)
             ->needs('$configKeys')
             ->give(function () {
                 return [

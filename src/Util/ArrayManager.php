@@ -52,6 +52,39 @@ class ArrayManager
     }
 
     /**
+     * This method expands original array in next way.
+     * Having original array as
+     * ```php
+     * [
+     *  'test_old' => 'two'
+     * ]
+     * ```
+     *
+     * And keys
+     * ```php
+     * [
+     *  'test',
+     *  'test2'
+     *  ]
+     * ```
+     *
+     * And value
+     *
+     * ```php
+     * one
+     * ```
+     *
+     * Will be resulted into array
+     *
+     * ```php
+     * [
+     *  'test_old' => 'two',
+     *  'test' => [
+     *      'test2' => 'one'
+     *      ]
+     *  ]
+     * ```
+     *
      * @param array $original
      * @param array $keys
      * @param string|int $val

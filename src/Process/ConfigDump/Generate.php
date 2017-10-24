@@ -3,11 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\ConfigDump\Export;
+namespace Magento\MagentoCloud\Process\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ArrayManager;
 
@@ -22,9 +22,9 @@ class Generate implements ProcessInterface
     private $connection;
 
     /**
-     * @var DirectoryList
+     * @var FileList
      */
-    private $directoryList;
+    private $fileList;
 
     /**
      * @var File
@@ -43,20 +43,20 @@ class Generate implements ProcessInterface
 
     /**
      * @param ConnectionInterface $connection
-     * @param DirectoryList $directoryList
+     * @param FileList $fileList
      * @param File $file
      * @param ArrayManager $arrayManager
      * @param array $configKeys
      */
     public function __construct(
         ConnectionInterface $connection,
-        DirectoryList $directoryList,
+        FileList $fileList,
         File $file,
         ArrayManager $arrayManager,
         array $configKeys
     ) {
         $this->connection = $connection;
-        $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
         $this->file = $file;
         $this->arrayManager = $arrayManager;
         $this->configKeys = $configKeys;
@@ -67,7 +67,7 @@ class Generate implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
+        $configFile = $this->fileList->getConfig();
         $oldConfig = require $configFile;
         $newConfig = [];
 
@@ -93,7 +93,7 @@ class Generate implements ProcessInterface
         }
 
         /**
-         * Only saving general/locale/code
+         * Only saving general/locale/code.
          */
         $configLocales = isset($newConfig['system']['stores'])
             ? array_keys($newConfig['system']['stores'])

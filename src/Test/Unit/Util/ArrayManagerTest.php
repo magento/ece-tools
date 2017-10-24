@@ -46,14 +46,12 @@ class ArrayManagerTest extends TestCase
         return [
             'simple' => [
                 ['test' => 'one'],
-
                 [],
                 ['test'],
                 'one',
             ],
             'multiple' => [
                 ['test' => ['test2' => 'one']],
-
                 [],
                 ['test', 'test2'],
                 'one',
