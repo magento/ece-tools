@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -104,9 +105,11 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
+                        $this->make(DeployProcess\InstallUpdate\Install\EmailChecker::class),
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
-                        $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\ConfigImport::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\ResetPassword::class),
                     ],
                 ]);
             });
@@ -116,7 +119,9 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
                         $this->make(DeployProcess\InstallUpdate\Update\Setup::class),
+                        $this->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
                         $this->make(DeployProcess\InstallUpdate\Update\ClearCache::class),
                     ],
                 ]);
@@ -129,10 +134,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
-                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\AdminCredentials::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
-                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\EnvConfiguration::class),
                     ],
                 ]);
             });
@@ -195,21 +198,18 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     private function createLogger(string $name): \Closure
     {
         return function () use ($name) {
-            $formatter = new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n");
-            $formatter->allowInlineLineBreaks();
-            $formatter->ignoreEmptyContextAndExtra();
+            $formatter = new LineFormatter(
+                "[%datetime%] %level_name%: %message% %context% %extra%\n",
+                null,
+                true,
+                true
+            );
+            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)->getMagentoRoot();
+            $logLevel = getenv('LOG_LEVEL') ?: Logger::DEBUG;
 
-            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)
-                ->getMagentoRoot();
-
-            return $this->makeWith(\Monolog\Logger::class, [
-                'name' => $name,
-                'handlers' => [
-                    (new StreamHandler($magentoRoot . '/var/log/cloud.log'))
-                        ->setFormatter($formatter),
-                    (new StreamHandler('php://stdout'))
-                        ->setFormatter($formatter),
-                ],
+            return new Logger($name, [
+                (new StreamHandler($magentoRoot . '/var/log/cloud.log', $logLevel))->setFormatter($formatter),
+                (new StreamHandler('php://stdout', $logLevel))->setFormatter($formatter),
             ]);
         };
     }
