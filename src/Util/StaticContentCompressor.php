@@ -20,8 +20,15 @@ class StaticContentCompressor
 
     /**
      * Default gzip compression level if not otherwise specified.
+     *
+      Compression level 4 takes about as long as compression level 1.
+     * It's just as fast because the reduction in I/O from the smaller
+     * compressed file speeds up compression about as fast as the increased
+     * CPU usage slows it down.
+     * Compression level 4 is the default instead of compression level 1 as a
+     * result.
      */
-    const DEFAULT_COMPRESSION_LEVEL = 1;
+    const DEFAULT_COMPRESSION_LEVEL = 4;
 
     /**
      * @var LoggerInterface
@@ -53,18 +60,11 @@ class StaticContentCompressor
     /**
      * Compress select files in the static content directory.
      *
-     * Compression level 4 takes about as long as compression level 1.
-     * It's just as fast because the reduction in I/O from the smaller
-     * compressed file speeds up compression about as fast as the increased
-     * CPU usage slows it down.
-     * Compression level 4 is the default instead of compression level 1 as a
-     * result.
-     *
      * @param int $compressionLevel
      *
      * @return bool
      */
-    public function process(int $compressionLevel = 4, bool $verbose = false): bool
+    public function process(int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL, bool $verbose = false): bool
     {
         $compressionCommand = $this->getCompressionCommand($compressionLevel);
 
