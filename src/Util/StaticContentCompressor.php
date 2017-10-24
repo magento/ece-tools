@@ -21,7 +21,7 @@ class StaticContentCompressor
     /**
      * Default gzip compression level if not otherwise specified.
      *
-      Compression level 4 takes about as long as compression level 1.
+     * Compression level 4 takes about as long as compression level 1.
      * It's just as fast because the reduction in I/O from the smaller
      * compressed file speeds up compression about as fast as the increased
      * CPU usage slows it down.
@@ -109,16 +109,10 @@ class StaticContentCompressor
     private function getCompressionCommand(
         int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL
     ): string {
-        if (!is_int($compressionLevel)
-            || $compressionLevel < 1
-            || $compressionLevel > 9
-        ) {
-            $this->logger->info(
-                "Compression level was \"$compressionLevel\" but this is invalid. Using default compression level"
-                . ' of "' . static::DEFAULT_COMPRESSION_LEVEL . '".'
-            );
-            $compressionLevel = static::DEFAULT_COMPRESSION_LEVEL;
-        }
+        $compressionLevel = (int)$compressionLevel;
+        $compressionLevel = $compressionLevel > 0 && $compressionLevel <= 9
+            ? $compressionLevel
+            : static::DEFAULT_COMPRESSION_LEVEL;
 
         $compressionCommand = $this->innerCompressionCommand();
         $compressionCommand .= " -$compressionLevel";
