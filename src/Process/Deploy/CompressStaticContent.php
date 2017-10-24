@@ -69,8 +69,8 @@ class CompressStaticContent implements ProcessInterface
             );
         } else {
             $this->logger->info(
-                "Skipping deploy-time static content compression because it's either already happened or"
-                . " static content deployment is disabled is false."
+                "Static content deployment was performed during the build phase or disabled. Skipping deploy phase"
+                . " static content compression."
             );
         }
     }
