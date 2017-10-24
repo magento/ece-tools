@@ -64,7 +64,7 @@ class StaticContentCompressor
      *
      * @return bool
      */
-    public function process(int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL, bool $verbose = false): bool
+    public function process(int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL, string $verbose = ''): bool
     {
         $compressionCommand = $this->getCompressionCommand($compressionLevel);
 
