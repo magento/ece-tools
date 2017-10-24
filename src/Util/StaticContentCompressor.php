@@ -107,7 +107,7 @@ class StaticContentCompressor
      * @return string
      */
     private function getCompressionCommand(
-        int $compressionLevel = 1
+        int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL
     ): string {
         if (!is_int($compressionLevel)
             || $compressionLevel < 1
