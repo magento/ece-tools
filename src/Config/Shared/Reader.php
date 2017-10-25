@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Config\Deploy;
+namespace Magento\MagentoCloud\Config\Shared;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -44,7 +44,7 @@ class Reader implements ReaderInterface
             return [];
         }
 
-        return include $configPath;
+        return require $configPath;
     }
 
     /**
@@ -52,6 +52,6 @@ class Reader implements ReaderInterface
      */
     public function getPath(): string
     {
-        return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
+        return $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
     }
 }

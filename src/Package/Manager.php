@@ -80,4 +80,18 @@ class Manager
     {
         return $this->repository->findPackage($packageName, $version) instanceof PackageInterface;
     }
+
+    /**
+     * Retrieve required packages from composer.json
+     *
+     * @return string[]
+     */
+    public function getRequiredPackageNames(): array
+    {
+        $packages = [];
+        foreach ($this->composer->getPackage()->getRequires() as $link) {
+            $packages[] = $link->getTarget();
+        }
+        return $packages;
+    }
 }

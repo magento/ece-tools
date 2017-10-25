@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process;
 /**
  * @inheritdoc
  */
-class ProcessPool implements ProcessInterface
+class ProcessComposite implements ProcessInterface
 {
     /**
      * @var ProcessInterface[]
