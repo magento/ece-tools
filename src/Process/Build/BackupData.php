@@ -104,8 +104,10 @@ class BackupData implements ProcessInterface
 
             if (count($this->file->scanDir($originalDir)) > 2) {
                 $this->file->copyDirectory($originalDir, $initDir);
-                $this->file->deleteDirectory($originalDir);
-                $this->file->createDirectory($originalDir);
+                if (isset($_ENV['MAGENTO_CLOUD_PROJECT'])) { // if this is running on cloud filesystem (not local)
+                    $this->file->deleteDirectory($originalDir);
+                    $this->file->createDirectory($originalDir);
+                }
             }
         }
     }
