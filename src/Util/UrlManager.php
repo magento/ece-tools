@@ -77,7 +77,7 @@ class UrlManager
         }
 
         if (!count($this->urls['secure'])) {
-            $this->urls['secure'] = str_replace('http','https',$this->urls['unsecure']);
+            $this->urls['secure'] = str_replace(self::PREFIX_UNSECURE,self::PREFIX_SECURE,$this->urls['unsecure']);
         }
 
         $this->logger->info(sprintf('Routes: %s', var_export($this->urls, true)));
