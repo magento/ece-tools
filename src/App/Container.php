@@ -75,6 +75,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->make(BuildProcess\PreBuild::class),
+                        $this->make(BuildProcess\PrepareModuleConfig::class),
                         $this->make(BuildProcess\ApplyPatches::class),
                         $this->make(BuildProcess\MarshallFiles::class),
                         $this->make(BuildProcess\CopySampleData::class),
