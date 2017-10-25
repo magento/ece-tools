@@ -9,6 +9,7 @@ use Composer\Composer;
 use Composer\Package\Locker;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
+use Composer\Package\Link;
 use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -165,5 +166,22 @@ class ManagerTest extends TestCase
 
         $this->assertSame(true, $this->packageManager->has('some_package'));
         $this->assertSame(false, $this->packageManager->has('some_package', '0.1'));
+    }
+
+    public function testGetRequiredPackageNames()
+    {
+        $linkMock = $this->createMock(Link::class);
+
+        $linkMock->expects($this->once())
+            ->method('getTarget')
+            ->willReturn('some/random-package');
+        $this->composerMock->expects($this->once())
+            ->method('getPackage')
+            ->willReturn($this->packageMock);
+        $this->packageMock->expects($this->once())
+            ->method('getRequires')
+            ->willReturn([$linkMock]);
+
+        $this->packageManager->getRequiredPackageNames();
     }
 }
