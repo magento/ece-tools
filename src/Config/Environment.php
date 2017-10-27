@@ -428,5 +428,4 @@ class Environment
     {
         return file_exists('/etc/platform/boot');
     }
-
 }
