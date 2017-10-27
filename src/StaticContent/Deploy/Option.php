@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
+use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 
 /**
  * Options for static deploy command in build process
@@ -31,18 +32,26 @@ class Option implements OptionInterface
     private $magentoVersion;
 
     /**
+     * @var ThreadCountOptimizer
+     */
+    private $threadCountOptimizer;
+
+    /**
      * @param Environment $environment
      * @param ConnectionInterface $connection
      * @param MagentoVersion $magentoVersion
+     * @param ThreadCountOptimizer $threadCountOptimizer
      */
     public function __construct(
         Environment $environment,
         ConnectionInterface $connection,
-        MagentoVersion $magentoVersion
+        MagentoVersion $magentoVersion,
+        ThreadCountOptimizer $threadCountOptimizer
     ) {
         $this->environment = $environment;
         $this->connection = $connection;
         $this->magentoVersion = $magentoVersion;
+        $this->threadCountOptimizer = $threadCountOptimizer;
     }
 
     /**
@@ -50,7 +59,10 @@ class Option implements OptionInterface
      */
     public function getTreadCount(): int
     {
-        return $this->environment->getStaticDeployThreadsCount();
+        return $this->threadCountOptimizer->optimize(
+            $this->environment->getStaticDeployThreadsCount(),
+            $this->getStrategy()
+        );
     }
 
     /**
