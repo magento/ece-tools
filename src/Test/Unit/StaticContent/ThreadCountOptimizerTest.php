@@ -45,6 +45,16 @@ class ThreadCountOptimizerTest extends TestCase
                 ThreadCountOptimizer::STRATEGY_COMPACT,
                 1
             ],
+            [
+                5,
+                'SomeStrategy',
+                5
+            ],
+            [
+                1,
+                'SomeStrategy',
+                1
+            ]
         ];
     }
 }
