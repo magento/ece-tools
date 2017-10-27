@@ -203,7 +203,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 true,
                 true
             );
-            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)->getMagentoRoot();
+            // $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)->getMagentoRoot();
             $logLevel = getenv('LOG_LEVEL') ?: Logger::DEBUG;
 
             return new Logger($name, [
