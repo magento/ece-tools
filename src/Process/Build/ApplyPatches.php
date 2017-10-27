@@ -52,12 +52,10 @@ class ApplyPatches implements ProcessInterface
     {
         $this->logger->info('Applying patches.');
 
-        if (!$this->packageManager->has('magento/ece-patches')) {
-            $this->logger->warning('Package with patches was not found.');
-
-            return;
+        if (!file_exists('./vendor/bin/m2-apply-patches')) {
+            $this->logger->warning('m2-apply-patches was not found.');
+        } else {
+            $this->shell->execute('php ./vendor/bin/m2-apply-patches');
         }
-
-        $this->shell->execute('php ./vendor/bin/m2-apply-patches');
     }
 }

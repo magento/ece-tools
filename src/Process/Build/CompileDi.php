@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -32,6 +33,16 @@ class CompileDi implements ProcessInterface
     private $buildConfig;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @var DirectoryList
      */
     private $directoryList;
@@ -40,17 +51,20 @@ class CompileDi implements ProcessInterface
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param BuildConfig $buildConfig
+     * @param Environment $environment,
      * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
         BuildConfig $buildConfig,
+        Environment $environment,
         DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->buildConfig = $buildConfig;
+        $this->environment = $environment;
         $this->directoryList = $directoryList;
     }
 
@@ -61,8 +75,12 @@ class CompileDi implements ProcessInterface
     public function execute()
     {
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
-
-        $this->logger->info('Running DI compilation');
-        $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
+        if ($this->environment->isPlatformEnv() ||
+            $this->environment->getVariable('APPLICATION_MODE') === $this->environment::MAGENTO_PRODUCTION_MODE) {
+            $this->logger->info('Running DI compilation');
+            $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
+        } else {
+            $this->logger->info('Skipping DI compilation');
+        }
     }
 }

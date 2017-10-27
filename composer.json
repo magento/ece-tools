@@ -1,7 +1,7 @@
 {
-  "name": "magento/ece-tools",
+  "name": "magentoese/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
-  "version": "2002.0",
+  "version": "2002.0.1",
   "license": [
     "OSL-3.0",
     "AFL-3.0"
@@ -23,6 +23,9 @@
     "php-mock/php-mock-phpunit": "^2.0",
     "phpunit/php-code-coverage": "^5.2",
     "illuminate/config": "^5.5"
+  },
+  "replace": {
+    "magento/ece-tools": "*"
   },
   "bin": [
     "m2-ece-build",

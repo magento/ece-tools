@@ -63,6 +63,23 @@ class Shell implements ShellInterface
         }
 
         return $output;
+
+/*
+
+        $descriptorspec = array(
+            0 => array("pipe", "r"),  // stdin
+            1 => array("pipe", "w"),  // stdout
+            2 => array("pipe", "w"),  // stderr
+        );
+        $process = proc_open($rootPathCommand, $descriptorspec, $pipes);
+        $output = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[0]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $status = proc_close($process);
+        return $output;
+*/
     }
 
     /**

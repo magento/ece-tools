@@ -280,6 +280,7 @@ class File
                 'The directory "%1" cannot be deleted %2',
                 [$path, $this->getWarningMessage()]
             );
+//            error_log('The directory '.$path.' cannot be deleted: '.$this->getWarningMessage());
         }
 
         return $result;
