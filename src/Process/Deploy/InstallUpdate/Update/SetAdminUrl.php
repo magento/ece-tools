@@ -48,12 +48,6 @@ class SetAdminUrl implements ProcessInterface
     public function execute()
     {
         $adminUrl = $this->environment->getAdminUrl();
-
-        if (!$adminUrl) {
-            $this->logger->info('Not updating env.php backend front name. (ADMIN_URL not set)');
-            return;
-        }
-
         $this->logger->info('Updating env.php backend front name.');
         $config['backend']['frontName'] = $adminUrl;
         $this->configWriter->update($config);

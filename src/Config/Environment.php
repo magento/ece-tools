@@ -391,7 +391,7 @@ class Environment
      */
     public function getAdminUrl(): string
     {
-        return $this->getVariables()['ADMIN_URL'] ?? '';
+        return @$this->getVariables()['ADMIN_URL'] ?: self::DEFAULT_ADMIN_URL;
     }
 
     /**
@@ -419,5 +419,13 @@ class Environment
     {
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPlatformEnv(): bool
+    {
+        return file_exists('/etc/platform/boot');
     }
 }
