@@ -75,11 +75,12 @@ class CompileDi implements ProcessInterface
     public function execute()
     {
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
-        if ($this->environment->isPlatformEnv() || $this->environment->getVariable('APPLICATION_MODE') === $this->environment::MAGENTO_PRODUCTION_MODE) {
-          $this->logger->info('Running DI compilation');
-          $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
+        if ($this->environment->isPlatformEnv() ||
+            $this->environment->getVariable('APPLICATION_MODE') === $this->environment::MAGENTO_PRODUCTION_MODE) {
+            $this->logger->info('Running DI compilation');
+            $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
         } else {
-          $this->logger->info('Skipping DI compilation');
+            $this->logger->info('Skipping DI compilation');
         }
     }
 }
