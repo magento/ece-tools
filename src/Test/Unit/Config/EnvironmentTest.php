@@ -194,7 +194,7 @@ class EnvironmentTest extends TestCase
     public function testGetRecoverableDirectories()
     {
         $this->assertSame(
-            ['var/log', 'var/view_preprocessed', 'app/etc', 'pub/media'],
+            ['var/view_preprocessed', 'app/etc', 'pub/media'],
             $this->environment->getRecoverableDirectories()
         );
     }
