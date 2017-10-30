@@ -13,9 +13,6 @@ use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -57,7 +54,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
-        $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
+        $this->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
         $this->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
@@ -220,28 +217,5 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     public function get($id)
     {
         return $this->resolve($id);
-    }
-
-    /**
-     * @param string $name
-     * @return \Closure
-     */
-    private function createLogger(string $name): \Closure
-    {
-        return function () use ($name) {
-            $formatter = new LineFormatter(
-                "[%datetime%] %level_name%: %message% %context% %extra%\n",
-                null,
-                true,
-                true
-            );
-            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)->getMagentoRoot();
-            $logLevel = getenv('LOG_LEVEL') ?: Logger::DEBUG;
-
-            return new Logger($name, [
-                (new StreamHandler($magentoRoot . '/var/log/cloud.log', $logLevel))->setFormatter($formatter),
-                (new StreamHandler('php://stdout', $logLevel))->setFormatter($formatter),
-            ]);
-        };
     }
 }
