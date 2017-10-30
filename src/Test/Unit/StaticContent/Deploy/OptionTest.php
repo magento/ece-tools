@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
+use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -34,16 +35,23 @@ class OptionTest extends TestCase
      */
     private $connectionMock;
 
+    /**
+     * @var ThreadCountOptimizer|Mock
+     */
+    private $threadCountOptimizerMock;
+
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->connectionMock = $this->createMock(Connection::class);
         $this->environmentMock = $this->createMock(Environment::class);
+        $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
 
         $this->option = new Option(
             $this->environmentMock,
             $this->connectionMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->threadCountOptimizerMock
         );
     }
 
@@ -51,6 +59,14 @@ class OptionTest extends TestCase
     {
         $this->environmentMock->expects($this->once())
             ->method('getStaticDeployThreadsCount')
+            ->willReturn(3);
+        $this->environmentMock->expects($this->once())
+            ->method('getVariable')
+            ->with(Environment::VAR_SCD_STRATEGY)
+            ->willReturn('strategyName');
+        $this->threadCountOptimizerMock->expects($this->once())
+            ->method('optimize')
+            ->with(3, 'strategyName')
             ->willReturn(3);
 
         $this->assertEquals(3, $this->option->getTreadCount());
