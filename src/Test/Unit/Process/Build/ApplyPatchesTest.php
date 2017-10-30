@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\ApplyPatches;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -33,9 +34,14 @@ class ApplyPatchesTest extends TestCase
     private $shellMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var File|Mock
      */
-    private $magentoVersionMock;
+    private $fileMock;
+
+    /**
+     * @var DirectoryList|Mock
+     */
+    private $directoryListMock;
 
     /**
      * @inheritdoc
@@ -46,14 +52,16 @@ class ApplyPatchesTest extends TestCase
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
-        $this->magentoVersionMock = $this->getMockBuilder(MagentoVersion::class)
+        $this->fileMock = $this->getMockBuilder(File::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->process = new ApplyPatches(
             $this->shellMock,
             $this->loggerMock,
-            $this->magentoVersionMock
+            $this->fileMock,
+            $this->directoryListMock
         );
 
         parent::setUp();
@@ -61,14 +69,16 @@ class ApplyPatchesTest extends TestCase
 
     public function testExecute()
     {
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Applying patches.');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php vendor/bin/m2-apply-patches');
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
+            ->with('php magento_root/vendor/bin/m2-apply-patches');
+        $this->fileMock->method('isExists')
+            ->with('magento_root/vendor/bin/m2-apply-patches')
             ->willReturn(true);
 
         $this->process->execute();
@@ -76,18 +86,19 @@ class ApplyPatchesTest extends TestCase
 
     public function testExecuteWithoutPatches()
     {
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Applying patches.');
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
+        $this->fileMock->method('isExists')
+            ->with('magento_root/vendor/bin/m2-apply-patches')
+            ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Patching was failed. Skipping.');
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->willThrowException(new \Exception('Patching failed.'));
+            ->with('Package with patches was not found.');
+        $this->shellMock->expects($this->never())
+            ->method('execute');
 
         $this->process->execute();
     }
