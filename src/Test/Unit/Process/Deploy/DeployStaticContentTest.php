@@ -89,7 +89,9 @@ class DeployStaticContentTest extends TestCase
             ->method('doCleanStaticFiles')
             ->willReturn(true);
         $this->staticContentCleanerMock->expects($this->once())
-            ->method('clean');
+            ->method('cleanPubStatic');
+        $this->staticContentCleanerMock->expects($this->once())
+            ->method('cleanViewPreprocessed');
         $this->processMock->expects($this->once())
             ->method('execute');
 
@@ -114,7 +116,9 @@ class DeployStaticContentTest extends TestCase
             ->method('doCleanStaticFiles')
             ->willReturn(false);
         $this->staticContentCleanerMock->expects($this->never())
-            ->method('clean');
+            ->method('cleanPubStatic');
+        $this->staticContentCleanerMock->expects($this->never())
+            ->method('cleanViewPreprocessed');
         $this->processMock->expects($this->once())
             ->method('execute');
 

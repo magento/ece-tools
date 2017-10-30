@@ -3,7 +3,6 @@
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
@@ -242,7 +241,7 @@ class Environment
      */
     public function getRecoverableDirectories(): array
     {
-        return ['app/etc', 'pub/media'];
+        return ['var/view_preprocessed', 'app/etc', 'pub/media'];
     }
 
     /**
