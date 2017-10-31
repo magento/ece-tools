@@ -420,4 +420,25 @@ class Environment
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
     }
+
+    /**
+     * @return bool Returns true if we are in Production environment.
+     * False if we are in Integration or Staging environment.
+     * TODO: Eventually, this should return an enum instead of bool.
+     */
+    public function isProductionEnvironment(): bool
+    {
+        // TODO: We should find a better way to determine this.
+        if (empty($_ENV["HOME"]) || empty($_ENV["MAGENTO_CLOUD_PROJECT"])) {
+            return false;
+        }
+        /* If the string ends in "_stg", it is staging */
+        if (strrpos($_ENV["MAGENTO_CLOUD_PROJECT"], "_stg") + strlen("_stg") === strlen($_ENV["MAGENTO_CLOUD_PROJECT"])) {
+            return false;
+        }
+        if ("/app/{$_ENV["MAGENTO_CLOUD_PROJECT"]}" == $_ENV["HOME"]) {
+            return true;
+        }
+        return false;
+    }
 }

@@ -136,6 +136,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                        $this->make(DeployProcess\InstallUpdate\ConfigUpdate\CronInterval::class),
                     ],
                 ]);
             });
