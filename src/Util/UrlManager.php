@@ -25,7 +25,7 @@ class UrlManager
      */
     private $urls;
 
-    /**
+    /**1
      * @var LoggerInterface
      */
     private $logger;
@@ -43,20 +43,14 @@ class UrlManager
     }
 
     /**
-     * Parse MagentoCloud routes to more readable format.
+     * Reads JSON array of routes and parses them into an array
+     * @param array $routes from environment variable MAGENTO_CLOUD_ROUTES
+     * @return array
      */
-    public function getUrls()
+    public function parseRoutes(array $routes) : array
     {
-        if ($this->urls !== null) {
-            return $this->urls;
-        }
 
-        $this->logger->info('Initializing routes.');
-
-        $this->urls = ['secure' => [], 'unsecure' => []];
-
-        $routes = $this->environment->getRoutes();
-
+        $urls = ['secure' => [], 'unsecure' => []];
         foreach ($routes as $key => $val) {
             if ($val['type'] !== 'upstream') {
                 continue;
@@ -66,14 +60,38 @@ class UrlManager
             $originalUrl = str_replace(self::MAGIC_ROUTE, '', $urlParts['host']);
 
             if (strpos($key, self::PREFIX_UNSECURE) === 0) {
-                $this->urls['unsecure'][$originalUrl] = $key;
+                $urls['unsecure'][$originalUrl] = $key;
                 continue;
             }
 
             if (strpos($key, self::PREFIX_SECURE) === 0) {
-                $this->urls['secure'][$originalUrl] = $key;
+                $urls['secure'][$originalUrl] = $key;
                 continue;
             }
+        }
+        return $urls;
+    }
+
+
+    /**
+     * Parse MagentoCloud routes to more readable format.
+     * @throws \RuntimeException if no valid secure or unsecure route found
+     */
+    public function getUrls()
+    {
+        if ($this->urls !== null) {
+            return $this->urls;
+        }
+
+        $this->logger->info('Initializing routes.');
+
+        $this->urls = $this->parseRoutes($this->environment->getRoutes());
+
+        if (!count($this->urls['unsecure']) && !count($this->urls['secure'])) {
+            throw new \RuntimeException("Expected at least one valid unsecure or secure route. None found.");
+        }
+        if (!count($this->urls['unsecure'])) {
+            $this->urls['unsecure'] = $this->urls['secure'];
         }
 
         if (!count($this->urls['secure'])) {

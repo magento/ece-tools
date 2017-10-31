@@ -79,6 +79,7 @@ class UrlManagerTest extends TestCase
      * @param array $secureRoute
      * @param string $expectedUrl
      * @dataProvider secureRouteDataProvider
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function testGetSecureUrl(array $secureRoute, string $expectedUrl)
     {
@@ -128,6 +129,7 @@ class UrlManagerTest extends TestCase
      * @param array $secureRoute
      * @param $expectedUrl
      * @dataProvider unsecureRouteDataProvider
+      @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function testNoSecure(array $unsecureRoute, string $expectedUrl)
     {
@@ -145,7 +147,7 @@ class UrlManagerTest extends TestCase
     {
         // No Mock so we get an exception indicating no URLS present.
         $this->expectException(\RuntimeException::class);
-        $urls = $this->manager->getUrls();
+        $this->manager->getUrls();
     }
 
 
