@@ -432,8 +432,9 @@ class Environment
         if (empty($_ENV["HOME"]) || empty($_ENV["MAGENTO_CLOUD_PROJECT"])) {
             return false;
         }
+        $magentoCloudProject = $_ENV["MAGENTO_CLOUD_PROJECT"];
         /* If the string ends in "_stg", it is staging */
-        if (strrpos($_ENV["MAGENTO_CLOUD_PROJECT"], "_stg") + strlen("_stg") === strlen($_ENV["MAGENTO_CLOUD_PROJECT"])) {
+        if (strrpos($magentoCloudProject, "_stg") + strlen("_stg") === strlen($magentoCloudProject)) {
             return false;
         }
         if ("/app/{$_ENV["MAGENTO_CLOUD_PROJECT"]}" == $_ENV["HOME"]) {
