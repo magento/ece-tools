@@ -44,6 +44,7 @@ class UrlManager
 
     /**
      * Parse MagentoCloud routes to more readable format.
+     * @throws \RuntimeException if no valid secure or unsecure route found
      */
     public function getUrls()
     {
@@ -76,8 +77,16 @@ class UrlManager
             }
         }
 
+        if (!count($this->urls['unsecure']) && !count($this->urls['secure'])) {
+            throw new \RuntimeException("Expected at least one valid unsecure or secure route. None found.");
+        }
+
+        if (!count($this->urls['unsecure'])) {
+            $this->urls['unsecure'] = $this->urls['secure'];
+        }
+
         if (!count($this->urls['secure'])) {
-            $this->urls['secure'] = $this->urls['unsecure'];
+            $this->urls['secure'] = str_replace(self::PREFIX_UNSECURE, self::PREFIX_SECURE, $this->urls['unsecure']);
         }
 
         $this->logger->info(sprintf('Routes: %s', var_export($this->urls, true)));
