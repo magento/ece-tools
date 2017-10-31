@@ -15,7 +15,7 @@ class ErrorHandler
      *
      * @var array
      */
-    protected $errorPhrases = [
+    private $errorPhrases = [
         E_ERROR => 'Error',
         E_WARNING => 'Warning',
         E_PARSE => 'Parse Error',
