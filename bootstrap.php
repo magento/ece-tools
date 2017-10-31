@@ -9,4 +9,4 @@ date_default_timezone_set('UTC');
 require_once __DIR__ . '/autoload.php';
 
 $handler = new \Magento\MagentoCloud\App\ErrorHandler();
-set_error_handler([$handler, 'handler']);
+set_error_handler([$handler, 'handle']);

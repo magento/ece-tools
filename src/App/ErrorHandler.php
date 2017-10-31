@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\App;
 
 /**
- * An error handler that converts runtime errors into exceptions
+ * An error handler that converts runtime errors into exceptions.
  */
 class ErrorHandler
 {
@@ -34,7 +34,7 @@ class ErrorHandler
     ];
 
     /**
-     * Custom error handler
+     * Custom error handler.
      *
      * @param int $errorNo
      * @param string $errorStr
@@ -43,20 +43,24 @@ class ErrorHandler
      * @return bool
      * @throws \Exception
      */
-    public function handler($errorNo, $errorStr, $errorFile, $errorLine)
+    public function handle($errorNo, $errorStr, $errorFile, $errorLine)
     {
         if (strpos($errorStr, 'DateTimeZone::__construct') !== false) {
-            // there's no way to distinguish between caught system exceptions and warnings
+            /**
+             * There's no way to distinguish between caught system exceptions and warnings.
+             */
             return false;
         }
 
         $errorNo = $errorNo & error_reporting();
+
         if ($errorNo == 0) {
             return false;
         }
 
         $msg = isset($this->errorPhrases[$errorNo]) ? $this->errorPhrases[$errorNo] : "Unknown error ({$errorNo})";
         $msg .= ": {$errorStr} in {$errorFile} on line {$errorLine}";
+
         throw new \Exception($msg);
     }
 }
