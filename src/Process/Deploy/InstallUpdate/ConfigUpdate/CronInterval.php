@@ -68,11 +68,11 @@ class CronInterval implements ProcessInterface
         if ($isProduction) {
             // Normally, production environments are set to 1 minute intervals.
             $this->logger->info('Updating env.php to remove cron_interval. (This is production environment.)');
-            unset($config["system"]["cron"]["cron_interval"]);
+            unset($config["system"]["default"]["cron"]["cron_interval"]);
         } else {
             // Normally, non-production environments are set to 5 minute intervals.
             $this->logger->info('Updating env.php to have cron_interval 5. (This is not production environment.)');
-            $config["system"]["cron"]["cron_interval"] = "5";
+            $config["system"]["default"]["cron"]["cron_interval"] = "5";
         }
 
         $this->configWriter->write($config);
