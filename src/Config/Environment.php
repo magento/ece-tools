@@ -32,6 +32,11 @@ class Environment
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
+    const ENVIRONMENT_TYPE_UNKNOWN = 0;
+    const ENVIRONMENT_TYPE_INTEGRATION = 1;
+    const ENVIRONMENT_TYPE_STAGING = 2;
+    const ENVIRONMENT_TYPE_PRODUCTION = 3;
+
     /**
      * Let's keep variable names same for both phases.
      */
@@ -421,25 +426,19 @@ class Environment
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
     }
 
-    /**
-     * @return bool Returns true if we are in Production environment.
-     * False if we are in Integration or Staging environment.
-     * TODO: Eventually, this should return an enum instead of bool.
-     */
-    public function isProductionEnvironment(): bool
+    /* Determines if the current "Environment" is "Production", "Staging", or "Integration". */
+    public function getEnvironmentType(): int
     {
         // TODO: We should find a better way to determine this.
-        if (empty($_ENV["HOME"]) || empty($_ENV["MAGENTO_CLOUD_PROJECT"])) {
-            return false;
-        }
-        $magentoCloudProject = $_ENV["MAGENTO_CLOUD_PROJECT"];
-        /* If the string ends in "_stg", it is staging */
-        if (strrpos($magentoCloudProject, "_stg") + strlen("_stg") === strlen($magentoCloudProject)) {
-            return false;
+        if (empty($_ENV["MAGENTO_CLOUD_PROJECT"]) || empty($_ENV["HOME"])) {
+            return static::ENVIRONMENT_TYPE_UNKNOWN;
         }
         if ("/app/{$_ENV["MAGENTO_CLOUD_PROJECT"]}" == $_ENV["HOME"]) {
-            return true;
+            if (substr($_ENV['HOME'], 0, -4) === '_stg') {
+                return static::ENVIRONMENT_TYPE_STAGING;
+            }
+            return static::ENVIRONMENT_TYPE_PRODUCTION;
         }
-        return false;
+        return static::ENVIRONMENT_TYPE_INTEGRATION;
     }
 }
