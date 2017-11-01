@@ -63,8 +63,8 @@ class BackupData implements ProcessInterface
      */
     public function execute()
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot() . DIRECTORY_SEPARATOR;
-        $rootInitDir = $this->directoryList->getInit() . DIRECTORY_SEPARATOR;
+        $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
+        $rootInitDir = $this->directoryList->getInit() . '/';
 
         if ($this->file->isExists($magentoRoot . Environment::REGENERATE_FLAG)) {
             $this->logger->info('Removing .regenerate flag');

@@ -64,7 +64,7 @@ class DirectoryList
         }
 
         $path = $directories[$code][self::PATH];
-        $normalizedPath = $root . ($root && $path ? DIRECTORY_SEPARATOR : '') . $path;
+        $normalizedPath = $root . ($root && $path ? '/' : '') . $path;
 
         return $normalizedPath;
     }
