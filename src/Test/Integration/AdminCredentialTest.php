@@ -11,6 +11,9 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Symfony\Component\Console\Tester\CommandTester;
 
+/**
+ * @inheritdoc
+ */
 class AdminCredentialTest extends TestCase
 {
     /**
