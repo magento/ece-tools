@@ -9,6 +9,9 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
+/**
+ * @inheritdoc
+ */
 class Reader implements ReaderInterface
 {
     /**

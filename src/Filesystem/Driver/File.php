@@ -407,6 +407,26 @@ class File
     }
 
     /**
+     * Retrieve file contents from given path
+     *
+     * @param string $path
+     * @param string|null $flag
+     * @param resource|null $context
+     * @return string
+     * @throws FileSystemException
+     */
+    public function fileGetContents($path, $flag = null, $context = null)
+    {
+        clearstatcache();
+        $result = @file_get_contents($path, $flag, $context);
+        if (false === $result) {
+            $this->fileSystemException('Cannot read contents from file "%1" %2', [$path, $this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
+
+    /**
      * @param string $path
      * @return mixed
      */

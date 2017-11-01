@@ -11,12 +11,10 @@ use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Process\ProcessPool;
+use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -58,7 +56,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->singleton(\Magento\MagentoCloud\Config\Deploy::class);
-        $this->singleton(\Psr\Log\LoggerInterface::class, $this->createLogger('default'));
+        $this->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
         $this->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
@@ -66,13 +64,14 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             \Magento\MagentoCloud\DB\ConnectionInterface::class,
             \Magento\MagentoCloud\DB\Connection::class
         );
+        $this->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
         /**
          * Contextual binding.
          */
         $this->when(Build::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
@@ -85,12 +84,14 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                             ]
                         ]),
                         $this->make(BuildProcess\PreBuild::class),
+                        $this->make(BuildProcess\PrepareModuleConfig::class),
                         $this->make(BuildProcess\ApplyPatches::class),
                         $this->make(BuildProcess\MarshallFiles::class),
                         $this->make(BuildProcess\CopySampleData::class),
                         $this->make(BuildProcess\CompileDi::class),
                         $this->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->make(BuildProcess\DeployStaticContent::class),
+                        $this->make(BuildProcess\CompressStaticContent::class),
                         $this->make(BuildProcess\ClearInitDirectory::class),
                         $this->make(BuildProcess\BackupData::class),
                     ],
@@ -99,7 +100,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(Deploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
@@ -113,6 +114,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(DeployProcess\SetMode::class),
                         $this->make(DeployProcess\InstallUpdate::class),
                         $this->make(DeployProcess\DeployStaticContent::class),
+                        $this->make(DeployProcess\CompressStaticContent::class),
                         $this->make(DeployProcess\DisableGoogleAnalytics::class),
                     ],
                 ]);
@@ -120,11 +122,11 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(DeployProcess\InstallUpdate\Install::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
-                        $this->make(DeployProcess\InstallUpdate\Install\SecureAdmin::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
+                        $this->make(DeployProcess\InstallUpdate\Install\ConfigImport::class),
                         $this->make(DeployProcess\InstallUpdate\Install\ResetPassword::class),
                     ],
                 ]);
@@ -132,7 +134,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(DeployProcess\InstallUpdate\Update::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
                         $this->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
@@ -145,7 +147,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(DeployProcess\InstallUpdate\ConfigUpdate::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
@@ -158,16 +160,44 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(ConfigDump::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->make(ProcessComposite::class, [
                     'processes' => [
+                        $this->make(ConfigDumpProcess\Export::class),
+                        $this->make(ConfigDumpProcess\Generate::class),
                         $this->make(ConfigDumpProcess\Import::class),
                     ],
                 ]);
             });
+        $this->when(ConfigDumpProcess\Export::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->make(ProcessComposite::class, [
+                    'processes' => [
+                        $this->make(ConfigDumpProcess\Generate::class),
+                    ],
+                ]);
+            });
+        $this->when(ConfigDumpProcess\Generate::class)
+            ->needs('$configKeys')
+            ->give(function () {
+                return [
+                    'modules',
+                    'scopes',
+                    'system/default/general/locale/code',
+                    'system/default/dev/static/sign',
+                    'system/default/dev/front_end_development_workflow',
+                    'system/default/dev/template',
+                    'system/default/dev/js',
+                    'system/default/dev/css',
+                    'system/default/advanced/modules_disable_output',
+                    'system/stores',
+                    'system/websites',
+                ];
+            });
         $this->when(DeployProcess\PreDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                         $this->make(DeployProcess\PreDeploy\CleanRedisCache::class),
@@ -179,7 +209,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(DeployProcess\DeployStaticContent::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->get(DeployProcess\DeployStaticContent\Generate::class),
                     ],
@@ -191,7 +221,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->when(BuildProcess\DeployStaticContent::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessPool::class, [
+                return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->get(BuildProcess\DeployStaticContent\Generate::class),
                     ],
@@ -205,31 +235,5 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
     public function get($id)
     {
         return $this->resolve($id);
-    }
-
-    /**
-     * @param string $name
-     * @return \Closure
-     */
-    private function createLogger(string $name): \Closure
-    {
-        return function () use ($name) {
-            $formatter = new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n");
-            $formatter->allowInlineLineBreaks();
-            $formatter->ignoreEmptyContextAndExtra();
-
-            $magentoRoot = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class)
-                ->getMagentoRoot();
-
-            return $this->makeWith(\Monolog\Logger::class, [
-                'name' => $name,
-                'handlers' => [
-                    (new StreamHandler($magentoRoot . '/var/log/cloud.log'))
-                        ->setFormatter($formatter),
-                    (new StreamHandler('php://stdout'))
-                        ->setFormatter($formatter),
-                ],
-            ]);
-        };
     }
 }

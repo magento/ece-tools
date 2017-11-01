@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Build\ApplyPatches;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Package\Manager as PackageManager;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -33,9 +33,9 @@ class ApplyPatchesTest extends TestCase
     private $shellMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var PackageManager|Mock
      */
-    private $magentoVersionMock;
+    private $packageManagerMock;
 
     /**
      * @inheritdoc
@@ -46,14 +46,14 @@ class ApplyPatchesTest extends TestCase
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
-        $this->magentoVersionMock = $this->getMockBuilder(MagentoVersion::class)
+        $this->packageManagerMock = $this->getMockBuilder(PackageManager::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $this->process = new ApplyPatches(
             $this->shellMock,
             $this->loggerMock,
-            $this->magentoVersionMock
+            $this->packageManagerMock
         );
 
         parent::setUp();
@@ -66,9 +66,9 @@ class ApplyPatchesTest extends TestCase
             ->with('Applying patches.');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php vendor/bin/m2-apply-patches');
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
+            ->with('php ./vendor/bin/m2-apply-patches');
+        $this->packageManagerMock->method('has')
+            ->with('magento/ece-patches')
             ->willReturn(true);
 
         $this->process->execute();
@@ -76,18 +76,15 @@ class ApplyPatchesTest extends TestCase
 
     public function testExecuteWithoutPatches()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
+        $this->loggerMock->method('info')
             ->with('Applying patches.');
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('Patching was failed. Skipping.');
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->willThrowException(new \Exception('Patching failed.'));
+        $this->loggerMock->method('warning')
+            ->with('Package with patches was not found.');
+        $this->packageManagerMock->method('has')
+            ->with('magento/ece-patches')
+            ->willReturn(false);
+        $this->shellMock->expects($this->never())
+            ->method('execute');
 
         $this->process->execute();
     }

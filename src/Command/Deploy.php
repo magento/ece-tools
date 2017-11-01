@@ -33,8 +33,10 @@ class Deploy extends Command
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
-    {
+    public function __construct(
+        ProcessInterface $process,
+        LoggerInterface $logger
+    ) {
         $this->process = $process;
         $this->logger = $logger;
 
@@ -60,7 +62,6 @@ class Deploy extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->info('Starting deploy.');
             $this->process->execute();
             $this->logger->info('Deployment completed.');
         } catch (\Exception $exception) {

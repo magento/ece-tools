@@ -50,4 +50,59 @@ class ArrayManager
 
         return array_unique(array_values($filteredResult));
     }
+
+    /**
+     * This method expands original array in next way.
+     * Having original array as
+     * ```php
+     * [
+     *  'test_old' => 'two'
+     * ]
+     * ```
+     *
+     * And keys
+     * ```php
+     * [
+     *  'test',
+     *  'test2'
+     *  ]
+     * ```
+     *
+     * And value
+     *
+     * ```php
+     * one
+     * ```
+     *
+     * Will be resulted into array
+     *
+     * ```php
+     * [
+     *  'test_old' => 'two',
+     *  'test' => [
+     *      'test2' => 'one'
+     *      ]
+     *  ]
+     * ```
+     *
+     * @param array $original
+     * @param array $keys
+     * @param string|int $val
+     * @return array
+     */
+    public function nest(array $original, array $keys, $val): array
+    {
+        $data = &$original;
+
+        foreach ($keys as $key) {
+            if (!isset($data[$key])) {
+                $data[$key] = [];
+            }
+            $data = &$data[$key];
+        }
+
+        $data = $val;
+
+        return $original;
+    }
 }

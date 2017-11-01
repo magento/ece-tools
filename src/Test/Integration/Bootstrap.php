@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Integration;
 
+use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 
@@ -41,15 +42,13 @@ class Bootstrap
     {
         $sandboxDir = $this->getSandboxDir();
 
-        if (is_dir($sandboxDir)) {
+        if (file_exists($sandboxDir . '/composer.lock')) {
             return;
         }
 
         $buildFile = $this->getConfigFile('build_options.ini');
         $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
-        $deployType = getenv('DEPLOY_TYPE')
-            ? getenv('DEPLOY_TYPE')
-            : $deployConfig[static::DEPLOY_TYPE];
+        $deployType = getenv('DEPLOY_TYPE') ?: $deployConfig[static::DEPLOY_TYPE];
 
         if (!$deployType || !array_key_exists($deployType, $deployConfig['types'])) {
             throw new \Exception(
@@ -57,7 +56,9 @@ class Bootstrap
             );
         }
 
-        mkdir($sandboxDir, 0777, true);
+        if (!is_dir($sandboxDir)) {
+            mkdir($sandboxDir, 0777, true);
+        }
 
         switch ($deployConfig[static::DEPLOY_TYPE]) {
             case static::DEPLOY_TYPE_GIT:
@@ -83,7 +84,7 @@ class Bootstrap
 
                 $this->execute(
                     sprintf(
-                        'composer create-project --no-dev --repository-url=%s %s %s %s',
+                        'composer create-project --repository-url=%s %s %s %s',
                         $projectConfig['repo'],
                         $projectConfig['name'],
                         $sandboxDir,
@@ -95,19 +96,21 @@ class Bootstrap
                 throw new \Exception('Wrong deploy type');
         }
 
-        $this->execute(
-            sprintf(
-                'cp -f %s %s',
-                $buildFile,
-                $sandboxDir . '/build_options.ini'
-            )
-        );
-        $this->execute(
-            sprintf(
-                'composer install -n -d %s',
-                $sandboxDir
-            )
-        );
+        /**
+         * Copying build options.
+         */
+        $this->execute(sprintf(
+            'cp -f %s %s',
+            $buildFile,
+            $sandboxDir . '/build_options.ini'
+        ));
+        /**
+         * Install without dev dependencies.
+         */
+        $this->execute(sprintf(
+            'composer install -n -d %s --no-dev --no-progress',
+            $sandboxDir
+        ));
     }
 
     /**
@@ -116,15 +119,18 @@ class Bootstrap
      */
     public function createApplication(array $environment): Application
     {
-        $environment = array_replace_recursive(
-            require $this->getConfigFile('environment.php'),
-            $environment
-        );
+        $environment = $this->mergeConfig($environment);
 
         $_ENV = array_replace($_ENV, [
-            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode($environment['variables'])),
-            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode($environment['relationships'])),
-            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode($environment['routes'])),
+            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(
+                $environment->get('variables', [])
+            )),
+            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode(
+                $environment->get('relationships', [])
+            )),
+            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
+                $environment->get('routes', [])
+            )),
         ]);
 
         $server[\Magento\MagentoCloud\App\Bootstrap::INIT_PARAM_DIRS_CONFIG] = [
@@ -138,14 +144,24 @@ class Bootstrap
     }
 
     /**
+     * @param array $environment
+     * @return Repository
+     */
+    public function mergeConfig(array $environment): Repository
+    {
+        return new Repository(array_replace_recursive(
+            require $this->getConfigFile('environment.php'),
+            $environment
+        ));
+    }
+
+    /**
      * @return string
      */
     public function getSandboxDir(): string
     {
         $environmentFile = $this->getConfigFile('environment.php');
-        $sandboxKey = getenv('SANDBOX_KEY')
-            ? getenv('SANDBOX_KEY')
-            : md5_file($environmentFile);
+        $sandboxKey = getenv('SANDBOX_KEY') ?: md5_file($environmentFile);
 
         return ECE_BP . '/tests/integration/tmp/sandbox-' . $sandboxKey;
     }
@@ -176,7 +192,7 @@ class Bootstrap
      * @param string $command
      * @return string
      */
-    private function execute(string $command)
+    public function execute(string $command)
     {
         exec($command, $output, $status);
 

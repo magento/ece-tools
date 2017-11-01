@@ -73,7 +73,7 @@ class ProcessStaticContentTest extends TestCase
             ->method('isStaticContentSymlinkOn')
             ->willReturn(true);
         $this->staticContentCleanerMock->expects($this->once())
-            ->method('clean');
+            ->method('cleanPubStatic');
         $this->staticContentSymlinkMock->expects($this->once())
             ->method('create');
         $this->buildDirCopierMock->expects($this->never())
@@ -97,7 +97,7 @@ class ProcessStaticContentTest extends TestCase
             ->method('isStaticContentSymlinkOn')
             ->willReturn(false);
         $this->staticContentCleanerMock->expects($this->once())
-            ->method('clean');
+            ->method('cleanPubStatic');
         $this->buildDirCopierMock->expects($this->once())
             ->method('copy');
         $this->staticContentSymlinkMock->expects($this->never())
@@ -120,7 +120,7 @@ class ProcessStaticContentTest extends TestCase
         $this->environmentMock->expects($this->never())
             ->method('isStaticContentSymlinkOn');
         $this->staticContentCleanerMock->expects($this->never())
-            ->method('clean');
+            ->method('cleanPubStatic');
         $this->buildDirCopierMock->expects($this->never())
             ->method('copy');
         $this->staticContentSymlinkMock->expects($this->never())
