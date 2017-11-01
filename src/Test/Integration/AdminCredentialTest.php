@@ -56,9 +56,7 @@ class AdminCredentialTest extends TestCase
 
     /**
      * @expectedException \Exception
-     * @codingStandardsIgnoreStart
-     * @expectedExceptionMessage ADMIN_EMAIL not set during install!  We need this variable set to send the password reset email. Please set ADMIN_EMAIL and retry deploy.
-     * @codingStandardsIgnoreEnd
+     * @expectedExceptionMessage ADMIN_EMAIL not set during install!
      */
     public function testInstallWithoutAdminEmail()
     {
