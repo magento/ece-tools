@@ -112,7 +112,7 @@ class DirectoryList
              * Magento application's vendor folder.
              */
             static::MAGENTO_ROOT => [static::PATH => '../../..'],
-            static::INIT => [static::PATH => 'init'],
+            static::INIT => [static::PATH => '../../../init'],
         ];
     }
 }

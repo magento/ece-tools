@@ -93,4 +93,12 @@ class DirectoryListTest extends TestCase
             $this->directoryList->getMagentoRoot()
         );
     }
+
+    public function testGetInit()
+    {
+        $this->assertSame(
+            __DIR__ . DIRECTORY_SEPARATOR . '../../../init',
+            $this->directoryList->getInit()
+        );
+    }
 }
