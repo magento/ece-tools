@@ -149,7 +149,7 @@ class Bootstrap
      */
     public function mergeConfig(array $environment): Repository
     {
-        return new Repository(array_replace_recursive(
+        return new Repository(array_replace(
             require $this->getConfigFile('environment.php'),
             $environment
         ));
