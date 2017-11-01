@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -46,9 +46,9 @@ class DeployStaticContentTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var FileList|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $directoryListMock;
+    private $fileListMock;
 
     /**
      * @var ArrayManager|\PHPUnit_Framework_MockObject_MockObject
@@ -76,7 +76,7 @@ class DeployStaticContentTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
+        $this->fileListMock = $this->getMockBuilder(FileList::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->arrayManagerMock = $this->getMockBuilder(ArrayManager::class)
@@ -84,20 +84,19 @@ class DeployStaticContentTest extends TestCase
             ->getMock();
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
 
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/_files');
+        $this->fileListMock->method('getConfig')
+            ->willReturn(__DIR__ . '/_files/app/etc/config.php');
 
         $this->process = new DeployStaticContent(
             $this->loggerMock,
             $this->buildConfigMock,
             $this->fileMock,
             $this->environmentMock,
-            $this->directoryListMock,
+            $this->fileListMock,
             $this->arrayManagerMock,
             $this->processMock
         );
     }
-
 
     public function testExecute()
     {

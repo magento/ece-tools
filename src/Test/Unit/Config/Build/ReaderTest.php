@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Build;
 
 use Magento\MagentoCloud\Config\Build\Reader;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 
@@ -26,9 +26,9 @@ class ReaderTest extends TestCase
     private $fileMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var FileList|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $directoryListMock;
+    private $fileListMock;
 
     /**
      * @inheritdoc
@@ -36,18 +36,19 @@ class ReaderTest extends TestCase
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
 
         $this->reader = new Reader(
             $this->fileMock,
-            $this->directoryListMock
+            $this->fileListMock
         );
     }
 
     public function testRead()
     {
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn('magento_root');
+        $this->fileListMock->expects($this->once())
+            ->method('getBuildConfig')
+            ->willReturn('magento_root/build_options.ini');
         $this->fileMock->method('isExists')
             ->with('magento_root/build_options.ini')
             ->willReturn(true);
@@ -60,8 +61,9 @@ class ReaderTest extends TestCase
 
     public function testReadNoFile()
     {
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn('magento_root');
+        $this->fileListMock->expects($this->once())
+            ->method('getBuildConfig')
+            ->willReturn('magento_root/build_options.ini');
         $this->fileMock->method('isExists')
             ->with('magento_root/build_options.ini')
             ->willReturn(false);
@@ -69,16 +71,5 @@ class ReaderTest extends TestCase
             ->method('parseIni');
 
         $this->assertSame([], $this->reader->read());
-    }
-
-    public function testGetPath()
-    {
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn('magento_root');
-
-        $this->assertSame(
-            'magento_root/build_options.ini',
-            $this->reader->getPath()
-        );
     }
 }

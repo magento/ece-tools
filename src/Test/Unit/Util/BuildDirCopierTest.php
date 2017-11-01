@@ -51,24 +51,28 @@ class BuildDirCopierTest extends TestCase
     public function testCopy()
     {
         $rootDir = '/path/to/root';
+        $initDir = $rootDir . DIRECTORY_SEPARATOR . 'init';
         $dir = 'dir';
-        $rootInitDir = $rootDir . '/init/'. $dir;
+        $rootInitDir = $initDir . DIRECTORY_SEPARATOR . $dir;
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($rootDir);
+        $this->directoryListMock->expects($this->once())
+            ->method('getInit')
+            ->willReturn($initDir);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->withConsecutive(
                 [$rootInitDir],
-                [$rootDir . '/' . $dir]
+                [$rootDir . DIRECTORY_SEPARATOR . $dir]
             )
             ->willReturnOnConsecutiveCalls(true, true);
         $this->fileMock->expects($this->never())
             ->method('createDirectory');
         $this->fileMock->expects($this->once())
             ->method('copyDirectory')
-            ->with($rootInitDir, $rootDir . '/' .$dir)
+            ->with($rootInitDir, $rootDir . DIRECTORY_SEPARATOR .$dir)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -82,25 +86,29 @@ class BuildDirCopierTest extends TestCase
     public function testCopyDirectoryNotExist()
     {
         $rootDir = '/path/to/root';
+        $initDir = $rootDir . DIRECTORY_SEPARATOR . 'init';
         $dir = 'not-exist-dir';
-        $rootInitDir = $rootDir . '/init/'. $dir;
+        $rootInitDir = $initDir . DIRECTORY_SEPARATOR . $dir;
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($rootDir);
+        $this->directoryListMock->expects($this->once())
+            ->method('getInit')
+            ->willReturn($initDir);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->withConsecutive(
                 [$rootInitDir],
-                [$rootDir . '/' . $dir]
+                [$rootDir . DIRECTORY_SEPARATOR . $dir]
             )
             ->willReturnOnConsecutiveCalls(true, false);
         $this->fileMock->expects($this->once())
             ->method('createDirectory')
-            ->with($rootDir . '/' . $dir);
+            ->with($rootDir . DIRECTORY_SEPARATOR . $dir);
         $this->fileMock->expects($this->once())
             ->method('copyDirectory')
-            ->with($rootDir . '/init/' .$dir, $rootDir . '/' .$dir)
+            ->with($rootInitDir, $rootDir . DIRECTORY_SEPARATOR .$dir)
             ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -117,12 +125,16 @@ class BuildDirCopierTest extends TestCase
     public function testCopyInitDirectoryNotExists()
     {
         $rootDir = '/path/to/root';
+        $initDir = $rootDir . DIRECTORY_SEPARATOR . 'init';
         $dir = 'not-exist-dir';
-        $rootInitDir = $rootDir . '/init/'. $dir;
+        $rootInitDir = $initDir . DIRECTORY_SEPARATOR . $dir;
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($rootDir);
+        $this->directoryListMock->expects($this->once())
+            ->method('getInit')
+            ->willReturn($initDir);
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($rootInitDir)

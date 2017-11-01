@@ -38,4 +38,12 @@ class FileList
     {
         return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
     }
+
+    /**
+     * @return string
+     */
+    public function getBuildConfig()
+    {
+        return $this->directoryList->getMagentoRoot() . '/build_options.ini';
+    }
 }

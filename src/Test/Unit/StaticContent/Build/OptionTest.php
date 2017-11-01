@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
 use Magento\MagentoCloud\Util\ArrayManager;
@@ -42,14 +42,14 @@ class OptionTest extends TestCase
     private $buildConfigMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var FileList|Mock
      */
-    private $directoryListMock;
+    private $fileListMock;
 
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
         $this->buildConfigMock = $this->createMock(BuildConfig::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
@@ -58,7 +58,7 @@ class OptionTest extends TestCase
             $this->environmentMock,
             $this->arrayManagerMock,
             $this->magentoVersionMock,
-            $this->directoryListMock,
+            $this->fileListMock,
             $this->buildConfigMock
         );
     }
@@ -131,9 +131,9 @@ class OptionTest extends TestCase
 
     public function testGetLocales()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/_files/');
+        $this->fileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn(__DIR__ . '/_files/app/etc/config.php');
         $flattenConfig = [
             'scopes' => [
                 'websites' => [],
