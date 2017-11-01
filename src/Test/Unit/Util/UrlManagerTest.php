@@ -55,7 +55,7 @@ class UrlManagerTest extends TestCase
             ->willReturn($routes);
 
 
-        $this->assertArrayHasKey('secure', $this->manager->parseRoutes($this->environmentMock->getRoutes()));
+        $this->assertArrayHasKey('secure', $this->manager->getUrls());
     }
 
     /**
@@ -68,9 +68,7 @@ class UrlManagerTest extends TestCase
             ->method('getRoutes')
             ->willReturn($routes);
 
-        $urls = $this->manager->parseRoutes($this->environmentMock->getRoutes());
-
-        $this->assertArrayHasKey('unsecure', $urls);
+        $this->assertArrayHasKey('unsecure', $this->manager->getUrls());
     }
 
     /**
@@ -109,18 +107,17 @@ class UrlManagerTest extends TestCase
     /**
      * @param array $secureRoute
      * @param $expectedUrl
-     * @dataProvider unsecureRouteUrlDataProvider
+     * @dataProvider nosecureRouteUrlDataProvider
      */
-    public function testNoSecure(array $unsecureRoute)
+    public function testNoSecure(array $unsecureRoute, array $expectedUrl)
     {
-        // Will be invalidated quickly
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
             ->willReturn($unsecureRoute);
 
         $urls = $this->manager->getUrls();
 
-        $this->assertEquals($urls['secure'], $urls['unsecure']);
+        $this->assertEquals($urls['secure'], $expectedUrl);
     }
 
     /**
@@ -187,6 +184,38 @@ class UrlManagerTest extends TestCase
                         ]
                     ]
                 ]
+            ]
+        ];
+    }
+
+    public function noSecureRouteUrlDataProvider()
+    {
+        $route = [
+            'http://example.com/' => [
+                'original_url' => 'http://example.com/',
+                'type' => 'upstream',
+                'ssi' => [
+                    'enabled' => false
+                ],
+                'upstream' => 'mymagento',
+                'cache' => [
+                    'cookies' => ['*'],
+                    'default_ttl' => 0,
+                    'enabled' => true,
+                    'headers' => [
+                        'Accept',
+                        'Accept-Language'
+                    ]
+                ]
+            ]
+        ];
+        $expectedRoute = [
+            'example.com' => 'https://example.com/'
+        ];
+        return [
+            [
+                $route,
+                $expectedRoute
             ]
         ];
     }
@@ -301,7 +330,7 @@ class UrlManagerTest extends TestCase
                         ]
                     ]
                 ]
-                ]
+            ]
         ];
     }
 }

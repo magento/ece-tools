@@ -47,7 +47,7 @@ class UrlManager
      * @param array $routes from environment variable MAGENTO_CLOUD_ROUTES
      * @return array
      */
-    public function parseRoutes(array $routes) : array
+    private function parseRoutes(array $routes) : array
     {
 
         $urls = ['secure' => [], 'unsecure' => []];
@@ -95,7 +95,7 @@ class UrlManager
         }
 
         if (!count($urls['secure'])) {
-            $urls['secure'] = $urls['unsecure'];
+            $urls['secure'] = str_replace(self::PREFIX_UNSECURE, self::PREFIX_SECURE, $urls['unsecure']);
         }
 
         $this->logger->info(sprintf('Routes: %s', var_export($urls, true)));
