@@ -95,8 +95,8 @@ class WriterTest extends TestCase
     public function testUpdate(array $config, array $currentConfig, $updatedConfig)
     {
         $filePath = '/path/to/file';
-        $this->readerMock->expects($this->once())
-            ->method('getPath')
+        $this->fileListMock->expects($this->once())
+            ->method('getEnv')
             ->willReturn($filePath);
         $this->readerMock->expects($this->once())
             ->method('read')
