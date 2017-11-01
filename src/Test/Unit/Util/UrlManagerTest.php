@@ -35,8 +35,7 @@ class UrlManagerTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
 
         $this->manager = new UrlManager(
@@ -55,9 +54,8 @@ class UrlManagerTest extends TestCase
             ->method('getRoutes')
             ->willReturn($routes);
 
-        $urls = $this->manager->parseRoutes($this->environmentMock->getRoutes());
 
-        $this->assertArrayHasKey('secure', $urls);
+        $this->assertArrayHasKey('secure', $this->manager->parseRoutes($this->environmentMock->getRoutes()));
     }
 
     /**
@@ -73,23 +71,6 @@ class UrlManagerTest extends TestCase
         $urls = $this->manager->parseRoutes($this->environmentMock->getRoutes());
 
         $this->assertArrayHasKey('unsecure', $urls);
-    }
-
-    /**
-     * @param array $secureRoute
-     * @param string $expectedUrl
-     * @dataProvider secureRouteDataProvider
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
-     */
-    public function testGetSecureUrl(array $secureRoute, string $expectedUrl)
-    {
-        $this->environmentMock->expects($this->once())
-            ->method('getRoutes')
-            ->willReturn($secureRoute);
-
-        $urls = $this->manager->getUrls();
-
-        $this->assertEquals($urls['unsecure'], $urls['secure']);
     }
 
     /**
@@ -128,10 +109,9 @@ class UrlManagerTest extends TestCase
     /**
      * @param array $secureRoute
      * @param $expectedUrl
-     * @dataProvider unsecureRouteDataProvider
-      @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @dataProvider unsecureRouteUrlDataProvider
      */
-    public function testNoSecure(array $unsecureRoute, string $expectedUrl)
+    public function testNoSecure(array $unsecureRoute)
     {
         // Will be invalidated quickly
         $this->environmentMock->expects($this->once())
@@ -143,10 +123,27 @@ class UrlManagerTest extends TestCase
         $this->assertEquals($urls['secure'], $urls['unsecure']);
     }
 
+    /**
+     * @param array $secureRoute
+     * @param string $expectedUrl
+     * @dataProvider secureRouteUrlDataProvider
+     */
+    public function testGetSecureUrl(array $secureRoute)
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRoutes')
+            ->willReturn($secureRoute);
+        $urls = $this->manager->getUrls();
+
+        $this->assertEquals($urls['unsecure'], $urls['secure']);
+    }
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Expected at least one valid unsecure or secure route. None found.
+     */
     public function testGetUrlsException()
     {
         // No Mock so we get an exception indicating no URLS present.
-        $this->expectException(\RuntimeException::class);
         $this->manager->getUrls();
     }
 
@@ -249,6 +246,62 @@ class UrlManagerTest extends TestCase
                 $route,
                 'example.com'
             ]
+        ];
+    }
+
+
+    public function secureRouteUrlDataProvider()
+    {
+        return [
+            [
+                [
+                    'https://example.com/' => [
+                        'original_url' => 'https://example.com/',
+                        'type' => 'upstream',
+                        'ssi' => [
+                            'enabled' => false
+                        ],
+                        'upstream' => 'mymagento',
+                        'cache' => [
+                            'cookies' => ['*'],
+                            'default_ttl' => 0,
+                            'enabled' => true,
+                            'headers' => [
+                                'Accept',
+                                'Accept-Language'
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+    }
+
+    public function unsecureRouteUrlDataProvider()
+    {
+
+        return [
+            [
+                [
+                    'http://example.com/' => [
+                        'original_url' => 'http://example.com/',
+                        'type' => 'upstream',
+                        'ssi' => [
+                            'enabled' => false
+                        ],
+                        'upstream' => 'mymagento',
+                        'cache' => [
+                            'cookies' => ['*'],
+                            'default_ttl' => 0,
+                            'enabled' => true,
+                            'headers' => [
+                                'Accept',
+                                'Accept-Language'
+                            ]
+                        ]
+                    ]
+                ]
+                ]
         ];
     }
 }

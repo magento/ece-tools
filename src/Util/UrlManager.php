@@ -25,7 +25,7 @@ class UrlManager
      */
     private $urls;
 
-    /**1
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -85,22 +85,22 @@ class UrlManager
 
         $this->logger->info('Initializing routes.');
 
-        $this->urls = $this->parseRoutes($this->environment->getRoutes());
+        $urls = $this->parseRoutes($this->environment->getRoutes());
 
-        if (!count($this->urls['unsecure']) && !count($this->urls['secure'])) {
-            throw new \RuntimeException("Expected at least one valid unsecure or secure route. None found.");
+        if (!count($urls['unsecure']) && !count($urls['secure'])) {
+            throw new \RuntimeException('Expected at least one valid unsecure or secure route. None found.');
         }
-        if (!count($this->urls['unsecure'])) {
-            $this->urls['unsecure'] = $this->urls['secure'];
-        }
-
-        if (!count($this->urls['secure'])) {
-            $this->urls['secure'] = str_replace(self::PREFIX_UNSECURE, self::PREFIX_SECURE, $this->urls['unsecure']);
+        if (!count($urls['unsecure'])) {
+            $urls['unsecure'] = $urls['secure'];
         }
 
-        $this->logger->info(sprintf('Routes: %s', var_export($this->urls, true)));
+        if (!count($urls['secure'])) {
+            $urls['secure'] = $urls['unsecure'];
+        }
 
-        return $this->urls;
+        $this->logger->info(sprintf('Routes: %s', var_export($urls, true)));
+
+        return $this->urls = $urls;
     }
 
     public function getSecureUrls()
