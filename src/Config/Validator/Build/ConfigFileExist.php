@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Config\Validator\Build;
 
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
@@ -21,9 +21,9 @@ class ConfigFileExist implements ValidatorInterface
     private $file;
 
     /**
-     * @var DirectoryList
+     * @var FileList
      */
-    private $directoryList;
+    private $fileList;
 
     /**
      * @var Validator\ResultFactory
@@ -32,16 +32,16 @@ class ConfigFileExist implements ValidatorInterface
 
     /**
      * @param File $file
-     * @param DirectoryList $directoryList
+     * @param FileList $fileList
      * @param Validator\ResultFactory $resultFactory
      */
     public function __construct(
         File $file,
-        DirectoryList $directoryList,
+        FileList $fileList,
         Validator\ResultFactory $resultFactory
     ) {
         $this->file = $file;
-        $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
         $this->resultFactory = $resultFactory;
     }
 
@@ -52,7 +52,7 @@ class ConfigFileExist implements ValidatorInterface
      */
     public function validate(): Validator\Result
     {
-        $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
+        $configFile = $this->fileList->getConfig();
 
         if (!$this->file->isExists($configFile)) {
             $error = 'File app/etc/config.php not exists';

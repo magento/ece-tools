@@ -40,7 +40,7 @@ class ValidateConfiguration implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Validate configuration');
+        $this->logger->info('Validating configuration');
 
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
@@ -57,7 +57,7 @@ class ValidateConfiguration implements ProcessInterface
                     $this->logger->log($level, $message);
 
                     if ($level === ValidatorInterface::LEVEL_CRITICAL) {
-                        throw new \RuntimeException('Please fix configuration with given suggestions');
+                        throw new \RuntimeException('Please fix configuration with given suggestions:');
                     }
                 }
             }

@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileExist;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -29,9 +29,9 @@ class ConfigFileExistTest extends TestCase
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var FileList|Mock
      */
-    private $directoryListMock;
+    private $fileListMock;
 
     /**
      * @var ResultFactory|Mock
@@ -44,21 +44,21 @@ class ConfigFileExistTest extends TestCase
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
         $this->configFile = new ConfigFileExist(
             $this->fileMock,
-            $this->directoryListMock,
+            $this->fileListMock,
             $this->resultFactoryMock
         );
     }
 
     public function testRun()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+        $this->fileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn('magento_root/app/etc/config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
@@ -75,9 +75,9 @@ class ConfigFileExistTest extends TestCase
 
     public function testRunFileNotExists()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+        $this->fileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn('magento_root/app/etc/config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
