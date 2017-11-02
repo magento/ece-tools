@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Util\ArrayManager;
 /**
  * Validates that configuration file contains enough data for running static content deploy in build phase.
  */
-class ConfigFileScd implements ValidatorInterface
+class ConfigFileStructure implements ValidatorInterface
 {
     /**
      * @var DirectoryList
@@ -30,6 +30,7 @@ class ConfigFileScd implements ValidatorInterface
      * @var File
      */
     private $file;
+
     /**
      * @var Validator\ResultFactory
      */
@@ -56,7 +57,7 @@ class ConfigFileScd implements ValidatorInterface
     /**
      * @inheritdoc
      */
-    public function validate(): Validator\Result
+    public function validate(): Validator\ResultInterface
     {
         $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
         $config = $this->file->requireFile($configFile);
@@ -73,12 +74,20 @@ class ConfigFileScd implements ValidatorInterface
                     'To speed up the deploy process, please run the following commands:',
                     '1. bin/magento app:config:dump',
                     '2. git add -f app/etc/config.php',
-                    '3. git commit -a -m \'updating config.php\'',
+                    '3. git commit -a -m \'Updating config.php\'',
                     '4. git push'
+                ]
+            );
+
+            return $this->resultFactory->create(
+                Validator\ResultInterface::ERROR,
+                [
+                    'error' => $error,
+                    'suggestion' => $suggestion
                 ]
             );
         }
 
-        return $this->resultFactory->create($error ?? '', $suggestion ?? '');
+        return $this->resultFactory->create(Validator\ResultInterface::SUCCESS);
     }
 }

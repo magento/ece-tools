@@ -5,8 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
-use Magento\MagentoCloud\Config\Validator\Build\ConfigFileExist;
-use Magento\MagentoCloud\Config\Validator\Result;
+use Magento\MagentoCloud\Config\Validator\Build\ConfigFileExists;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -16,10 +18,10 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 /**
  * @inheritdoc
  */
-class ConfigFileExistTest extends TestCase
+class ConfigFileExistsTest extends TestCase
 {
     /**
-     * @var ConfigFileExist
+     * @var ConfigFileExists
      */
     private $configFile;
 
@@ -47,7 +49,7 @@ class ConfigFileExistTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
-        $this->configFile = new ConfigFileExist(
+        $this->configFile = new ConfigFileExists(
             $this->fileMock,
             $this->fileListMock,
             $this->resultFactoryMock
@@ -65,12 +67,12 @@ class ConfigFileExistTest extends TestCase
             ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
-            ->with('', '')
-            ->willReturn($this->createMock(Result::class));
+            ->with(ResultInterface::SUCCESS)
+            ->willReturn($this->createMock(Success::class));
 
         $result = $this->configFile->validate();
 
-        $this->assertFalse($result->hasError());
+        $this->assertInstanceOf(Success::class, $result);
     }
 
     public function testRunFileNotExists()
@@ -82,24 +84,24 @@ class ConfigFileExistTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(false);
-        $resultMock = $this->createMock(Result::class);
-        $resultMock->expects($this->once())
-            ->method('hasError')
-            ->willReturn(true);
+        $resultMock = $this->createMock(Error::class);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
-                'File app/etc/config.php not exists',
-                'Please run the following commands:' . PHP_EOL
-                . '1. bin/magento module:enable --all' . PHP_EOL
-                . '2. git add -f app/etc/config.php' . PHP_EOL
-                . '3. git commit -a -m \'adding config.php\'' . PHP_EOL
-                . '4. git push'
+                ResultInterface::ERROR,
+                [
+                    'error' => 'File app/etc/config.php not exists',
+                    'suggestion' => 'Please run the following commands:' . PHP_EOL
+                            . '1. bin/magento module:enable --all' . PHP_EOL
+                            . '2. git add -f app/etc/config.php' . PHP_EOL
+                            . '3. git commit -a -m \'Adding config.php\'' . PHP_EOL
+                            . '4. git push'
+                ]
             )
             ->willReturn($resultMock);
 
         $result = $this->configFile->validate();
 
-        $this->assertTrue($result->hasError());
+        $this->assertInstanceOf(Error::class, $result);
     }
 }

@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 /**
  * Validates that configuration file exists.
  */
-class ConfigFileExist implements ValidatorInterface
+class ConfigFileExists implements ValidatorInterface
 {
     /**
      * @var File
@@ -50,7 +50,7 @@ class ConfigFileExist implements ValidatorInterface
      *
      * {@inheritdoc}
      */
-    public function validate(): Validator\Result
+    public function validate(): Validator\ResultInterface
     {
         $configFile = $this->fileList->getConfig();
 
@@ -62,12 +62,20 @@ class ConfigFileExist implements ValidatorInterface
                     'Please run the following commands:',
                     '1. bin/magento module:enable --all',
                     '2. git add -f app/etc/config.php',
-                    '3. git commit -a -m \'adding config.php\'',
+                    '3. git commit -a -m \'Adding config.php\'',
                     '4. git push'
+                ]
+            );
+
+            return $this->resultFactory->create(
+                Validator\ResultInterface::ERROR,
+                [
+                    'error' => $error,
+                    'suggestion' => $suggestion
                 ]
             );
         }
 
-        return $this->resultFactory->create($error ?? '', $suggestion ?? '');
+        return $this->resultFactory->create(Validator\ResultInterface::SUCCESS);
     }
 }

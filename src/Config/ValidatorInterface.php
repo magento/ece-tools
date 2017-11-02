@@ -14,7 +14,7 @@ interface ValidatorInterface
     const LEVEL_CRITICAL = 'critical';
 
     /**
-     * @return Validator\Result
+     * @return Validator\ResultInterface
      */
-    public function validate(): Validator\Result;
+    public function validate(): Validator\ResultInterface;
 }

@@ -40,18 +40,21 @@ class AdminEmail implements ValidatorInterface
     /**
      * Validates that ADMIN_EMAIL variable was set
      *
-     * @return Validator\Result
+     * @return Validator\ResultInterface
      */
-    public function validate(): Validator\Result
+    public function validate(): Validator\ResultInterface
     {
         if (!$this->environment->getAdminEmail()) {
             return $this->resultFactory->create(
-                'The variable ADMIN_EMAIL was not set during the installation.',
-                'This variable is required to send the Admin password reset email.' .
-                ' Set an environment variable for ADMIN_EMAIL and retry deployment.'
+                Validator\ResultInterface::ERROR,
+                [
+                    'error' => 'The variable ADMIN_EMAIL was not set during the installation.',
+                    'suggestion' => 'This variable is required to send the Admin password reset email.' .
+                            ' Set an environment variable for ADMIN_EMAIL and retry deployment.'
+                ]
             );
         }
 
-        return $this->resultFactory->create();
+        return $this->resultFactory->create(Validator\ResultInterface::SUCCESS);
     }
 }

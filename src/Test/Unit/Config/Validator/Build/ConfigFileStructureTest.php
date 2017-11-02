@@ -5,9 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
-use Magento\MagentoCloud\Config\Validator\Build\ConfigFileScd;
+use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Util\ArrayManager;
@@ -17,12 +18,12 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 /**
  * @inheritdoc
  */
-class ConfigFileScdTest extends TestCase
+class ConfigFileStructureTest extends TestCase
 {
     /**
-     * @var ConfigFileScd
+     * @var ConfigFileStructure
      */
-    private $configFileScd;
+    private $configFileStructure;
 
     /**
      * @var DirectoryList|Mock
@@ -54,7 +55,7 @@ class ConfigFileScdTest extends TestCase
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
 
-        $this->configFileScd = new ConfigFileScd(
+        $this->configFileStructure = new ConfigFileStructure(
             $this->arrayManagerMock,
             $this->fileMock,
             $this->directoryListMock,
@@ -92,12 +93,12 @@ class ConfigFileScdTest extends TestCase
             );
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
-            ->with('', '')
-            ->willReturn($this->createMock(Result::class));
+            ->with(ResultInterface::SUCCESS)
+            ->willReturn($this->createMock(Result\Success::class));
 
-        $result = $this->configFileScd->validate();
+        $result = $this->configFileStructure->validate();
 
-        $this->assertFalse($result->hasError());
+        $this->assertInstanceOf(Result\Success::class, $result);
     }
 
     public function testRunScdConfigNotExists()
@@ -117,24 +118,24 @@ class ConfigFileScdTest extends TestCase
             ->method('filter')
             ->with([])
             ->willReturn([]);
-        $resultMock = $this->createMock(Result::class);
-        $resultMock->expects($this->once())
-            ->method('hasError')
-            ->willReturn(true);
+        $resultMock = $this->createMock(Result\Error::class);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
-                'No stores/website/locales found in config.php',
-                'To speed up the deploy process, please run the following commands:' . PHP_EOL
-                . '1. bin/magento app:config:dump' . PHP_EOL
-                . '2. git add -f app/etc/config.php' . PHP_EOL
-                . '3. git commit -a -m \'updating config.php\'' . PHP_EOL
-                . '4. git push'
+                ResultInterface::ERROR,
+                [
+                    'error' => 'No stores/website/locales found in config.php',
+                    'suggestion' => 'To speed up the deploy process, please run the following commands:' . PHP_EOL
+                        . '1. bin/magento app:config:dump' . PHP_EOL
+                        . '2. git add -f app/etc/config.php' . PHP_EOL
+                        . '3. git commit -a -m \'Updating config.php\'' . PHP_EOL
+                        . '4. git push'
+                ]
             )
             ->willReturn($resultMock);
 
-        $result = $this->configFileScd->validate();
+        $result = $this->configFileStructure->validate();
 
-        $this->assertTrue($result->hasError());
+        $this->assertInstanceOf(Result\Error::class, $result);
     }
 }

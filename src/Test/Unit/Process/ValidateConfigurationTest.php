@@ -34,7 +34,7 @@ class ValidateConfigurationTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Validate configuration'],
+                ['Validating configuration'],
                 ['End of validation']
             );
         $this->loggerMock->expects($this->never())
@@ -50,10 +50,7 @@ class ValidateConfigurationTest extends TestCase
     public function testExecuteWithCriticalError()
     {
         $criticalValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
-        $criticalResultMock = $this->createMock(Result::class);
-        $criticalResultMock->expects($this->once())
-            ->method('hasError')
-            ->willReturn(true);
+        $criticalResultMock = $this->createMock(Result\Error::class);
         $criticalResultMock->expects($this->once())
             ->method('getError')
             ->willReturn('some error');
@@ -80,10 +77,52 @@ class ValidateConfigurationTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Validate configuration');
+            ->with('Validating configuration');
         $this->loggerMock->expects($this->once())
             ->method('log')
             ->with('critical', 'some error' . PHP_EOL . 'SUGGESTION:' . PHP_EOL . 'some suggestion');
+
+        $process->execute();
+    }
+
+    public function testExecuteWithWarningMessage()
+    {
+        $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
+        $warningResultMock = $this->createMock(Result\Error::class);
+        $warningResultMock->expects($this->once())
+            ->method('getError')
+            ->willReturn('some warning');
+        $warningResultMock->expects($this->any())
+            ->method('getSuggestion')
+            ->willReturn('some warning suggestion');
+        $warningValidator->expects($this->once())
+            ->method('validate')
+            ->willReturn($warningResultMock);
+        $criticalValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
+        $criticalValidator->expects($this->once())
+            ->method('validate')
+            ->willReturn($this->createMock(Result\Success::class));
+        $process = new ValidateConfiguration(
+            $this->loggerMock,
+            [
+                ValidatorInterface::LEVEL_CRITICAL => [
+                    $criticalValidator
+                ],
+                ValidatorInterface::LEVEL_WARNING => [
+                    $warningValidator
+                ]
+            ]
+        );
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Validating configuration'],
+                ['End of validation']
+            );
+        $this->loggerMock->expects($this->once())
+            ->method('log')
+            ->with('warning', 'some warning' . PHP_EOL . 'SUGGESTION:' . PHP_EOL . 'some warning suggestion');
 
         $process->execute();
     }

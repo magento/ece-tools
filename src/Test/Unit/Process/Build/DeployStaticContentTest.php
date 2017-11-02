@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Process\Build\DeployStaticContent;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Validator\Build\ConfigFileScd;
+use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 
 /**
  * @inheritdoc
@@ -45,9 +45,9 @@ class DeployStaticContentTest extends TestCase
     private $processMock;
 
     /**
-     * @var ConfigFileScd|\PHPUnit_Framework_MockObject_MockObject
+     * @var ConfigFileStructure|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $configFileScdMock;
+    private $configFileStructureMock;
 
     /**
      * @inheritdoc
@@ -59,7 +59,7 @@ class DeployStaticContentTest extends TestCase
         $this->buildConfigMock = $this->createMock(Build::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $this->configFileScdMock = $this->createMock(ConfigFileScd::class);
+        $this->configFileStructureMock = $this->createMock(ConfigFileStructure::class);
 
         $this->environmentMock->expects($this->once())
             ->method('removeFlagStaticContentInBuild');
@@ -69,10 +69,9 @@ class DeployStaticContentTest extends TestCase
             $this->buildConfigMock,
             $this->environmentMock,
             $this->processMock,
-            $this->configFileScdMock
+            $this->configFileStructureMock
         );
     }
-
 
     public function testExecute()
     {
@@ -80,11 +79,8 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(Build::OPT_SKIP_SCD)
             ->willReturn(false);
-        $resultMock = $this->createMock(Result::class);
-        $resultMock->expects($this->once())
-            ->method('hasError')
-            ->willReturn(false);
-        $this->configFileScdMock->expects($this->once())
+        $resultMock = $this->createMock(Result\Success::class);
+        $this->configFileStructureMock->expects($this->once())
             ->method('validate')
             ->willReturn($resultMock);
         $this->processMock->expects($this->once())
@@ -95,14 +91,11 @@ class DeployStaticContentTest extends TestCase
 
     public function testExecuteWithNotValidConfig()
     {
-        $resultMock = $this->createMock(Result::class);
-        $resultMock->expects($this->once())
-            ->method('hasError')
-            ->willReturn(true);
+        $resultMock = $this->createMock(Result\Error::class);
         $resultMock->expects($this->once())
             ->method('getError')
             ->willReturn('error');
-        $this->configFileScdMock->expects($this->once())
+        $this->configFileStructureMock->expects($this->once())
             ->method('validate')
             ->willReturn($resultMock);
         $this->buildConfigMock->expects($this->once())
@@ -124,7 +117,7 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(Build::OPT_SKIP_SCD)
             ->willReturn(true);
-        $this->configFileScdMock->expects($this->never())
+        $this->configFileStructureMock->expects($this->never())
             ->method('validate');
         $this->processMock->expects($this->never())
             ->method('execute');

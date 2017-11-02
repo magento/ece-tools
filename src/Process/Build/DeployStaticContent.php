@@ -7,7 +7,8 @@ namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Validator\Build\ConfigFileScd;
+use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -35,30 +36,31 @@ class DeployStaticContent implements ProcessInterface
      * @var ProcessInterface
      */
     private $process;
+
     /**
-     * @var ConfigFileScd
+     * @var ConfigFileStructure
      */
-    private $configFileScdValidator;
+    private $configFileStructureValidator;
 
     /**
      * @param LoggerInterface $logger
      * @param BuildConfig $buildConfig
      * @param Environment $environment
      * @param ProcessInterface $process
-     * @param ConfigFileScd $configFileScdValidator
+     * @param ConfigFileStructure $configFileStructureValidator
      */
     public function __construct(
         LoggerInterface $logger,
         BuildConfig $buildConfig,
         Environment $environment,
         ProcessInterface $process,
-        ConfigFileScd $configFileScdValidator
+        ConfigFileStructure $configFileStructureValidator
     ) {
         $this->logger = $logger;
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;
         $this->process = $process;
-        $this->configFileScdValidator = $configFileScdValidator;
+        $this->configFileStructureValidator = $configFileStructureValidator;
     }
 
     /**
@@ -74,9 +76,9 @@ class DeployStaticContent implements ProcessInterface
             return;
         }
 
-        $validationResult = $this->configFileScdValidator->validate();
+        $validationResult = $this->configFileStructureValidator->validate();
 
-        if ($validationResult->hasError()) {
+        if ($validationResult instanceof Error) {
             $this->logger->info('Skipping static content deploy. ' . $validationResult->getError());
 
             return;

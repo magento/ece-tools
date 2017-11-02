@@ -3,9 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Config\Validator;
+namespace Magento\MagentoCloud\Config\Validator\Result;
 
-class Result
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
+
+class Error implements ResultInterface
 {
     /**
      * @var string
@@ -21,20 +23,10 @@ class Result
      * @param string $error
      * @param string $suggestion
      */
-    public function __construct(string $error = '', string $suggestion = '')
+    public function __construct(string $error, string $suggestion = '')
     {
         $this->error = $error;
         $this->suggestion = $suggestion;
-    }
-
-    /**
-     * Checks if at least one error was added
-     *
-     * @return bool
-     */
-    public function hasError(): bool
-    {
-        return !empty($this->error);
     }
 
     /**

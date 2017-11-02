@@ -7,7 +7,9 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\Deploy\AdminEmail;
-use Magento\MagentoCloud\Config\Validator\Result;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -56,10 +58,12 @@ class AdminEmailTest extends TestCase
             ->willReturn('admin@example.com');
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
-            ->with()
-            ->willReturn($this->createMock(Result::class));
+            ->with(ResultInterface::SUCCESS)
+            ->willReturn($this->createMock(Success::class));
 
-        $this->adminEmailValidator->validate();
+        $result = $this->adminEmailValidator->validate();
+
+        $this->assertInstanceOf(Success::class, $result);
     }
 
     /**
@@ -73,12 +77,17 @@ class AdminEmailTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
-                'The variable ADMIN_EMAIL was not set during the installation.',
-                'This variable is required to send the Admin password reset email.' .
-                ' Set an environment variable for ADMIN_EMAIL and retry deployment.'
+                ResultInterface::ERROR,
+                [
+                    'error' => 'The variable ADMIN_EMAIL was not set during the installation.',
+                    'suggestion' => 'This variable is required to send the Admin password reset email.' .
+                        ' Set an environment variable for ADMIN_EMAIL and retry deployment.'
+                ]
             )
-            ->willReturn($this->createMock(Result::class));
+            ->willReturn($this->createMock(Error::class));
 
-        $this->adminEmailValidator->validate();
+        $result = $this->adminEmailValidator->validate();
+
+        $this->assertInstanceOf(Error::class, $result);
     }
 }

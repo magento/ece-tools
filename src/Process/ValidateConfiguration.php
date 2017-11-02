@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process;
 
+use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Psr\Log\LoggerInterface;
 
@@ -47,7 +48,7 @@ class ValidateConfiguration implements ProcessInterface
             foreach ($validators as $validator) {
                 $result = $validator->validate();
 
-                if ($result->hasError()) {
+                if ($result instanceof Error) {
                     $message = $result->getError();
 
                     if (!empty($result->getSuggestion())) {

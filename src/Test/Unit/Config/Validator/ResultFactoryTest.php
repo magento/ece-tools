@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use PHPUnit\Framework\TestCase;
 
 class ResultFactoryTest extends TestCase
@@ -21,11 +22,25 @@ class ResultFactoryTest extends TestCase
         $this->resultFactory = new ResultFactory();
     }
 
-    public function testCreate()
+    public function testCreateSuccessResult()
     {
         $this->assertInstanceOf(
-            Result::class,
-            $this->resultFactory->create()
+            Result\Success::class,
+            $this->resultFactory->create(ResultInterface::SUCCESS)
         );
+    }
+
+    public function testCreateErrorResult()
+    {
+        /** @var Result\Error $result */
+        $result = $this->resultFactory->create(ResultInterface::ERROR, [
+            'error' => 'some error'
+        ]);
+
+        $this->assertInstanceOf(
+            Result\Error::class,
+            $result
+        );
+        $this->assertEquals('some error', $result->getError());
     }
 }

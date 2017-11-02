@@ -79,10 +79,10 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                         $this->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
-                                    $this->make(ConfigValidator\Build\ConfigFileExist::class)
+                                    $this->make(ConfigValidator\Build\ConfigFileExists::class)
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
-                                    $this->make(ConfigValidator\Build\ConfigFileScd::class)
+                                    $this->make(ConfigValidator\Build\ConfigFileStructure::class)
                                 ]
                             ]
                         ]),

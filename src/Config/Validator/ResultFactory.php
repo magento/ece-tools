@@ -6,19 +6,26 @@
 namespace Magento\MagentoCloud\Config\Validator;
 
 /**
- * Creates instance of Result object
+ * Creates instance of ResultInterface object
  */
 class ResultFactory
 {
     /**
-     * Creates instance of Result object
+     * Creates instance of ResultInterface object
      *
-     * @param string $error
-     * @param string $suggestion
-     * @return Result
+     * @param string $type
+     * @param array $arguments
+     * @return ResultInterface
      */
-    public function create(string $error = '', string $suggestion = '')
+    public function create(string $type, array $arguments = []): ResultInterface
     {
-        return new Result($error, $suggestion);
+        if ($type === ResultInterface::ERROR) {
+            $suggestion = $arguments['suggestion'] ?? '';
+            $result = new Result\Error($arguments['error'], $suggestion);
+        } else {
+            $result = new Result\Success();
+        }
+
+        return $result;
     }
 }
