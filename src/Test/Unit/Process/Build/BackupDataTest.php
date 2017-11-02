@@ -62,6 +62,9 @@ class BackupDataTest extends TestCase
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
+        $this->directoryListMock->expects($this->once())
+            ->method('getInit')
+            ->willReturn('magento_root/init');
 
         $this->process = new BackupData(
             $this->fileMock,

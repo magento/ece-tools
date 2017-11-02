@@ -36,12 +36,13 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
         $this->singleton(\Magento\MagentoCloud\Filesystem\DirectoryList::class, function () use ($root, $config) {
             return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $config);
         });
+        $this->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
         $this->singleton(\Composer\Composer::class, function () {
-            $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
+            $fileList = $this->get(\Magento\MagentoCloud\Filesystem\FileList::class);
 
             return \Composer\Factory::create(
                 new \Composer\IO\BufferIO(),
-                $directoryList->getMagentoRoot() . '/composer.json'
+                $fileList->getComposer()
             );
         });
         /**
