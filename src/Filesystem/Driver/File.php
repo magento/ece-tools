@@ -425,4 +425,13 @@ class File
 
         return $result;
     }
+
+    /**
+     * @param string $path
+     * @return mixed
+     */
+    public function requireFile(string $path)
+    {
+        return require $path;
+    }
 }

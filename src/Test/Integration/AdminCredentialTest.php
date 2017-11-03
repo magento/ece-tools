@@ -5,10 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Integration;
 
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Config\Environment;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -33,11 +32,6 @@ class AdminCredentialTest extends TestCase
     {
         $this->bootstrap = Bootstrap::create();
 
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento module:enable --all',
-            $this->bootstrap->getSandboxDir()
-        ));
-
         $this->env = $_ENV;
     }
 
@@ -46,7 +40,7 @@ class AdminCredentialTest extends TestCase
      */
     protected function tearDown()
     {
-        shell_exec(sprintf(
+        $this->bootstrap->execute(sprintf(
             'cd %s && php bin/magento setup:uninstall -n',
             $this->bootstrap->getSandboxDir()
         ));
@@ -56,7 +50,7 @@ class AdminCredentialTest extends TestCase
 
     /**
      * @expectedException \Exception
-     * @expectedExceptionMessage ADMIN_EMAIL not set during install!
+     * @expectedExceptionMessage Please fix configuration with given suggestions
      */
     public function testInstallWithoutAdminEmail()
     {
