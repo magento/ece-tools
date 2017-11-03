@@ -103,6 +103,7 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->make(DeployProcess\PreDeploy::class),
                         $this->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -110,7 +111,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                                 ],
                             ]
                         ]),
-                        $this->make(DeployProcess\PreDeploy::class),
                         $this->make(DeployProcess\CreateConfigFile::class),
                         $this->make(DeployProcess\SetMode::class),
                         $this->make(DeployProcess\InstallUpdate::class),
