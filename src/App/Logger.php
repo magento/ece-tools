@@ -5,9 +5,7 @@
  */
 namespace Magento\MagentoCloud\App;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\StreamHandler;
+use Magento\MagentoCloud\App\Logger\Pool;
 
 /**
  * @inheritdoc
@@ -30,19 +28,15 @@ class Logger extends \Monolog\Logger
     const LOG_DIR = 'var/log';
 
     /**
-     * @param DirectoryList $directoryList
+     * Path to the file with handlers configurations
      */
-    public function __construct(DirectoryList $directoryList)
-    {
-        $formatter = new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n");
-        $formatter->allowInlineLineBreaks();
-        $formatter->ignoreEmptyContextAndExtra();
+    const CONFIG_HANDLERS_LOG = '.log.handlers.yml';
 
-        parent::__construct('default', [
-            (new StreamHandler($directoryList->getMagentoRoot() . '/' . self::DEPLOY_LOG_PATH))
-                ->setFormatter($formatter),
-            (new StreamHandler('php://stdout'))
-                ->setFormatter($formatter),
-        ]);
+    /**
+     * @param Pool $pool
+     */
+    public function __construct(Pool $pool)
+    {
+        parent::__construct('default', $pool->getHandlers());
     }
 }
