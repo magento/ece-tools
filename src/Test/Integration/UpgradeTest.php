@@ -65,30 +65,26 @@ class UpgradeTest extends TestCase
             $sandboxDir
         ));
 
-        $assertBuild = function () use ($application) {
-            $commandTester = new CommandTester($application->get(Build::NAME));
-            $commandTester->execute([]);
-            $this->assertSame(0, $commandTester->getStatusCode());
-        };
-        $assertDeploy = function () use ($application) {
-            $commandTester = new CommandTester($application->get(Deploy::NAME));
+        $assert = function ($commandName) use ($application) {
+            $commandTester = new CommandTester($application->get($commandName));
             $commandTester->execute([]);
             $this->assertSame(0, $commandTester->getStatusCode());
         };
 
-        $assertBuild();
-        $assertDeploy();
+        $assert(Build::NAME);
+        $assert(Deploy::NAME);
         $this->assertContentPresence();
 
+        $this->bootstrap->execute('composer clear-cache');
         $this->bootstrap->execute(sprintf(
-            'composer require magento/product-enterprise-edition %s -n -d %s',
+            'composer require magento/product-enterprise-edition %s --no-update -n -d %s',
             $to,
             $sandboxDir
         ));
         $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s', $sandboxDir));
 
-        $assertBuild();
-        $assertDeploy();
+        $assert(Build::NAME);
+        $assert(Deploy::NAME);
         $this->assertContentPresence();
     }
 
