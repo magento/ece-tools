@@ -38,4 +38,20 @@ class FileList
     {
         return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
     }
+
+    /**
+     * @return string
+     */
+    public function getBuildConfig(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/build_options.ini';
+    }
+
+    /**
+     * @return string
+     */
+    public function getComposer(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/composer.json';
+    }
 }
