@@ -51,12 +51,16 @@ class BuildDirCopierTest extends TestCase
     public function testCopy()
     {
         $rootDir = '/path/to/root';
+        $initDir = $rootDir . '/init';
         $dir = 'dir';
-        $rootInitDir = $rootDir . '/init/'. $dir;
+        $rootInitDir = $initDir . '/' . $dir;
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($rootDir);
+        $this->directoryListMock->expects($this->once())
+            ->method('getInit')
+            ->willReturn($initDir);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->withConsecutive(
@@ -82,12 +86,16 @@ class BuildDirCopierTest extends TestCase
     public function testCopyDirectoryNotExist()
     {
         $rootDir = '/path/to/root';
+        $initDir = $rootDir . '/init';
         $dir = 'not-exist-dir';
-        $rootInitDir = $rootDir . '/init/'. $dir;
+        $rootInitDir = $initDir . '/' . $dir;
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($rootDir);
+        $this->directoryListMock->expects($this->once())
+            ->method('getInit')
+            ->willReturn($initDir);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->withConsecutive(
@@ -100,7 +108,7 @@ class BuildDirCopierTest extends TestCase
             ->with($rootDir . '/' . $dir);
         $this->fileMock->expects($this->once())
             ->method('copyDirectory')
-            ->with($rootDir . '/init/' .$dir, $rootDir . '/' .$dir)
+            ->with($rootInitDir, $rootDir . '/' .$dir)
             ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -117,12 +125,16 @@ class BuildDirCopierTest extends TestCase
     public function testCopyInitDirectoryNotExists()
     {
         $rootDir = '/path/to/root';
+        $initDir = $rootDir . '/init';
         $dir = 'not-exist-dir';
-        $rootInitDir = $rootDir . '/init/'. $dir;
+        $rootInitDir = $initDir . '/' . $dir;
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($rootDir);
+        $this->directoryListMock->expects($this->once())
+            ->method('getInit')
+            ->willReturn($initDir);
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($rootInitDir)

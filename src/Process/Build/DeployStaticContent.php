@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
@@ -39,9 +39,9 @@ class DeployStaticContent implements ProcessInterface
     private $environment;
 
     /**
-     * @var DirectoryList
+     * @var FileList
      */
-    private $directoryList;
+    private $fileList;
 
     /**
      * @var ArrayManager
@@ -58,7 +58,7 @@ class DeployStaticContent implements ProcessInterface
      * @param BuildConfig $buildConfig
      * @param File $file
      * @param Environment $environment
-     * @param DirectoryList $directoryList
+     * @param FileList $fileList
      * @param ArrayManager $arrayManager
      * @param ProcessInterface $process
      */
@@ -67,7 +67,7 @@ class DeployStaticContent implements ProcessInterface
         BuildConfig $buildConfig,
         File $file,
         Environment $environment,
-        DirectoryList $directoryList,
+        FileList $fileList,
         ArrayManager $arrayManager,
         ProcessInterface $process
     ) {
@@ -75,7 +75,7 @@ class DeployStaticContent implements ProcessInterface
         $this->file = $file;
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;
-        $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
         $this->arrayManager = $arrayManager;
         $this->process = $process;
     }
@@ -85,7 +85,7 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
+        $configFile = $this->fileList->getConfig();
 
         if (!$this->file->isExists($configFile) || $this->buildConfig->get(BuildConfig::OPT_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
