@@ -1,0 +1,42 @@
+#!/bin/bash
+
+[ "$DEBUG" = "true" ] && set -x
+
+AUTH_JSON_FILE="$(composer -g config data-dir 2>/dev/null)/auth.json"
+
+if [ -f "$AUTH_JSON_FILE" ]; then
+    # Get composer auth information into an environment variable to avoid "you need
+    # to be using an interactive terminal to authenticate".
+    COMPOSER_AUTH=`cat $AUTH_JSON_FILE`
+fi
+
+MAGENTO_COMMAND="magento-command"
+
+if [ ! -f "$MAGENTO_ROOT/composer.json" ]; then
+    echo "Creating Magento ($M2SETUP_VERSION) project from composer"
+
+    composer create-project \
+        --repository-url=https://repo.magento.com/ \
+        magento/project-enterprise-edition=$M2SETUP_VERSION \
+        --no-interaction \
+        $MAGENTO_ROOT
+
+    # Magento forces Composer to use $MAGENTO_ROOT/var/composer_home as the home directory
+    # when running any Composer commands through Magento, e.g. sampledata:deploy, so copy the
+    # credentials over to it to prevent Composer from asking for them again
+    if [ -f "$AUTH_JSON_FILE" ]; then
+        mkdir -p $MAGENTO_ROOT/var/composer_home
+        cp $AUTH_JSON_FILE $MAGENTO_ROOT/var/composer_home/auth.json
+    fi
+else
+    echo "Magento installation found in $MAGENTO_ROOT, installing composer dependencies"
+    composer --working-dir=$MAGENTO_ROOT install
+fi
+
+chown -R www-data:www-data $MAGENTO_ROOT
+
+echo "Fixing file permissions.."
+
+chown -R www-data:www-data $MAGENTO_ROOT
+
+echo "Installation complete"

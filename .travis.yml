@@ -5,6 +5,7 @@ addons:
       - magento2.travis
 services:
   - mysql
+  - docker
 language: php
 php:
   - 7.0
@@ -18,10 +19,13 @@ env:
     - TEST_SUITE=static
     - TEST_SUITE=unit
     - TEST_SUITE=integration
+    - TEST_SUITE=integration-docker
 matrix:
   exclude:
     - php: 7.1
       env: TEST_SUITE=integration
+    - php: 7.1
+      env: TEST_SUITE=integration-docker
 cache:
   apt: true
   directories:
@@ -33,3 +37,4 @@ script:
   - if [ $TEST_SUITE == "static" ]; then phpmd src xml tests/static/phpmd-ruleset.xml; fi;
   - if [ $TEST_SUITE == "unit" ]; then phpunit --configuration tests/unit/phpunit.xml.dist; fi;
   - if [ $TEST_SUITE == "integration" ]; then phpunit --verbose --configuration tests/integration/phpunit.xml.dist; fi;
+  - if [ $TEST_SUITE == "integration-docker" ]; then docker-compose run cli magento-command; fi;
