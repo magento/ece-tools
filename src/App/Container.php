@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\App;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -74,6 +76,16 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     'processes' => [
                         $this->make(BuildProcess\PreBuild::class),
                         $this->make(BuildProcess\PrepareModuleConfig::class),
+                        $this->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+                            'validators' => [
+                                ValidatorInterface::LEVEL_CRITICAL => [
+                                    $this->make(ConfigValidator\Build\ConfigFileExists::class)
+                                ],
+                                ValidatorInterface::LEVEL_WARNING => [
+                                    $this->make(ConfigValidator\Build\ConfigFileStructure::class)
+                                ]
+                            ]
+                        ]),
                         $this->make(BuildProcess\ApplyPatches::class),
                         $this->make(BuildProcess\MarshallFiles::class),
                         $this->make(BuildProcess\CopySampleData::class),
@@ -92,6 +104,13 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->make(DeployProcess\PreDeploy::class),
+                        $this->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+                            'validators' => [
+                                ValidatorInterface::LEVEL_CRITICAL => [
+                                    $this->make(ConfigValidator\Deploy\AdminEmail::class)
+                                ],
+                            ]
+                        ]),
                         $this->make(DeployProcess\CreateConfigFile::class),
                         $this->make(DeployProcess\SetMode::class),
                         $this->make(DeployProcess\InstallUpdate::class),
@@ -106,7 +125,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
             ->give(function () {
                 return $this->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->make(DeployProcess\InstallUpdate\Install\EmailChecker::class),
                         $this->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
                         $this->make(DeployProcess\InstallUpdate\Install\ConfigImport::class),

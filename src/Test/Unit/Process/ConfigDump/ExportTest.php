@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Process\ConfigDump\Export;
@@ -33,7 +32,7 @@ class ExportTest extends TestCase
     private $fileMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var FileList|\PHPUnit_Framework_MockObject_MockObject
      */
     private $fileListMock;
 
