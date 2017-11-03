@@ -37,4 +37,4 @@ script:
   - if [ $TEST_SUITE == "static" ]; then phpmd src xml tests/static/phpmd-ruleset.xml; fi;
   - if [ $TEST_SUITE == "unit" ]; then phpunit --configuration tests/unit/phpunit.xml.dist; fi;
   - if [ $TEST_SUITE == "integration" ]; then phpunit --verbose --configuration tests/integration/phpunit.xml.dist; fi;
-  - if [ $TEST_SUITE == "integration-docker" ]; then docker-compose --project-directory tests/integrtion-docker run cli magento-command; fi;
+  - if [ $TEST_SUITE == "integration-docker" ]; then cd tests/integration-docker && docker-compose run cli magento-command; fi;
