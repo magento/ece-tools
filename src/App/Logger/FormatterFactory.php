@@ -13,18 +13,10 @@ use Monolog\Formatter\LineFormatter;
 class FormatterFactory
 {
     /**
-     * @param string $format
-     * @param string $dateFormat
-     * @param bool $allowInlineLineBreaks
-     * @param bool $ignoreEmptyContextAndExtra
      * @return LineFormatter
      */
-    public function create(
-        $format = null,
-        $dateFormat = null,
-        $allowInlineLineBreaks = false,
-        $ignoreEmptyContextAndExtra = false
-    ): LineFormatter {
-        return new LineFormatter($format, $dateFormat, $allowInlineLineBreaks, $ignoreEmptyContextAndExtra);
+    public function create(): LineFormatter
+    {
+        return new LineFormatter("[%datetime%] %level_name%: %message% %context% %extra%\n", null, true, true);
     }
 }

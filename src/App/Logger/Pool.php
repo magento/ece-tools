@@ -6,9 +6,7 @@
 namespace Magento\MagentoCloud\App\Logger;
 
 use Monolog\Formatter\LineFormatter;
-use Magento\MagentoCloud\App\Logger\Handler\StreamFactory as StreamHandlerFactory;
-use Magento\MagentoCloud\App\Logger\Handler\SlackFactory as SlackHandlerFactory;
-use Magento\MagentoCloud\App\Logger\Handler\EmailFactory as EmailHandlerFactory;
+use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Monolog\Handler\HandlerInterface;
@@ -39,48 +37,26 @@ class Pool
     private $formatter;
 
     /**
-     * @var StreamHandlerFactory
+     * @var HandlerFactory
      */
-    private $streamHandlerFactory;
-
-    /**
-     * @var SlackHandlerFactory
-     */
-    private $slackHandlerFactory;
-
-    /**
-     * @var EmailHandlerFactory
-     */
-    private $emailHandlerFactory;
+    private $handlerFactory;
 
     /**
      * @param DirectoryList $directoryList
      * @param ConfigReader $configReader
      * @param FormatterFactory $formatterFactory
-     * @param StreamHandlerFactory $streamHandlerFactory
-     * @param SlackHandlerFactory $slackHandlerFactory
-     * @param EmailHandlerFactory $emailHandlerFactory
+     * @param HandlerFactory $handlerFactory
      */
     public function __construct(
         DirectoryList $directoryList,
         ConfigReader $configReader,
         FormatterFactory $formatterFactory,
-        StreamHandlerFactory $streamHandlerFactory,
-        SlackHandlerFactory $slackHandlerFactory,
-        EmailHandlerFactory $emailHandlerFactory
+        HandlerFactory $handlerFactory
     ) {
         $this->directoryList = $directoryList;
         $this->configReader = $configReader;
-        $this->formatter = $formatterFactory->create(
-            "[%datetime%] %level_name%: %message% %context% %extra%\n",
-            null,
-            true,
-            true
-        );
-
-        $this->streamHandlerFactory = $streamHandlerFactory;
-        $this->slackHandlerFactory = $slackHandlerFactory;
-        $this->emailHandlerFactory = $emailHandlerFactory;
+        $this->formatter = $formatterFactory->create();
+        $this->handlerFactory = $handlerFactory;
 
         $this->populateHandler();
     }
@@ -100,25 +76,17 @@ class Pool
      */
     private function populateHandler()
     {
-        $this->handlers[] = $this->streamHandlerFactory->create([
+        $this->handlers[] = $this->handlerFactory->create('stream', [
             'stream' => $this->directoryList->getMagentoRoot() . '/' . Logger::DEPLOY_LOG_PATH
         ])
             ->setFormatter($this->formatter);
-        $this->handlers[] = $this->streamHandlerFactory->create()
+        $this->handlers[] = $this->handlerFactory->create('stream')
             ->setFormatter($this->formatter);
 
         $handlers = $this->configReader->getHandlersConfig();
         foreach ($handlers as $handler => $configuration) {
-            switch ($handler) {
-                case 'slack':
-                    $this->handlers[] = $this->slackHandlerFactory->create($configuration)
-                        ->setFormatter($this->formatter);
-                    break;
-                case 'email':
-                    $this->handlers[] = $this->emailHandlerFactory->create($configuration)
-                        ->setFormatter($this->formatter);
-                    break;
-            }
+            $this->handlers[] = $this->handlerFactory->create($handler, $configuration)
+                ->setFormatter($this->formatter);
         }
     }
 }

@@ -34,8 +34,8 @@ class ConfigReader
      */
     public function getHandlersConfig(): array
     {
-        return (array) Yaml::parse(
-            file_get_contents($this->directoryList->getMagentoRoot() . '/' . Logger::CONFIG_HANDLERS_LOG)
-        );
+        $path = $this->directoryList->getMagentoRoot() . '/' . Logger::CONFIG_HANDLERS_LOG;
+
+        return !file_exists($path) ? [] : (array) Yaml::parse(file_get_contents($path));
     }
 }
