@@ -3,6 +3,7 @@ dist: trusty
 addons:
   hosts:
       - magento2.travis
+      - magento2.docker
 services:
   - mysql
   - docker
