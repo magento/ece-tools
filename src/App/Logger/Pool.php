@@ -36,16 +36,16 @@ class Pool
 
     /**
      * @param LogConfig $logConfig
-     * @param FormatterFactory $formatterFactory
+     * @param LineFormatterFactory $lineFormatterFactory
      * @param HandlerFactory $handlerFactory
      */
     public function __construct(
         LogConfig $logConfig,
-        FormatterFactory $formatterFactory,
+        LineFormatterFactory $lineFormatterFactory,
         HandlerFactory $handlerFactory
     ) {
         $this->logConfig = $logConfig;
-        $this->formatter = $formatterFactory->create();
+        $this->formatter = $lineFormatterFactory->create();
         $this->handlerFactory = $handlerFactory;
 
         $this->populateHandler();

@@ -10,7 +10,7 @@ use Monolog\Formatter\LineFormatter;
 /**
  * The factory for LineFormatter
  */
-class FormatterFactory
+class LineFormatterFactory
 {
     /**
      * @return LineFormatter
