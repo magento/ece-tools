@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\Build\CompileDi;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -38,11 +37,6 @@ class CompileDiTest extends TestCase
     private $buildConfigMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $directoryListMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -51,22 +45,12 @@ class CompileDiTest extends TestCase
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
-        $this->buildConfigMock = $this->getMockBuilder(Build::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->directoryListMock->expects($this->any())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+        $this->buildConfigMock = $this->createMock(Build::class);
 
         $this->process = new CompileDi(
             $this->loggerMock,
             $this->shellMock,
-            $this->buildConfigMock,
-            $this->directoryListMock
+            $this->buildConfigMock
         );
     }
 
