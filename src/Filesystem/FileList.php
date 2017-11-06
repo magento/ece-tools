@@ -54,4 +54,20 @@ class FileList
     {
         return $this->directoryList->getMagentoRoot() . '/composer.json';
     }
+
+    /**
+     * @return string
+     */
+    public function getLogConfig(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/.magento.log.options.yml';
+    }
+
+    /**
+     * @return string
+     */
+    public function getDeployLog(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/var/log/cloud.log';
+    }
 }

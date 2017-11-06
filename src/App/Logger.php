@@ -28,11 +28,6 @@ class Logger extends \Monolog\Logger
     const LOG_DIR = 'var/log';
 
     /**
-     * Path to the file with handlers configurations
-     */
-    const CONFIG_HANDLERS_LOG = '.log.handlers.yml';
-
-    /**
      * @param Pool $pool
      */
     public function __construct(Pool $pool)

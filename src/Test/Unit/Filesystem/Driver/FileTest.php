@@ -6,34 +6,37 @@
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\Driver;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
  */
 class FileTest extends TestCase
 {
+    use \phpmock\phpunit\PHPMock;
+
+    /**
+     * @var Mock
+     */
+    private $shellMock;
+
     /**
      * @var File
      */
     private $driver;
 
     /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $shellMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-
-        $this->driver = new File(
-            $this->shellMock
+        $this->shellMock = $this->getFunctionMock(
+            'Magento\MagentoCloud\Filesystem\Driver',
+            'shell_exec'
         );
+
+        $this->driver = new File();
     }
 
     /**
@@ -44,7 +47,6 @@ class FileTest extends TestCase
     public function testCopyDirectory(string $source, string $destination)
     {
         $this->shellMock->expects($this->once())
-            ->method('execute')
             ->with(sprintf(
                 '/bin/bash -c "shopt -s dotglob; cp -R %s/* %s/"',
                 $source,

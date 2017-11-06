@@ -6,10 +6,8 @@
 namespace Magento\MagentoCloud\App\Logger;
 
 use Monolog\Formatter\LineFormatter;
-use Magento\MagentoCloud\App\Logger\HandlerFactory;
-use Magento\MagentoCloud\App\Logger;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Monolog\Handler\HandlerInterface;
+use Magento\MagentoCloud\Config\Log as LogConfig;
 
 /**
  * The pool of handlers
@@ -22,14 +20,9 @@ class Pool
     private $handlers = [];
 
     /**
-     * @var DirectoryList
+     * @var LogConfig
      */
-    private $directoryList;
-
-    /**
-     * @var ConfigReader
-     */
-    private $configReader;
+    private $logConfig;
 
     /**
      * @var LineFormatter
@@ -42,19 +35,16 @@ class Pool
     private $handlerFactory;
 
     /**
-     * @param DirectoryList $directoryList
-     * @param ConfigReader $configReader
+     * @param LogConfig $logConfig
      * @param FormatterFactory $formatterFactory
      * @param HandlerFactory $handlerFactory
      */
     public function __construct(
-        DirectoryList $directoryList,
-        ConfigReader $configReader,
+        LogConfig $logConfig,
         FormatterFactory $formatterFactory,
         HandlerFactory $handlerFactory
     ) {
-        $this->directoryList = $directoryList;
-        $this->configReader = $configReader;
+        $this->logConfig = $logConfig;
         $this->formatter = $formatterFactory->create();
         $this->handlerFactory = $handlerFactory;
 
@@ -76,16 +66,8 @@ class Pool
      */
     private function populateHandler()
     {
-        $this->handlers[] = $this->handlerFactory->create('stream', [
-            'stream' => $this->directoryList->getMagentoRoot() . '/' . Logger::DEPLOY_LOG_PATH
-        ])
-            ->setFormatter($this->formatter);
-        $this->handlers[] = $this->handlerFactory->create('stream')
-            ->setFormatter($this->formatter);
-
-        $handlers = $this->configReader->getHandlersConfig();
-        foreach ($handlers as $handler => $configuration) {
-            $this->handlers[] = $this->handlerFactory->create($handler, $configuration)
+        foreach ($this->logConfig->getHandlers() as $handler) {
+            $this->handlers[] = $this->handlerFactory->create($handler)
                 ->setFormatter($this->formatter);
         }
     }
