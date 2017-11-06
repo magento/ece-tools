@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\DBDump;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -47,6 +48,11 @@ class ApplicationTest extends TestCase
     private $deployCommandMock;
 
     /**
+     * @var $dbdumpCommandMock;
+     */
+    private $dbdumpCommandMock;
+
+    /**
      * @var ConfigDump|\PHPUnit_Framework_MockObject_MockObject
      */
     private $configDumpCommand;
@@ -61,6 +67,7 @@ class ApplicationTest extends TestCase
         $this->composerMock = $this->createMock(Composer::class);
         $this->buildCommandMock = $this->createMock(Build::class);
         $this->deployCommandMock = $this->createMock(Deploy::class);
+        $this->dbdumpCommandMock = $this->createMock(DBDump::class);
         $this->configDumpCommand = $this->createMock(Deploy::class);
 
         $this->buildCommandMock->method('getName')
@@ -79,6 +86,14 @@ class ApplicationTest extends TestCase
             ->willReturn([]);
         $this->deployCommandMock->method('getAliases')
             ->willReturn([]);
+        $this->dbdumpCommandMock->method('getName')
+            ->willReturn(DBDump::NAME);
+        $this->dbdumpCommandMock->method('isEnabled')
+            ->willReturn(true);
+        $this->dbdumpCommandMock->method('getDefinition')
+            ->willReturn([]);
+        $this->dbdumpCommandMock->method('getAliases')
+            ->willReturn([]);
         $this->configDumpCommand->method('getName')
             ->willReturn(ConfigDump::NAME);
         $this->configDumpCommand->method('isEnabled')
@@ -93,6 +108,7 @@ class ApplicationTest extends TestCase
                 [Composer::class, $this->composerMock],
                 [Build::class, $this->buildCommandMock],
                 [Deploy::class, $this->deployCommandMock],
+                [DBDump::class, $this->dbdumpCommandMock],
                 [ConfigDump::class, $this->configDumpCommand],
             ]);
         $this->composerMock->method('getPackage')
@@ -107,6 +123,7 @@ class ApplicationTest extends TestCase
     {
         $this->assertTrue($this->application->has(Build::NAME));
         $this->assertTrue($this->application->has(Deploy::NAME));
+        $this->assertTrue($this->application->has(DBDump::NAME));
         $this->assertTrue($this->application->has(ConfigDump::NAME));
     }
 }
