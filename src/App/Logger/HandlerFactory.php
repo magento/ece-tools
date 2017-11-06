@@ -53,7 +53,7 @@ class HandlerFactory
             case static::HANDLER_FILE:
                 return new StreamHandler($this->logConfig->get($typeHandler)->get('stream'));
                 break;
-            case 'email':
+            case static::HANDLER_EMAIL:
                 $configuration = $this->logConfig->get($typeHandler);
                 return new NativeMailerHandler(
                     $configuration->get('to'),
@@ -62,7 +62,7 @@ class HandlerFactory
                     $this->levelResolver->resolve($configuration->get('min_level'))
                 );
                 break;
-            case 'slack':
+            case static::HANDLER_SLACK:
                 $configuration = $this->logConfig->get($typeHandler);
                 return new SlackHandler(
                     $configuration->get('token'),
