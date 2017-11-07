@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
+use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 use Magento\MagentoCloud\Util\ArrayManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -46,6 +47,11 @@ class OptionTest extends TestCase
      */
     private $fileListMock;
 
+    /**
+     * @var ThreadCountOptimizer|Mock
+     */
+    private $threadCountOptimizerMock;
+
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -53,21 +59,30 @@ class OptionTest extends TestCase
         $this->buildConfigMock = $this->createMock(BuildConfig::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
+        $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
 
         $this->option = new Option(
             $this->environmentMock,
             $this->arrayManagerMock,
             $this->magentoVersionMock,
             $this->fileListMock,
-            $this->buildConfigMock
+            $this->buildConfigMock,
+            $this->threadCountOptimizerMock
         );
     }
 
     public function testGetThreadCount()
     {
-        $this->buildConfigMock->expects($this->once())
+        $this->buildConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(BuildConfig::OPT_SCD_THREADS)
+            ->withConsecutive(
+                [BuildConfig::OPT_SCD_THREADS],
+                [BuildConfig::OPT_SCD_STRATEGY]
+            )
+            ->willReturnOnConsecutiveCalls(3, 'strategyName');
+        $this->threadCountOptimizerMock->expects($this->once())
+            ->method('optimize')
+            ->with(3, 'strategyName')
             ->willReturn(3);
 
         $this->assertEquals(3, $this->option->getTreadCount());
