@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Config\Log;
+namespace Magento\MagentoCloud\Config\Environment;
 
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\FileList;

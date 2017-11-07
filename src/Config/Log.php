@@ -6,7 +6,8 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Config\Log\Reader;
+use Magento\MagentoCloud\Config\Environment\Reader;
+use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Illuminate\Config\Repository;
 
 /**
@@ -14,6 +15,8 @@ use Illuminate\Config\Repository;
  */
 class Log
 {
+    const CONFIG_SECTION = 'log';
+
     /**
      * @var FileList
      */
@@ -63,11 +66,11 @@ class Log
     {
         if ($this->config === null) {
             $this->config = [
-                'stream' => ['stream' => 'php://stdout'],
-                'file' => ['stream' => $this->fileList->getDeployLog()],
+                HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
+                HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getDeployLog()],
             ];
 
-            $this->config += $this->reader->read();
+            $this->config += $this->reader->read()[static::CONFIG_SECTION] ?? [];
         }
 
         return $this->config;

@@ -10,14 +10,14 @@ use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 
 /**
- * The pool of handlers
+ * The pool of handlers.
  */
 class Pool
 {
     /**
      * @var HandlerInterface[]
      */
-    private $handlers = [];
+    private $handlers;
 
     /**
      * @var LogConfig
@@ -25,9 +25,9 @@ class Pool
     private $logConfig;
 
     /**
-     * @var LineFormatter
+     * @var LineFormatterFactory
      */
-    private $formatter;
+    private $lineFormatterFactory;
 
     /**
      * @var HandlerFactory
@@ -45,10 +45,8 @@ class Pool
         HandlerFactory $handlerFactory
     ) {
         $this->logConfig = $logConfig;
-        $this->formatter = $lineFormatterFactory->create();
+        $this->lineFormatterFactory = $lineFormatterFactory;
         $this->handlerFactory = $handlerFactory;
-
-        $this->populateHandler();
     }
 
     /**
@@ -56,19 +54,13 @@ class Pool
      */
     public function getHandlers(): array
     {
-        return $this->handlers;
-    }
-
-    /**
-     * Populates $this->handlers
-     *
-     * @return void
-     */
-    private function populateHandler()
-    {
-        foreach ($this->logConfig->getHandlers() as $handler) {
-            $this->handlers[] = $this->handlerFactory->create($handler)
-                ->setFormatter($this->formatter);
+        if (null === $this->handlers) {
+            foreach ($this->logConfig->getHandlers() as $handler) {
+                $this->handlers[] = $this->handlerFactory->create($handler)
+                    ->setFormatter($this->lineFormatterFactory->create());
+            }
         }
+
+        return $this->handlers;
     }
 }

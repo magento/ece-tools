@@ -12,7 +12,7 @@ use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 
 /**
- * The handler factory
+ * The handler factory.
  */
 class HandlerFactory
 {
@@ -42,39 +42,42 @@ class HandlerFactory
     }
 
     /**
-     * @param string $typeHandler
+     * @param string $handler
      * @return HandlerInterface
      * @throws \Exception
      */
-    public function create(string $typeHandler): HandlerInterface
+    public function create(string $handler): HandlerInterface
     {
-        switch ($typeHandler) {
+        $configuration = $this->logConfig->get($handler);
+        $minLevel = $this->levelResolver->resolve($configuration->get('min_level', ''));
+
+        switch ($handler) {
             case static::HANDLER_STREAM:
             case static::HANDLER_FILE:
-                return new StreamHandler($this->logConfig->get($typeHandler)->get('stream'));
+                $handlerInstance =  new StreamHandler($configuration->get('stream'));
                 break;
             case static::HANDLER_EMAIL:
-                $configuration = $this->logConfig->get($typeHandler);
-                return new NativeMailerHandler(
+                $handlerInstance = new NativeMailerHandler(
                     $configuration->get('to'),
                     $configuration->get('subject', 'Log form Magento Cloud'),
                     $configuration->get('from'),
-                    $this->levelResolver->resolve($configuration->get('min_level'))
+                    $minLevel
                 );
                 break;
             case static::HANDLER_SLACK:
-                $configuration = $this->logConfig->get($typeHandler);
-                return new SlackHandler(
+                $handlerInstance = new SlackHandler(
                     $configuration->get('token'),
-                    $configuration->get('chanel', 'general'),
+                    $configuration->get('channel', 'general'),
                     $configuration->get('username', 'Slack Log Notifier'),
                     true,
                     null,
-                    $this->levelResolver->resolve($configuration->get('min_level'))
+                    $minLevel
                 );
                 break;
             default:
-                throw new \Exception('Unknown type of log handler: ' . $typeHandler);
+                throw new \Exception('Unknown type of log handler: ' . $handler);
         }
+
+        return $handlerInstance;
     }
 }

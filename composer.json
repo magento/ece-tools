@@ -11,6 +11,7 @@
     "monolog/monolog": "^1.17",
     "symfony/console": "^2.6",
     "illuminate/container": "^5.5",
+    "illuminate/config": "^5.5",
     "psr/log": "^1.0",
     "psr/container": "^1.0",
     "composer/composer": "@stable",
@@ -22,8 +23,7 @@
     "squizlabs/php_codesniffer": " ^3.0",
     "phpmd/phpmd": "@stable",
     "php-mock/php-mock-phpunit": "^2.0",
-    "phpunit/php-code-coverage": "^5.2",
-    "illuminate/config": "^5.5"
+    "phpunit/php-code-coverage": "^5.2"
   },
   "bin": [
     "m2-ece-build",

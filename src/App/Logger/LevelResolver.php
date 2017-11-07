@@ -8,14 +8,14 @@ namespace Magento\MagentoCloud\App\Logger;
 use \Monolog\Logger;
 
 /**
- * Resolves string level to int level from Logger
+ * Resolves string level to int level from Logger.
  */
 class LevelResolver
 {
     /**
      * @var int
      */
-    private $defaultMinLevel = Logger::WARNING;
+    private $defaultMinLevel = Logger::NOTICE;
 
     /**
      * @var array
@@ -23,6 +23,7 @@ class LevelResolver
     private $mapLevels = [
         'debug' => Logger::DEBUG,
         'info' => Logger::INFO,
+        'notice' => Logger::NOTICE,
         'warning' => Logger::WARNING,
         'error' => Logger::ERROR,
         'critical' => Logger::CRITICAL,
@@ -36,6 +37,6 @@ class LevelResolver
      */
     public function resolve(string $level): int
     {
-        return $this->mapLevels[strtolower($level)] ?: $this->defaultMinLevel;
+        return $this->mapLevels[strtolower($level)] ?? $this->defaultMinLevel;
     }
 }

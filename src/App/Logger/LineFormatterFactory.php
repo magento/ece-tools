@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\App\Logger;
 use Monolog\Formatter\LineFormatter;
 
 /**
- * The factory for LineFormatter
+ * The factory for LineFormatter.
  */
 class LineFormatterFactory
 {

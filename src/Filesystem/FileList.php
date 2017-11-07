@@ -60,7 +60,7 @@ class FileList
      */
     public function getLogConfig(): string
     {
-        return $this->directoryList->getMagentoRoot() . '/.magento.log.options.yml';
+        return $this->directoryList->getMagentoRoot() . '/.magento.tools.yml';
     }
 
     /**
