@@ -44,13 +44,14 @@ class UrlManager
 
     /**
      * Reads JSON array of routes and parses them into an array
+     *
      * @param array $routes from environment variable MAGENTO_CLOUD_ROUTES
      * @return array
      */
-    private function parseRoutes(array $routes) : array
+    private function parseRoutes(array $routes): array
     {
-
         $urls = ['secure' => [], 'unsecure' => []];
+
         foreach ($routes as $key => $val) {
             if ($val['type'] !== 'upstream') {
                 continue;
@@ -69,15 +70,16 @@ class UrlManager
                 continue;
             }
         }
+
         return $urls;
     }
 
-
     /**
      * Parse MagentoCloud routes to more readable format.
+     *
      * @throws \RuntimeException if no valid secure or unsecure route found
      */
-    public function getUrls()
+    public function getUrls(): array
     {
         if ($this->urls !== null) {
             return $this->urls;

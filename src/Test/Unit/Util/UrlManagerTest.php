@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Util\UrlManager;
-use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -30,6 +29,7 @@ class UrlManagerTest extends TestCase
      * @var Environment
      */
     private $environmentMock;
+
     /**
      * @inheritdoc
      */
@@ -101,9 +101,8 @@ class UrlManagerTest extends TestCase
         $this->assertArrayHasKey($expectedUrl, $urls);
     }
 
-
     /**
-     * @param array $secureRoute
+     * @param array $unsecureRoute
      * @param $expectedUrl
      * @dataProvider noSecureRouteUrlDataProvider
      */
@@ -118,7 +117,6 @@ class UrlManagerTest extends TestCase
 
     /**
      * @param array $secureRoute
-     * @param string $expectedUrl
      * @dataProvider secureRouteUrlDataProvider
      */
     public function testGetSecureUrl(array $secureRoute)
@@ -130,6 +128,7 @@ class UrlManagerTest extends TestCase
 
         $this->assertEquals($urls['unsecure'], $urls['secure']);
     }
+
     /**
      * @expectedException \RuntimeException
      * @expectedExceptionMessage Expected at least one valid unsecure or secure route. None found.
@@ -140,74 +139,72 @@ class UrlManagerTest extends TestCase
         $this->manager->getUrls();
     }
 
-    /**************** DATA PROVIDERS ***********/
-    public function allRoutesDataProvider() : array
+    public function allRoutesDataProvider(): array
     {
         return [
             [
                 $this->secureUrlExample(),
                 $this->unsecureUrlExample(),
-            ]
+            ],
         ];
     }
 
-    public function noSecureRouteUrlDataProvider() : array
+    public function noSecureRouteUrlDataProvider(): array
     {
         return [
             [
                 $this->unsecureUrlExample(),
                 [
-                    'example.com' => 'https://example.com/'
-                ]
-            ]
+                    'example.com' => 'https://example.com/',
+                ],
+            ],
         ];
     }
 
-    public function secureRouteDataProvider() : array
+    public function secureRouteDataProvider(): array
     {
         return [
             [
                 $this->secureUrlExample(),
-                'example.com'
-            ]
+                'example.com',
+            ],
         ];
     }
 
-    public function unsecureRouteDataProvider() : array
+    public function unsecureRouteDataProvider(): array
     {
         return [
             [
                 $this->unsecureUrlExample(),
-                'example.com'
-            ]
+                'example.com',
+            ],
         ];
     }
 
-
-    public function secureRouteUrlDataProvider() : array
+    public function secureRouteUrlDataProvider(): array
     {
         return [
             [
-                $this->secureUrlExample()
-            ]
+                $this->secureUrlExample(),
+            ],
         ];
     }
 
-    public function unsecureRouteUrlDataProvider() : array
+    public function unsecureRouteUrlDataProvider(): array
     {
         return [
-            $this->secureUrlExample()
+            $this->secureUrlExample(),
         ];
     }
 
-    private function secureUrlExample() : array
+    private function secureUrlExample(): array
     {
         return [
             'https://example.com/' => [
                 'original_url' => 'https://example.com/',
                 'type' => 'upstream',
                 'ssi' => [
-                    'enabled' => false
+                    'enabled' => false,
                 ],
                 'upstream' => 'mymagento',
                 'cache' => [
@@ -216,21 +213,21 @@ class UrlManagerTest extends TestCase
                     'enabled' => true,
                     'headers' => [
                         'Accept',
-                        'Accept-Language'
-                    ]
-                ]
-            ]
+                        'Accept-Language',
+                    ],
+                ],
+            ],
         ];
     }
 
-    private function unsecureUrlExample() : array
+    private function unsecureUrlExample(): array
     {
         return [
             'http://example.com/' => [
                 'original_url' => 'https://example.com/',
                 'type' => 'upstream',
                 'ssi' => [
-                    'enabled' => false
+                    'enabled' => false,
                 ],
                 'upstream' => 'mymagento',
                 'cache' => [
@@ -239,10 +236,10 @@ class UrlManagerTest extends TestCase
                     'enabled' => true,
                     'headers' => [
                         'Accept',
-                        'Accept-Language'
-                    ]
-                ]
-            ]
+                        'Accept-Language',
+                    ],
+                ],
+            ],
         ];
     }
 }
