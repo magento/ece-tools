@@ -25,11 +25,6 @@ use Psr\Container\ContainerInterface;
 class Container implements ContainerInterface
 {
     /**
-     * @var self
-     */
-    private static $instance;
-
-    /**
      * @var \Illuminate\Container\Container
      */
     private $container;
@@ -37,24 +32,10 @@ class Container implements ContainerInterface
     /**
      * @param string $root
      * @param array $config
-     * @return Container
-     */
-    public static function getInstance(string $root = '', array $config = []): Container
-    {
-        if (null === self::$instance) {
-            static::$instance = new static($root, $config);
-        }
-
-        return self::$instance;
-    }
-
-    /**
-     * @param string $root
-     * @param array $config
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    private function __construct(string $root, array $config)
+    public function __construct(string $root, array $config)
     {
         /**
          * Creating concrete container.
