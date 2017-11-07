@@ -97,7 +97,7 @@ class UrlManager
         }
 
         if (0 == count($urls['secure'])) {
-            $urls['secure'] = str_replace(self::PREFIX_UNSECURE, self::PREFIX_SECURE, $urls['unsecure']);
+            $urls['secure'] = substr_replace($urls['unsecure'], self::PREFIX_SECURE, 0, strlen(self::PREFIX_UNSECURE));
         }
 
         $this->logger->info(sprintf('Routes: %s', var_export($urls, true)));
