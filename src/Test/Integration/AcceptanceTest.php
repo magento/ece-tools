@@ -76,11 +76,16 @@ class AcceptanceTest extends TestCase
     {
         return [
             'default configuration' => [
-                'environment' => [],
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                    ],
+                ],
             ],
             'disabled static content symlinks 3 jobs' => [
                 'environment' => [
                     'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
                         'STATIC_CONTENT_SYMLINK' => Environment::VAL_DISABLED,
                         'STATIC_CONTENT_THREADS' => 3,
                     ],
@@ -130,7 +135,11 @@ class AcceptanceTest extends TestCase
     {
         return [
             'default configuration' => [
-                'environment' => [],
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                    ],
+                ],
             ],
         ];
     }

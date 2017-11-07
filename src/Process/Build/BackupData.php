@@ -64,6 +64,7 @@ class BackupData implements ProcessInterface
     public function execute()
     {
         $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
+        $rootInitDir = $this->directoryList->getInit() . '/';
 
         if ($this->file->isExists($magentoRoot . Environment::REGENERATE_FLAG)) {
             $this->logger->info('Removing .regenerate flag');
@@ -71,7 +72,7 @@ class BackupData implements ProcessInterface
         }
 
         if ($this->environment->isStaticDeployInBuild()) {
-            $initPub = $magentoRoot . 'init/pub/';
+            $initPub = $rootInitDir . 'pub/';
             $initPubStatic = $initPub . 'static/';
             $originalPubStatic = $magentoRoot . 'pub/static/';
 
@@ -87,7 +88,7 @@ class BackupData implements ProcessInterface
             $this->file->copyDirectory($originalPubStatic, $initPubStatic);
             $this->file->copy(
                 $magentoRoot . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                $magentoRoot . 'init/' . Environment::STATIC_CONTENT_DEPLOY_FLAG
+                $rootInitDir . Environment::STATIC_CONTENT_DEPLOY_FLAG
             );
         } else {
             $this->logger->info('No file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
@@ -97,7 +98,7 @@ class BackupData implements ProcessInterface
 
         foreach ($this->environment->getWritableDirectories() as $dir) {
             $originalDir = $magentoRoot . $dir;
-            $initDir = $magentoRoot . 'init/' . $dir;
+            $initDir = $rootInitDir . $dir;
 
             $this->file->createDirectory($initDir);
             $this->file->createDirectory($originalDir);

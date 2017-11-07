@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Process\Build\ClearInitDirectory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -32,6 +33,11 @@ class ClearInitDirectoryTest extends TestCase
     private $directoryListMock;
 
     /**
+     * @var FileList|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $fileListMock;
+
+    /**
      * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $loggerMock;
@@ -43,12 +49,14 @@ class ClearInitDirectoryTest extends TestCase
     {
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
         $this->process = new ClearInitDirectory(
             $this->fileMock,
             $this->directoryListMock,
+            $this->fileListMock,
             $this->loggerMock
         );
     }
@@ -65,17 +73,20 @@ class ClearInitDirectoryTest extends TestCase
             ->method('info')
             ->with('Clearing temporary directory.');
         $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+            ->method('getInit')
+            ->willReturn('magento_root/init');
+        $this->fileListMock->expects($this->once())
+            ->method('getEnv')
+            ->willReturn('magento_root/app/etc/env.php');
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->willReturnMap([
-                ['magento_root/init/', $isExists],
+                ['magento_root/init', $isExists],
                 ['magento_root/app/etc/env.php', $isExists]
             ]);
         $this->fileMock->expects($this->exactly($clearDirectory))
             ->method('clearDirectory')
-            ->with('magento_root/init/')
+            ->with('magento_root/init')
             ->willReturn(true);
         $this->fileMock->expects($this->exactly($deleteFile))
             ->method('deleteFile')

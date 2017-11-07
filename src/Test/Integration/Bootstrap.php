@@ -137,6 +137,9 @@ class Bootstrap
             DirectoryList::MAGENTO_ROOT => [
                 DirectoryList::PATH => '',
             ],
+            DirectoryList::INIT => [
+                DirectoryList::PATH => 'init',
+            ],
         ];
 
         return \Magento\MagentoCloud\App\Bootstrap::create($this->getSandboxDir(), $server)
@@ -149,7 +152,7 @@ class Bootstrap
      */
     public function mergeConfig(array $environment): Repository
     {
-        return new Repository(array_replace_recursive(
+        return new Repository(array_replace(
             require $this->getConfigFile('environment.php'),
             $environment
         ));

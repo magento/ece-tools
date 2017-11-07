@@ -20,6 +20,7 @@ class DirectoryList
      */
     const ROOT = 'root';
     const MAGENTO_ROOT = 'magento_root';
+    const INIT = 'init';
 
     /**
      * @var string
@@ -63,7 +64,7 @@ class DirectoryList
         }
 
         $path = $directories[$code][self::PATH];
-        $normalizedPath = $root . ($root && $path ? DIRECTORY_SEPARATOR : '') . $path;
+        $normalizedPath = $root . ($root && $path ? '/' : '') . $path;
 
         return $normalizedPath;
     }
@@ -93,6 +94,14 @@ class DirectoryList
     }
 
     /**
+     * @return string
+     */
+    public function getInit(): string
+    {
+        return $this->getPath(static::INIT);
+    }
+
+    /**
      * @return array
      */
     public static function getDefaultConfig(): array
@@ -103,6 +112,7 @@ class DirectoryList
              * Magento application's vendor folder.
              */
             static::MAGENTO_ROOT => [static::PATH => '../../..'],
+            static::INIT => [static::PATH => '../../../init'],
         ];
     }
 }
