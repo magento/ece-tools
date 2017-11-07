@@ -21,12 +21,12 @@ class UrlManagerTest extends TestCase
     private $manager;
 
     /**
-     * @var LoggerInterface
+     * @var LoggerInterface |\PHPUnit_Framework_MockObject_MockObject
      */
     private $loggerMock;
 
     /**
-     * @var Environment
+     * @var Environment |\PHPUnit_Framework_MockObject_MockObject
      */
     private $environmentMock;
 
