@@ -87,14 +87,14 @@ class UrlManager
 
         $urls = $this->parseRoutes($this->environment->getRoutes());
 
-        if (!count($urls['unsecure']) && !count($urls['secure'])) {
+        if (0 == count($urls['unsecure']) && 0 == count($urls['secure'])) {
             throw new \RuntimeException('Expected at least one valid unsecure or secure route. None found.');
         }
-        if (!count($urls['unsecure'])) {
+        if (0 == count($urls['unsecure'])) {
             $urls['unsecure'] = $urls['secure'];
         }
 
-        if (!count($urls['secure'])) {
+        if (0 == count($urls['secure'])) {
             $urls['secure'] = str_replace(self::PREFIX_UNSECURE, self::PREFIX_SECURE, $urls['unsecure']);
         }
 

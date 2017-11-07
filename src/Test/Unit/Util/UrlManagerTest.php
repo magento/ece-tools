@@ -60,7 +60,7 @@ class UrlManagerTest extends TestCase
 
     /**
      * @param array $routes
-     * @dataProvider secureRouteDataProvider
+     * @dataProvider unsecureRouteDataProvider
      */
     public function testParseRoutesUnsecure(array $routes)
     {
@@ -82,9 +82,7 @@ class UrlManagerTest extends TestCase
             ->method('getRoutes')
             ->willReturn($secureRoute);
 
-        $urls = $this->manager->getSecureUrls();
-
-        $this->assertArrayHasKey($expectedUrl, $urls);
+        $this->assertArrayHasKey($expectedUrl, $this->manager->getSecureUrls());
     }
 
     /**
@@ -107,7 +105,7 @@ class UrlManagerTest extends TestCase
     /**
      * @param array $secureRoute
      * @param $expectedUrl
-     * @dataProvider nosecureRouteUrlDataProvider
+     * @dataProvider noSecureRouteUrlDataProvider
      */
     public function testNoSecure(array $unsecureRoute, array $expectedUrl)
     {
@@ -115,9 +113,7 @@ class UrlManagerTest extends TestCase
             ->method('getRoutes')
             ->willReturn($unsecureRoute);
 
-        $urls = $this->manager->getUrls();
-
-        $this->assertEquals($urls['secure'], $expectedUrl);
+        $this->assertEquals($this->manager->getUrls()['secure'], $expectedUrl);
     }
 
     /**
@@ -144,85 +140,69 @@ class UrlManagerTest extends TestCase
         $this->manager->getUrls();
     }
 
-
-    public function allRoutesDataProvider()
+    /**************** DATA PROVIDERS ***********/
+    public function allRoutesDataProvider() : array
     {
         return [
             [
-                'https://example.com/' => [
-                    'original_url' => 'https://example.com/',
-                    'type' => 'upstream',
-                    'ssi' => [
-                        'enabled' => false
-                    ],
-                    'upstream' => 'mymagento',
-                    'cache' => [
-                        'cookies' => ['*'],
-                        'default_ttl' => 0,
-                        'enabled' => true,
-                        'headers' => [
-                            'Accept',
-                            'Accept-Language'
-                        ]
-                    ]
-                ],
+                $this->secureUrlExample(),
+                $this->unsecureUrlExample(),
+            ]
+        ];
+    }
 
-                'http://example.com/' => [
-                    'original_url' => 'https://example.com/',
-                    'type' => 'upstream',
-                    'ssi' => [
-                        'enabled' => false
-                    ],
-                    'upstream' => 'mymagento',
-                    'cache' => [
-                        'cookies' => ['*'],
-                        'default_ttl' => 0,
-                        'enabled' => true,
-                        'headers' => [
-                            'Accept',
-                            'Accept-Language'
-                        ]
-                    ]
+    public function noSecureRouteUrlDataProvider() : array
+    {
+        return [
+            [
+                $this->unsecureUrlExample(),
+                [
+                    'example.com' => 'https://example.com/'
                 ]
             ]
         ];
     }
 
-    public function noSecureRouteUrlDataProvider()
+    public function secureRouteDataProvider() : array
     {
-        $route = [
-            'http://example.com/' => [
-                'original_url' => 'http://example.com/',
-                'type' => 'upstream',
-                'ssi' => [
-                    'enabled' => false
-                ],
-                'upstream' => 'mymagento',
-                'cache' => [
-                    'cookies' => ['*'],
-                    'default_ttl' => 0,
-                    'enabled' => true,
-                    'headers' => [
-                        'Accept',
-                        'Accept-Language'
-                    ]
-                ]
-            ]
-        ];
-        $expectedRoute = [
-            'example.com' => 'https://example.com/'
-        ];
         return [
             [
-                $route,
-                $expectedRoute
+                $this->secureUrlExample(),
+                'example.com'
             ]
         ];
     }
 
-    public function secureRouteDataProvider()
+    public function unsecureRouteDataProvider() : array
     {
-        $route = [
+        return [
+            [
+                $this->unsecureUrlExample(),
+                'example.com'
+            ]
+        ];
+    }
+
+
+    public function secureRouteUrlDataProvider() : array
+    {
+        return [
+            [
+                $this->secureUrlExample()
+            ]
+        ];
+    }
+
+    public function unsecureRouteUrlDataProvider() : array
+    {
+        return [
+            $this->secureUrlExample()
+        ];
+    }
+
+    private function secureUrlExample() : array
+    {
+        return [
             'https://example.com/' => [
                 'original_url' => 'https://example.com/',
                 'type' => 'upstream',
@@ -241,19 +221,13 @@ class UrlManagerTest extends TestCase
                 ]
             ]
         ];
-        return [
-            [
-                $route,
-                'example.com'
-            ]
-        ];
     }
 
-    public function unsecureRouteDataProvider()
+    private function unsecureUrlExample() : array
     {
-        $route = [
+        return [
             'http://example.com/' => [
-                'original_url' => 'http://example.com/',
+                'original_url' => 'https://example.com/',
                 'type' => 'upstream',
                 'ssi' => [
                     'enabled' => false
@@ -266,68 +240,6 @@ class UrlManagerTest extends TestCase
                     'headers' => [
                         'Accept',
                         'Accept-Language'
-                    ]
-                ]
-            ]
-        ];
-        return [
-            [
-                $route,
-                'example.com'
-            ]
-        ];
-    }
-
-
-    public function secureRouteUrlDataProvider()
-    {
-        return [
-            [
-                [
-                    'https://example.com/' => [
-                        'original_url' => 'https://example.com/',
-                        'type' => 'upstream',
-                        'ssi' => [
-                            'enabled' => false
-                        ],
-                        'upstream' => 'mymagento',
-                        'cache' => [
-                            'cookies' => ['*'],
-                            'default_ttl' => 0,
-                            'enabled' => true,
-                            'headers' => [
-                                'Accept',
-                                'Accept-Language'
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ];
-    }
-
-    public function unsecureRouteUrlDataProvider()
-    {
-
-        return [
-            [
-                [
-                    'http://example.com/' => [
-                        'original_url' => 'http://example.com/',
-                        'type' => 'upstream',
-                        'ssi' => [
-                            'enabled' => false
-                        ],
-                        'upstream' => 'mymagento',
-                        'cache' => [
-                            'cookies' => ['*'],
-                            'default_ttl' => 0,
-                            'enabled' => true,
-                            'headers' => [
-                                'Accept',
-                                'Accept-Language'
-                            ]
-                        ]
                     ]
                 ]
             ]
