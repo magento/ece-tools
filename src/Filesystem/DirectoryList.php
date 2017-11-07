@@ -21,6 +21,8 @@ class DirectoryList
     const ROOT = 'root';
     const MAGENTO_ROOT = 'magento_root';
     const INIT = 'init';
+    const VAR = 'var';
+    const LOG = 'log';
 
     /**
      * @var string
@@ -102,6 +104,22 @@ class DirectoryList
     }
 
     /**
+     * @return string
+     */
+    public function getVar(): string
+    {
+        return $this->getPath(static::VAR);
+    }
+
+    /**
+     * @return string
+     */
+    public function getLog(): string
+    {
+        return $this->getPath(static::LOG);
+    }
+
+    /**
      * @return array
      */
     public static function getDefaultConfig(): array
@@ -113,6 +131,8 @@ class DirectoryList
              */
             static::MAGENTO_ROOT => [static::PATH => '../../..'],
             static::INIT => [static::PATH => '../../../init'],
+            static::VAR => [static::PATH => '../../../var'],
+            static::LOG => [static::PATH => '../../../var/log'],
         ];
     }
 }

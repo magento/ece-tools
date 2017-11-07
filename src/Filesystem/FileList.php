@@ -66,8 +66,16 @@ class FileList
     /**
      * @return string
      */
-    public function getDeployLog(): string
+    public function getCloudLog(): string
     {
-        return $this->directoryList->getMagentoRoot() . '/var/log/cloud.log';
+        return $this->directoryList->getLog() . '/cloud.log';
+    }
+
+    /**
+     * @return string
+     */
+    public function getInitCloudLog(): string
+    {
+        return $this->directoryList->getInit() . '/var/log/cloud.log';
     }
 }

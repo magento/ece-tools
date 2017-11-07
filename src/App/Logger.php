@@ -13,21 +13,6 @@ use Magento\MagentoCloud\App\Logger\Pool;
 class Logger extends \Monolog\Logger
 {
     /**
-     * Path to the deployment log.
-     */
-    const DEPLOY_LOG_PATH = 'var/log/cloud.log';
-
-    /**
-     * Path to the build phase log.
-     */
-    const BACKUP_BUILD_PHASE_LOG_PATH = 'init/var/log/cloud.log';
-
-    /**
-     * Path to the log dir
-     */
-    const LOG_DIR = 'var/log';
-
-    /**
      * @param Pool $pool
      */
     public function __construct(Pool $pool)

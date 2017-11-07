@@ -140,6 +140,12 @@ class Bootstrap
             DirectoryList::INIT => [
                 DirectoryList::PATH => 'init',
             ],
+            DirectoryList::VAR => [
+                DirectoryList::PATH => 'var',
+            ],
+            DirectoryList::LOG => [
+                DirectoryList::PATH => 'var/log',
+            ],
         ];
 
         return \Magento\MagentoCloud\App\Bootstrap::create($this->getSandboxDir(), $server)

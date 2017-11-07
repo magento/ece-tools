@@ -67,7 +67,7 @@ class Log
         if ($this->config === null) {
             $this->config = [
                 HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getDeployLog()],
+                HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getCloudLog()],
             ];
 
             $this->config += $this->reader->read()[static::CONFIG_SECTION] ?? [];
