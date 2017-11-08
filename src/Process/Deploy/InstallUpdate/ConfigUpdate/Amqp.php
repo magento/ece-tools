@@ -34,6 +34,13 @@ class Amqp implements ProcessInterface
     private $configReader;
 
     /**
+     * Possible names for amqp relationship
+     *
+     * @var array
+     */
+    private $possibleRelationshipNames = ['rabbitmq', 'mq', 'amqp'];
+
+    /**
      * @param Environment $environment
      * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
@@ -56,7 +63,7 @@ class Amqp implements ProcessInterface
      */
     public function execute()
     {
-        $mqConfig = $this->environment->getRelationship('mq');
+        $mqConfig = $this->getAmqpConfig();
         $config = $this->configReader->read();
 
         if (count($mqConfig)) {
@@ -94,5 +101,23 @@ class Amqp implements ProcessInterface
         }
 
         return $config;
+    }
+
+    /**
+     * Finds if configuration exists for one of possible amqp relationship names and return first match,
+     * amqp relationship can have different name on different environment.
+     *
+     * @return array
+     */
+    private function getAmqpConfig(): array
+    {
+        foreach ($this->possibleRelationshipNames as $relationshipName) {
+            $mqConfig = $this->environment->getRelationship($relationshipName);
+            if (!empty($mqConfig)) {
+                return $mqConfig;
+            }
+        }
+
+        return [];
     }
 }
