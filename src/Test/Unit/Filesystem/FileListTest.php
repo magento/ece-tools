@@ -67,7 +67,7 @@ class FileListTest extends TestCase
 
     public function testGetToolsConfig()
     {
-        $this->assertSame('magento_root/.magento.tools.yaml', $this->fileList->getToolsConfig());
+        $this->assertSame('magento_root/.magento.env.yaml', $this->fileList->getEnvConfig());
     }
 
     public function testGetCloudLog()

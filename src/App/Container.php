@@ -70,7 +70,12 @@ class Container implements ContainerInterface
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Deploy::class);
-        $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
+        $this->container->singleton(\Psr\Log\LoggerInterface::class, function () {
+            return new \Monolog\Logger(
+                'default',
+                $this->container->make(\Magento\MagentoCloud\App\Logger\Pool::class)->getHandlers()
+            );
+        });
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
         $this->container->singleton(\Magento\MagentoCloud\Util\UrlManager::class);

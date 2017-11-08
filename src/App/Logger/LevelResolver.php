@@ -15,7 +15,7 @@ class LevelResolver
     /**
      * @var int
      */
-    private $defaultMinLevel = Logger::NOTICE;
+    private $defaultLevel = Logger::NOTICE;
 
     /**
      * @var array
@@ -37,6 +37,6 @@ class LevelResolver
      */
     public function resolve(string $level): int
     {
-        return $this->mapLevels[strtolower($level)] ?? $this->defaultMinLevel;
+        return $this->mapLevels[strtolower($level)] ?? $this->defaultLevel;
     }
 }

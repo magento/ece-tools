@@ -58,9 +58,9 @@ class FileList
     /**
      * @return string
      */
-    public function getToolsConfig(): string
+    public function getEnvConfig(): string
     {
-        return $this->directoryList->getMagentoRoot() . '/.magento.tools.yaml';
+        return $this->directoryList->getMagentoRoot() . '/.magento.env.yaml';
     }
 
     /**

@@ -42,7 +42,7 @@ class Reader implements ReaderInterface
      */
     public function read(): array
     {
-        $path = $this->fileList->getToolsConfig();
+        $path = $this->fileList->getEnvConfig();
 
         return !$this->file->isExists($path) ? [] : (array) Yaml::parse($this->file->fileGetContents($path));
     }
