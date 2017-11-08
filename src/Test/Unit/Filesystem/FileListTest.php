@@ -30,9 +30,15 @@ class FileListTest extends TestCase
     protected function setUp()
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->directoryListMock->expects($this->once())
+        $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
+        $this->directoryListMock->expects($this->any())
+            ->method('getLog')
+            ->willReturn('magento_root/var/log');
+        $this->directoryListMock->expects($this->any())
+            ->method('getInit')
+            ->willReturn('magento_root/init');
 
         $this->fileList = new FileList(
             $this->directoryListMock
@@ -57,5 +63,20 @@ class FileListTest extends TestCase
     public function testGetComposer()
     {
         $this->assertSame('magento_root/composer.json', $this->fileList->getComposer());
+    }
+
+    public function testGetToolsConfig()
+    {
+        $this->assertSame('magento_root/.magento.tools.yaml', $this->fileList->getToolsConfig());
+    }
+
+    public function testGetCloudLog()
+    {
+        $this->assertSame('magento_root/var/log/cloud.log', $this->fileList->getCloudLog());
+    }
+
+    public function testGetInitCloudLog()
+    {
+        $this->assertSame('magento_root/init/var/log/cloud.log', $this->fileList->getInitCloudLog());
     }
 }

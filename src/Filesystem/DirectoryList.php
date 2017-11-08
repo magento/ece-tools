@@ -18,11 +18,11 @@ class DirectoryList
     /**
      * Directory codes.
      */
-    const ROOT = 'root';
-    const MAGENTO_ROOT = 'magento_root';
-    const INIT = 'init';
-    const VAR = 'var';
-    const LOG = 'log';
+    const DIR_ROOT = 'root';
+    const DIR_MAGENTO_ROOT = 'magento_root';
+    const DIR_INIT = 'init';
+    const DIR_VAR = 'var';
+    const DIR_LOG = 'log';
 
     /**
      * @var string
@@ -92,7 +92,7 @@ class DirectoryList
      */
     public function getMagentoRoot(): string
     {
-        return $this->getPath(static::MAGENTO_ROOT);
+        return $this->getPath(static::DIR_MAGENTO_ROOT);
     }
 
     /**
@@ -100,7 +100,7 @@ class DirectoryList
      */
     public function getInit(): string
     {
-        return $this->getPath(static::INIT);
+        return $this->getPath(static::DIR_INIT);
     }
 
     /**
@@ -108,7 +108,7 @@ class DirectoryList
      */
     public function getVar(): string
     {
-        return $this->getPath(static::VAR);
+        return $this->getPath(static::DIR_VAR);
     }
 
     /**
@@ -116,7 +116,7 @@ class DirectoryList
      */
     public function getLog(): string
     {
-        return $this->getPath(static::LOG);
+        return $this->getPath(static::DIR_LOG);
     }
 
     /**
@@ -125,14 +125,14 @@ class DirectoryList
     public static function getDefaultConfig(): array
     {
         return [
-            static::ROOT => [static::PATH => ''],
+            static::DIR_ROOT => [static::PATH => ''],
             /*
              * Magento application's vendor folder.
              */
-            static::MAGENTO_ROOT => [static::PATH => '../../..'],
-            static::INIT => [static::PATH => '../../../init'],
-            static::VAR => [static::PATH => '../../../var'],
-            static::LOG => [static::PATH => '../../../var/log'],
+            static::DIR_MAGENTO_ROOT => [static::PATH => '../../..'],
+            static::DIR_INIT => [static::PATH => '../../../init'],
+            static::DIR_VAR => [static::PATH => '../../../var'],
+            static::DIR_LOG => [static::PATH => '../../../var/log'],
         ];
     }
 }

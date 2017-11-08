@@ -53,9 +53,14 @@ class Log
     /**
      * @param string $handler
      * @return Repository
+     * @throws \Exception
      */
     public function get(string $handler): Repository
     {
+        if (!isset($this->getConfig()[$handler])) {
+            throw new \Exception('Configuration for ' . $handler . ' is not found');
+        }
+
         return new Repository($this->getConfig()[$handler]);
     }
 

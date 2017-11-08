@@ -58,7 +58,7 @@ class FileList
     /**
      * @return string
      */
-    public function getLogConfig(): string
+    public function getToolsConfig(): string
     {
         return $this->directoryList->getMagentoRoot() . '/.magento.tools.yaml';
     }

@@ -48,9 +48,9 @@ class DirectoryListTest extends TestCase
     public function getPathDataProvider(): array
     {
         return [
-            'root' => [DirectoryList::ROOT, __DIR__],
+            'root' => [DirectoryList::DIR_ROOT, __DIR__],
             'magento root' => [
-                DirectoryList::MAGENTO_ROOT,
+                DirectoryList::DIR_MAGENTO_ROOT,
                 __DIR__ . '/../../..',
             ],
             'test var' => [
@@ -99,6 +99,22 @@ class DirectoryListTest extends TestCase
         $this->assertSame(
             __DIR__ . '/../../../init',
             $this->directoryList->getInit()
+        );
+    }
+
+    public function testGetVar()
+    {
+        $this->assertSame(
+            __DIR__ . '/../../../var',
+            $this->directoryList->getVar()
+        );
+    }
+
+    public function testGetLog()
+    {
+        $this->assertSame(
+            __DIR__ . '/../../../var/log',
+            $this->directoryList->getLog()
         );
     }
 }
