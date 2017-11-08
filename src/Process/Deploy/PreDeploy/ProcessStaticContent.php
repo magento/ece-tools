@@ -69,19 +69,19 @@ class ProcessStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->env->isStaticDeployInBuild()) {
-            return;
-        }
+//        if (!$this->env->isStaticDeployInBuild()) {
+//            return;
+//        }
 
-        $this->logger->info('Static content deployment was performed during build hook');
-        $this->staticContentCleaner->cleanPubStatic();
-
-        if ($this->env->isStaticContentSymlinkOn()) {
-            $this->logger->info('Symlinking static content from pub/static to init/pub/static');
-            $this->staticContentSymlink->create();
-        } else {
-            $this->logger->info('Copying static content from init/pub/static to pub/static');
-            $this->buildDirCopier->copy('pub/static');
-        }
+//        $this->logger->info('Static content deployment was performed during build hook');
+//        $this->staticContentCleaner->cleanPubStatic();
+//
+//        if ($this->env->isStaticContentSymlinkOn()) {
+//            $this->logger->info('Symlinking static content from pub/static to init/pub/static');
+//            $this->staticContentSymlink->create();
+//        } else {
+//            $this->logger->info('Copying static content from init/pub/static to pub/static');
+//            $this->buildDirCopier->copy('pub/static');
+//        }
     }
 }
