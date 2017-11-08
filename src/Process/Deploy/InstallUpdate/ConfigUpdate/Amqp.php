@@ -73,7 +73,7 @@ class Amqp implements ProcessInterface
             $config['queue']['amqp']['port'] = $amqpConfig['port'];
             $config['queue']['amqp']['user'] = $amqpConfig['username'];
             $config['queue']['amqp']['password'] = $amqpConfig['password'];
-            $config['queue']['amqp']['virtualhost'] = '/';
+            $config['queue']['amqp']['virtualhost'] = isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/';
             $config['queue']['amqp']['ssl'] = '';
         } else {
             $config = $this->removeAmqpConfig($config);
