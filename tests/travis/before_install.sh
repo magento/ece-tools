@@ -39,4 +39,15 @@ case $TEST_SUITE in
         phpenv config-rm xdebug.ini
         sudo service apache2 restart
         ;;
+    integration-docker)
+        cd tests/integration-docker;
+
+        echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> composer.env
+        echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> composer.env
+
+        mkdir magento
+        docker-compose run cli magento-installer
+        docker-compose up -d
+        cd ../..;
+        ;;
 esac
