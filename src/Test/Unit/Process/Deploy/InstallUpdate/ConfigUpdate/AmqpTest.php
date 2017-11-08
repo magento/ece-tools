@@ -67,9 +67,9 @@ class AmqpTest extends TestCase
     public function testExecuteWithoutAmqp()
     {
         $config = ['some config'];
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->any())
             ->method('getRelationship')
-            ->with('mq')
+            ->with($this->anything())
             ->willReturn([]);
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -110,10 +110,16 @@ class AmqpTest extends TestCase
             ],
         ];
 
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('mq')
-            ->willReturn($amqpConfig);
+            ->withConsecutive(
+                ['rabbitmq'],
+                ['mq']
+            )
+            ->willReturnOnConsecutiveCalls(
+                [],
+                $amqpConfig
+            );
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
@@ -158,9 +164,9 @@ class AmqpTest extends TestCase
      */
     public function testExecuteRemoveAmqp(array $config, array $expectedConfig)
     {
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->any())
             ->method('getRelationship')
-            ->with('mq')
+            ->with($this->anything())
             ->willReturn([]);
         $this->configReaderMock->expects($this->once())
             ->method('read')
