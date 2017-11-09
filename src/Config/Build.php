@@ -17,6 +17,7 @@ class Build
     const OPT_SKIP_SCD = 'skip_scd';
     const OPT_SCD_STRATEGY = 'SCD_STRATEGY';
     const OPT_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
+    const OPT_SKIP_STATIC_MOUNT = 'SKIP_STATIC_MOUNT';
 
     /**
      * @var ReaderInterface
@@ -56,5 +57,13 @@ class Build
     public function getVerbosityLevel(): string
     {
         return $this->get(static::OPT_VERBOSE_COMMANDS) === 'enabled' ? ' -vv ' : '';
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSkipStaticMount(): bool
+    {
+        return $this->get(static::OPT_SKIP_STATIC_MOUNT) === 'enabled';
     }
 }

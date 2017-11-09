@@ -82,7 +82,7 @@ class ProcessStaticContent implements ProcessInterface
             return;
         }
 
-        if ($this->buildConfig->get('SKIP_STATIC_MOUNT')) {
+        if ($this->buildConfig->isSkipStaticMount()) {
             $this->logger->info('Static content folder was not mounted. Read-only mode used.');
 
             return;
