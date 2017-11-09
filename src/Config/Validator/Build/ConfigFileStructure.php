@@ -74,7 +74,7 @@ class ConfigFileStructure implements ValidatorInterface
                     'To speed up the deploy process, please run the following commands:',
                     '1. bin/magento app:config:dump',
                     '2. git add -f app/etc/config.php',
-                    '3. git commit -a -m \'Updating config.php\'',
+                    '3. git commit -m \'Updating config.php\'',
                     '4. git push'
                 ]
             );

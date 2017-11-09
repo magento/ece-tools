@@ -62,7 +62,7 @@ class ConfigFileExists implements ValidatorInterface
                     'Please run the following commands:',
                     '1. bin/magento module:enable --all',
                     '2. git add -f app/etc/config.php',
-                    '3. git commit -a -m \'Adding config.php\'',
+                    '3. git commit -m \'Adding config.php\'',
                     '4. git push'
                 ]
             );
