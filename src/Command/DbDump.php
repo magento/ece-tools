@@ -13,9 +13,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class DBDump for safely createing backup of database
+ * Class DbDump for safely creating backup of database
  */
-class DBDump extends Command
+class DbDump extends Command
 {
     const NAME = 'db-dump';
 
