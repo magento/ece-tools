@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Filesystem\DirectoryCopier;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Psr\Container\ContainerInterface;
 
 /**
  * Creates instance of CopierInterface
@@ -13,13 +13,13 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 class StrategyFactory
 {
     /**
-     * @var File
+     * @var ContainerInterface
      */
-    private $file;
+    private $container;
 
-    public function __construct(File $file)
+    public function __construct(ContainerInterface $container)
     {
-        $this->file = $file;
+        $this->container = $container;
     }
 
     /**
@@ -31,10 +31,10 @@ class StrategyFactory
     {
         switch ($strategy) {
             case StrategyInterface::STRATEGY_COPY:
-                $strategyInstance = new CopyStrategy($this->file);
+                $strategyInstance = $this->container->get(CopyStrategy::class);
                 break;
             case StrategyInterface::STRATEGY_SYMLINK:
-                $strategyInstance = new SymlinkStrategy($this->file);
+                $strategyInstance = $this->container->get(SymlinkStrategy::class);
                 break;
             default:
                 throw new \RuntimeException(
