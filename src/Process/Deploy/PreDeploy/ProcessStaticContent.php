@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
@@ -81,7 +82,7 @@ class ProcessStaticContent implements ProcessInterface
             $this->staticContentSymlink->create();
         } else {
             $this->logger->info('Copying static content from init/pub/static to pub/static');
-            $this->buildDirCopier->copy('pub/static');
+            $this->buildDirCopier->copy('pub/static', StrategyInterface::STRATEGY_COPY);
         }
     }
 }

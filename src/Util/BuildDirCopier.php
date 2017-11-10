@@ -5,8 +5,9 @@
  */
 namespace Magento\MagentoCloud\Util;
 
+use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
 class BuildDirCopier
@@ -22,46 +23,61 @@ class BuildDirCopier
     private $logger;
 
     /**
-     * @var File
+     * @var StrategyFactory
      */
-    private $file;
+    private $strategyFactory;
 
     /**
      * @param LoggerInterface $logger
      * @param DirectoryList $directoryList
-     * @param File $file
+     * @param StrategyFactory $strategyFactory
      */
     public function __construct(
         LoggerInterface $logger,
         DirectoryList $directoryList,
-        File $file
+        StrategyFactory $strategyFactory
     ) {
         $this->logger = $logger;
         $this->directoryList = $directoryList;
-        $this->file = $file;
+        $this->strategyFactory = $strategyFactory;
     }
 
     /**
      * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
      *                    or trailing slashes
+     * @param string $strategyName Name of strategy that will be used for copying directories
      */
-    public function copy($dir)
+    public function copy(string $dir, string $strategyName)
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot();
-        $originalDir = $magentoRoot . '/' . $dir;
-        $initDir = $this->directoryList->getInit() . '/' . $dir;
+        try {
+            $magentoRoot = $this->directoryList->getMagentoRoot();
+            $initDir = $this->directoryList->getInit();
 
-        if (!$this->file->isExists($initDir)) {
-            $this->logger->notice(sprintf('Can\'t copy directory %s. Directory does not exist.', $magentoRoot));
-            return;
+            $fromDirectory = $initDir . '/' . $dir;
+            $toDirectory = $magentoRoot . '/' . $dir;
+
+            $strategy = $this->strategyFactory->create($strategyName);
+            $result = $strategy->copy($fromDirectory, $toDirectory);
+
+            if ($result) {
+                $this->logger->info(
+                    sprintf(
+                        'Directory %s was copied with strategy: %s',
+                        $dir,
+                        $strategyName
+                    )
+                );
+            } else {
+                $this->logger->notice(
+                    sprintf(
+                        'Can\'t copy directory %s with strategy: %s',
+                        $dir,
+                        $strategyName
+                    )
+                );
+            }
+        } catch (FileSystemException $e) {
+            $this->logger->notice($e->getMessage());
         }
-
-        if (!$this->file->isExists($originalDir)) {
-            $this->file->createDirectory($originalDir);
-            $this->logger->info(sprintf('Created directory: %s', $dir));
-        }
-
-        $this->file->copyDirectory($initDir, $originalDir);
-        $this->logger->info(sprintf('Copied directory: %s', $dir));
     }
 }

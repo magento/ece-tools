@@ -235,16 +235,6 @@ class Environment
     }
 
     /**
-     * Retrieves recoverable directories.
-     *
-     * @return array
-     */
-    public function getRecoverableDirectories(): array
-    {
-        return ['var/view_preprocessed', 'app/etc', 'pub/media'];
-    }
-
-    /**
      * @return bool
      */
     public function isDeployStaticContent(): bool

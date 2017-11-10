@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use Psr\Log\LoggerInterface;
@@ -30,33 +31,33 @@ class RestoreWritableDirectories implements ProcessInterface
     private $buildDirCopier;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var DirectoryList
      */
     private $directoryList;
 
     /**
+     * @var RecoverableDirectoryList
+     */
+    private $recoverableDirectoryList;
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
      * @param BuildDirCopier $buildDirCopier
-     * @param Environment $environment
+     * @param RecoverableDirectoryList $recoverableDirectoryList
      * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
         File $file,
         BuildDirCopier $buildDirCopier,
-        Environment $environment,
+        RecoverableDirectoryList $recoverableDirectoryList,
         DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->buildDirCopier = $buildDirCopier;
-        $this->environment = $environment;
+        $this->recoverableDirectoryList = $recoverableDirectoryList;
         $this->directoryList = $directoryList;
     }
 
@@ -67,8 +68,11 @@ class RestoreWritableDirectories implements ProcessInterface
      */
     public function execute()
     {
-        foreach ($this->environment->getRecoverableDirectories() as $dir) {
-            $this->buildDirCopier->copy($dir);
+        foreach ($this->recoverableDirectoryList->getList() as $dirOptions) {
+            $this->buildDirCopier->copy(
+                $dirOptions['directory'],
+                $dirOptions['strategy']
+            );
         }
 
         // Restore mounted directories
