@@ -33,8 +33,6 @@ services:
     build: ./7.0-cli
     links:
       - db
-    volumes:
-      - ~/.composer/cache:/root/.composer/cache
     volumes_from:
       - appdata
     env_file:
