@@ -141,7 +141,7 @@ class BuildDirCopierTest extends TestCase
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('Can\'t copy directory /path/to/root. Directory does not exist.');
+            ->with('Can\'t copy directory /path/to/root/not-exist-dir. Directory does not exist.');
 
         $this->fileMock->expects($this->never())
             ->method('createDirectory');

@@ -52,7 +52,7 @@ class BuildDirCopier
         $initDir = $this->directoryList->getInit() . '/' . $dir;
 
         if (!$this->file->isExists($initDir)) {
-            $this->logger->notice(sprintf('Can\'t copy directory %s. Directory does not exist.', $magentoRoot));
+            $this->logger->notice(sprintf('Can\'t copy directory %s. Directory does not exist.', $originalDir));
             return;
         }
 

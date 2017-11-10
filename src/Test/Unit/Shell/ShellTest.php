@@ -71,7 +71,7 @@ class ShellTest extends TestCase
         $testCase = $this;
         $command = 'ls -al';
         $magentoRoot = '/magento';
-        $execCommand = 'cd ' . $magentoRoot . ' && ' . $command;
+        $execCommand = 'cd ' . $magentoRoot . ' && /bin/bash -c "' . $command . '" 2>&1';
 
         $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
         $execMock->expects($this->once())
@@ -123,7 +123,7 @@ class ShellTest extends TestCase
         $testCase = $this;
         $command = 'ls -al';
         $magentoRoot = '/magento';
-        $execCommand = 'cd ' . $magentoRoot . ' && ' . $command;
+        $execCommand = 'cd ' . $magentoRoot . ' && /bin/bash -c "' . $command . '" 2>&1';
 
         $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
         $execMock->expects($this->once())

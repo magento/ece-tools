@@ -41,7 +41,7 @@ class Shell implements ShellInterface
         $this->logger->info('Command: ' . $command);
 
         $rootPathCommand = sprintf(
-            'cd %s && %s',
+            'cd %s && /bin/bash -c "%s" 2>&1',
             $this->directoryList->getMagentoRoot(),
             $command
         );
