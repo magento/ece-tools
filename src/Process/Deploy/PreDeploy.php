@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Package\Manager;
@@ -43,24 +43,32 @@ class PreDeploy implements ProcessInterface
     private $directoryList;
 
     /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
      * @param LoggerInterface $logger
      * @param ProcessInterface $process
      * @param Manager $packageManager
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param FileList $fileList
      */
     public function __construct(
         LoggerInterface $logger,
         ProcessInterface $process,
         Manager $packageManager,
         File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        FileList $fileList
     ) {
         $this->logger = $logger;
         $this->process = $process;
         $this->packageManager = $packageManager;
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
     }
 
     /**
@@ -82,9 +90,8 @@ class PreDeploy implements ProcessInterface
      */
     private function prepareLog()
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot();
-        $deployLogPath = $magentoRoot . '/' . Logger::DEPLOY_LOG_PATH;
-        $buildPhaseLogPath = $magentoRoot . '/' . Logger::BACKUP_BUILD_PHASE_LOG_PATH;
+        $deployLogPath = $this->fileList->getCloudLog();
+        $buildPhaseLogPath = $this->fileList->getInitCloudLog();
         $buildPhaseLogContent = $this->file->fileGetContents($buildPhaseLogPath);
 
         $deployLogFileIsExists = $this->file->isExists($deployLogPath);
@@ -92,7 +99,7 @@ class PreDeploy implements ProcessInterface
         if ($deployLogFileIsExists && !$this->buildLogIsApplied($deployLogPath, $buildPhaseLogContent)) {
             $this->file->filePutContents($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
         } elseif (!$deployLogFileIsExists) {
-            $this->file->createDirectory($magentoRoot . '/' . Logger::LOG_DIR);
+            $this->file->createDirectory($this->directoryList->getLog());
             $this->file->copy($buildPhaseLogPath, $deployLogPath);
         }
     }

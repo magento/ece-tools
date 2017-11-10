@@ -169,8 +169,6 @@ class AdminCredentialTest extends TestCase
 
     private function getCloudLog()
     {
-        return file_get_contents(
-            $this->bootstrap->getSandboxDir() . '/' . \Magento\MagentoCloud\App\Logger::DEPLOY_LOG_PATH
-        );
+        return file_get_contents($this->bootstrap->getSandboxDir() . '/var/log/cloud.log');
     }
 }

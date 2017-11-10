@@ -94,7 +94,7 @@ class ConfigFileExistsTest extends TestCase
                     'suggestion' => 'Please run the following commands:' . PHP_EOL
                             . '1. bin/magento module:enable --all' . PHP_EOL
                             . '2. git add -f app/etc/config.php' . PHP_EOL
-                            . '3. git commit -a -m \'Adding config.php\'' . PHP_EOL
+                            . '3. git commit -m \'Adding config.php\'' . PHP_EOL
                             . '4. git push'
                 ]
             )
