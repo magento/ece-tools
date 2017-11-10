@@ -54,7 +54,8 @@ class Bootstrap
     public function createApplication()
     {
         $config = $this->server[static::INIT_PARAM_DIRS_CONFIG] ?? [];
-        $container = new Container($this->root, $config);
+        $container = Container::getInstance($this->root, $config);
+
 
         return new Application($container);
     }

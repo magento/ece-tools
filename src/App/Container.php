@@ -30,12 +30,31 @@ class Container implements ContainerInterface
     private $container;
 
     /**
+     * @var self
+     */
+    private static $instance;
+
+    /**
+     * @param string $root
+     * @param array $config
+     * @return Container
+     */
+    public static function getInstance(string $root = null, array $config = null): self
+    {
+        if (null === static::$instance) {
+            static::$instance = new self($root, $config);
+        }
+
+        return static::$instance;
+    }
+
+    /**
      * @param string $root
      * @param array $config
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(string $root, array $config)
+    private function __construct(string $root, array $config)
     {
         /**
          * Creating concrete container.
