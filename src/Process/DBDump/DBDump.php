@@ -16,25 +16,26 @@ use Psr\Log\LoggerInterface;
 class DbDump implements ProcessInterface
 {
     /**
-     * Last part of dump file name.
-     * Timestamp will be added at the beginning for uniqueness.
+     * Template for dump file name where %s should be changed to timestamp for uniqueness
      */
-    const DUMP_FILE_NAME = 'prod.sql.gz';
+    const DUMP_FILE_NAME_TEMPLATE = 'dump-%s.sql.gz';
 
     /**
      * Lock file name.
-     * If this file exists, it means that dumping is in process.
+     * During the dumping this file is locked to prevent running dump by others.
      */
-    const LOCK_FILE_NAME = 'dbsync.prod.lock';
+    const LOCK_FILE_NAME = 'dbdump.%s.lock';
 
     /**
-     * Database connection data for read operations.
+     * Database connection data for read operations
      *
      * @var DbConnectionDataInterface
      */
     private $dbConnection;
 
     /**
+     * Used for execution shell operations
+     *
      * @var ShellInterface
      */
     private $shell;
@@ -43,7 +44,6 @@ class DbDump implements ProcessInterface
      * @var LoggerInterface
      */
     private $logger;
-
 
     /**
      * @param DbConnectionDataInterface $dbConnection
@@ -61,52 +61,51 @@ class DbDump implements ProcessInterface
     }
 
     /**
-     * Creates database dump.
+     * Creates database dump and archive it.
      *
      * Lock file is created at the beginning of dumping.
-     * If file already exists then dumping is running by another process.
+     * If file already exists and locked then dumping is running by another process and current procees wait for unlock.
      * If eny error happened during dumping, dump file is removed.
-     * Lock file is deleted at the end of operation.
+     * Path to the created dump file is written to lock file.
      *
      * @return void
      */
     public function execute()
     {
-        $uniqueFileSuffix = time() . '-';
+        $dumpFileName = sprintf(self::DUMP_FILE_NAME_TEMPLATE, time());
         //verified with platform this is the best way to get temporary folder location on all instances
         $temporaryDirectory = sys_get_temp_dir();
 
-        $dumpFile = $temporaryDirectory . '/' . $uniqueFileSuffix . self::DUMP_FILE_NAME;
-        $lockFile = $temporaryDirectory . '/' . $uniqueFileSuffix . self::LOCK_FILE_NAME;
+        $dumpFile = $temporaryDirectory . '/' . $dumpFileName;
+        $lockFile = $temporaryDirectory . '/' . self::LOCK_FILE_NAME;
 
         // lock file has dual purpose, it creates a lock, so another DB backup process cannot be executed,
         // as well as serves as a log with the details of the db dump executed.
         $fp = fopen($lockFile, "w+");
 
-        $this->logger->info('Beginning DB dump.');
-
-        # Lock the production sql dump so staging sync doesn't start using it until we're done.
-        $this->logger->info('Waiting for lock on prod db dump.');
+        # Lock the sql dump so staging sync doesn't start using it until we're done.
+        $this->logger->info('Waiting for lock on db dump.');
 
         if (flock($fp, LOCK_EX)) {
-            $this->logger->info('Starting dump...');
+            $this->logger->info('Start creation DB dump...');
 
             $command = $this->getCommand() . '| gzip > ' . $dumpFile;
-            $errors = $this->shell->execute($command);
+            $errors = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '" 2>&1');
 
             if ($errors) {
                 $this->logger->info('Error has occurred during mysqldump');
-                $this->logger->info(implode(PHP_EOL, $errors));
                 $this->shell->execute('rm ' . $dumpFile);
 
             } else {
                 $this->logger->info('Finished DB dump, it can be found here: ' . $dumpFile);
+                fwrite($fp, sprintf('[%s] Dump was written in %s', date("Y-m-d H:i:s"), $dumpFile) . PHP_EOL);
+                fflush($fp);
             }
+            flock($fp, LOCK_UN);
         } else {
             $this->logger->info('Could not get the lock!');
         }
         fclose($fp);
-        $this->shell->execute('rm ' . $lockFile);
     }
 
 
