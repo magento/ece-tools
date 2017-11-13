@@ -37,6 +37,14 @@ class SymlinkStrategy implements StrategyInterface
             );
         }
 
+        if ($this->file->isExists($toDirectory)) {
+            if ($this->file->isLink($toDirectory)) {
+                $this->file->unLink($toDirectory);
+            } else {
+                $this->file->deleteDirectory($toDirectory);
+            }
+        }
+
         return $this->file->symlink($fromDirectory, $toDirectory);
     }
 }
