@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
  */
 class RecoverableDirectoryList
 {
+    const OPTION_DIRECTORY = 'directory';
+    const OPTION_STRATEGY = 'strategy';
+
     /**
      * @var Environment
      */
@@ -37,17 +40,17 @@ class RecoverableDirectoryList
 
         return [
             [
-                'directory' => 'var/view_preprocessed',
-                'strategy' => $isSymlinkEnabled ?
+                self::OPTION_DIRECTORY => 'var/view_preprocessed',
+                self::OPTION_STRATEGY => $isSymlinkEnabled ?
                     StrategyInterface::STRATEGY_SYMLINK : StrategyInterface::STRATEGY_COPY
             ],
             [
-                'directory' => 'app/etc',
-                'strategy' => StrategyInterface::STRATEGY_COPY
+                self::OPTION_DIRECTORY => 'app/etc',
+                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
             ],
             [
-                'directory' => 'pub/media',
-                'strategy' => StrategyInterface::STRATEGY_COPY
+                self::OPTION_DIRECTORY => 'pub/media',
+                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
             ]
         ];
     }

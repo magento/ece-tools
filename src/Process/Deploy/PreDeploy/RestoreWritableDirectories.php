@@ -70,8 +70,8 @@ class RestoreWritableDirectories implements ProcessInterface
     {
         foreach ($this->recoverableDirectoryList->getList() as $dirOptions) {
             $this->buildDirCopier->copy(
-                $dirOptions['directory'],
-                $dirOptions['strategy']
+                $dirOptions[RecoverableDirectoryList::OPTION_DIRECTORY],
+                $dirOptions[RecoverableDirectoryList::OPTION_STRATEGY]
             );
         }
 
