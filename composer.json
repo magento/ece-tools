@@ -29,8 +29,7 @@
     "bin/ece-tools",
     "m2-ece-build",
     "m2-ece-deploy",
-    "m2-ece-scd-dump",
-    "m2-ece-post-deploy"
+    "m2-ece-scd-dump"
   ],
   "autoload": {
     "psr-4": {
