@@ -34,14 +34,20 @@ class Shell implements ShellInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * If your command contains pipe please use the next construction for correct logging:
+     *
+     * ```php
+     * $this->shell->execute('/bin/bash -c "set -o pipefail; firstCommand | secondCommand"');
+     * ```
      */
     public function execute(string $command)
     {
         $this->logger->info('Command: ' . $command);
 
         $rootPathCommand = sprintf(
-            'cd %s && %s',
+            'cd %s && %s 2>&1',
             $this->directoryList->getMagentoRoot(),
             $command
         );

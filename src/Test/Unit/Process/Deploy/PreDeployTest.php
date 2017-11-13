@@ -81,6 +81,7 @@ class PreDeployTest extends TestCase
     /**
      * @param $fileMockFileGetContentsExpects
      * @param $buildPhaseLogContent
+     * @param $buildLogFileExists
      * @param $deployLogContent
      * @param $deployLogFileExists
      * @param $fileMockFilePutContentsExpects
@@ -91,6 +92,7 @@ class PreDeployTest extends TestCase
     public function testExecute(
         $fileMockFileGetContentsExpects,
         $buildPhaseLogContent,
+        $buildLogFileExists,
         $deployLogContent,
         $deployLogFileExists,
         $fileMockFilePutContentsExpects,
@@ -112,15 +114,16 @@ class PreDeployTest extends TestCase
             ->willReturn($magentoRoot);
         $this->fileMock->expects($fileMockFileGetContentsExpects)
             ->method('fileGetContents')
-            ->withConsecutive(
-                [$buildPhaseLogPath],
-                [$deployLogPath]
-            )
-            ->willReturnOnConsecutiveCalls($buildPhaseLogContent, $deployLogContent);
-        $this->fileMock->expects($this->once())
+            ->willReturnMap([
+                [$buildPhaseLogPath, null, null, $buildPhaseLogContent],
+                [$deployLogPath, null, null, $deployLogContent],
+            ]);
+        $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->with($deployLogPath)
-            ->willReturn($deployLogFileExists);
+            ->willReturnMap([
+                [$buildPhaseLogPath, $buildLogFileExists],
+                [$deployLogPath, $deployLogFileExists]
+            ]);
         $this->fileMock->expects($fileMockFilePutContentsExpects)
             ->method('filePutContents')
             ->with($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
@@ -149,6 +152,7 @@ class PreDeployTest extends TestCase
             [
                 'fileMockFileGetContentsExpects' => $this->once(),
                 'buildPhaseLogContent' => 'the build phase log was not applied',
+                'buildLogFileExists' => true,
                 'deployLogContent' => null,
                 'deployLogFileExists' => false,
                 'fileMockFilePutContentsExpects' => $this->never(),
@@ -158,6 +162,7 @@ class PreDeployTest extends TestCase
             [
                 'fileMockFileGetContentsExpects' => $this->exactly(2),
                 'buildPhaseLogContent' => 'the build phase log was applied',
+                'buildLogFileExists' => true,
                 'deployLogContent' => 'some log the build phase log was applied some log',
                 'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => $this->never(),
@@ -167,6 +172,7 @@ class PreDeployTest extends TestCase
             [
                 'fileMockFileGetContentsExpects' => $this->exactly(2),
                 'buildPhaseLogContent' => 'the build phase log was not applied',
+                'buildLogFileExists' => true,
                 'deployLogContent' => 'some log the build phase log was applied some log',
                 'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => $this->once(),

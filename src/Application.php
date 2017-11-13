@@ -35,6 +35,14 @@ class Application extends \Symfony\Component\Console\Application
     }
 
     /**
+     * @return ContainerInterface
+     */
+    public function getContainer(): ContainerInterface
+    {
+        return $this->container;
+    }
+
+    /**
      * @inheritdoc
      */
     protected function getDefaultCommands()
