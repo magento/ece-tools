@@ -220,18 +220,6 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     ],
                 ]);
             });
-        $this->when(DbDump::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->make(DbDumpProcess\DbDump::class),
-                    ],
-                ]);
-            });
-        $this->when(DbDumpProcess\DbDump::class)
-            ->needs(ConnectionInterface::class)
-            ->give(ReadConnection::class);
         $this->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
@@ -244,6 +232,18 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                     ],
                 ]);
             });
+        $this->when(DbDump::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->make(DbDumpProcess\DbDump::class),
+                    ],
+                ]);
+            });
+        $this->when(DbDumpProcess\DbDump::class)
+            ->needs(ConnectionInterface::class)
+            ->give(ReadConnection::class);
     }
 
     /**

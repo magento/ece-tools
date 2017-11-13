@@ -86,25 +86,38 @@ class DbDump implements ProcessInterface
         // Lock the sql dump so staging sync doesn't start using it until we're done.
         $this->logger->info('Waiting for lock on db dump.');
 
-        if (flock($lockFileHandle, LOCK_EX)) {
-            $this->logger->info('Start creation DB dump...');
-
-            $command = $this->getCommand() . '| gzip > ' . $dumpFile;
-            $errors = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '" 2>&1');
-
-            if ($errors) {
-                $this->logger->info('Error has occurred during mysqldump');
-                $this->shell->execute('rm ' . $dumpFile);
-            } else {
-                $this->logger->info('Finished DB dump, it can be found here: ' . $dumpFile);
-                fwrite($lockFileHandle, sprintf('[%s] Dump was written in %s', date("Y-m-d H:i:s"), $dumpFile) . PHP_EOL);
-                fflush($lockFileHandle);
-            }
-            flock($lockFileHandle, LOCK_UN);
-        } else {
-            $this->logger->info('Could not get the lock!');
+        if ($lockFileHandle === false) {
+            $this->logger->info('Could not get the lock file!');
+            return;
         }
-        fclose($lockFileHandle);
+
+        try {
+            if (flock($lockFileHandle, LOCK_EX)) {
+                $this->logger->info('Start creation DB dump...');
+
+                $command = $this->getCommand() . ' | gzip > ' . $dumpFile;
+                $errors = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
+
+                if ($errors) {
+                    $this->logger->info('Error has occurred during mysqldump');
+                    $this->shell->execute('rm ' . $dumpFile);
+                } else {
+                    $this->logger->info('Finished DB dump, it can be found here: ' . $dumpFile);
+                    fwrite(
+                        $lockFileHandle,
+                        sprintf('[%s] Dump was written in %s', date("Y-m-d H:i:s"), $dumpFile) . PHP_EOL
+                    );
+                    fflush($lockFileHandle);
+                }
+                flock($lockFileHandle, LOCK_UN);
+            } else {
+                $this->logger->info('Dump process is locked!');
+            }
+            fclose($lockFileHandle);
+        } catch (\Exception $e) {
+            $this->logger->info('ERROR: ' . $e->getMessage());
+            fclose($lockFileHandle);
+        }
     }
 
     /**

@@ -1,3 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env php
+<?php
+/**
+ * Copyright ? Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+require_once __DIR__ . '/bootstrap.php';
 
-php ./bin/ece-tools db-dump
+$application = \Magento\MagentoCloud\App\Bootstrap::create()->createApplication();
+$application->setDefaultCommand('db-dump');
+$application->run();
