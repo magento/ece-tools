@@ -39,6 +39,12 @@ class CopyStrategyTest extends TestCase
             )
             ->willReturn(true);
         $this->fileMock->expects($this->once())
+            ->method('isLink')
+            ->with('toDir')
+            ->willReturn(false);
+        $this->fileMock->expects($this->never())
+            ->method('unLink');
+        $this->fileMock->expects($this->once())
             ->method('copyDirectory')
             ->with('fromDir', 'toDir');
 
