@@ -32,10 +32,10 @@ class Environment
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
-    const ENVIRONMENT_TYPE_UNKNOWN = 0;
-    const ENVIRONMENT_TYPE_INTEGRATION = 1;
-    const ENVIRONMENT_TYPE_STAGING = 2;
-    const ENVIRONMENT_TYPE_PRODUCTION = 3;
+    const ENVIRONMENT_TYPE_UNKNOWN = 'ENVIRONMENT_TYPE_UNKNOWN';
+    const ENVIRONMENT_TYPE_INTEGRATION = 'ENVIRONMENT_TYPE_INTEGRATION';
+    const ENVIRONMENT_TYPE_STAGING = 'ENVIRONMENT_TYPE_STAGING';
+    const ENVIRONMENT_TYPE_PRODUCTION = 'ENVIRONMENT_TYPE_PRODUCTION';
 
     /**
      * Let's keep variable names same for both phases.
@@ -430,10 +430,10 @@ class Environment
     public function getEnvironmentType(): int
     {
         // TODO: We should find a better way to determine this.
-        if (empty($_ENV["MAGENTO_CLOUD_PROJECT"]) || empty($_ENV["HOME"])) {
+        if (empty($_ENV['MAGENTO_CLOUD_PROJECT']) || empty($_ENV['HOME'])) {
             return static::ENVIRONMENT_TYPE_UNKNOWN;
         }
-        if ("/app/{$_ENV["MAGENTO_CLOUD_PROJECT"]}" == $_ENV["HOME"]) {
+        if ("/app/{$_ENV['MAGENTO_CLOUD_PROJECT']}" === $_ENV['HOME']) {
             if (substr($_ENV['HOME'], 0, -4) === '_stg') {
                 return static::ENVIRONMENT_TYPE_STAGING;
             }
