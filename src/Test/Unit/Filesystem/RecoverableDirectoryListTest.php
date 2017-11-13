@@ -33,14 +33,18 @@ class RecoverableDirectoryListTest extends TestCase
 
     /**
      * @param bool $isSymlinkOn
+     * @param bool $isStaticInBuild
      * @param array $expected
      * @dataProvider getListDataProvider
      */
-    public function testGetList(bool $isSymlinkOn, array $expected)
+    public function testGetList(bool $isSymlinkOn, bool $isStaticInBuild, array $expected)
     {
         $this->environmentMock->expects($this->once())
             ->method('isStaticContentSymlinkOn')
             ->willReturn($isSymlinkOn);
+        $this->environmentMock->expects($this->once())
+            ->method('isStaticDeployInBuild')
+            ->willReturn($isStaticInBuild);
 
         $this->assertEquals(
             $expected,
@@ -53,28 +57,26 @@ class RecoverableDirectoryListTest extends TestCase
         return [
             [
                 true,
+                true,
                 [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => 'copy'
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => 'copy'
+                    ],
                     [
                         'directory' => 'var/view_preprocessed',
                         'strategy' => 'symlink'
                     ],
-                    [
-                        'directory' => 'app/etc',
-                        'strategy' => 'copy'
-                    ],
-                    [
-                        'directory' => 'pub/media',
-                        'strategy' => 'copy'
-                    ]
                 ]
             ],
             [
                 false,
+                true,
                 [
-                    [
-                        'directory' => 'var/view_preprocessed',
-                        'strategy' => 'copy'
-                    ],
                     [
                         'directory' => 'app/etc',
                         'strategy' => 'copy'
@@ -82,7 +84,25 @@ class RecoverableDirectoryListTest extends TestCase
                     [
                         'directory' => 'pub/media',
                         'strategy' => 'copy'
-                    ]
+                    ],
+                    [
+                        'directory' => 'var/view_preprocessed',
+                        'strategy' => 'copy'
+                    ],
+                ]
+            ],
+            [
+                true,
+                false,
+                [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => 'copy'
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => 'copy'
+                    ],
                 ]
             ]
         ];

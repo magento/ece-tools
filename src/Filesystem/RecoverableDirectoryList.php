@@ -38,12 +38,7 @@ class RecoverableDirectoryList
     {
         $isSymlinkEnabled = $this->environment->isStaticContentSymlinkOn();
 
-        return [
-            [
-                self::OPTION_DIRECTORY => 'var/view_preprocessed',
-                self::OPTION_STRATEGY => $isSymlinkEnabled ?
-                    StrategyInterface::STRATEGY_SYMLINK : StrategyInterface::STRATEGY_COPY
-            ],
+        $recoverableDirs = [
             [
                 self::OPTION_DIRECTORY => 'app/etc',
                 self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
@@ -53,5 +48,15 @@ class RecoverableDirectoryList
                 self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
             ]
         ];
+
+        if ($this->environment->isStaticDeployInBuild()) {
+            $recoverableDirs[] = [
+                self::OPTION_DIRECTORY => 'var/view_preprocessed',
+                self::OPTION_STRATEGY => $isSymlinkEnabled ?
+                    StrategyInterface::STRATEGY_SYMLINK : StrategyInterface::STRATEGY_COPY
+            ];
+        }
+
+        return $recoverableDirs;
     }
 }
