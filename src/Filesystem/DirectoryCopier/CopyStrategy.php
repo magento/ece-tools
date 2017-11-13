@@ -35,6 +35,10 @@ class CopyStrategy implements StrategyInterface
             );
         }
 
+        if ($this->file->isLink($toDirectory)) {
+            $this->file->unLink($toDirectory);
+        }
+
         if (!$this->file->isExists($toDirectory)) {
             $this->file->createDirectory($toDirectory);
         }

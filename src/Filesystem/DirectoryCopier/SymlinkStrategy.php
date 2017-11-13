@@ -25,7 +25,7 @@ class SymlinkStrategy implements StrategyInterface
     }
 
     /**
-     * Creates symlink from one folder to another.
+     * Creates symlink from one folder to another. Remove or unlink directory if it exists previously.
      *
      * @inheritdoc
      */

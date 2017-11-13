@@ -31,10 +31,45 @@ class SymlinkStrategyTest extends TestCase
 
     public function testCopy()
     {
-        $this->fileMock->expects($this->once())
+        $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
-            ->with('fromDir')
+            ->withConsecutive(
+                ['fromDir'],
+                ['toDir']
+            )
+            ->willReturnOnConsecutiveCalls(
+                true,
+                false
+            );
+        $this->fileMock->expects($this->once())
+            ->method('symlink')
+            ->with('fromDir', 'toDir')
             ->willReturn(true);
+
+        $this->assertTrue($this->symlinkStrategy->copy('fromDir', 'toDir'));
+    }
+
+    public function testCopyToExistsDirectory()
+    {
+        $this->fileMock->expects($this->exactly(2))
+            ->method('isExists')
+            ->withConsecutive(
+                ['fromDir'],
+                ['toDir']
+            )
+            ->willReturnOnConsecutiveCalls(
+                true,
+                true
+            );
+        $this->fileMock->expects($this->once())
+            ->method('isLink')
+            ->with('toDir')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('unLink')
+            ->with('toDir');
+        $this->fileMock->expects($this->never())
+            ->method('deleteDirectory');
         $this->fileMock->expects($this->once())
             ->method('symlink')
             ->with('fromDir', 'toDir')
