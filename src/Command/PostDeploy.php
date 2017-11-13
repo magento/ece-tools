@@ -12,7 +12,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @inheritdoc
+ * Performs post-deploy operations, such us:
+ * - Cleaning cache
  */
 class PostDeploy extends Command
 {

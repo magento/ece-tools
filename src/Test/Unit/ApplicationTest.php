@@ -38,6 +38,16 @@ class ApplicationTest extends TestCase
     private $packageMock;
 
     /**
+     * @var string
+     */
+    private $applicationVersion = '1.0';
+
+    /**
+     * @var string
+     */
+    private $applicationName = 'Magento Cloud Tools';
+
+    /**
      * @inheritdoc
      */
     public function setUp()
@@ -71,10 +81,10 @@ class ApplicationTest extends TestCase
             ->willReturn($this->packageMock);
         $this->packageMock->expects($this->once())
             ->method('getPrettyName')
-            ->willReturn('Magento Cloud');
+            ->willReturn($this->applicationName);
         $this->packageMock->expects($this->once())
             ->method('getPrettyVersion')
-            ->willReturn('1.0');
+            ->willReturn($this->applicationVersion);
 
         $this->application = new Application(
             $this->containerMock
@@ -108,7 +118,7 @@ class ApplicationTest extends TestCase
     public function testGetName()
     {
         $this->assertSame(
-            'Magento Cloud',
+            $this->applicationName,
             $this->application->getName()
         );
     }
@@ -116,7 +126,7 @@ class ApplicationTest extends TestCase
     public function testGetVersion()
     {
         $this->assertSame(
-            '1.0',
+            $this->applicationVersion,
             $this->application->getVersion()
         );
     }

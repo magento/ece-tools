@@ -55,4 +55,16 @@ class CleanCacheTest extends TestCase
 
         $this->process->execute();
     }
+
+    public function testExecuteNoVerbosity()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getVerbosityLevel')
+            ->willReturn('');
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php ./bin/magento cache:flush');
+
+        $this->process->execute();
+    }
 }

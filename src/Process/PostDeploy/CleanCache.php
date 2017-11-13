@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
- * @inheritdoc
+ * Cleans all cache by tags.
  */
 class CleanCache implements ProcessInterface
 {
