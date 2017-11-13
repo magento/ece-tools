@@ -61,7 +61,6 @@ class Deploy extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-
             // See "Starting deploy." message in Magento\MagentoCloud\Process\Deploy\PreDeploy::execute()
             $this->process->execute();
             $this->logger->info('Deployment completed.');

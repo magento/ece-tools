@@ -49,9 +49,9 @@ class DeployTest extends TestCase
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(['Starting deploy.'], ['Deployment completed.']);
+            ->with('Deployment completed.');
         $this->processMock->expects($this->once())
             ->method('execute');
 
