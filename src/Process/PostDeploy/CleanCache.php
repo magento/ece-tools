@@ -39,6 +39,6 @@ class CleanCache implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute('php ./bin/magento cache:clean' . $this->environment->getVerbosityLevel());
+        $this->shell->execute('php ./bin/magento cache:flush' . $this->environment->getVerbosityLevel());
     }
 }

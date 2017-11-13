@@ -51,7 +51,7 @@ class CleanCacheTest extends TestCase
             ->willReturn(' -vvv');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento cache:clean -vvv');
+            ->with('php ./bin/magento cache:flush -vvv');
 
         $this->process->execute();
     }
