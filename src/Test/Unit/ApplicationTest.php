@@ -38,26 +38,6 @@ class ApplicationTest extends TestCase
     private $packageMock;
 
     /**
-     * @var Build|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $buildCommandMock;
-
-    /**
-     * @var Deploy|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $deployCommandMock;
-
-    /**
-     * @var ConfigDump|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $configDumpCommand;
-
-    /**
-     * @var PostDeploy|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $postDeployCommand;
-
-    /**
      * @inheritdoc
      */
     public function setUp()
@@ -65,66 +45,27 @@ class ApplicationTest extends TestCase
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
-        $this->buildCommandMock = $this->createMock(Build::class);
-        $this->deployCommandMock = $this->createMock(Deploy::class);
-        $this->configDumpCommand = $this->createMock(ConfigDump::class);
-        $this->postDeployCommand = $this->createMock(PostDeploy::class);
 
         /**
-         * Build.
+         * Command mocks.
          */
-        $this->buildCommandMock->method('getName')
-            ->willReturn(Build::NAME);
-        $this->buildCommandMock->method('isEnabled')
-            ->willReturn(true);
-        $this->buildCommandMock->method('getDefinition')
-            ->willReturn([]);
-        $this->buildCommandMock->method('getAliases')
-            ->willReturn([]);
+        $buildCommandMock = $this->createMock(Build::class);
+        $deployCommandMock = $this->createMock(Deploy::class);
+        $configDumpCommand = $this->createMock(ConfigDump::class);
+        $postDeployCommand = $this->createMock(PostDeploy::class);
 
-        /**
-         * Deploy.
-         */
-        $this->deployCommandMock->method('getName')
-            ->willReturn(Deploy::NAME);
-        $this->deployCommandMock->method('isEnabled')
-            ->willReturn(true);
-        $this->deployCommandMock->method('getDefinition')
-            ->willReturn([]);
-        $this->deployCommandMock->method('getAliases')
-            ->willReturn([]);
-
-        /**
-         * Config dump.
-         */
-        $this->configDumpCommand->method('getName')
-            ->willReturn(ConfigDump::NAME);
-        $this->configDumpCommand->method('isEnabled')
-            ->willReturn(true);
-        $this->configDumpCommand->method('getDefinition')
-            ->willReturn([]);
-        $this->configDumpCommand->method('getAliases')
-            ->willReturn([]);
-
-        /**
-         * Post deploy.
-         */
-        $this->postDeployCommand->method('getName')
-            ->willReturn(PostDeploy::NAME);
-        $this->postDeployCommand->method('isEnabled')
-            ->willReturn(true);
-        $this->postDeployCommand->method('getDefinition')
-            ->willReturn([]);
-        $this->postDeployCommand->method('getAliases')
-            ->willReturn([]);
+        $this->mockCommand($buildCommandMock, Build::NAME);
+        $this->mockCommand($deployCommandMock, Deploy::NAME);
+        $this->mockCommand($configDumpCommand, ConfigDump::NAME);
+        $this->mockCommand($postDeployCommand, PostDeploy::NAME);
 
         $this->containerMock->method('get')
             ->willReturnMap([
                 [Composer::class, $this->composerMock],
-                [Build::class, $this->buildCommandMock],
-                [Deploy::class, $this->deployCommandMock],
-                [ConfigDump::class, $this->configDumpCommand],
-                [PostDeploy::class, $this->postDeployCommand],
+                [Build::class, $buildCommandMock],
+                [Deploy::class, $deployCommandMock],
+                [ConfigDump::class, $configDumpCommand],
+                [PostDeploy::class, $postDeployCommand],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
@@ -138,6 +79,22 @@ class ApplicationTest extends TestCase
         $this->application = new Application(
             $this->containerMock
         );
+    }
+
+    /**
+     * @param \PHPUnit_Framework_MockObject_MockObject $command
+     * @param string $name
+     */
+    private function mockCommand(\PHPUnit_Framework_MockObject_MockObject $command, string $name)
+    {
+        $command->method('getName')
+            ->willReturn($name);
+        $command->method('isEnabled')
+            ->willReturn(true);
+        $command->method('getDefinition')
+            ->willReturn([]);
+        $command->method('getAliases')
+            ->willReturn([]);
     }
 
     public function testHasCommand()
