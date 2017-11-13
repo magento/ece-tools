@@ -10,9 +10,9 @@ use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Config\DbConnectionDataInterface;
-use Magento\MagentoCloud\Config\DbReadConnectionData;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
+use Magento\MagentoCloud\Db\Data\ConnectionInterface;
+use Magento\MagentoCloud\Db\Data\ReadConnection;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -230,8 +230,8 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 ]);
             });
         $this->when(DbDumpProcess\DbDump::class)
-            ->needs(DbConnectionDataInterface::class)
-            ->give(DbReadConnectionData::class);
+            ->needs(ConnectionInterface::class)
+            ->give(ReadConnection::class);
         $this->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);

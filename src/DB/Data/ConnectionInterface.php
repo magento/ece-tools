@@ -3,12 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Config;
+namespace Magento\MagentoCloud\Db\Data;
 
 /**
  * Database connection data interface
  */
-interface DbConnectionDataInterface
+interface ConnectionInterface
 {
     /**
      * Returns DB host name or IP address

@@ -3,13 +3,15 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Config;
+namespace Magento\MagentoCloud\Db\Data;
+
+use Magento\MagentoCloud\Config\Environment;
 
 /**
  * Data for read only connection to database.
  * Should be used for backup or other read operations.
  */
-class DbReadConnectionData implements DbConnectionDataInterface
+class ReadConnection implements ConnectionInterface
 {
     /**
      * Resource of environment data
@@ -34,7 +36,8 @@ class DbReadConnectionData implements DbConnectionDataInterface
     {
         //return empty($_ENV['REGISTRY']);
         //while $_ENV['REGISTRY'] is not approved by platform we check the DB host name
-        return $this->environment->getDbHost() == 'database.internal';
+        //TODO: use method from Environment class which will be implemented in MAGECLOUD-1122
+        return $this->environment->getDbHost() === 'database.internal';
     }
 
     /**
@@ -54,7 +57,7 @@ class DbReadConnectionData implements DbConnectionDataInterface
      * Returns ports for DB connection for backup.
      * There are several available ports:
      *  - 3306 - talks to master DB
-     *  - 3307 -talks to local node
+     *  - 3307 - talks to local node
      *  - 3304 - is used for read only operations
      * For production or staging server we cannot make such operations as backup from active master,
      * so we should always use 3304 for them for localhost, this connection will proxy to appropriate server.

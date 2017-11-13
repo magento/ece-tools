@@ -3,7 +3,6 @@
  * Copyright © Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -47,7 +46,7 @@ class DbDump extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('creates backup of database');
+            ->setDescription('Creates backup of database');
 
         parent::configure();
     }
