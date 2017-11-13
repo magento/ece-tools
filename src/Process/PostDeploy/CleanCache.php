@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
@@ -19,11 +20,18 @@ class CleanCache implements ProcessInterface
     private $shell;
 
     /**
-     * @param ShellInterface $shell
+     * @var Environment
      */
-    public function __construct(ShellInterface $shell)
+    private $environment;
+
+    /**
+     * @param ShellInterface $shell
+     * @param Environment $environment
+     */
+    public function __construct(ShellInterface $shell, Environment $environment)
     {
         $this->shell = $shell;
+        $this->environment = $environment;
     }
 
     /**
@@ -31,6 +39,6 @@ class CleanCache implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute('php ./bin/magento cache:clean');
+        $this->shell->execute('php ./bin/magento cache:clean' . $this->environment->getVerbosityLevel());
     }
 }

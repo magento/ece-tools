@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\PostDeploy\CleanCache;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -25,22 +26,32 @@ class CleanCacheTest extends TestCase
     private $shellMock;
 
     /**
+     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $environmentMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->environmentMock = $this->createMock(Environment::class);
 
         $this->process = new CleanCache(
-            $this->shellMock
+            $this->shellMock,
+            $this->environmentMock
         );
     }
 
     public function testExecute()
     {
+        $this->environmentMock->expects($this->once())
+            ->method('getVerbosityLevel')
+            ->willReturn(' -vvv');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento cache:clean');
+            ->with('php ./bin/magento cache:clean -vvv');
 
         $this->process->execute();
     }
