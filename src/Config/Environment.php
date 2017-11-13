@@ -434,7 +434,7 @@ class Environment
             return static::ENVIRONMENT_TYPE_UNKNOWN;
         }
         if ("/app/{$_ENV['MAGENTO_CLOUD_PROJECT']}" === $_ENV['HOME']) {
-            if (substr($_ENV['HOME'], 0, -4) === '_stg') {
+            if (substr($_ENV['HOME'], -4) === '_stg') {
                 return static::ENVIRONMENT_TYPE_STAGING;
             }
             return static::ENVIRONMENT_TYPE_PRODUCTION;
