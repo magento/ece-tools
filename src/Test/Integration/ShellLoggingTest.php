@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Integration;
 
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 
@@ -30,11 +29,11 @@ class ShellLoggingTest extends TestCase
      */
     protected function setUp()
     {
-        Bootstrap::create()
+        $application = Bootstrap::create()
             ->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
-        $this->shell = Container::getInstance()
+        $this->shell = $application->getContainer()
             ->get(ShellInterface::class);
-        $this->fileList = Container::getInstance()
+        $this->fileList = $application->getContainer()
             ->get(FileList::class);
     }
 

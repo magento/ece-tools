@@ -92,7 +92,8 @@ class PreDeploy implements ProcessInterface
     {
         $deployLogPath = $this->fileList->getCloudLog();
         $buildPhaseLogPath = $this->fileList->getInitCloudLog();
-        $buildPhaseLogContent = $this->file->fileGetContents($buildPhaseLogPath);
+        $buildPhaseLogContent = $this->file->isExists($buildPhaseLogPath)
+            ? $this->file->fileGetContents($buildPhaseLogPath) : '';
 
         $deployLogFileIsExists = $this->file->isExists($deployLogPath);
 
