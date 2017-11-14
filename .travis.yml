@@ -37,8 +37,7 @@ install: composer install --no-interaction
 script:
   - if [ $TEST_SUITE == "static" ]; then phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n; fi;
   - if [ $TEST_SUITE == "static" ]; then phpmd src xml tests/static/phpmd-ruleset.xml; fi;
-  - if [ $TEST_SUITE == "static" ]; then phpunit --configuration tests/unit/phpunit.xml.dist --coverage-clover tests/unit/tmp/clover.xml; fi;
-  - if [ $TEST_SUITE == "static" ]; then php tests/unit/code-coverage.php tests/unit/tmp/clover.xml $MIN_CODE_COVERAGE; fi;
+  - if [ $TEST_SUITE == "static" ]; then phpunit --configuration tests/unit/phpunit.xml.dist --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml $MIN_CODE_COVERAGE; fi;
   - if [ $TEST_SUITE == "unit" ]; then phpunit --configuration tests/unit/phpunit.xml.dist; fi;
   - if [ $TEST_SUITE == "integration" ]; then phpunit --verbose --configuration tests/integration/phpunit.xml.dist; fi;
   - if [ $TEST_SUITE == "integration-docker" ]; then cd tests/integration-docker && docker-compose run cli magento-command; fi;
