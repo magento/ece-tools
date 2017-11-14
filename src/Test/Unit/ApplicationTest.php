@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\DbDump;
+use Magento\MagentoCloud\Command\PostDeploy;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -38,24 +39,14 @@ class ApplicationTest extends TestCase
     private $packageMock;
 
     /**
-     * @var Build|\PHPUnit_Framework_MockObject_MockObject
+     * @var string
      */
-    private $buildCommandMock;
+    private $applicationVersion = '1.0';
 
     /**
-     * @var Deploy|\PHPUnit_Framework_MockObject_MockObject
+     * @var string
      */
-    private $deployCommandMock;
-
-    /**
-     * @var $dbDumpCommandMock;
-     */
-    private $dbDumpCommandMock;
-
-    /**
-     * @var ConfigDump|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $configDumpCommand;
+    private $applicationName = 'Magento Cloud Tools';
 
     /**
      * @inheritdoc
@@ -65,58 +56,59 @@ class ApplicationTest extends TestCase
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
-        $this->buildCommandMock = $this->createMock(Build::class);
-        $this->deployCommandMock = $this->createMock(Deploy::class);
-        $this->dbDumpCommandMock = $this->createMock(DbDump::class);
-        $this->configDumpCommand = $this->createMock(Deploy::class);
 
-        $this->buildCommandMock->method('getName')
-            ->willReturn(Build::NAME);
-        $this->buildCommandMock->method('isEnabled')
-            ->willReturn(true);
-        $this->buildCommandMock->method('getDefinition')
-            ->willReturn([]);
-        $this->buildCommandMock->method('getAliases')
-            ->willReturn([]);
-        $this->deployCommandMock->method('getName')
-            ->willReturn(Deploy::NAME);
-        $this->deployCommandMock->method('isEnabled')
-            ->willReturn(true);
-        $this->deployCommandMock->method('getDefinition')
-            ->willReturn([]);
-        $this->deployCommandMock->method('getAliases')
-            ->willReturn([]);
-        $this->dbDumpCommandMock->method('getName')
-            ->willReturn(DbDump::NAME);
-        $this->dbDumpCommandMock->method('isEnabled')
-            ->willReturn(true);
-        $this->dbDumpCommandMock->method('getDefinition')
-            ->willReturn([]);
-        $this->dbDumpCommandMock->method('getAliases')
-            ->willReturn([]);
-        $this->configDumpCommand->method('getName')
-            ->willReturn(ConfigDump::NAME);
-        $this->configDumpCommand->method('isEnabled')
-            ->willReturn(true);
-        $this->configDumpCommand->method('getDefinition')
-            ->willReturn([]);
-        $this->configDumpCommand->method('getAliases')
-            ->willReturn([]);
+        /**
+         * Command mocks.
+         */
+        $buildCommandMock = $this->createMock(Build::class);
+        $deployCommandMock = $this->createMock(Deploy::class);
+        $configDumpCommand = $this->createMock(ConfigDump::class);
+        $postDeployCommand = $this->createMock(PostDeploy::class);
+        $dbDumpCommand = $this->createMock(DbDump::class);
+
+        $this->mockCommand($buildCommandMock, Build::NAME);
+        $this->mockCommand($deployCommandMock, Deploy::NAME);
+        $this->mockCommand($configDumpCommand, ConfigDump::NAME);
+        $this->mockCommand($postDeployCommand, PostDeploy::NAME);
+        $this->mockCommand($dbDumpCommand, DbDump::NAME);
 
         $this->containerMock->method('get')
             ->willReturnMap([
                 [Composer::class, $this->composerMock],
-                [Build::class, $this->buildCommandMock],
-                [Deploy::class, $this->deployCommandMock],
-                [DbDump::class, $this->dbDumpCommandMock],
-                [ConfigDump::class, $this->configDumpCommand],
+                [Build::class, $buildCommandMock],
+                [Deploy::class, $deployCommandMock],
+                [ConfigDump::class, $configDumpCommand],
+                [PostDeploy::class, $postDeployCommand],
+                [DbDump::class, $postDeployCommand],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
+        $this->packageMock->expects($this->once())
+            ->method('getPrettyName')
+            ->willReturn($this->applicationName);
+        $this->packageMock->expects($this->once())
+            ->method('getPrettyVersion')
+            ->willReturn($this->applicationVersion);
 
         $this->application = new Application(
             $this->containerMock
         );
+    }
+
+    /**
+     * @param \PHPUnit_Framework_MockObject_MockObject $command
+     * @param string $name
+     */
+    private function mockCommand(\PHPUnit_Framework_MockObject_MockObject $command, string $name)
+    {
+        $command->method('getName')
+            ->willReturn($name);
+        $command->method('isEnabled')
+            ->willReturn(true);
+        $command->method('getDefinition')
+            ->willReturn([]);
+        $command->method('getAliases')
+            ->willReturn([]);
     }
 
     public function testHasCommand()
@@ -125,5 +117,22 @@ class ApplicationTest extends TestCase
         $this->assertTrue($this->application->has(Deploy::NAME));
         $this->assertTrue($this->application->has(DbDump::NAME));
         $this->assertTrue($this->application->has(ConfigDump::NAME));
+        $this->assertTrue($this->application->has(PostDeploy::NAME));
+    }
+
+    public function testGetName()
+    {
+        $this->assertSame(
+            $this->applicationName,
+            $this->application->getName()
+        );
+    }
+
+    public function testGetVersion()
+    {
+        $this->assertSame(
+            $this->applicationVersion,
+            $this->application->getVersion()
+        );
     }
 }

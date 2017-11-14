@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\Db\Data\ConnectionInterface;
@@ -19,6 +20,7 @@ use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
+use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -262,6 +264,15 @@ class Container implements ContainerInterface
         $this->container->when(DbDumpProcess\DbDump::class)
             ->needs(ConnectionInterface::class)
             ->give(ReadConnection::class);
+        $this->container->when(PostDeploy::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->make(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(PostDeployProcess\CleanCache::class),
+                    ],
+                ]);
+            });
     }
 
     /**
