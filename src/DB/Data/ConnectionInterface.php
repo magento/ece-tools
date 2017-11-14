@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Db\Data;
+namespace Magento\MagentoCloud\DB\Data;
 
 /**
  * Database connection data interface

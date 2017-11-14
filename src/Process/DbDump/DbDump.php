@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\DbDump;
 
-use Magento\MagentoCloud\Db\Data\ConnectionInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
