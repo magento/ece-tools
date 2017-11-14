@@ -43,13 +43,11 @@ class DbDumpTest extends TestCase
     protected function setUp()
     {
         $this->connectionDataMock = $this->getMockBuilder(ConnectionInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+            ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+            ->getMockForAbstractClass();
 
         $this->process = new DbDump(
             $this->connectionDataMock,
@@ -146,10 +144,14 @@ class DbDumpTest extends TestCase
      * @param string $port
      * @param string $dbName
      * @param string $user
-     * @param null $password
+     * @param null|string $password
      */
-    private function setConnectionData($host = 'localhost', $port = '3306', $dbName = 'main',
-                                       $user = 'user', $password = null
+    private function setConnectionData(
+        $host = 'localhost',
+        $port = '3306',
+        $dbName = 'main',
+        $user = 'user',
+        $password = null
     ) {
         $this->connectionDataMock->expects($this->once())
             ->method('getHost')
@@ -174,8 +176,9 @@ class DbDumpTest extends TestCase
      * @param $argumentValue string
      * @return callable
      */
-    private function captureArg(&$argumentValue) {
-        return $this->callback(function($argToMock) use (&$argumentValue) {
+    private function captureArg(&$argumentValue)
+    {
+        return $this->callback(function ($argToMock) use (&$argumentValue) {
             $argumentValue = $argToMock;
             return true;
         });
