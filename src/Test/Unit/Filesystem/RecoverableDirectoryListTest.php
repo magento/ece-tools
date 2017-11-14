@@ -71,6 +71,10 @@ class RecoverableDirectoryListTest extends TestCase
                         'directory' => 'var/view_preprocessed',
                         'strategy' => 'symlink'
                     ],
+                    [
+                        'directory' => 'pub/static',
+                        'strategy' => 'sub_symlink'
+                    ],
                 ]
             ],
             [
@@ -87,6 +91,10 @@ class RecoverableDirectoryListTest extends TestCase
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
+                        'strategy' => 'copy'
+                    ],
+                    [
+                        'directory' => 'pub/static',
                         'strategy' => 'copy'
                     ],
                 ]

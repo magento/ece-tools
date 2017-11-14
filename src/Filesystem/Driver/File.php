@@ -449,6 +449,17 @@ class File
     }
 
     /**
+     * Returns directory iterator for given path
+     *
+     * @param $path
+     * @return \DirectoryIterator
+     */
+    public function getDirectoryIterator($path): \DirectoryIterator
+    {
+        return new \DirectoryIterator($path);
+    }
+
+    /**
      * @param string $path
      * @return mixed
      */

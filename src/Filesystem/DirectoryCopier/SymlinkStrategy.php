@@ -34,6 +34,9 @@ class SymlinkStrategy implements StrategyInterface
      */
     public function copy(string $fromDirectory, string $toDirectory): bool
     {
+        $fromDirectory = $this->file->getRealPath($fromDirectory);
+        $toDirectory = $this->file->getRealPath($toDirectory);
+
         if (!$this->file->isExists($fromDirectory)) {
             throw new FileSystemException(
                 sprintf('Can\'t copy directory %s. Directory does not exist.', $fromDirectory)

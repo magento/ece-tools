@@ -25,6 +25,16 @@ class SymlinkStrategyTest extends TestCase
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('getRealPath')
+            ->withConsecutive(
+                ['fromDir'],
+                ['toDir']
+            )
+            ->willReturnOnConsecutiveCalls(
+                'realFromDir',
+                'realToDir'
+            );
 
         $this->symlinkStrategy = new SymlinkStrategy($this->fileMock);
     }
@@ -34,8 +44,8 @@ class SymlinkStrategyTest extends TestCase
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
+                ['realFromDir'],
+                ['realToDir']
             )
             ->willReturnOnConsecutiveCalls(
                 true,
@@ -43,7 +53,7 @@ class SymlinkStrategyTest extends TestCase
             );
         $this->fileMock->expects($this->once())
             ->method('symlink')
-            ->with('fromDir', 'toDir')
+            ->with('realFromDir', 'realToDir')
             ->willReturn(true);
 
         $this->assertTrue($this->symlinkStrategy->copy('fromDir', 'toDir'));
@@ -54,8 +64,8 @@ class SymlinkStrategyTest extends TestCase
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
+                ['realFromDir'],
+                ['realToDir']
             )
             ->willReturnOnConsecutiveCalls(
                 true,
@@ -63,16 +73,16 @@ class SymlinkStrategyTest extends TestCase
             );
         $this->fileMock->expects($this->once())
             ->method('isLink')
-            ->with('toDir')
+            ->with('realToDir')
             ->willReturn(true);
         $this->fileMock->expects($this->once())
             ->method('unLink')
-            ->with('toDir');
+            ->with('realToDir');
         $this->fileMock->expects($this->never())
             ->method('deleteDirectory');
         $this->fileMock->expects($this->once())
             ->method('symlink')
-            ->with('fromDir', 'toDir')
+            ->with('realFromDir', 'realToDir')
             ->willReturn(true);
 
         $this->assertTrue($this->symlinkStrategy->copy('fromDir', 'toDir'));
@@ -80,13 +90,13 @@ class SymlinkStrategyTest extends TestCase
 
     /**
      * @expectedException \Magento\MagentoCloud\Filesystem\FileSystemException
-     * @expectedExceptionMessage Can't copy directory fromDir. Directory does not exist.
+     * @expectedExceptionMessage Can't copy directory realFromDir. Directory does not exist.
      */
     public function testCopyFromDirNotExists()
     {
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with('fromDir')
+            ->with('realFromDir')
             ->willReturn(false);
 
         $this->symlinkStrategy->copy('fromDir', 'toDir');
