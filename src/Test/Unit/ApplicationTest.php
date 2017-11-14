@@ -79,7 +79,7 @@ class ApplicationTest extends TestCase
                 [Deploy::class, $deployCommandMock],
                 [ConfigDump::class, $configDumpCommand],
                 [PostDeploy::class, $postDeployCommand],
-                [DbDump::class, $postDeployCommand],
+                [DbDump::class, $dbDumpCommand],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
