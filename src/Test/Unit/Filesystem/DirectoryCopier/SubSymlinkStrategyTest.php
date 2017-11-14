@@ -25,16 +25,10 @@ class SubSymlinkStrategyTest extends TestCase
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->fileMock->expects($this->exactly(2))
+        $this->fileMock->expects($this->once())
             ->method('getRealPath')
-            ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                'realFromDir',
-                'realToDir'
-            );
+            ->with('fromDir')
+            ->willReturnOnConsecutiveCalls('realFromDir');
 
         $this->subSymlinkStrategy = new SubSymlinkStrategy($this->fileMock);
     }
@@ -61,8 +55,8 @@ class SubSymlinkStrategyTest extends TestCase
         $this->fileMock->expects($this->exactly(2))
             ->method('symlink')
             ->withConsecutive(
-                ['realFromDir/file1', 'realToDir/file1'],
-                ['realFromDir/file2', 'realToDir/file2']
+                ['realFromDir/file1', 'toDir/file1'],
+                ['realFromDir/file2', 'toDir/file2']
             );
 
         $this->assertTrue($this->subSymlinkStrategy->copy('fromDir', 'toDir'));

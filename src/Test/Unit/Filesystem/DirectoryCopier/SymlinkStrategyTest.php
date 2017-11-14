@@ -25,16 +25,10 @@ class SymlinkStrategyTest extends TestCase
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->fileMock->expects($this->exactly(2))
+        $this->fileMock->expects($this->once())
             ->method('getRealPath')
-            ->withConsecutive(
-                ['fromDir'],
-                ['toDir']
-            )
-            ->willReturnOnConsecutiveCalls(
-                'realFromDir',
-                'realToDir'
-            );
+            ->with('fromDir')
+            ->willReturnOnConsecutiveCalls('realFromDir');
 
         $this->symlinkStrategy = new SymlinkStrategy($this->fileMock);
     }
@@ -45,7 +39,7 @@ class SymlinkStrategyTest extends TestCase
             ->method('isExists')
             ->withConsecutive(
                 ['realFromDir'],
-                ['realToDir']
+                ['toDir']
             )
             ->willReturnOnConsecutiveCalls(
                 true,
@@ -53,7 +47,7 @@ class SymlinkStrategyTest extends TestCase
             );
         $this->fileMock->expects($this->once())
             ->method('symlink')
-            ->with('realFromDir', 'realToDir')
+            ->with('realFromDir', 'toDir')
             ->willReturn(true);
 
         $this->assertTrue($this->symlinkStrategy->copy('fromDir', 'toDir'));
@@ -65,7 +59,7 @@ class SymlinkStrategyTest extends TestCase
             ->method('isExists')
             ->withConsecutive(
                 ['realFromDir'],
-                ['realToDir']
+                ['toDir']
             )
             ->willReturnOnConsecutiveCalls(
                 true,
@@ -73,16 +67,16 @@ class SymlinkStrategyTest extends TestCase
             );
         $this->fileMock->expects($this->once())
             ->method('isLink')
-            ->with('realToDir')
+            ->with('toDir')
             ->willReturn(true);
         $this->fileMock->expects($this->once())
             ->method('unLink')
-            ->with('realToDir');
+            ->with('toDir');
         $this->fileMock->expects($this->never())
             ->method('deleteDirectory');
         $this->fileMock->expects($this->once())
             ->method('symlink')
-            ->with('realFromDir', 'realToDir')
+            ->with('realFromDir', 'toDir')
             ->willReturn(true);
 
         $this->assertTrue($this->symlinkStrategy->copy('fromDir', 'toDir'));
