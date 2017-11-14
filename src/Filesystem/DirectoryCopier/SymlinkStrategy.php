@@ -8,6 +8,9 @@ namespace Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 
+/**
+ * Creates symlink from one folder to another.
+ */
 class SymlinkStrategy implements StrategyInterface
 {
     /**

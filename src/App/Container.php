@@ -223,10 +223,10 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
+                        $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
-                        $this->container->make(DeployProcess\PreDeploy\ProcessStaticContent::class),
+                        $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                     ],
                 ]);
             });

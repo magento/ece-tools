@@ -14,6 +14,7 @@ interface StrategyInterface
 {
     const STRATEGY_COPY = 'copy';
     const STRATEGY_SYMLINK = 'symlink';
+    const STRATEGY_SUB_SYMLINK = 'sub_symlink';
 
     /**
      * @param string $fromDirectory

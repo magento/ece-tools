@@ -36,6 +36,9 @@ class StrategyFactory
             case StrategyInterface::STRATEGY_SYMLINK:
                 $strategyInstance = $this->container->get(SymlinkStrategy::class);
                 break;
+            case StrategyInterface::STRATEGY_SUB_SYMLINK:
+                $strategyInstance = $this->container->get(SubSymlinkStrategy::class);
+                break;
             default:
                 throw new \RuntimeException(
                     sprintf('Strategy "%s" not exists', $strategy)

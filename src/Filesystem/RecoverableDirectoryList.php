@@ -55,6 +55,11 @@ class RecoverableDirectoryList
                 self::OPTION_STRATEGY => $isSymlinkEnabled ?
                     StrategyInterface::STRATEGY_SYMLINK : StrategyInterface::STRATEGY_COPY
             ];
+            $recoverableDirs[] = [
+                self::OPTION_DIRECTORY => 'pub/static',
+                self::OPTION_STRATEGY => $isSymlinkEnabled ?
+                    StrategyInterface::STRATEGY_SUB_SYMLINK : StrategyInterface::STRATEGY_COPY
+            ];
         }
 
         return $recoverableDirs;
