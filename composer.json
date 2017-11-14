@@ -26,10 +26,10 @@
     "phpunit/php-code-coverage": "^5.2"
   },
   "bin": [
+    "bin/ece-tools",
     "m2-ece-build",
     "m2-ece-deploy",
-    "m2-ece-scd-dump",
-    "bin/ece-tools"
+    "m2-ece-scd-dump"
   ],
   "autoload": {
     "psr-4": {
