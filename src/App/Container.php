@@ -250,16 +250,16 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->when(DbDump::class)
+        $this->container->when(DbDump::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->makeWith(ProcessComposite::class, [
+                return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->make(DbDumpProcess\DbDump::class),
+                        $this->container->make(DbDumpProcess\DbDump::class),
                     ],
                 ]);
             });
-        $this->when(DbDumpProcess\DbDump::class)
+        $this->container->when(DbDumpProcess\DbDump::class)
             ->needs(ConnectionInterface::class)
             ->give(ReadConnection::class);
     }
