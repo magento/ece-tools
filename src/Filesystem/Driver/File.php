@@ -8,7 +8,6 @@
 namespace Magento\MagentoCloud\Filesystem\Driver;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Class File.
@@ -17,19 +16,6 @@ use Magento\MagentoCloud\Shell\ShellInterface;
  */
 class File
 {
-    /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
-     * @param ShellInterface $shell
-     */
-    public function __construct(ShellInterface $shell)
-    {
-        $this->shell = $shell;
-    }
-
     /**
      * Returns last warning message string
      *
@@ -206,7 +192,7 @@ class File
         /**
          * Use shell for best performance.
          */
-        $this->shell->execute(sprintf(
+        shell_exec(sprintf(
             '/bin/bash -c "shopt -s dotglob; cp -R %s/* %s/"',
             $source,
             $destination
@@ -424,5 +410,14 @@ class File
         }
 
         return $result;
+    }
+
+    /**
+     * @param string $path
+     * @return mixed
+     */
+    public function requireFile(string $path)
+    {
+        return require $path;
     }
 }

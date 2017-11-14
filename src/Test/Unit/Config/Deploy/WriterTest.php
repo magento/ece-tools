@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Deploy;
 
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -20,9 +20,9 @@ class WriterTest extends TestCase
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var FileList|Mock
      */
-    private $directoryListMock;
+    private $fileListMock;
 
     /**
      * @var Reader|Mock
@@ -38,12 +38,12 @@ class WriterTest extends TestCase
     {
         $this->fileMock = $this->createMock(File::class);
         $this->readerMock = $this->createMock(Reader::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
 
         $this->writer = new Writer(
             $this->readerMock,
             $this->fileMock,
-            $this->directoryListMock
+            $this->fileListMock
         );
     }
 
@@ -55,8 +55,8 @@ class WriterTest extends TestCase
     public function testWrite(array $config, $updatedConfig)
     {
         $filePath = '/path/to/file';
-        $this->readerMock->expects($this->once())
-            ->method('getPath')
+        $this->fileListMock->expects($this->once())
+            ->method('getEnv')
             ->willReturn($filePath);
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
@@ -95,8 +95,8 @@ class WriterTest extends TestCase
     public function testUpdate(array $config, array $currentConfig, $updatedConfig)
     {
         $filePath = '/path/to/file';
-        $this->readerMock->expects($this->once())
-            ->method('getPath')
+        $this->fileListMock->expects($this->once())
+            ->method('getEnv')
             ->willReturn($filePath);
         $this->readerMock->expects($this->once())
             ->method('read')

@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -32,26 +31,18 @@ class CompileDi implements ProcessInterface
     private $buildConfig;
 
     /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param BuildConfig $buildConfig
-     * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
-        BuildConfig $buildConfig,
-        DirectoryList $directoryList
+        BuildConfig $buildConfig
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->buildConfig = $buildConfig;
-        $this->directoryList = $directoryList;
     }
 
     /**

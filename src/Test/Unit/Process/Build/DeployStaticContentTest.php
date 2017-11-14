@@ -7,13 +7,12 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\ArrayManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 
 /**
  * @inheritdoc
@@ -24,11 +23,6 @@ class DeployStaticContentTest extends TestCase
      * @var DeployStaticContent
      */
     private $process;
-
-    /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $fileMock;
 
     /**
      * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
@@ -46,19 +40,14 @@ class DeployStaticContentTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $directoryListMock;
-
-    /**
-     * @var ArrayManager|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $arrayManagerMock;
-
-    /**
      * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $processMock;
+
+    /**
+     * @var ConfigFileStructure|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $configFileStructureMock;
 
     /**
      * @inheritdoc
@@ -67,115 +56,55 @@ class DeployStaticContentTest extends TestCase
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->buildConfigMock = $this->getMockBuilder(Build::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->fileMock = $this->getMockBuilder(File::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->arrayManagerMock = $this->getMockBuilder(ArrayManager::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->buildConfigMock = $this->createMock(Build::class);
+        $this->environmentMock = $this->createMock(Environment::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->configFileStructureMock = $this->createMock(ConfigFileStructure::class);
 
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/_files');
+        $this->environmentMock->expects($this->once())
+            ->method('removeFlagStaticContentInBuild');
 
         $this->process = new DeployStaticContent(
             $this->loggerMock,
             $this->buildConfigMock,
-            $this->fileMock,
             $this->environmentMock,
-            $this->directoryListMock,
-            $this->arrayManagerMock,
-            $this->processMock
+            $this->processMock,
+            $this->configFileStructureMock
         );
     }
 
-
     public function testExecute()
     {
-        $flattenConfig = [
-            'scopes' => [
-                'websites' => [],
-                'stores' => [],
-            ],
-        ];
-
-        $this->fileMock->method('isExists')
-            ->with(__DIR__ . '/_files/app/etc/config.php')
-            ->willReturn(true);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
             ->with(Build::OPT_SKIP_SCD)
             ->willReturn(false);
-        $this->arrayManagerMock->method('flatten')
-            ->willReturn([
-                'scopes' => [
-                    'websites' => [],
-                    'stores' => [],
-                ],
-            ]);
-        $this->arrayManagerMock->expects($this->exactly(2))
-            ->method('filter')
-            ->willReturnMap([
-                [$flattenConfig, 'scopes/websites', false, ['websites1']],
-                [$flattenConfig, 'scopes/stores', false, ['store1']],
-            ]);
+        $resultMock = $this->createMock(Result\Success::class);
+        $this->configFileStructureMock->expects($this->once())
+            ->method('validate')
+            ->willReturn($resultMock);
         $this->processMock->expects($this->once())
             ->method('execute');
 
         $this->process->execute();
     }
 
-    public function testExecuteWithoutStores()
+    public function testExecuteWithNotValidConfig()
     {
-        $flattenConfig = [
-            'scopes' => [
-                'websites' => [],
-                'stores' => [],
-            ],
-        ];
-
-        $this->fileMock->method('isExists')
-            ->with(__DIR__ . '/_files/app/etc/config.php')
-            ->willReturn(true);
+        $resultMock = $this->createMock(Result\Error::class);
+        $resultMock->expects($this->once())
+            ->method('getError')
+            ->willReturn('error');
+        $this->configFileStructureMock->expects($this->once())
+            ->method('validate')
+            ->willReturn($resultMock);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
             ->with(Build::OPT_SKIP_SCD)
             ->willReturn(false);
-        $this->arrayManagerMock->method('flatten')
-            ->willReturn([
-                'scopes' => [
-                    'websites' => [],
-                    'stores' => [],
-                ],
-            ]);
-        $this->arrayManagerMock->expects($this->exactly(2))
-            ->method('filter')
-            ->withConsecutive(
-                [$flattenConfig, 'scopes/websites', false],
-                [$flattenConfig, 'scopes/stores', false]
-            )->willReturn([]);
-        $this->processMock->expects($this->never())
-            ->method('execute');
-
-        $this->process->execute();
-    }
-
-    public function testExecuteNoConfig()
-    {
-        $this->fileMock->method('isExists')
-            ->with(__DIR__ . '/_files/app/etc/config.php')
-            ->willReturn(false);
-        $this->buildConfigMock->expects($this->never())
-            ->method('get');
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Skipping static content deploy. error');
         $this->processMock->expects($this->never())
             ->method('execute');
 
@@ -184,13 +113,12 @@ class DeployStaticContentTest extends TestCase
 
     public function testExecuteSkipBuildOption()
     {
-        $this->fileMock->method('isExists')
-            ->with(__DIR__ . '/_files/app/etc/config.php')
-            ->willReturn(true);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
             ->with(Build::OPT_SKIP_SCD)
             ->willReturn(true);
+        $this->configFileStructureMock->expects($this->never())
+            ->method('validate');
         $this->processMock->expects($this->never())
             ->method('execute');
 

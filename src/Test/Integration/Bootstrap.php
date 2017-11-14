@@ -134,8 +134,17 @@ class Bootstrap
         ]);
 
         $server[\Magento\MagentoCloud\App\Bootstrap::INIT_PARAM_DIRS_CONFIG] = [
-            DirectoryList::MAGENTO_ROOT => [
+            DirectoryList::DIR_MAGENTO_ROOT => [
                 DirectoryList::PATH => '',
+            ],
+            DirectoryList::DIR_INIT => [
+                DirectoryList::PATH => 'init',
+            ],
+            DirectoryList::DIR_VAR => [
+                DirectoryList::PATH => 'var',
+            ],
+            DirectoryList::DIR_LOG => [
+                DirectoryList::PATH => 'var/log',
             ],
         ];
 
@@ -149,7 +158,7 @@ class Bootstrap
      */
     public function mergeConfig(array $environment): Repository
     {
-        return new Repository(array_replace_recursive(
+        return new Repository(array_replace(
             require $this->getConfigFile('environment.php'),
             $environment
         ));

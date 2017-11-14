@@ -45,50 +45,35 @@ class UpgradeTest extends TestCase
     }
 
     /**
-     * @param string $from
-     * @param string $to
+     * @param string $fromVersion
+     * @param string $toVersion
      * @dataProvider defaultDataProvider
      */
-    public function testDefault(string $from, string $to)
+    public function testDefault(string $fromVersion, string $toVersion)
     {
         $application = $this->bootstrap->createApplication([]);
-        $sandboxDir = $this->bootstrap->getSandboxDir();
         $config = $this->bootstrap->mergeConfig([]);
 
         if ($config->get('deploy.type') !== Bootstrap::DEPLOY_TYPE_PROJECT) {
             $this->markTestIncomplete('Git upgrades does not supported.');
         }
 
-        $this->bootstrap->execute(sprintf(
-            'composer require magento/product-enterprise-edition %s -n -d %s',
-            $from,
-            $sandboxDir
-        ));
-
-        $assertBuild = function () use ($application) {
-            $commandTester = new CommandTester($application->get(Build::NAME));
-            $commandTester->execute([]);
-            $this->assertSame(0, $commandTester->getStatusCode());
-        };
-        $assertDeploy = function () use ($application) {
-            $commandTester = new CommandTester($application->get(Deploy::NAME));
+        $executeAndAssert = function ($commandName) use ($application) {
+            $commandTester = new CommandTester($application->get($commandName));
             $commandTester->execute([]);
             $this->assertSame(0, $commandTester->getStatusCode());
         };
 
-        $assertBuild();
-        $assertDeploy();
+        $this->updateToVersion($fromVersion);
+
+        $executeAndAssert(Build::NAME);
+        $executeAndAssert(Deploy::NAME);
         $this->assertContentPresence();
 
-        $this->bootstrap->execute(sprintf(
-            'composer require magento/product-enterprise-edition %s -n -d %s',
-            $to,
-            $sandboxDir
-        ));
-        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s', $sandboxDir));
+        $this->updateToVersion($toVersion);
 
-        $assertBuild();
-        $assertDeploy();
+        $executeAndAssert(Build::NAME);
+        $executeAndAssert(Deploy::NAME);
         $this->assertContentPresence();
     }
 
@@ -116,5 +101,16 @@ class UpgradeTest extends TestCase
         $pageContent = file_get_contents($defaultRoute);
 
         $this->assertContains('Home Page', $pageContent, 'Check "Home Page" phrase presence');
+    }
+
+    private function updateToVersion($version)
+    {
+        $sandboxDir = $this->bootstrap->getSandboxDir();
+        $this->bootstrap->execute(sprintf(
+            'composer require magento/product-enterprise-edition %s --no-update -n -d %s',
+            $version,
+            $sandboxDir
+        ));
+        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s', $sandboxDir));
     }
 }
