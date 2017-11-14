@@ -96,13 +96,15 @@ class DbDumpTest extends TestCase
     public function testExecuteWithException()
     {
         $errorMessage = 'Some error';
-        $this->loggerMock->expects($this->exactly(3))
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Waiting for lock on db dump.'],
-                ['Start creation DB dump...'],
-                ['ERROR: ' . $errorMessage]
+                ['Start creation DB dump...']
             );
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with($errorMessage);
 
         $this->setConnectionData();
         $this->shellMock->expects($this->once())

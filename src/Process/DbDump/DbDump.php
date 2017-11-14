@@ -87,7 +87,7 @@ class DbDump implements ProcessInterface
         $this->logger->info('Waiting for lock on db dump.');
 
         if ($lockFileHandle === false) {
-            $this->logger->info('Could not get the lock file!');
+            $this->logger->error('Could not get the lock file!');
             return;
         }
 
@@ -99,7 +99,7 @@ class DbDump implements ProcessInterface
                 $errors = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
 
                 if ($errors) {
-                    $this->logger->info('Error has occurred during mysqldump');
+                    $this->logger->error('Error has occurred during mysqldump');
                     $this->shell->execute('rm ' . $dumpFile);
                 } else {
                     $this->logger->info('Finished DB dump, it can be found here: ' . $dumpFile);
@@ -115,7 +115,7 @@ class DbDump implements ProcessInterface
             }
             fclose($lockFileHandle);
         } catch (\Exception $e) {
-            $this->logger->info('ERROR: ' . $e->getMessage());
+            $this->logger->error($e->getMessage());
             fclose($lockFileHandle);
         }
     }
