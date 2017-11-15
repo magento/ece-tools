@@ -16,7 +16,6 @@ env:
     - COMPOSER_BIN_DIR=~/bin
     - MAGENTO_HOST_NAME="magento2.travis"
     - SANDBOX_KEY="travis"
-    - MIN_CODE_COVERAGE=84
   matrix:
     - TEST_SUITE=static
     - TEST_SUITE=unit
