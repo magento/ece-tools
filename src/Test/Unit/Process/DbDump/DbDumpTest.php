@@ -67,6 +67,9 @@ class DbDumpTest extends TestCase
         $timeMock->expects($this->once())
             ->willReturn($time);
 
+        $this->defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'fopen');
+        $this->defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'flock');
+
         $this->process = new DbDump(
             $this->connectionDataMock,
             $this->loggerMock,
@@ -121,6 +124,47 @@ class DbDumpTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new \Exception($errorMessage));
+
+        $this->process->execute();
+    }
+
+    public function testFailedCreationLockFile()
+    {
+        // Mock fopen() function which is used for creation lock file
+        $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\Process\DbDump', 'fopen');
+        $fopenMock->expects($this->once())
+            ->willReturn(false);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Waiting for lock on db dump.');
+
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with('Could not get the lock file!');
+
+        $this->shellMock->expects($this->never())
+            ->method('execute');
+
+        $this->process->execute();
+    }
+
+    public function testLockedFile()
+    {
+        // Mock fopen() function which is used for creation lock file
+        $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\Process\DbDump', 'flock');
+        $fopenMock->expects($this->once())
+            ->willReturn(false);
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Waiting for lock on db dump.'],
+                ['Dump process is locked!']
+            );
+
+        $this->shellMock->expects($this->never())
+            ->method('execute');
 
         $this->process->execute();
     }
