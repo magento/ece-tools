@@ -102,7 +102,6 @@ class DbDumpTest extends TestCase
             ->with($command);
 
         $this->process->execute();
-
     }
 
     public function testExecuteWithException()
