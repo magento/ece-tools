@@ -17,6 +17,8 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
  */
 class DbDumpTest extends TestCase
 {
+    use \phpmock\phpunit\PHPMock;
+
     /**
      * @var DbDump
      */
@@ -38,6 +40,13 @@ class DbDumpTest extends TestCase
     private $shellMock;
 
     /**
+     * Dump file path
+     *
+     * @var string
+     */
+    private $dumpFilePath;
+
+    /**
      * Setup the test environment.
      */
     protected function setUp()
@@ -48,6 +57,15 @@ class DbDumpTest extends TestCase
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
+
+        // Mock time() function which is used as part of file name
+        $temporaryDirectory = sys_get_temp_dir();
+        $time = 123456;
+        $this->dumpFilePath = $temporaryDirectory . '/dump-' . $time . '.sql.gz';
+
+        $timeMock = $this->getFunctionMock('Magento\MagentoCloud\Process\DbDump', 'time');
+        $timeMock->expects($this->once())
+            ->willReturn($time);
 
         $this->process = new DbDump(
             $this->connectionDataMock,
@@ -73,24 +91,18 @@ class DbDumpTest extends TestCase
             ->withConsecutive(
                 ['Waiting for lock on db dump.'],
                 ['Start creation DB dump...'],
-                [$this->captureArg($thirdLogData)]
+                ['Finished DB dump, it can be found here: ' . $this->dumpFilePath]
             );
 
         $this->setConnectionData($host, $port, $dbName, $user, $password);
+
+        $command = 'bash -c "set -o pipefail; ' . $expectedCommand . ' | gzip > ' . $this->dumpFilePath . '"';
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with($this->captureArg($actualCommand));
+            ->with($command);
 
         $this->process->execute();
 
-        // As we do not know the dump file name before running script,
-        // we can retrieve it from arguments passed to log methods
-        $dumpFile = trim(substr($thirdLogData, strrpos($thirdLogData, ' ')));
-
-        $this->assertEquals('Finished DB dump, it can be found here: ' . $dumpFile, $thirdLogData);
-
-        $expectedCommand = 'bash -c "set -o pipefail; ' . $expectedCommand . ' | gzip > %s"';
-        $this->assertEquals(sprintf($expectedCommand, $dumpFile), $actualCommand);
     }
 
     public function testExecuteWithException()
@@ -170,19 +182,5 @@ class DbDumpTest extends TestCase
         $this->connectionDataMock->expects($this->once())
             ->method('getPassword')
             ->willReturn($password);
-    }
-
-    /**
-     * Method is used to retrieve argument sent to mock object
-     *
-     * @param $argumentValue string
-     * @return callable
-     */
-    private function captureArg(&$argumentValue)
-    {
-        return $this->callback(function ($argToMock) use (&$argumentValue) {
-            $argumentValue = $argToMock;
-            return true;
-        });
     }
 }
