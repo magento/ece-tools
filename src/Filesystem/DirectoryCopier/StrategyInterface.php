@@ -17,10 +17,10 @@ interface StrategyInterface
     const STRATEGY_SUB_SYMLINK = 'sub_symlink';
 
     /**
-     * @param string $fromDirectory
-     * @param string $toDirectory
-     * @return bool
-     * @throws FileSystemException
+     * @param string $fromDirectory Origin directory
+     * @param string $toDirectory Destination directory
+     * @return bool True if copy process finished successfully, False if folders copying wasn't performed
+     * @throws FileSystemException When happened filesystem related error
      */
     public function copy(string $fromDirectory, string $toDirectory): bool;
 }

@@ -45,7 +45,7 @@ class CleanStaticContent implements ProcessInterface
     /**
      * Clean static files if static content deploy was performed during build phase.
      *
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function execute()
     {

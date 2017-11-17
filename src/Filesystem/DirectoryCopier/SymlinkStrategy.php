@@ -21,16 +21,15 @@ class SymlinkStrategy implements StrategyInterface
     /**
      * @param File $file
      */
-    public function __construct(
-        File $file
-    ) {
+    public function __construct(File $file)
+    {
         $this->file = $file;
     }
 
     /**
      * Creates symlink from one folder to another. Remove or unlink directory if it exists previously.
      *
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function copy(string $fromDirectory, string $toDirectory): bool
     {

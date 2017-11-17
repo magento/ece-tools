@@ -451,7 +451,7 @@ class File
     /**
      * Returns directory iterator for given path
      *
-     * @param $path
+     * @param string $path
      * @return \DirectoryIterator
      */
     public function getDirectoryIterator($path): \DirectoryIterator

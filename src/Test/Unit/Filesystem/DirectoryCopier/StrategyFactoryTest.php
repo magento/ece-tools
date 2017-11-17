@@ -33,9 +33,9 @@ class StrategyFactoryTest extends TestCase
     }
 
     /**
-     * @dataProvider createDataProvider
      * @param string $strategy
      * @param string $expectedClass
+     * @dataProvider createDataProvider
      */
     public function testCreate(string $strategy, string $expectedClass)
     {
@@ -50,7 +50,10 @@ class StrategyFactoryTest extends TestCase
         );
     }
 
-    public function createDataProvider()
+    /**
+     * @return array
+     */
+    public function createDataProvider(): array
     {
         return [
             [

@@ -30,7 +30,7 @@ class SubSymlinkStrategy implements StrategyInterface
     /**
      * Creates symlink from directory folders and files to another directory.
      *
-     * @inheritdoc
+     * {@inheritdoc}
      */
     public function copy(string $fromDirectory, string $toDirectory): bool
     {
