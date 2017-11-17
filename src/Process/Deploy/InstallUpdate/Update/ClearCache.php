@@ -10,6 +10,12 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Class ClearCache.
+ *
+ * @deprecated This functionality will be moved to post-deploy hook.
+ * @see \Magento\MagentoCloud\Process\PostDeploy\CleanCache
+ */
 class ClearCache implements ProcessInterface
 {
     /**
@@ -38,7 +44,10 @@ class ClearCache implements ProcessInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @deprecated This functionality will be moved to post-deploy hook.
+     * @see \Magento\MagentoCloud\Process\PostDeploy\CleanCache
      */
     public function execute()
     {

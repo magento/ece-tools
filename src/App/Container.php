@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\App;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
@@ -16,6 +17,7 @@ use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
+use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -248,6 +250,15 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->get(BuildProcess\DeployStaticContent\Generate::class),
+                    ],
+                ]);
+            });
+        $this->container->when(PostDeploy::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->make(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);
             });
