@@ -45,3 +45,5 @@ This test will show you pretty report for unit tests coverage.
 1. Run `composer test-coverage`
 2. Navigate to `tests/unit/tmp/coverage` and open `index.html` file in browser
 
+! Be sure to enable xDebug for this test
+
