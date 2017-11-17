@@ -42,11 +42,13 @@ class SubSymlinkStrategyTest extends TestCase
 
         $splFileInfoOne = $this->createFileInfoMock(false, 'file1');
         $splFileInfoTwo = $this->createFileInfoMock(false, 'file2');
+        $splFileInfoDot = $this->createFileInfoMock(true, '.');
 
         $directoryIteratorMock = $this->createMock(\DirectoryIterator::class);
         $this->mockIterator($directoryIteratorMock, [
             $splFileInfoOne,
-            $splFileInfoTwo
+            $splFileInfoTwo,
+            $splFileInfoDot
         ]);
         $this->fileMock->expects($this->once())
             ->method('getDirectoryIterator')
@@ -87,9 +89,14 @@ class SubSymlinkStrategyTest extends TestCase
         $splFileInfoMock->expects($this->once())
             ->method('isDot')
             ->willReturn($isDot);
-        $splFileInfoMock->expects($this->exactly(2))
-            ->method('getFilename')
-            ->willReturn($fileName);
+        if ($isDot) {
+            $splFileInfoMock->expects($this->never())
+                ->method('getFilename');
+        } else {
+            $splFileInfoMock->expects($this->exactly(2))
+                ->method('getFilename')
+                ->willReturn($fileName);
+        }
 
         return $splFileInfoMock;
     }

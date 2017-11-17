@@ -53,7 +53,7 @@ class SymlinkStrategyTest extends TestCase
         $this->assertTrue($this->symlinkStrategy->copy('fromDir', 'toDir'));
     }
 
-    public function testCopyToExistsDirectory()
+    public function testCopyToExistsLinkedDirectory()
     {
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
@@ -74,6 +74,35 @@ class SymlinkStrategyTest extends TestCase
             ->with('toDir');
         $this->fileMock->expects($this->never())
             ->method('deleteDirectory');
+        $this->fileMock->expects($this->once())
+            ->method('symlink')
+            ->with('realFromDir', 'toDir')
+            ->willReturn(true);
+
+        $this->assertTrue($this->symlinkStrategy->copy('fromDir', 'toDir'));
+    }
+
+    public function testCopyToExistsDirectory()
+    {
+        $this->fileMock->expects($this->exactly(2))
+            ->method('isExists')
+            ->withConsecutive(
+                ['realFromDir'],
+                ['toDir']
+            )
+            ->willReturnOnConsecutiveCalls(
+                true,
+                true
+            );
+        $this->fileMock->expects($this->once())
+            ->method('isLink')
+            ->with('toDir')
+            ->willReturn(false);
+        $this->fileMock->expects($this->never())
+            ->method('unLink');
+        $this->fileMock->expects($this->once())
+            ->method('deleteDirectory')
+            ->with('toDir');
         $this->fileMock->expects($this->once())
             ->method('symlink')
             ->with('realFromDir', 'toDir')

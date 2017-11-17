@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryCopier\SubSymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SymlinkStrategy;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -63,7 +64,11 @@ class StrategyFactoryTest extends TestCase
             [
                 StrategyInterface::STRATEGY_SYMLINK,
                 SymlinkStrategy::class
-            ]
+            ],
+            [
+                StrategyInterface::STRATEGY_SUB_SYMLINK,
+                SubSymlinkStrategy::class
+            ],
         ];
     }
 

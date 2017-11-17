@@ -51,6 +51,35 @@ class CopyStrategyTest extends TestCase
         $this->assertTrue($this->copyStrategy->copy('fromDir', 'toDir'));
     }
 
+    public function testCopyToDirectoryIsLink()
+    {
+        $this->fileMock->expects($this->exactly(2))
+            ->method('isExists')
+            ->withConsecutive(
+                ['fromDir'],
+                ['toDir']
+            )
+            ->willReturnOnConsecutiveCalls(
+                true,
+                false
+            );
+        $this->fileMock->expects($this->once())
+            ->method('isLink')
+            ->with('toDir')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('unLink')
+            ->with('toDir');
+        $this->fileMock->expects($this->once())
+            ->method('createDirectory')
+            ->with('toDir');
+        $this->fileMock->expects($this->once())
+            ->method('copyDirectory')
+            ->with('fromDir', 'toDir');
+
+        $this->assertTrue($this->copyStrategy->copy('fromDir', 'toDir'));
+    }
+
     /**
      * @expectedException \Magento\MagentoCloud\Filesystem\FileSystemException
      * @expectedExceptionMessage Can't copy directory fromDir. Directory does not exist.

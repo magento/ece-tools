@@ -63,4 +63,19 @@ class CleanStaticContentTest extends TestCase
 
         $this->process->execute();
     }
+
+    public function testExecuteWithoutDeployInBuild()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('isStaticDeployInBuild')
+            ->willReturn(false);
+        $this->staticContentCleanerMock->expects($this->never())
+            ->method('cleanPubStatic');
+        $this->staticContentCleanerMock->expects($this->never())
+            ->method('cleanViewPreprocessed');
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+
+        $this->process->execute();
+    }
 }
