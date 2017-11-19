@@ -49,7 +49,7 @@ cp environment.php.dist environemnt.php
 It will create a snapshot folder under `tests/integration/tmp` and clone the project.
 Then, all available tests will be executed.
 
-## Code coverage
+## Code coverage report
 
 This test will generate a pretty report for unit test coverage.
 
