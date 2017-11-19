@@ -6,6 +6,7 @@ This way will run next tests:
 
 - Static tests, including PHPMD and PHPCS
 - All unit tests
+- Code coverage test
 
 This is the best way to run tests locally.
 
