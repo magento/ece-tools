@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * Creates symlink from directory folders and files to another directory.
+ *
+ * For this strategy destination folder should exists and doesn't contain symlinks or folders that could conflicts
+ * with new symlinks.
  */
 class SubSymlinkStrategy implements StrategyInterface
 {
