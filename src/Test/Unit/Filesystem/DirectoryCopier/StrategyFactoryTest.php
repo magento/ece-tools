@@ -74,7 +74,7 @@ class StrategyFactoryTest extends TestCase
 
     /**
      * @expectedException \RuntimeException
-     * @expectedExceptionMessage Strategy "not_exists_strategy" not exists
+     * @expectedExceptionMessage Strategy "not_exists_strategy" doesn't exist
      */
     public function testCopyFromDirNotExists()
     {

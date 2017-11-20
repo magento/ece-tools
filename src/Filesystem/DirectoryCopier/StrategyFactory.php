@@ -44,7 +44,7 @@ class StrategyFactory
                 break;
             default:
                 throw new \RuntimeException(
-                    sprintf('Strategy "%s" not exists', $strategy)
+                    sprintf('Strategy "%s" doesn\'t exist', $strategy)
                 );
         }
 
