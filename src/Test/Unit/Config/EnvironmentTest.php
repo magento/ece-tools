@@ -191,14 +191,6 @@ class EnvironmentTest extends TestCase
         );
     }
 
-    public function testGetRecoverableDirectories()
-    {
-        $this->assertSame(
-            ['var/view_preprocessed', 'app/etc', 'pub/media'],
-            $this->environment->getRecoverableDirectories()
-        );
-    }
-
     public function testIsDeployStaticContent()
     {
         $this->setVariables([
