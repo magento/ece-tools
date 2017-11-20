@@ -27,6 +27,11 @@ class DbDump implements ProcessInterface
     const LOCK_FILE_NAME = 'dbdump.lock';
 
     /**
+     * Timeout for mysqldump command in seconds
+     */
+    const DUMP_TIMEOUT = 3600;
+
+    /**
      * Database connection data for read operations
      *
      * @var ConnectionInterface
@@ -127,7 +132,8 @@ class DbDump implements ProcessInterface
      */
     private function getCommand()
     {
-        $command = "timeout 3600 mysqldump -h {$this->connectionData->getHost()} -P {$this->connectionData->getPort()}"
+        $command = 'timeout ' . self::DUMP_TIMEOUT
+            . " mysqldump -h {$this->connectionData->getHost()} -P {$this->connectionData->getPort()}"
             . " -u {$this->connectionData->getUser()}";
         $password = $this->connectionData->getPassword();
         if ($password) {
