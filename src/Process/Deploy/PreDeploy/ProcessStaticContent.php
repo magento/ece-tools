@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Util\BuildDirCopier;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
 use Magento\MagentoCloud\Util\StaticContentSymlink;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Config\Build as BuildConfig;
 
 class ProcessStaticContent implements ProcessInterface
 {
@@ -40,24 +41,32 @@ class ProcessStaticContent implements ProcessInterface
     private $staticContentSymlink;
 
     /**
+     * @var BuildConfig
+     */
+    private $buildConfig;
+
+    /**
      * @param LoggerInterface $logger
      * @param Environment $env
      * @param StaticContentCleaner $staticContentCleaner
      * @param StaticContentSymlink $staticContentSymlink
      * @param BuildDirCopier $buildDirCopier
+     * @param BuildConfig $buildConfig
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $env,
         StaticContentCleaner $staticContentCleaner,
         StaticContentSymlink $staticContentSymlink,
-        BuildDirCopier $buildDirCopier
+        BuildDirCopier $buildDirCopier,
+        BuildConfig $buildConfig
     ) {
         $this->logger = $logger;
         $this->env = $env;
         $this->staticContentCleaner = $staticContentCleaner;
         $this->buildDirCopier = $buildDirCopier;
         $this->staticContentSymlink = $staticContentSymlink;
+        $this->buildConfig = $buildConfig;
     }
 
     /**
@@ -70,6 +79,12 @@ class ProcessStaticContent implements ProcessInterface
     public function execute()
     {
         if (!$this->env->isStaticDeployInBuild()) {
+            return;
+        }
+
+        if ($this->buildConfig->isSkipStaticMount()) {
+            $this->logger->info('Static content folder was not mounted. Read-only mode used.');
+
             return;
         }
 
