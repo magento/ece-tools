@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
+use Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -51,6 +52,7 @@ class Container implements ContainerInterface
         /**
          * Instance configuration.
          */
+        $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
             function () use ($root, $config) {
@@ -90,6 +92,9 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\Connection::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
+        $this->container->singleton(DirectoryCopier\CopyStrategy::class);
+        $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
+        $this->container->singleton(DirectoryCopier\StrategyFactory::class);
         /**
          * Contextual binding.
          */
@@ -224,10 +229,10 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
+                        $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
-                        $this->container->make(DeployProcess\PreDeploy\ProcessStaticContent::class),
+                        $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                     ],
                 ]);
             });

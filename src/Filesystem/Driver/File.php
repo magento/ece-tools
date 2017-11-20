@@ -50,6 +50,42 @@ class File
     }
 
     /**
+     * Tells whether the filename is a link
+     *
+     * @param string $path
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function isLink($path): bool
+    {
+        clearstatcache();
+        $result = @is_link($path);
+        if ($result === null) {
+            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Unlink symlink path
+     *
+     * @param string $path
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function unLink($path): bool
+    {
+        clearstatcache();
+        $result = @unlink($path);
+        if ($result === null) {
+            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
+
+    /**
      * Parse a configuration file.
      *
      * @param string $path
@@ -410,6 +446,17 @@ class File
         }
 
         return $result;
+    }
+
+    /**
+     * Returns directory iterator for given path
+     *
+     * @param string $path
+     * @return \DirectoryIterator
+     */
+    public function getDirectoryIterator($path): \DirectoryIterator
+    {
+        return new \DirectoryIterator($path);
     }
 
     /**
