@@ -122,5 +122,4 @@ class ConnectionTest extends TestCase
             ['production_db_name', 3304]
         ];
     }
-
 }
