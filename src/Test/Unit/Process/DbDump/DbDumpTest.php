@@ -25,7 +25,7 @@ class DbDumpTest extends TestCase
     private $process;
 
     /**
-     * @var ConnectionInterface
+     * @var ConnectionInterface|Mock
      */
     private $connectionDataMock;
 
@@ -165,6 +165,47 @@ class DbDumpTest extends TestCase
 
         $this->shellMock->expects($this->never())
             ->method('execute');
+
+        $this->process->execute();
+    }
+
+    /**
+     * @param string $host
+     * @param int $port
+     * @param string $dbName
+     * @param string $user
+     * @param string|null $password
+     * @param string $expectedCommand
+     *
+     * @dataProvider executeDataProvider
+     */
+    public function testExecuteWithErrors($host, $port, $dbName, $user, $password, $expectedCommand)
+    {
+        $executeOutput = ['Some error'];
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Waiting for lock on db dump.'],
+                ['Start creation DB dump...']
+            );
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with('Error has occurred during mysqldump');
+
+        $this->setConnectionData($host, $port, $dbName, $user, $password);
+
+        $command = 'bash -c "set -o pipefail; ' . $expectedCommand . ' | gzip > ' . $this->dumpFilePath . '"';
+
+        $this->shellMock->expects($this->exactly(2))
+            ->method('execute')
+            ->withConsecutive(
+                [$command],
+                ['rm ' . $this->dumpFilePath]
+            )->willReturnMap([
+                [$command, $executeOutput],
+                ['rm ' . $this->dumpFilePath, true]
+            ]);
+
 
         $this->process->execute();
     }
