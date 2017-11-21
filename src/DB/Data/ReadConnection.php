@@ -46,7 +46,7 @@ class ReadConnection implements ConnectionInterface
      * Production or staging projects have 3 nodes but for read operations we need to connect to localhost
      * with 3304 port and this connection will proxy to appropriate server.
      *
-     * @return string
+     * {@inheritdoc}
      */
     public function getHost()
     {
@@ -63,11 +63,11 @@ class ReadConnection implements ConnectionInterface
      * so we should always use 3304 for them for localhost, this connection will proxy to appropriate server.
      * For integration we have only one node and 3306 is always used.
      *
-     * @return int
+     * {@inheritdoc}
      */
     public function getPort()
     {
-        return $this->isIntegration() ? 3306 : 3304;
+        return $this->isIntegration() ? '3306' : '3304';
     }
 
     /**

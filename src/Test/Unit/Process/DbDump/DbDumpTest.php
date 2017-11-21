@@ -224,7 +224,7 @@ class DbDumpTest extends TestCase
                 'main',
                 'user',
                 null,
-                sprintf($command, '-h localhost -P 3306 -u user main')
+                sprintf($command, "-h 'localhost' -P '3306' -u 'user' 'main'")
             ],
             [
                 'localhost',
@@ -232,7 +232,7 @@ class DbDumpTest extends TestCase
                 'main',
                 'user',
                 'pswd',
-                sprintf($command, '-h localhost -P 3306 -u user -ppswd main')
+                sprintf($command, "-h 'localhost' -P '3306' -u 'user' -p'pswd' 'main'")
             ]
         ];
     }

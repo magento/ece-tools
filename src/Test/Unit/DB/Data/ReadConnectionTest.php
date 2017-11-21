@@ -118,8 +118,8 @@ class ConnectionTest extends TestCase
     public function getPortDataProvider()
     {
         return [
-            ['database.internal', 3306],
-            ['production_db_name', 3304]
+            ['database.internal', '3306'],
+            ['production_db_name', '3304']
         ];
     }
 }

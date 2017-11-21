@@ -20,7 +20,7 @@ interface ConnectionInterface
     /**
      * Returns TCP/IP port number to use for the connection
      *
-     * @return int
+     * @return string
      */
     public function getPort();
 

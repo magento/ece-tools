@@ -133,13 +133,15 @@ class DbDump implements ProcessInterface
     private function getCommand()
     {
         $command = 'timeout ' . self::DUMP_TIMEOUT
-            . " mysqldump -h {$this->connectionData->getHost()} -P {$this->connectionData->getPort()}"
-            . " -u {$this->connectionData->getUser()}";
+            . ' mysqldump -h ' . escapeshellarg($this->connectionData->getHost())
+            . ' -P ' . escapeshellarg($this->connectionData->getPort())
+            . ' -u ' . escapeshellarg($this->connectionData->getUser());
         $password = $this->connectionData->getPassword();
         if ($password) {
-            $command .= " -p{$password}";
+            $command .= ' -p' . escapeshellarg($password);
         }
-        $command .= " {$this->connectionData->getDbName()} --single-transaction --no-autocommit --quick";
+        $command .= ' ' . escapeshellarg($this->connectionData->getDbName())
+            . ' --single-transaction --no-autocommit --quick';
 
         return $command;
     }
