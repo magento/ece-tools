@@ -80,14 +80,18 @@ class Redis implements ProcessInterface
                 ? $cacheConfig
                 : array_replace_recursive($config['cache'], $cacheConfig);
 
+            $redisSessionConfig = [
+                'host' => $redisConfig[0]['host'],
+                'port' => $redisConfig[0]['port'],
+                'database' => 0,
+                'disable_locking' => intval($this->isLockingDisabled())
+            ];
             $config['session'] = [
                 'save' => 'redis',
-                'redis' => [
-                    'host' => $redisConfig[0]['host'],
-                    'port' => $redisConfig[0]['port'],
-                    'database' => 0,
-                    'disable_locking' => intval($this->isLockingDisabled())
-                ],
+                'redis' => array_replace_recursive(
+                    $config['session']['redis'] ?? [],
+                    $redisSessionConfig
+                )
             ];
         } else {
             $config = $this->removeRedisConfiguration($config);
