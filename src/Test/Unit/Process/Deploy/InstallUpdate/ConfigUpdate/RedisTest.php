@@ -49,7 +49,7 @@ class RedisTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->setMethods(['getRelationships', 'getAdminUrl'])
+            ->setMethods(['getRelationships', 'getAdminUrl', 'getVariable'])
             ->disableOriginalConstructor()
             ->getMock();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
@@ -65,7 +65,12 @@ class RedisTest extends TestCase
         );
     }
 
-    public function testExecute()
+    /**
+     * @param $envSessionLocking
+     * @param int $expectedDisableLocking
+     * @dataProvider executeDataProvider
+     */
+    public function testExecute($envSessionLocking, int $expectedDisableLocking)
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -83,7 +88,10 @@ class RedisTest extends TestCase
         $this->environmentMock->expects($this->any())
             ->method('getAdminUrl')
             ->willReturn('admin');
-
+        $this->environmentMock->expects($this->once())
+            ->method('getVariable')
+            ->with(Environment::VAR_REDIS_SESSION_DISABLE_LOCKING)
+            ->willReturn($envSessionLocking);
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
@@ -117,11 +125,30 @@ class RedisTest extends TestCase
                         'host' => '127.0.0.1',
                         'port' => '6379',
                         'database' => 0,
+                        'disable_locking' => $expectedDisableLocking
                     ],
                 ],
             ]);
 
         $this->process->execute();
+    }
+
+    public function executeDataProvider()
+    {
+        return [
+            [
+                '',
+                1
+            ],
+            [
+                Environment::VAL_DISABLED,
+                0
+            ],
+            [
+                Environment::VAL_ENABLED,
+                1
+            ]
+        ];
     }
 
     public function testExecuteRemovingRedis()
@@ -177,6 +204,85 @@ class RedisTest extends TestCase
                 ],
                 'session' => [
                     'save' => 'db',
+                ],
+            ]);
+
+        $this->process->execute();
+    }
+
+
+    public function testExecuteWithDifferentRedisOptions()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating env.php Redis cache configuration.');
+        $this->environmentMock->expects($this->any())
+            ->method('getRelationships')
+            ->willReturn([
+                'redis' => [
+                    0 => [
+                        'host' => '127.0.0.1',
+                        'port' => '6379'
+                    ]
+                ],
+            ]);
+        $this->environmentMock->expects($this->any())
+            ->method('getAdminUrl')
+            ->willReturn('admin');
+        $this->environmentMock->expects($this->once())
+            ->method('getVariable')
+            ->with(Environment::VAR_REDIS_SESSION_DISABLE_LOCKING)
+            ->willReturn('');
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'session' => [
+                    'redis' => [
+                        'max_concurrency' => 10,
+                        'bot_first_lifetime' => 100,
+                        'bot_lifetime' => 10000,
+                        'min_lifetime' => 100,
+                        'max_lifetime' => 10000
+                    ]
+                ]
+            ]);
+
+        $this->configWriterMock->expects($this->once())
+            ->method('write')
+            ->with([
+                'cache' => [
+                    'frontend' => [
+                        'default' => [
+                            'backend' => 'Cm_Cache_Backend_Redis',
+                            'backend_options' => [
+                                'server' => '127.0.0.1',
+                                'port' => '6379',
+                                'database' => 1,
+                            ],
+                        ],
+                        'page_cache' => [
+                            'backend' => 'Cm_Cache_Backend_Redis',
+                            'backend_options' => [
+                                'server' => '127.0.0.1',
+                                'port' => '6379',
+                                'database' => 1,
+                            ],
+                        ],
+                    ],
+                ],
+                'session' => [
+                    'save' => 'redis',
+                    'redis' => [
+                        'host' => '127.0.0.1',
+                        'port' => '6379',
+                        'database' => 0,
+                        'disable_locking' => 1,
+                        'max_concurrency' => 10,
+                        'bot_first_lifetime' => 100,
+                        'bot_lifetime' => 10000,
+                        'min_lifetime' => 100,
+                        'max_lifetime' => 10000
+                    ],
                 ],
             ]);
 

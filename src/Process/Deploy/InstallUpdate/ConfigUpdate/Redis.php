@@ -80,13 +80,18 @@ class Redis implements ProcessInterface
                 ? $cacheConfig
                 : array_replace_recursive($config['cache'], $cacheConfig);
 
+            $redisSessionConfig = [
+                'host' => $redisConfig[0]['host'],
+                'port' => $redisConfig[0]['port'],
+                'database' => 0,
+                'disable_locking' => (int)$this->isLockingDisabled()
+            ];
             $config['session'] = [
                 'save' => 'redis',
-                'redis' => [
-                    'host' => $redisConfig[0]['host'],
-                    'port' => $redisConfig[0]['port'],
-                    'database' => 0,
-                ],
+                'redis' => array_replace_recursive(
+                    $config['session']['redis'] ?? [],
+                    $redisSessionConfig
+                )
             ];
         } else {
             $config = $this->removeRedisConfiguration($config);
@@ -121,5 +126,19 @@ class Redis implements ProcessInterface
         }
 
         return $config;
+    }
+
+    /**
+     * Checks if disable_locking options is enabled.
+     * By default this method returns true and disable_locking options will be set to 1.
+     * For turning this option off environment variable 'REDIS_SESSION_DISABLE_LOCKING' should have value 'disabled'.
+     *
+     * @return bool
+     */
+    private function isLockingDisabled(): bool
+    {
+        $envValue = $this->environment->getVariable(Environment::VAR_REDIS_SESSION_DISABLE_LOCKING);
+
+        return $envValue !== Environment::VAL_DISABLED;
     }
 }
