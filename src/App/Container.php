@@ -188,8 +188,8 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\UpdateUrlsInDbConfig::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\UpdateUrlsInEnvConfig::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\UrlsInDbConfig::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\UrlsInEnvConfig::class),
                     ],
                 ]);
             });

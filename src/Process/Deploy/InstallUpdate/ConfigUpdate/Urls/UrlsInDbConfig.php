@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class UpdateUrlsInDbConfig implements ProcessInterface
+class UrlsInDbConfig implements ProcessInterface
 {
     /**
      * @var Environment
@@ -64,21 +64,38 @@ class UpdateUrlsInDbConfig implements ProcessInterface
         $configBaseUrls = $this->getConfigBaseUrls();
 
         foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
-            if (isset($actualUrl['']) && isset($configBaseUrls[$typeUrl])) {
-                $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
-                $actualUrlHost = parse_url($actualUrl[''])['host'];
-                if($baseUrlHost !== $actualUrlHost){
-                    $this->updateUrl($baseUrlHost,$actualUrlHost);
-                }
+            if (empty($actualUrl['']) or empty($configBaseUrls[$typeUrl])) {
+                continue;
             }
+            $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
+            $actualUrlHost = parse_url($actualUrl[''])['host'];
+
+            if ($baseUrlHost === $actualUrlHost) {
+                continue;
+            }
+
+            $changedRowsCount = $this->updateUrl($baseUrlHost, $actualUrlHost);
+
+            if (0 === $changedRowsCount) {
+                continue;
+            }
+            $this->logger->info(sprintf('Replace host: [%s] => [%s]', $baseUrlHost, $actualUrlHost));
         }
     }
 
     /**
+     * Returns the base_url configuration with `core_config_data` table.
+     *
+     * ```
+     * array(
+     *     'secure' => 'https://example.com',
+     *     'unsecure' => 'http://example.com',
+     * )
+     * ```
      * @return array
      */
-    private function getConfigBaseUrls(){
-
+    private function getConfigBaseUrls()
+    {
         $configBaseUrls = $this->connection->select(
             'SELECT `value`, `path` FROM `core_config_data` WHERE (`path`=? OR `path`= ?) AND `scope_id` = ?',
             [
@@ -88,7 +105,7 @@ class UpdateUrlsInDbConfig implements ProcessInterface
             ]
         );
         $result = [];
-        foreach ($configBaseUrls as $configBaseUrl){
+        foreach ($configBaseUrls as $configBaseUrl) {
             $key = $configBaseUrl['path'] == 'web/secure/base_url' ? 'secure' : 'unsecure';
             $result[$key] = $configBaseUrl['value'];
         }
@@ -97,11 +114,16 @@ class UpdateUrlsInDbConfig implements ProcessInterface
     }
 
     /**
+     * State changing queries
+     *
      * @param $baseHost
      * @param $actualHost
+     *
+     * @return int
      */
-    private function updateUrl($baseHost, $actualHost){
-        $this->connection->affectingQuery(
+    private function updateUrl($baseHost, $actualHost)
+    {
+        return $this->connection->affectingQuery(
             'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
             [
                 $baseHost,

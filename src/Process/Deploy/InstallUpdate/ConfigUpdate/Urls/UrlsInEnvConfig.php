@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Config\Deploy\Reader as EnvConfigReader;
 /**
  * @inheritdoc
  */
-class UpdateUrlsInEnvConfig implements ProcessInterface
+class UrlsInEnvConfig implements ProcessInterface
 {
     /**
      * @var Environment
@@ -80,19 +80,50 @@ class UpdateUrlsInEnvConfig implements ProcessInterface
         $this->logger->info('Updating secure and unsecure URLs in app/etc/env.php file');
 
         $configBaseUrls = $this->getConfigBaseUrls();
+        $envConfigPath = $this->fileList->getEnv();
+        $envConfContent = $this->file->fileGetContents($envConfigPath);
+        $configUrlsChanges = false;
 
         foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
-            if (isset($actualUrl['']) && isset($configBaseUrls[$typeUrl])) {
-                $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
-                $actualUrlHost = parse_url($actualUrl[''])['host'];
-                if ($baseUrlHost !== $actualUrlHost) {
-                    $this->updateUrl($baseUrlHost, $actualUrlHost);
-                }
+            if (empty($actualUrl['']) or empty($configBaseUrls[$typeUrl])) {
+                continue;
             }
+
+            $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
+            $actualUrlHost = parse_url($actualUrl[''])['host'];
+
+            if ($baseUrlHost === $actualUrlHost) {
+                continue;
+            }
+
+            $envConfContent = str_replace($baseUrlHost, $actualUrlHost, $envConfContent, $replaceCount);
+
+            if (0 === $replaceCount) {
+                continue;
+            }
+
+            $configUrlsChanges = true;
+
+            $this->logger->info(sprintf('Replace host: [%s] => [%s]', $baseUrlHost, $actualUrlHost));
+
+            $replaceCount = null;
+        }
+
+        if (true === $configUrlsChanges) {
+            $this->logger->info(sprintf('Write the updating configuration in %s file', $envConfigPath));
+            $this->file->filePutContents($envConfigPath, $envConfContent);
         }
     }
 
     /**
+     * Returns the base_url configuration with <magento_root>/app/etc/env.php file.
+     *
+     * ```
+     * array(
+     *     'secure' => 'https://example.com',
+     *     'unsecure' => 'http://example.com',
+     * )
+     * ```
      * @return array
      */
     private function getConfigBaseUrls()
@@ -101,22 +132,11 @@ class UpdateUrlsInEnvConfig implements ProcessInterface
         $result = [];
         foreach (['secure', 'unsecure'] as $type) {
             $url = $envConfig['system']['default']['web'][$type]['base_url'] ?? null;
-            if(null !== $url){
+            if (null !== $url) {
                 $result[$type] = $url;
             }
         }
 
         return $result;
-    }
-
-    /**
-     * @param $baseHost
-     * @param $actualHost
-     */
-    private function updateUrl($baseHost, $actualHost)
-    {
-        $envConfigPath = $this->fileList->getEnv();
-        $envConfContent = $this->file->fileGetContents($envConfigPath);
-        $this->file->filePutContents($envConfigPath, str_replace($baseHost, $actualHost, $envConfContent));
     }
 }
