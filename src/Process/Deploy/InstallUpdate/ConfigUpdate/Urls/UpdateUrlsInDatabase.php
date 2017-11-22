@@ -3,19 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
+namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Deploy\Reader as EnvConfigReader;
 
 /**
  * @inheritdoc
  */
-class Urls implements ProcessInterface
+class UpdateUrlsInConfigDatabase implements ProcessInterface
 {
     /**
      * @var Environment
@@ -38,29 +37,21 @@ class Urls implements ProcessInterface
     private $urlManager;
 
     /**
-     * @var EnvConfigReader
-     */
-    private $envConfigReader;
-
-    /**
      * @param Environment $environment
      * @param ConnectionInterface $connection
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
-     * @param EnvConfigReader $envConfigReader
      */
     public function __construct(
         Environment $environment,
         ConnectionInterface $connection,
         LoggerInterface $logger,
-        UrlManager $urlManager,
-        EnvConfigReader $envConfigReader
+        UrlManager $urlManager
     ) {
         $this->environment = $environment;
         $this->connection = $connection;
         $this->logger = $logger;
         $this->urlManager = $urlManager;
-        $this->envConfigReader = $envConfigReader;
     }
 
     /**
@@ -83,7 +74,7 @@ class Urls implements ProcessInterface
                 $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
                 $actualUrlHost = parse_url($actualUrl[''])['host'];
                 if($baseUrlHost !== $actualUrlHost){
-                    $this->replaceUrl($baseUrlHost,$actualUrlHost);
+                    $this->updateUrl($baseUrlHost,$actualUrlHost);
                 }
             }
         }
@@ -115,7 +106,7 @@ class Urls implements ProcessInterface
      * @param $baseHost
      * @param $actualHost
      */
-    private function replaceUrl($baseHost, $actualHost){
+    private function updateUrl($baseHost, $actualHost){
         $this->connection->affectingQuery(
             'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
             [
