@@ -20,8 +20,10 @@ if (!file_exists($magentoRoot . '/app/etc/NonComposerComponentRegistration.php')
     );
 }
 
-foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
+foreach ([__DIR__ . '/../../../app/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
     if (file_exists($file)) {
         return require $file;
     }
 }
+
+throw new \RuntimeException('Required file \'autoload.php\' was not found.');
