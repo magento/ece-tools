@@ -67,9 +67,9 @@ class AmqpTest extends TestCase
     public function testExecuteWithoutAmqp()
     {
         $config = ['some config'];
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->any())
             ->method('getRelationship')
-            ->with('mq')
+            ->with($this->anything())
             ->willReturn([]);
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -88,32 +88,18 @@ class AmqpTest extends TestCase
      * @return void
      * @dataProvider executeAddUpdateDataProvider
      */
-    public function testExecuteAddUpdate(array $config)
+    public function testExecuteAddUpdate(array $config, array $amqpConfig, array $resultConfig)
     {
-        $amqpConfig = [[
-            'host' => 'localhost',
-            'port' => '777',
-            'username' => 'login',
-            'password' => 'pswd'
-        ]];
-        $resultConfig = [
-            'some config',
-            'queue' => [
-                'amqp' => [
-                    'host' => 'localhost',
-                    'port' => '777',
-                    'user' => 'login',
-                    'password' => 'pswd',
-                    'virtualhost' => '/',
-                    'ssl' => '',
-                ]
-            ],
-        ];
-
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
-            ->with('mq')
-            ->willReturn($amqpConfig);
+            ->withConsecutive(
+                ['rabbitmq'],
+                ['mq']
+            )
+            ->willReturnOnConsecutiveCalls(
+                [],
+                $amqpConfig
+            );
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
@@ -133,20 +119,86 @@ class AmqpTest extends TestCase
     public function executeAddUpdateDataProvider(): array
     {
         return [
-            [['some config']],
-            [[
-                'some config',
-                'queue' => [
-                    'amqp' => [
-                        'host' => 'some-host',
-                        'port' => '888',
-                        'user' => 'mylogin',
-                        'password' => 'mysqwwd',
-                        'virtualhost' => 'virtualhost',
-                        'ssl' => '1',
-                    ]
+            [
+                ['some config'],
+                [[
+                    'host' => 'localhost',
+                    'port' => '777',
+                    'username' => 'login',
+                    'password' => 'pswd',
+                    'vhost' => 'virtualhost'
+                ]],
+                [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'localhost',
+                            'port' => '777',
+                            'user' => 'login',
+                            'password' => 'pswd',
+                            'virtualhost' => 'virtualhost',
+                            'ssl' => '',
+                        ]
+                    ],
+                ]
+            ],
+            [
+                ['some config'],
+                [[
+                    'host' => 'localhost',
+                    'port' => '777',
+                    'username' => 'login',
+                    'password' => 'pswd',
+                ]],
+                [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'localhost',
+                            'port' => '777',
+                            'user' => 'login',
+                            'password' => 'pswd',
+                            'virtualhost' => '/',
+                            'ssl' => '',
+                        ]
+                    ],
+                ]
+            ],
+            [
+                [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'some-host',
+                            'port' => '888',
+                            'user' => 'mylogin',
+                            'password' => 'mysqwwd',
+                            'virtualhost' => 'virtualhost',
+                            'ssl' => '1',
+                        ]
+                    ],
                 ],
-            ]]
+                [[
+                    'host' => 'localhost',
+                    'port' => '777',
+                    'username' => 'login',
+                    'password' => 'pswd',
+                    'vhost' => 'virtualhost'
+                ]],
+                [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'localhost',
+                            'port' => '777',
+                            'user' => 'login',
+                            'password' => 'pswd',
+                            'virtualhost' => 'virtualhost',
+                            'ssl' => '',
+                        ]
+                    ],
+                ]
+            ]
         ];
     }
 
@@ -158,9 +210,9 @@ class AmqpTest extends TestCase
      */
     public function testExecuteRemoveAmqp(array $config, array $expectedConfig)
     {
-        $this->environmentMock->expects($this->once())
+        $this->environmentMock->expects($this->any())
             ->method('getRelationship')
-            ->with('mq')
+            ->with($this->anything())
             ->willReturn([]);
         $this->configReaderMock->expects($this->once())
             ->method('read')
