@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class UpdateUrlsInConfigDatabase implements ProcessInterface
+class UpdateUrlsInDbConfig implements ProcessInterface
 {
     /**
      * @var Environment
@@ -59,18 +59,12 @@ class UpdateUrlsInConfigDatabase implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->environment->isUpdateUrlsEnabled()) {
-            $this->logger->info('Skipping URL updates');
-
-            return;
-        }
-
-        $this->logger->info('Updating secure and unsecure URLs');
+        $this->logger->info('Updating secure and unsecure URLs in database.core_config_data table.');
 
         $configBaseUrls = $this->getConfigBaseUrls();
 
         foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
-            if (isset($actualUrl[''])) {
+            if (isset($actualUrl['']) && isset($configBaseUrls[$typeUrl])) {
                 $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
                 $actualUrlHost = parse_url($actualUrl[''])['host'];
                 if($baseUrlHost !== $actualUrlHost){

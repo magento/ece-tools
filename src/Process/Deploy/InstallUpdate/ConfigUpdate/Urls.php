@@ -6,11 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Deploy\Reader as EnvConfigReader;
 
 /**
  * @inheritdoc
@@ -23,9 +20,9 @@ class Urls implements ProcessInterface
     private $environment;
 
     /**
-     * @var ConnectionInterface
+     * @var ProcessInterface
      */
-    private $connection;
+    private $process;
 
     /**
      * @var LoggerInterface
@@ -33,34 +30,18 @@ class Urls implements ProcessInterface
     private $logger;
 
     /**
-     * @var UrlManager
-     */
-    private $urlManager;
-
-    /**
-     * @var EnvConfigReader
-     */
-    private $envConfigReader;
-
-    /**
      * @param Environment $environment
-     * @param ConnectionInterface $connection
+     * @param ProcessInterface $process
      * @param LoggerInterface $logger
-     * @param UrlManager $urlManager
-     * @param EnvConfigReader $envConfigReader
      */
     public function __construct(
         Environment $environment,
-        ConnectionInterface $connection,
-        LoggerInterface $logger,
-        UrlManager $urlManager,
-        EnvConfigReader $envConfigReader
+        ProcessInterface $process,
+        LoggerInterface $logger
     ) {
         $this->environment = $environment;
-        $this->connection = $connection;
+        $this->process = $process;
         $this->logger = $logger;
-        $this->urlManager = $urlManager;
-        $this->envConfigReader = $envConfigReader;
     }
 
     /**
@@ -76,53 +57,6 @@ class Urls implements ProcessInterface
 
         $this->logger->info('Updating secure and unsecure URLs');
 
-        $configBaseUrls = $this->getConfigBaseUrls();
-
-        foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
-            if (isset($actualUrl[''])) {
-                $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
-                $actualUrlHost = parse_url($actualUrl[''])['host'];
-                if($baseUrlHost !== $actualUrlHost){
-                    $this->replaceUrl($baseUrlHost,$actualUrlHost);
-                }
-            }
-        }
-    }
-
-    /**
-     * @return array
-     */
-    private function getConfigBaseUrls(){
-
-        $configBaseUrls = $this->connection->select(
-            'SELECT `value`, `path` FROM `core_config_data` WHERE (`path`=? OR `path`= ?) AND `scope_id` = ?',
-            [
-                'web/unsecure/base_url',
-                'web/secure/base_url',
-                0
-            ]
-        );
-        $result = [];
-        foreach ($configBaseUrls as $configBaseUrl){
-            $key = $configBaseUrl['path'] == 'web/secure/base_url' ? 'secure' : 'unsecure';
-            $result[$key] = $configBaseUrl['value'];
-        }
-
-        return $result;
-    }
-
-    /**
-     * @param $baseHost
-     * @param $actualHost
-     */
-    private function replaceUrl($baseHost, $actualHost){
-        $this->connection->affectingQuery(
-            'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
-            [
-                $baseHost,
-                $actualHost,
-                '%' . $baseHost . '%'
-            ]
-        );
+        $this->process->execute();
     }
 }

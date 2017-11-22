@@ -128,20 +128,21 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(DeployProcess\PreDeploy::class),
-                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
-                            'validators' => [
-                                ValidatorInterface::LEVEL_CRITICAL => [
-                                    $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
-                                ],
-                            ],
-                        ]),
-                        $this->container->make(DeployProcess\CreateConfigFile::class),
-                        $this->container->make(DeployProcess\SetMode::class),
-                        $this->container->make(DeployProcess\InstallUpdate::class),
-                        $this->container->make(DeployProcess\DeployStaticContent::class),
-                        $this->container->make(DeployProcess\CompressStaticContent::class),
-                        $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+//                        $this->container->make(DeployProcess\PreDeploy::class),
+//                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+//                            'validators' => [
+//                                ValidatorInterface::LEVEL_CRITICAL => [
+//                                    $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
+//                                ],
+//                            ],
+//                        ]),
+//                        $this->container->make(DeployProcess\CreateConfigFile::class),
+//                        $this->container->make(DeployProcess\SetMode::class),
+//                        $this->container->make(DeployProcess\InstallUpdate::class),
+//                        $this->container->make(DeployProcess\DeployStaticContent::class),
+//                        $this->container->make(DeployProcess\CompressStaticContent::class),
+//                        $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                     ],
                 ]);
             });
@@ -180,6 +181,16 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                    ],
+                ]);
+            });
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\UpdateUrlsInDbConfig::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\UpdateUrlsInEnvConfig::class),
                     ],
                 ]);
             });
