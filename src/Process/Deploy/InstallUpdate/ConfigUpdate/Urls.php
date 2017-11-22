@@ -67,38 +67,53 @@ class Urls implements ProcessInterface
 
         $this->logger->info('Updating secure and unsecure URLs');
 
-        foreach ($this->urlManager->getUrls() as $urlType => $urls) {
-            foreach ($urls as $route => $url) {
-                $this->update($urlType, $url, $route);
+        $configBaseUrls = $this->getConfigBaseUrls();
+
+        foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
+            if (isset($actualUrl[''])) {
+                $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
+                $actualUrlHost = parse_url($actualUrl[''])['host'];
+                if($baseUrlHost !== $actualUrlHost){
+                    $this->replaceUrl($baseUrlHost,$actualUrlHost);
+                }
             }
         }
     }
 
     /**
-     * Updates core config with new URLs.
-     *
-     * @param string $urlType
-     * @param string $url
-     * @param string $route
+     * @return array
      */
-    private function update(string $urlType, string $url, string $route)
-    {
-        $prefix = 'unsecure' === $urlType ? UrlManager::PREFIX_UNSECURE : UrlManager::PREFIX_SECURE;
-        if (!strlen($route)) {
-            // @codingStandardsIgnoreStart
-            $this->connection->affectingQuery(
-                "UPDATE `core_config_data` SET `value` = '$url' WHERE `path` = 'web/$urlType/base_url' AND `scope_id` = '0'"
-            );
+    private function getConfigBaseUrls(){
 
-            // @codingStandardsIgnoreEnd
-            return;
-        }
-        $likeKey = $prefix . $route . '%';
-        $likeKeyParsed = $prefix . str_replace('.', '---', $route) . '%';
-        // @codingStandardsIgnoreStart
-        $this->connection->affectingQuery(
-            "UPDATE `core_config_data` SET `value` = '$url' WHERE `path` = 'web/$urlType/base_url' AND (`value` LIKE '$likeKey' OR `value` LIKE '$likeKeyParsed')"
+        $configBaseUrls = $this->connection->select(
+            'SELECT `value`, `path` FROM `core_config_data` WHERE (`path`=? OR `path`= ?) AND `scope_id` = ?',
+            [
+                'web/unsecure/base_url',
+                'web/secure/base_url',
+                0
+            ]
         );
-        // @codingStandardsIgnoreEnd
+        $result = [];
+        foreach ($configBaseUrls as $configBaseUrl){
+            $key = $configBaseUrl['path'] == 'web/secure/base_url' ? 'secure' : 'unsecure';
+            $result[$key] = $configBaseUrl['value'];
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param $baseHost
+     * @param $actualHost
+     */
+    private function replaceUrl($baseHost, $actualHost){
+        $this->connection->affectingQuery(
+            'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
+            [
+                $baseHost,
+                $actualHost,
+                '%' . $baseHost . '%'
+            ]
+        );
     }
 }

@@ -58,7 +58,7 @@ class UrlManager
             }
 
             $urlParts = parse_url($val['original_url']);
-            $originalUrl = str_replace(self::MAGIC_ROUTE, '', $urlParts['host']);
+            $originalUrl = preg_replace('/\.?'.self::MAGIC_ROUTE.'/', '', $urlParts['host']);
 
             if (strpos($key, self::PREFIX_UNSECURE) === 0) {
                 $urls['unsecure'][$originalUrl] = $key;
