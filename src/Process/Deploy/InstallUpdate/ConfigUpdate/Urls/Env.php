@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Config\Deploy\Reader as EnvConfigReader;
 /**
  * @inheritdoc
  */
-class UrlsInEnvConfig implements ProcessInterface
+class Env implements ProcessInterface
 {
     /**
      * @var Environment
@@ -85,7 +85,7 @@ class UrlsInEnvConfig implements ProcessInterface
         $configUrlsChanges = false;
 
         foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
-            if (empty($actualUrl['']) or empty($configBaseUrls[$typeUrl])) {
+            if (empty($actualUrl['']) || empty($configBaseUrls[$typeUrl])) {
                 continue;
             }
 

@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\UrlsInDbConfig;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Db;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\Environment;
@@ -16,10 +16,10 @@ use Magento\MagentoCloud\Util\UrlManager;
 /**
  * @inheritdoc
  */
-class UrlsInDbConfigTest extends TestCase
+class DbTest extends TestCase
 {
     /**
-     * @var UrlsInDbConfig
+     * @var Db
      */
     private $process;
 
@@ -56,7 +56,7 @@ class UrlsInDbConfigTest extends TestCase
             ->getMockForAbstractClass();
         $this->urlManagerMock = $this->createMock(UrlManager::class);
 
-        $this->process = new UrlsInDbConfig(
+        $this->process = new Db(
             $this->environmentMock,
             $this->connectionMock,
             $this->loggerMock,

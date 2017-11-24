@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\UrlsInEnvConfig;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Env;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\Environment;
@@ -18,10 +18,10 @@ use Magento\MagentoCloud\Util\UrlManager;
 /**
  * @inheritdoc
  */
-class UrlsInEnvConfigTest extends TestCase
+class EnvTest extends TestCase
 {
     /**
-     * @var UrlsInEnvConfig
+     * @var Env
      */
     private $process;
 
@@ -68,7 +68,7 @@ class UrlsInEnvConfigTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
 
-        $this->process = new UrlsInEnvConfig(
+        $this->process = new Env(
             $this->environmentMock,
             $this->loggerMock,
             $this->urlManagerMock,

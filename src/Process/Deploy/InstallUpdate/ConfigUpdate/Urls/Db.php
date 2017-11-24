@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class UrlsInDbConfig implements ProcessInterface
+class Db implements ProcessInterface
 {
     /**
      * @var Environment
@@ -64,7 +64,7 @@ class UrlsInDbConfig implements ProcessInterface
         $configBaseUrls = $this->getConfigBaseUrls();
 
         foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
-            if (empty($actualUrl['']) or empty($configBaseUrls[$typeUrl])) {
+            if (empty($actualUrl['']) || empty($configBaseUrls[$typeUrl])) {
                 continue;
             }
             $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
@@ -84,7 +84,7 @@ class UrlsInDbConfig implements ProcessInterface
     }
 
     /**
-     * Returns the base_url configuration with `core_config_data` table.
+     * Returns the base_url configuration from `core_config_data` table.
      *
      * ```
      * array(
@@ -114,7 +114,7 @@ class UrlsInDbConfig implements ProcessInterface
     }
 
     /**
-     * State changing queries
+     * Returns the number of updated URLs
      *
      * @param $baseHost
      * @param $actualHost
