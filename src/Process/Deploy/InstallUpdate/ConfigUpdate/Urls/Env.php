@@ -98,7 +98,7 @@ class Env implements ProcessInterface
 
             $envConfContent = str_replace($baseUrlHost, $actualUrlHost, $envConfContent, $replaceCount);
 
-            if (0 === $replaceCount) {
+            if (!$replaceCount) {
                 continue;
             }
 
@@ -109,7 +109,7 @@ class Env implements ProcessInterface
             $replaceCount = null;
         }
 
-        if (true === $configUrlsChanges) {
+        if ($configUrlsChanges) {
             $this->logger->info(sprintf('Write the updating configuration in %s file', $envConfigPath));
             $this->file->filePutContents($envConfigPath, $envConfContent);
         }

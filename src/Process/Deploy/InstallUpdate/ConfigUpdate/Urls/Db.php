@@ -114,12 +114,12 @@ class Db implements ProcessInterface
     }
 
     /**
-     * Returns the number of updated URLs
+     * Updates the base_url configuration in the `core_config_data` table.
      *
      * @param $baseHost
      * @param $actualHost
      *
-     * @return int
+     * @return int Returns the number of updated URLs
      */
     private function updateUrl($baseHost, $actualHost)
     {

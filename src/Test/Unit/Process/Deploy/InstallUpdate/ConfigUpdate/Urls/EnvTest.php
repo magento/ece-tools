@@ -61,8 +61,7 @@ class EnvTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->envConfigReaderMock = $this->createMock(EnvConfigReader::class);
         $this->fileMock = $this->createMock(File::class);
@@ -86,36 +85,33 @@ class EnvTest extends TestCase
      */
     public function testExecute($loggerInfoExpects, $urlManagerGetUrlsWillReturn, $fileExpectsFilePutContents)
     {
+        $configPath = __DIR__ . '/_files/env.php';
+        $configEnv = include $configPath;
+        $configEnvContent = file_get_contents($configPath);
+        $configEnvForVerification = file_get_contents(__DIR__ . '/_files/env_.php');
+
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
             ->withConsecutive(
                 ['Updating secure and unsecure URLs in app/etc/env.php file'],
                 ['Replace host: [example1.com] => [example2.com]'],
-                [sprintf('Write the updating configuration in %s file', $this->getConfigPath())]
+                [sprintf('Write the updating configuration in %s file', $configPath)]
             );
-
         $this->envConfigReaderMock->expects($this->once())
             ->method('read')
-            ->willReturn($this->getConfigEnv());
-
+            ->willReturn($configEnv);
         $this->fileListMock->expects($this->once())
             ->method('getEnv')
-            ->willReturn($this->getConfigPath());
-
+            ->willReturn($configPath);
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
-            ->willReturn($this->getConfigEnvContent());
-
+            ->willReturn($configEnvContent);
         $this->urlManagerMock->expects($this->once())
             ->method('getUrls')
             ->willReturn($urlManagerGetUrlsWillReturn);
-
         $this->fileMock->expects($fileExpectsFilePutContents)
             ->method('filePutContents')
-            ->with(
-                $this->getConfigPath(),
-                $this->getConfigEnvForVerification()
-            );
+            ->with($configPath, $configEnvForVerification);
 
         $this->process->execute();
     }
@@ -151,45 +147,5 @@ class EnvTest extends TestCase
                 'fileExpectsFilePutContents' => $this->never()
             ],
         ];
-    }
-
-    /**
-     * Returns configuration array
-     *
-     * @return array
-     */
-    private function getConfigEnv()
-    {
-        return include $this->getConfigPath();
-    }
-
-    /**
-     * Returns path to testing env.php file
-     *
-     * @return string path to testing env.php file
-     */
-    private function getConfigPath()
-    {
-        return __DIR__ . '/_files/env.php';
-    }
-
-    /**
-     * Returns content of testing env.php file
-     *
-     * @return bool|string
-     */
-    private function getConfigEnvContent()
-    {
-        return file_get_contents($this->getConfigPath());
-    }
-
-    /**
-     * Returns content of testing env_.php file
-     *
-     * @return bool|string
-     */
-    private function getConfigEnvForVerification()
-    {
-        return file_get_contents(__DIR__ . '/_files/env_.php');
     }
 }

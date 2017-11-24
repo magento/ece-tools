@@ -50,10 +50,8 @@ class DbTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
 
         $this->process = new Db(
