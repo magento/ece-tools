@@ -5,13 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Env;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Deploy\Reader as EnvConfigReader;
+use Magento\MagentoCloud\Config\Deploy\Reader;
+use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 
@@ -26,11 +24,6 @@ class EnvTest extends TestCase
     private $process;
 
     /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
-
-    /**
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
@@ -41,77 +34,75 @@ class EnvTest extends TestCase
     private $urlManagerMock;
 
     /**
-     * @var EnvConfigReader|Mock
+     * @var Reader|Mock
      */
-    private $envConfigReaderMock;
+    private $readerMock;
 
     /**
-     * @var File|Mock
+     * @var Writer|Mock
      */
-    private $fileMock;
-
-    /**
-     * @var FileList|Mock
-     */
-    private $fileListMock;
+    private $writerMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->envConfigReaderMock = $this->createMock(EnvConfigReader::class);
-        $this->fileMock = $this->createMock(File::class);
-        $this->fileListMock = $this->createMock(FileList::class);
+        $this->readerMock = $this->createMock(Reader::class);
+        $this->writerMock = $this->createMock(Writer::class);
 
         $this->process = new Env(
-            $this->environmentMock,
             $this->loggerMock,
             $this->urlManagerMock,
-            $this->envConfigReaderMock,
-            $this->fileMock,
-            $this->fileListMock
+            $this->readerMock,
+            $this->writerMock
         );
     }
 
     /**
      * @param \PHPUnit_Framework_MockObject_Matcher_InvokedCount $loggerInfoExpects
      * @param array $urlManagerGetUrlsWillReturn
-     * @param \PHPUnit_Framework_MockObject_Matcher_InvokedCount $fileExpectsFilePutContents
+     * @param \PHPUnit_Framework_MockObject_Matcher_InvokedCount $writerWriteExpects
      * @dataProvider executeDataProvider
      */
-    public function testExecute($loggerInfoExpects, $urlManagerGetUrlsWillReturn, $fileExpectsFilePutContents)
+    public function testExecute($loggerInfoExpects, $urlManagerGetUrlsWillReturn, $writerWriteExpects)
     {
-        $configPath = __DIR__ . '/_files/env.php';
-        $configEnv = include $configPath;
-        $configEnvContent = file_get_contents($configPath);
-        $configEnvForVerification = file_get_contents(__DIR__ . '/_files/env_.php');
-
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
             ->withConsecutive(
                 ['Updating secure and unsecure URLs in app/etc/env.php file'],
                 ['Replace host: [example1.com] => [example2.com]'],
-                [sprintf('Write the updating configuration in %s file', $configPath)]
+                ['Write the updating configuration in the app/etc/env.php file']
             );
-        $this->envConfigReaderMock->expects($this->once())
+        $this->readerMock->expects($this->once())
             ->method('read')
-            ->willReturn($configEnv);
-        $this->fileListMock->expects($this->once())
-            ->method('getEnv')
-            ->willReturn($configPath);
-        $this->fileMock->expects($this->once())
-            ->method('fileGetContents')
-            ->willReturn($configEnvContent);
+            ->willReturn([
+                'system' => [
+                    'default' => [
+                        'web' => [
+                            'secure' => ['base_url' => 'https://example1.com/'],
+                            'unsecure' => ['base_url' => 'http://example1.com/']
+                        ]
+                    ]
+                ]
+            ]);
         $this->urlManagerMock->expects($this->once())
             ->method('getUrls')
             ->willReturn($urlManagerGetUrlsWillReturn);
-        $this->fileMock->expects($fileExpectsFilePutContents)
-            ->method('filePutContents')
-            ->with($configPath, $configEnvForVerification);
+        $this->writerMock->expects($writerWriteExpects)
+            ->method('write')
+            ->with([
+                'system' => [
+                    'default' => [
+                        'web' => [
+                            'secure' => ['base_url' => 'https://example2.com/'],
+                            'unsecure' => ['base_url' => 'http://example2.com/']
+                        ]
+                    ]
+                ]
+            ]);
 
         $this->process->execute();
     }
@@ -128,7 +119,7 @@ class EnvTest extends TestCase
                     'secure' => ['' => 'https://example2.com/', '*' => 'https://subsite---example2.com'],
                     'unsecure' => ['' => 'http://example2.com/', '*' => 'http://subsite---example2.com'],
                 ],
-                'fileExpectsFilePutContents' => $this->once()
+                'writerWriteExpects' => $this->once()
             ],
             'urls equal' => [
                 'loggerInfoExpects' => $this->once(),
@@ -136,7 +127,7 @@ class EnvTest extends TestCase
                     'secure' => ['' => 'https://example1.com/', '*' => 'https://subsite---example1.com'],
                     'unsecure' => ['' => 'http://example1.com/', '*' => 'http://subsite---example1.com'],
                 ],
-                'fileExpectsFilePutContents' => $this->never()
+                'writerWriteExpects' => $this->never()
             ],
             'urls not exists' => [
                 'loggerInfoExpects' => $this->once(),
@@ -144,7 +135,7 @@ class EnvTest extends TestCase
                     'secure' => [],
                     'unsecure' => [],
                 ],
-                'fileExpectsFilePutContents' => $this->never()
+                'writerWriteExpects' => $this->never()
             ],
         ];
     }

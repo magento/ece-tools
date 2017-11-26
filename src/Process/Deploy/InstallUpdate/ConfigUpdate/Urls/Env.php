@@ -5,24 +5,17 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Deploy\Reader as EnvConfigReader;
+use Magento\MagentoCloud\Config\Deploy\Reader;
+use Magento\MagentoCloud\Config\Deploy\Writer;
 
 /**
  * @inheritdoc
  */
 class Env implements ProcessInterface
 {
-    /**
-     * @var Environment
-     */
-    private $environment;
-
     /**
      * @var LoggerInterface
      */
@@ -34,42 +27,31 @@ class Env implements ProcessInterface
     private $urlManager;
 
     /**
-     * @var EnvConfigReader
+     * @var Reader
      */
-    private $envConfigReader;
+    private $reader;
 
     /**
-     * @var File
+     * @var Writer
      */
-    private $file;
+    private $writer;
 
     /**
-     * @var FileList
-     */
-    private $fileList;
-
-    /**
-     * @param Environment $environment
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
-     * @param EnvConfigReader $envConfigReader
-     * @param File $file
-     * @param FileList $fileList
+     * @param Reader $reader
+     * @param Writer $writer
      */
     public function __construct(
-        Environment $environment,
         LoggerInterface $logger,
         UrlManager $urlManager,
-        EnvConfigReader $envConfigReader,
-        File $file,
-        FileList $fileList
+        Reader $reader,
+        Writer $writer
     ) {
-        $this->environment = $environment;
         $this->logger = $logger;
         $this->urlManager = $urlManager;
-        $this->envConfigReader = $envConfigReader;
-        $this->file = $file;
-        $this->fileList = $fileList;
+        $this->reader = $reader;
+        $this->writer = $writer;
     }
 
     /**
@@ -79,64 +61,47 @@ class Env implements ProcessInterface
     {
         $this->logger->info('Updating secure and unsecure URLs in app/etc/env.php file');
 
-        $configBaseUrls = $this->getConfigBaseUrls();
-        $envConfigPath = $this->fileList->getEnv();
-        $envConfContent = $this->file->fileGetContents($envConfigPath);
-        $configUrlsChanges = false;
+        $config = $this->reader->read();
 
-        foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
-            if (empty($actualUrl['']) || empty($configBaseUrls[$typeUrl])) {
+        $baseUrls = [];
+        foreach (['secure', 'unsecure'] as $type) {
+            $url = $config['system']['default']['web'][$type]['base_url'] ?? null;
+            if (null !== $url) {
+                $baseUrls[$type] = $url;
+            }
+        }
+
+        $urlsChanged = false;
+        foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrls) {
+            if (empty($actualUrls['']) || empty($baseUrls[$typeUrl])) {
                 continue;
             }
 
-            $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
-            $actualUrlHost = parse_url($actualUrl[''])['host'];
+            $baseHost = parse_url($baseUrls[$typeUrl])['host'];
+            $actualHost = parse_url($actualUrls[''])['host'];
 
-            if ($baseUrlHost === $actualUrlHost) {
+            if ($baseHost === $actualHost) {
                 continue;
             }
 
-            $envConfContent = str_replace($baseUrlHost, $actualUrlHost, $envConfContent, $replaceCount);
+            array_walk_recursive($config, function (&$value) use ($baseHost, $actualHost, &$replaceCount) {
+                $value = str_replace($baseHost, $actualHost, $value, $replaceCount);
+            });
 
             if (!$replaceCount) {
                 continue;
             }
 
-            $configUrlsChanges = true;
+            $urlsChanged = true;
 
-            $this->logger->info(sprintf('Replace host: [%s] => [%s]', $baseUrlHost, $actualUrlHost));
+            $this->logger->info(sprintf('Replace host: [%s] => [%s]', $baseHost, $actualHost));
 
             $replaceCount = null;
         }
 
-        if ($configUrlsChanges) {
-            $this->logger->info(sprintf('Write the updating configuration in %s file', $envConfigPath));
-            $this->file->filePutContents($envConfigPath, $envConfContent);
+        if ($urlsChanged) {
+            $this->logger->info('Write the updating configuration in the app/etc/env.php file');
+            $this->writer->write($config);
         }
-    }
-
-    /**
-     * Returns the base_url configuration with <magento_root>/app/etc/env.php file.
-     *
-     * ```
-     * array(
-     *     'secure' => 'https://example.com',
-     *     'unsecure' => 'http://example.com',
-     * )
-     * ```
-     * @return array
-     */
-    private function getConfigBaseUrls()
-    {
-        $envConfig = $this->envConfigReader->read();
-        $result = [];
-        foreach (['secure', 'unsecure'] as $type) {
-            $url = $envConfig['system']['default']['web'][$type]['base_url'] ?? null;
-            if (null !== $url) {
-                $result[$type] = $url;
-            }
-        }
-
-        return $result;
     }
 }
