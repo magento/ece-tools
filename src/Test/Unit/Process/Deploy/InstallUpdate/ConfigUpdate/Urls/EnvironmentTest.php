@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Env;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\Deploy\Reader;
@@ -16,10 +16,10 @@ use Magento\MagentoCloud\Util\UrlManager;
 /**
  * @inheritdoc
  */
-class EnvTest extends TestCase
+class EnvironmentTest extends TestCase
 {
     /**
-     * @var Env
+     * @var Environment
      */
     private $process;
 
@@ -53,7 +53,7 @@ class EnvTest extends TestCase
         $this->readerMock = $this->createMock(Reader::class);
         $this->writerMock = $this->createMock(Writer::class);
 
-        $this->process = new Env(
+        $this->process = new Environment(
             $this->loggerMock,
             $this->urlManagerMock,
             $this->readerMock,

@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class Db implements ProcessInterface
+class Database implements ProcessInterface
 {
     /**
      * @var Environment
@@ -59,7 +59,7 @@ class Db implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Updating secure and unsecure URLs in database.core_config_data table.');
+        $this->logger->info('Updating secure and unsecure URLs in core_config_data table.');
 
         $configBaseUrls = $this->getConfigBaseUrls();
 
@@ -106,7 +106,7 @@ class Db implements ProcessInterface
         );
         $result = [];
         foreach ($configBaseUrls as $configBaseUrl) {
-            $key = $configBaseUrl['path'] == 'web/secure/base_url' ? 'secure' : 'unsecure';
+            $key = $configBaseUrl['path'] === 'web/secure/base_url' ? 'secure' : 'unsecure';
             $result[$key] = $configBaseUrl['value'];
         }
 

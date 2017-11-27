@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Config\Deploy\Writer;
 /**
  * @inheritdoc
  */
-class Env implements ProcessInterface
+class Environment implements ProcessInterface
 {
     /**
      * @var LoggerInterface
@@ -60,9 +60,7 @@ class Env implements ProcessInterface
     public function execute()
     {
         $this->logger->info('Updating secure and unsecure URLs in app/etc/env.php file');
-
         $config = $this->reader->read();
-
         $baseUrls = [];
         foreach (['secure', 'unsecure'] as $type) {
             $url = $config['system']['default']['web'][$type]['base_url'] ?? null;
@@ -95,8 +93,6 @@ class Env implements ProcessInterface
             $urlsChanged = true;
 
             $this->logger->info(sprintf('Replace host: [%s] => [%s]', $baseHost, $actualHost));
-
-            $replaceCount = null;
         }
 
         if ($urlsChanged) {

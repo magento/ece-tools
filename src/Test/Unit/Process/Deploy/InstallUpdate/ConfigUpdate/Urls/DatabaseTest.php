@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Db;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Database;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\Environment;
@@ -16,10 +16,10 @@ use Magento\MagentoCloud\Util\UrlManager;
 /**
  * @inheritdoc
  */
-class DbTest extends TestCase
+class DatabaseTest extends TestCase
 {
     /**
-     * @var Db
+     * @var Database
      */
     private $process;
 
@@ -43,7 +43,6 @@ class DbTest extends TestCase
      */
     private $urlManagerMock;
 
-
     /**
      * @inheritdoc
      */
@@ -54,7 +53,7 @@ class DbTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
 
-        $this->process = new Db(
+        $this->process = new Database(
             $this->environmentMock,
             $this->connectionMock,
             $this->loggerMock,
@@ -73,7 +72,7 @@ class DbTest extends TestCase
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
             ->withConsecutive(
-                ['Updating secure and unsecure URLs in database.core_config_data table.'],
+                ['Updating secure and unsecure URLs in core_config_data table.'],
                 ['Replace host: [example1.com] => [example2.com]']
             );
         $this->connectionMock->expects($this->once())
