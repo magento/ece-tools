@@ -75,6 +75,10 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Shell\ShellInterface::class,
             \Magento\MagentoCloud\Shell\Shell::class
         );
+        $this->container->singleton(
+            \Magento\MagentoCloud\DB\DumpInterface::class,
+            \Magento\MagentoCloud\DB\Dump::class
+        );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Deploy::class);
@@ -266,7 +270,7 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(DbDumpProcess\DbDump::class)
+        $this->container->when(\Magento\MagentoCloud\DB\Dump::class)
             ->needs(ConnectionInterface::class)
             ->give(ReadConnection::class);
         $this->container->when(PostDeploy::class)

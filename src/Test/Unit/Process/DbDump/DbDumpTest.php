@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\DbDump;
 
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\DB\DumpInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\DbDump\DbDump;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -25,9 +26,9 @@ class DbDumpTest extends TestCase
     private $process;
 
     /**
-     * @var ConnectionInterface|Mock
+     * @var DumpInterface|Mock
      */
-    private $connectionDataMock;
+    private $dbDumpMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -40,6 +41,11 @@ class DbDumpTest extends TestCase
     private $shellMock;
 
     /**
+     * @var DirectoryList|Mock
+     */
+    private $directoryListMock;
+
+    /**
      * Dump file path
      *
      * @var string
@@ -47,21 +53,31 @@ class DbDumpTest extends TestCase
     private $dumpFilePath;
 
     /**
+     * @var string
+     */
+    private $tmpDir;
+
+    /**
      * Setup the test environment.
      */
     protected function setUp()
     {
-        $this->connectionDataMock = $this->getMockBuilder(ConnectionInterface::class)
+        $this->dbDumpMock = $this->getMockBuilder(DumpInterface::class)
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
+
+        $this->tmpDir = sys_get_temp_dir();
+        $this->directoryListMock->expects($this->once())
+            ->method('getVar')
+            ->willReturn($this->tmpDir);
 
         // Mock time() function which is used as part of file name
-        $temporaryDirectory = sys_get_temp_dir();
         $time = 123456;
-        $this->dumpFilePath = $temporaryDirectory . '/dump-' . $time . '.sql.gz';
+        $this->dumpFilePath = $this->tmpDir . '/dump-' . $time . '.sql.gz';
 
         $timeMock = $this->getFunctionMock('Magento\MagentoCloud\Process\DbDump', 'time');
         $timeMock->expects($this->once())
@@ -71,23 +87,32 @@ class DbDumpTest extends TestCase
         $this->defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'flock');
 
         $this->process = new DbDump(
-            $this->connectionDataMock,
+            $this->dbDumpMock,
             $this->loggerMock,
-            $this->shellMock
+            $this->shellMock,
+            $this->directoryListMock
         );
     }
 
-    /**
-     * @param string $host
-     * @param int $port
-     * @param string $dbName
-     * @param string $user
-     * @param string|null $password
-     * @param string $expectedCommand
-     *
-     * @dataProvider executeDataProvider
-     */
-    public function testExecute($host, $port, $dbName, $user, $password, $expectedCommand)
+    protected function tearDown()
+    {
+        if (file_exists($this->tmpDir . '/dbdump.lock')) {
+            unlink($this->tmpDir . '/dbdump.lock');
+        }
+        parent::tearDown();
+    }
+
+    private function getCommand()
+    {
+        $command = 'mysqldump -h localhost';
+        $this->dbDumpMock->expects($this->once())
+            ->method('getCommand')
+            ->willReturn($command);
+
+        return 'bash -c "set -o pipefail; timeout 3600 ' . $command . ' | gzip > ' . $this->dumpFilePath . '"';
+    }
+
+    public function testExecute()
     {
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
@@ -97,12 +122,12 @@ class DbDumpTest extends TestCase
                 ['Finished DB dump, it can be found here: ' . $this->dumpFilePath]
             );
 
-        $this->setConnectionData($host, $port, $dbName, $user, $password);
+        $command = $this->getCommand();
 
-        $command = 'bash -c "set -o pipefail; ' . $expectedCommand . ' | gzip > ' . $this->dumpFilePath . '"';
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with($command);
+            ->with($command)
+            ->willReturn([]);
 
         $this->process->execute();
     }
@@ -120,7 +145,7 @@ class DbDumpTest extends TestCase
             ->method('error')
             ->with($errorMessage);
 
-        $this->setConnectionData();
+        $this->getCommand();
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new \Exception($errorMessage));
@@ -169,17 +194,7 @@ class DbDumpTest extends TestCase
         $this->process->execute();
     }
 
-    /**
-     * @param string $host
-     * @param int $port
-     * @param string $dbName
-     * @param string $user
-     * @param string|null $password
-     * @param string $expectedCommand
-     *
-     * @dataProvider executeDataProvider
-     */
-    public function testExecuteWithErrors($host, $port, $dbName, $user, $password, $expectedCommand)
+    public function testExecuteWithErrors()
     {
         $executeOutput = ['Some error'];
         $this->loggerMock->expects($this->exactly(2))
@@ -192,9 +207,7 @@ class DbDumpTest extends TestCase
             ->method('error')
             ->with('Error has occurred during mysqldump');
 
-        $this->setConnectionData($host, $port, $dbName, $user, $password);
-
-        $command = 'bash -c "set -o pipefail; ' . $expectedCommand . ' | gzip > ' . $this->dumpFilePath . '"';
+        $command = $this->getCommand();
 
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
@@ -206,65 +219,6 @@ class DbDumpTest extends TestCase
                 ['rm ' . $this->dumpFilePath, true]
             ]);
 
-
         $this->process->execute();
-    }
-
-    /**
-     * Data provider for testExecute
-     * @return array
-     */
-    public function executeDataProvider()
-    {
-        $command = 'timeout 3600 mysqldump %s --single-transaction --no-autocommit --quick';
-        return [
-            [
-                'localhost',
-                '3306',
-                'main',
-                'user',
-                null,
-                sprintf($command, "-h 'localhost' -P '3306' -u 'user' 'main'")
-            ],
-            [
-                'localhost',
-                '3306',
-                'main',
-                'user',
-                'pswd',
-                sprintf($command, "-h 'localhost' -P '3306' -u 'user' -p'pswd' 'main'")
-            ]
-        ];
-    }
-
-    /**
-     * @param string $host
-     * @param string $port
-     * @param string $dbName
-     * @param string $user
-     * @param null|string $password
-     */
-    private function setConnectionData(
-        $host = 'localhost',
-        $port = '3306',
-        $dbName = 'main',
-        $user = 'user',
-        $password = null
-    ) {
-        $this->connectionDataMock->expects($this->once())
-            ->method('getHost')
-            ->willReturn($host);
-        $this->connectionDataMock->expects($this->once())
-            ->method('getPort')
-            ->willReturn($port);
-        $this->connectionDataMock->expects($this->once())
-            ->method('getDbName')
-            ->willReturn($dbName);
-        $this->connectionDataMock->expects($this->once())
-            ->method('getUser')
-            ->willReturn($user);
-        $this->connectionDataMock->expects($this->once())
-            ->method('getPassword')
-            ->willReturn($password);
     }
 }

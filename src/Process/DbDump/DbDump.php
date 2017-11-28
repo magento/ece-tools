@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\DbDump;
 
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\DB\DumpInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -32,11 +33,11 @@ class DbDump implements ProcessInterface
     const DUMP_TIMEOUT = 3600;
 
     /**
-     * Database connection data for read operations
+     * Generate command for DB dump
      *
-     * @var ConnectionInterface
+     * @var DumpInterface
      */
-    private $connectionData;
+    private $dbDump;
 
     /**
      * Used for execution shell operations
@@ -51,18 +52,26 @@ class DbDump implements ProcessInterface
     private $logger;
 
     /**
-     * @param ConnectionInterface $connectionData
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @param DumpInterface $dbDump
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
+     * @param DirectoryList $directoryList
      */
     public function __construct(
-        ConnectionInterface $connectionData,
+        DumpInterface $dbDump,
         LoggerInterface $logger,
-        ShellInterface $shell
+        ShellInterface $shell,
+        DirectoryList $directoryList
     ) {
-        $this->connectionData = $connectionData;
+        $this->dbDump = $dbDump;
         $this->logger = $logger;
         $this->shell = $shell;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -82,7 +91,7 @@ class DbDump implements ProcessInterface
         $temporaryDirectory = sys_get_temp_dir();
 
         $dumpFile = $temporaryDirectory . '/' . $dumpFileName;
-        $lockFile = $temporaryDirectory . '/' . self::LOCK_FILE_NAME;
+        $lockFile = $this->directoryList->getVar() . '/' . self::LOCK_FILE_NAME;
 
         // Lock file has dual purpose, it creates a lock, so another DB backup process cannot be executed,
         // as well as serves as a log with the name of created dump file.
@@ -132,17 +141,6 @@ class DbDump implements ProcessInterface
      */
     private function getCommand()
     {
-        $command = 'timeout ' . self::DUMP_TIMEOUT
-            . ' mysqldump -h ' . escapeshellarg($this->connectionData->getHost())
-            . ' -P ' . escapeshellarg($this->connectionData->getPort())
-            . ' -u ' . escapeshellarg($this->connectionData->getUser());
-        $password = $this->connectionData->getPassword();
-        if ($password) {
-            $command .= ' -p' . escapeshellarg($password);
-        }
-        $command .= ' ' . escapeshellarg($this->connectionData->getDbName())
-            . ' --single-transaction --no-autocommit --quick';
-
-        return $command;
+        return 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dbDump->getCommand();
     }
 }
