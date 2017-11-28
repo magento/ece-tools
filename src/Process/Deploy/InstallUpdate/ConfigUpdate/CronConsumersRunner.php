@@ -38,6 +38,11 @@ class CronConsumersRunner implements ProcessInterface
     private $configWriter;
 
     /**
+     * Max messages that will be processed by each consumer
+     */
+    const DEFAULT_MAX_MESSAGES = 10000;
+
+    /**
      * @param Environment $environment
      * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
@@ -66,7 +71,7 @@ class CronConsumersRunner implements ProcessInterface
 
         $config['cron_consumers_runner'] = [
             'cron_run' => $cronConsumersRunnerConfig->get('cron_run') === 'true',
-            'max_messages' => $cronConsumersRunnerConfig->get('max_messages', 10000),
+            'max_messages' => $cronConsumersRunnerConfig->get('max_messages', static::DEFAULT_MAX_MESSAGES),
             'consumers' => $cronConsumersRunnerConfig->get('consumers', []),
         ];
 

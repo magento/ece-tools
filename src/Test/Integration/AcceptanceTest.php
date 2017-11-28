@@ -139,6 +139,13 @@ class AcceptanceTest extends TestCase
                         'STATIC_CONTENT_THREADS' => 3,
                     ],
                 ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 10000,
+                        'consumers' => [],
+                    ]
+                ],
             ],
         ];
     }
