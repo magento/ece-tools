@@ -3,20 +3,19 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
+namespace Magento\MagentoCloud\Process;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class ClearCache.
+ * Class CleanCache.
  *
  * @deprecated This functionality will be moved to post-deploy hook.
  * @see \Magento\MagentoCloud\Process\PostDeploy\CleanCache
  */
-class ClearCache implements ProcessInterface
+class CleanCache implements ProcessInterface
 {
     /**
      * @var LoggerInterface
