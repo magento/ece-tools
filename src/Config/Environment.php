@@ -386,6 +386,20 @@ class Environment
     }
 
     /**
+     * @return array
+     */
+    public function getCronConsumersRunner(): array
+    {
+        $config = $this->getVariable('CRON_CONSUMERS_RUNNER', []);
+
+        if (!is_array($config)) {
+            $config = json_decode($config, true);
+        }
+
+        return $config;
+    }
+
+    /**
      * @return bool
      */
     public function isUpdateUrlsEnabled(): bool
