@@ -19,6 +19,7 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
+use Magento\MagentoCloud\Process as Process;
 
 /**
  * @inheritdoc
@@ -142,6 +143,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
+                        $this->container->make(Process\CleanCache::class),
                     ],
                 ]);
             });
@@ -166,7 +168,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\Setup::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
-                        $this->container->make(DeployProcess\InstallUpdate\Update\ClearCache::class),
                     ],
                 ]);
             });
