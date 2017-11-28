@@ -44,7 +44,7 @@ class UnlockCronJobsTest extends TestCase
         $this->updateCronJobs(5);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('5 cron jobs was updated from status running to status missed');
+            ->with('5 cron jobs were updated from status "running" to status "missed"');
 
         $this->process->execute();
     }

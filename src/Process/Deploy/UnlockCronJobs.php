@@ -59,7 +59,7 @@ class UnlockCronJobs implements ProcessInterface
         if ($updatedJobsCount) {
             $this->logger->info(
                 sprintf(
-                    '%d cron jobs were updated from status %s to status %s',
+                    '%d cron jobs were updated from status "%s" to status "%s"',
                     $updatedJobsCount,
                     self::STATUS_RUNNING,
                     self::STATUS_MISSED
