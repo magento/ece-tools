@@ -11,6 +11,10 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Updates running cron jobs.
+ *
+ * In magento version 2.2 was implemented locking functionality for cron jobs, new cron jobs can't be started
+ * if exist job in status 'running' with same 'job_code'.
+ * This process are used for unlocking cron jobs that stuck in 'running' status.
  */
 class UnlockCronJobs implements ProcessInterface
 {
