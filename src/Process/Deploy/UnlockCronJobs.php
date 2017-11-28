@@ -15,7 +15,6 @@ use Psr\Log\LoggerInterface;
 class UnlockCronJobs implements ProcessInterface
 {
     const STATUS_RUNNING = 'running';
-
     const STATUS_MISSED = 'missed';
 
     /**
@@ -47,7 +46,7 @@ class UnlockCronJobs implements ProcessInterface
      */
     public function execute()
     {
-        $updateCronStatusQuery = 'UPDATE cron_schedule SET status = :to_status WHERE status = :from_status';
+        $updateCronStatusQuery = 'UPDATE `cron_schedule` SET `status` = :to_status WHERE `status` = :from_status';
 
         $updatedJobsCount = $this->connection->affectingQuery(
             $updateCronStatusQuery,
@@ -60,7 +59,7 @@ class UnlockCronJobs implements ProcessInterface
         if ($updatedJobsCount) {
             $this->logger->info(
                 sprintf(
-                    '%d cron jobs was updated from status %s to status %s',
+                    '%d cron jobs were updated from status %s to status %s',
                     $updatedJobsCount,
                     self::STATUS_RUNNING,
                     self::STATUS_MISSED

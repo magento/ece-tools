@@ -66,7 +66,7 @@ class UnlockCronJobsTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('affectingQuery')
             ->with(
-                'UPDATE cron_schedule SET status = :to_status WHERE status = :from_status',
+                'UPDATE `cron_schedule` SET `status` = :to_status WHERE `status` = :from_status',
                 [
                     ':to_status' => UnlockCronJobs::STATUS_MISSED,
                     ':from_status' => UnlockCronJobs::STATUS_RUNNING
