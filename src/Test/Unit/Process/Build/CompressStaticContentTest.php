@@ -73,6 +73,10 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecute()
     {
+        $this->buildConfigMock->expects($this->once())
+            ->method('get')
+            ->with(BuildConfig::OPT_SCD_COMPRESSION_LEVEL, CompressStaticContent::COMPRESSION_LEVEL)
+            ->willReturn(6);
         $this->environmentMock
             ->expects($this->once())
             ->method('isStaticDeployInBuild')
@@ -80,7 +84,7 @@ class CompressStaticContentTest extends TestCase
         $this->compressorMock
             ->expects($this->once())
             ->method('process')
-            ->with('6');
+            ->with(6);
 
         $this->process->execute();
     }

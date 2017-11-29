@@ -41,8 +41,8 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
-     * @param LoggerInterface         $logger
-     * @param Environment             $environment
+     * @param LoggerInterface $logger
+     * @param Environment $environment
      * @param StaticContentCompressor $staticContentCompressor
      */
     public function __construct(
@@ -64,7 +64,10 @@ class CompressStaticContent implements ProcessInterface
     {
         if ($this->environment->isDeployStaticContent()) {
             $this->staticContentCompressor->process(
-                static::COMPRESSION_LEVEL,
+                $this->environment->getVariable(
+                    Environment::VAR_SCD_COMPRESSION_LEVEL,
+                    static::COMPRESSION_LEVEL
+                ),
                 $this->environment->getVerbosityLevel()
             );
         } else {
