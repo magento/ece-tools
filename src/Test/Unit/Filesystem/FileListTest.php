@@ -82,6 +82,6 @@ class FileListTest extends TestCase
 
     public function testGetInstallUpgradeLog()
     {
-        $this->assertSame('magento_root/var/log/installUpgrade.log', $this->fileList->getInstallUpgradeLog());
+        $this->assertSame('magento_root/var/log/install_upgrade.log', $this->fileList->getInstallUpgradeLog());
     }
 }

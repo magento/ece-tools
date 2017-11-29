@@ -84,6 +84,6 @@ class FileList
      */
     public function getInstallUpgradeLog(): string
     {
-        return $this->directoryList->getLog() . '/installUpgrade.log';
+        return $this->directoryList->getLog() . '/install_upgrade.log';
     }
 }
