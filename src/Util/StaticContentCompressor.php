@@ -47,7 +47,7 @@ class StaticContentCompressor
 
     /**
      * @param LoggerInterface $logger
-     * @param ShellInterface  $shell
+     * @param ShellInterface $shell
      */
     public function __construct(
         LoggerInterface $logger,
@@ -61,11 +61,17 @@ class StaticContentCompressor
      * Compress select files in the static content directory.
      *
      * @param int $compressionLevel
-     *
-     * @return bool
+     * @param string $verbose
+     * @return void
      */
-    public function process(int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL, string $verbose = ''): bool
+    public function process(int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL, string $verbose = '')
     {
+        if ($compressionLevel === 0) {
+            $this->logger->info('Static content compression was disabled.');
+
+            return;
+        }
+
         $compressionCommand = $this->getCompressionCommand($compressionLevel);
 
         $startTime = microtime(true);
@@ -77,12 +83,10 @@ class StaticContentCompressor
             $this->logger->info(
                 "Static content compression took $duration seconds.",
                 [
-                    'commandRun' => $compressionCommand
+                    'commandRun' => $compressionCommand,
                 ]
             );
         }
-
-        return true;
     }
 
     /**
@@ -101,9 +105,7 @@ class StaticContentCompressor
     /**
      * Get the string containing the full shell command for compression.
      *
-     * @param int  $compressionLevel
-     * @param bool $verbose
-     *
+     * @param int $compressionLevel
      * @return string
      */
     private function getCompressionCommand(
