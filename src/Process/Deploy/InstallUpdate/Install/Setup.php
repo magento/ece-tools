@@ -101,6 +101,6 @@ class Setup implements ProcessInterface
 
         $command .= $this->environment->getVerbosityLevel();
 
-        $this->shell->execute(escapeshellcmd($command));
+        $this->shell->execute('/bin/bash -c "set -o pipefail; '.escapeshellcmd($command).' | tee -a /tmp/install.log"');
     }
 }
