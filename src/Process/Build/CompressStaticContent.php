@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Psr\Log\LoggerInterface;
@@ -33,11 +33,6 @@ class CompressStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var BuildConfig
      */
     private $buildConfig;
@@ -48,21 +43,27 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
-     * @param LoggerInterface         $logger
-     * @param Environment             $environment
-     * @param BuildConfig             $buildConfig
+     * @var FlagFilePool
+     */
+    private $flagFilePool;
+
+    /**
+     * CompressStaticContent constructor.
+     * @param LoggerInterface $logger
+     * @param BuildConfig $buildConfig
      * @param StaticContentCompressor $staticContentCompressor
+     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         LoggerInterface $logger,
-        Environment $environment,
         BuildConfig $buildConfig,
-        StaticContentCompressor $staticContentCompressor
+        StaticContentCompressor $staticContentCompressor,
+        FlagFilePool $flagFilePool
     ) {
         $this->logger = $logger;
-        $this->environment = $environment;
         $this->buildConfig = $buildConfig;
         $this->staticContentCompressor = $staticContentCompressor;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -72,7 +73,7 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->environment->isStaticDeployInBuild()) {
+        if ($this->flagFilePool->getFlag('scd_in_build')->exists()) {
             $this->staticContentCompressor->process(
                 static::COMPRESSION_LEVEL,
                 $this->buildConfig->getVerbosityLevel()

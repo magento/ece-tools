@@ -6,8 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -34,34 +33,27 @@ class Setup implements ProcessInterface
     private $shell;
 
     /**
-     * @var File
+     * @var FlagFilePool
      */
-    private $file;
+    private $flagFilePool;
 
     /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
+     * Setup constructor.
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param ShellInterface $shell
-     * @param File $file
-     * @param DirectoryList $directoryList
+     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         ShellInterface $shell,
-        File $file,
-        DirectoryList $directoryList
+        FlagFilePool $flagFilePool
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->shell = $shell;
-        $this->file = $file;
-        $this->directoryList = $directoryList;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -71,7 +63,8 @@ class Setup implements ProcessInterface
      */
     public function execute()
     {
-        $this->removeRegenerateFlag();
+        $regenerateFlag = $this->flagFilePool->getFlag('regenerate');
+        $regenerateFlag->delete();
 
         try {
             $verbosityLevel = $this->environment->getVerbosityLevel();
@@ -90,19 +83,6 @@ class Setup implements ProcessInterface
             throw new \RuntimeException($e->getMessage(), 6);
         }
 
-        $this->removeRegenerateFlag();
-    }
-
-    /**
-     * Removes regenerate flag file if such file exists
-     */
-    private function removeRegenerateFlag()
-    {
-        $magentoRoot = $this->directoryList->getMagentoRoot();
-
-        if ($this->file->isExists($magentoRoot . '/' . Environment::REGENERATE_FLAG)) {
-            $this->logger->info('Removing .regenerate flag');
-            $this->file->deleteFile($magentoRoot . '/' . Environment::REGENERATE_FLAG);
-        }
+        $regenerateFlag->delete();
     }
 }

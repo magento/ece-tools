@@ -57,6 +57,7 @@ class BuildDirCopier
             $toDirectory = $magentoRoot . '/' . $dir;
 
             $strategy = $this->strategyFactory->create($strategyName);
+
             $result = $strategy->copy($fromDirectory, $toDirectory);
 
             if ($result) {

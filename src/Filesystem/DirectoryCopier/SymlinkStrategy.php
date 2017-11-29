@@ -41,6 +41,11 @@ class SymlinkStrategy implements StrategyInterface
             );
         }
 
+        if ($this->file->isEmptyDirectory($fromDirectory)) {
+            $this->logger->info(sprintf("%s is empty. Nothing to restore", $fromDirectory));
+            return;
+        }
+
         if ($this->file->isExists($toDirectory)) {
             if ($this->file->isLink($toDirectory)) {
                 $this->file->unLink($toDirectory);

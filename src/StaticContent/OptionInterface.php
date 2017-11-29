@@ -10,7 +10,7 @@ interface OptionInterface
     /**
      * @return int
      */
-    public function getTreadCount(): int;
+    public function getThreadCount(): int;
 
     /**
      * @return array

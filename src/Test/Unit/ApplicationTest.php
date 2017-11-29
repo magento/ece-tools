@@ -11,8 +11,10 @@ use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Container\ContainerInterface;
 
 class ApplicationTest extends TestCase
@@ -23,17 +25,17 @@ class ApplicationTest extends TestCase
     private $application;
 
     /**
-     * @var ContainerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ContainerInterface|Mock
      */
     private $containerMock;
 
     /**
-     * @var Composer|\PHPUnit_Framework_MockObject_MockObject
+     * @var Composer|Mock
      */
     private $composerMock;
 
     /**
-     * @var PackageInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var PackageInterface|Mock
      */
     private $packageMock;
 
@@ -61,21 +63,24 @@ class ApplicationTest extends TestCase
          */
         $buildCommandMock = $this->createMock(Build::class);
         $deployCommandMock = $this->createMock(Deploy::class);
-        $configDumpCommand = $this->createMock(ConfigDump::class);
-        $postDeployCommand = $this->createMock(PostDeploy::class);
+        $configDumpCommandMock = $this->createMock(ConfigDump::class);
+        $prestartCommandMock = $this->createMock(Prestart::class);
+        $postDeployCommandMock = $this->createMock(PostDeploy::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
         $this->mockCommand($deployCommandMock, Deploy::NAME);
-        $this->mockCommand($configDumpCommand, ConfigDump::NAME);
-        $this->mockCommand($postDeployCommand, PostDeploy::NAME);
+        $this->mockCommand($configDumpCommandMock, ConfigDump::NAME);
+        $this->mockCommand($prestartCommandMock, Prestart::NAME);
+        $this->mockCommand($postDeployCommandMock, PostDeploy::NAME);
 
         $this->containerMock->method('get')
             ->willReturnMap([
                 [Composer::class, $this->composerMock],
                 [Build::class, $buildCommandMock],
                 [Deploy::class, $deployCommandMock],
-                [ConfigDump::class, $configDumpCommand],
-                [PostDeploy::class, $postDeployCommand],
+                [ConfigDump::class, $configDumpCommandMock],
+                [Prestart::class, $prestartCommandMock],
+                [PostDeploy::class, $postDeployCommandMock],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
@@ -112,6 +117,7 @@ class ApplicationTest extends TestCase
         $this->assertTrue($this->application->has(Build::NAME));
         $this->assertTrue($this->application->has(Deploy::NAME));
         $this->assertTrue($this->application->has(ConfigDump::NAME));
+        $this->assertTrue($this->application->has(Prestart::NAME));
         $this->assertTrue($this->application->has(PostDeploy::NAME));
     }
 

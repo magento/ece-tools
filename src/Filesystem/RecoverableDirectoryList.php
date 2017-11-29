@@ -23,10 +23,14 @@ class RecoverableDirectoryList
 
     /**
      * @param Environment $environment
+     * @param FlagFilePool $flagFilePool
      */
-    public function __construct(Environment $environment)
-    {
+    public function __construct(
+        Environment $environment,
+        FlagFilePool $flagFilePool
+    ) {
         $this->environment = $environment;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -49,7 +53,7 @@ class RecoverableDirectoryList
             ]
         ];
 
-        if ($this->environment->isStaticDeployInBuild()) {
+        if ($this->flagFilePool->getFlag('scd_in_build')->exists()) {
             $recoverableDirs[] = [
                 self::OPTION_DIRECTORY => 'var/view_preprocessed',
                 self::OPTION_STRATEGY => $isSymlinkEnabled ?

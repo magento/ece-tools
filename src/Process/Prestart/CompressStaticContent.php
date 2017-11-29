@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy;
+namespace Magento\MagentoCloud\Process\Prestart;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
@@ -24,7 +24,6 @@ class CompressStaticContent implements ProcessInterface
      * Level 4 is appropriate for when we must finish compression as fast as possible, such as in this site
      * deploy phase that brings the site down.
      */
-    const COMPRESSION_LEVEL = 4;
 
     /**
      * @var LoggerInterface
@@ -47,11 +46,9 @@ class CompressStaticContent implements ProcessInterface
     private $flagFilePool;
 
     /**
-     * CompressStaticContent constructor.
-     * @param LoggerInterface $logger
-     * @param Environment $environment
+     * @param LoggerInterface         $logger
+     * @param Environment             $environment
      * @param StaticContentCompressor $staticContentCompressor
-     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         LoggerInterface $logger,
@@ -72,18 +69,14 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->environment->isDeployStaticContent()) {
-            if ($this->flagFilePool->getFlag('scd_pending')->exists()) {
-                $this->logger->info('Postpone static content compression until prestart');
-                return;
-            }
+        if ($this->environment->isDeployStaticContent() && $this->flagFilePool->getFlag('scd_pending')->exists()) {
             $this->staticContentCompressor->process(
-                static::COMPRESSION_LEVEL,
+                StaticContentCompressor::DEFAULT_COMPRESSION_LEVEL,
                 $this->environment->getVerbosityLevel()
             );
         } else {
             $this->logger->info(
-                "Static content deployment was performed during the build phase or disabled. Skipping deploy phase"
+                "Static content deployment was performed during the build phase or disabled. Skipping prestart phase"
                 . " static content compression."
             );
         }

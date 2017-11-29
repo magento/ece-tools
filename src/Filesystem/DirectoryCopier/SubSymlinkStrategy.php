@@ -45,6 +45,11 @@ class SubSymlinkStrategy implements StrategyInterface
             );
         }
 
+        if ($this->file->isEmptyDirectory($fromDirectory)) {
+            $this->logger->info(sprintf("%s is empty. Nothing to restore", $fromDirectory));
+            return;
+        }
+
         $directoryIterator = $this->file->getDirectoryIterator($fromDirectory);
         foreach ($directoryIterator as $fileInfo) {
             if ($fileInfo->isDot()) {
