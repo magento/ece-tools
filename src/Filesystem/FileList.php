@@ -78,4 +78,12 @@ class FileList
     {
         return $this->directoryList->getInit() . '/var/log/cloud.log';
     }
+
+    /**
+     * @return string
+     */
+    public function getInstallUpgradeLog(): string
+    {
+        return $this->directoryList->getLog() . '/installUpgrade.log';
+    }
 }

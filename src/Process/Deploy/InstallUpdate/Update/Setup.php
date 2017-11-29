@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -39,6 +40,11 @@ class Setup implements ProcessInterface
     private $file;
 
     /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
      * @var DirectoryList
      */
     private $directoryList;
@@ -49,19 +55,22 @@ class Setup implements ProcessInterface
      * @param ShellInterface $shell
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param FileList $fileList
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         ShellInterface $shell,
         File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        FileList $fileList
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->shell = $shell;
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
     }
 
     /**
@@ -80,7 +89,12 @@ class Setup implements ProcessInterface
             $this->shell->execute('php ./bin/magento maintenance:enable ' . $verbosityLevel);
 
             $this->logger->info('Running setup upgrade.');
-            $this->shell->execute('php ./bin/magento setup:upgrade --keep-generated -n ' . $verbosityLevel);
+
+            $this->shell->execute(sprintf(
+                '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
+                'php ./bin/magento setup:upgrade --keep-generated -n ' . $verbosityLevel,
+                $this->fileList->getInstallUpgradeLog()
+            ));
 
             /* Disable maintenance mode */
             $this->shell->execute('php ./bin/magento maintenance:disable ' . $verbosityLevel);
