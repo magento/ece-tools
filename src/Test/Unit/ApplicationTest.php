@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -63,11 +64,13 @@ class ApplicationTest extends TestCase
         $deployCommandMock = $this->createMock(Deploy::class);
         $configDumpCommand = $this->createMock(ConfigDump::class);
         $postDeployCommand = $this->createMock(PostDeploy::class);
+        $dbDumpCommand = $this->createMock(DbDump::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
         $this->mockCommand($deployCommandMock, Deploy::NAME);
         $this->mockCommand($configDumpCommand, ConfigDump::NAME);
         $this->mockCommand($postDeployCommand, PostDeploy::NAME);
+        $this->mockCommand($dbDumpCommand, DbDump::NAME);
 
         $this->containerMock->method('get')
             ->willReturnMap([
@@ -76,6 +79,7 @@ class ApplicationTest extends TestCase
                 [Deploy::class, $deployCommandMock],
                 [ConfigDump::class, $configDumpCommand],
                 [PostDeploy::class, $postDeployCommand],
+                [DbDump::class, $dbDumpCommand],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
@@ -111,6 +115,7 @@ class ApplicationTest extends TestCase
     {
         $this->assertTrue($this->application->has(Build::NAME));
         $this->assertTrue($this->application->has(Deploy::NAME));
+        $this->assertTrue($this->application->has(DbDump::NAME));
         $this->assertTrue($this->application->has(ConfigDump::NAME));
         $this->assertTrue($this->application->has(PostDeploy::NAME));
     }

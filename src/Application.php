@@ -9,6 +9,7 @@ use Composer\Composer;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Psr\Container\ContainerInterface;
 
@@ -54,6 +55,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(Build::class),
                 $this->container->get(Deploy::class),
                 $this->container->get(ConfigDump::class),
+                $this->container->get(DbDump::class),
                 $this->container->get(PostDeploy::class),
             ]
         );
