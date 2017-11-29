@@ -6,19 +6,24 @@
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
+use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
+use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
+use Magento\MagentoCloud\Process as Process;
 
 /**
  * @inheritdoc
@@ -70,6 +75,10 @@ class Container implements ContainerInterface
         $this->container->singleton(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
             \Magento\MagentoCloud\Shell\Shell::class
+        );
+        $this->container->singleton(
+            \Magento\MagentoCloud\DB\DumpInterface::class,
+            \Magento\MagentoCloud\DB\Dump::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Build::class);
@@ -142,6 +151,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
+                        $this->container->make(Process\CleanCache::class),
                     ],
                 ]);
             });
@@ -166,7 +176,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\Setup::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
-                        $this->container->make(DeployProcess\InstallUpdate\Update\ClearCache::class),
                     ],
                 ]);
             });
@@ -263,6 +272,18 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(DbDump::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(DbDumpProcess\DbDump::class),
+                    ],
+                ]);
+            });
+        $this->container->when(\Magento\MagentoCloud\DB\Dump::class)
+            ->needs(ConnectionInterface::class)
+            ->give(ReadConnection::class);
         $this->container->when(PostDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
