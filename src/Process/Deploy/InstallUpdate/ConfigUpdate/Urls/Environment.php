@@ -82,14 +82,18 @@ class Environment implements ProcessInterface
                 continue;
             }
 
-            array_walk_recursive($config, function (&$value) use ($baseHost, $actualHost, &$replaceCount) {
+            array_walk_recursive($config, function (&$value) use ($baseHost, $actualHost, &$replaced) {
                 $value = str_replace($baseHost, $actualHost, $value, $replaceCount);
+                if ($replaceCount) {
+                    $replaced = true;
+                }
             });
 
-            if (!$replaceCount) {
+            if (!$replaced) {
                 continue;
             }
 
+            $replaced = null;
             $urlsChanged = true;
 
             $this->logger->info(sprintf('Replace host: [%s] => [%s]', $baseHost, $actualHost));
