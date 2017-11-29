@@ -7,13 +7,13 @@ namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
+use Magento\MagentoCloud\Config\Repository;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
 use Magento\MagentoCloud\Config\Log as LogConfig;
-use Illuminate\Config\Repository;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 

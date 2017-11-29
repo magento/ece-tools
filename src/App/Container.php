@@ -91,6 +91,7 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\CopyStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\RepositoryFactory::class);
         /**
          * Contextual binding.
          */
@@ -292,5 +293,17 @@ class Container implements ContainerInterface
     {
         $this->container->forgetInstance($abstract);
         $this->container->bind($abstract, $concrete, $shared);
+    }
+
+    /**
+     * Creates instance with params.
+     *
+     * @param string $abstract
+     * @param array $params
+     * @return mixed
+     */
+    public function create(string $abstract, array $params = [])
+    {
+        return $this->container->make($abstract, $params);
     }
 }

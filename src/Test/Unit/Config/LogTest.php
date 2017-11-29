@@ -6,10 +6,11 @@
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\Log as LogConfig;
+use Magento\MagentoCloud\Config\Repository;
+use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
-use Illuminate\Config\Repository;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -34,14 +35,34 @@ class LogTest extends TestCase
     private $logConfig;
 
     /**
+     * @var RepositoryFactory|Mock
+     */
+    private $repositoryFactoryMock;
+
+    /**
+     * @var Repository|Mock
+     */
+    private $repositoryMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->fileListMock = $this->createMock(FileList::class);
         $this->readerMock = $this->createMock(Reader::class);
+        $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
+        $this->repositoryMock = $this->createMock(Repository::class);
 
-        $this->logConfig = new LogConfig($this->fileListMock, $this->readerMock);
+        $this->repositoryFactoryMock->expects($this->any())
+            ->method('create')
+            ->willReturn($this->repositoryMock);
+
+        $this->logConfig = new LogConfig(
+            $this->fileListMock,
+            $this->readerMock,
+            $this->repositoryFactoryMock
+        );
     }
 
     /**
@@ -70,19 +91,19 @@ class LogTest extends TestCase
             ['config' => [], 'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE]],
             [
                 'config' => ['someConfig' => ['someConfig']],
-                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE]
+                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE],
             ],
             [
                 'config' => ['log' => []],
-                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE]
+                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE],
             ],
             [
                 'config' => ['log' => ['SomeHandler' => ['SomeConfig']]],
-                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE, 'SomeHandler']
+                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE, 'SomeHandler'],
             ],
             [
                 'config' => ['log' => ['SomeHandler' => ['SomeConfig']], 'someConfig' => ['someConfig']],
-                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE, 'SomeHandler']
+                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE, 'SomeHandler'],
             ],
         ];
     }
@@ -98,16 +119,16 @@ class LogTest extends TestCase
             ->method('read')
             ->willReturn($config);
 
-        $this->assertEquals(
-            (new Repository(['stream' => 'php://stdout'])),
+        $this->assertInstanceOf(
+            Repository::class,
             $this->logConfig->get(HandlerFactory::HANDLER_STREAM)
         );
-        $this->assertEquals(
-            (new Repository(['stream' => $logPath])),
+        $this->assertInstanceOf(
+            Repository::class,
             $this->logConfig->get(HandlerFactory::HANDLER_FILE)
         );
-        $this->assertEquals(
-            (new Repository(['SomeConfig'])),
+        $this->assertInstanceOf(
+            Repository::class,
             $this->logConfig->get('SomeHandler')
         );
     }

@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Config;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
-use Illuminate\Config\Repository;
 
 /**
  * Log configuration.
@@ -33,13 +32,20 @@ class Log
     private $config;
 
     /**
+     * @var RepositoryFactory
+     */
+    private $repositoryFactory;
+
+    /**
      * @param FileList $fileList
      * @param Reader $reader
+     * @param RepositoryFactory $repositoryFactory
      */
-    public function __construct(FileList $fileList, Reader $reader)
+    public function __construct(FileList $fileList, Reader $reader, RepositoryFactory $repositoryFactory)
     {
         $this->fileList = $fileList;
         $this->reader = $reader;
+        $this->repositoryFactory = $repositoryFactory;
     }
 
     /**
@@ -52,16 +58,18 @@ class Log
 
     /**
      * @param string $handler
-     * @return Repository
+     * @return RepositoryInterface
      * @throws \Exception
      */
-    public function get(string $handler): Repository
+    public function get(string $handler): RepositoryInterface
     {
         if (!isset($this->getConfig()[$handler])) {
             throw new \Exception('Configuration for ' . $handler . ' is not found');
         }
 
-        return new Repository($this->getConfig()[$handler]);
+        return $this->repositoryFactory->create(
+            $this->getConfig()[$handler]
+        );
     }
 
     /**
