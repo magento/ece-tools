@@ -76,7 +76,7 @@ class Database implements ProcessInterface
 
             $changedRowsCount = $this->updateUrl($baseUrlHost, $actualUrlHost);
 
-            if (0 === $changedRowsCount) {
+            if (!$changedRowsCount) {
                 continue;
             }
             $this->logger->info(sprintf('Host was replaced: [%s] => [%s]', $baseUrlHost, $actualUrlHost));
