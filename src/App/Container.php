@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
+use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -145,6 +146,15 @@ class Container extends \Illuminate\Container\Container implements ContainerInte
                 return $this->makeWith(ProcessPool::class, [
                     'processes' => [
                         $this->make(ConfigDumpProcess\Import::class),
+                    ],
+                ]);
+            });
+        $this->when(CronUnlock::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->makeWith(ProcessPool::class, [
+                    'processes' => [
+                        $this->make(DeployProcess\UnlockCronJobs::class),
                     ],
                 ]);
             });
