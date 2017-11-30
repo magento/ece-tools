@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit_Framework_MockObject_Matcher_InvokedCount as InvokedCount;
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
@@ -62,13 +63,16 @@ class EnvironmentTest extends TestCase
     }
 
     /**
-     * @param \PHPUnit_Framework_MockObject_Matcher_InvokedCount $loggerInfoExpects
+     * @param InvokedCount $loggerInfoExpects
      * @param array $urlManagerGetUrlsWillReturn
-     * @param \PHPUnit_Framework_MockObject_Matcher_InvokedCount $writerWriteExpects
+     * @param InvokedCount $writerWriteExpects
      * @dataProvider executeDataProvider
      */
-    public function testExecute($loggerInfoExpects, $urlManagerGetUrlsWillReturn, $writerWriteExpects)
-    {
+    public function testExecute(
+        InvokedCount $loggerInfoExpects,
+        array $urlManagerGetUrlsWillReturn,
+        InvokedCount $writerWriteExpects
+    ) {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
             ->withConsecutive(
@@ -110,7 +114,7 @@ class EnvironmentTest extends TestCase
     /**
      * @return array
      */
-    public function executeDataProvider()
+    public function executeDataProvider(): array
     {
         return [
             'urls not equal' => [

@@ -12,7 +12,9 @@ use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * Updates the base_url configuration in the `core_config_data` table
+ *
+ * {@inheritdoc}
  */
 class Database implements ProcessInterface
 {
@@ -61,32 +63,32 @@ class Database implements ProcessInterface
     {
         $this->logger->info('Updating secure and unsecure URLs in core_config_data table.');
 
-        $configBaseUrls = $this->getConfigBaseUrls();
+        $baseUrls = $this->getBaseUrls();
 
         foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrl) {
-            if (empty($actualUrl['']) || empty($configBaseUrls[$typeUrl])) {
+            if (empty($actualUrl['']) || empty($baseUrls[$typeUrl])) {
                 continue;
             }
-            $baseUrlHost = parse_url($configBaseUrls[$typeUrl])['host'];
-            $actualUrlHost = parse_url($actualUrl[''])['host'];
+            $baseHost = parse_url($baseUrls[$typeUrl])['host'];
+            $actualHost = parse_url($actualUrl[''])['host'];
 
-            if ($baseUrlHost === $actualUrlHost) {
+            if ($baseHost === $actualHost) {
                 continue;
             }
 
-            $changedRowsCount = $this->updateUrl($baseUrlHost, $actualUrlHost);
+            $changedRowsCount = $this->updateUrl($baseHost, $actualHost);
 
             if (!$changedRowsCount) {
                 continue;
             }
-            $this->logger->info(sprintf('Host was replaced: [%s] => [%s]', $baseUrlHost, $actualUrlHost));
+            $this->logger->info(sprintf('Host was replaced: [%s] => [%s]', $baseHost, $actualHost));
         }
     }
 
     /**
      * Returns the base_url configuration from `core_config_data` table.
      *
-     * ```
+     * ```php
      * array(
      *     'secure' => 'https://example.com',
      *     'unsecure' => 'http://example.com',
@@ -94,7 +96,7 @@ class Database implements ProcessInterface
      * ```
      * @return array
      */
-    private function getConfigBaseUrls()
+    private function getBaseUrls(): array
     {
         $configBaseUrls = $this->connection->select(
             'SELECT `value`, `path` FROM `core_config_data` WHERE (`path`=? OR `path`= ?) AND `scope_id` = ?',
@@ -121,7 +123,7 @@ class Database implements ProcessInterface
      *
      * @return int Returns the number of updated URLs
      */
-    private function updateUrl($baseHost, $actualHost)
+    private function updateUrl(string $baseHost, string $actualHost): int
     {
         return $this->connection->affectingQuery(
             'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',

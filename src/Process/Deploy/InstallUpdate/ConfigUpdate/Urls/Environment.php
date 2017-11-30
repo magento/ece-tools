@@ -12,7 +12,9 @@ use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 
 /**
- * @inheritdoc
+ * Updates the base_url configuration in the <magento_root>/app/etc/env.php file
+ *
+ * {@inheritdoc}
  */
 class Environment implements ProcessInterface
 {
@@ -108,7 +110,7 @@ class Environment implements ProcessInterface
     /**
      * @return array
      */
-    private function getBaseUrls()
+    private function getBaseUrls(): array
     {
         $config = $this->getEnvConfig();
         $baseUrls = [];
@@ -125,7 +127,7 @@ class Environment implements ProcessInterface
     /**
      * @return array
      */
-    private function getEnvConfig()
+    private function getEnvConfig(): array
     {
         if (!$this->envConfig) {
             $this->envConfig = $this->reader->read();

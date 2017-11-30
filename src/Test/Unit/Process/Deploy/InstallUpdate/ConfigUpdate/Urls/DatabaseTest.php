@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Database;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit_Framework_MockObject_Matcher_InvokedCount as InvokedCount;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
@@ -62,13 +63,16 @@ class DatabaseTest extends TestCase
     }
 
     /**
-     * @param \PHPUnit_Framework_MockObject_Matcher_InvokedCount $loggerInfoExpects
+     * @param InvokedCount $loggerInfoExpects
      * @param array $urlManagerGetUrlsWillReturn
-     * @param \PHPUnit_Framework_MockObject_Matcher_InvokedCount $connectionExpectsAffectingQuery
+     * @param InvokedCount $connectionExpectsAffectingQuery
      * @dataProvider executeDataProvider
      */
-    public function testExecute($loggerInfoExpects, $urlManagerGetUrlsWillReturn, $connectionExpectsAffectingQuery)
-    {
+    public function testExecute(
+        InvokedCount $loggerInfoExpects,
+        array $urlManagerGetUrlsWillReturn,
+        InvokedCount $connectionExpectsAffectingQuery
+    ) {
         $this->loggerMock->expects($loggerInfoExpects)
             ->method('info')
             ->withConsecutive(
@@ -108,7 +112,7 @@ class DatabaseTest extends TestCase
     /**
      * @return array
      */
-    public function executeDataProvider()
+    public function executeDataProvider(): array
     {
         return [
             'urls not equal' => [
