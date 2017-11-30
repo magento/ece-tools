@@ -10,6 +10,8 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Helper\HelperSet;
+use Symfony\Component\Console\Helper\QuestionHelper;
 
 /**
  * @inheritdoc
@@ -32,6 +34,16 @@ class DbDumpTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var HelperSet|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $helperSetMock;
+
+    /**
+     * @var QuestionHelper|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $questionMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -41,14 +53,28 @@ class DbDumpTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
+        $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
+            ->setMethods(['ask'])
+            ->getMock();
+        $this->helperSetMock = $this->createMock(HelperSet::class);
+        $this->helperSetMock->expects($this->once())
+            ->method('get')
+            ->with('question')
+            ->will($this->returnValue($this->questionMock));
+
         $this->command = new DbDump(
             $this->processMock,
             $this->loggerMock
         );
+        $this->command->setHelperSet($this->helperSetMock);
     }
 
-    public function testExecute()
+    public function testExecuteWithConfirmation()
     {
+        $this->questionMock->expects($this->once())
+            ->method('ask')
+            ->will($this->returnValue(true));
+
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -66,12 +92,34 @@ class DbDumpTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
+    public function testExecuteConfirmationDeny()
+    {
+        $this->questionMock->expects($this->once())
+            ->method('ask')
+            ->will($this->returnValue(false));
+
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+        $this->processMock->expects($this->never())
+            ->method('execute');
+
+        $tester = new CommandTester(
+            $this->command
+        );
+        $tester->execute([]);
+
+        $this->assertSame(0, $tester->getStatusCode());
+    }
+
     /**
      * @expectedException \Exception
      * @expectedExceptionMessage Some error
      */
     public function testExecuteWithException()
     {
+        $this->questionMock->expects($this->once())
+            ->method('ask')
+            ->will($this->returnValue(true));
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting backup.');
