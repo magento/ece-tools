@@ -203,6 +203,46 @@ class StaticContentCleanerTest extends TestCase
             ->method('isExists')
             ->with($magentoVarDir . '/view_preprocessed')
             ->willReturn(false);
+        $this->fileMock->expects($this->once())
+            ->method('isLink')
+            ->with($magentoVarDir . '/view_preprocessed')
+            ->willReturn(false);
+
+        $this->fileMock->expects($this->never())
+            ->method('rename');
+        $this->fileMock->expects($this->never())
+            ->method('unLink');
+        $this->shellMock->expects($this->never())
+            ->method('backgroundExecute');
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+
+        $this->staticContentCleaner->cleanViewPreprocessed();
+    }
+
+    public function testCleanViewPreprocessedIsLink()
+    {
+        $magentoRootDir = '/magento/';
+        $magentoVarDir = $magentoRootDir . '/var';
+
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($magentoRootDir);
+        $this->fileMock->expects($this->once())
+            ->method('getRealPath')
+            ->with($magentoVarDir)
+            ->willReturn($magentoVarDir);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($magentoVarDir . '/view_preprocessed')
+            ->willReturn(false);
+        $this->fileMock->expects($this->once())
+            ->method('isLink')
+            ->with($magentoVarDir . '/view_preprocessed')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('unLink')
+            ->with($magentoVarDir . '/view_preprocessed');
 
         $this->fileMock->expects($this->never())
             ->method('rename');
