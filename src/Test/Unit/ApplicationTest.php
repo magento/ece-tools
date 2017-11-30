@@ -10,6 +10,7 @@ use Composer\Package\PackageInterface;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
@@ -71,6 +72,18 @@ class ApplicationTest extends TestCase
         $this->mockCommand($configDumpCommand, ConfigDump::NAME);
         $this->mockCommand($postDeployCommand, PostDeploy::NAME);
         $this->mockCommand($dbDumpCommand, DbDump::NAME);
+        /**
+         * Command mocks.
+         */
+        $buildCommandMock = $this->createMock(Build::class);
+        $deployCommandMock = $this->createMock(Deploy::class);
+        $configDumpCommand = $this->createMock(ConfigDump::class);
+        $cronUnlockCommand = $this->createMock(CronUnlock::class);
+
+        $this->mockCommand($buildCommandMock, Build::NAME);
+        $this->mockCommand($deployCommandMock, Deploy::NAME);
+        $this->mockCommand($configDumpCommand, ConfigDump::NAME);
+        $this->mockCommand($cronUnlockCommand, CronUnlock::NAME);
 
         $this->containerMock->method('get')
             ->willReturnMap([
@@ -80,6 +93,10 @@ class ApplicationTest extends TestCase
                 [ConfigDump::class, $configDumpCommand],
                 [PostDeploy::class, $postDeployCommand],
                 [DbDump::class, $dbDumpCommand],
+                [Build::class, $buildCommandMock],
+                [Deploy::class, $deployCommandMock],
+                [ConfigDump::class, $configDumpCommand],
+                [CronUnlock::class, $cronUnlockCommand],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
@@ -134,5 +151,6 @@ class ApplicationTest extends TestCase
             $this->applicationVersion,
             $this->application->getVersion()
         );
+        $this->assertTrue($this->application->has(CronUnlock::NAME));
     }
 }
