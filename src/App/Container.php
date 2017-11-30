@@ -23,7 +23,7 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
-use Magento\MagentoCloud\Process as Process;
+use Magento\MagentoCloud\Process;
 
 /**
  * @inheritdoc

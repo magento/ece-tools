@@ -73,8 +73,8 @@ class EnvironmentTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Updating secure and unsecure URLs in app/etc/env.php file'],
-                ['Replace host: [example1.com] => [example2.com]'],
-                ['Write the updating configuration in the app/etc/env.php file']
+                ['Host was replaced: [example1.com] => [example2.com]'],
+                ['Write the updating base URLs configuration in the app/etc/env.php file']
             );
         $this->readerMock->expects($this->once())
             ->method('read')

@@ -37,6 +37,11 @@ class Environment implements ProcessInterface
     private $writer;
 
     /**
+     * @var array
+     */
+    private $envConfig;
+
+    /**
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
      * @param Reader $reader
@@ -60,14 +65,9 @@ class Environment implements ProcessInterface
     public function execute()
     {
         $this->logger->info('Updating secure and unsecure URLs in app/etc/env.php file');
-        $config = $this->reader->read();
-        $baseUrls = [];
-        foreach (['secure', 'unsecure'] as $type) {
-            $url = $config['system']['default']['web'][$type]['base_url'] ?? null;
-            if (null !== $url) {
-                $baseUrls[$type] = $url;
-            }
-        }
+
+        $config = $this->getEnvConfig();
+        $baseUrls = $this->getBaseUrls();
 
         $urlsChanged = false;
         foreach ($this->urlManager->getUrls() as $typeUrl => $actualUrls) {
@@ -96,12 +96,40 @@ class Environment implements ProcessInterface
             $replaced = null;
             $urlsChanged = true;
 
-            $this->logger->info(sprintf('Replace host: [%s] => [%s]', $baseHost, $actualHost));
+            $this->logger->info(sprintf('Host was replaced: [%s] => [%s]', $baseHost, $actualHost));
         }
 
         if ($urlsChanged) {
-            $this->logger->info('Write the updating configuration in the app/etc/env.php file');
+            $this->logger->info('Write the updating base URLs configuration in the app/etc/env.php file');
             $this->writer->write($config);
         }
+    }
+
+    /**
+     * @return array
+     */
+    private function getBaseUrls()
+    {
+        $config = $this->getEnvConfig();
+        $baseUrls = [];
+        foreach (['secure', 'unsecure'] as $type) {
+            $url = $config['system']['default']['web'][$type]['base_url'] ?? null;
+            if (null !== $url) {
+                $baseUrls[$type] = $url;
+            }
+        }
+
+        return $baseUrls;
+    }
+
+    /**
+     * @return array
+     */
+    private function getEnvConfig()
+    {
+        if (!$this->envConfig) {
+            $this->envConfig = $this->reader->read();
+        }
+        return $this->envConfig;
     }
 }

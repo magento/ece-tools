@@ -73,7 +73,7 @@ class DatabaseTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Updating secure and unsecure URLs in core_config_data table.'],
-                ['Replace host: [example1.com] => [example2.com]']
+                ['Host was replaced: [example1.com] => [example2.com]']
             );
         $this->connectionMock->expects($this->once())
             ->method('select')

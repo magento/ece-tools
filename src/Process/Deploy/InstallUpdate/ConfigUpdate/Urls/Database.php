@@ -79,7 +79,7 @@ class Database implements ProcessInterface
             if (0 === $changedRowsCount) {
                 continue;
             }
-            $this->logger->info(sprintf('Replace host: [%s] => [%s]', $baseUrlHost, $actualUrlHost));
+            $this->logger->info(sprintf('Host was replaced: [%s] => [%s]', $baseUrlHost, $actualUrlHost));
         }
     }
 
