@@ -65,7 +65,7 @@ class StaticContentCompressorTest extends TestCase
                         $this->stringContains('xargs'),
                         $this->stringContains($this->staticContentCompressor::TARGET_DIR),
                         $this->stringContains("-$i")
-                    )
+                    ),
                 ];
             }
 
@@ -80,5 +80,14 @@ class StaticContentCompressorTest extends TestCase
         for ($i = $minLevel; $i <= $maxLevel; $i++) {
             $this->staticContentCompressor->process($i);
         }
+    }
+
+    public function testCompressionDisabled()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Static content compression was disabled.');
+
+        $this->staticContentCompressor->process(0);
     }
 }
