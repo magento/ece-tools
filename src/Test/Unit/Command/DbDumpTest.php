@@ -60,7 +60,7 @@ class DbDumpTest extends TestCase
         $this->helperSetMock->expects($this->once())
             ->method('get')
             ->with('question')
-            ->will($this->returnValue($this->questionMock));
+            ->willReturn($this->questionMock);
 
         $this->command = new DbDump(
             $this->processMock,
@@ -73,7 +73,7 @@ class DbDumpTest extends TestCase
     {
         $this->questionMock->expects($this->once())
             ->method('ask')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -96,7 +96,7 @@ class DbDumpTest extends TestCase
     {
         $this->questionMock->expects($this->once())
             ->method('ask')
-            ->will($this->returnValue(false));
+            ->willReturn(false);
 
         $this->loggerMock->expects($this->never())
             ->method('info');
@@ -119,7 +119,7 @@ class DbDumpTest extends TestCase
     {
         $this->questionMock->expects($this->once())
             ->method('ask')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting backup.');

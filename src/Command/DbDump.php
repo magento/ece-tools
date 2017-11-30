@@ -62,7 +62,7 @@ class DbDump extends Command
     {
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion(
-            'We suggest to enable maintenance mode before running this command. Do you want to continue [y/n]?',
+            'We suggest to enable maintenance mode before running this command. Do you want to continue [y/N]?',
             false
         );
         if (!$helper->ask($input, $output, $question) && $input->isInteractive()) {
