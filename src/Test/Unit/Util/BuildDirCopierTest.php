@@ -117,7 +117,7 @@ class BuildDirCopierTest extends TestCase
         $dir = 'not-exist-dir';
         $rootInitDir = $initDir . '/' . $dir;
         $fileMock = $this->createMock(File::class);
-        $copyStrategy = new CopyStrategy($fileMock);
+        $copyStrategy = new CopyStrategy($fileMock, $this->loggerMock);
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')

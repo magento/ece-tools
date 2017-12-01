@@ -208,4 +208,53 @@ class DeployStaticContentTest extends TestCase
 
         $this->process->execute();
     }
+
+    public function testDoCleanStaticFiles()
+    {
+        $magentoRoot = 'magento_root';
+        $this->remoteDiskIdentifierMock->expects($this->once())
+            ->method('isOnLocalDisk')
+            ->with('pub/static')
+            ->willReturn(true);
+        $this->flagFilePoolMock->expects($this->once())
+            ->method('getFlag')
+            ->with('scd_pending')
+            ->willReturn($this->flagMock);
+        $this->flagMock->expects($this->once())
+            ->method('exists')
+            ->willReturn(true);
+        $this->environmentMock->expects($this->once())
+            ->method('getApplicationMode')
+            ->willReturn(Environment::MAGENTO_PRODUCTION_MODE);
+        $this->environmentMock->expects($this->once())
+            ->method('isDeployStaticContent')
+            ->willReturn(true);
+        $this->environmentMock->expects($this->once())
+            ->method('doCleanStaticFiles')
+            ->willReturn(true);
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($magentoRoot);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('backgroundClearDirectory')
+            ->withConsecutive(
+                [$magentoRoot. '/pub/static'],
+                [$magentoRoot. '/var/view_preprocessed']
+            );
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('info')
+            ->withConsecutive(
+                ['Clearing pub/static'],
+                ['Clearing var/view_preprocessed'],
+                ['Generating fresh static content']
+            );
+
+        $this->processMock->expects($this->once())
+            ->method('execute');
+
+
+
+
+        $this->process->execute();
+    }
 }
