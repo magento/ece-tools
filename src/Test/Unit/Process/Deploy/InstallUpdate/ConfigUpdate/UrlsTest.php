@@ -61,7 +61,8 @@ class UrlsTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function testExecute() {
+    public function testExecute()
+    {
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
             ->willReturn(false);
