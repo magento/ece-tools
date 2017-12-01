@@ -69,8 +69,8 @@ class Database implements ProcessInterface
             if (empty($actualUrl['']) || empty($baseUrls[$typeUrl])) {
                 continue;
             }
-            $baseHost = parse_url($baseUrls[$typeUrl])['host'];
-            $actualHost = parse_url($actualUrl[''])['host'];
+            $baseHost = parse_url($baseUrls[$typeUrl], PHP_URL_HOST);
+            $actualHost = parse_url($actualUrl[''], PHP_URL_HOST);
 
             if ($baseHost === $actualHost) {
                 continue;
