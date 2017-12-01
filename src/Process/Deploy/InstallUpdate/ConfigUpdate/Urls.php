@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -49,7 +50,10 @@ class Urls implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->environment->isUpdateUrlsEnabled()) {
+        if (
+            $this->environment->isMasterBranch()
+            || !$this->environment->isUpdateUrlsEnabled()
+        ) {
             $this->logger->info('Skipping URL updates');
 
             return;

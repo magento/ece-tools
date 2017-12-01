@@ -11,6 +11,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit_Framework_MockObject_Matcher_InvokedCount as InvokedCount;
 
 /**
  * @inheritdoc
@@ -60,11 +61,15 @@ class UrlsTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function testExecute()
-    {
-        $this->environmentMock->method('isUpdateUrlsEnabled')
+    public function testExecute() {
+        $this->environmentMock->expects($this->once())
+            ->method('isMasterBranch')
+            ->willReturn(false);
+        $this->environmentMock->expects($this->once())
+            ->method('isUpdateUrlsEnabled')
             ->willReturn(true);
-        $this->loggerMock->method('info')
+        $this->loggerMock->expects($this->once())
+            ->method('info')
             ->with('Updating secure and unsecure URLs');
         $this->processMock->expects($this->once())
             ->method('execute');
@@ -72,13 +77,42 @@ class UrlsTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteSkipped()
-    {
-        $this->environmentMock->method('isUpdateUrlsEnabled')
+    /**
+     * @param bool $envIsMasterBranchWillReturn
+     * @param InvokedCount $envIsUpdateUrlsEnabledExpects
+     * @dataProvider executeSkippedDataProvider
+     */
+    public function testExecuteSkipped(
+        bool $envIsMasterBranchWillReturn,
+        InvokedCount $envIsUpdateUrlsEnabledExpects
+    ) {
+        $this->environmentMock->expects($this->once())
+            ->method('isMasterBranch')
+            ->willReturn($envIsMasterBranchWillReturn);
+        $this->environmentMock->expects($envIsUpdateUrlsEnabledExpects)
+            ->method('isUpdateUrlsEnabled')
             ->willReturn(false);
-        $this->loggerMock->method('notice')
+        $this->loggerMock->expects($this->once())
+            ->method('info')
             ->with('Skipping URL updates');
 
         $this->process->execute();
+    }
+
+    /**
+     * @return array
+     */
+    public function executeSkippedDataProvider(): array
+    {
+        return [
+            [
+                'envIsMasterBranchWillReturn' => true,
+                'envIsUpdateUrlsEnabledExpects' => $this->never(),
+            ],
+            [
+                'envIsMasterBranchWillReturn' => false,
+                'envIsMasterBranchExpects' => $this->once(),
+            ]
+        ];
     }
 }
