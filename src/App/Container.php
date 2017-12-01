@@ -240,7 +240,7 @@ class Container implements ContainerInterface
         $this->container->when(CronUnlock::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
-                return $this->container->makeWith(ProcessPool::class, [
+                return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
                     ],
