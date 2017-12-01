@@ -24,7 +24,7 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
-use Magento\MagentoCloud\Process as Process;
+use Magento\MagentoCloud\Process;
 
 /**
  * @inheritdoc
@@ -196,6 +196,16 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                    ],
+                ]);
+            });
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Database::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Environment::class),
                     ],
                 ]);
             });
