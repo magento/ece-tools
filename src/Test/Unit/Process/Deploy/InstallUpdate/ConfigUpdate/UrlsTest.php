@@ -113,7 +113,7 @@ class UrlsTest extends TestCase
             [
                 'envIsMasterBranchWillReturn' => false,
                 'envIsMasterBranchExpects' => $this->once(),
-            ]
+            ],
         ];
     }
 }

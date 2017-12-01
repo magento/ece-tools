@@ -103,7 +103,7 @@ class Database implements ProcessInterface
             [
                 'web/unsecure/base_url',
                 'web/secure/base_url',
-                0
+                0,
             ]
         );
         $result = [];
@@ -130,7 +130,7 @@ class Database implements ProcessInterface
             [
                 $baseHost,
                 $actualHost,
-                '%' . $baseHost . '%'
+                '%' . $baseHost . '%',
             ]
         );
     }
