@@ -5,8 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\FlagFile;
 
+use JsonSchema\Exception\RuntimeException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\FlagFile\Base;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
@@ -167,5 +169,63 @@ class BaseTest extends TestCase
             ->withConsecutive($logs);
 
         $this->assertSame($result, $this->base->delete($path));
+    }
+
+    public function testExistsException()
+    {
+        $path = 'path/that/doesnt/exist';
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($this->magentoRoot);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willThrowException(new FileSystemException('Error occurred during execution'));
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Error occurred during execution');
+
+        $this->assertFalse($this->base->exists($path));
+    }
+
+
+    public function testSetException()
+    {
+        $path = 'path/that/doesnt/exist';
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->fileMock->expects($this->once())
+            ->method('touch')
+            ->willThrowException(new FileSystemException('Error occurred during execution'));
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Error occurred during execution');
+
+        $this->assertFalse($this->base->set($path));
+    }
+
+
+    public function testDeleteException()
+    {
+        $root = $this->magentoRoot;
+        $path = '.some_flag';
+        $flag = 'magento_root/.some_flag';
+        $flagState = true;
+
+        $this->directoryListMock->expects($this->any())
+            ->method('getMagentoRoot')
+            ->willReturn($root);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($flag)
+            ->willReturn($flagState);
+        $this->fileMock->expects($this->once())
+            ->method('deleteFile')
+            ->willThrowException(new FileSystemException('Error occurred during execution'));
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Error occurred during execution');
+
+        $this->assertFalse($this->base->delete($path));
     }
 }

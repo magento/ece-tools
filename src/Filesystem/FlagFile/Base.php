@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Filesystem\FlagFile;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -51,7 +52,12 @@ class Base
     public function exists(string $flag): bool
     {
         $path = $this->directoryList->getMagentoRoot() . '/' . $flag;
-        return $this->file->isExists($path);
+        try {
+            return $this->file->isExists($path);
+        } catch (FileSystemException $e) {
+            $this->logger->notice($e->getMessage());
+        }
+        return false;
     }
 
     /**
@@ -61,9 +67,13 @@ class Base
     public function set(string $flag): bool
     {
         $path = $this->directoryList->getMagentoRoot() . '/' . $flag;
-        if ($this->file->touch($path)) {
-            $this->logger->info('Set flag: ' . $flag);
-            return true;
+        try {
+            if ($this->file->touch($path)) {
+                $this->logger->info('Set flag: ' . $flag);
+                return true;
+            }
+        } catch (FileSystemException $e) {
+            $this->logger->notice($e->getMessage());
         }
         return false;
     }
@@ -81,9 +91,13 @@ class Base
 
         $path = $this->directoryList->getMagentoRoot() . '/' . $flag;
 
-        if ($this->file->deleteFile($path)) {
-            $this->logger->info('Deleted flag: ' . $flag);
-            return true;
+        try {
+            if ($this->file->deleteFile($path)) {
+                $this->logger->info('Deleted flag: ' . $flag);
+                return true;
+            }
+        } catch (FileSystemException $e) {
+            $this->logger->notice($e->getMessage());
         }
 
         return false;
