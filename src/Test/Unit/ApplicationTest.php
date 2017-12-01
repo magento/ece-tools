@@ -10,8 +10,10 @@ use Composer\Package\PackageInterface;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\Prestart;
+use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -62,25 +64,31 @@ class ApplicationTest extends TestCase
          * Command mocks.
          */
         $buildCommandMock = $this->createMock(Build::class);
-        $deployCommandMock = $this->createMock(Deploy::class);
         $configDumpCommandMock = $this->createMock(ConfigDump::class);
-        $prestartCommandMock = $this->createMock(Prestart::class);
+        $cronUnlockCommandMock = $this->createMock(CronUnlock::class);
+        $dbDumpCommandMock = $this->createMock(DbDump::class);
+        $deployCommandMock = $this->createMock(Deploy::class);
         $postDeployCommandMock = $this->createMock(PostDeploy::class);
+        $prestartCommandMock = $this->createMock(Prestart::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
-        $this->mockCommand($deployCommandMock, Deploy::NAME);
         $this->mockCommand($configDumpCommandMock, ConfigDump::NAME);
-        $this->mockCommand($prestartCommandMock, Prestart::NAME);
+        $this->mockCommand($cronUnlockCommandMock, CronUnlock::NAME);
+        $this->mockCommand($dbDumpCommandMock, DbDump::NAME);
+        $this->mockCommand($deployCommandMock, Deploy::NAME);
         $this->mockCommand($postDeployCommandMock, PostDeploy::NAME);
+        $this->mockCommand($prestartCommandMock, Prestart::NAME);
 
         $this->containerMock->method('get')
             ->willReturnMap([
-                [Composer::class, $this->composerMock],
                 [Build::class, $buildCommandMock],
-                [Deploy::class, $deployCommandMock],
+                [Composer::class, $this->composerMock],
                 [ConfigDump::class, $configDumpCommandMock],
-                [Prestart::class, $prestartCommandMock],
+                [CronUnlock::class, $cronUnlockCommandMock],
+                [DbDump::class, $dbDumpCommandMock],
+                [Deploy::class, $deployCommandMock],
                 [PostDeploy::class, $postDeployCommandMock],
+                [Prestart::class, $prestartCommandMock],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
@@ -116,6 +124,7 @@ class ApplicationTest extends TestCase
     {
         $this->assertTrue($this->application->has(Build::NAME));
         $this->assertTrue($this->application->has(Deploy::NAME));
+        $this->assertTrue($this->application->has(DbDump::NAME));
         $this->assertTrue($this->application->has(ConfigDump::NAME));
         $this->assertTrue($this->application->has(Prestart::NAME));
         $this->assertTrue($this->application->has(PostDeploy::NAME));
@@ -135,5 +144,6 @@ class ApplicationTest extends TestCase
             $this->applicationVersion,
             $this->application->getVersion()
         );
+        $this->assertTrue($this->application->has(CronUnlock::NAME));
     }
 }

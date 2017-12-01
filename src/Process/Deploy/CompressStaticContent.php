@@ -78,7 +78,10 @@ class CompressStaticContent implements ProcessInterface
                 return;
             }
             $this->staticContentCompressor->process(
-                static::COMPRESSION_LEVEL,
+                $this->environment->getVariable(
+                    Environment::VAR_SCD_COMPRESSION_LEVEL,
+                    static::COMPRESSION_LEVEL
+                ),
                 $this->environment->getVerbosityLevel()
             );
         } else {

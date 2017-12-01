@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -48,9 +49,10 @@ class AcceptanceTest extends TestCase
 
     /**
      * @param array $environment
+     * @param array $expectedConsumersRunnerConfig
      * @dataProvider defaultDataProvider
      */
-    public function testDefault(array $environment)
+    public function testDefault(array $environment, array $expectedConsumersRunnerConfig)
     {
         $application = $this->bootstrap->createApplication($environment);
 
@@ -76,6 +78,12 @@ class AcceptanceTest extends TestCase
         $this->assertSame(0, $commandTester->getStatusCode());
 
         $this->assertContentPresence($environment);
+
+        /** @var ConfigReader $configReader */
+        $configReader = $application->getContainer()->get(ConfigReader::class);
+        $config = $configReader->read();
+
+        $this->assertArraySubset($expectedConsumersRunnerConfig, $config);
     }
 
     /**
@@ -90,6 +98,47 @@ class AcceptanceTest extends TestCase
                         'ADMIN_EMAIL' => 'admin@example.com',
                     ],
                 ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 10000,
+                        'consumers' => [],
+                    ]
+                ]
+            ],
+            'test cron_consumers_runner with array' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => [
+                            'cron_run' => "true",
+                            'max_messages' => 5000,
+                            'consumers' => ['test'],
+                        ]
+                    ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 5000,
+                        'consumers' => ['test'],
+                    ]
+                ]
+            ],
+            'test cron_consumers_runner with string' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
+                    ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 100,
+                        'consumers' => ['test2'],
+                    ]
+                ]
             ],
             'disabled static content symlinks 3 jobs' => [
                 'environment' => [
@@ -98,6 +147,13 @@ class AcceptanceTest extends TestCase
                         'STATIC_CONTENT_SYMLINK' => Environment::VAL_DISABLED,
                         'STATIC_CONTENT_THREADS' => 3,
                     ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 10000,
+                        'consumers' => [],
+                    ]
                 ],
             ],
         ];

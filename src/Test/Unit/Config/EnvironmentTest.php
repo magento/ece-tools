@@ -247,4 +247,49 @@ class EnvironmentTest extends TestCase
             $this->environment->getDefaultCurrency()
         );
     }
+
+    /**
+     * @param array $variables
+     * @param array $expectedResult
+     * @dataProvider getCronConsumersRunnerDataProvider
+     */
+    public function testGetCronConsumersRunner(array $variables, array $expectedResult)
+    {
+        $this->setVariables($variables);
+        $this->assertEquals($expectedResult, $this->environment->getCronConsumersRunner());
+    }
+
+    /**
+     * @return array
+     */
+    public function getCronConsumersRunnerDataProvider(): array
+    {
+        return [
+            ['variables' => [], 'expectedResult' => []],
+            [
+                'variables' => [
+                    'CRON_CONSUMERS_RUNNER' => [
+                        'cron_run' => 'false',
+                        'max_messages' => '100',
+                        'consumers' => ['test'],
+                    ],
+                ],
+                'expectedResult' => [
+                    'cron_run' => 'false',
+                    'max_messages' => '100',
+                    'consumers' => ['test'],
+                ]
+            ],
+            [
+                'variables' => [
+                    'CRON_CONSUMERS_RUNNER' => '{"cron_run":"false", "max_messages":"100", "consumers":["test"]}',
+                ],
+                'expectedResult' => [
+                    'cron_run' => 'false',
+                    'max_messages' => '100',
+                    'consumers' => ['test'],
+                ]
+            ]
+        ];
+    }
 }

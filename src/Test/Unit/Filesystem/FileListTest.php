@@ -6,7 +6,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -20,9 +22,14 @@ class FileListTest extends TestCase
     private $fileList;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var DirectoryList|Mock
      */
     private $directoryListMock;
+
+    /**
+     * @var File|Mock
+     */
+    private $fileMock;
 
     /**
      * @inheritdoc
@@ -30,9 +37,14 @@ class FileListTest extends TestCase
     protected function setUp()
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileMock = $this->createMock(File::class);
+
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
+        $this->directoryListMock->expects($this->any())
+            ->method('getRoot')
+            ->willReturn('root');
         $this->directoryListMock->expects($this->any())
             ->method('getLog')
             ->willReturn('magento_root/var/log');
@@ -41,7 +53,8 @@ class FileListTest extends TestCase
             ->willReturn('magento_root/init');
 
         $this->fileList = new FileList(
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->fileMock
         );
     }
 
@@ -60,9 +73,27 @@ class FileListTest extends TestCase
         $this->assertSame('magento_root/build_options.ini', $this->fileList->getBuildConfig());
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
     public function testGetComposer()
     {
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/composer.json')
+            ->willReturn(true);
+
         $this->assertSame('magento_root/composer.json', $this->fileList->getComposer());
+    }
+
+    public function testGetComposerPackage()
+    {
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/composer.json')
+            ->willReturn(false);
+
+        $this->assertSame('root/composer.json', $this->fileList->getComposer());
     }
 
     public function testGetToolsConfig()

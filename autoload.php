@@ -11,6 +11,10 @@ define('ECE_BP', __DIR__);
  */
 $magentoRoot = __DIR__ . '/../../../';
 
+if (!defined('BP')) {
+    define('BP', realpath($magentoRoot));
+}
+
 if (!file_exists($magentoRoot . '/app/etc/NonComposerComponentRegistration.php') &&
     file_exists($magentoRoot . '/init/app/etc/NonComposerComponentRegistration.php')
 ) {
@@ -20,7 +24,7 @@ if (!file_exists($magentoRoot . '/app/etc/NonComposerComponentRegistration.php')
     );
 }
 
-foreach ([__DIR__ . '/../../../app/autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
+foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
     if (file_exists($file)) {
         return require $file;
     }
