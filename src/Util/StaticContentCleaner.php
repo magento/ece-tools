@@ -50,7 +50,7 @@ class StaticContentCleaner
         $this->directoryList = $directoryList;
     }
 
-    public function clean()
+    public function cleanPubStatic()
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
         // atomic move within pub/static directory
@@ -74,15 +74,23 @@ class StaticContentCleaner
 
         $this->logger->info('Removing ' . $oldStaticContentLocation . ' in the background');
         $this->shell->backgroundExecute('rm -rf ' . $oldStaticContentLocation);
+    }
 
-        // Clean view_preprocessed directory
+
+    public function cleanViewPreprocessed()
+    {
+        $magentoRoot = $this->directoryList->getMagentoRoot();
         $preprocessedLocation = $this->file->getRealPath($magentoRoot . '/var') . '/view_preprocessed';
+
         if ($this->file->isExists($preprocessedLocation)) {
+            $timestamp = time();
             $oldPreprocessedLocation = $preprocessedLocation . '_old_' . $timestamp;
             $this->logger->info('Rename ' . $preprocessedLocation . ' to ' . $oldPreprocessedLocation);
             $this->file->rename($preprocessedLocation, $oldPreprocessedLocation);
             $this->logger->info('Removing '.  $oldPreprocessedLocation . ' in the background');
             $this->shell->backgroundExecute('rm -rf ' . $oldPreprocessedLocation);
+        } elseif ($this->file->isLink($preprocessedLocation)) {
+            $this->file->unLink($preprocessedLocation);
         }
     }
 }

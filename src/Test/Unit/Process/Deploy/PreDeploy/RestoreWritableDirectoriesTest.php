@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\RestoreWritableDirectories;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use PHPUnit\Framework\TestCase;
@@ -37,14 +38,14 @@ class RestoreWritableDirectoriesTest extends TestCase
     private $buildDirCopierMock;
 
     /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
-
-    /**
      * @var DirectoryList|Mock
      */
     private $directoryListMock;
+
+    /**
+     * @var RecoverableDirectoryList|Mock
+     */
+    private $recoverableDirectoryListMock;
 
     protected function setUp()
     {
@@ -52,7 +53,7 @@ class RestoreWritableDirectoriesTest extends TestCase
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->buildDirCopierMock = $this->createMock(BuildDirCopier::class);
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
+        $this->recoverableDirectoryListMock = $this->getMockBuilder(RecoverableDirectoryList::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -61,7 +62,7 @@ class RestoreWritableDirectoriesTest extends TestCase
             $this->loggerMock,
             $this->fileMock,
             $this->buildDirCopierMock,
-            $this->environmentMock,
+            $this->recoverableDirectoryListMock,
             $this->directoryListMock
         );
     }
@@ -77,14 +78,17 @@ class RestoreWritableDirectoriesTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('deleteFile')
             ->with('magento_root/' . Environment::REGENERATE_FLAG);
-        $this->environmentMock->expects($this->once())
-            ->method('getRecoverableDirectories')
-            ->willReturn(['app/etc', 'pub/media']);
+        $this->recoverableDirectoryListMock->expects($this->once())
+            ->method('getList')
+            ->willReturn([
+                ['directory' => 'app/etc', 'strategy' => 'copy'],
+                ['directory' => 'pub/media', 'strategy' => 'copy']
+            ]);
         $this->buildDirCopierMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
-                ['app/etc'],
-                ['pub/media']
+                ['app/etc', 'copy'],
+                ['pub/media', 'copy']
             );
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -106,14 +110,17 @@ class RestoreWritableDirectoriesTest extends TestCase
             ->willReturn(false);
         $this->fileMock->expects($this->never())
             ->method('deleteFile');
-        $this->environmentMock->expects($this->once())
-            ->method('getRecoverableDirectories')
-            ->willReturn(['app/etc', 'pub/media']);
+        $this->recoverableDirectoryListMock->expects($this->once())
+            ->method('getList')
+            ->willReturn([
+                ['directory' => 'app/etc', 'strategy' => 'copy'],
+                ['directory' => 'pub/media', 'strategy' => 'copy']
+            ]);
         $this->buildDirCopierMock->expects($this->exactly(2))
             ->method('copy')
             ->withConsecutive(
-                ['app/etc'],
-                ['pub/media']
+                ['app/etc', 'copy'],
+                ['pub/media', 'copy']
             );
         $this->loggerMock->expects($this->once())
             ->method('info')

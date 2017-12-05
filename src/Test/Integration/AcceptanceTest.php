@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -28,8 +29,8 @@ class AcceptanceTest extends TestCase
     {
         $this->bootstrap = Bootstrap::create();
 
-        shell_exec(sprintf(
-            'cd %s && rm -rf init',
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento module:enable --all',
             $this->bootstrap->getSandboxDir()
         ));
     }
@@ -39,7 +40,7 @@ class AcceptanceTest extends TestCase
      */
     protected function tearDown()
     {
-        shell_exec(sprintf(
+        $this->bootstrap->execute(sprintf(
             'cd %s && php bin/magento setup:uninstall -n',
             $this->bootstrap->getSandboxDir()
         ));
@@ -47,17 +48,12 @@ class AcceptanceTest extends TestCase
 
     /**
      * @param array $environment
+     * @param array $expectedConsumersRunnerConfig
      * @dataProvider defaultDataProvider
      */
-    public function testDefault(array $environment)
+    public function testDefault(array $environment, array $expectedConsumersRunnerConfig)
     {
         $application = $this->bootstrap->createApplication($environment);
-
-        shell_exec(sprintf(
-            'cp -f %s %s',
-            $this->bootstrap->getConfigFile('config.php'),
-            $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
-        ));
 
         $commandTester = new CommandTester(
             $application->get(Build::NAME)
@@ -73,6 +69,12 @@ class AcceptanceTest extends TestCase
 
         $this->assertSame(0, $commandTester->getStatusCode());
         $this->assertContentPresence($environment);
+
+        /** @var ConfigReader $configReader */
+        $configReader = $application->getContainer()->get(ConfigReader::class);
+        $config = $configReader->read();
+
+        $this->assertArraySubset($expectedConsumersRunnerConfig, $config);
     }
 
     /**
@@ -82,14 +84,67 @@ class AcceptanceTest extends TestCase
     {
         return [
             'default configuration' => [
-                'environment' => [],
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                    ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 10000,
+                        'consumers' => [],
+                    ]
+                ]
+            ],
+            'test cron_consumers_runner with array' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => [
+                            'cron_run' => "true",
+                            'max_messages' => 5000,
+                            'consumers' => ['test'],
+                        ]
+                    ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 5000,
+                        'consumers' => ['test'],
+                    ]
+                ]
+            ],
+            'test cron_consumers_runner with string' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
+                    ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 100,
+                        'consumers' => ['test2'],
+                    ]
+                ]
             ],
             'disabled static content symlinks 3 jobs' => [
                 'environment' => [
                     'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
                         'STATIC_CONTENT_SYMLINK' => Environment::VAL_DISABLED,
                         'STATIC_CONTENT_THREADS' => 3,
                     ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 10000,
+                        'consumers' => [],
+                    ]
                 ],
             ],
         ];
@@ -103,10 +158,14 @@ class AcceptanceTest extends TestCase
     {
         $application = $this->bootstrap->createApplication($environment);
 
-        shell_exec(sprintf(
+        $this->bootstrap->execute(sprintf(
             'cp -f %s %s',
             __DIR__ . '/_files/config_scd_in_build.php',
             $this->bootstrap->getSandboxDir() . '/app/etc/config.php'
+        ));
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento module:enable --all',
+            $this->bootstrap->getSandboxDir()
         ));
 
         $commandTester = new CommandTester(
@@ -132,7 +191,11 @@ class AcceptanceTest extends TestCase
     {
         return [
             'default configuration' => [
-                'environment' => [],
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                    ],
+                ],
             ],
         ];
     }
@@ -163,17 +226,5 @@ class AcceptanceTest extends TestCase
             $pageContent,
             'Check "CMS homepage content goes here." phrase presence'
         );
-    }
-
-    /**
-     * @return array
-     */
-    public function upgradeDataProvider(): array
-    {
-        return [
-            'default configuration' => [
-                'environment' => [],
-            ],
-        ];
     }
 }

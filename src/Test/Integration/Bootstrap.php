@@ -48,9 +48,7 @@ class Bootstrap
 
         $buildFile = $this->getConfigFile('build_options.ini');
         $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
-        $deployType = getenv('DEPLOY_TYPE')
-            ? getenv('DEPLOY_TYPE')
-            : $deployConfig[static::DEPLOY_TYPE];
+        $deployType = getenv('DEPLOY_TYPE') ?: $deployConfig[static::DEPLOY_TYPE];
 
         if (!$deployType || !array_key_exists($deployType, $deployConfig['types'])) {
             throw new \Exception(
@@ -86,7 +84,7 @@ class Bootstrap
 
                 $this->execute(
                     sprintf(
-                        'composer create-project --no-dev --repository-url=%s %s %s %s',
+                        'composer create-project --repository-url=%s %s %s %s',
                         $projectConfig['repo'],
                         $projectConfig['name'],
                         $sandboxDir,
@@ -98,19 +96,21 @@ class Bootstrap
                 throw new \Exception('Wrong deploy type');
         }
 
-        $this->execute(
-            sprintf(
-                'cp -f %s %s',
-                $buildFile,
-                $sandboxDir . '/build_options.ini'
-            )
-        );
-        $this->execute(
-            sprintf(
-                'composer install -n -d %s',
-                $sandboxDir
-            )
-        );
+        /**
+         * Copying build options.
+         */
+        $this->execute(sprintf(
+            'cp -f %s %s',
+            $buildFile,
+            $sandboxDir . '/build_options.ini'
+        ));
+        /**
+         * Install without dev dependencies.
+         */
+        $this->execute(sprintf(
+            'composer install -n -d %s --no-dev --no-progress',
+            $sandboxDir
+        ));
     }
 
     /**
@@ -134,8 +134,17 @@ class Bootstrap
         ]);
 
         $server[\Magento\MagentoCloud\App\Bootstrap::INIT_PARAM_DIRS_CONFIG] = [
-            DirectoryList::MAGENTO_ROOT => [
+            DirectoryList::DIR_MAGENTO_ROOT => [
                 DirectoryList::PATH => '',
+            ],
+            DirectoryList::DIR_INIT => [
+                DirectoryList::PATH => 'init',
+            ],
+            DirectoryList::DIR_VAR => [
+                DirectoryList::PATH => 'var',
+            ],
+            DirectoryList::DIR_LOG => [
+                DirectoryList::PATH => 'var/log',
             ],
         ];
 
@@ -149,7 +158,7 @@ class Bootstrap
      */
     public function mergeConfig(array $environment): Repository
     {
-        return new Repository(array_replace_recursive(
+        return new Repository(array_replace(
             require $this->getConfigFile('environment.php'),
             $environment
         ));
@@ -161,9 +170,7 @@ class Bootstrap
     public function getSandboxDir(): string
     {
         $environmentFile = $this->getConfigFile('environment.php');
-        $sandboxKey = getenv('SANDBOX_KEY')
-            ? getenv('SANDBOX_KEY')
-            : md5_file($environmentFile);
+        $sandboxKey = getenv('SANDBOX_KEY') ?: md5_file($environmentFile);
 
         return ECE_BP . '/tests/integration/tmp/sandbox-' . $sandboxKey;
     }
@@ -194,7 +201,7 @@ class Bootstrap
      * @param string $command
      * @return string
      */
-    private function execute(string $command)
+    public function execute(string $command)
     {
         exec($command, $output, $status);
 

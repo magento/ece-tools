@@ -70,4 +70,28 @@ class Manager
 
         return $package;
     }
+
+    /**
+     * @param string $packageName
+     * @param string $version
+     * @return bool
+     */
+    public function has(string $packageName, string $version = '*'): bool
+    {
+        return $this->repository->findPackage($packageName, $version) instanceof PackageInterface;
+    }
+
+    /**
+     * Retrieve required packages from composer.json
+     *
+     * @return string[]
+     */
+    public function getRequiredPackageNames(): array
+    {
+        $packages = [];
+        foreach ($this->composer->getPackage()->getRequires() as $link) {
+            $packages[] = $link->getTarget();
+        }
+        return $packages;
+    }
 }

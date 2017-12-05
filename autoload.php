@@ -11,6 +11,10 @@ define('ECE_BP', __DIR__);
  */
 $magentoRoot = __DIR__ . '/../../../';
 
+if (!defined('BP')) {
+    define('BP', realpath($magentoRoot));
+}
+
 if (!file_exists($magentoRoot . '/app/etc/NonComposerComponentRegistration.php') &&
     file_exists($magentoRoot . '/init/app/etc/NonComposerComponentRegistration.php')
 ) {
@@ -25,3 +29,5 @@ foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/vendor/autoload.php'] as 
         return require $file;
     }
 }
+
+throw new \RuntimeException('Required file \'autoload.php\' was not found.');

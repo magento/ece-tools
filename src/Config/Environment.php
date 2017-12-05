@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2016 Magento. All rights reserved.
+ * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\MagentoCloud\Config;
@@ -32,11 +32,12 @@ class Environment
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
-    const VAR_REDIS_SESSION_DISABLE_LOCKING = 'REDIS_SESSION_DISABLE_LOCKING';
     /**
-     * Let's keep variable names same for both phases.
+     * Variables.
      */
+    const VAR_REDIS_SESSION_DISABLE_LOCKING = 'REDIS_SESSION_DISABLE_LOCKING';
     const VAR_SCD_STRATEGY = Build::OPT_SCD_STRATEGY;
+    const VAR_SCD_COMPRESSION_LEVEL = Build::OPT_SCD_COMPRESSION_LEVEL;
 
     /**
      * @var LoggerInterface
@@ -236,16 +237,6 @@ class Environment
     }
 
     /**
-     * Retrieves recoverable directories.
-     *
-     * @return array
-     */
-    public function getRecoverableDirectories(): array
-    {
-        return ['var/log', 'app/etc', 'pub/media'];
-    }
-
-    /**
      * @return bool
      */
     public function isDeployStaticContent(): bool
@@ -393,6 +384,20 @@ class Environment
     public function getAdminUrl(): string
     {
         return $this->getVariables()['ADMIN_URL'] ?? '';
+    }
+
+    /**
+     * @return array
+     */
+    public function getCronConsumersRunner(): array
+    {
+        $config = $this->getVariable('CRON_CONSUMERS_RUNNER', []);
+
+        if (!is_array($config)) {
+            $config = json_decode($config, true);
+        }
+
+        return $config;
     }
 
     /**

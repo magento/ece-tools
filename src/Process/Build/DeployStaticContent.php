@@ -5,12 +5,11 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
-use Magento\MagentoCloud\Util\ArrayManager;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,11 +23,6 @@ class DeployStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var File
-     */
-    private $file;
-
-    /**
      * @var BuildConfig
      */
     private $buildConfig;
@@ -39,45 +33,34 @@ class DeployStaticContent implements ProcessInterface
     private $environment;
 
     /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
-     * @var ArrayManager
-     */
-    private $arrayManager;
-
-    /**
      * @var ProcessInterface
      */
     private $process;
 
     /**
+     * @var ConfigFileStructure
+     */
+    private $configFileStructureValidator;
+
+    /**
      * @param LoggerInterface $logger
      * @param BuildConfig $buildConfig
-     * @param File $file
      * @param Environment $environment
-     * @param DirectoryList $directoryList
-     * @param ArrayManager $arrayManager
      * @param ProcessInterface $process
+     * @param ConfigFileStructure $configFileStructureValidator
      */
     public function __construct(
         LoggerInterface $logger,
         BuildConfig $buildConfig,
-        File $file,
         Environment $environment,
-        DirectoryList $directoryList,
-        ArrayManager $arrayManager,
-        ProcessInterface $process
+        ProcessInterface $process,
+        ConfigFileStructure $configFileStructureValidator
     ) {
         $this->logger = $logger;
-        $this->file = $file;
         $this->buildConfig = $buildConfig;
         $this->environment = $environment;
-        $this->directoryList = $directoryList;
-        $this->arrayManager = $arrayManager;
         $this->process = $process;
+        $this->configFileStructureValidator = $configFileStructureValidator;
     }
 
     /**
@@ -85,23 +68,18 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
+        $this->environment->removeFlagStaticContentInBuild();
 
-        if (!$this->file->isExists($configFile) || $this->buildConfig->get(BuildConfig::OPT_SKIP_SCD)) {
+        if ($this->buildConfig->get(BuildConfig::OPT_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
-            $this->environment->removeFlagStaticContentInBuild();
 
             return;
         }
 
-        $config = require $configFile;
-        $flattenedConfig = $this->arrayManager->flatten($config);
-        $websites = $this->arrayManager->filter($flattenedConfig, 'scopes/websites', false);
-        $stores = $this->arrayManager->filter($flattenedConfig, 'scopes/stores', false);
+        $validationResult = $this->configFileStructureValidator->validate();
 
-        if (count($stores) === 0 && count($websites) === 0) {
-            $this->logger->info('Skipping static content deploy. No stores/website/locales found in config.php');
-            $this->environment->removeFlagStaticContentInBuild();
+        if ($validationResult instanceof Error) {
+            $this->logger->info('Skipping static content deploy. ' . $validationResult->getError());
 
             return;
         }

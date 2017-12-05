@@ -13,7 +13,6 @@ case $TEST_SUITE in
 
         mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
 
-        composer config -a -n -g github-oauth.github.com ${GH_TOKEN}
         composer config -a -n -g http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
         composer config -a -n -g http-basic.connect20-qa01.magedevteam.com ${CONNECT20_USERNAME} ${CONNECT20_PASSWORD}
 
@@ -39,5 +38,16 @@ case $TEST_SUITE in
 
         phpenv config-rm xdebug.ini
         sudo service apache2 restart
+        ;;
+    integration-docker)
+        cd tests/integration-docker;
+
+        echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> composer.env
+        echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> composer.env
+
+        mkdir magento
+        docker-compose run cli magento-installer
+        docker-compose up -d
+        cd ../..;
         ;;
 esac

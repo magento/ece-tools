@@ -8,7 +8,6 @@
 namespace Magento\MagentoCloud\Filesystem\Driver;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Class File.
@@ -17,19 +16,6 @@ use Magento\MagentoCloud\Shell\ShellInterface;
  */
 class File
 {
-    /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
-     * @param ShellInterface $shell
-     */
-    public function __construct(ShellInterface $shell)
-    {
-        $this->shell = $shell;
-    }
-
     /**
      * Returns last warning message string
      *
@@ -56,6 +42,42 @@ class File
     {
         clearstatcache();
         $result = @file_exists($path);
+        if ($result === null) {
+            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Tells whether the filename is a link
+     *
+     * @param string $path
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function isLink($path): bool
+    {
+        clearstatcache();
+        $result = @is_link($path);
+        if ($result === null) {
+            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Unlink symlink path
+     *
+     * @param string $path
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function unLink($path): bool
+    {
+        clearstatcache();
+        $result = @unlink($path);
         if ($result === null) {
             $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
         }
@@ -206,7 +228,7 @@ class File
         /**
          * Use shell for best performance.
          */
-        $this->shell->execute(sprintf(
+        shell_exec(sprintf(
             '/bin/bash -c "shopt -s dotglob; cp -R %s/* %s/"',
             $source,
             $destination
@@ -404,5 +426,45 @@ class File
         }
 
         return $result;
+    }
+
+    /**
+     * Retrieve file contents from given path
+     *
+     * @param string $path
+     * @param string|null $flag
+     * @param resource|null $context
+     * @return string
+     * @throws FileSystemException
+     */
+    public function fileGetContents($path, $flag = null, $context = null)
+    {
+        clearstatcache();
+        $result = @file_get_contents($path, $flag, $context);
+        if (false === $result) {
+            $this->fileSystemException('Cannot read contents from file "%1" %2', [$path, $this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
+
+    /**
+     * Returns directory iterator for given path
+     *
+     * @param string $path
+     * @return \DirectoryIterator
+     */
+    public function getDirectoryIterator($path): \DirectoryIterator
+    {
+        return new \DirectoryIterator($path);
+    }
+
+    /**
+     * @param string $path
+     * @return mixed
+     */
+    public function requireFile(string $path)
+    {
+        return require $path;
     }
 }

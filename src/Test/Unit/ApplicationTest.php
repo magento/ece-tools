@@ -12,6 +12,8 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\DbDump;
+use Magento\MagentoCloud\Command\PostDeploy;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -62,6 +64,20 @@ class ApplicationTest extends TestCase
         $buildCommandMock = $this->createMock(Build::class);
         $deployCommandMock = $this->createMock(Deploy::class);
         $configDumpCommand = $this->createMock(ConfigDump::class);
+        $postDeployCommand = $this->createMock(PostDeploy::class);
+        $dbDumpCommand = $this->createMock(DbDump::class);
+
+        $this->mockCommand($buildCommandMock, Build::NAME);
+        $this->mockCommand($deployCommandMock, Deploy::NAME);
+        $this->mockCommand($configDumpCommand, ConfigDump::NAME);
+        $this->mockCommand($postDeployCommand, PostDeploy::NAME);
+        $this->mockCommand($dbDumpCommand, DbDump::NAME);
+        /**
+         * Command mocks.
+         */
+        $buildCommandMock = $this->createMock(Build::class);
+        $deployCommandMock = $this->createMock(Deploy::class);
+        $configDumpCommand = $this->createMock(ConfigDump::class);
         $cronUnlockCommand = $this->createMock(CronUnlock::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
@@ -72,6 +88,11 @@ class ApplicationTest extends TestCase
         $this->containerMock->method('get')
             ->willReturnMap([
                 [Composer::class, $this->composerMock],
+                [Build::class, $buildCommandMock],
+                [Deploy::class, $deployCommandMock],
+                [ConfigDump::class, $configDumpCommand],
+                [PostDeploy::class, $postDeployCommand],
+                [DbDump::class, $dbDumpCommand],
                 [Build::class, $buildCommandMock],
                 [Deploy::class, $deployCommandMock],
                 [ConfigDump::class, $configDumpCommand],
@@ -111,8 +132,9 @@ class ApplicationTest extends TestCase
     {
         $this->assertTrue($this->application->has(Build::NAME));
         $this->assertTrue($this->application->has(Deploy::NAME));
+        $this->assertTrue($this->application->has(DbDump::NAME));
         $this->assertTrue($this->application->has(ConfigDump::NAME));
-        $this->assertTrue($this->application->has(CronUnlock::NAME));
+        $this->assertTrue($this->application->has(PostDeploy::NAME));
     }
 
     public function testGetName()
@@ -129,5 +151,6 @@ class ApplicationTest extends TestCase
             $this->applicationVersion,
             $this->application->getVersion()
         );
+        $this->assertTrue($this->application->has(CronUnlock::NAME));
     }
 }

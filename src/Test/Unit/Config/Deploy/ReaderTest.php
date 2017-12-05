@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Deploy;
 
 use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -19,9 +19,9 @@ class ReaderTest extends TestCase
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var FileList|Mock
      */
-    private $directoryListMock;
+    private $fileListMock;
 
     /**
      * @var Reader
@@ -31,19 +31,19 @@ class ReaderTest extends TestCase
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
 
         $this->reader = new Reader(
             $this->fileMock,
-            $this->directoryListMock
+            $this->fileListMock
         );
     }
 
     public function testRead()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/../_file/Deploy');
+        $this->fileListMock->expects($this->once())
+            ->method('getEnv')
+            ->willReturn(__DIR__ . '/../_file/Deploy/app/etc/env.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with(__DIR__ . '/../_file/Deploy/app/etc/env.php')
@@ -61,9 +61,9 @@ class ReaderTest extends TestCase
 
     public function testReadFileNotExists()
     {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/../_file/Deploy');
+        $this->fileListMock->expects($this->once())
+            ->method('getEnv')
+            ->willReturn(__DIR__ . '/../_file/Deploy/app/etc/env.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with(__DIR__ . '/../_file/Deploy/app/etc/env.php')
@@ -72,19 +72,6 @@ class ReaderTest extends TestCase
         $this->assertEquals(
             [],
             $this->reader->read()
-        );
-    }
-
-
-    public function testGetPath()
-    {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('/path');
-
-        $this->assertEquals(
-            '/path/app/etc/env.php',
-            $this->reader->getPath()
         );
     }
 }

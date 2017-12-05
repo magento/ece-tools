@@ -53,12 +53,8 @@ class StaticContentCleanerTest extends TestCase
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
-        $this->fileMock = $this->getMockBuilder(File::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->fileMock = $this->createMock(File::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->staticContentCleaner = new StaticContentCleaner(
             $this->loggerMock,
@@ -71,28 +67,17 @@ class StaticContentCleanerTest extends TestCase
     /**
      * @param bool $oldStaticExists
      * @param int $createOldStaticExpects
-     * @param bool $preprocessedExists
-     * @param int $logInfoExpects
-     * @param int $backgroundExecuteExpects
-     * @param int $renameExpects
      * @dataProvider cleanDataProvider
      * @return void
      */
-    public function testClean(
+    public function testCleanPubStatic(
         $oldStaticExists,
-        $createOldStaticExpects,
-        $preprocessedExists,
-        $logInfoExpects,
-        $backgroundExecuteExpects,
-        $renameExpects
+        $createOldStaticExpects
     ) {
         $magentoRoot = '/magento/';
         $pubStatic = $magentoRoot . '/pub/static';
-        $var = $magentoRoot . '/var';
-        $varPreprocessed = $var . '/view_preprocessed';
         $time = 123456;
         $oldStaticContentLocation = $pubStatic . '/old_static_content_' . $time . '/';
-        $oldPreprocessedLocation = $varPreprocessed . '_old_' . $time;
 
         $timeMock = $this->getFunctionMock('Magento\MagentoCloud\Util', 'time');
         $timeMock->expects($this->once())
@@ -102,45 +87,37 @@ class StaticContentCleanerTest extends TestCase
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
 
-        $this->loggerMock->expects($this->exactly($logInfoExpects))
+        $this->loggerMock->expects($this->exactly(5))
             ->method('info')
             ->withConsecutive(
                 ['Moving out old static content into ' . $oldStaticContentLocation],
                 ['Rename ' . $pubStatic . '/folder1 to ' . $oldStaticContentLocation . 'folder1'],
                 ['Rename ' . $pubStatic . '/file1.jpg to ' . $oldStaticContentLocation . 'file1.jpg'],
                 ['Rename ' . $pubStatic . '/file2.jpg to ' . $oldStaticContentLocation . 'file2.jpg'],
-                ['Removing ' . $oldStaticContentLocation . ' in the background'],
-                ['Rename ' . $varPreprocessed . ' to ' . $oldPreprocessedLocation],
-                ['Removing '.  $oldPreprocessedLocation . ' in the background']
+                ['Removing ' . $oldStaticContentLocation . ' in the background']
             );
 
-        $this->shellMock->expects($this->exactly($backgroundExecuteExpects))
+        $this->shellMock->expects($this->once())
             ->method('backgroundExecute')
             ->withConsecutive(
-                ['rm -rf ' . $oldStaticContentLocation],
-                ['rm -rf ' . $oldPreprocessedLocation]
+                ['rm -rf ' . $oldStaticContentLocation]
             );
 
-        $this->fileMock->expects($this->exactly(2))
+        $this->fileMock->expects($this->once())
             ->method('getRealPath')
-            ->willReturnMap([
-                [$pubStatic, $pubStatic],
-                [$var, $var]
-            ]);
-        $this->fileMock->expects($this->exactly($renameExpects))
+            ->with($pubStatic)
+            ->willReturn($pubStatic);
+        $this->fileMock->expects($this->exactly(3))
             ->method('rename')
             ->withConsecutive(
                 [$pubStatic . '/folder1', $oldStaticContentLocation . 'folder1'],
                 [$pubStatic . '/file1.jpg', $oldStaticContentLocation . 'file1.jpg'],
-                [$pubStatic . '/file2.jpg', $oldStaticContentLocation . 'file2.jpg'],
-                [$varPreprocessed, $oldPreprocessedLocation]
+                [$pubStatic . '/file2.jpg', $oldStaticContentLocation . 'file2.jpg']
             );
-        $this->fileMock->expects($this->exactly(2))
+        $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->willReturnMap([
-                [$oldStaticContentLocation, $oldStaticExists],
-                [$varPreprocessed, $preprocessedExists],
-            ]);
+            ->with($oldStaticContentLocation)
+            ->willReturn($oldStaticExists);
         $this->fileMock->expects($this->exactly($createOldStaticExpects))
             ->method('createDirectory')
             ->with($oldStaticContentLocation);
@@ -154,7 +131,7 @@ class StaticContentCleanerTest extends TestCase
                 $pubStatic . '/file2.jpg',
             ]);
 
-        $this->staticContentCleaner->clean();
+        $this->staticContentCleaner->cleanPubStatic();
     }
 
     public function cleanDataProvider()
@@ -163,27 +140,117 @@ class StaticContentCleanerTest extends TestCase
             [
                 'oldStaticExists' => true,
                 'createOldStaticExpects' => 0,
-                'preprocessedExists' => true,
-                'logInfoExpects' => 7,
-                'backgroundExecuteExpects' => 2,
-                'renameExpects' => 4,
             ],
             [
                 'oldStaticExists' => false,
                 'createOldStaticExpects' => 1,
-                'preprocessedExists' => true,
-                'logInfoExpects' => 7,
-                'backgroundExecuteExpects' => 2,
-                'renameExpects' => 4,
-            ],
-            [
-                'oldStaticExists' => false,
-                'createOldStaticExpects' => 1,
-                'preprocessedExists' => false,
-                'logInfoExpects' => 5,
-                'backgroundExecuteExpects' => 1,
-                'renameExpects' => 3,
-            ],
+            ]
         ];
+    }
+
+    public function testCleanViewPreprocessedExists()
+    {
+        $time = 123456;
+        $magentoRootDir = '/magento';
+        $magentoVarDir = $magentoRootDir . '/var';
+        $magentoVarPreprocessedDir = $magentoVarDir . '/view_preprocessed';
+        $oldPreprocessedLocation = $magentoVarPreprocessedDir . '_old_' . $time;
+
+        $timeMock = $this->getFunctionMock('Magento\MagentoCloud\Util', 'time');
+        $timeMock->expects($this->once())
+            ->willReturn($time);
+
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($magentoRootDir);
+        $this->fileMock->expects($this->once())
+            ->method('getRealPath')
+            ->with($magentoVarDir)
+            ->willReturn($magentoVarDir);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($magentoVarDir . '/view_preprocessed')
+            ->willReturn(true);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Rename ' . $magentoVarPreprocessedDir . ' to ' . $oldPreprocessedLocation],
+                ['Removing '.  $oldPreprocessedLocation . ' in the background']
+            );
+        $this->fileMock->expects($this->once())
+            ->method('rename')
+            ->with($magentoVarPreprocessedDir, $oldPreprocessedLocation);
+        $this->shellMock->expects($this->once())
+            ->method('backgroundExecute')
+            ->with('rm -rf ' . $oldPreprocessedLocation);
+
+        $this->staticContentCleaner->cleanViewPreprocessed();
+    }
+
+    public function testCleanViewPreprocessedNotExists()
+    {
+        $magentoRootDir = '/magento/';
+        $magentoVarDir = $magentoRootDir . '/var';
+
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($magentoRootDir);
+        $this->fileMock->expects($this->once())
+            ->method('getRealPath')
+            ->with($magentoVarDir)
+            ->willReturn($magentoVarDir);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($magentoVarDir . '/view_preprocessed')
+            ->willReturn(false);
+        $this->fileMock->expects($this->once())
+            ->method('isLink')
+            ->with($magentoVarDir . '/view_preprocessed')
+            ->willReturn(false);
+
+        $this->fileMock->expects($this->never())
+            ->method('rename');
+        $this->fileMock->expects($this->never())
+            ->method('unLink');
+        $this->shellMock->expects($this->never())
+            ->method('backgroundExecute');
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+
+        $this->staticContentCleaner->cleanViewPreprocessed();
+    }
+
+    public function testCleanViewPreprocessedIsLink()
+    {
+        $magentoRootDir = '/magento/';
+        $magentoVarDir = $magentoRootDir . '/var';
+
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($magentoRootDir);
+        $this->fileMock->expects($this->once())
+            ->method('getRealPath')
+            ->with($magentoVarDir)
+            ->willReturn($magentoVarDir);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($magentoVarDir . '/view_preprocessed')
+            ->willReturn(false);
+        $this->fileMock->expects($this->once())
+            ->method('isLink')
+            ->with($magentoVarDir . '/view_preprocessed')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('unLink')
+            ->with($magentoVarDir . '/view_preprocessed');
+
+        $this->fileMock->expects($this->never())
+            ->method('rename');
+        $this->shellMock->expects($this->never())
+            ->method('backgroundExecute');
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+
+        $this->staticContentCleaner->cleanViewPreprocessed();
     }
 }

@@ -191,14 +191,6 @@ class EnvironmentTest extends TestCase
         );
     }
 
-    public function testGetRecoverableDirectories()
-    {
-        $this->assertSame(
-            ['var/log', 'app/etc', 'pub/media'],
-            $this->environment->getRecoverableDirectories()
-        );
-    }
-
     public function testIsDeployStaticContent()
     {
         $this->setVariables([
@@ -304,5 +296,50 @@ class EnvironmentTest extends TestCase
             'USD',
             $this->environment->getDefaultCurrency()
         );
+    }
+
+    /**
+     * @param array $variables
+     * @param array $expectedResult
+     * @dataProvider getCronConsumersRunnerDataProvider
+     */
+    public function testGetCronConsumersRunner(array $variables, array $expectedResult)
+    {
+        $this->setVariables($variables);
+        $this->assertEquals($expectedResult, $this->environment->getCronConsumersRunner());
+    }
+
+    /**
+     * @return array
+     */
+    public function getCronConsumersRunnerDataProvider(): array
+    {
+        return [
+            ['variables' => [], 'expectedResult' => []],
+            [
+                'variables' => [
+                    'CRON_CONSUMERS_RUNNER' => [
+                        'cron_run' => 'false',
+                        'max_messages' => '100',
+                        'consumers' => ['test'],
+                    ],
+                ],
+                'expectedResult' => [
+                    'cron_run' => 'false',
+                    'max_messages' => '100',
+                    'consumers' => ['test'],
+                ]
+            ],
+            [
+                'variables' => [
+                    'CRON_CONSUMERS_RUNNER' => '{"cron_run":"false", "max_messages":"100", "consumers":["test"]}',
+                ],
+                'expectedResult' => [
+                    'cron_run' => 'false',
+                    'max_messages' => '100',
+                    'consumers' => ['test'],
+                ]
+            ]
+        ];
     }
 }

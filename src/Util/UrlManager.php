@@ -43,9 +43,44 @@ class UrlManager
     }
 
     /**
-     * Parse MagentoCloud routes to more readable format.
+     * Reads JSON array of routes and parses them into an array
+     *
+     * @param array $routes from environment variable MAGENTO_CLOUD_ROUTES
+     * @return array
      */
-    public function getUrls()
+    private function parseRoutes(array $routes): array
+    {
+        $urls = ['secure' => [], 'unsecure' => []];
+
+        foreach ($routes as $key => $val) {
+            if ($val['type'] !== 'upstream') {
+                continue;
+            }
+
+            $host = parse_url($val['original_url'], PHP_URL_HOST);
+            $originalUrlRegEx = sprintf('/\.?%s/', preg_quote(self::MAGIC_ROUTE));
+            $originalUrl = preg_replace($originalUrlRegEx, '', $host);
+
+            if (strpos($key, self::PREFIX_UNSECURE) === 0) {
+                $urls['unsecure'][$originalUrl] = $key;
+                continue;
+            }
+
+            if (strpos($key, self::PREFIX_SECURE) === 0) {
+                $urls['secure'][$originalUrl] = $key;
+                continue;
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Parse MagentoCloud routes to more readable format.
+     *
+     * @throws \RuntimeException if no valid secure or unsecure route found
+     */
+    public function getUrls(): array
     {
         if ($this->urls !== null) {
             return $this->urls;
@@ -53,36 +88,22 @@ class UrlManager
 
         $this->logger->info('Initializing routes.');
 
-        $this->urls = ['secure' => [], 'unsecure' => []];
+        $urls = $this->parseRoutes($this->environment->getRoutes());
 
-        $routes = $this->environment->getRoutes();
-
-        foreach ($routes as $key => $val) {
-            if ($val['type'] !== 'upstream') {
-                continue;
-            }
-
-            $urlParts = parse_url($val['original_url']);
-            $originalUrl = str_replace(self::MAGIC_ROUTE, '', $urlParts['host']);
-
-            if (strpos($key, self::PREFIX_UNSECURE) === 0) {
-                $this->urls['unsecure'][$originalUrl] = $key;
-                continue;
-            }
-
-            if (strpos($key, self::PREFIX_SECURE) === 0) {
-                $this->urls['secure'][$originalUrl] = $key;
-                continue;
-            }
+        if (0 == count($urls['unsecure']) && 0 == count($urls['secure'])) {
+            throw new \RuntimeException('Expected at least one valid unsecure or secure route. None found.');
+        }
+        if (0 == count($urls['unsecure'])) {
+            $urls['unsecure'] = $urls['secure'];
         }
 
-        if (!count($this->urls['secure'])) {
-            $this->urls['secure'] = $this->urls['unsecure'];
+        if (0 == count($urls['secure'])) {
+            $urls['secure'] = substr_replace($urls['unsecure'], self::PREFIX_SECURE, 0, strlen(self::PREFIX_UNSECURE));
         }
 
-        $this->logger->info(sprintf('Routes: %s', var_export($this->urls, true)));
+        $this->logger->info(sprintf('Routes: %s', var_export($urls, true)));
 
-        return $this->urls;
+        return $this->urls = $urls;
     }
 
     public function getSecureUrls()

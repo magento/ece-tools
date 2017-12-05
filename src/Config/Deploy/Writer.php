@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Deploy;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 
 class Writer
@@ -16,9 +16,9 @@ class Writer
     private $reader;
 
     /**
-     * @var DirectoryList
+     * @var FileList
      */
-    private $directoryList;
+    private $fileList;
 
     /**
      * @var File
@@ -28,16 +28,16 @@ class Writer
     /**
      * @param Reader $reader
      * @param File $file
-     * @param DirectoryList $directoryList
+     * @param FileList $fileList
      */
     public function __construct(
         Reader $reader,
         File $file,
-        DirectoryList $directoryList
+        FileList $fileList
     ) {
         $this->reader = $reader;
         $this->file = $file;
-        $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
     }
 
     /**
@@ -49,7 +49,7 @@ class Writer
     {
         $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($config, true) . ';';
 
-        $this->file->filePutContents($this->reader->getPath(), $updatedConfig);
+        $this->file->filePutContents($this->fileList->getEnv(), $updatedConfig);
     }
 
     /**
