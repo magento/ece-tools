@@ -32,7 +32,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     /**
      * @inheritdoc
      */
-    public function exists()
+    public function exists(): bool
     {
         return $this->base->exists(self::PATH);
     }
@@ -40,7 +40,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     /**
      * @inheritdoc
      */
-    public function set()
+    public function set(): bool
     {
         return $this->base->set(self::PATH);
     }
@@ -48,7 +48,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     /**
      * @inheritdoc
      */
-    public function delete()
+    public function delete(): bool
     {
         return $this->base->delete(self::PATH);
     }
@@ -56,7 +56,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     /**
      * @inheritdoc
      */
-    public function getPath()
+    public function getPath(): string
     {
         return self::PATH;
     }
@@ -64,7 +64,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     /**
      * @inheritdoc
      */
-    public function getKey()
+    public function getKey(): string
     {
         return self::KEY;
     }
