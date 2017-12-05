@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**
- * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
+ * CLI command for prestart hook.
  */
 class Prestart extends Command
 {

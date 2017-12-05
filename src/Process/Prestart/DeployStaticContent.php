@@ -89,7 +89,7 @@ class DeployStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
-            && $this->flagFilePool->getFlag('scd_pending')->exists()
+            && $this->flagFilePool->getFlag(FlagFilePool::SCD_PENDING_FLAG)->exists()
         ) {
             if (Environment::MAGENTO_PRODUCTION_MODE !== $this->environment->getApplicationMode()) {
                 return;

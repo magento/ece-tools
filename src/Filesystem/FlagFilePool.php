@@ -9,6 +9,7 @@ class FlagFilePool
 {
     const REGENERATE_FLAG = 'regenerate';
     const SCD_IN_BUILD_FLAG = 'scd_in_build';
+    const SCD_PENDING_FLAG = 'scd_pending';
     /**
      * @var FlagFileInterface[]
      */
