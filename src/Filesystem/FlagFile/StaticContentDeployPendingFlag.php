@@ -30,7 +30,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     }
 
     /**
-     * Default exists
+     * @inheritdoc
      */
     public function exists()
     {
@@ -38,7 +38,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     }
 
     /**
-     * Default set
+     * @inheritdoc
      */
     public function set()
     {
@@ -46,7 +46,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     }
 
     /**
-     * Default clear
+     * @inheritdoc
      */
     public function delete()
     {
@@ -54,9 +54,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     }
 
     /**
-     * Return our path
-     *
-     * @return string
+     * @inheritdoc
      */
     public function getPath()
     {
@@ -64,9 +62,7 @@ class StaticContentDeployPendingFlag implements FlagFileInterface
     }
 
     /**
-     * Return our key
-     *
-     * @return string
+     * @inheritdoc
      */
     public function getKey()
     {

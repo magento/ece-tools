@@ -75,8 +75,8 @@ class BackupData implements ProcessInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
         $rootInitDir = $this->directoryList->getInit() . '/';
-        $regenerateFlag = $this->flagFilePool->getFlag('regenerate');
-        $scdFlag = $this->flagFilePool->getFlag('scd_in_build');
+        $regenerateFlag = $this->flagFilePool->getFlag(FlagFilePool::REGENERATE_FLAG);
+        $scdFlag = $this->flagFilePool->getFlag(FlagFilePool::SCD_IN_BUILD_FLAG);
 
         $regenerateFlag->delete();
 

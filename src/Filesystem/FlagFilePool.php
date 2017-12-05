@@ -5,11 +5,10 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
-/**
- * @inheritdoc
- */
 class FlagFilePool
 {
+    const REGENERATE_FLAG = 'regenerate';
+    const SCD_IN_BUILD_FLAG = 'scd_in_build';
     /**
      * @var FlagFileInterface[]
      */
@@ -24,10 +23,10 @@ class FlagFilePool
     }
 
     /**
-     * Get all flags
+     * Gets all flags, returns all if no filter is present, otherwise it filters down
      *
      * @param string[] $filter Match on provided filter
-     * @return FlagFileInterface[]|array
+     * @return FlagFileInterface[]
      */
     public function get(array $filter = null)
     {

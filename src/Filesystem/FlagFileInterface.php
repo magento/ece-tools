@@ -6,13 +6,39 @@
 namespace Magento\MagentoCloud\Filesystem;
 
 /**
- * Inteface for Restorable cloud directories
+ * Inteface for FlagFiles
  */
 interface FlagFileInterface
 {
-    public function exists();
-    public function set();
-    public function delete();
-    public function getPath();
+    /**
+     * Determines whether or not a flag exists
+     * @return bool
+     */
+    public function exists(): bool;
+
+    /**
+     * Sets a flag on the file system
+     * @return bool
+     */
+    public function set(): bool;
+
+    /**
+     * Deletes a flag from the filesystem
+     * @return bool
+     */
+    public function delete(): bool;
+
+    /**
+     * Return our path
+     *
+     * @return string
+     */
+    public function getPath(): string;
+
+    /**
+     * Return our key
+     *
+     * @return string
+     */
     public function getKey();
 }

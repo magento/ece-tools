@@ -88,10 +88,10 @@ class RemoteDiskIdentifier
         if ($this->file->isDirectory($path)) {
             $output = $this->shell->execute('df ' . escapeshellarg($path));
             $disk = $this->getDiskFromOutput($output);
-        }
 
-        if ($disk) {
-            return preg_match(self::REMOTE_DISK_RE, $disk);
+            if ($disk) {
+                return preg_match(self::REMOTE_DISK_RE, $disk);
+            }
         }
     }
 
