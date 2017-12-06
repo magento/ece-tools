@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\Process\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
@@ -90,8 +92,8 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $scdInBuildFlag = $this->flagFilePool->getFlag('scd_in_build');
-        $scdPendingFlag = $this->flagFilePool->getFlag('scd_pending');
+        $scdInBuildFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
+        $scdPendingFlag = $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY);
         $scdPendingFlag->delete();
         if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static') && !$scdInBuildFlag->exists()) {
             $scdPendingFlag->set();

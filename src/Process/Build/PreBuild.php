@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
@@ -63,7 +64,7 @@ class PreBuild implements ProcessInterface
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
 
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
-        $this->flagFilePool->getFlag('scd_in_build')->delete();
+        $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->delete();
         $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }
 }

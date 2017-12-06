@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -63,7 +64,7 @@ class Setup implements ProcessInterface
      */
     public function execute()
     {
-        $regenerateFlag = $this->flagFilePool->getFlag('regenerate');
+        $regenerateFlag = $this->flagFilePool->getFlag(RegenerateFlag::KEY);
         $regenerateFlag->delete();
 
         try {

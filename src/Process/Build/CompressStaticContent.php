@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
@@ -73,7 +74,7 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->flagFilePool->getFlag('scd_in_build')->exists()) {
+        if ($this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists()) {
             $this->staticContentCompressor->process(
                 $this->buildConfig->get(BuildConfig::OPT_SCD_COMPRESSION_LEVEL, static::COMPRESSION_LEVEL),
                 $this->buildConfig->getVerbosityLevel()

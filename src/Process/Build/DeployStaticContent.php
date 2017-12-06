@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -69,7 +70,7 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $scdFlag = $this->flagFilePool->getFlag('scd_in_build');
+        $scdFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
         $scdFlag->delete();
 
         if ($this->buildConfig->get(BuildConfig::OPT_SKIP_SCD)) {

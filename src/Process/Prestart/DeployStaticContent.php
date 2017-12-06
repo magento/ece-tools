@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
@@ -89,7 +90,7 @@ class DeployStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
-            && $this->flagFilePool->getFlag(FlagFilePool::SCD_PENDING_FLAG)->exists()
+            && $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()
         ) {
             if (Environment::MAGENTO_PRODUCTION_MODE !== $this->environment->getApplicationMode()) {
                 return;

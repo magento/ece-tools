@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Psr\Log\LoggerInterface;
 
@@ -218,7 +219,7 @@ class Environment
         if (isset($var['DO_DEPLOY_STATIC_CONTENT']) && $var['DO_DEPLOY_STATIC_CONTENT'] == 'disabled') {
             $flag = false;
         } else {
-            $flag = !$this->flagFilePool->getFlag('scd_in_build')->exists();
+            $flag = !$this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists();
         }
 
         $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . ($flag ? 'enabled' : 'disabled'));

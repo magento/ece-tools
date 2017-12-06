@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Prestart;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -69,7 +70,8 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->environment->isDeployStaticContent() && $this->flagFilePool->getFlag('scd_pending')->exists()) {
+        if ($this->environment->isDeployStaticContent() &&
+            $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()) {
             $this->staticContentCompressor->process(
                 StaticContentCompressor::DEFAULT_COMPRESSION_LEVEL,
                 $this->environment->getVerbosityLevel()

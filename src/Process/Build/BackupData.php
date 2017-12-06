@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -75,8 +77,8 @@ class BackupData implements ProcessInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
         $rootInitDir = $this->directoryList->getInit() . '/';
-        $regenerateFlag = $this->flagFilePool->getFlag(FlagFilePool::REGENERATE_FLAG);
-        $scdFlag = $this->flagFilePool->getFlag(FlagFilePool::SCD_IN_BUILD_FLAG);
+        $regenerateFlag = $this->flagFilePool->getFlag(RegenerateFlag::KEY);
+        $scdFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
 
         $regenerateFlag->delete();
 
