@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
@@ -37,21 +38,29 @@ class Option implements OptionInterface
     private $threadCountOptimizer;
 
     /**
+     * @var StageConfigInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param Environment $environment
      * @param ConnectionInterface $connection
      * @param MagentoVersion $magentoVersion
      * @param ThreadCountOptimizer $threadCountOptimizer
+     * @param StageConfigInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         ConnectionInterface $connection,
         MagentoVersion $magentoVersion,
-        ThreadCountOptimizer $threadCountOptimizer
+        ThreadCountOptimizer $threadCountOptimizer,
+        StageConfigInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->connection = $connection;
         $this->magentoVersion = $magentoVersion;
         $this->threadCountOptimizer = $threadCountOptimizer;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -80,7 +89,7 @@ class Option implements OptionInterface
      */
     public function getStrategy(): string
     {
-        return $this->environment->getVariable(Environment::VAR_SCD_STRATEGY, '');
+        return $this->stageConfig->getDeploy(StageConfigInterface::VAR_SCD_STRATEGY);
     }
 
     /**

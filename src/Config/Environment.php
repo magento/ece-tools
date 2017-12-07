@@ -36,7 +36,6 @@ class Environment
      * Variables.
      */
     const VAR_REDIS_SESSION_DISABLE_LOCKING = 'REDIS_SESSION_DISABLE_LOCKING';
-    const VAR_SCD_STRATEGY = Build::OPT_SCD_STRATEGY;
     const VAR_SCD_COMPRESSION_LEVEL = Build::OPT_SCD_COMPRESSION_LEVEL;
 
     /**

@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -23,9 +23,9 @@ class DeployStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var BuildConfig
+     * @var StageConfigInterface
      */
-    private $buildConfig;
+    private $stageConfig;
 
     /**
      * @var Environment
@@ -44,20 +44,20 @@ class DeployStaticContent implements ProcessInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param BuildConfig $buildConfig
+     * @param StageConfigInterface $stageConfig
      * @param Environment $environment
      * @param ProcessInterface $process
      * @param ConfigFileStructure $configFileStructureValidator
      */
     public function __construct(
         LoggerInterface $logger,
-        BuildConfig $buildConfig,
+        StageConfigInterface $stageConfig,
         Environment $environment,
         ProcessInterface $process,
         ConfigFileStructure $configFileStructureValidator
     ) {
         $this->logger = $logger;
-        $this->buildConfig = $buildConfig;
+        $this->stageConfig = $stageConfig;
         $this->environment = $environment;
         $this->process = $process;
         $this->configFileStructureValidator = $configFileStructureValidator;
@@ -70,7 +70,7 @@ class DeployStaticContent implements ProcessInterface
     {
         $this->environment->removeFlagStaticContentInBuild();
 
-        if ($this->buildConfig->get(BuildConfig::OPT_SKIP_SCD)) {
+        if ($this->stageConfig->getBuild(StageConfigInterface::VAR_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
 
             return;

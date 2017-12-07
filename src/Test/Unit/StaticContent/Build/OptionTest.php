@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
@@ -15,6 +16,9 @@ use Magento\MagentoCloud\Util\ArrayManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class OptionTest extends TestCase
 {
     /**
@@ -52,6 +56,11 @@ class OptionTest extends TestCase
      */
     private $threadCountOptimizerMock;
 
+    /**
+     * @var StageConfigInterface|Mock
+     */
+    private $stageConfigMock;
+
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -60,6 +69,7 @@ class OptionTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(StageConfigInterface::class);
 
         $this->option = new Option(
             $this->environmentMock,
@@ -67,19 +77,23 @@ class OptionTest extends TestCase
             $this->magentoVersionMock,
             $this->fileListMock,
             $this->buildConfigMock,
-            $this->threadCountOptimizerMock
+            $this->threadCountOptimizerMock,
+            $this->stageConfigMock
         );
     }
 
     public function testGetThreadCount()
     {
-        $this->buildConfigMock->expects($this->exactly(2))
+        $this->buildConfigMock->expects($this->once())
             ->method('get')
             ->withConsecutive(
-                [BuildConfig::OPT_SCD_THREADS],
-                [BuildConfig::OPT_SCD_STRATEGY]
+                [BuildConfig::OPT_SCD_THREADS]
             )
             ->willReturnOnConsecutiveCalls(3, 'strategyName');
+        $this->stageConfigMock->expects($this->once())
+            ->method('getBuild')
+            ->with(StageConfigInterface::VAR_SCD_STRATEGY)
+            ->willReturn('strategyName');
         $this->threadCountOptimizerMock->expects($this->once())
             ->method('optimize')
             ->with(3, 'strategyName')
@@ -111,24 +125,24 @@ class OptionTest extends TestCase
         return [
             [
                 '',
-                []
+                [],
             ],
             [
                 'theme1, theme2 ,,  theme3 ',
-                ['theme1', 'theme2', 'theme3']
+                ['theme1', 'theme2', 'theme3'],
             ],
             [
                 'theme3,,theme4,,,,theme5',
-                ['theme3', 'theme4', 'theme5']
-            ]
+                ['theme3', 'theme4', 'theme5'],
+            ],
         ];
     }
 
     public function testGetStrategy()
     {
-        $this->buildConfigMock->expects($this->once())
-            ->method('get')
-            ->with(BuildConfig::OPT_SCD_STRATEGY)
+        $this->stageConfigMock->expects($this->once())
+            ->method('getBuild')
+            ->with(StageConfigInterface::VAR_SCD_STRATEGY)
             ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());
@@ -178,7 +192,7 @@ class OptionTest extends TestCase
                 'ua_UA',
                 'fr_FR',
                 'es_ES',
-                'en_US'
+                'en_US',
             ],
             $this->option->getLocales()
         );

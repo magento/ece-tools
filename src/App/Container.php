@@ -101,6 +101,10 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\CopyStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\StageConfigInterface::class,
+            \Magento\MagentoCloud\Config\StageConfig::class
+        );
         /**
          * Contextual binding.
          */
