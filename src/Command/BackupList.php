@@ -12,6 +12,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Filesystem\BackupList as BackupFilesList;
 use Psr\Log\LoggerInterface;
 
+/**
+ * CLI command for showing the list of backup files.
+ */
 class BackupList extends Command
 {
     /**
@@ -29,6 +32,10 @@ class BackupList extends Command
      */
     const NAME = 'backup:list';
 
+    /**
+     * @param BackupFilesList $backupFilesList
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         BackupFilesList $backupFilesList,
         LoggerInterface $logger
