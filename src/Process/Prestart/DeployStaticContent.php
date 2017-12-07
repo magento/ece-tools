@@ -3,12 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy;
+namespace Magento\MagentoCloud\Process\Prestart;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -84,45 +83,35 @@ class DeployStaticContent implements ProcessInterface
     }
 
     /**
-     * This function deploys the static content.
-     * Moved this from processMagentoMode() to its own function because we changed the order to have
-     * processMagentoMode called before the install.  Static content deployment still needs to happen after install.
+     * This function deploys the static content to local storage during the prestart hook
      *
      * {@inheritdoc}
      */
     public function execute()
     {
-        $scdInBuildFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
-        $scdPendingFlag = $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY);
-        $scdPendingFlag->delete();
-        if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static') && !$scdInBuildFlag->exists()) {
-            $scdPendingFlag->set();
-            $this->logger->info('Postpone static content deployment until prestart');
-            return;
+        if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
+            && $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()
+        ) {
+            if (Environment::MAGENTO_PRODUCTION_MODE !== $this->environment->getApplicationMode()) {
+                return;
+            }
+
+            /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
+            if (!$this->environment->isDeployStaticContent()) {
+                return;
+            }
+
+            // Clear old static content if necessary
+            if ($this->environment->doCleanStaticFiles()) {
+                $magentoRoot = $this->directoryList->getMagentoRoot();
+                $this->logger->info('Clearing pub/static');
+                $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
+                $this->logger->info('Clearing var/view_preprocessed');
+                $this->file->backgroundClearDirectory($magentoRoot . '/var/view_preprocessed');
+            }
+
+            $this->logger->info('Generating fresh static content');
+            $this->process->execute();
         }
-
-        $applicationMode = $this->environment->getApplicationMode();
-        $this->logger->info('Application mode is ' . $applicationMode);
-
-        if ($applicationMode !== Environment::MAGENTO_PRODUCTION_MODE) {
-            return;
-        }
-
-        /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
-        if (!$this->environment->isDeployStaticContent()) {
-            return;
-        }
-
-        // Clear old static content if necessary
-        if ($this->environment->doCleanStaticFiles()) {
-            $magentoRoot = $this->directoryList->getMagentoRoot();
-            $this->logger->info('Clearing pub/static');
-            $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
-            $this->logger->info('Clearing var/view_preprocessed');
-            $this->file->backgroundClearDirectory($magentoRoot . '/var/view_preprocessed');
-        }
-
-        $this->logger->info('Generating fresh static content');
-        $this->process->execute();
     }
 }

@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -14,9 +16,6 @@ use Psr\Log\LoggerInterface;
  */
 class Environment
 {
-    const STATIC_CONTENT_DEPLOY_FLAG = '.static_content_deploy';
-    const REGENERATE_FLAG = 'var/.regenerate';
-
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
 
@@ -55,6 +54,11 @@ class Environment
     private $directoryList;
 
     /**
+     * @var FlagFilePool
+     */
+    private $flagFilePool;
+
+    /**
      * @var array
      */
     private $data = [];
@@ -64,11 +68,16 @@ class Environment
      * @param File $file
      * @param DirectoryList $directoryList
      */
-    public function __construct(LoggerInterface $logger, File $file, DirectoryList $directoryList)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        File $file,
+        DirectoryList $directoryList,
+        FlagFilePool $flagFilePool
+    ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -187,46 +196,6 @@ class Environment
     }
 
     /**
-     * Sets flag that static content was generated in build phase.
-     *
-     * @return void
-     */
-    public function setFlagStaticDeployInBuild()
-    {
-        $this->logger->info('Setting flag file ' . static::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->file->touch(
-            $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-        );
-    }
-
-    /**
-     * Removes flag that static content was generated in build phase.
-     *
-     * @return void
-     */
-    public function removeFlagStaticContentInBuild()
-    {
-        if ($this->isStaticDeployInBuild()) {
-            $this->logger->info('Removing flag file ' . static::STATIC_CONTENT_DEPLOY_FLAG);
-            $this->file->deleteFile(
-                $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-            );
-        }
-    }
-
-    /**
-     * Checks if static content generates during build process.
-     *
-     * @return bool
-     */
-    public function isStaticDeployInBuild(): bool
-    {
-        return $this->file->isExists(
-            $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-        );
-    }
-
-    /**
      * Retrieves writable directories.
      *
      * @return array
@@ -250,7 +219,7 @@ class Environment
         if (isset($var['DO_DEPLOY_STATIC_CONTENT']) && $var['DO_DEPLOY_STATIC_CONTENT'] == 'disabled') {
             $flag = false;
         } else {
-            $flag = !$this->isStaticDeployInBuild();
+            $flag = !$this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists();
         }
 
         $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . ($flag ? 'enabled' : 'disabled'));

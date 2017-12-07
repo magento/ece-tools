@@ -9,6 +9,8 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFileInterface;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\RestoreWritableDirectories;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use PHPUnit\Framework\TestCase;
@@ -21,11 +23,6 @@ class RestoreWritableDirectoriesTest extends TestCase
      * @var RestoreWritableDirectories
      */
     private $process;
-
-    /**
-     * @var File|Mock
-     */
-    private $fileMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -47,69 +44,41 @@ class RestoreWritableDirectoriesTest extends TestCase
      */
     private $recoverableDirectoryListMock;
 
+
+    /**
+     * @var FlagFilePool|Mock
+     */
+    private $flagFilePoolMock;
+
+    /**
+     * @var FlagFileInterface|Mock
+     */
+    private $flagMock;
+
     protected function setUp()
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->fileMock = $this->createMock(File::class);
         $this->buildDirCopierMock = $this->createMock(BuildDirCopier::class);
         $this->recoverableDirectoryListMock = $this->getMockBuilder(RecoverableDirectoryList::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
+        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
+            ->getMockForAbstractClass();
 
         $this->process = new RestoreWritableDirectories(
             $this->loggerMock,
-            $this->fileMock,
             $this->buildDirCopierMock,
             $this->recoverableDirectoryListMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->flagFilePoolMock
         );
     }
 
     public function testExecute()
     {
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/' . Environment::REGENERATE_FLAG)
-            ->willReturn(true);
-        $this->fileMock->expects($this->once())
-            ->method('deleteFile')
-            ->with('magento_root/' . Environment::REGENERATE_FLAG);
-        $this->recoverableDirectoryListMock->expects($this->once())
-            ->method('getList')
-            ->willReturn([
-                ['directory' => 'app/etc', 'strategy' => 'copy'],
-                ['directory' => 'pub/media', 'strategy' => 'copy']
-            ]);
-        $this->buildDirCopierMock->expects($this->exactly(2))
-            ->method('copy')
-            ->withConsecutive(
-                ['app/etc', 'copy'],
-                ['pub/media', 'copy']
-            );
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Recoverable directories were copied back.'],
-                ['Removing var/.regenerate flag']
-            );
-
-        $this->process->execute();
-    }
-
-    public function testExecuteFlagNotExists()
-    {
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/' . Environment::REGENERATE_FLAG)
-            ->willReturn(false);
-        $this->fileMock->expects($this->never())
-            ->method('deleteFile');
         $this->recoverableDirectoryListMock->expects($this->once())
             ->method('getList')
             ->willReturn([
@@ -125,6 +94,13 @@ class RestoreWritableDirectoriesTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Recoverable directories were copied back.');
+
+        $this->flagFilePoolMock->expects($this->once())
+            ->method('getFlag')
+            ->with('regenerate')
+            ->willReturn($this->flagMock);
+        $this->flagMock->expects($this->once())
+            ->method('delete');
 
         $this->process->execute();
     }

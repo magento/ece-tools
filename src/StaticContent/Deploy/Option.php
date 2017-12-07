@@ -57,7 +57,7 @@ class Option implements OptionInterface
     /**
      * @inheritdoc
      */
-    public function getTreadCount(): int
+    public function getThreadCount(): int
     {
         return $this->threadCountOptimizer->optimize(
             $this->environment->getStaticDeployThreadsCount(),

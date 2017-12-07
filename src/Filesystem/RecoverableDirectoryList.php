@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 
 /**
  * Returns list of recoverable directories
@@ -23,10 +24,14 @@ class RecoverableDirectoryList
 
     /**
      * @param Environment $environment
+     * @param FlagFilePool $flagFilePool
      */
-    public function __construct(Environment $environment)
-    {
+    public function __construct(
+        Environment $environment,
+        FlagFilePool $flagFilePool
+    ) {
         $this->environment = $environment;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -49,7 +54,7 @@ class RecoverableDirectoryList
             ]
         ];
 
-        if ($this->environment->isStaticDeployInBuild()) {
+        if ($this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists()) {
             $recoverableDirs[] = [
                 self::OPTION_DIRECTORY => 'var/view_preprocessed',
                 self::OPTION_STRATEGY => $isSymlinkEnabled ?

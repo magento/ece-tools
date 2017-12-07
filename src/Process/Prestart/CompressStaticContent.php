@@ -3,17 +3,17 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Build;
+namespace Magento\MagentoCloud\Process\Prestart;
 
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 
 /**
- * Compress static content at build time.
+ * Compress static content at deploy time.
  */
 class CompressStaticContent implements ProcessInterface
 {
@@ -21,12 +21,10 @@ class CompressStaticContent implements ProcessInterface
      * Compression level to be used by gzip.
      *
      * This should be an integer between 1 and 9, inclusive.
-     * Compression level 6 is the best trade-off between speed and compression strength.
-     * Level 6 obtains 99% of the compression ratio that level 9 does in 45% of the time.
-     * Level 6 is appropriate for when we can afford to wait a few extra seconds for better compression,
-     * such as in this site build phase.
+     * Compression level 4 is just as fast as level 1 on modern processors due to reduced filesystem I/O.
+     * Level 4 is appropriate for when we must finish compression as fast as possible, such as in this site
+     * deploy phase that brings the site down.
      */
-    const COMPRESSION_LEVEL = 6;
 
     /**
      * @var LoggerInterface
@@ -34,9 +32,9 @@ class CompressStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var BuildConfig
+     * @var Environment
      */
-    private $buildConfig;
+    private $environment;
 
     /**
      * @var StaticContentCompressor
@@ -49,42 +47,40 @@ class CompressStaticContent implements ProcessInterface
     private $flagFilePool;
 
     /**
-     * CompressStaticContent constructor.
-     * @param LoggerInterface $logger
-     * @param BuildConfig $buildConfig
+     * @param LoggerInterface         $logger
+     * @param Environment             $environment
      * @param StaticContentCompressor $staticContentCompressor
-     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         LoggerInterface $logger,
-        BuildConfig $buildConfig,
+        Environment $environment,
         StaticContentCompressor $staticContentCompressor,
         FlagFilePool $flagFilePool
     ) {
         $this->logger = $logger;
-        $this->buildConfig = $buildConfig;
+        $this->environment = $environment;
         $this->staticContentCompressor = $staticContentCompressor;
         $this->flagFilePool = $flagFilePool;
     }
 
     /**
-     * Execute the build-time static content compression process.
+     * Execute the deploy-time static content compression process.
      *
      * @return void
      */
     public function execute()
     {
-        if ($this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists()) {
+        if ($this->environment->isDeployStaticContent() &&
+            $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()) {
             $this->staticContentCompressor->process(
-                $this->buildConfig->get(BuildConfig::OPT_SCD_COMPRESSION_LEVEL, static::COMPRESSION_LEVEL),
-                $this->buildConfig->getVerbosityLevel()
+                StaticContentCompressor::DEFAULT_COMPRESSION_LEVEL,
+                $this->environment->getVerbosityLevel()
             );
         } else {
             $this->logger->info(
-                "Skipping build-time static content compression because static content deployment hasn't happened."
+                "Static content deployment was performed during the build phase or disabled. Skipping prestart phase"
+                . " static content compression."
             );
-
-            return;
         }
     }
 }

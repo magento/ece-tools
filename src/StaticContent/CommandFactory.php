@@ -25,7 +25,7 @@ class CommandFactory
             $command .= ' ' . implode(' ', $locales);
         }
 
-        $treadCount = $option->getTreadCount();
+        $treadCount = $option->getThreadCount();
         if ($treadCount) {
             $command .= ' --jobs=' . $treadCount;
         }

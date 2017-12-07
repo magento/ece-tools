@@ -66,9 +66,24 @@ class File
 
         return $result;
     }
+    /**
+     * @param string $path
+     * @return bool
+     */
+    public function isDirectory(string $path): bool
+    {
+        clearstatcache();
+        $result = @is_dir($path);
+        if ($result === null) {
+            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
+        }
+
+        return $result;
+    }
 
     /**
      * Unlink symlink path
+     * Tells whether the filename is a link
      *
      * @param string $path
      * @return bool
@@ -236,6 +251,22 @@ class File
     }
 
     /**
+     * Test for an empty directory
+     *
+     * @param string $path
+     * @returns bool
+     */
+    public function isEmptyDirectory(string $path): bool
+    {
+        if ($this->isDirectory($path)) {
+            if (count(scandir($path)) > 2) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Create symlink on source and place it into destination
      *
      * @param string $source
@@ -332,6 +363,45 @@ class File
         }
 
         return true;
+    }
+
+    /**
+     * Handle deleting contents of a directory in the background
+     *
+     * @param string $path Path to flush
+     * @param array $excludes
+     * @return void
+     */
+    public function backgroundClearDirectory(string $path, array $excludes = [])
+    {
+        $timestamp = time();
+        $tempDir = $path . '/' . preg_replace('/\//', '_', basename($path)) . '_' . $timestamp;
+        $excludes[] = $tempDir;
+
+        if (!$this->isDirectory($tempDir)) {
+            $this->createDirectory($tempDir);
+        }
+
+        foreach (new \DirectoryIterator($path) as $fileInfo) {
+            $fileName = $fileInfo->getFilename();
+            $src = "$path/$fileName";
+            $dst = "$tempDir/$fileName";
+
+            if ($fileInfo->isDot() || in_array($src, $excludes)) {
+                continue;
+            }
+
+            if ($this->isLink($src)) {
+                $this->deleteFile($src);
+                continue;
+            }
+
+            if ($this->isExists($dst)) {
+                ($this->isDirectory($dst)) ? $this->deleteDirectory($dst) : $this->deleteFile($dst);
+            }
+            $this->rename($src, $dst);
+        }
+        shell_exec('nohup rm -rf ' . escapeshellarg($tempDir) . ' 1>/dev/null 2>&1 &');
     }
 
     /**
