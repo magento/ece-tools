@@ -65,7 +65,7 @@ class BackupList extends Command
 
         try {
             $output->writeln('<comment>The list of backup files:</comment>');
-            $output->writeln($this->backupFilesList->getList());
+            $output->writeln(array_keys($this->backupFilesList->getList()));
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
