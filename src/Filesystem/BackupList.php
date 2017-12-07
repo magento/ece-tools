@@ -36,8 +36,8 @@ class BackupList
     public function getList(): array
     {
         return [
-            realpath($this->fileList->getEnv()),
-            realpath($this->fileList->getConfig()),
+            realpath($this->fileList->getEnv()) ?: $this->fileList->getEnv(),
+            realpath($this->fileList->getConfig()) ?: $this->fileList->getConfig(),
         ];
     }
 }
