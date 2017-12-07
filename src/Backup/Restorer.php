@@ -51,7 +51,7 @@ class Restorer
         $backupList = $this->backupList->getList();
 
         if ($specificPath) {
-            if (isset($backupList[$specificPath])) {
+            if (empty($backupList[$specificPath])) {
                 $output->writeln(sprintf('<error>There is no %s file in the backup list.</error>'
                     . ' <comment>Run backup:list to show files from backup list.</comment>', $specificPath));
                 return;
