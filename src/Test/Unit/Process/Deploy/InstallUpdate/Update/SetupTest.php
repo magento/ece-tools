@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -42,6 +43,11 @@ class SetupTest extends TestCase
     private $shellMock;
 
     /**
+     * @var FileList|Mock
+     */
+    private $fileListMock;
+
+    /**
      * @var DirectoryList|Mock
      */
     private $directoryListMock;
@@ -53,23 +59,30 @@ class SetupTest extends TestCase
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
 
         $this->process = new Setup(
             $this->loggerMock,
             $this->environmentMock,
             $this->shellMock,
             $this->fileMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->fileListMock
         );
     }
 
     public function testExecute()
     {
+        $installUpgradeLog = '/tmp/log.log';
+
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
         $this->environmentMock->expects($this->once())
             ->method('getVerbosityLevel')
             ->willReturn('-v');
+        $this->fileListMock->expects($this->once())
+            ->method('getInstallUpgradeLog')
+            ->willReturn($installUpgradeLog);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
             ->with('magento_root/' . Environment::REGENERATE_FLAG)
@@ -81,7 +94,10 @@ class SetupTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 ['php ./bin/magento maintenance:enable -v'],
-                ['php ./bin/magento setup:upgrade --keep-generated -n -v'],
+                [
+                    '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade --keep-generated -n -v | tee -a '
+                    . $installUpgradeLog . '"'
+                ],
                 ['php ./bin/magento maintenance:disable -v']
             );
         $this->loggerMock->expects($this->exactly(3))
