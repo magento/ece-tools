@@ -8,6 +8,7 @@ namespace Unit;
 use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Magento\MagentoCloud\Application;
+use Magento\MagentoCloud\Command\BackupList;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\CronUnlock;
@@ -18,6 +19,9 @@ use Magento\MagentoCloud\Command\BackupRestore;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class ApplicationTest extends TestCase
 {
     /**
@@ -69,6 +73,7 @@ class ApplicationTest extends TestCase
         $dbDumpCommand = $this->createMock(DbDump::class);
         $cronUnlockCommand = $this->createMock(CronUnlock::class);
         $backupRestoreCommand = $this->createMock(BackupRestore::class);
+        $backupListCommand = $this->createMock(BackupList::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
         $this->mockCommand($deployCommandMock, Deploy::NAME);
@@ -77,6 +82,7 @@ class ApplicationTest extends TestCase
         $this->mockCommand($dbDumpCommand, DbDump::NAME);
         $this->mockCommand($cronUnlockCommand, CronUnlock::NAME);
         $this->mockCommand($backupRestoreCommand, BackupRestore::class);
+        $this->mockCommand($backupListCommand, BackupList::class);
 
         $this->containerMock->method('get')
             ->willReturnMap([
@@ -87,7 +93,8 @@ class ApplicationTest extends TestCase
                 [PostDeploy::class, $postDeployCommand],
                 [DbDump::class, $dbDumpCommand],
                 [CronUnlock::class, $cronUnlockCommand],
-                [BackupRestore::class, $backupRestoreCommand]
+                [BackupRestore::class, $backupRestoreCommand],
+                [BackupList::class, $backupListCommand],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
