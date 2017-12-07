@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
+use Magento\MagentoCloud\Command\BackupRestore;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
@@ -66,24 +67,16 @@ class ApplicationTest extends TestCase
         $configDumpCommand = $this->createMock(ConfigDump::class);
         $postDeployCommand = $this->createMock(PostDeploy::class);
         $dbDumpCommand = $this->createMock(DbDump::class);
+        $cronUnlockCommand = $this->createMock(CronUnlock::class);
+        $backupRestoreCommand = $this->createMock(BackupRestore::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
         $this->mockCommand($deployCommandMock, Deploy::NAME);
         $this->mockCommand($configDumpCommand, ConfigDump::NAME);
         $this->mockCommand($postDeployCommand, PostDeploy::NAME);
         $this->mockCommand($dbDumpCommand, DbDump::NAME);
-        /**
-         * Command mocks.
-         */
-        $buildCommandMock = $this->createMock(Build::class);
-        $deployCommandMock = $this->createMock(Deploy::class);
-        $configDumpCommand = $this->createMock(ConfigDump::class);
-        $cronUnlockCommand = $this->createMock(CronUnlock::class);
-
-        $this->mockCommand($buildCommandMock, Build::NAME);
-        $this->mockCommand($deployCommandMock, Deploy::NAME);
-        $this->mockCommand($configDumpCommand, ConfigDump::NAME);
         $this->mockCommand($cronUnlockCommand, CronUnlock::NAME);
+        $this->mockCommand($backupRestoreCommand, BackupRestore::class);
 
         $this->containerMock->method('get')
             ->willReturnMap([
@@ -93,10 +86,8 @@ class ApplicationTest extends TestCase
                 [ConfigDump::class, $configDumpCommand],
                 [PostDeploy::class, $postDeployCommand],
                 [DbDump::class, $dbDumpCommand],
-                [Build::class, $buildCommandMock],
-                [Deploy::class, $deployCommandMock],
-                [ConfigDump::class, $configDumpCommand],
                 [CronUnlock::class, $cronUnlockCommand],
+                [BackupRestore::class, $backupRestoreCommand]
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
