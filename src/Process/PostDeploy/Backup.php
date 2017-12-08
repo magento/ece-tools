@@ -51,7 +51,7 @@ class Backup implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Create backup important files.');
+        $this->logger->info('Create backup of important files.');
 
         foreach ($this->backupList->getList() as $file) {
             if (!$this->file->isExists($file)) {

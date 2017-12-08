@@ -6,10 +6,11 @@
 namespace Magento\MagentoCloud\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Magento\MagentoCloud\Backup\Restorer;
+use Magento\MagentoCloud\Command\Backup\Restore;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,9 +19,9 @@ use Psr\Log\LoggerInterface;
 class BackupRestore extends Command
 {
     /**
-     * @var Restorer
+     * @var Restore
      */
-    private $restorer;
+    private $restore;
 
     /**
      * @var LoggerInterface
@@ -33,12 +34,12 @@ class BackupRestore extends Command
     const NAME = 'backup:restore';
 
     /**
-     * @param Restorer $restorer
+     * @param Restore $restore
      * @param LoggerInterface $logger
      */
-    public function __construct(Restorer $restorer, LoggerInterface $logger)
+    public function __construct(Restore $restore, LoggerInterface $logger)
     {
-        $this->restorer = $restorer;
+        $this->restore = $restore;
         $this->logger = $logger;
         parent::__construct();
     }
@@ -49,7 +50,7 @@ class BackupRestore extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Restore important configuration files');
+            ->setDescription('Restore important configuration files. Run backup:list to show the list of backup files');
         $this->addOption(
             'force',
             'f',
@@ -71,12 +72,24 @@ class BackupRestore extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $restore = true;
+        if ($input->getOption('force')) {
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(
+                'Command ' . self::NAME
+                . ' with option --force rewrite your existed files. Do you want to continue [y/N]?',
+                false
+            );
+            $restore = $helper->ask($input, $output, $question);
+        }
+
         try {
-            $this->restorer->run($input, $output);
+            if ($restore) {
+                $this->restore->run($input, $output);
+            }
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
-
-            throw $exception;
+            return 1;
         }
     }
 }

@@ -3,13 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\MagentoCloud\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\MagentoCloud\Filesystem\BackupList as BackupFilesList;
+use Magento\MagentoCloud\Command\Backup\FileList as BackupFilesList;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -62,14 +61,12 @@ class BackupList extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-
         try {
             $output->writeln('<comment>The list of backup files:</comment>');
-            $output->writeln(array_keys($this->backupFilesList->getList()));
+            $output->writeln($this->backupFilesList->get() ?: 'There are no files in the backup');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
-
-            throw $exception;
+            return 1;
         }
     }
 }

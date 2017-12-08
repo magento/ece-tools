@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Backup;
+namespace Magento\MagentoCloud\Command\Backup;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
  *
  * @see \Magento\MagentoCloud\Filesystem\BackupList contains the list of files for restoring
  */
-class Restorer
+class Restore
 {
     /**
      * @var BackupList
@@ -44,6 +44,7 @@ class Restorer
      *
      * @param InputInterface $input
      * @param OutputInterface $output
+     * @return void
      */
     public function run(InputInterface $input, OutputInterface $output)
     {
@@ -56,10 +57,10 @@ class Restorer
                     . ' <comment>Run backup:list to show files from backup list.</comment>', $specificPath));
                 return;
             }
-            $this->restore($input, $output, $specificPath, $backupList[$specificPath]);
+            $this->restore($input, $output, $backupList[$specificPath], $specificPath);
         } else {
-            foreach ($backupList as $alias => $file) {
-                $this->restore($input, $output, $alias, $file);
+            foreach ($backupList as $aliasPath => $filePath) {
+                $this->restore($input, $output, $filePath, $aliasPath);
             }
         }
     }
@@ -69,24 +70,26 @@ class Restorer
      *
      * @param InputInterface $input
      * @param OutputInterface $output
-     * @param string $alias
-     * @param string $file
+     * @param string $aliasPath
+     * @param string $filePath
+     * @return void
      */
-    private function restore(InputInterface $input, OutputInterface $output, string $alias, string $file)
+    private function restore(InputInterface $input, OutputInterface $output, string $filePath, string $aliasPath)
     {
-        $backup = $file . BackupList::BACKUP_SUFFIX;
-        if (!$this->file->isExists($backup)) {
-            $output->writeln(sprintf('<info>Backup for %s does not exist.</info> <comment>Skipped.</comment>', $alias));
+        $backupPath = $filePath . BackupList::BACKUP_SUFFIX;
+        if (!$this->file->isExists($backupPath)) {
+            $output->writeln(sprintf('<info>Backup for %s does not exist.</info>'
+                . ' <comment>Skipped.</comment>', $aliasPath));
             return;
         }
 
-        if ($this->file->isExists($file) && !$input->getOption('force')) {
+        if ($this->file->isExists($filePath) && !$input->getOption('force')) {
             $output->writeln(sprintf('<info>%s file exists!</info>'
-                . ' <comment>If you want to rewrite existed files use --force</comment>', $alias));
+                . ' <comment>If you want to rewrite existed files use --force</comment>', $aliasPath));
             return;
         }
 
-        $this->file->copy($backup, $file);
-        $output->writeln(sprintf('<info>Backup file %s was restored.</info>', $alias));
+        $this->file->copy($backupPath, $filePath);
+        $output->writeln(sprintf('<info>Backup file %s was restored.</info>', $aliasPath));
     }
 }
