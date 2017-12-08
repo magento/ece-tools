@@ -35,6 +35,11 @@ class StageConfig implements StageConfigInterface
     private $buildConfig;
 
     /**
+     * @var array
+     */
+    private $mergedConfig;
+
+    /**
      * @param EnvironmentReader $environmentReader
      * @param Environment $environmentConfig
      * @param Build $buildConfig
@@ -63,44 +68,12 @@ class StageConfig implements StageConfigInterface
             return $this->environmentConfig->getVariable($name);
         }
 
-        $config = $this->environmentReader->read();
+        $config = $this->mergeConfig();
 
         if (isset($config[$stage][$name])) {
             return $config[$stage][$name];
         } elseif (isset($config[self::STAGE_GLOBAL][$name])) {
             return $config[self::STAGE_GLOBAL][$name];
-        }
-
-        return $this->getDefault($stage, $name);
-    }
-
-    /**
-     * Resolves default configuration value if other was not provided.
-     *
-     * @param string $stage
-     * @param string $name
-     * @return mixed
-     * @throws \RuntimeException
-     */
-    private function getDefault(string $stage, string $name)
-    {
-        $default = [
-            self::VAR_SCD_COMPRESSION_LEVEL => [
-                self::STAGE_BUILD => 6,
-                self::STAGE_DEPLOY => 4,
-            ],
-            self::VAR_SCD_STRATEGY => [
-                self::STAGE_GLOBAL => '',
-            ],
-            self::VAR_SKIP_SCD => [
-                self::STAGE_BUILD => false,
-            ],
-        ];
-
-        if (isset($default[$name][$stage])) {
-            return $default[$name][$stage];
-        } elseif (isset($default[$name][self::STAGE_GLOBAL])) {
-            return $default[$name][self::STAGE_GLOBAL];
         }
 
         throw new \RuntimeException(sprintf(
@@ -111,9 +84,44 @@ class StageConfig implements StageConfigInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
+     * @return array
      * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    private function mergeConfig(): array
+    {
+        if (null === $this->mergedConfig) {
+            $this->mergedConfig = array_replace_recursive(
+                $this->getDefault(),
+                $this->environmentReader->read()
+            );
+        }
+
+        return $this->mergedConfig;
+    }
+
+    /**
+     * Resolves default configuration value if other was not provided.
+     *
+     * @return array
+     */
+    private function getDefault(): array
+    {
+        return [
+            self::STAGE_GLOBAL => [
+                self::VAR_SCD_STRATEGY => '',
+            ],
+            self::STAGE_BUILD => [
+                self::VAR_SKIP_SCD => false,
+                self::VAR_SCD_COMPRESSION_LEVEL => 6,
+            ],
+            self::STAGE_DEPLOY => [
+                self::VAR_SCD_COMPRESSION_LEVEL => 4,
+            ],
+        ];
+    }
+
+    /**
+     * @inheritdoc
      */
     public function getBuild(string $name)
     {
@@ -121,9 +129,7 @@ class StageConfig implements StageConfigInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @inheritdoc
      */
     public function getDeploy(string $name)
     {
