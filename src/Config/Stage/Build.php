@@ -61,8 +61,8 @@ class Build implements StageConfigInterface
 
             $this->mergedConfig = array_replace(
                 $this->getDefault(),
-                $envConfig[self::STAGE_GLOBAL] ?: [],
-                $envConfig[self::STAGE_BUILD] ?: [],
+                $envConfig[self::STAGE_GLOBAL] ?? [],
+                $envConfig[self::STAGE_BUILD] ?? [],
                 $this->buildReader->read()
             );
         }

@@ -59,8 +59,8 @@ class Deploy implements StageConfigInterface
 
             $this->mergedConfig = array_replace(
                 $this->getDefault(),
-                $envConfig[self::STAGE_GLOBAL] ?: [],
-                $envConfig[self::STAGE_DEPLOY] ?: [],
+                $envConfig[self::STAGE_GLOBAL] ?? [],
+                $envConfig[self::STAGE_DEPLOY] ?? [],
                 $this->environmentConfig->getVariables()
             );
         }
