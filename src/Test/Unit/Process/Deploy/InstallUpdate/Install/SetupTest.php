@@ -153,7 +153,7 @@ class SetupTest extends TestCase
             ->method('execute')
             ->with(
                 '/bin/bash -c "set -o pipefail;'
-                . ' php ./bin/magento setup:install --session-save=db --cleanup-database --currency=\'USD\''
+                . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
                 . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\' --language=\'fr_FR\''
                 . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
                 . ' --backend-frontname=\'' . $adminUrlExpected . '\' --admin-user=\'' . $adminNameExpected . '\''
