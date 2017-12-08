@@ -59,11 +59,12 @@ class BackupList extends Command
     /**
      * @inheritdoc
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
             $output->writeln('<comment>The list of backup files:</comment>');
             $output->writeln($this->backupFilesList->get() ?: 'There are no files in the backup');
+            return 0;
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
             return 1;

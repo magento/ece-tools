@@ -70,7 +70,7 @@ class BackupRestore extends Command
     /**
      * @inheritdoc
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $restore = true;
         if ($input->getOption('force')) {
@@ -87,6 +87,7 @@ class BackupRestore extends Command
             if ($restore) {
                 $this->restore->run($input, $output);
             }
+            return 0;
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
             return 1;
