@@ -70,7 +70,7 @@ class DeployStaticContent implements ProcessInterface
     {
         $this->environment->removeFlagStaticContentInBuild();
 
-        if ($this->stageConfig->getBuild(StageConfigInterface::VAR_SKIP_SCD)) {
+        if ($this->stageConfig->get(StageConfigInterface::VAR_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
 
             return;

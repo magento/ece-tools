@@ -107,7 +107,7 @@ class Option implements OptionInterface
      */
     public function getStrategy(): string
     {
-        return $this->stageConfig->getBuild(StageConfigInterface::VAR_SCD_STRATEGY);
+        return $this->stageConfig->get(StageConfigInterface::VAR_SCD_STRATEGY);
     }
 
     /**

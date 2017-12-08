@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Config;
 
 /**
- * Interface StageConfigInterface
+ * Provides access to configuration of deployment stages.
  */
 interface StageConfigInterface
 {
@@ -15,6 +15,10 @@ interface StageConfigInterface
      */
     const STAGE_BUILD = 'build';
     const STAGE_DEPLOY = 'deploy';
+    /**
+     * Default, unified stage.
+     */
+    const STAGE_GLOBAL = 'global';
 
     /**
      * Deployment variables.
@@ -26,25 +30,9 @@ interface StageConfigInterface
     /**
      * Retrieves environment configuration per stage.
      *
-     * @param string $stage The stage name
      * @param string $name The config name
-     * @return mixed The config value
+     * @param string|bool|array|int $default The default value
+     * @return string|bool|array|int The config value
      */
-    public function get(string $stage, string $name);
-
-    /**
-     * Retrieves environment configuration for build stage.
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function getBuild(string $name);
-
-    /**
-     * Retrieves environment configuration for deploy stage.
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function getDeploy(string $name);
+    public function get(string $name, $default = null);
 }

@@ -69,7 +69,7 @@ class OptionTest extends TestCase
             ->method('getStaticDeployThreadsCount')
             ->willReturn(3);
         $this->stageConfigMock->expects($this->once())
-            ->method('getDeploy')
+            ->method('get')
             ->with(StageConfigInterface::VAR_SCD_STRATEGY)
             ->willReturn('strategyName');
         $this->threadCountOptimizerMock->expects($this->once())
@@ -118,7 +118,7 @@ class OptionTest extends TestCase
     public function testGetStrategy()
     {
         $this->stageConfigMock->expects($this->once())
-            ->method('getDeploy')
+            ->method('get')
             ->with(StageConfigInterface::VAR_SCD_STRATEGY)
             ->willReturn('strategy');
 

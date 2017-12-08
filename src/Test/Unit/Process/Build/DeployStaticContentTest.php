@@ -76,7 +76,7 @@ class DeployStaticContentTest extends TestCase
     public function testExecute()
     {
         $this->stageConfigMock->expects($this->once())
-            ->method('getBuild')
+            ->method('get')
             ->with(StageConfigInterface::VAR_SKIP_SCD)
             ->willReturn(false);
         $resultMock = $this->createMock(Result\Success::class);
@@ -99,7 +99,7 @@ class DeployStaticContentTest extends TestCase
             ->method('validate')
             ->willReturn($resultMock);
         $this->stageConfigMock->expects($this->once())
-            ->method('getBuild')
+            ->method('get')
             ->with(StageConfigInterface::VAR_SKIP_SCD)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
@@ -114,7 +114,7 @@ class DeployStaticContentTest extends TestCase
     public function testExecuteSkipBuildOption()
     {
         $this->stageConfigMock->expects($this->once())
-            ->method('getBuild')
+            ->method('get')
             ->with(StageConfigInterface::VAR_SKIP_SCD)
             ->willReturn(true);
         $this->configFileStructureMock->expects($this->never())

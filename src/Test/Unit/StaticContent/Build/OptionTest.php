@@ -91,7 +91,7 @@ class OptionTest extends TestCase
             )
             ->willReturnOnConsecutiveCalls(3, 'strategyName');
         $this->stageConfigMock->expects($this->once())
-            ->method('getBuild')
+            ->method('get')
             ->with(StageConfigInterface::VAR_SCD_STRATEGY)
             ->willReturn('strategyName');
         $this->threadCountOptimizerMock->expects($this->once())
@@ -141,7 +141,7 @@ class OptionTest extends TestCase
     public function testGetStrategy()
     {
         $this->stageConfigMock->expects($this->once())
-            ->method('getBuild')
+            ->method('get')
             ->with(StageConfigInterface::VAR_SCD_STRATEGY)
             ->willReturn('strategy');
 
