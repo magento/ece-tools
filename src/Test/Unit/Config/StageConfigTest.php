@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\StageConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -78,6 +79,75 @@ class StageConfigTest extends TestCase
     {
         return [
             ['testName', 'testValue'],
+        ];
+    }
+
+    /**
+     * @param string $configName
+     * @param mixed $configValue
+     * @dataProvider deployExistsDataProvider
+     */
+    public function testDeployExists(string $configName, $configValue)
+    {
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                StageConfig::STAGE_DEPLOY => [
+                    $configName => $configValue,
+                ],
+            ]);
+
+        $this->assertSame($configValue, $this->stageConfig->getDeploy($configName));
+    }
+
+    public function deployExistsDataProvider(): array
+    {
+        return [
+            ['testName', 'testValue'],
+        ];
+    }
+
+    /**
+     * @param string $stage
+     * @param string $name
+     * @param mixed $expectedValue
+     * @dataProvider getDefaultDataProvider
+     */
+    public function testGetDefault(string $stage, string $name, $expectedValue)
+    {
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+
+        $this->assertSame($expectedValue, $this->stageConfig->get($stage, $name));
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefaultDataProvider(): array
+    {
+        return [
+            [
+                StageConfigInterface::STAGE_BUILD,
+                StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
+                6,
+            ],
+            [
+                StageConfigInterface::STAGE_DEPLOY,
+                StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
+                4,
+            ],
+            [
+                StageConfigInterface::STAGE_BUILD,
+                StageConfigInterface::VAR_SCD_STRATEGY,
+                '',
+            ],
+            [
+                StageConfigInterface::STAGE_DEPLOY,
+                StageConfigInterface::VAR_SCD_STRATEGY,
+                '',
+            ],
         ];
     }
 

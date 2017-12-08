@@ -10,7 +10,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
 /**
- * @inheritdoc
+ * {@inheritdoc}
+ *
+ * @deprecated
  */
 class Reader implements ReaderInterface
 {
