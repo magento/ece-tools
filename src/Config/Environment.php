@@ -67,6 +67,7 @@ class Environment
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         LoggerInterface $logger,

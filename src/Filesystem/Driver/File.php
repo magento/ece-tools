@@ -66,9 +66,11 @@ class File
 
         return $result;
     }
+
     /**
      * @param string $path
      * @return bool
+     * @throws FileSystemException
      */
     public function isDirectory(string $path): bool
     {
@@ -107,6 +109,7 @@ class File
      * @param bool $processSections
      * @param int $scannerMode
      * @return array|bool
+     * @throws FileSystemException
      */
     public function parseIni($path, $processSections = false, $scannerMode = INI_SCANNER_NORMAL)
     {
@@ -254,7 +257,7 @@ class File
      * Test for an empty directory
      *
      * @param string $path
-     * @returns bool
+     * @return bool
      */
     public function isEmptyDirectory(string $path): bool
     {
