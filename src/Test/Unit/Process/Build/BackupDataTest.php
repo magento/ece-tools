@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
+use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -43,6 +44,11 @@ class BackupDataTest extends TestCase
     private $directoryListMock;
 
     /**
+     * @var LoggerPool|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $loggerPoolMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -51,6 +57,7 @@ class BackupDataTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
+            ->setMethods(['setHandlers', 'info'])
             ->getMockForAbstractClass();
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
@@ -58,6 +65,7 @@ class BackupDataTest extends TestCase
         $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->loggerPoolMock = $this->createMock(LoggerPool::class);
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -66,11 +74,22 @@ class BackupDataTest extends TestCase
             ->method('getInit')
             ->willReturn('magento_root/init');
 
+        $this->loggerPoolMock->expects($this->once())
+            ->method('getHandlers')
+            ->willReturn(['handler1', 'handler2']);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('setHandlers')
+            ->withConsecutive(
+                [[]],
+                [['handler1', 'handler2']]
+            );
+
         $this->process = new BackupData(
             $this->fileMock,
             $this->loggerMock,
             $this->environmentMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->loggerPoolMock
         );
     }
 
