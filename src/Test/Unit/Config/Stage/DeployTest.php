@@ -5,20 +5,20 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
-use Magento\MagentoCloud\Config\Stage\Build;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use Magento\MagentoCloud\Config\Build\Reader as BuildReader;
+use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
+use Magento\MagentoCloud\Config\Stage\Deploy;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
  */
-class BuildTest extends TestCase
+class DeployTest extends TestCase
 {
     /**
-     * @var Build
+     * @var Deploy
      */
     private $config;
 
@@ -28,9 +28,9 @@ class BuildTest extends TestCase
     private $environmentReaderMock;
 
     /**
-     * @var BuildReader|Mock
+     * @var EnvironmentConfig|Mock
      */
-    private $buildReaderMock;
+    private $environmentConfigMock;
 
     /**
      * @inheritdoc
@@ -38,30 +38,30 @@ class BuildTest extends TestCase
     protected function setUp()
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
-        $this->buildReaderMock = $this->createMock(BuildReader::class);
+        $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);
 
-        $this->config = new Build(
+        $this->config = new Deploy(
             $this->environmentReaderMock,
-            $this->buildReaderMock
+            $this->environmentConfigMock
         );
     }
 
     /**
      * @param string $name
      * @param array $envConfig
-     * @param array $buildConfig
+     * @param array $envVarConfig
      * @param mixed $default
      * @param mixed $expectedValue
      * @dataProvider getDataProvider
      */
-    public function testGet(string $name, array $envConfig, array $buildConfig, $default, $expectedValue)
+    public function testGet(string $name, array $envConfig, array $envVarConfig, $default, $expectedValue)
     {
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($envConfig);
-        $this->buildReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($buildConfig);
+        $this->environmentConfigMock->expects($this->once())
+            ->method('getVariables')
+            ->willReturn($envVarConfig);
 
         $this->assertSame($expectedValue, $this->config->get($name, $default));
     }
@@ -73,18 +73,18 @@ class BuildTest extends TestCase
     {
         return [
             'default strategy' => [
-                Build::VAR_SCD_STRATEGY,
+                Deploy::VAR_SCD_STRATEGY,
                 [],
                 [],
                 null,
                 '',
             ],
             'env configured strategy' => [
-                Build::VAR_SCD_STRATEGY,
+                Deploy::VAR_SCD_STRATEGY,
                 [
                     StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_BUILD => [
-                        Build::VAR_SCD_STRATEGY => 'simple',
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
                 ],
                 [],
@@ -92,37 +92,37 @@ class BuildTest extends TestCase
                 'simple',
             ],
             'global env strategy' => [
-                Build::VAR_SCD_STRATEGY,
+                Deploy::VAR_SCD_STRATEGY,
                 [
                     StageConfigInterface::STAGE_GLOBAL => [
-                        Build::VAR_SCD_STRATEGY => 'simple',
+                        Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
-                    StageConfigInterface::STAGE_BUILD => [],
+                    StageConfigInterface::STAGE_DEPLOY => [],
                 ],
                 [],
                 null,
                 'simple',
             ],
             'default strategy with parameter' => [
-                Build::VAR_SCD_STRATEGY,
+                Deploy::VAR_SCD_STRATEGY,
                 [
                     StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_BUILD => [],
+                    StageConfigInterface::STAGE_DEPLOY => [],
                 ],
                 [],
                 'quick',
                 '',
             ],
-            'build configured strategy' => [
-                Build::VAR_SCD_STRATEGY,
+            'env var configured strategy' => [
+                Deploy::VAR_SCD_STRATEGY,
                 [
                     StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_BUILD => [
-                        Build::VAR_SCD_STRATEGY => 'simple',
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
                 ],
                 [
-                    Build::VAR_SCD_STRATEGY => 'quick',
+                    Deploy::VAR_SCD_STRATEGY => 'quick',
                 ],
                 null,
                 'quick',

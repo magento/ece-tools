@@ -86,10 +86,8 @@ class OptionTest extends TestCase
     {
         $this->buildConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [BuildConfig::OPT_SCD_THREADS]
-            )
-            ->willReturnOnConsecutiveCalls(3, 'strategyName');
+            ->with(BuildConfig::OPT_SCD_THREADS)
+            ->willReturn(3, 'strategyName');
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(StageConfigInterface::VAR_SCD_STRATEGY)
