@@ -78,7 +78,7 @@ class BackupRestore extends Command
                 $helper = $this->getHelper('question');
                 $question = new ConfirmationQuestion(
                     'Command ' . self::NAME
-                    . ' with option --force rewrite your existed files. Do you want to continue [y/N]?',
+                    . ' with option --force will rewrite your existed files. Do you want to continue [y/N]?',
                     false
                 );
                 $restore = $helper->ask($input, $output, $question);
