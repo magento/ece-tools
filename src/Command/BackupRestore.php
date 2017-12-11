@@ -70,27 +70,26 @@ class BackupRestore extends Command
     /**
      * @inheritdoc
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $restore = true;
-        if ($input->getOption('force')) {
-            $helper = $this->getHelper('question');
-            $question = new ConfirmationQuestion(
-                'Command ' . self::NAME
-                . ' with option --force rewrite your existed files. Do you want to continue [y/N]?',
-                false
-            );
-            $restore = $helper->ask($input, $output, $question);
-        }
-
         try {
+            $restore = true;
+            if ($input->getOption('force')) {
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion(
+                    'Command ' . self::NAME
+                    . ' with option --force rewrite your existed files. Do you want to continue [y/N]?',
+                    false
+                );
+                $restore = $helper->ask($input, $output, $question);
+            }
+
             if ($restore) {
                 $this->restore->run($input, $output);
             }
-            return 0;
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
-            return 1;
+            throw $exception;
         }
     }
 }

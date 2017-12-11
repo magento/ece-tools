@@ -98,6 +98,10 @@ class BackupRestoreTest extends TestCase
         ];
     }
 
+    /**
+     * @expectedExceptionMessage Sorry error
+     * @expectedException \Exception
+     */
     public function testExecuteWithException()
     {
         $this->helperSetMock->expects($this->never())

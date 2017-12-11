@@ -78,6 +78,10 @@ class BackupListTest extends TestCase
         ];
     }
 
+    /**
+     * @expectedExceptionMessage Sorry error
+     * @expectedException \Exception
+     */
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
