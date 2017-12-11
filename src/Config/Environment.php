@@ -32,6 +32,11 @@ class Environment
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
+    const ENVIRONMENT_TYPE_UNKNOWN = 'ENVIRONMENT_TYPE_UNKNOWN';
+    const ENVIRONMENT_TYPE_INTEGRATION = 'ENVIRONMENT_TYPE_INTEGRATION';
+    const ENVIRONMENT_TYPE_STAGING = 'ENVIRONMENT_TYPE_STAGING';
+    const ENVIRONMENT_TYPE_PRODUCTION = 'ENVIRONMENT_TYPE_PRODUCTION';
+
     /**
      * Variables.
      */
@@ -425,5 +430,21 @@ class Environment
     {
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
+    }
+
+    /* Determines if the current "Environment" is "Production", "Staging", or "Integration". */
+    public function getEnvironmentType(): int
+    {
+        // TODO: We should find a better way to determine this.
+        if (empty($_ENV['MAGENTO_CLOUD_PROJECT']) || empty($_ENV['HOME'])) {
+            return static::ENVIRONMENT_TYPE_UNKNOWN;
+        }
+        if ("/app/{$_ENV['MAGENTO_CLOUD_PROJECT']}" === $_ENV['HOME']) {
+            if (substr($_ENV['HOME'], -4) === '_stg') {
+                return static::ENVIRONMENT_TYPE_STAGING;
+            }
+            return static::ENVIRONMENT_TYPE_PRODUCTION;
+        }
+        return static::ENVIRONMENT_TYPE_INTEGRATION;
     }
 }

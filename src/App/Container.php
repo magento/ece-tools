@@ -196,6 +196,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\CronInterval::class),
                     ],
                 ]);
             });
