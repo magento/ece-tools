@@ -64,9 +64,13 @@ class Amqp implements ProcessInterface
     public function execute()
     {
         $mqConfig = $this->getAmqpConfig();
+        $envQueueConfig = $this->environment->getJsonVariable(Environment::VAR_QUEUE_CONFIGURATION);
         $config = $this->configReader->read();
 
-        if (count($mqConfig)) {
+        if (count($envQueueConfig)) {
+            $this->logger->info('Updating env.php AMQP configuration.');
+            $config['queue'] = $envQueueConfig;
+        } elseif (count($mqConfig)) {
             $this->logger->info('Updating env.php AMQP configuration.');
             $amqpConfig = $mqConfig[0];
             $config['queue']['amqp']['host'] = $amqpConfig['host'];

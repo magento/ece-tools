@@ -67,6 +67,10 @@ class AmqpTest extends TestCase
     public function testExecuteWithoutAmqp()
     {
         $config = ['some config'];
+        $this->environmentMock->expects($this->once())
+            ->method('getJsonVariable')
+            ->with(Environment::VAR_QUEUE_CONFIGURATION)
+            ->willReturn([]);
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
             ->with($this->anything())
@@ -85,11 +89,22 @@ class AmqpTest extends TestCase
 
     /**
      * @param array $config
+     * @param array $envQueueConfig
+     * @param array $amqpConfig
+     * @param array $resultConfig
      * @return void
      * @dataProvider executeAddUpdateDataProvider
      */
-    public function testExecuteAddUpdate(array $config, array $amqpConfig, array $resultConfig)
-    {
+    public function testExecuteAddUpdate(
+        array $config,
+        array $envQueueConfig,
+        array $amqpConfig,
+        array $resultConfig
+    ) {
+        $this->environmentMock->expects($this->once())
+            ->method('getJsonVariable')
+            ->with(Environment::VAR_QUEUE_CONFIGURATION)
+            ->willReturn($envQueueConfig);
         $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
             ->withConsecutive(
@@ -121,6 +136,7 @@ class AmqpTest extends TestCase
         return [
             [
                 ['some config'],
+                [],
                 [[
                     'host' => 'localhost',
                     'port' => '777',
@@ -144,6 +160,7 @@ class AmqpTest extends TestCase
             ],
             [
                 ['some config'],
+                [],
                 [[
                     'host' => 'localhost',
                     'port' => '777',
@@ -178,6 +195,7 @@ class AmqpTest extends TestCase
                         ]
                     ],
                 ],
+                [],
                 [[
                     'host' => 'localhost',
                     'port' => '777',
@@ -198,7 +216,48 @@ class AmqpTest extends TestCase
                         ]
                     ],
                 ]
-            ]
+            ],
+            [
+                [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'some-host',
+                            'port' => '888',
+                            'user' => 'mylogin',
+                            'password' => 'mysqwwd',
+                            'virtualhost' => 'virtualhost',
+                            'ssl' => '1',
+                        ]
+                    ],
+                ],
+                [
+                    'amqp' => [
+                        'host' => 'env-config-host',
+                        'port' => 'env-config-port',
+                        'user' => 'env-config-user',
+                        'password' => 'env-config-password',
+                    ]
+                ],
+                [[
+                    'host' => 'localhost',
+                    'port' => '777',
+                    'username' => 'login',
+                    'password' => 'pswd',
+                    'vhost' => 'virtualhost'
+                ]],
+                [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'env-config-host',
+                            'port' => 'env-config-port',
+                            'user' => 'env-config-user',
+                            'password' => 'env-config-password',
+                        ]
+                    ],
+                ]
+            ],
         ];
     }
 
@@ -210,6 +269,10 @@ class AmqpTest extends TestCase
      */
     public function testExecuteRemoveAmqp(array $config, array $expectedConfig)
     {
+        $this->environmentMock->expects($this->once())
+            ->method('getJsonVariable')
+            ->with(Environment::VAR_QUEUE_CONFIGURATION)
+            ->willReturn([]);
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
             ->with($this->anything())
