@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Illuminate\Config\Repository;
-use Illuminate\Contracts\Config\Repository as RepositoryContract;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use PHPUnit\Framework\TestCase;

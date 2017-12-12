@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Integration;
 
+use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Application;
-use Magento\MagentoCloud\Config\Repository;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 
 /**
