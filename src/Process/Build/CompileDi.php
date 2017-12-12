@@ -63,7 +63,7 @@ class CompileDi implements ProcessInterface
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
 
         $this->logger->info('Running DI compilation');
-        $tempfilename = tempnam();
+        $tempfilename = tempnam('/tmp/', 'config.php.backup');
         $configfilename = $this->fileList->getConfig();
         /* Note: Making a backup before we enable all modules */
         if (! copy($configfilename, $tempfilename)) {
