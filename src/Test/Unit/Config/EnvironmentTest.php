@@ -404,5 +404,4 @@ class EnvironmentTest extends TestCase
             ],
         ];
     }
-
 }

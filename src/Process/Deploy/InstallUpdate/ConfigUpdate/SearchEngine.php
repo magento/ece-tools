@@ -64,7 +64,7 @@ class SearchEngine implements ProcessInterface
     private function getSearchConfiguration(): array
     {
         $envSearchConfiguration = $this->environment->getJsonVariable(Environment::VAR_SEARCH_CONFIGURATION);
-        if ($this->isValidSearchConfiguration($envSearchConfiguration)) {
+        if ($this->isSearchConfigurationValid($envSearchConfiguration)) {
             return $envSearchConfiguration;
         }
 
@@ -119,7 +119,7 @@ class SearchEngine implements ProcessInterface
      * @param array $searchConfiguration
      * @return bool
      */
-    private function isValidSearchConfiguration(array $searchConfiguration): bool
+    private function isSearchConfigurationValid(array $searchConfiguration): bool
     {
         return !empty($searchConfiguration) && isset($searchConfiguration['engine']);
     }
