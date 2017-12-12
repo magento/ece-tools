@@ -434,7 +434,7 @@ class Environment
         $config = $this->getVariable($name, []);
 
         if (!is_array($config)) {
-            $config = json_decode($config, true);
+            $config = (array)json_decode($config, true);
         }
 
         return $config;

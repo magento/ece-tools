@@ -345,17 +345,15 @@ class EnvironmentTest extends TestCase
 
     /**
      * @param array $variables
+     * @param array $expected
      * @dataProvider getJsonVariableDataProvider
      */
-    public function testGetJsonVariable(array $variables)
+    public function testGetJsonVariable(array $variables, array $expected)
     {
         $this->setVariables($variables);
 
         $this->assertEquals(
-            [
-                'option1' => 'value1',
-                'option2' => 'value2',
-            ],
+            $expected,
             $this->environment->getJsonVariable('SOME_VARIABLE')
         );
     }
@@ -363,13 +361,45 @@ class EnvironmentTest extends TestCase
     public function getJsonVariableDataProvider()
     {
         return [
-            [['SOME_VARIABLE' => '{"option1":"value1", "option2":"value2"}']],
+            [
+                [
+                    'SOME_VARIABLE' => ''
+                ],
+                []
+            ],
+            [
+                [
+                    'SOME_VARIABLE' => 'not json string'
+                ],
+                []
+            ],
+            [
+                [
+                    'SOME_VARIABLE' => 12345
+                ],
+                [
+                    12345
+                ]
+            ],
+            [
+                [
+                    'SOME_VARIABLE' => '{"option1":"value1", "option2":"value2"}'
+                ],
+                [
+                    'option1' => 'value1',
+                    'option2' => 'value2',
+                ]
+            ],
             [
                 [
                     'SOME_VARIABLE' => [
                         'option1' => 'value1',
                         'option2' => 'value2',
                     ]
+                ],
+                [
+                    'option1' => 'value1',
+                    'option2' => 'value2',
                 ]
             ],
         ];
