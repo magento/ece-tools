@@ -62,7 +62,7 @@ class StaticContentCompressorTest extends TestCase
                 $runningArray[] = [
                     $this->logicalAnd(
                         $this->stringContains('gzip -q --keep'),
-                        $this->stringContains('xargs'),
+                        $this->stringContains('-print0 | xargs -0'),
                         $this->stringContains($this->staticContentCompressor::TARGET_DIR),
                         $this->stringContains("-$i")
                     ),
