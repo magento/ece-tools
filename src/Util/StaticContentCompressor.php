@@ -98,8 +98,8 @@ class StaticContentCompressor
     {
         return "find " . escapeshellarg(static::TARGET_DIR) . " -type f -size +300c"
             . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
-            . " -or -name '*.html' -or -name '*.htm' ')'"
-            . " | xargs -n100 -P16 gzip -q --keep";
+            . " -or -name '*.html' -or -name '*.htm' ')' -print0"
+            . " | xargs -0 -n100 -P16 gzip -q --keep";
     }
 
     /**
