@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
  * Class DbDump for safely creating backup of database
@@ -52,10 +53,21 @@ class DbDump extends Command
     }
 
     /**
-     * @inheritdoc
+     * Creates DB dump.
+     * Command requires confirmation before execution.
+     *
+     * {@inheritdoc}
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion(
+            'We suggest to enable maintenance mode before running this command. Do you want to continue [y/N]?',
+            false
+        );
+        if (!$helper->ask($input, $output, $question) && $input->isInteractive()) {
+            return null;
+        }
         try {
             $this->logger->info('Starting backup.');
             $this->process->execute();

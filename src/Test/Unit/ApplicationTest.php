@@ -8,14 +8,20 @@ namespace Unit;
 use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Magento\MagentoCloud\Application;
+use Magento\MagentoCloud\Command\BackupList;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
+use Magento\MagentoCloud\Command\BackupRestore;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class ApplicationTest extends TestCase
 {
     /**
@@ -65,12 +71,18 @@ class ApplicationTest extends TestCase
         $configDumpCommand = $this->createMock(ConfigDump::class);
         $postDeployCommand = $this->createMock(PostDeploy::class);
         $dbDumpCommand = $this->createMock(DbDump::class);
+        $cronUnlockCommand = $this->createMock(CronUnlock::class);
+        $backupRestoreCommand = $this->createMock(BackupRestore::class);
+        $backupListCommand = $this->createMock(BackupList::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
         $this->mockCommand($deployCommandMock, Deploy::NAME);
         $this->mockCommand($configDumpCommand, ConfigDump::NAME);
         $this->mockCommand($postDeployCommand, PostDeploy::NAME);
         $this->mockCommand($dbDumpCommand, DbDump::NAME);
+        $this->mockCommand($cronUnlockCommand, CronUnlock::NAME);
+        $this->mockCommand($backupRestoreCommand, BackupRestore::class);
+        $this->mockCommand($backupListCommand, BackupList::class);
 
         $this->containerMock->method('get')
             ->willReturnMap([
@@ -80,6 +92,9 @@ class ApplicationTest extends TestCase
                 [ConfigDump::class, $configDumpCommand],
                 [PostDeploy::class, $postDeployCommand],
                 [DbDump::class, $dbDumpCommand],
+                [CronUnlock::class, $cronUnlockCommand],
+                [BackupRestore::class, $backupRestoreCommand],
+                [BackupList::class, $backupListCommand],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
@@ -134,5 +149,6 @@ class ApplicationTest extends TestCase
             $this->applicationVersion,
             $this->application->getVersion()
         );
+        $this->assertTrue($this->application->has(CronUnlock::NAME));
     }
 }

@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Psr\Log\LoggerInterface;
 
 class Setup implements ProcessInterface
@@ -35,6 +36,11 @@ class Setup implements ProcessInterface
     private $shell;
 
     /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
      * @var PasswordGenerator
      */
     private $passwordGenerator;
@@ -45,19 +51,22 @@ class Setup implements ProcessInterface
      * @param Environment $environment
      * @param ShellInterface $shell
      * @param PasswordGenerator $passwordGenerator
+     * @param FileList $fileList
      */
     public function __construct(
         LoggerInterface $logger,
         UrlManager $urlManager,
         Environment $environment,
         ShellInterface $shell,
-        PasswordGenerator $passwordGenerator
+        PasswordGenerator $passwordGenerator,
+        FileList $fileList
     ) {
         $this->logger = $logger;
         $this->urlManager = $urlManager;
         $this->environment = $environment;
         $this->shell = $shell;
         $this->passwordGenerator = $passwordGenerator;
+        $this->fileList = $fileList;
     }
 
     /**
@@ -72,7 +81,7 @@ class Setup implements ProcessInterface
 
         $command =
             'php ./bin/magento setup:install'
-            . ' --session-save=db --cleanup-database'
+            . ' -n --session-save=db --cleanup-database'
             . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
             . ' --base-url=' . escapeshellarg($urlUnsecure)
             . ' --base-url-secure=' . escapeshellarg($urlSecure)
@@ -101,6 +110,10 @@ class Setup implements ProcessInterface
 
         $command .= $this->environment->getVerbosityLevel();
 
-        $this->shell->execute(escapeshellcmd($command));
+        $this->shell->execute(sprintf(
+            '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
+            escapeshellcmd($command),
+            $this->fileList->getInstallUpgradeLog()
+        ));
     }
 }

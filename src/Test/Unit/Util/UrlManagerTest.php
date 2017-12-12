@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -54,7 +55,6 @@ class UrlManagerTest extends TestCase
             ->method('getRoutes')
             ->willReturn($routes);
 
-
         $this->assertArrayHasKey('secure', $this->manager->getUrls());
     }
 
@@ -90,13 +90,13 @@ class UrlManagerTest extends TestCase
      * @param string $expectedUrl
      * @dataProvider unsecureRouteDataProvider
      */
-    public function testGetunsecureUrlMethod(array $unsecureRoute, string $expectedUrl)
+    public function testGetUnsecureUrlMethod(array $unsecureRoute, string $expectedUrl)
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
             ->willReturn($unsecureRoute);
 
-        $urls = $this->manager->getunsecureUrls();
+        $urls = $this->manager->getUnsecureUrls();
 
         $this->assertArrayHasKey($expectedUrl, $urls);
     }
@@ -127,6 +127,20 @@ class UrlManagerTest extends TestCase
         $urls = $this->manager->getUrls();
 
         $this->assertEquals($urls['unsecure'], $urls['secure']);
+    }
+
+    /**
+     * @param array $routes
+     * @param array $expectedResult
+     * @dataProvider returnedDataProvider
+     */
+    public function testReturnedData(array $routes, array $expectedResult)
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRoutes')
+            ->willReturn($routes);
+
+        $this->assertEquals($expectedResult, $this->manager->getUrls());
     }
 
     /**
@@ -224,7 +238,7 @@ class UrlManagerTest extends TestCase
     {
         return [
             'http://example.com/' => [
-                'original_url' => 'https://example.com/',
+                'original_url' => 'http://example.com/',
                 'type' => 'upstream',
                 'ssi' => [
                     'enabled' => false,
@@ -237,6 +251,69 @@ class UrlManagerTest extends TestCase
                     'headers' => [
                         'Accept',
                         'Accept-Language',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    public function returnedDataProvider()
+    {
+        return [
+            [
+                'routes' => [
+                    'http://example.com/' => ['original_url' => 'http://example.com/', 'type' => 'upstream'],
+                    'https://example.com/' => ['original_url' => 'https://example.com/', 'type' => 'upstream'],
+                    'http://*.example.com/' => ['original_url' => 'http://*.example.com/', 'type' => 'upstream'],
+                    'https://*.example.com/' => ['original_url' => 'https://*.example.com/', 'type' => 'upstream'],
+                    'http://french.example.com/' => [
+                        'original_url' => 'http://french.example.com/',
+                        'type' => 'upstream'
+                    ],
+                    'https://french.example.com/' => [
+                        'original_url' => 'https://french.example.com/',
+                        'type' => 'upstream'
+                    ],
+                ],
+                'expectedResult' => [
+                    'secure' => [
+                        'example.com' => 'https://example.com/',
+                        '*.example.com' => 'https://*.example.com/',
+                        'french.example.com' => 'https://french.example.com/',
+                    ],
+                    'unsecure' => [
+                        'example.com' => 'http://example.com/',
+                        '*.example.com' => 'http://*.example.com/',
+                        'french.example.com' => 'http://french.example.com/',
+
+                    ],
+                ],
+            ],
+            [
+                'routes' => [
+                    'http://example.com/' => ['original_url' => 'http://{default}/', 'type' => 'upstream'],
+                    'https://example.com/' => ['original_url' => 'https://{default}/', 'type' => 'upstream'],
+                    'http://*.example.com/' => ['original_url' => 'http://*.{default}/', 'type' => 'upstream'],
+                    'https://*.example.com/' => ['original_url' => 'https://*.{default}/', 'type' => 'upstream'],
+                    'http://french.example.com/' => [
+                        'original_url' => 'http://french.{default}/',
+                        'type' => 'upstream'
+                    ],
+                    'https://french.example.com/' => [
+                        'original_url' => 'https://french.{default}/',
+                        'type' => 'upstream'
+                    ],
+                ],
+                [
+                    'secure' => [
+                        '' => 'https://example.com/',
+                        '*' => 'https://*.example.com/',
+                        'french' => 'https://french.example.com/',
+                    ],
+                    'unsecure' => [
+                        '' => 'http://example.com/',
+                        '*' => 'http://*.example.com/',
+                        'french' => 'http://french.example.com/',
                     ],
                 ],
             ],

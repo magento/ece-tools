@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
+use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\PostDeploy;
@@ -23,7 +24,7 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
-use Magento\MagentoCloud\Process as Process;
+use Magento\MagentoCloud\Process;
 
 /**
  * @inheritdoc
@@ -152,6 +153,15 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
+                        $this->container->make(DeployProcess\UnlockCronJobs::class),
+                        /**
+                         * Remove this line after implementation post-deploy hook
+                         */
+                        $this->container->make(PostDeployProcess\Backup::class),
+                        /**
+                         * Cache clean process must remain the last one in deploy chain.
+                         * Do not add any processes after it.
+                         */
                         $this->container->make(Process\CleanCache::class),
                     ],
                 ]);
@@ -185,11 +195,22 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\CronConsumersRunner::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                    ],
+                ]);
+            });
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Database::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Environment::class),
                     ],
                 ]);
             });
@@ -229,6 +250,16 @@ class Container implements ContainerInterface
                     'system/stores',
                     'system/websites',
                 ];
+            });
+        $this->container->when(DeployProcess\PreDeploy::class);
+        $this->container->when(CronUnlock::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(DeployProcess\UnlockCronJobs::class),
+                    ],
+                ]);
             });
         $this->container->when(DeployProcess\PreDeploy::class)
             ->needs(ProcessInterface::class)
@@ -280,6 +311,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->make(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);

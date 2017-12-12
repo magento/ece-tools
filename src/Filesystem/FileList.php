@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
+use Magento\MagentoCloud\Filesystem\Driver\File;
+
 /**
  * Resolver of file configurations.
  */
@@ -16,11 +18,18 @@ class FileList
     private $directoryList;
 
     /**
-     * @param DirectoryList $directoryList
+     * @var File
      */
-    public function __construct(DirectoryList $directoryList)
+    private $file;
+
+    /**
+     * @param DirectoryList $directoryList
+     * @param File $file
+     */
+    public function __construct(DirectoryList $directoryList, File $file)
     {
         $this->directoryList = $directoryList;
+        $this->file = $file;
     }
 
     /**
@@ -49,10 +58,20 @@ class FileList
 
     /**
      * @return string
+     * @throws FileSystemException
      */
     public function getComposer(): string
     {
-        return $this->directoryList->getMagentoRoot() . '/composer.json';
+        $magentoComposer = $this->directoryList->getMagentoRoot() . '/composer.json';
+
+        if ($this->file->isExists($magentoComposer)) {
+            return $magentoComposer;
+        }
+
+        /**
+         * Workaround for local development.
+         */
+        return $this->directoryList->getRoot() . '/composer.json';
     }
 
     /**
@@ -77,5 +96,13 @@ class FileList
     public function getInitCloudLog(): string
     {
         return $this->directoryList->getInit() . '/var/log/cloud.log';
+    }
+
+    /**
+     * @return string
+     */
+    public function getInstallUpgradeLog(): string
+    {
+        return $this->directoryList->getLog() . '/install_upgrade.log';
     }
 }

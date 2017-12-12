@@ -6,11 +6,12 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
-use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Process\ProcessInterface;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit_Framework_MockObject_Matcher_InvokedCount as InvokedCount;
 
 /**
  * @inheritdoc
@@ -23,24 +24,19 @@ class UrlsTest extends TestCase
     private $process;
 
     /**
-     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
+     * @var Environment|Mock
      */
     private $environmentMock;
 
     /**
-     * @var ConnectionInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ProcessInterface|Mock
      */
-    private $connectionMock;
+    private $processMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
-
-    /**
-     * @var UrlManager|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $urlManagerMock;
 
     /**
      * @inheritdoc
@@ -50,19 +46,15 @@ class UrlsTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
+        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->urlManagerMock = $this->getMockBuilder(UrlManager::class)
-            ->disableOriginalConstructor()
-            ->getMock();
 
         $this->process = new Urls(
             $this->environmentMock,
-            $this->connectionMock,
-            $this->loggerMock,
-            $this->urlManagerMock
+            $this->processMock,
+            $this->loggerMock
         );
     }
 
@@ -71,41 +63,57 @@ class UrlsTest extends TestCase
      */
     public function testExecute()
     {
-        $this->environmentMock->method('isUpdateUrlsEnabled')
+        $this->environmentMock->expects($this->once())
+            ->method('isMasterBranch')
+            ->willReturn(false);
+        $this->environmentMock->expects($this->once())
+            ->method('isUpdateUrlsEnabled')
             ->willReturn(true);
-        $this->loggerMock->method('info')
+        $this->loggerMock->expects($this->once())
+            ->method('info')
             ->with('Updating secure and unsecure URLs');
-        $this->urlManagerMock->method('getUrls')
-            ->willReturn([
-                'secure' => [
-                    '' => 'https://route_default.local',
-                    'route_1' => 'https://route1.local',
-                    'route_2' => 'https://route2.local',
-                ],
-                'unsecure' => [
-                    'route_4' => 'http://route4.local',
-                ],
-            ]);
-        // @codingStandardsIgnoreStart
-        $this->connectionMock->method('affectingQuery')
-            ->withConsecutive(
-                ["UPDATE `core_config_data` SET `value` = 'https://route_default.local' WHERE `path` = 'web/secure/base_url' AND `scope_id` = '0'"],
-                ["UPDATE `core_config_data` SET `value` = 'https://route1.local' WHERE `path` = 'web/secure/base_url' AND (`value` LIKE 'https://route_1%' OR `value` LIKE 'https://route_1%')"],
-                ["UPDATE `core_config_data` SET `value` = 'https://route2.local' WHERE `path` = 'web/secure/base_url' AND (`value` LIKE 'https://route_2%' OR `value` LIKE 'https://route_2%')"],
-                ["UPDATE `core_config_data` SET `value` = 'http://route4.local' WHERE `path` = 'web/unsecure/base_url' AND (`value` LIKE 'http://route_4%' OR `value` LIKE 'http://route_4%')"]
-            );
-        // @codingStandardsIgnoreEnd
+        $this->processMock->expects($this->once())
+            ->method('execute');
 
         $this->process->execute();
     }
 
-    public function testExecuteSkipped()
-    {
-        $this->environmentMock->method('isUpdateUrlsEnabled')
+    /**
+     * @param bool $envIsMasterBranchWillReturn
+     * @param InvokedCount $envIsUpdateUrlsEnabledExpects
+     * @dataProvider executeSkippedDataProvider
+     */
+    public function testExecuteSkipped(
+        bool $envIsMasterBranchWillReturn,
+        InvokedCount $envIsUpdateUrlsEnabledExpects
+    ) {
+        $this->environmentMock->expects($this->once())
+            ->method('isMasterBranch')
+            ->willReturn($envIsMasterBranchWillReturn);
+        $this->environmentMock->expects($envIsUpdateUrlsEnabledExpects)
+            ->method('isUpdateUrlsEnabled')
             ->willReturn(false);
-        $this->loggerMock->method('notice')
+        $this->loggerMock->expects($this->once())
+            ->method('info')
             ->with('Skipping URL updates');
 
         $this->process->execute();
+    }
+
+    /**
+     * @return array
+     */
+    public function executeSkippedDataProvider(): array
+    {
+        return [
+            [
+                'envIsMasterBranchWillReturn' => true,
+                'envIsUpdateUrlsEnabledExpects' => $this->never(),
+            ],
+            [
+                'envIsMasterBranchWillReturn' => false,
+                'envIsMasterBranchExpects' => $this->once(),
+            ],
+        ];
     }
 }

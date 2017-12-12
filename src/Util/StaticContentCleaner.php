@@ -89,6 +89,8 @@ class StaticContentCleaner
             $this->file->rename($preprocessedLocation, $oldPreprocessedLocation);
             $this->logger->info('Removing '.  $oldPreprocessedLocation . ' in the background');
             $this->shell->backgroundExecute('rm -rf ' . $oldPreprocessedLocation);
+        } elseif ($this->file->isLink($preprocessedLocation)) {
+            $this->file->unLink($preprocessedLocation);
         }
     }
 }

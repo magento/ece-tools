@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -41,21 +42,29 @@ class BackupData implements ProcessInterface
     private $directoryList;
 
     /**
+     * @var LoggerPool
+     */
+    private $loggerPool;
+
+    /**
      * @param File $file
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param DirectoryList $directoryList
+     * @param LoggerPool $loggerPool
      */
     public function __construct(
         File $file,
         LoggerInterface $logger,
         Environment $environment,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        LoggerPool $loggerPool
     ) {
         $this->file = $file;
         $this->logger = $logger;
         $this->environment = $environment;
         $this->directoryList = $directoryList;
+        $this->loggerPool = $loggerPool;
     }
 
     /**
@@ -96,6 +105,8 @@ class BackupData implements ProcessInterface
 
         $this->logger->info('Copying writable directories to temp directory.');
 
+        $this->stopLogging();
+
         foreach ($this->environment->getWritableDirectories() as $dir) {
             $originalDir = $magentoRoot . $dir;
             $initDir = $rootInitDir . $dir;
@@ -109,5 +120,26 @@ class BackupData implements ProcessInterface
                 $this->file->createDirectory($originalDir);
             }
         }
+
+        $this->restoreLogging();
+    }
+
+    /**
+     * Removes all log handlers for closing all connections to files that are opened for logging.
+     *
+     * It's done for avoiding file system exceptions while file opened for writing is not physically exists
+     * and some process trying to write into that file.
+     */
+    private function stopLogging()
+    {
+        $this->logger->setHandlers([]);
+    }
+
+    /**
+     * Restore all log handlers.
+     */
+    private function restoreLogging()
+    {
+        $this->logger->setHandlers($this->loggerPool->getHandlers());
     }
 }

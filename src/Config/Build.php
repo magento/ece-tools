@@ -17,6 +17,7 @@ class Build
     const OPT_SKIP_SCD = 'skip_scd';
     const OPT_SCD_STRATEGY = 'SCD_STRATEGY';
     const OPT_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
+    const OPT_SCD_COMPRESSION_LEVEL = 'SCD_COMPRESSION_LEVEL';
 
     /**
      * @var ReaderInterface
