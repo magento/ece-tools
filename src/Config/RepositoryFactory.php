@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\App\Container;
 use Psr\Container\ContainerInterface;
 
@@ -30,9 +31,9 @@ class RepositoryFactory
      * Creates instances of Repository.
      *
      * @param array $items
-     * @return RepositoryInterface
+     * @return Repository
      */
-    public function create(array $items = []): RepositoryInterface
+    public function create(array $items = []): Repository
     {
         if (!$this->container instanceof Container) {
             /**
@@ -43,6 +44,6 @@ class RepositoryFactory
             throw new \RuntimeException('New object can not be created via container.');
         }
 
-        return $this->container->create(Repository::class, ['items' => $items]);
+        return $this->container->create(\Illuminate\Config\Repository::class, ['items' => $items]);
     }
 }

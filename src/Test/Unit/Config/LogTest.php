@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\Log as LogConfig;
-use Magento\MagentoCloud\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Config\Environment\Reader;

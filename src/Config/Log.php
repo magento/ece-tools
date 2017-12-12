@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
@@ -58,10 +59,10 @@ class Log
 
     /**
      * @param string $handler
-     * @return RepositoryInterface
+     * @return Repository
      * @throws \Exception
      */
-    public function get(string $handler): RepositoryInterface
+    public function get(string $handler): Repository
     {
         if (!isset($this->getConfig()[$handler])) {
             throw new \Exception('Configuration for ' . $handler . ' is not found');
