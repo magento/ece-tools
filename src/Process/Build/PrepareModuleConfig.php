@@ -68,6 +68,10 @@ class PrepareModuleConfig implements ProcessInterface
             return;
         }
 
+        /*
+         NOTE: This way has problems as described in MAGECLOUD-1424
+         Note: I'm leaving this in for now, but we should change soon.
+        */
         $newModules = $this->moduleInformation->getNewModuleNames();
 
         if (empty($newModules)) {
