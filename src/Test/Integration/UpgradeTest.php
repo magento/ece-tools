@@ -83,7 +83,6 @@ class UpgradeTest extends TestCase
     public function defaultDataProvider(): array
     {
         return [
-            ['^2.1', '2.2.0'],
             ['2.2.0', '^2.2'],
         ];
     }
@@ -103,6 +102,9 @@ class UpgradeTest extends TestCase
         $this->assertContains('Home Page', $pageContent, 'Check "Home Page" phrase presence');
     }
 
+    /**
+     * @param string $version
+     */
     private function updateToVersion($version)
     {
         $sandboxDir = $this->bootstrap->getSandboxDir();
