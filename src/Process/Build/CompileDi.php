@@ -19,14 +19,17 @@ class CompileDi implements ProcessInterface
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var ShellInterface
      */
     private $shell;
+
     /**
      * @var BuildConfig
      */
     private $buildConfig;
+
     /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
@@ -41,6 +44,7 @@ class CompileDi implements ProcessInterface
         $this->shell = $shell;
         $this->buildConfig = $buildConfig;
     }
+
     /**
      * {@inheritdoc}
      * @throws \RuntimeException
@@ -48,6 +52,7 @@ class CompileDi implements ProcessInterface
     public function execute()
     {
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
+
         $this->logger->info('Running DI compilation');
         $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
     }
