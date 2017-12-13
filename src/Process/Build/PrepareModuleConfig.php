@@ -60,18 +60,18 @@ class PrepareModuleConfig implements ProcessInterface
     public function execute()
     {
         $this->logger->info('Reconciling installed modules with shared config.');
-        $moduleConfig = $this->sharedConfig->get('modules');
+        //$moduleConfig = $this->sharedConfig->get('modules');
 
         if (empty($moduleConfig)) {
             $this->logger->info('Shared config file is missing module section. Updating with all installed modules.');
             $this->shell->execute('php bin/magento module:enable --all');
+            $this->$this->sharedConfig->clearCache();
             return;
         }
 
         /*
          NOTE: This way has problems as described in MAGECLOUD-1424
-         Note: I'm leaving this in for now, but we should change soon.
-        */
+
         $newModules = $this->moduleInformation->getNewModuleNames();
 
         if (empty($newModules)) {
@@ -82,5 +82,12 @@ class PrepareModuleConfig implements ProcessInterface
         $this->logger->info('Enabling newly installed modules not found in shared config.');
         $enableModules = join(" ", $newModules);
         $this->shell->execute("php bin/magento module:enable $enableModules");
+        */
+
+        $oldconfig = $this->$this->sharedConfig->read();
+        $this->shell->execute('php bin/magento module:enable --all');
+        $this->$this->sharedConfig->clearCache();
+        $oldconfig = $this->$this->sharedConfig->udate($oldconfig);
+
     }
 }
