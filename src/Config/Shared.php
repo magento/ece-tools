@@ -34,7 +34,7 @@ class Shared
      */
     public function __construct(
         Reader $reader,
-        Reader $writer
+        Writer $writer
     ) {
         $this->reader = $reader;
         $this->writer = $writer;
