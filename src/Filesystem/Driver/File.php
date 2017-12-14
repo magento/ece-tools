@@ -377,6 +377,10 @@ class File
      */
     public function backgroundClearDirectory(string $path, array $excludes = [])
     {
+        if ($this->isLink($path)) {
+            return $this->deleteFile($path);
+        }
+
         $timestamp = time();
         $tempDir = $path . '/' . preg_replace('/\//', '_', basename($path)) . '_' . $timestamp;
         $excludes[] = $tempDir;
