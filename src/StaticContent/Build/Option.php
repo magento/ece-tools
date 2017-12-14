@@ -75,7 +75,7 @@ class Option implements OptionInterface
     /**
      * @inheritdoc
      */
-    public function getTreadCount(): int
+    public function getThreadCount(): int
     {
         return $this->threadCountOptimizer->optimize(
             (int)$this->buildConfig->get(BuildConfig::OPT_SCD_THREADS, 1),

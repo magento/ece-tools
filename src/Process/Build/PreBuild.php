@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Package\Manager;
@@ -22,11 +23,6 @@ class PreBuild implements ProcessInterface
     private $buildConfig;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -37,21 +33,27 @@ class PreBuild implements ProcessInterface
     private $packageManager;
 
     /**
+     * @var FlagFilePool
+     */
+    private $flagFilePool;
+
+    /**
+     * PreBuild constructor.
      * @param BuildConfig $buildConfig
-     * @param Environment $environment
      * @param LoggerInterface $logger
      * @param Manager $packageManager
+     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         BuildConfig $buildConfig,
-        Environment $environment,
         LoggerInterface $logger,
-        Manager $packageManager
+        Manager $packageManager,
+        FlagFilePool $flagFilePool
     ) {
         $this->buildConfig = $buildConfig;
-        $this->environment = $environment;
         $this->logger = $logger;
         $this->packageManager = $packageManager;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -62,7 +64,7 @@ class PreBuild implements ProcessInterface
         $verbosityLevel = $this->buildConfig->getVerbosityLevel();
 
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
-        $this->environment->removeFlagStaticContentInBuild();
+        $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->delete();
         $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }
 }

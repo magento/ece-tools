@@ -6,8 +6,13 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\StaticContentCleaner;
+use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -31,26 +36,51 @@ class DeployStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var StaticContentCleaner
+     * @var File
      */
-    private $staticContentCleaner;
+    private $file;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @var RemoteDiskIdentifier
+     */
+    private $remoteDiskIdentifier;
+
+    /**
+     * @var FlagFilePool
+     */
+    private $flagFilePool;
+
+    /**
+     * DeployStaticContent constructor.
      * @param ProcessInterface $process
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param StaticContentCleaner $staticContentCleaner
+     * @param File $file
+     * @param DirectoryList $directoryList
+     * @param RemoteDiskIdentifier $remoteDiskIdentifier
+     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         ProcessInterface $process,
         Environment $environment,
         LoggerInterface $logger,
-        StaticContentCleaner $staticContentCleaner
+        File $file,
+        DirectoryList $directoryList,
+        RemoteDiskIdentifier $remoteDiskIdentifier,
+        FlagFilePool $flagFilePool
     ) {
         $this->process = $process;
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->staticContentCleaner = $staticContentCleaner;
+        $this->file = $file;
+        $this->directoryList = $directoryList;
+        $this->remoteDiskIdentifier = $remoteDiskIdentifier;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -62,6 +92,15 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
+        $scdInBuildFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
+        $scdPendingFlag = $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY);
+        $scdPendingFlag->delete();
+        if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static') && !$scdInBuildFlag->exists()) {
+            $scdPendingFlag->set();
+            $this->logger->info('Postpone static content deployment until prestart');
+            return;
+        }
+
         $applicationMode = $this->environment->getApplicationMode();
         $this->logger->info('Application mode is ' . $applicationMode);
 
@@ -76,8 +115,11 @@ class DeployStaticContent implements ProcessInterface
 
         // Clear old static content if necessary
         if ($this->environment->doCleanStaticFiles()) {
-            $this->staticContentCleaner->cleanPubStatic();
-            $this->staticContentCleaner->cleanViewPreprocessed();
+            $magentoRoot = $this->directoryList->getMagentoRoot();
+            $this->logger->info('Clearing pub/static');
+            $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
+            $this->logger->info('Clearing var/view_preprocessed');
+            $this->file->backgroundClearDirectory($magentoRoot . '/var/view_preprocessed');
         }
 
         $this->logger->info('Generating fresh static content');

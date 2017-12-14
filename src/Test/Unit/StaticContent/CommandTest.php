@@ -122,7 +122,7 @@ class CommandTest extends TestCase
 
         if (isset($optionConfig['thread_count'])) {
             $optionMock->expects($this->once())
-                ->method('getTreadCount')
+                ->method('getThreadCount')
                 ->willReturn($optionConfig['thread_count']);
         }
         $optionMock->expects($this->once())

@@ -75,7 +75,7 @@ class GenerateTest extends TestCase
             ->method('getLocales')
             ->willReturn(['ua_UA', 'fr_FR', 'es_ES', 'en_US']);
         $this->optionMock->expects($this->once())
-            ->method('getTreadCount')
+            ->method('getThreadCount')
             ->willReturn(3);
         $this->loggerMock->method('info')
             ->withConsecutive(
