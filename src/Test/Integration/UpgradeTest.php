@@ -68,12 +68,14 @@ class UpgradeTest extends TestCase
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
+        $executeAndAssert(Prestart::NAME);
         $this->assertContentPresence();
 
         $this->updateToVersion($toVersion);
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
+        $executeAndAssert(Prestart::NAME);
         $this->assertContentPresence();
     }
 
