@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
+use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -79,6 +80,10 @@ class BackupDataTest extends TestCase
      * @var string
      */
     private $initSomeDir;
+    /**
+     * @var LoggerPool|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $loggerPoolMock;
 
     /**
      * @inheritdoc
@@ -87,6 +92,7 @@ class BackupDataTest extends TestCase
     {
         $this->fileMock = $this->createMock(File::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
+            ->setMethods(['setHandlers', 'info'])
             ->getMockForAbstractClass();
         $this->environmentMock = $this->createMock(Environment::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -98,6 +104,13 @@ class BackupDataTest extends TestCase
         $this->initPubStatic = 'magento_root/init/pub/static/';
         $this->someDir = 'magento_root/some_dir';
         $this->initSomeDir = 'magento_root/init/some_dir';
+        $this->environmentMock = $this->getMockBuilder(Environment::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->loggerPoolMock = $this->createMock(LoggerPool::class);
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -114,12 +127,23 @@ class BackupDataTest extends TestCase
         $this->flagMock->expects($this->once())
             ->method('delete');
 
+        $this->loggerPoolMock->expects($this->once())
+            ->method('getHandlers')
+            ->willReturn(['handler1', 'handler2']);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('setHandlers')
+            ->withConsecutive(
+                [[]],
+                [['handler1', 'handler2']]
+            );
+
         $this->process = new BackupData(
             $this->fileMock,
             $this->loggerMock,
             $this->environmentMock,
             $this->directoryListMock,
-            $this->flagFilePoolMock
+            $this->flagFilePoolMock,
+            $this->loggerPoolMock
         );
     }
 

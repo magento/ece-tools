@@ -51,6 +51,23 @@ class SearchEngine implements ProcessInterface
     {
         $this->logger->info('Updating search engine configuration.');
 
+        $searchConfig = $this->getSearchConfiguration();
+
+        $this->logger->info('Set search engine to: ' . $searchConfig['engine']);
+        $config['system']['default']['catalog']['search'] = $searchConfig;
+        $this->writer->update($config);
+    }
+
+    /**
+     * @return array
+     */
+    private function getSearchConfiguration(): array
+    {
+        $envSearchConfiguration = $this->environment->getJsonVariable(Environment::VAR_SEARCH_CONFIGURATION);
+        if ($this->isSearchConfigurationValid($envSearchConfiguration)) {
+            return $envSearchConfiguration;
+        }
+
         $relationships = $this->environment->getRelationships();
 
         if (isset($relationships['elasticsearch'])) {
@@ -61,9 +78,7 @@ class SearchEngine implements ProcessInterface
             $searchConfig = ['engine' => 'mysql'];
         }
 
-        $this->logger->info('Set search engine to: ' . $searchConfig['engine']);
-        $config['system']['default']['catalog']['search'] = $searchConfig;
-        $this->writer->update($config);
+        return $searchConfig;
     }
 
     /**
@@ -96,5 +111,16 @@ class SearchEngine implements ProcessInterface
             'elasticsearch_server_hostname' => $config['host'],
             'elasticsearch_server_port' => $config['port'],
         ];
+    }
+
+    /**
+     * Checks that given configuration is valid.
+     *
+     * @param array $searchConfiguration
+     * @return bool
+     */
+    private function isSearchConfigurationValid(array $searchConfiguration): bool
+    {
+        return !empty($searchConfiguration) && isset($searchConfiguration['engine']);
     }
 }

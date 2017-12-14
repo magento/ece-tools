@@ -81,7 +81,7 @@ class Setup implements ProcessInterface
 
         $command =
             'php ./bin/magento setup:install'
-            . ' --session-save=db --cleanup-database'
+            . ' -n --session-save=db --cleanup-database'
             . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
             . ' --base-url=' . escapeshellarg($urlUnsecure)
             . ' --base-url-secure=' . escapeshellarg($urlSecure)
