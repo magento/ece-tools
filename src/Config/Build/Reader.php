@@ -37,7 +37,9 @@ class Reader implements ReaderInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @deprecated
      */
     public function read(): array
     {

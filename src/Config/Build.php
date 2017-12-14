@@ -41,6 +41,8 @@ class Build
      * @param string $key
      * @param string|null $default
      * @return string|null
+     *
+     * @deprecated
      */
     public function get(string $key, $default = null)
     {
@@ -53,6 +55,8 @@ class Build
 
     /**
      * @return string
+     *
+     * @deprecated
      */
     public function getVerbosityLevel(): string
     {

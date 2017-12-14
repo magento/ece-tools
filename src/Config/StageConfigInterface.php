@@ -31,8 +31,7 @@ interface StageConfigInterface
      * Retrieves environment configuration per stage.
      *
      * @param string $name The config name
-     * @param string|bool|array|int $default The default value
      * @return string|bool|array|int The config value
      */
-    public function get(string $name, $default = null);
+    public function get(string $name);
 }

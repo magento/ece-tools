@@ -44,11 +44,11 @@ class Build implements StageConfigInterface
     /**
      * @inheritdoc
      */
-    public function get(string $name, $default = null)
+    public function get(string $name)
     {
         $config = $this->mergeConfig();
 
-        return $config[$name] ?? $default;
+        return $config[$name] ?? null;
     }
 
     /**

@@ -50,11 +50,10 @@ class BuildTest extends TestCase
      * @param string $name
      * @param array $envConfig
      * @param array $buildConfig
-     * @param mixed $default
      * @param mixed $expectedValue
      * @dataProvider getDataProvider
      */
-    public function testGet(string $name, array $envConfig, array $buildConfig, $default, $expectedValue)
+    public function testGet(string $name, array $envConfig, array $buildConfig, $expectedValue)
     {
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
@@ -63,7 +62,7 @@ class BuildTest extends TestCase
             ->method('read')
             ->willReturn($buildConfig);
 
-        $this->assertSame($expectedValue, $this->config->get($name, $default));
+        $this->assertSame($expectedValue, $this->config->get($name));
     }
 
     /**
@@ -76,7 +75,6 @@ class BuildTest extends TestCase
                 Build::VAR_SCD_STRATEGY,
                 [],
                 [],
-                null,
                 '',
             ],
             'env configured strategy' => [
@@ -88,7 +86,6 @@ class BuildTest extends TestCase
                     ],
                 ],
                 [],
-                null,
                 'simple',
             ],
             'global env strategy' => [
@@ -100,7 +97,6 @@ class BuildTest extends TestCase
                     StageConfigInterface::STAGE_BUILD => [],
                 ],
                 [],
-                null,
                 'simple',
             ],
             'default strategy with parameter' => [
@@ -110,7 +106,6 @@ class BuildTest extends TestCase
                     StageConfigInterface::STAGE_BUILD => [],
                 ],
                 [],
-                'quick',
                 '',
             ],
             'build configured strategy' => [
@@ -124,7 +119,6 @@ class BuildTest extends TestCase
                 [
                     Build::VAR_SCD_STRATEGY => 'quick',
                 ],
-                null,
                 'quick',
             ],
         ];
