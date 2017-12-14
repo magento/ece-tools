@@ -70,6 +70,8 @@ class PrepareModuleConfigTest extends TestCase
             ->method('get')
             ->with('modules')
             ->willReturn([]);
+        $this->sharedConfigMock->expects($this->once())
+            ->method('reset');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php bin/magento module:enable --all');
@@ -91,10 +93,12 @@ class PrepareModuleConfigTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php bin/magento module:enable --all');
-        $this->sharedConfigMock->expects($this->any())
+        $this->sharedConfigMock->expects($this->never())
+            ->method('reset');
+        $this->sharedConfigMock->expects($this->once())
             ->method('read')
             ->willReturn(['modules' => ['Some_ExistingModule' => 1]]);
-        $this->sharedConfigMock->expects($this->any())
+        $this->sharedConfigMock->expects($this->once())
             ->method('update')
             ->willReturn(null);
 

@@ -53,16 +53,16 @@ class PrepareModuleConfig implements ProcessInterface
         $this->logger->info('Reconciling installed modules with shared config.');
         $moduleConfig = $this->sharedConfig->get('modules');
 
-        if (empty($moduleConfig)) {
+        if (!$moduleConfig) {
             $this->logger->info('Shared config file is missing module section. Updating with all installed modules.');
             $this->shell->execute('php bin/magento module:enable --all');
-            $this->sharedConfig->clearCache();
+            $this->sharedConfig->reset();
+
             return;
         }
 
-        $oldconfig = $this->sharedConfig->read();
+        $actualConfig = $this->sharedConfig->read();
         $this->shell->execute('php bin/magento module:enable --all');
-        $this->sharedConfig->clearCache();
-        $this->sharedConfig->update($oldconfig);
+        $this->sharedConfig->update($actualConfig);
     }
 }

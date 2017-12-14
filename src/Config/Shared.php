@@ -50,21 +50,31 @@ class Shared
         return $this->read()[$key] ?? $default;
     }
 
-    public function read()
+    /**
+     * @return array
+     */
+    public function read(): array
     {
         if ($this->config === null) {
             $this->config = $this->reader->read();
         }
+
         return $this->config;
     }
 
+    /**
+     * @param array $config
+     */
     public function update(array $config)
     {
-        $this->clearCache();
-        return $this->writer->update($config);
+        $this->reset();
+        $this->writer->update($config);
     }
 
-    public function clearCache()
+    /**
+     * Resets cached data.
+     */
+    public function reset()
     {
         $this->config = null;
     }

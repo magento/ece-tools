@@ -10,5 +10,19 @@ namespace Magento\MagentoCloud\Filesystem\Writer;
  */
 interface WriterInterface
 {
-  // TODO: something
+    /**
+     * Writes given configuration to file.
+     *
+     * @param array $config
+     * @return void
+     */
+    public function create(array $config);
+
+    /**
+     * Updates existence configuration.
+     *
+     * @param array $config
+     * @return void
+     */
+    public function update(array $config);
 }

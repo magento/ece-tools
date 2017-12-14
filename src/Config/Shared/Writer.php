@@ -14,7 +14,6 @@ use Magento\MagentoCloud\Filesystem\Writer\WriterInterface;
  */
 class Writer implements WriterInterface
 {
-
     /**
      * @var Reader
      */
@@ -31,7 +30,7 @@ class Writer implements WriterInterface
     private $fileList;
 
     /**
-     * @param Reader $reader,
+     * @param Reader $reader ,
      * @param File $file
      * @param FileList $fileList
      */
@@ -46,11 +45,9 @@ class Writer implements WriterInterface
     }
 
     /**
-     * Writes given configuration to file.
-     *
-     * @param array $config
+     * @inheritdoc
      */
-    public function write(array $config)
+    public function create(array $config)
     {
         $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($config, true) . ';';
 
@@ -58,14 +55,12 @@ class Writer implements WriterInterface
     }
 
     /**
-     * Updates existence configuration.
-     *
-     * @param array $config
+     * @inheritdoc
      */
     public function update(array $config)
     {
-        $updatedConfig = array_replace_recursive($this->reader->read(), $config);
-
-        $this->write($updatedConfig);
+        $this->create(
+            array_replace_recursive($this->reader->read(), $config)
+        );
     }
 }
