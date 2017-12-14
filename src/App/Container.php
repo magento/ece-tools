@@ -306,7 +306,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
+                        $this->get(PrestartProcess\DeployStaticContent\Generate::class),
                     ],
                 ]);
             });
