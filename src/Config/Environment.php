@@ -35,6 +35,8 @@ class Environment
     /**
      * Variables.
      */
+    const VAR_QUEUE_CONFIGURATION = 'QUEUE_CONFIGURATION';
+    const VAR_SEARCH_CONFIGURATION = 'SEARCH_CONFIGURATION';
     const VAR_REDIS_SESSION_DISABLE_LOCKING = 'REDIS_SESSION_DISABLE_LOCKING';
     const VAR_SCD_COMPRESSION_LEVEL = Build::OPT_SCD_COMPRESSION_LEVEL;
 
@@ -390,13 +392,7 @@ class Environment
      */
     public function getCronConsumersRunner(): array
     {
-        $config = $this->getVariable('CRON_CONSUMERS_RUNNER', []);
-
-        if (!is_array($config)) {
-            $config = json_decode($config, true);
-        }
-
-        return $config;
+        return $this->getJsonVariable('CRON_CONSUMERS_RUNNER');
     }
 
     /**
@@ -424,5 +420,22 @@ class Environment
     {
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
+    }
+
+    /**
+     * Returns variable that was set in json format.
+     *
+     * @param string $name
+     * @return array
+     */
+    public function getJsonVariable(string $name): array
+    {
+        $config = $this->getVariable($name, []);
+
+        if (!is_array($config)) {
+            $config = (array)json_decode($config, true);
+        }
+
+        return $config;
     }
 }

@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
+use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -42,6 +43,11 @@ class SetupTest extends TestCase
     private $passwordGeneratorMock;
 
     /**
+     * @var FileList|Mock
+     */
+    private $fileListMock;
+
+    /**
      * @var Setup
      */
     private $process;
@@ -58,13 +64,15 @@ class SetupTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
+        $this->fileListMock = $this->createMock(FileList::class);
 
         $this->process = new Setup(
             $this->loggerMock,
             $this->urlManagerMock,
             $this->environmentMock,
             $this->shellMock,
-            $this->passwordGeneratorMock
+            $this->passwordGeneratorMock,
+            $this->fileListMock
         );
     }
 
@@ -94,6 +102,8 @@ class SetupTest extends TestCase
         $adminFirstnameExpected,
         $adminLastnameExpected
     ) {
+        $installUpgradeLog = '/tmp/log.log';
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Installing Magento.');
@@ -135,10 +145,15 @@ class SetupTest extends TestCase
             ->method('generateRandomPassword')
             ->willReturn($adminPasswordExpected);
 
+        $this->fileListMock->expects($this->once())
+            ->method('getInstallUpgradeLog')
+            ->willReturn($installUpgradeLog);
+
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with(
-                'php ./bin/magento setup:install --session-save=db --cleanup-database --currency=\'USD\''
+                '/bin/bash -c "set -o pipefail;'
+                . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
                 . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\' --language=\'fr_FR\''
                 . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
                 . ' --backend-frontname=\'' . $adminUrlExpected . '\' --admin-user=\'' . $adminNameExpected . '\''
@@ -146,6 +161,7 @@ class SetupTest extends TestCase
                 . '\' --admin-email=\'admin@example.com\' --admin-password=\'' . $adminPasswordExpected . '\''
                 . ' --use-secure-admin=1'
                 . ' --db-password=\'password\' -v'
+                . ' | tee -a ' . $installUpgradeLog . '"'
             );
 
         $this->process->execute();

@@ -159,6 +159,10 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
                         /**
+                         * Remove this line after implementation post-deploy hook
+                         */
+                        $this->container->make(PostDeployProcess\Backup::class),
+                        /**
                          * Cache clean process must remain the last one in deploy chain.
                          * Do not add any processes after it.
                          */
@@ -311,6 +315,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->make(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);
