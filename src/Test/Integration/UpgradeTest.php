@@ -102,6 +102,9 @@ class UpgradeTest extends TestCase
         $this->assertContains('Home Page', $pageContent, 'Check "Home Page" phrase presence');
     }
 
+    /**
+     * @param string $version
+     */
     private function updateToVersion($version)
     {
         $sandboxDir = $this->bootstrap->getSandboxDir();
