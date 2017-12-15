@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
+use Magento\MagentoCloud\Filesystem\FlagFileInterface;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\Deploy\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Config\Environment;
@@ -38,23 +40,33 @@ class CompressStaticContentTest extends TestCase
     private $compressorMock;
 
     /**
+     * @var FlagFilePool|Mock
+     */
+    private $flagFilePoolMock;
+
+    /**
+     * @var FlagFileInterface
+     */
+    private $flagMock;
+
+    /**
      * Setup the test environment.
      */
     protected function setUp()
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->compressorMock = $this->getMockBuilder(StaticContentCompressor::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->environmentMock = $this->createMock(Environment::class);
+        $this->compressorMock = $this->createMock(StaticContentCompressor::class);
+        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
+        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
+            ->getMockForAbstractClass();
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->environmentMock,
-            $this->compressorMock
+            $this->compressorMock,
+            $this->flagFilePoolMock
         );
     }
 
@@ -71,6 +83,16 @@ class CompressStaticContentTest extends TestCase
             ->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(true);
+        $this->flagFilePoolMock->expects($this->once())
+            ->method('getFlag')
+            ->with('scd_pending')
+            ->willReturn($this->flagMock);
+        $this->flagMock->expects($this->once())
+            ->method('exists')
+            ->willReturn(false);
+        $this->environmentMock->expects($this->once())
+            ->method('getVerbosityLevel')
+            ->willReturn('');
         $this->compressorMock
             ->expects($this->once())
             ->method('process')
@@ -82,12 +104,47 @@ class CompressStaticContentTest extends TestCase
     /**
      * Test that deploy-time compression will fail appropriately.
      */
-    public function testExecuteNoCompress()
+    public function testExecuteNoCompressByEnv()
     {
         $this->environmentMock
             ->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(false);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with(
+                'Static content deployment was performed during the build phase or disabled. Skipping deploy phase'
+                . ' static content compression.'
+            );
+        $this->flagFilePoolMock->expects($this->never())
+            ->method('getFlag');
+        $this->environmentMock->expects($this->never())
+            ->method('getVerbosityLevel');
+        $this->compressorMock
+            ->expects($this->never())
+            ->method('process');
+
+        $this->process->execute();
+    }
+
+    public function testExecuteNoCompressBySCDInBuild()
+    {
+        $this->environmentMock
+            ->expects($this->once())
+            ->method('isDeployStaticContent')
+            ->willReturn(true);
+        $this->flagFilePoolMock->expects($this->once())
+            ->method('getFlag')
+            ->with('scd_pending')
+            ->willReturn($this->flagMock);
+        $this->flagMock->expects($this->once())
+            ->method('exists')
+            ->willReturn(true);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Postpone static content compression until prestart');
+        $this->environmentMock->expects($this->never())
+            ->method('getVerbosityLevel');
         $this->compressorMock
             ->expects($this->never())
             ->method('process');

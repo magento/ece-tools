@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryCopier\SymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 class SymlinkStrategyTest extends TestCase
 {
@@ -22,6 +23,11 @@ class SymlinkStrategyTest extends TestCase
      */
     private $fileMock;
 
+    /**
+     * @var LoggerInterface|Mock
+     */
+    private $loggerMock;
+
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
@@ -29,8 +35,10 @@ class SymlinkStrategyTest extends TestCase
             ->method('getRealPath')
             ->with('fromDir')
             ->willReturnOnConsecutiveCalls('realFromDir');
+        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
+            ->getMockForAbstractClass();
 
-        $this->symlinkStrategy = new SymlinkStrategy($this->fileMock);
+        $this->symlinkStrategy = new SymlinkStrategy($this->fileMock, $this->loggerMock);
     }
 
     public function testCopy()
@@ -109,6 +117,31 @@ class SymlinkStrategyTest extends TestCase
             ->willReturn(true);
 
         $this->assertTrue($this->symlinkStrategy->copy('fromDir', 'toDir'));
+    }
+
+    public function testIsEmptyDirectory()
+    {
+
+        $this->fileMock->expects($this->once())
+            ->method('getRealPath')
+            ->with('fromDir')
+            ->willReturn('realFromDir');
+
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('realFromDir')
+            ->willReturn(true);
+
+        $this->fileMock->expects($this->once())
+            ->method('isEmptyDirectory')
+            ->with('realFromDir')
+            ->willReturn(true);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('realFromDir is empty. Nothing to restore');
+
+        $this->assertFalse($this->symlinkStrategy->copy('fromDir', 'toDir'));
     }
 
     /**

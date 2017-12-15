@@ -6,11 +6,13 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FlagFileInterface;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\Build\PreBuild;
 use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -23,47 +25,48 @@ class PreBuildTest extends TestCase
     private $process;
 
     /**
-     * @var Build|\PHPUnit_Framework_MockObject_MockObject
+     * @var Build|Mock
      */
     private $buildConfigMock;
 
     /**
-     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $environmentMock;
-
-    /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var Manager|\PHPUnit_Framework_MockObject_MockObject
+     * @var Manager|Mock
      */
     private $packageManagerMock;
+
+    /**
+     * @var FlagFilePool|Mock
+     */
+    private $flagFilePoolMock;
+
+    /**
+     * @var FlagFileInterface|Mock
+     */
+    private $flagMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->buildConfigMock = $this->getMockBuilder(Build::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->buildConfigMock = $this->createMock(Build::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->packageManagerMock = $this->getMockBuilder(Manager::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->packageManagerMock = $this->createMock(Manager::class);
+        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
+        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
+            ->getMockForAbstractClass();
 
         $this->process = new PreBuild(
             $this->buildConfigMock,
-            $this->environmentMock,
             $this->loggerMock,
-            $this->packageManagerMock
+            $this->packageManagerMock,
+            $this->flagFilePoolMock
         );
     }
 
@@ -83,8 +86,11 @@ class PreBuildTest extends TestCase
                 ['Verbosity level is ' . $expectedVerbosity],
                 ['Starting build. Some info.']
             );
-        $this->environmentMock->expects($this->once())
-            ->method('removeFlagStaticContentInBuild');
+        $this->flagFilePoolMock->expects($this->once())
+            ->method('getFlag')
+            ->willReturn($this->flagMock);
+        $this->flagMock->expects($this->once())
+            ->method('delete');
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('Some info.');

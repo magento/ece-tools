@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -25,6 +26,7 @@ use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
+use Magento\MagentoCloud\Process\Prestart as PrestartProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
 use Magento\MagentoCloud\Process;
@@ -73,6 +75,18 @@ class Container implements ContainerInterface
                 $fileList->getComposer()
             );
         });
+        $this->container->singleton(
+            \Magento\MagentoCloud\Filesystem\FlagFilePool::class,
+            function () {
+                return new \Magento\MagentoCloud\Filesystem\FlagFilePool([
+                    $this->container->make(\Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag::class),
+                    $this->container->make(\Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag::class),
+                    $this->container->make(
+                        \Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag::class
+                    ),
+                ]);
+            }
+        );
         /**
          * Interface to implementation binding.
          */
@@ -208,6 +222,16 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(Prestart::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(PrestartProcess\DeployStaticContent::class),
+                        $this->container->make(PrestartProcess\CompressStaticContent::class),
+                    ],
+                ]);
+            });
         $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -286,6 +310,15 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(PrestartProcess\DeployStaticContent::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->get(PrestartProcess\DeployStaticContent\Generate::class),
+                    ],
+                ]);
+            });
         $this->container->when(\Magento\MagentoCloud\Config\Build::class)
             ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
             ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
@@ -329,6 +362,9 @@ class Container implements ContainerInterface
         $this->container->when(\Magento\MagentoCloud\StaticContent\Deploy\Option::class)
             ->needs(StageConfigInterface::class)
             ->give(DeployConfig::class);
+        $this->container->when(\Magento\MagentoCloud\StaticContent\Prestart\Option::class)
+            ->needs(StageConfigInterface::class)
+            ->give(BuildConfig::class);
     }
 
     /**

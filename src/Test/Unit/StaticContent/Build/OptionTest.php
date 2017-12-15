@@ -97,7 +97,7 @@ class OptionTest extends TestCase
             ->with(3, 'strategyName')
             ->willReturn(3);
 
-        $this->assertEquals(3, $this->option->getTreadCount());
+        $this->assertEquals(3, $this->option->getThreadCount());
     }
 
     /**

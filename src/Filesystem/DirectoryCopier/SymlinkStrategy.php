@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Creates symlink from one folder to another.
@@ -19,11 +20,20 @@ class SymlinkStrategy implements StrategyInterface
     private $file;
 
     /**
-     * @param File $file
+     * @var LoggerInterface
      */
-    public function __construct(File $file)
-    {
+    private $logger;
+
+    /**
+     * @param File $file
+     * @param LoggerInterface $logger
+     */
+    public function __construct(
+        File $file,
+        LoggerInterface $logger
+    ) {
         $this->file = $file;
+        $this->logger = $logger;
     }
 
     /**
@@ -39,6 +49,11 @@ class SymlinkStrategy implements StrategyInterface
             throw new FileSystemException(
                 sprintf('Can\'t copy directory %s. Directory does not exist.', $fromDirectory)
             );
+        }
+
+        if ($this->file->isEmptyDirectory($fromDirectory)) {
+            $this->logger->info(sprintf("%s is empty. Nothing to restore", $fromDirectory));
+            return false;
         }
 
         if ($this->file->isExists($toDirectory)) {

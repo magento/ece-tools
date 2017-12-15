@@ -8,7 +8,9 @@ namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use Psr\Log\LoggerInterface;
@@ -19,11 +21,6 @@ class RestoreWritableDirectories implements ProcessInterface
      * @var LoggerInterface
      */
     private $logger;
-
-    /**
-     * @var File
-     */
-    private $file;
 
     /**
      * @var BuildDirCopier
@@ -39,26 +36,31 @@ class RestoreWritableDirectories implements ProcessInterface
      * @var RecoverableDirectoryList
      */
     private $recoverableDirectoryList;
+    /**
+     * @var FlagFilePool
+     */
+    private $flagFilePool;
 
     /**
+     * RestoreWritableDirectories constructor.
      * @param LoggerInterface $logger
-     * @param File $file
      * @param BuildDirCopier $buildDirCopier
      * @param RecoverableDirectoryList $recoverableDirectoryList
      * @param DirectoryList $directoryList
+     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         LoggerInterface $logger,
-        File $file,
         BuildDirCopier $buildDirCopier,
         RecoverableDirectoryList $recoverableDirectoryList,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        FlagFilePool $flagFilePool
     ) {
         $this->logger = $logger;
-        $this->file = $file;
         $this->buildDirCopier = $buildDirCopier;
         $this->recoverableDirectoryList = $recoverableDirectoryList;
         $this->directoryList = $directoryList;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -77,12 +79,6 @@ class RestoreWritableDirectories implements ProcessInterface
 
         // Restore mounted directories
         $this->logger->info('Recoverable directories were copied back.');
-
-        $magentoRoot = $this->directoryList->getMagentoRoot();
-
-        if ($this->file->isExists($magentoRoot . '/' . Environment::REGENERATE_FLAG)) {
-            $this->logger->info('Removing var/.regenerate flag');
-            $this->file->deleteFile($magentoRoot . '/' . Environment::REGENERATE_FLAG);
-        }
+        $this->flagFilePool->getFlag(RegenerateFlag::KEY)->delete();
     }
 }
