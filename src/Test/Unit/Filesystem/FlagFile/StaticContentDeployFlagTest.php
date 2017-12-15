@@ -1,11 +1,8 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: wgilbert
- * Date: 12/1/17
- * Time: 1:57 PM
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
  */
-
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\FlagFile;
 
 use Magento\MagentoCloud\Filesystem\FlagFile\Base;
@@ -13,6 +10,9 @@ use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class StaticContentDeployFlagTest extends TestCase
 {
     /**
@@ -60,7 +60,6 @@ class StaticContentDeployFlagTest extends TestCase
 
         $this->assertTrue($this->flag->delete());
     }
-
 
     public function testGetPath()
     {
