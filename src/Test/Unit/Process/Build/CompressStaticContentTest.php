@@ -5,15 +5,14 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Config\Build as BuildConfig;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\Build\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
-use Magento\MagentoCloud\Config\Build as BuildConfig;
-use Magento\MagentoCloud\Config\Environment;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 /**
  * Unit test for build-time static content compressor.
@@ -41,14 +40,9 @@ class CompressStaticContentTest extends TestCase
     private $compressorMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagFileManager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
+    private $flagFileManagerMock;
 
     /**
      * Setup the test environment.
@@ -59,15 +53,13 @@ class CompressStaticContentTest extends TestCase
             ->getMockForAbstractClass();
         $this->buildConfigMock = $this->createMock(BuildConfig::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
+        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->buildConfigMock,
             $this->compressorMock,
-            $this->flagFilePoolMock
+            $this->flagFileManagerMock
         );
     }
 
@@ -76,12 +68,9 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecute()
     {
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_in_build')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployInBuild::KEY)
             ->willReturn(true);
         $this->buildConfigMock->expects($this->once())
             ->method('getVerbosityLevel')
@@ -104,12 +93,9 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecuteNoCompress()
     {
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_in_build')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployInBuild::KEY)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')

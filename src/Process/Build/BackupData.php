@@ -9,9 +9,9 @@ use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\Regenerate;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -45,9 +45,9 @@ class BackupData implements ProcessInterface
     private $directoryList;
 
     /**
-     * FlagFilePool
+     * @var FlagFileManager
      */
-    private $flagFilePool;
+    private $flagFileManager;
 
     /**
      * @var LoggerPool
@@ -61,7 +61,7 @@ class BackupData implements ProcessInterface
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param DirectoryList $directoryList
-     * @param FlagFilePool $flagFilePool
+     * @param FlagFileManager $flagFileManager
      * @param LoggerPool $loggerPool
      */
     public function __construct(
@@ -69,14 +69,14 @@ class BackupData implements ProcessInterface
         LoggerInterface $logger,
         Environment $environment,
         DirectoryList $directoryList,
-        FlagFilePool $flagFilePool,
+        FlagFileManager $flagFileManager,
         LoggerPool $loggerPool
     ) {
         $this->file = $file;
         $this->logger = $logger;
         $this->environment = $environment;
         $this->directoryList = $directoryList;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagFileManager = $flagFileManager;
         $this->loggerPool = $loggerPool;
     }
 
@@ -87,12 +87,10 @@ class BackupData implements ProcessInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
         $rootInitDir = $this->directoryList->getInit() . '/';
-        $regenerateFlag = $this->flagFilePool->getFlag(RegenerateFlag::KEY);
-        $scdFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
+        $this->flagFileManager->delete(Regenerate::KEY);
 
-        $regenerateFlag->delete();
-
-        if ($scdFlag->exists()) {
+        if ($this->flagFileManager->exists(StaticContentDeployInBuild::KEY)) {
+            $scdFlag = $this->flagFileManager->getFlag(StaticContentDeployInBuild::KEY);
             $initPub = $rootInitDir . 'pub/';
             $initPubStatic = $initPub . 'static/';
             $originalPubStatic = $magentoRoot . 'pub/static/';

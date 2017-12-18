@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\Build\PreBuild;
 use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
@@ -40,14 +40,9 @@ class PreBuildTest extends TestCase
     private $packageManagerMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagFileManager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
+    private $flagFileManagerMock;
 
     /**
      * @inheritdoc
@@ -58,15 +53,13 @@ class PreBuildTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->packageManagerMock = $this->createMock(Manager::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
+        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
 
         $this->process = new PreBuild(
             $this->buildConfigMock,
             $this->loggerMock,
             $this->packageManagerMock,
-            $this->flagFilePoolMock
+            $this->flagFileManagerMock
         );
     }
 
@@ -86,11 +79,9 @@ class PreBuildTest extends TestCase
                 ['Verbosity level is ' . $expectedVerbosity],
                 ['Starting build. Some info.']
             );
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
-            ->method('delete');
+        $this->flagFileManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(StaticContentDeployInBuild::KEY);
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('Some info.');

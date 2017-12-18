@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Process\Prestart;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployPending;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
@@ -42,25 +42,26 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
-     * @var FlagFilePool
+     * @var FlagFileManager
      */
-    private $flagFilePool;
+    private $flagFileManager;
 
     /**
-     * @param LoggerInterface         $logger
-     * @param Environment             $environment
+     * @param LoggerInterface $logger
+     * @param Environment $environment
      * @param StaticContentCompressor $staticContentCompressor
+     * @param FlagFileManager $flagFileManager
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         StaticContentCompressor $staticContentCompressor,
-        FlagFilePool $flagFilePool
+        FlagFileManager $flagFileManager
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->staticContentCompressor = $staticContentCompressor;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagFileManager = $flagFileManager;
     }
 
     /**
@@ -71,7 +72,7 @@ class CompressStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->environment->isDeployStaticContent() &&
-            $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()) {
+            $this->flagFileManager->exists(StaticContentDeployPending::KEY)) {
             $this->staticContentCompressor->process(
                 StaticContentCompressor::DEFAULT_COMPRESSION_LEVEL,
                 $this->environment->getVerbosityLevel()

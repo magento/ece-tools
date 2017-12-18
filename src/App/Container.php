@@ -17,6 +17,7 @@ use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
+use Magento\MagentoCloud\Filesystem\FlagFile;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -73,14 +74,12 @@ class Container implements ContainerInterface
             );
         });
         $this->container->singleton(
-            \Magento\MagentoCloud\Filesystem\FlagFilePool::class,
+            FlagFile\Pool::class,
             function () {
-                return new \Magento\MagentoCloud\Filesystem\FlagFilePool([
-                    $this->container->make(\Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag::class),
-                    $this->container->make(\Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag::class),
-                    $this->container->make(
-                        \Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag::class
-                    ),
+                return new FlagFile\Pool([
+                    $this->container->make(FlagFile\Flag\Regenerate::class),
+                    $this->container->make(FlagFile\Flag\StaticContentDeployInBuild::class),
+                    $this->container->make(FlagFile\Flag\StaticContentDeployPending::class),
                 ]);
             }
         );

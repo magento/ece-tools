@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -25,26 +25,18 @@ class RecoverableDirectoryListTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var Manager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
+    private $flagFileManagerMock;
 
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
+        $this->flagFileManagerMock = $this->createMock(Manager::class);
 
         $this->recoverableDirectoryList = new RecoverableDirectoryList(
             $this->environmentMock,
-            $this->flagFilePoolMock
+            $this->flagFileManagerMock
         );
     }
 
@@ -60,12 +52,9 @@ class RecoverableDirectoryListTest extends TestCase
             ->method('isStaticContentSymlinkOn')
             ->willReturn($isSymlinkOn);
 
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_in_build')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployInBuild::KEY)
             ->willReturn($isStaticInBuild);
         $this->assertEquals(
             $expected,

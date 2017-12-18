@@ -8,8 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployPending;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
 use PHPUnit\Framework\TestCase;
@@ -47,21 +47,15 @@ class DeployStaticContentTest extends TestCase
      */
     private $directoryListMock;
 
-
     /**
      * @var RemoteDiskIdentifier|Mock
      */
     private $remoteDiskIdentifierMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagFileManager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
+    private $flagFileManagerMock;
 
     /**
      * @var ProcessInterface|Mock
@@ -81,9 +75,7 @@ class DeployStaticContentTest extends TestCase
         $this->remoteDiskIdentifierMock = $this->createMock(RemoteDiskIdentifier::class);
         $this->processMock = $this->getMockBuilder(ProcessInterface::class)
             ->getMockForAbstractClass();
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
+        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
 
         $this->process = new DeployStaticContent(
             $this->processMock,
@@ -92,7 +84,7 @@ class DeployStaticContentTest extends TestCase
             $this->fileMock,
             $this->directoryListMock,
             $this->remoteDiskIdentifierMock,
-            $this->flagFilePoolMock
+            $this->flagFileManagerMock
         );
     }
 
@@ -102,8 +94,8 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(false);
-        $this->flagFilePoolMock->expects($this->never())
-            ->method('getFlag');
+        $this->flagFileManagerMock->expects($this->never())
+            ->method('exists');
         $this->environmentMock->expects($this->never())
             ->method('getApplicationMode');
         $this->environmentMock->expects($this->never())
@@ -124,12 +116,9 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(true);
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_pending')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployPending::KEY)
             ->willReturn(true);
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
@@ -160,12 +149,9 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(true);
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_pending')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployPending::KEY)
             ->willReturn(true);
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
@@ -184,12 +170,9 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(true);
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_pending')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployPending::KEY)
             ->willReturn(true);
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
@@ -216,12 +199,9 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(true);
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_pending')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployPending::KEY)
             ->willReturn(true);
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
@@ -251,9 +231,6 @@ class DeployStaticContentTest extends TestCase
 
         $this->processMock->expects($this->once())
             ->method('execute');
-
-
-
 
         $this->process->execute();
     }

@@ -82,7 +82,6 @@ class PreDeploy implements ProcessInterface
         $this->process->execute();
     }
 
-
     /**
      * Prepares the deploy log for further use.
      *

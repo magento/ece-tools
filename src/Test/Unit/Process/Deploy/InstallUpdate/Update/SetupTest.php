@@ -7,10 +7,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\Regenerate;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -41,9 +39,9 @@ class SetupTest extends TestCase
     private $shellMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagFileManager|Mock
      */
-    private $flagFilePoolMock;
+    private $flagFileManagerMock;
 
     /**
      * @var FileList|Mock
@@ -55,11 +53,6 @@ class SetupTest extends TestCase
      */
     private $directoryListMock;
 
-    /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
-
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
@@ -67,9 +60,7 @@ class SetupTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileListMock = $this->createMock(FileList::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
+        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
 
         $this->process = new Setup(
             $this->loggerMock,
@@ -77,7 +68,7 @@ class SetupTest extends TestCase
             $this->shellMock,
             $this->directoryListMock,
             $this->fileListMock,
-            $this->flagFilePoolMock
+            $this->flagFileManagerMock
         );
     }
 
@@ -93,20 +84,9 @@ class SetupTest extends TestCase
         $this->fileListMock->expects($this->once())
             ->method('getInstallUpgradeLog')
             ->willReturn($installUpgradeLog);
-//        $this->fileMock->expects($this->exactly(2))
-//            ->method('isExists')
-//            ->with('magento_root/' . RegenerateFlag::KEY)
-//            ->willReturn(true);
-//        $this->fileMock->expects($this->exactly(2))
-//            ->method('deleteFile')
-//            ->with('magento_root/' . RegenerateFlag::KEY);
-
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('regenerate')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->exactly(2))
-            ->method('delete');
+        $this->flagFileManagerMock->expects($this->exactly(2))
+            ->method('delete')
+            ->with(Regenerate::KEY);
         $this->environmentMock->expects($this->once())
             ->method('getVerbosityLevel')
             ->willReturn('-v');
@@ -139,12 +119,9 @@ class SetupTest extends TestCase
      */
     public function testExecuteWithException()
     {
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('regenerate')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
-            ->method('delete');
+        $this->flagFileManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(Regenerate::KEY);
         $this->shellMock->expects($this->at(0))
             ->method('execute')
             ->willThrowException(new \RuntimeException('Error during command execution'));

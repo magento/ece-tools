@@ -7,9 +7,8 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\Regenerate;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -37,10 +36,10 @@ class Setup implements ProcessInterface
     private $shell;
 
     /**
-     * @var FlagFilePool
+     * @var FlagFileManager
      */
 
-    private $flagFilePool;
+    private $flagFileManager;
 
     /**
      * @var FileList
@@ -59,7 +58,7 @@ class Setup implements ProcessInterface
      * @param ShellInterface $shell
      * @param DirectoryList $directoryList
      * @param FileList $fileList
-     * @param FlagFilePool $flagFilePool
+     * @param FlagFileManager $flagFileManager
      */
     public function __construct(
         LoggerInterface $logger,
@@ -67,14 +66,14 @@ class Setup implements ProcessInterface
         ShellInterface $shell,
         DirectoryList $directoryList,
         FileList $fileList,
-        FlagFilePool $flagFilePool
+        FlagFileManager $flagFileManager
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->shell = $shell;
         $this->directoryList = $directoryList;
         $this->fileList = $fileList;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagFileManager = $flagFileManager;
     }
 
     /**
@@ -84,8 +83,7 @@ class Setup implements ProcessInterface
      */
     public function execute()
     {
-        $regenerateFlag = $this->flagFilePool->getFlag(RegenerateFlag::KEY);
-        $regenerateFlag->delete();
+        $this->flagFileManager->delete(Regenerate::KEY);
 
         try {
             $verbosityLevel = $this->environment->getVerbosityLevel();
@@ -109,6 +107,6 @@ class Setup implements ProcessInterface
             throw new \RuntimeException($e->getMessage(), 6);
         }
 
-        $regenerateFlag->delete();
+        $this->flagFileManager->delete(Regenerate::KEY);
     }
 }

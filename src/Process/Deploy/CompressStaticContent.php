@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployPending;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
@@ -43,27 +43,27 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
-     * @var FlagFilePool
+     * @var FlagFileManager
      */
-    private $flagFilePool;
+    private $flagFileManager;
 
     /**
      * CompressStaticContent constructor.
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param StaticContentCompressor $staticContentCompressor
-     * @param FlagFilePool $flagFilePool
+     * @param FlagFileManager $flagFileManager
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         StaticContentCompressor $staticContentCompressor,
-        FlagFilePool $flagFilePool
+        FlagFileManager $flagFileManager
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->staticContentCompressor = $staticContentCompressor;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagFileManager = $flagFileManager;
     }
 
     /**
@@ -74,7 +74,7 @@ class CompressStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->environment->isDeployStaticContent()) {
-            if ($this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()) {
+            if ($this->flagFileManager->exists(StaticContentDeployPending::KEY)) {
                 $this->logger->info('Postpone static content compression until prestart');
                 return;
             }

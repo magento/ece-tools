@@ -5,14 +5,14 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Prestart;
 
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployPending;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager;
 use Magento\MagentoCloud\Process\Prestart\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
-use Magento\MagentoCloud\Config\Environment;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 /**
  * Unit test for deploy-time static content compressor.
@@ -40,14 +40,9 @@ class CompressStaticContentTest extends TestCase
     private $compressorMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var Manager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface
-     */
-    private $flagMock;
+    private $flagFileManagerMock;
 
     /**
      * Setup the test environment.
@@ -58,16 +53,13 @@ class CompressStaticContentTest extends TestCase
             ->getMockForAbstractClass();
         $this->environmentMock = $this->createMock(Environment::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
-
+        $this->flagFileManagerMock = $this->createMock(Manager::class);
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->environmentMock,
             $this->compressorMock,
-            $this->flagFilePoolMock
+            $this->flagFileManagerMock
         );
     }
 
@@ -77,12 +69,9 @@ class CompressStaticContentTest extends TestCase
             ->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(true);
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_pending')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployPending::KEY)
             ->willReturn(true);
         $this->environmentMock->expects($this->once())
             ->method('getVerbosityLevel')
@@ -104,8 +93,8 @@ class CompressStaticContentTest extends TestCase
             ->method('info')
             ->with('Static content deployment was performed during the build phase or disabled. Skipping prestart phase'
             . ' static content compression.');
-        $this->flagFilePoolMock->expects($this->never())
-            ->method('getFlag');
+        $this->flagFileManagerMock->expects($this->never())
+            ->method('exists');
         $this->compressorMock
             ->expects($this->never())
             ->method('process');
@@ -119,12 +108,9 @@ class CompressStaticContentTest extends TestCase
             ->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(true);
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_pending')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagFileManagerMock->expects($this->once())
             ->method('exists')
+            ->with(StaticContentDeployPending::KEY)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')

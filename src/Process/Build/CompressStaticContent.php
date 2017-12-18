@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Psr\Log\LoggerInterface;
@@ -44,27 +44,27 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
-     * @var FlagFilePool
+     * @var FlagFileManager
      */
-    private $flagFilePool;
+    private $flagFileManager;
 
     /**
      * CompressStaticContent constructor.
      * @param LoggerInterface $logger
      * @param BuildConfig $buildConfig
      * @param StaticContentCompressor $staticContentCompressor
-     * @param FlagFilePool $flagFilePool
+     * @param FlagFileManager $flagFileManager
      */
     public function __construct(
         LoggerInterface $logger,
         BuildConfig $buildConfig,
         StaticContentCompressor $staticContentCompressor,
-        FlagFilePool $flagFilePool
+        FlagFileManager $flagFileManager
     ) {
         $this->logger = $logger;
         $this->buildConfig = $buildConfig;
         $this->staticContentCompressor = $staticContentCompressor;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagFileManager = $flagFileManager;
     }
 
     /**
@@ -74,7 +74,7 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists()) {
+        if ($this->flagFileManager->exists(StaticContentDeployInBuild::KEY)) {
             $this->staticContentCompressor->process(
                 $this->buildConfig->get(BuildConfig::OPT_SCD_COMPRESSION_LEVEL, static::COMPRESSION_LEVEL),
                 $this->buildConfig->getVerbosityLevel()

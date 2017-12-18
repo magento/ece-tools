@@ -8,9 +8,9 @@ namespace Magento\MagentoCloud\Process\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployPending;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
 use Psr\Log\LoggerInterface;
@@ -51,9 +51,9 @@ class DeployStaticContent implements ProcessInterface
     private $remoteDiskIdentifier;
 
     /**
-     * @var FlagFilePool
+     * @var FlagFileManager
      */
-    private $flagFilePool;
+    private $flagFileManager;
 
     /**
      * DeployStaticContent constructor.
@@ -63,7 +63,7 @@ class DeployStaticContent implements ProcessInterface
      * @param File $file
      * @param DirectoryList $directoryList
      * @param RemoteDiskIdentifier $remoteDiskIdentifier
-     * @param FlagFilePool $flagFilePool
+     * @param FlagFileManager $flagFileManager
      */
     public function __construct(
         ProcessInterface $process,
@@ -72,7 +72,7 @@ class DeployStaticContent implements ProcessInterface
         File $file,
         DirectoryList $directoryList,
         RemoteDiskIdentifier $remoteDiskIdentifier,
-        FlagFilePool $flagFilePool
+        FlagFileManager $flagFileManager
     ) {
         $this->process = $process;
         $this->environment = $environment;
@@ -80,7 +80,7 @@ class DeployStaticContent implements ProcessInterface
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->remoteDiskIdentifier = $remoteDiskIdentifier;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagFileManager = $flagFileManager;
     }
 
     /**
@@ -92,11 +92,11 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $scdInBuildFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
-        $scdPendingFlag = $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY);
-        $scdPendingFlag->delete();
-        if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static') && !$scdInBuildFlag->exists()) {
-            $scdPendingFlag->set();
+        $this->flagFileManager->delete(StaticContentDeployPending::KEY);
+        if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
+            && !$this->flagFileManager->exists(StaticContentDeployInBuild::KEY)
+        ) {
+            $this->flagFileManager->set(StaticContentDeployPending::KEY);
             $this->logger->info('Postpone static content deployment until prestart');
             return;
         }

@@ -82,7 +82,7 @@ class RemoteDiskIdentifierTest extends TestCase
                 )
             );
 
-        $this->assertTrue($this-->$this->remoteDiskIdentifier->isOnRemoteDisk($path));
+        $this->assertTrue($this->remoteDiskIdentifier->isOnRemoteDisk($path));
     }
 
     public function testIsOnLocalDisk()
@@ -111,6 +111,6 @@ class RemoteDiskIdentifierTest extends TestCase
                 )
             );
 
-        $this->assertTrue($this-->$this->remoteDiskIdentifier->isOnLocalDisk($path));
+        $this->assertTrue($this->remoteDiskIdentifier->isOnLocalDisk($path));
     }
 }

@@ -7,8 +7,8 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -56,9 +56,9 @@ class Environment
     private $directoryList;
 
     /**
-     * @var FlagFilePool
+     * @var FlagFileManager
      */
-    private $flagFilePool;
+    private $flagFileManager;
 
     /**
      * @var array
@@ -69,18 +69,18 @@ class Environment
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
-     * @param FlagFilePool $flagFilePool
+     * @param FlagFileManager $flagFileManager
      */
     public function __construct(
         LoggerInterface $logger,
         File $file,
         DirectoryList $directoryList,
-        FlagFilePool $flagFilePool
+        FlagFileManager $flagFileManager
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagFileManager = $flagFileManager;
     }
 
     /**
@@ -222,7 +222,7 @@ class Environment
         if (isset($var['DO_DEPLOY_STATIC_CONTENT']) && $var['DO_DEPLOY_STATIC_CONTENT'] == 'disabled') {
             $flag = false;
         } else {
-            $flag = !$this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists();
+            $flag = !$this->flagFileManager->exists(StaticContentDeployInBuild::KEY);
         }
 
         $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . ($flag ? 'enabled' : 'disabled'));
