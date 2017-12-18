@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\Prestart;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -26,11 +27,6 @@ class UpgradeTest extends TestCase
     protected function setUp()
     {
         $this->bootstrap = Bootstrap::create();
-
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento module:enable --all',
-            $this->bootstrap->getSandboxDir()
-        ));
     }
 
     /**
@@ -68,12 +64,14 @@ class UpgradeTest extends TestCase
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
+        $executeAndAssert(Prestart::NAME);
         $this->assertContentPresence();
 
         $this->updateToVersion($toVersion);
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
+        $executeAndAssert(Prestart::NAME);
         $this->assertContentPresence();
     }
 

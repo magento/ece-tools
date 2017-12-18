@@ -8,8 +8,11 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FlagFileInterface;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -22,19 +25,24 @@ class EnvironmentTest extends TestCase
     private $environment;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     * @var File|Mock
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var DirectoryList|Mock
      */
     private $directoryListMock;
+
+    /**
+     * @var FlagFilePool|Mock
+     */
+    private $flagFilePoolMock;
 
     /**
      * @var array
@@ -49,17 +57,15 @@ class EnvironmentTest extends TestCase
         $this->environmentData = $_ENV;
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->fileMock = $this->getMockBuilder(File::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->fileMock = $this->createMock(File::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
 
         $this->environment = new Environment(
             $this->loggerMock,
             $this->fileMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->flagFilePoolMock
         );
     }
 
@@ -120,69 +126,6 @@ class EnvironmentTest extends TestCase
         ];
     }
 
-    public function testSetFlagStaticDeployInBuild()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Setting flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('touch')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-
-        $this->environment->setFlagStaticDeployInBuild();
-    }
-
-    public function testRemoveFlagStaticContentInBuild()
-    {
-        $this->directoryListMock->expects($this->exactly(2))
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)
-            ->willReturn(true);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Removing flag file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->fileMock->expects($this->once())
-            ->method('deleteFile')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-
-        $this->environment->removeFlagStaticContentInBuild();
-    }
-
-    public function testRemoveFlagStaticContentInBuildDisabled()
-    {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG)
-            ->willReturn(false);
-        $this->loggerMock->expects($this->never())
-            ->method('info');
-        $this->fileMock->expects($this->never())
-            ->method('deleteFile');
-
-        $this->environment->removeFlagStaticContentInBuild();
-    }
-
-    public function testIsStaticDeployInBuild()
-    {
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
-
-        $this->environment->isStaticDeployInBuild();
-    }
-
     public function testGetWritableDirectories()
     {
         $this->assertSame(
@@ -191,7 +134,7 @@ class EnvironmentTest extends TestCase
         );
     }
 
-    public function testIsDeployStaticContent()
+    public function testIsDeployStaticContentDisabled()
     {
         $this->setVariables([
             'DO_DEPLOY_STATIC_CONTENT' => 'disabled',
@@ -213,8 +156,15 @@ class EnvironmentTest extends TestCase
             'DO_DEPLOY_STATIC_CONTENT' => 'enabled',
         ]);
 
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
+        $flagMock = $this->getMockBuilder(FlagFileInterface::class)
+            ->getMockForAbstractClass();
+
+        $this->flagFilePoolMock->expects($this->once())
+            ->method('getFlag')
+            ->with('scd_in_build')
+            ->willReturn($flagMock);
+        $flagMock->expects($this->once())
+            ->method('exists')
             ->willReturn($isExists);
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -340,6 +290,68 @@ class EnvironmentTest extends TestCase
                     'consumers' => ['test'],
                 ]
             ]
+        ];
+    }
+
+    /**
+     * @param array $variables
+     * @param array $expected
+     * @dataProvider getJsonVariableDataProvider
+     */
+    public function testGetJsonVariable(array $variables, array $expected)
+    {
+        $this->setVariables($variables);
+
+        $this->assertEquals(
+            $expected,
+            $this->environment->getJsonVariable('SOME_VARIABLE')
+        );
+    }
+
+    public function getJsonVariableDataProvider()
+    {
+        return [
+            [
+                [
+                    'SOME_VARIABLE' => ''
+                ],
+                []
+            ],
+            [
+                [
+                    'SOME_VARIABLE' => 'not json string'
+                ],
+                []
+            ],
+            [
+                [
+                    'SOME_VARIABLE' => 12345
+                ],
+                [
+                    12345
+                ]
+            ],
+            [
+                [
+                    'SOME_VARIABLE' => '{"option1":"value1", "option2":"value2"}'
+                ],
+                [
+                    'option1' => 'value1',
+                    'option2' => 'value2',
+                ]
+            ],
+            [
+                [
+                    'SOME_VARIABLE' => [
+                        'option1' => 'value1',
+                        'option2' => 'value2',
+                    ]
+                ],
+                [
+                    'option1' => 'value1',
+                    'option2' => 'value2',
+                ]
+            ],
         ];
     }
 }

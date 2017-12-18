@@ -9,13 +9,13 @@ use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
 /**
  * Class Build.
+ *
+ * @deprecated
  */
 class Build
 {
     const OPT_SCD_EXCLUDE_THEMES = 'exclude_themes';
     const OPT_SCD_THREADS = 'scd_threads';
-    const OPT_SKIP_SCD = 'skip_scd';
-    const OPT_SCD_STRATEGY = 'SCD_STRATEGY';
     const OPT_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
     const OPT_SCD_COMPRESSION_LEVEL = 'SCD_COMPRESSION_LEVEL';
 
@@ -41,6 +41,8 @@ class Build
      * @param string $key
      * @param string|null $default
      * @return string|null
+     *
+     * @deprecated
      */
     public function get(string $key, $default = null)
     {
@@ -53,6 +55,8 @@ class Build
 
     /**
      * @return string
+     *
+     * @deprecated
      */
     public function getVerbosityLevel(): string
     {

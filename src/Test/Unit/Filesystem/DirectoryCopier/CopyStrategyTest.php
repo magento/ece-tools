@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 class CopyStrategyTest extends TestCase
 {
@@ -22,11 +23,18 @@ class CopyStrategyTest extends TestCase
      */
     private $fileMock;
 
+    /**
+     * @var LoggerInterface|Mock
+     */
+    private $loggerMock;
+
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
+        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
+            ->getMockForAbstractClass();
 
-        $this->copyStrategy = new CopyStrategy($this->fileMock);
+        $this->copyStrategy = new CopyStrategy($this->fileMock, $this->loggerMock);
     }
 
     public function testCopy()
@@ -92,5 +100,24 @@ class CopyStrategyTest extends TestCase
             ->willReturn(false);
 
         $this->copyStrategy->copy('fromDir', 'toDir');
+    }
+
+    public function testIsEmptyDirectory()
+    {
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('fromDir')
+            ->willReturn(true);
+
+        $this->fileMock->expects($this->once())
+            ->method('isEmptyDirectory')
+            ->with('fromDir')
+            ->willReturn(true);
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('fromDir is empty. Nothing to restore');
+
+        $this->assertFalse($this->copyStrategy->copy('fromDir', 'toDir'));
     }
 }

@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use PHPUnit\Framework\TestCase;
@@ -28,11 +29,6 @@ class AcceptanceTest extends TestCase
     protected function setUp()
     {
         $this->bootstrap = Bootstrap::create();
-
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento module:enable --all',
-            $this->bootstrap->getSandboxDir()
-        ));
     }
 
     /**
@@ -68,6 +64,14 @@ class AcceptanceTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(0, $commandTester->getStatusCode());
+
+        $commandTester = new CommandTester(
+            $application->get(Prestart::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+
         $this->assertContentPresence($environment);
 
         /** @var ConfigReader $configReader */
@@ -177,6 +181,13 @@ class AcceptanceTest extends TestCase
 
         $commandTester = new CommandTester(
             $application->get(Deploy::NAME)
+        );
+        $commandTester->execute([]);
+
+        $this->assertSame(0, $commandTester->getStatusCode());
+
+        $commandTester = new CommandTester(
+            $application->get(Prestart::NAME)
         );
         $commandTester->execute([]);
 

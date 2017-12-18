@@ -24,15 +24,19 @@ class SharedTest extends TestCase
     private $readerMock;
 
     /**
+     * @var Shared\Writer|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $writerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->readerMock = $this->createMock(Shared\Reader::class);
+        $this->writerMock = $this->createMock(Shared\Writer::class);
 
-        $this->shared = new Shared(
-            $this->readerMock
-        );
+        $this->shared = new Shared($this->readerMock, $this->writerMock);
     }
 
     public function testGet()

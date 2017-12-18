@@ -36,11 +36,6 @@ class PrepareModuleConfigTest extends TestCase
     private $shellMock;
 
     /**
-     * @var ModuleInformation|Mock
-     */
-    private $moduleInformationMock;
-
-    /**
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
@@ -53,14 +48,12 @@ class PrepareModuleConfigTest extends TestCase
         $this->sharedConfigMock = $this->createMock(SharedConfig::class);
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
-        $this->moduleInformationMock = $this->createMock(ModuleInformation::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
         $this->process = new PrepareModuleConfig(
             $this->sharedConfigMock,
             $this->shellMock,
-            $this->moduleInformationMock,
             $this->loggerMock
         );
     }
@@ -77,50 +70,56 @@ class PrepareModuleConfigTest extends TestCase
             ->method('get')
             ->with('modules')
             ->willReturn([]);
+        $this->sharedConfigMock->expects($this->once())
+            ->method('reset');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php bin/magento module:enable --all');
+        $this->sharedConfigMock->expects($this->never())
+            ->method('update');
 
         $this->process->execute();
     }
 
     public function testExecuteWithNewModules()
     {
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->exactly(1))
             ->method('info')
-            ->withConsecutive(
-                ['Reconciling installed modules with shared config.'],
-                ['Enabling newly installed modules not found in shared config.']
-            );
+            ->withConsecutive(['Reconciling installed modules with shared config.']);
         $this->sharedConfigMock->expects($this->once())
             ->method('get')
             ->with('modules')
             ->willReturn(['Some_OtherModule' => 1]);
-        $this->moduleInformationMock->expects($this->once())
-            ->method('getNewModuleNames')
-            ->willReturn(['Some_NewModule']);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento module:enable Some_NewModule');
+            ->with('php bin/magento module:enable --all');
+        $this->sharedConfigMock->expects($this->never())
+            ->method('reset');
+        $this->sharedConfigMock->expects($this->once())
+            ->method('read')
+            ->willReturn(['modules' => ['Some_ExistingModule' => 1]]);
+        $this->sharedConfigMock->expects($this->once())
+            ->method('update')
+            ->willReturn(null);
 
         $this->process->execute();
     }
 
     public function testExecuteWithNoNewModules()
     {
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->exactly(1))
             ->method('info')
-            ->withConsecutive(
-                ['Reconciling installed modules with shared config.'],
-                ['All installed modules present in shared config.']
-            );
+            ->withConsecutive(['Reconciling installed modules with shared config.']);
         $this->sharedConfigMock->expects($this->once())
             ->method('get')
             ->with('modules')
             ->willReturn(['Some_ExistingModule' => 1]);
-        $this->moduleInformationMock->expects($this->once())
-            ->method('getNewModuleNames')
-            ->willReturn([]);
+        $this->sharedConfigMock->expects($this->any())
+            ->method('read')
+            ->willReturn(['modules' => ['Some_ExistingModule' => 1]]);
+        $this->sharedConfigMock->expects($this->any())
+            ->method('update')
+            ->willReturn(null);
 
         $this->process->execute();
     }

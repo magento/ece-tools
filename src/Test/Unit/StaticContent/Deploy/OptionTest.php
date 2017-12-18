@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
@@ -40,18 +41,25 @@ class OptionTest extends TestCase
      */
     private $threadCountOptimizerMock;
 
+    /**
+     * @var StageConfigInterface|Mock
+     */
+    private $stageConfigMock;
+
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->connectionMock = $this->createMock(Connection::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
+        $this->stageConfigMock = $this->createMock(StageConfigInterface::class);
 
         $this->option = new Option(
             $this->environmentMock,
             $this->connectionMock,
             $this->magentoVersionMock,
-            $this->threadCountOptimizerMock
+            $this->threadCountOptimizerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -60,16 +68,16 @@ class OptionTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getStaticDeployThreadsCount')
             ->willReturn(3);
-        $this->environmentMock->expects($this->once())
-            ->method('getVariable')
-            ->with(Environment::VAR_SCD_STRATEGY)
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(StageConfigInterface::VAR_SCD_STRATEGY)
             ->willReturn('strategyName');
         $this->threadCountOptimizerMock->expects($this->once())
             ->method('optimize')
             ->with(3, 'strategyName')
             ->willReturn(3);
 
-        $this->assertEquals(3, $this->option->getTreadCount());
+        $this->assertEquals(3, $this->option->getThreadCount());
     }
 
     /**
@@ -94,24 +102,24 @@ class OptionTest extends TestCase
         return [
             [
                 '',
-                []
+                [],
             ],
             [
                 'theme1, theme2 ,,  theme3 ',
-                ['theme1', 'theme2', 'theme3']
+                ['theme1', 'theme2', 'theme3'],
             ],
             [
                 'theme3,,theme4,,,,theme5',
-                ['theme3', 'theme4', 'theme5']
-            ]
+                ['theme3', 'theme4', 'theme5'],
+            ],
         ];
     }
 
     public function testGetStrategy()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getVariable')
-            ->with(Environment::VAR_SCD_STRATEGY)
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(StageConfigInterface::VAR_SCD_STRATEGY)
             ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());
@@ -147,7 +155,7 @@ class OptionTest extends TestCase
             [
                 'fr_FR',
                 'de_DE',
-                'en_US'
+                'en_US',
             ],
             $this->option->getLocales()
         );

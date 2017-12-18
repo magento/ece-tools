@@ -5,10 +5,13 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
+use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -23,14 +26,9 @@ class DeployStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var BuildConfig
+     * @var StageConfigInterface
      */
-    private $buildConfig;
-
-    /**
-     * @var Environment
-     */
-    private $environment;
+    private $stageConfig;
 
     /**
      * @var ProcessInterface
@@ -43,24 +41,35 @@ class DeployStaticContent implements ProcessInterface
     private $configFileStructureValidator;
 
     /**
+     * @var FlagFilePool
+     */
+    private $flagFilePool;
+
+    /**
      * @param LoggerInterface $logger
-     * @param BuildConfig $buildConfig
+     * @param StageConfigInterface $stageConfig
      * @param Environment $environment
+     * @param BuildConfig $buildConfig
      * @param ProcessInterface $process
      * @param ConfigFileStructure $configFileStructureValidator
+     * @param FlagFilePool $flagFilePool
      */
     public function __construct(
         LoggerInterface $logger,
-        BuildConfig $buildConfig,
+        StageConfigInterface $stageConfig,
         Environment $environment,
+        BuildConfig $buildConfig,
         ProcessInterface $process,
-        ConfigFileStructure $configFileStructureValidator
+        ConfigFileStructure $configFileStructureValidator,
+        FlagFilePool $flagFilePool
     ) {
         $this->logger = $logger;
-        $this->buildConfig = $buildConfig;
+        $this->stageConfig = $stageConfig;
         $this->environment = $environment;
+        $this->buildConfig = $buildConfig;
         $this->process = $process;
         $this->configFileStructureValidator = $configFileStructureValidator;
+        $this->flagFilePool = $flagFilePool;
     }
 
     /**
@@ -68,9 +77,10 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $this->environment->removeFlagStaticContentInBuild();
+        $scdFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
+        $scdFlag->delete();
 
-        if ($this->buildConfig->get(BuildConfig::OPT_SKIP_SCD)) {
+        if ($this->stageConfig->get(StageConfigInterface::VAR_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
 
             return;
@@ -85,5 +95,6 @@ class DeployStaticContent implements ProcessInterface
         }
 
         $this->process->execute();
+        $scdFlag->set();
     }
 }
