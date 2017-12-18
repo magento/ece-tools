@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -24,9 +26,9 @@ class DeployStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var BuildConfig
+     * @var StageConfigInterface
      */
-    private $buildConfig;
+    private $stageConfig;
 
     /**
      * @var ProcessInterface
@@ -44,8 +46,9 @@ class DeployStaticContent implements ProcessInterface
     private $flagFileManager;
 
     /**
-     * DeployStaticContent constructor.
      * @param LoggerInterface $logger
+     * @param StageConfigInterface $stageConfig
+     * @param Environment $environment
      * @param BuildConfig $buildConfig
      * @param ProcessInterface $process
      * @param ConfigFileStructure $configFileStructureValidator
@@ -53,12 +56,16 @@ class DeployStaticContent implements ProcessInterface
      */
     public function __construct(
         LoggerInterface $logger,
+        StageConfigInterface $stageConfig,
+        Environment $environment,
         BuildConfig $buildConfig,
         ProcessInterface $process,
         ConfigFileStructure $configFileStructureValidator,
         FlagFileManager $flagFileManager
     ) {
         $this->logger = $logger;
+        $this->stageConfig = $stageConfig;
+        $this->environment = $environment;
         $this->buildConfig = $buildConfig;
         $this->process = $process;
         $this->configFileStructureValidator = $configFileStructureValidator;
@@ -72,7 +79,7 @@ class DeployStaticContent implements ProcessInterface
     {
         $this->flagFileManager->delete(StaticContentDeployInBuild::KEY);
 
-        if ($this->buildConfig->get(BuildConfig::OPT_SKIP_SCD)) {
+        if ($this->stageConfig->get(StageConfigInterface::VAR_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
 
             return;

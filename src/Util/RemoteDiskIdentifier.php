@@ -93,6 +93,8 @@ class RemoteDiskIdentifier
                 return preg_match(self::REMOTE_DISK_RE, $disk);
             }
         }
+
+        return false;
     }
 
     /**

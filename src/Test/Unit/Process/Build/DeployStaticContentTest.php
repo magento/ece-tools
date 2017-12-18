@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
@@ -13,6 +15,7 @@ use Magento\MagentoCloud\Process\Build\DeployStaticContent;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -32,7 +35,17 @@ class DeployStaticContentTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Build|Mock
+     * @var StageConfigInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
+     * @var Environment|Mock
+     */
+    private $environmentMock;
+
+    /**
+     * @var BuildConfig|Mock
      */
     private $buildConfigMock;
 
@@ -58,6 +71,8 @@ class DeployStaticContentTest extends TestCase
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
+        $this->stageConfigMock = $this->getMockForAbstractClass(StageConfigInterface::class);
+        $this->environmentMock = $this->createMock(Environment::class);
         $this->buildConfigMock = $this->createMock(Build::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->configFileStructureMock = $this->createMock(ConfigFileStructure::class);
@@ -68,6 +83,8 @@ class DeployStaticContentTest extends TestCase
 
         $this->process = new DeployStaticContent(
             $this->loggerMock,
+            $this->stageConfigMock,
+            $this->environmentMock,
             $this->buildConfigMock,
             $this->processMock,
             $this->configFileStructureMock,
@@ -77,9 +94,9 @@ class DeployStaticContentTest extends TestCase
 
     public function testExecute()
     {
-        $this->buildConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(Build::OPT_SKIP_SCD)
+            ->with(StageConfigInterface::VAR_SKIP_SCD)
             ->willReturn(false);
         $resultMock = $this->createMock(Result\Success::class);
         $this->configFileStructureMock->expects($this->once())
@@ -103,9 +120,9 @@ class DeployStaticContentTest extends TestCase
         $this->configFileStructureMock->expects($this->once())
             ->method('validate')
             ->willReturn($resultMock);
-        $this->buildConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(Build::OPT_SKIP_SCD)
+            ->with(StageConfigInterface::VAR_SKIP_SCD)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -118,9 +135,9 @@ class DeployStaticContentTest extends TestCase
 
     public function testExecuteSkipBuildOption()
     {
-        $this->buildConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(Build::OPT_SKIP_SCD)
+            ->with(StageConfigInterface::VAR_SKIP_SCD)
             ->willReturn(true);
         $this->configFileStructureMock->expects($this->never())
             ->method('validate');

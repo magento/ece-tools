@@ -1,11 +1,8 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: wgilbert
- * Date: 12/1/17
- * Time: 3:23 PM
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
  */
-
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
@@ -15,9 +12,11 @@ use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class RemoteDiskIdentifierTest extends TestCase
 {
-
     /**
      * @var ShellInterface|Mock
      */
@@ -39,7 +38,7 @@ class RemoteDiskIdentifierTest extends TestCase
     private $remoteDiskIdentifier;
 
     /**
-     * Setup the test environment.
+     * @inheritdoc
      */
     protected function setUp()
     {
@@ -54,7 +53,6 @@ class RemoteDiskIdentifierTest extends TestCase
             $this->directoryListMock
         );
     }
-
 
     public function testIsOnRemoteDisk()
     {
@@ -76,13 +74,13 @@ class RemoteDiskIdentifierTest extends TestCase
             ->method('execute')
             ->with("df '{$magentoRoot}/{$path}'")
             ->willReturn(
-                array(
+                [
                     'Filesystem   512-blocks      Used Available Capacity iused      ifree %iused  Mounted on',
-                    '/dev/disk0s2  1 1 1    1% 1 1    0%   /'
-                )
+                    '/dev/disk0s2  1 1 1    1% 1 1    0%   /',
+                ]
             );
 
-        $this->assertTrue($this->remoteDiskIdentifier->isOnRemoteDisk($path));
+        $this->assertTrue($this-- > $this->remoteDiskIdentifier->isOnRemoteDisk($path));
     }
 
     public function testIsOnLocalDisk()
@@ -105,12 +103,12 @@ class RemoteDiskIdentifierTest extends TestCase
             ->method('execute')
             ->with("df '{$magentoRoot}/{$path}'")
             ->willReturn(
-                array(
+                [
                     'Filesystem   512-blocks      Used Available Capacity iused      ifree %iused  Mounted on',
-                    '/dev/rbd1  1 1 1    1% 1 1    0%   /'
-                )
+                    '/dev/rbd1  1 1 1    1% 1 1    0%   /',
+                ]
             );
 
-        $this->assertTrue($this->remoteDiskIdentifier->isOnLocalDisk($path));
+        $this->assertTrue($this-- > $this->remoteDiskIdentifier->isOnLocalDisk($path));
     }
 }

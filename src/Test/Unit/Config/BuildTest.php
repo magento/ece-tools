@@ -9,7 +9,9 @@ use Magento\MagentoCloud\Config\Build;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * {@inheritdoc}
+ *
+ * @deprecated
  */
 class BuildTest extends TestCase
 {
