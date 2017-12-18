@@ -45,7 +45,9 @@ class Logger extends \Monolog\Logger
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->fileList = $fileList;
-        $this->prepareLog();
+
+        $this->prepare();
+
         parent::__construct('default', $pool->getHandlers());
     }
 
@@ -54,7 +56,7 @@ class Logger extends \Monolog\Logger
      *
      * @return void
      */
-    private function prepareLog()
+    private function prepare()
     {
         $deployLogPath = $this->fileList->getCloudLog();
         $buildPhaseLogPath = $this->fileList->getInitCloudLog();
