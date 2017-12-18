@@ -58,14 +58,13 @@ class Logger extends \Monolog\Logger
     {
         $deployLogPath = $this->fileList->getCloudLog();
         $buildPhaseLogPath = $this->fileList->getInitCloudLog();
-        $buildPhaseLogContent = $this->file->isExists($buildPhaseLogPath)
-            ? $this->file->fileGetContents($buildPhaseLogPath) : '';
-
         $deployLogFileIsExists = $this->file->isExists($deployLogPath);
+        $buildLogFileIsExists = $this->file->isExists($buildPhaseLogPath);
+        $buildPhaseLogContent = $buildLogFileIsExists ? $this->file->fileGetContents($buildPhaseLogPath) : '';
 
         if ($deployLogFileIsExists && !$this->buildLogIsApplied($deployLogPath, $buildPhaseLogContent)) {
             $this->file->filePutContents($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
-        } elseif (!$deployLogFileIsExists) {
+        } elseif (!$deployLogFileIsExists && $buildLogFileIsExists) {
             $this->file->createDirectory($this->directoryList->getLog());
             $this->file->copy($buildPhaseLogPath, $deployLogPath);
         }
