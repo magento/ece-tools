@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
@@ -49,12 +50,18 @@ class Option implements OptionInterface
     private $threadCountOptimizer;
 
     /**
+     * @var StageConfigInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param Environment $environment
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
      * @param FileList $fileList
      * @param BuildConfig $buildConfig
      * @param ThreadCountOptimizer $threadCountOptimizer
+     * @param StageConfigInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
@@ -62,7 +69,8 @@ class Option implements OptionInterface
         MagentoVersion $magentoVersion,
         FileList $fileList,
         BuildConfig $buildConfig,
-        ThreadCountOptimizer $threadCountOptimizer
+        ThreadCountOptimizer $threadCountOptimizer,
+        StageConfigInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->magentoVersion = $magentoVersion;
@@ -70,6 +78,7 @@ class Option implements OptionInterface
         $this->fileList = $fileList;
         $this->buildConfig = $buildConfig;
         $this->threadCountOptimizer = $threadCountOptimizer;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -98,7 +107,7 @@ class Option implements OptionInterface
      */
     public function getStrategy(): string
     {
-        return $this->buildConfig->get(BuildConfig::OPT_SCD_STRATEGY, '');
+        return $this->stageConfig->get(StageConfigInterface::VAR_SCD_STRATEGY);
     }
 
     /**

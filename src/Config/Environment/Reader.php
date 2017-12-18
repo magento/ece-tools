@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Environment;
 
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -39,11 +40,12 @@ class Reader implements ReaderInterface
     /**
      * @return array
      * @throws ParseException
+     * @throws FileSystemException
      */
     public function read(): array
     {
         $path = $this->fileList->getEnvConfig();
 
-        return !$this->file->isExists($path) ? [] : (array) Yaml::parse($this->file->fileGetContents($path));
+        return !$this->file->isExists($path) ? [] : (array)Yaml::parse($this->file->fileGetContents($path));
     }
 }

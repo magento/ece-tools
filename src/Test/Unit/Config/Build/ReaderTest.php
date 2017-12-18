@@ -11,7 +11,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * {@inheritdoc}
+ *
+ * @deprecated
  */
 class ReaderTest extends TestCase
 {
