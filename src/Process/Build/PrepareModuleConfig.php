@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
-use Magento\MagentoCloud\Util\ModuleInformation;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,11 +26,6 @@ class PrepareModuleConfig implements ProcessInterface
     private $shell;
 
     /**
-     * @var moduleInformation
-     */
-    private $moduleInformation;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -39,18 +33,15 @@ class PrepareModuleConfig implements ProcessInterface
     /**
      * @param SharedConfig $sharedConfig
      * @param ShellInterface $shell
-     * @param moduleInformation $moduleInformation
      * @param LoggerInterface $logger
      */
     public function __construct(
         SharedConfig $sharedConfig,
         ShellInterface $shell,
-        moduleInformation $moduleInformation,
         LoggerInterface $logger
     ) {
         $this->sharedConfig = $sharedConfig;
         $this->shell = $shell;
-        $this->moduleInformation = $moduleInformation;
         $this->logger = $logger;
     }
 
@@ -62,21 +53,16 @@ class PrepareModuleConfig implements ProcessInterface
         $this->logger->info('Reconciling installed modules with shared config.');
         $moduleConfig = $this->sharedConfig->get('modules');
 
-        if (empty($moduleConfig)) {
+        if (!$moduleConfig) {
             $this->logger->info('Shared config file is missing module section. Updating with all installed modules.');
             $this->shell->execute('php bin/magento module:enable --all');
+            $this->sharedConfig->reset();
+
             return;
         }
 
-        $newModules = $this->moduleInformation->getNewModuleNames();
-
-        if (empty($newModules)) {
-            $this->logger->info('All installed modules present in shared config.');
-            return;
-        }
-
-        $this->logger->info('Enabling newly installed modules not found in shared config.');
-        $enableModules = join(" ", $newModules);
-        $this->shell->execute("php bin/magento module:enable $enableModules");
+        $actualConfig = $this->sharedConfig->read();
+        $this->shell->execute('php bin/magento module:enable --all');
+        $this->sharedConfig->update($actualConfig);
     }
 }

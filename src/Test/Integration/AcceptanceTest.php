@@ -29,11 +29,6 @@ class AcceptanceTest extends TestCase
     protected function setUp()
     {
         $this->bootstrap = Bootstrap::create();
-
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento module:enable --all',
-            $this->bootstrap->getSandboxDir()
-        ));
     }
 
     /**
