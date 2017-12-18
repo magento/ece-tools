@@ -37,6 +37,11 @@
       "Magento\\MagentoCloud\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Magento\\MagentoCloud\\Test\\": "tests/static/"
+    }
+  },
   "scripts": {
     "test": [
       "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",

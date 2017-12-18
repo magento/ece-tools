@@ -47,7 +47,6 @@ class DeployStaticContentTest extends TestCase
      */
     private $directoryListMock;
 
-
     /**
      * @var RemoteDiskIdentifier|Mock
      */
@@ -251,9 +250,6 @@ class DeployStaticContentTest extends TestCase
 
         $this->processMock->expects($this->once())
             ->method('execute');
-
-
-
 
         $this->process->execute();
     }
