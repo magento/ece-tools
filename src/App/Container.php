@@ -401,9 +401,9 @@ class Container implements ContainerInterface
     /**
      * Creates instance with params.
      *
-     * @param string $abstract
-     * @param array $params
-     * @return mixed
+     * @param string $abstract The class name to create
+     * @param array $params Associative array of constructor params
+     * @return mixed The resolved object
      */
     public function create(string $abstract, array $params = [])
     {

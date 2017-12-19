@@ -30,7 +30,7 @@ class RepositoryFactory
     /**
      * Creates instances of Repository.
      *
-     * @param array $items
+     * @param array $items The config array
      * @return Repository
      */
     public function create(array $items = []): Repository
