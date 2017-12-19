@@ -403,7 +403,7 @@ class Container implements ContainerInterface
      *
      * @param string $abstract The class name to create
      * @param array $params Associative array of constructor params
-     * @return mixed The resolved object
+     * @return object The resolved object
      */
     public function create(string $abstract, array $params = [])
     {

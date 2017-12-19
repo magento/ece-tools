@@ -32,6 +32,7 @@ class RepositoryFactory
      *
      * @param array $items The config array
      * @return Repository
+     * @throws \RuntimeException If object cannot be created via container
      */
     public function create(array $items = []): Repository
     {
