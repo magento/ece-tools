@@ -84,7 +84,6 @@ class CompressStaticContentTest extends TestCase
             ->method('process')
             ->with(6);
 
-
         $this->process->execute();
     }
 

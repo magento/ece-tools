@@ -47,8 +47,6 @@ class CleanStaticContentTest extends TestCase
      */
     private $process;
 
-
-
     protected function setUp()
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
