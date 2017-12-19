@@ -210,7 +210,6 @@ class RedisTest extends TestCase
         $this->process->execute();
     }
 
-
     public function testExecuteWithDifferentRedisOptions()
     {
         $this->loggerMock->expects($this->once())

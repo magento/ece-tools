@@ -62,7 +62,6 @@ class CompressStaticContentTest extends TestCase
         $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
             ->getMockForAbstractClass();
 
-
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->environmentMock,

@@ -187,7 +187,6 @@ class BaseTest extends TestCase
         $this->assertFalse($this->base->exists($path));
     }
 
-
     public function testSetException()
     {
         $path = 'path/that/doesnt/exist';
@@ -203,7 +202,6 @@ class BaseTest extends TestCase
 
         $this->assertFalse($this->base->set($path));
     }
-
 
     public function testDeleteException()
     {

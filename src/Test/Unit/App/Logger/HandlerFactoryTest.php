@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
+use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
 use Monolog\Handler\SlackHandler;
@@ -13,7 +14,6 @@ use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Logger;
 use Magento\MagentoCloud\Config\Log as LogConfig;
-use Illuminate\Config\Repository;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -115,18 +115,18 @@ class HandlerFactoryTest extends TestCase
                 'repositoryMockGetExpects' => 2,
                 'repositoryMockReturnMap' => [
                     ['stream', null, 'php://stdout'],
-                    ['min_level', '' , '']
+                    ['min_level', '', ''],
                 ],
-                'expectedClass' => StreamHandler::class
+                'expectedClass' => StreamHandler::class,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_FILE,
                 'repositoryMockGetExpects' => 2,
                 'repositoryMockReturnMap' => [
                     ['stream', null, 'var/log/cloud.log'],
-                    ['min_level', '' , '']
+                    ['min_level', '', ''],
                 ],
-                'expectedClass' => StreamHandler::class
+                'expectedClass' => StreamHandler::class,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_SLACK,
@@ -135,9 +135,9 @@ class HandlerFactoryTest extends TestCase
                     ['token', null, 'someToken'],
                     ['channel', 'general', 'someChannel'],
                     ['username', 'Slack Log Notifier', 'someUser'],
-                    ['min_level', '' , '']
+                    ['min_level', '', ''],
                 ],
-                'expectedClass' => SlackHandler::class
+                'expectedClass' => SlackHandler::class,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_EMAIL,
@@ -146,9 +146,9 @@ class HandlerFactoryTest extends TestCase
                     ['to', null, 'user@example.com'],
                     ['from', null, 'user2@example.com'],
                     ['subject', 'Log form Magento Cloud', 'someSubject'],
-                    ['min_level', '' , '']
+                    ['min_level', '', ''],
                 ],
-                'expectedClass' => NativeMailerHandler::class
+                'expectedClass' => NativeMailerHandler::class,
             ],
         ];
     }
