@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\PreBuild;
 use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
@@ -40,9 +40,9 @@ class PreBuildTest extends TestCase
     private $packageManagerMock;
 
     /**
-     * @var FlagFileManager|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFileManagerMock;
+    private $flagManagerMock;
 
     /**
      * @inheritdoc
@@ -53,13 +53,13 @@ class PreBuildTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->packageManagerMock = $this->createMock(Manager::class);
-        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->process = new PreBuild(
             $this->buildConfigMock,
             $this->loggerMock,
             $this->packageManagerMock,
-            $this->flagFileManagerMock
+            $this->flagManagerMock
         );
     }
 
@@ -79,7 +79,7 @@ class PreBuildTest extends TestCase
                 ['Verbosity level is ' . $expectedVerbosity],
                 ['Starting build. Some info.']
             );
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('delete')
             ->with(StaticContentDeployInBuild::KEY);
         $this->packageManagerMock->expects($this->once())

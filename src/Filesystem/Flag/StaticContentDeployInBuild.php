@@ -3,9 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Filesystem\FlagFile\Flag;
-
-use Magento\MagentoCloud\Filesystem\FlagFile\FlagInterface;
+namespace Magento\MagentoCloud\Filesystem\Flag;
 
 /**
  * @inheritdoc

@@ -7,8 +7,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\Regenerate;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -39,9 +39,9 @@ class SetupTest extends TestCase
     private $shellMock;
 
     /**
-     * @var FlagFileManager|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFileManagerMock;
+    private $flagManagerMock;
 
     /**
      * @var FileList|Mock
@@ -60,7 +60,7 @@ class SetupTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileListMock = $this->createMock(FileList::class);
-        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->process = new Setup(
             $this->loggerMock,
@@ -68,7 +68,7 @@ class SetupTest extends TestCase
             $this->shellMock,
             $this->directoryListMock,
             $this->fileListMock,
-            $this->flagFileManagerMock
+            $this->flagManagerMock
         );
     }
 
@@ -84,7 +84,7 @@ class SetupTest extends TestCase
         $this->fileListMock->expects($this->once())
             ->method('getInstallUpgradeLog')
             ->willReturn($installUpgradeLog);
-        $this->flagFileManagerMock->expects($this->exactly(2))
+        $this->flagManagerMock->expects($this->exactly(2))
             ->method('delete')
             ->with(Regenerate::KEY);
         $this->environmentMock->expects($this->once())
@@ -119,7 +119,7 @@ class SetupTest extends TestCase
      */
     public function testExecuteWithException()
     {
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('delete')
             ->with(Regenerate::KEY);
         $this->shellMock->expects($this->at(0))

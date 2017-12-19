@@ -9,14 +9,13 @@ use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\Regenerate;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- *
  * Writable directories will be erased when the writable filesystem is mounted to them. This
  * step backs them up to ./init/
  *
@@ -45,9 +44,9 @@ class BackupData implements ProcessInterface
     private $directoryList;
 
     /**
-     * @var FlagFileManager
+     * @var FlagManager
      */
-    private $flagFileManager;
+    private $flagManager;
 
     /**
      * @var LoggerPool
@@ -61,7 +60,7 @@ class BackupData implements ProcessInterface
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param DirectoryList $directoryList
-     * @param FlagFileManager $flagFileManager
+     * @param FlagManager $flagManager
      * @param LoggerPool $loggerPool
      */
     public function __construct(
@@ -69,14 +68,14 @@ class BackupData implements ProcessInterface
         LoggerInterface $logger,
         Environment $environment,
         DirectoryList $directoryList,
-        FlagFileManager $flagFileManager,
+        FlagManager $flagManager,
         LoggerPool $loggerPool
     ) {
         $this->file = $file;
         $this->logger = $logger;
         $this->environment = $environment;
         $this->directoryList = $directoryList;
-        $this->flagFileManager = $flagFileManager;
+        $this->flagManager = $flagManager;
         $this->loggerPool = $loggerPool;
     }
 
@@ -87,10 +86,10 @@ class BackupData implements ProcessInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
         $rootInitDir = $this->directoryList->getInit() . '/';
-        $this->flagFileManager->delete(Regenerate::KEY);
+        $this->flagManager->delete(Regenerate::KEY);
 
-        if ($this->flagFileManager->exists(StaticContentDeployInBuild::KEY)) {
-            $scdFlag = $this->flagFileManager->getFlag(StaticContentDeployInBuild::KEY);
+        if ($this->flagManager->exists(StaticContentDeployInBuild::KEY)) {
+            $scdFlag = $this->flagManager->getFlag(StaticContentDeployInBuild::KEY);
             $initPub = $rootInitDir . 'pub/';
             $initPubStatic = $initPub . 'static/';
             $originalPubStatic = $magentoRoot . 'pub/static/';

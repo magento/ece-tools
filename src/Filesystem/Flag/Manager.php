@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Filesystem\FlagFile;
+namespace Magento\MagentoCloud\Filesystem\Flag;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -33,23 +33,23 @@ class Manager
     /**
      * @var Pool
      */
-    private $flagFilePool;
+    private $flagPool;
 
     /**
      * @param LoggerInterface $logger
      * @param File $file
-     * @param Pool $flagFilePool
+     * @param Pool $flagPool
      * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
         File $file,
-        Pool $flagFilePool,
+        Pool $flagPool,
         DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->file = $file;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagPool = $flagPool;
         $this->directoryList = $directoryList;
     }
 
@@ -139,11 +139,11 @@ class Manager
      */
     public function getFlag(string $flagKey): FlagInterface
     {
-        $result = $this->flagFilePool->get([$flagKey]);
+        $result = $this->flagPool->get([$flagKey]);
         $flag = array_pop($result);
 
         if (!$flag instanceof FlagInterface) {
-            throw new \RuntimeException(sprintf('Flag with key %s is not registered in FlagFilePool', $flagKey));
+            throw new \RuntimeException(sprintf('Flag with key %s is not registered in flagPool', $flagKey));
         }
 
         return $flag;

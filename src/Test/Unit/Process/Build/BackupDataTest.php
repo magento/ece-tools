@@ -9,10 +9,10 @@ use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\Regenerate;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\FlagFile\FlagInterface;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\Flag\FlagInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\BackupData;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -49,9 +49,9 @@ class BackupDataTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var FlagFileManager|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFileManagerMock;
+    private $flagManagerMock;
 
     /**
      * @var FlagInterface|Mock
@@ -98,7 +98,7 @@ class BackupDataTest extends TestCase
             ->getMockForAbstractClass();
         $this->environmentMock = $this->createMock(Environment::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->flagMock = $this->getMockBuilder(FlagInterface::class)
             ->getMockForAbstractClass();
         $this->rootInitDir = 'magento_root/init';
@@ -120,7 +120,7 @@ class BackupDataTest extends TestCase
         $this->directoryListMock->expects($this->once())
             ->method('getInit')
             ->willReturn('magento_root/init');
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('delete')
             ->with(Regenerate::KEY);
 
@@ -139,18 +139,18 @@ class BackupDataTest extends TestCase
             $this->loggerMock,
             $this->environmentMock,
             $this->directoryListMock,
-            $this->flagFileManagerMock,
+            $this->flagManagerMock,
             $this->loggerPoolMock
         );
     }
 
     public function testExecute()
     {
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn(true);
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('getFlag')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn($this->flagMock);
@@ -199,11 +199,11 @@ class BackupDataTest extends TestCase
 
     public function testExecuteSCDInDeploy()
     {
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn(false);
-        $this->flagFileManagerMock->expects($this->never())
+        $this->flagManagerMock->expects($this->never())
             ->method('getFlag');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -237,11 +237,11 @@ class BackupDataTest extends TestCase
 
     public function testExecuteNoWritableDirs()
     {
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn(true);
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('getFlag')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn($this->flagMock);

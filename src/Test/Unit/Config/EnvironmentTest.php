@@ -8,8 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -40,9 +40,9 @@ class EnvironmentTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var FlagFileManager|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFileManagerMock;
+    private $flagManagerMock;
 
     /**
      * @var array
@@ -59,13 +59,13 @@ class EnvironmentTest extends TestCase
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->environment = new Environment(
             $this->loggerMock,
             $this->fileMock,
             $this->directoryListMock,
-            $this->flagFileManagerMock
+            $this->flagManagerMock
         );
     }
 
@@ -156,7 +156,7 @@ class EnvironmentTest extends TestCase
             'DO_DEPLOY_STATIC_CONTENT' => 'enabled',
         ]);
 
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn($isExists);

@@ -3,10 +3,10 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Filesystem\FlagFile;
+namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 
-use Magento\MagentoCloud\Filesystem\FlagFile\FlagInterface;
-use Magento\MagentoCloud\Filesystem\FlagFile\Pool;
+use Magento\MagentoCloud\Filesystem\Flag\FlagInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Pool;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
 
@@ -15,12 +15,12 @@ class PoolTest extends TestCase
     /**
      * @var FlagInterface|Mock
      */
-    private $flagFileMockOneMock;
+    private $flagMockOneMock;
 
     /**
      * @var FlagInterface|Mock
      */
-    private $flagFileMockTwoMock;
+    private $flagMockTwoMock;
 
     /**
      * @var Pool
@@ -29,30 +29,30 @@ class PoolTest extends TestCase
 
     protected function setUp()
     {
-        $this->flagFileMockOneMock = $this->getMockForAbstractClass(FlagInterface::class);
-        $this->flagFileMockTwoMock = $this->getMockForAbstractClass(FlagInterface::class);
+        $this->flagMockOneMock = $this->getMockForAbstractClass(FlagInterface::class);
+        $this->flagMockTwoMock = $this->getMockForAbstractClass(FlagInterface::class);
 
         $this->pool = new Pool([
-            $this->flagFileMockOneMock,
-            $this->flagFileMockTwoMock,
+            $this->flagMockOneMock,
+            $this->flagMockTwoMock,
         ]);
     }
 
     public function testGet()
     {
-        $this->flagFileMockOneMock->expects($this->any())
+        $this->flagMockOneMock->expects($this->any())
             ->method('getKey')
             ->willReturn('key1');
-        $this->flagFileMockTwoMock->expects($this->any())
+        $this->flagMockTwoMock->expects($this->any())
             ->method('getKey')
             ->willReturn('key2');
 
-        $flagFiles = $this->pool->get(['key2']);
+        $flags = $this->pool->get(['key2']);
 
-        $this->assertCount(1, $flagFiles);
+        $this->assertCount(1, $flags);
         $this->assertEquals(
-            $this->flagFileMockTwoMock,
-            array_pop($flagFiles)
+            $this->flagMockTwoMock,
+            array_pop($flags)
         );
     }
 

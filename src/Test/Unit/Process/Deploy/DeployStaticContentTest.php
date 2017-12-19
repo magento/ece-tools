@@ -8,9 +8,9 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployPending;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployPending;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
@@ -60,9 +60,9 @@ class DeployStaticContentTest extends TestCase
     private $remoteDiskIdentifierMock;
 
     /**
-     * @var FlagFileManager|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFileManagerMock;
+    private $flagManagerMock;
 
     /**
      * @var ProcessInterface|Mock
@@ -84,8 +84,8 @@ class DeployStaticContentTest extends TestCase
         $this->remoteDiskIdentifierMock = $this->createMock(RemoteDiskIdentifier::class);
         $this->processMock = $this->getMockBuilder(ProcessInterface::class)
             ->getMockForAbstractClass();
-        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
+        $this->flagManagerMock->expects($this->once())
             ->method('delete')
             ->with(StaticContentDeployPending::KEY);
 
@@ -96,7 +96,7 @@ class DeployStaticContentTest extends TestCase
             $this->fileMock,
             $this->directoryListMock,
             $this->remoteDiskIdentifierMock,
-            $this->flagFileManagerMock
+            $this->flagManagerMock
         );
     }
 
@@ -144,9 +144,9 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(false);
-        $this->flagFileManagerMock->expects($this->never())
+        $this->flagManagerMock->expects($this->never())
             ->method('set');
-        $this->flagFileManagerMock->expects($this->never())
+        $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
@@ -177,9 +177,9 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(false);
-        $this->flagFileManagerMock->expects($this->never())
+        $this->flagManagerMock->expects($this->never())
             ->method('set');
-        $this->flagFileManagerMock->expects($this->never())
+        $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
@@ -203,9 +203,9 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(false);
-        $this->flagFileManagerMock->expects($this->never())
+        $this->flagManagerMock->expects($this->never())
             ->method('set');
-        $this->flagFileManagerMock->expects($this->never())
+        $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
@@ -232,11 +232,11 @@ class DeployStaticContentTest extends TestCase
             ->method('isOnLocalDisk')
             ->with('pub/static')
             ->willReturn(true);
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn(false);
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('set')
             ->with(StaticContentDeployPending::KEY)
             ->willReturn(false);

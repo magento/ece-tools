@@ -20,7 +20,7 @@ use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
-use Magento\MagentoCloud\Filesystem\FlagFile;
+use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -77,12 +77,12 @@ class Container implements ContainerInterface
             );
         });
         $this->container->singleton(
-            FlagFile\Pool::class,
+            Flag\Pool::class,
             function () {
-                return new FlagFile\Pool([
-                    $this->container->make(FlagFile\Flag\Regenerate::class),
-                    $this->container->make(FlagFile\Flag\StaticContentDeployInBuild::class),
-                    $this->container->make(FlagFile\Flag\StaticContentDeployPending::class),
+                return new Flag\Pool([
+                    $this->container->make(Flag\Regenerate::class),
+                    $this->container->make(Flag\StaticContentDeployInBuild::class),
+                    $this->container->make(Flag\StaticContentDeployPending::class),
                 ]);
             }
         );

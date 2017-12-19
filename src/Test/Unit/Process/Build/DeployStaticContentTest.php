@@ -9,8 +9,8 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Config\Validator\Result;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
@@ -60,9 +60,9 @@ class DeployStaticContentTest extends TestCase
     private $configFileStructureMock;
 
     /**
-     * @var FlagFileManager|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFileManagerMock;
+    private $flagManagerMock;
 
     /**
      * @inheritdoc
@@ -76,8 +76,8 @@ class DeployStaticContentTest extends TestCase
         $this->buildConfigMock = $this->createMock(Build::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->configFileStructureMock = $this->createMock(ConfigFileStructure::class);
-        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
+        $this->flagManagerMock->expects($this->once())
             ->method('delete')
             ->with(StaticContentDeployInBuild::KEY);
 
@@ -88,7 +88,7 @@ class DeployStaticContentTest extends TestCase
             $this->buildConfigMock,
             $this->processMock,
             $this->configFileStructureMock,
-            $this->flagFileManagerMock
+            $this->flagManagerMock
         );
     }
 
@@ -104,7 +104,7 @@ class DeployStaticContentTest extends TestCase
             ->willReturn($resultMock);
         $this->processMock->expects($this->once())
             ->method('execute');
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('set')
             ->with(StaticContentDeployInBuild::KEY);
 

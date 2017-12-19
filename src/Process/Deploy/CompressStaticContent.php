@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployPending;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployPending;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
@@ -43,27 +43,27 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
-     * @var FlagFileManager
+     * @var FlagManager
      */
-    private $flagFileManager;
+    private $flagManager;
 
     /**
      * CompressStaticContent constructor.
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param StaticContentCompressor $staticContentCompressor
-     * @param FlagFileManager $flagFileManager
+     * @param FlagManager $flagManager
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         StaticContentCompressor $staticContentCompressor,
-        FlagFileManager $flagFileManager
+        FlagManager $flagManager
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->staticContentCompressor = $staticContentCompressor;
-        $this->flagFileManager = $flagFileManager;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -74,7 +74,7 @@ class CompressStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->environment->isDeployStaticContent()) {
-            if ($this->flagFileManager->exists(StaticContentDeployPending::KEY)) {
+            if ($this->flagManager->exists(StaticContentDeployPending::KEY)) {
                 $this->logger->info('Postpone static content compression until prestart');
                 return;
             }

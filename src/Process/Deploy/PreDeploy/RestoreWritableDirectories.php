@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\Regenerate;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
@@ -36,9 +36,9 @@ class RestoreWritableDirectories implements ProcessInterface
     private $recoverableDirectoryList;
 
     /**
-     * @var FlagFileManager
+     * @var FlagManager
      */
-    private $flagFileManager;
+    private $flagManager;
 
     /**
      * RestoreWritableDirectories constructor.
@@ -46,20 +46,20 @@ class RestoreWritableDirectories implements ProcessInterface
      * @param BuildDirCopier $buildDirCopier
      * @param RecoverableDirectoryList $recoverableDirectoryList
      * @param DirectoryList $directoryList
-     * @param FlagFileManager $flagFileManager
+     * @param FlagManager $flagManager
      */
     public function __construct(
         LoggerInterface $logger,
         BuildDirCopier $buildDirCopier,
         RecoverableDirectoryList $recoverableDirectoryList,
         DirectoryList $directoryList,
-        FlagFileManager $flagFileManager
+        FlagManager $flagManager
     ) {
         $this->logger = $logger;
         $this->buildDirCopier = $buildDirCopier;
         $this->recoverableDirectoryList = $recoverableDirectoryList;
         $this->directoryList = $directoryList;
-        $this->flagFileManager = $flagFileManager;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -78,6 +78,6 @@ class RestoreWritableDirectories implements ProcessInterface
 
         // Restore mounted directories
         $this->logger->info('Recoverable directories were copied back.');
-        $this->flagFileManager->delete(Regenerate::KEY);
+        $this->flagManager->delete(Regenerate::KEY);
     }
 }

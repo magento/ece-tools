@@ -8,8 +8,8 @@ namespace Magento\MagentoCloud\Process\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployPending;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployPending;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
 use Psr\Log\LoggerInterface;
@@ -50,9 +50,9 @@ class DeployStaticContent implements ProcessInterface
     private $remoteDiskIdentifier;
 
     /**
-     * @var FlagFileManager
+     * @var FlagManager
      */
-    private $flagFileManager;
+    private $flagManager;
 
     /**
      * DeployStaticContent constructor.
@@ -62,7 +62,7 @@ class DeployStaticContent implements ProcessInterface
      * @param File $file
      * @param DirectoryList $directoryList
      * @param RemoteDiskIdentifier $remoteDiskIdentifier
-     * @param FlagFileManager $flagFileManager
+     * @param FlagManager $flagManager
      */
     public function __construct(
         ProcessInterface $process,
@@ -71,7 +71,7 @@ class DeployStaticContent implements ProcessInterface
         File $file,
         DirectoryList $directoryList,
         RemoteDiskIdentifier $remoteDiskIdentifier,
-        FlagFileManager $flagFileManager
+        FlagManager $flagManager
     ) {
         $this->process = $process;
         $this->environment = $environment;
@@ -79,7 +79,7 @@ class DeployStaticContent implements ProcessInterface
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->remoteDiskIdentifier = $remoteDiskIdentifier;
-        $this->flagFileManager = $flagFileManager;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -90,7 +90,7 @@ class DeployStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
-            && $this->flagFileManager->exists(StaticContentDeployPending::KEY)
+            && $this->flagManager->exists(StaticContentDeployPending::KEY)
         ) {
             if (Environment::MAGENTO_PRODUCTION_MODE !== $this->environment->getApplicationMode()) {
                 return;

@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build as BuildConfig;
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager as FlagFileManager;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use PHPUnit\Framework\TestCase;
@@ -40,9 +40,9 @@ class CompressStaticContentTest extends TestCase
     private $compressorMock;
 
     /**
-     * @var FlagFileManager|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFileManagerMock;
+    private $flagManagerMock;
 
     /**
      * Setup the test environment.
@@ -53,13 +53,13 @@ class CompressStaticContentTest extends TestCase
             ->getMockForAbstractClass();
         $this->buildConfigMock = $this->createMock(BuildConfig::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
-        $this->flagFileManagerMock = $this->createMock(FlagFileManager::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->buildConfigMock,
             $this->compressorMock,
-            $this->flagFileManagerMock
+            $this->flagManagerMock
         );
     }
 
@@ -68,7 +68,7 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecute()
     {
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn(true);
@@ -93,7 +93,7 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecuteNoCompress()
     {
-        $this->flagFileManagerMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(StaticContentDeployInBuild::KEY)
             ->willReturn(false);

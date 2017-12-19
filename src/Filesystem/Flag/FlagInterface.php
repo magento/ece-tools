@@ -3,10 +3,10 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Filesystem\FlagFile;
+namespace Magento\MagentoCloud\Filesystem\Flag;
 
 /**
- * Interface for FlagFiles.
+ * Interface for flags.
  */
 interface FlagInterface
 {

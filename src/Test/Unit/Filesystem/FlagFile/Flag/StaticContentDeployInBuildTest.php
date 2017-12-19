@@ -3,9 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Filesystem\FlagFile;
+namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 
-use Magento\MagentoCloud\Filesystem\FlagFile\Flag\StaticContentDeployInBuild;
+use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use PHPUnit\Framework\TestCase;
 
 class StaticContentDeployInBuildTest extends TestCase

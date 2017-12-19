@@ -3,14 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Filesystem\FlagFile;
+namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Filesystem\FlagFile\FlagInterface;
-use Magento\MagentoCloud\Filesystem\FlagFile\Manager;
-use Magento\MagentoCloud\Filesystem\FlagFile\Pool;
+use Magento\MagentoCloud\Filesystem\Flag\FlagInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager;
+use Magento\MagentoCloud\Filesystem\Flag\Pool;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -38,7 +38,7 @@ class ManagerTest extends TestCase
     /**
      * @var Pool|Mock
      */
-    private $flagFilePool;
+    private $flagPool;
 
     /**
      * @var Manager
@@ -57,7 +57,7 @@ class ManagerTest extends TestCase
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagFilePool = $this->createMock(Pool::class);
+        $this->flagPool = $this->createMock(Pool::class);
 
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
@@ -69,7 +69,7 @@ class ManagerTest extends TestCase
         $this->manager = new Manager(
             $this->loggerMock,
             $this->fileMock,
-            $this->flagFilePool,
+            $this->flagPool,
             $this->directoryListMock
         );
 
@@ -79,7 +79,7 @@ class ManagerTest extends TestCase
     public function testGetFlag()
     {
         $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
-        $this->flagFilePool->expects($this->once())
+        $this->flagPool->expects($this->once())
             ->method('get')
             ->with(['some_flag'])
             ->willReturn([$flagMock]);
@@ -92,11 +92,11 @@ class ManagerTest extends TestCase
 
     /**
      * @expectedException \RuntimeException
-     * @expectedExceptionMessage Flag with key some_flag is not registered in FlagFilePool
+     * @expectedExceptionMessage Flag with key some_flag is not registered in flagPool
      */
     public function testGetFlagWithException()
     {
-        $this->flagFilePool->expects($this->once())
+        $this->flagPool->expects($this->once())
             ->method('get')
             ->with(['some_flag'])
             ->willReturn([]);
@@ -130,7 +130,7 @@ class ManagerTest extends TestCase
         $flagMock->expects($this->once())
             ->method('getPath')
             ->willReturn($path);
-        $this->flagFilePool->expects($this->once())
+        $this->flagPool->expects($this->once())
             ->method('get')
             ->with([$key])
             ->willReturn([$flagMock]);
@@ -157,7 +157,7 @@ class ManagerTest extends TestCase
         $flagMock->expects($this->once())
             ->method('getPath')
             ->willReturn($path);
-        $this->flagFilePool->expects($this->once())
+        $this->flagPool->expects($this->once())
             ->method('get')
             ->with([$key])
             ->willReturn([$flagMock]);
@@ -201,7 +201,7 @@ class ManagerTest extends TestCase
         $flagMock->expects($this->any())
             ->method('getPath')
             ->willReturn($path);
-        $this->flagFilePool->expects($this->any())
+        $this->flagPool->expects($this->any())
             ->method('get')
             ->with([$key])
             ->willReturn([$flagMock]);
@@ -265,7 +265,7 @@ class ManagerTest extends TestCase
         $flagMock->expects($this->any())
             ->method('getPath')
             ->willReturn($path);
-        $this->flagFilePool->expects($this->any())
+        $this->flagPool->expects($this->any())
             ->method('get')
             ->with(['some_key'])
             ->willReturn([$flagMock]);
@@ -289,7 +289,7 @@ class ManagerTest extends TestCase
         $flagMock->expects($this->any())
             ->method('getPath')
             ->willReturn($path);
-        $this->flagFilePool->expects($this->any())
+        $this->flagPool->expects($this->any())
             ->method('get')
             ->with(['some_key'])
             ->willReturn([$flagMock]);
@@ -317,7 +317,7 @@ class ManagerTest extends TestCase
         $flagMock->expects($this->any())
             ->method('getPath')
             ->willReturn($path);
-        $this->flagFilePool->expects($this->any())
+        $this->flagPool->expects($this->any())
             ->method('get')
             ->with(['some_key'])
             ->willReturn([$flagMock]);

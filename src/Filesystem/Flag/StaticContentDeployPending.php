@@ -3,23 +3,21 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Filesystem\FlagFile\Flag;
-
-use Magento\MagentoCloud\Filesystem\FlagFile\FlagInterface;
+namespace Magento\MagentoCloud\Filesystem\Flag;
 
 /**
  * @inheritdoc
  */
-class Regenerate implements FlagInterface
+class StaticContentDeployPending implements FlagInterface
 {
-    const KEY = 'regenerate';
+    const KEY = 'scd_pending';
 
     /**
      * @inheritdoc
      */
     public function getPath(): string
     {
-        return 'var/.regenerate';
+        return 'var/.static_content_deploy_pending';
     }
 
     /**
