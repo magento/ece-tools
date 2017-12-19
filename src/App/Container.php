@@ -44,12 +44,13 @@ class Container implements ContainerInterface
     private $container;
 
     /**
-     * @param string $root
+     * @param string $root The package directory
+     * @param string $magentoRoot The Magento root directory
      * @param array $config
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(string $root, array $config)
+    public function __construct(string $root, string $magentoRoot, array $config)
     {
         /**
          * Creating concrete container.
@@ -62,8 +63,8 @@ class Container implements ContainerInterface
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () use ($root, $config) {
-                return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $config);
+            function () use ($root, $magentoRoot, $config) {
+                return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $magentoRoot, $config);
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);

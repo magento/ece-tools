@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Integration;
 
 use Illuminate\Config\Repository;
+use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Application;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 
 /**
  * Integration testing bootstrap.
@@ -133,23 +133,9 @@ class Bootstrap
             )),
         ]);
 
-        $server[\Magento\MagentoCloud\App\Bootstrap::INIT_PARAM_DIRS_CONFIG] = [
-            DirectoryList::DIR_MAGENTO_ROOT => [
-                DirectoryList::PATH => '',
-            ],
-            DirectoryList::DIR_INIT => [
-                DirectoryList::PATH => 'init',
-            ],
-            DirectoryList::DIR_VAR => [
-                DirectoryList::PATH => 'var',
-            ],
-            DirectoryList::DIR_LOG => [
-                DirectoryList::PATH => 'var/log',
-            ],
-        ];
+        $container = new Container($this->getSandboxDir(), $this->getSandboxDir(), []);
 
-        return \Magento\MagentoCloud\App\Bootstrap::create($this->getSandboxDir(), $server)
-            ->createApplication();
+        return new Application($container);
     }
 
     /**

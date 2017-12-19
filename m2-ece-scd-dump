@@ -4,8 +4,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-require_once __DIR__ . '/bootstrap.php';
+$container = require_once __DIR__ . '/bootstrap.php';
 
-$application = \Magento\MagentoCloud\App\Bootstrap::create()->createApplication();
-$application->setDefaultCommand('dump');
+$application = new \Magento\MagentoCloud\Application($container);
+$application->setDefaultCommand(\Magento\MagentoCloud\Command\ConfigDump::class);
 $application->run();
