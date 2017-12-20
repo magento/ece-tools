@@ -84,13 +84,9 @@ class Generate implements ProcessInterface
 
             $this->logger->info($logMessage);
 
-            $parallelCommands = $this->commandFactory->createParallel($this->buildOption);
+            $command = $this->commandFactory->create($this->buildOption);
 
-            $this->shell->execute(sprintf(
-                "printf '%s' | xargs -I CMD -P %d bash -c CMD",
-                $parallelCommands,
-                $threadCount
-            ));
+            $this->shell->execute($command);
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage(), 5);
         }
