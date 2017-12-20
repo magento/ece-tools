@@ -6,7 +6,9 @@
 namespace Magento\MagentoCloud\Filesystem\Flag;
 
 /**
- * @inheritdoc
+ * Used to mark that static content deployment was performed on build phase.
+ *
+ * {@inheritdoc}
  */
 class StaticContentDeployInBuild implements FlagInterface
 {

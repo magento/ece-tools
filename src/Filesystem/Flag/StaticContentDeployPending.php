@@ -6,7 +6,9 @@
 namespace Magento\MagentoCloud\Filesystem\Flag;
 
 /**
- * @inheritdoc
+ * Used for postponing static content deployment until prestart phase.
+ *
+ * {@inheritdoc}
  */
 class StaticContentDeployPending implements FlagInterface
 {

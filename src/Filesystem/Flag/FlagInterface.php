@@ -11,14 +11,14 @@ namespace Magento\MagentoCloud\Filesystem\Flag;
 interface FlagInterface
 {
     /**
-     * Return flag path.
+     * Returns flag path relative to magento root.
      *
      * @return string
      */
     public function getPath(): string;
 
     /**
-     * Return flag key.
+     * Returns flag key.
      *
      * @return string
      */

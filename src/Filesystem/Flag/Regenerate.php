@@ -6,7 +6,10 @@
 namespace Magento\MagentoCloud\Filesystem\Flag;
 
 /**
- * @inheritdoc
+ * This flag is creating by magento for cleaning up generated/code, generated/metadata and var/cache directories
+ * for subsequent regeneration of this content.
+ *
+ * {@inheritdoc}
  */
 class Regenerate implements FlagInterface
 {
