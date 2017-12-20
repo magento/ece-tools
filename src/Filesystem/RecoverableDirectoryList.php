@@ -52,8 +52,7 @@ class RecoverableDirectoryList
         if ($this->environment->isStaticDeployInBuild()) {
             $recoverableDirs[] = [
                 self::OPTION_DIRECTORY => 'var/view_preprocessed',
-                self::OPTION_STRATEGY => $isSymlinkEnabled ?
-                    StrategyInterface::STRATEGY_SYMLINK : StrategyInterface::STRATEGY_COPY
+                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
             ];
             $recoverableDirs[] = [
                 self::OPTION_DIRECTORY => 'pub/static',
