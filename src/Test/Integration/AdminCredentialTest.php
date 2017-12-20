@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -49,6 +50,22 @@ class AdminCredentialTest extends TestCase
     }
 
     /**
+     * @param string $commandName
+     * @param Application $application
+     * @return void
+     */
+    private function executeAndAssert($commandName, $application)
+    {
+        $application->getContainer()->set(
+            \Psr\Log\LoggerInterface::class,
+            \Magento\MagentoCloud\App\Logger::class
+        );
+        $commandTester = new CommandTester($application->get($commandName));
+        $commandTester->execute([]);
+        $this->assertSame(0, $commandTester->getStatusCode());
+    }
+
+    /**
      * @expectedException \Exception
      * @expectedExceptionMessage Please fix configuration with given suggestions
      */
@@ -86,19 +103,8 @@ class AdminCredentialTest extends TestCase
     ) {
         $application = $this->bootstrap->createApplication(['variables' => $variables]);
 
-        $commandTester = new CommandTester(
-            $application->get(Build::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
-
-        $commandTester = new CommandTester(
-            $application->get(Deploy::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->executeAndAssert(Build::NAME, $application);
+        $this->executeAndAssert(Deploy::NAME, $application);
 
         $credentialsEmail = file_get_contents($this->bootstrap->getSandboxDir() . '/var/credentials_email.txt');
         $this->assertContains($expectedAdminEmail, $credentialsEmail);
@@ -137,11 +143,7 @@ class AdminCredentialTest extends TestCase
     {
         $application = $this->bootstrap->createApplication([]);
 
-        $commandTester = new CommandTester(
-            $application->get(Build::NAME)
-        );
-        $commandTester->execute([]);
-        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->executeAndAssert(Build::NAME, $application);
 
         $application = $this->bootstrap->createApplication([
             'variables' => [
@@ -150,18 +152,11 @@ class AdminCredentialTest extends TestCase
             ]
         ]);
         // Install Magento
-        $commandTester = new CommandTester(
-            $application->get(Deploy::NAME)
-        );
-        $commandTester->execute([]);
-        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->executeAndAssert(Deploy::NAME, $application);
 
         // Upgrade Magento with the same environment variables
-        $commandTester = new CommandTester(
-            $application->get(Deploy::NAME)
-        );
-        $commandTester->execute([]);
-        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->executeAndAssert(Deploy::NAME, $application);
+
         $this->assertContains('Updating admin credentials: nothing to update.', $this->getCloudLog());
         $this->assertContains('Some administrator already uses this email admin@example.com', $this->getCloudLog());
         $this->assertContains('Some administrator already uses this username admin', $this->getCloudLog());

@@ -64,10 +64,11 @@ class Logger extends \Monolog\Logger
         $buildLogFileIsExists = $this->file->isExists($buildPhaseLogPath);
         $buildPhaseLogContent = $buildLogFileIsExists ? $this->file->fileGetContents($buildPhaseLogPath) : '';
 
+        $this->file->createDirectory($this->directoryList->getLog());
+
         if ($deployLogFileIsExists && !$this->buildLogIsApplied($deployLogPath, $buildPhaseLogContent)) {
             $this->file->filePutContents($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
         } elseif (!$deployLogFileIsExists && $buildLogFileIsExists) {
-            $this->file->createDirectory($this->directoryList->getLog());
             $this->file->copy($buildPhaseLogPath, $deployLogPath);
         }
     }

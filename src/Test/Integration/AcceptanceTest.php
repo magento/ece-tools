@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -43,6 +44,22 @@ class AcceptanceTest extends TestCase
     }
 
     /**
+     * @param string $commandName
+     * @param Application $application
+     * @return void
+     */
+    private function executeAndAssert($commandName, $application)
+    {
+        $application->getContainer()->set(
+            \Psr\Log\LoggerInterface::class,
+            \Magento\MagentoCloud\App\Logger::class
+        );
+        $commandTester = new CommandTester($application->get($commandName));
+        $commandTester->execute([]);
+        $this->assertSame(0, $commandTester->getStatusCode());
+    }
+
+    /**
      * @param array $environment
      * @param array $expectedConsumersRunnerConfig
      * @dataProvider defaultDataProvider
@@ -51,26 +68,9 @@ class AcceptanceTest extends TestCase
     {
         $application = $this->bootstrap->createApplication($environment);
 
-        $commandTester = new CommandTester(
-            $application->get(Build::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
-
-        $commandTester = new CommandTester(
-            $application->get(Deploy::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
-
-        $commandTester = new CommandTester(
-            $application->get(Prestart::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
+        $this->executeAndAssert(Build::NAME, $application);
+        $this->executeAndAssert(Deploy::NAME, $application);
+        $this->executeAndAssert(Prestart::NAME, $application);
 
         $this->assertContentPresence($environment);
 
@@ -172,26 +172,10 @@ class AcceptanceTest extends TestCase
             $this->bootstrap->getSandboxDir()
         ));
 
-        $commandTester = new CommandTester(
-            $application->get(Build::NAME)
-        );
-        $commandTester->execute([]);
+        $this->executeAndAssert(Build::NAME, $application);
+        $this->executeAndAssert(Deploy::NAME, $application);
+        $this->executeAndAssert(Prestart::NAME, $application);
 
-        $this->assertSame(0, $commandTester->getStatusCode());
-
-        $commandTester = new CommandTester(
-            $application->get(Deploy::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
-
-        $commandTester = new CommandTester(
-            $application->get(Prestart::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
         $this->assertContentPresence($environment);
     }
 
