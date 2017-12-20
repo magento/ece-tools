@@ -107,9 +107,6 @@ class ManagerTest extends TestCase
         );
     }
 
-
-
-
     public function flagDataProvider()
     {
         return [
