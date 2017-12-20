@@ -84,14 +84,18 @@ class CleanStaticContentTest extends TestCase
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
+        $this->fileMock->expects($this->exactly(2))
             ->method('backgroundClearDirectory')
-            ->with('magento_root/pub/static');
-        $this->loggerMock->expects($this->exactly(2))
+            ->withConsecutive(
+                ['magento_root/pub/static'],
+                ['magento_root/var/view_preprocessed']
+            );
+        $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(
                 ['Static content deployment was performed during build hook, cleaning old content.'],
-                ['Clearing pub/static']
+                ['Clearing pub/static'],
+                ['Clearing var/view_preprocessed']
             );
 
         $this->process->execute();
@@ -107,11 +111,9 @@ class CleanStaticContentTest extends TestCase
             ->method('exists')
             ->willReturn(false);
         $this->directoryListMock->expects($this->never())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+            ->method('getMagentoRoot');
         $this->fileMock->expects($this->never())
-            ->method('backgroundClearDirectory')
-            ->with('magento_root/pub/static');
+            ->method('backgroundClearDirectory');
 
         $this->process->execute();
     }

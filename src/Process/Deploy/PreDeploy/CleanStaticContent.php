@@ -31,6 +31,16 @@ class CleanStaticContent implements ProcessInterface
     private $flagFilePool;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @param LoggerInterface $logger
      * @param Environment $env
      * @param File $file
@@ -66,5 +76,7 @@ class CleanStaticContent implements ProcessInterface
         $magentoRoot = $this->directoryList->getMagentoRoot();
         $this->logger->info('Clearing pub/static');
         $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
+        $this->logger->info('Clearing var/view_preprocessed');
+        $this->file->backgroundClearDirectory($magentoRoot . '/var/view_preprocessed');
     }
 }
