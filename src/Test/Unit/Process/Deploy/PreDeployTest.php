@@ -57,9 +57,9 @@ class PreDeployTest extends TestCase
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('(components info)');
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(['Starting deploy.'], ['Starting pre-deploy. (components info)']);
+            ->with('Starting pre-deploy. (components info)');
         $this->processMock->expects($this->once())
             ->method('execute');
 
