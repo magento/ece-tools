@@ -224,7 +224,6 @@ class EnvironmentTest extends TestCase
             'STATIC_CONTENT_SYMLINK' => $variableValue,
         ]);
 
-
         $this->assertSame(
             $expected,
             $this->environment->isStaticContentSymlinkOn()

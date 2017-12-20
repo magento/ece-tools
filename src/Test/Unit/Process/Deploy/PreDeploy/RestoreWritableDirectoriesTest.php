@@ -44,7 +44,6 @@ class RestoreWritableDirectoriesTest extends TestCase
      */
     private $recoverableDirectoryListMock;
 
-
     /**
      * @var FlagFilePool|Mock
      */

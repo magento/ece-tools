@@ -12,8 +12,11 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
+use Magento\MagentoCloud\Config\Stage\Build as BuildConfig;
+use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
@@ -110,6 +113,9 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\CopyStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\RepositoryFactory::class);
         /**
          * Contextual binding.
          */
@@ -342,6 +348,18 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(BuildProcess\DeployStaticContent::class)
+            ->needs(StageConfigInterface::class)
+            ->give(BuildConfig::class);
+        $this->container->when(\Magento\MagentoCloud\StaticContent\Build\Option::class)
+            ->needs(StageConfigInterface::class)
+            ->give(BuildConfig::class);
+        $this->container->when(\Magento\MagentoCloud\StaticContent\Deploy\Option::class)
+            ->needs(StageConfigInterface::class)
+            ->give(DeployConfig::class);
+        $this->container->when(\Magento\MagentoCloud\StaticContent\Prestart\Option::class)
+            ->needs(StageConfigInterface::class)
+            ->give(BuildConfig::class);
     }
 
     /**
@@ -372,5 +390,17 @@ class Container implements ContainerInterface
     {
         $this->container->forgetInstance($abstract);
         $this->container->bind($abstract, $concrete, $shared);
+    }
+
+    /**
+     * Creates instance with params.
+     *
+     * @param string $abstract The class name to create
+     * @param array $params Associative array of constructor params
+     * @return object The resolved object
+     */
+    public function create(string $abstract, array $params = [])
+    {
+        return $this->container->make($abstract, $params);
     }
 }

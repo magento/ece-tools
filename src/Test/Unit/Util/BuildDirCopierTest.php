@@ -107,7 +107,6 @@ class BuildDirCopierTest extends TestCase
             ]
         ];
     }
-       
    
     public function testCopyMissingDestDirectory()
     {
