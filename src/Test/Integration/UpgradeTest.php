@@ -55,6 +55,10 @@ class UpgradeTest extends TestCase
         }
 
         $executeAndAssert = function ($commandName) use ($application) {
+            $application->getContainer()->set(
+                \Psr\Log\LoggerInterface::class,
+                \Magento\MagentoCloud\App\Logger::class
+            );
             $commandTester = new CommandTester($application->get($commandName));
             $commandTester->execute([]);
             $this->assertSame(0, $commandTester->getStatusCode());
