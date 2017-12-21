@@ -60,15 +60,15 @@ class Logger extends \Monolog\Logger
     {
         $deployLogPath = $this->fileList->getCloudLog();
         $buildPhaseLogPath = $this->fileList->getInitCloudLog();
-        $deployLogFileIsExists = $this->file->isExists($deployLogPath);
-        $buildLogFileIsExists = $this->file->isExists($buildPhaseLogPath);
-        $buildPhaseLogContent = $buildLogFileIsExists ? $this->file->fileGetContents($buildPhaseLogPath) : '';
+        $deployLogFileExists = $this->file->isExists($deployLogPath);
+        $buildLogFileExists = $this->file->isExists($buildPhaseLogPath);
+        $buildPhaseLogContent = $buildLogFileExists ? $this->file->fileGetContents($buildPhaseLogPath) : '';
 
         $this->file->createDirectory($this->directoryList->getLog());
 
-        if ($deployLogFileIsExists && !$this->buildLogIsApplied($deployLogPath, $buildPhaseLogContent)) {
+        if ($deployLogFileExists && !$this->isBuildLogApplied($deployLogPath, $buildPhaseLogContent)) {
             $this->file->filePutContents($deployLogPath, $buildPhaseLogContent, FILE_APPEND);
-        } elseif (!$deployLogFileIsExists && $buildLogFileIsExists) {
+        } elseif (!$deployLogFileExists && $buildLogFileExists) {
             $this->file->copy($buildPhaseLogPath, $deployLogPath);
         }
     }
@@ -80,7 +80,7 @@ class Logger extends \Monolog\Logger
      * @param string $buildPhaseLogContent build log content
      * @return bool
      */
-    private function buildLogIsApplied(string $deployLogPath, string $buildPhaseLogContent): bool
+    private function isBuildLogApplied(string $deployLogPath, string $buildPhaseLogContent): bool
     {
         return false !== strpos($this->file->fileGetContents($deployLogPath), $buildPhaseLogContent);
     }
