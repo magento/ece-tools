@@ -23,14 +23,6 @@ class StaticContentDeployInBuildTest extends TestCase
         $this->flag = new StaticContentDeployInBuild();
     }
 
-    public function testGetKey()
-    {
-        $this->assertEquals(
-            StaticContentDeployInBuild::KEY,
-            $this->flag->getKey()
-        );
-    }
-
     public function testGetPath()
     {
         $this->assertEquals(

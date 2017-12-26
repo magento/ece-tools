@@ -23,14 +23,6 @@ class RegenerateTest extends TestCase
         $this->flag = new Regenerate();
     }
 
-    public function testGetKey()
-    {
-        $this->assertEquals(
-            Regenerate::KEY,
-            $this->flag->getKey()
-        );
-    }
-
     public function testGetPath()
     {
         $this->assertEquals(

@@ -81,8 +81,8 @@ class ManagerTest extends TestCase
         $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
         $this->flagPool->expects($this->once())
             ->method('get')
-            ->with(['some_flag'])
-            ->willReturn([$flagMock]);
+            ->with('some_flag')
+            ->willReturn($flagMock);
 
         $this->assertInstanceOf(
             FlagInterface::class,
@@ -98,8 +98,8 @@ class ManagerTest extends TestCase
     {
         $this->flagPool->expects($this->once())
             ->method('get')
-            ->with(['some_flag'])
-            ->willReturn([]);
+            ->with('some_flag')
+            ->willReturn(null);
 
         $this->assertInstanceOf(
             FlagInterface::class,
@@ -129,8 +129,8 @@ class ManagerTest extends TestCase
             ->willReturn($path);
         $this->flagPool->expects($this->once())
             ->method('get')
-            ->with([$key])
-            ->willReturn([$flagMock]);
+            ->with($key)
+            ->willReturn($flagMock);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -156,8 +156,8 @@ class ManagerTest extends TestCase
             ->willReturn($path);
         $this->flagPool->expects($this->once())
             ->method('get')
-            ->with([$key])
-            ->willReturn([$flagMock]);
+            ->with($key)
+            ->willReturn($flagMock);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -200,8 +200,8 @@ class ManagerTest extends TestCase
             ->willReturn($path);
         $this->flagPool->expects($this->any())
             ->method('get')
-            ->with([$key])
-            ->willReturn([$flagMock]);
+            ->with($key)
+            ->willReturn($flagMock);
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -264,8 +264,8 @@ class ManagerTest extends TestCase
             ->willReturn($path);
         $this->flagPool->expects($this->any())
             ->method('get')
-            ->with(['some_key'])
-            ->willReturn([$flagMock]);
+            ->with('some_key')
+            ->willReturn($flagMock);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($this->magentoRoot);
@@ -288,8 +288,8 @@ class ManagerTest extends TestCase
             ->willReturn($path);
         $this->flagPool->expects($this->any())
             ->method('get')
-            ->with(['some_key'])
-            ->willReturn([$flagMock]);
+            ->with('some_key')
+            ->willReturn($flagMock);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -316,8 +316,8 @@ class ManagerTest extends TestCase
             ->willReturn($path);
         $this->flagPool->expects($this->any())
             ->method('get')
-            ->with(['some_key'])
-            ->willReturn([$flagMock]);
+            ->with('some_key')
+            ->willReturn($flagMock);
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
             ->willReturn($root);

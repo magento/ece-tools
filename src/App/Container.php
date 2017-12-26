@@ -80,9 +80,11 @@ class Container implements ContainerInterface
             Flag\Pool::class,
             function () {
                 return new Flag\Pool([
-                    $this->container->make(Flag\Regenerate::class),
-                    $this->container->make(Flag\StaticContentDeployInBuild::class),
-                    $this->container->make(Flag\StaticContentDeployPending::class),
+                    Flag\Regenerate::KEY => $this->container->make(Flag\Regenerate::class),
+                    Flag\StaticContentDeployInBuild::KEY =>
+                        $this->container->make(Flag\StaticContentDeployInBuild::class),
+                    Flag\StaticContentDeployPending::KEY =>
+                        $this->container->make(Flag\StaticContentDeployPending::class),
                 ]);
             }
         );

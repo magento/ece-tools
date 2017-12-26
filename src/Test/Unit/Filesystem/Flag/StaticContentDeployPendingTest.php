@@ -23,14 +23,6 @@ class StaticContentDeployPendingTest extends TestCase
         $this->flag = new StaticContentDeployPending();
     }
 
-    public function testGetKey()
-    {
-        $this->assertEquals(
-            StaticContentDeployPending::KEY,
-            $this->flag->getKey()
-        );
-    }
-
     public function testGetPath()
     {
         $this->assertEquals(

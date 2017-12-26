@@ -33,31 +33,29 @@ class PoolTest extends TestCase
         $this->flagMockTwoMock = $this->getMockForAbstractClass(FlagInterface::class);
 
         $this->pool = new Pool([
-            $this->flagMockOneMock,
-            $this->flagMockTwoMock,
+            'key1' => $this->flagMockOneMock,
+            'key2' => $this->flagMockTwoMock,
         ]);
     }
 
-    public function testGet()
+    public function testGetFlagOne()
     {
-        $this->flagMockOneMock->expects($this->any())
-            ->method('getKey')
-            ->willReturn('key1');
-        $this->flagMockTwoMock->expects($this->any())
-            ->method('getKey')
-            ->willReturn('key2');
+        $flag = $this->pool->get('key1');
 
-        $flags = $this->pool->get(['key2']);
-
-        $this->assertCount(1, $flags);
-        $this->assertEquals(
-            $this->flagMockTwoMock,
-            array_pop($flags)
-        );
+        $this->assertInstanceOf(FlagInterface::class, $flag);
     }
 
-    public function testGetWithoutFilter()
+    public function testGetFlagTwo()
     {
-        $this->assertCount(2, $this->pool->get());
+        $flag = $this->pool->get('key2');
+
+        $this->assertInstanceOf(FlagInterface::class, $flag);
+    }
+
+    public function testGetFlagNotExists()
+    {
+        $flag = $this->pool->get('key3');
+
+        $this->assertNull($flag);
     }
 }

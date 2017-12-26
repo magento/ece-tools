@@ -21,12 +21,4 @@ class StaticContentDeployPending implements FlagInterface
     {
         return 'var/.static_content_deploy_pending';
     }
-
-    /**
-     * @inheritdoc
-     */
-    public function getKey(): string
-    {
-        return self::KEY;
-    }
 }

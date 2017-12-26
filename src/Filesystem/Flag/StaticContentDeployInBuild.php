@@ -21,12 +21,4 @@ class StaticContentDeployInBuild implements FlagInterface
     {
         return '.static_content_deploy';
     }
-
-    /**
-     * @inheritdoc
-     */
-    public function getKey(): string
-    {
-        return self::KEY;
-    }
 }

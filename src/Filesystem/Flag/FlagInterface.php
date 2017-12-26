@@ -16,11 +16,4 @@ interface FlagInterface
      * @return string
      */
     public function getPath(): string;
-
-    /**
-     * Returns flag key.
-     *
-     * @return string
-     */
-    public function getKey(): string;
 }

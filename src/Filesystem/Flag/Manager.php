@@ -139,8 +139,7 @@ class Manager
      */
     public function getFlag(string $flagKey): FlagInterface
     {
-        $result = $this->flagPool->get([$flagKey]);
-        $flag = array_pop($result);
+        $flag = $this->flagPool->get($flagKey);
 
         if (!$flag instanceof FlagInterface) {
             throw new \RuntimeException(sprintf('Flag with key %s is not registered in flagPool', $flagKey));

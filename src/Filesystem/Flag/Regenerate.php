@@ -22,12 +22,4 @@ class Regenerate implements FlagInterface
     {
         return 'var/.regenerate';
     }
-
-    /**
-     * @inheritdoc
-     */
-    public function getKey(): string
-    {
-        return self::KEY;
-    }
 }

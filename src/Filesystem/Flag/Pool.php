@@ -21,19 +21,13 @@ class Pool
     }
 
     /**
-     * Gets all flags, returns all if no filter is present, otherwise it filters down
+     * Gets flag by key, returns null if flag not exists.
      *
-     * @param string[] $filter Match on provided filter
-     * @return FlagInterface[]
+     * @param string $key
+     * @return FlagInterface|null
      */
-    public function get(array $filter = null)
+    public function get(string $key)
     {
-        if (!$filter) {
-            return $this->flags;
-        }
-
-        return array_filter($this->flags, function (FlagInterface $flag) use ($filter) {
-            return in_array($flag->getKey(), $filter);
-        });
+        return $this->flags[$key] ?? null;
     }
 }
