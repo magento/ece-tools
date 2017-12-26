@@ -5,11 +5,13 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -22,12 +24,12 @@ class DeployTest extends TestCase
     private $command;
 
     /**
-     * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ProcessInterface|Mock
      */
     private $processMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
@@ -36,24 +38,28 @@ class DeployTest extends TestCase
      */
     protected function setUp()
     {
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->command = new Deploy(
             $this->processMock,
-            $this->loggerMock
+            $this->loggerMock,
+            new Wrapper($this->loggerMock)
         );
     }
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(['Starting deploy.'], ['Deployment completed.']);
         $this->processMock->expects($this->once())
             ->method('execute');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Starting deploy.'],
+                ['Deployment completed.']
+            );
+        $this->loggerMock->expects($this->once())
+            ->method('debug');
 
         $tester = new CommandTester(
             $this->command
@@ -61,24 +67,5 @@ class DeployTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(0, $tester->getStatusCode());
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
-    public function testExecuteWithException()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('critical')
-            ->with('Some error');
-        $this->processMock->expects($this->once())
-            ->method('execute')
-            ->willThrowException(new \Exception('Some error'));
-
-        $tester = new CommandTester(
-            $this->command
-        );
-        $tester->execute([]);
     }
 }

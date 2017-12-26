@@ -40,9 +40,7 @@ class Wrapper
 
         try {
             \PHP_Timer::start();
-
             $closure();
-
             \PHP_Timer::stop();
         } catch (\Exception $exception) {
             \PHP_Timer::stop();
