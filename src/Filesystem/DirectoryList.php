@@ -38,9 +38,9 @@ class DirectoryList
     private $directories;
 
     /**
-     * @param string $root
-     * @param string $magentoRoot
-     * @param array $config
+     * @param string $root The ECE Tools root directory
+     * @param string $magentoRoot The Magento root directory
+     * @param array $config Directory configuration
      */
     public function __construct(string $root, string $magentoRoot, array $config = [])
     {

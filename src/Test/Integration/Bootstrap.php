@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Application;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 
 /**
  * Integration testing bootstrap.
@@ -133,7 +134,11 @@ class Bootstrap
             )),
         ]);
 
-        $container = new Container($this->getSandboxDir(), $this->getSandboxDir(), []);
+        $container = new Container(new DirectoryList(
+            $this->getSandboxDir(),
+            $this->getSandboxDir(),
+            []
+        ));
 
         return new Application($container);
     }
