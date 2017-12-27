@@ -351,6 +351,9 @@ class Container implements ContainerInterface
         $this->container->when(\Magento\MagentoCloud\StaticContent\Deploy\Option::class)
             ->needs(StageConfigInterface::class)
             ->give(DeployConfig::class);
+        $this->container->when(\Magento\MagentoCloud\StaticContent\Prestart\Option::class)
+            ->needs(StageConfigInterface::class)
+            ->give(DeployConfig::class);
     }
 
     /**
