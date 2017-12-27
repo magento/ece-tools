@@ -91,7 +91,7 @@ class Build implements BuildInterface
      *
      * @return array
      */
-    private function getDeprecatedConfig()
+    private function getDeprecatedConfig(): array
     {
         $buildConfig = $this->buildReader->read();
         $result = [];

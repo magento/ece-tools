@@ -119,6 +119,10 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Stage\BuildInterface::class,
             \Magento\MagentoCloud\Config\Stage\Build::class
         );
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\DeployInterface::class,
+            \Magento\MagentoCloud\Config\Stage\Deploy::class
+        );
         /**
          * Contextual binding.
          */
