@@ -55,10 +55,10 @@ class DeployTest extends TestCase
      */
     public function testGet(string $name, array $envConfig, array $envVarConfig, $expectedValue)
     {
-        $this->environmentReaderMock->expects($this->once())
+        $this->environmentReaderMock->expects($this->any())
             ->method('read')
             ->willReturn($envConfig);
-        $this->environmentConfigMock->expects($this->once())
+        $this->environmentConfigMock->expects($this->any())
             ->method('getVariables')
             ->willReturn($envVarConfig);
 
@@ -80,8 +80,8 @@ class DeployTest extends TestCase
             'env configured strategy' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_DEPLOY => [
+                    Deploy::STAGE_GLOBAL => [],
+                    Deploy::STAGE_DEPLOY => [
                         Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
                 ],
@@ -91,10 +91,10 @@ class DeployTest extends TestCase
             'global env strategy' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [
-                    StageConfigInterface::STAGE_GLOBAL => [
+                    Deploy::STAGE_GLOBAL => [
                         Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
-                    StageConfigInterface::STAGE_DEPLOY => [],
+                    Deploy::STAGE_DEPLOY => [],
                 ],
                 [],
                 'simple',
@@ -102,8 +102,8 @@ class DeployTest extends TestCase
             'default strategy with parameter' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_DEPLOY => [],
+                    Deploy::STAGE_GLOBAL => [],
+                    Deploy::STAGE_DEPLOY => [],
                 ],
                 [],
                 '',
@@ -111,8 +111,8 @@ class DeployTest extends TestCase
             'env var configured strategy' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_DEPLOY => [
+                    Deploy::STAGE_GLOBAL => [],
+                    Deploy::STAGE_DEPLOY => [
                         Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
                 ],
@@ -121,6 +121,32 @@ class DeployTest extends TestCase
                 ],
                 'quick',
             ],
+            'json value' => [
+                Deploy::VAR_QUEUE_CONFIGURATION,
+                [
+                    Deploy::STAGE_DEPLOY => [
+                        Deploy::VAR_QUEUE_CONFIGURATION => '{"SOME_CONFIG": "some value"}',
+                    ],
+                ],
+                [],
+                ['SOME_CONFIG' => 'some value'],
+            ],
         ];
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Config value was not defined.
+     */
+    public function testNotExists()
+    {
+        $this->environmentReaderMock->expects($this->any())
+            ->method('read')
+            ->willReturn([]);
+        $this->environmentConfigMock->expects($this->any())
+            ->method('getVariables')
+            ->willReturn([]);
+
+        $this->config->get('NOT_EXISTS_VALUE');
     }
 }

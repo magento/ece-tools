@@ -6,11 +6,15 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class Amqp implements ProcessInterface
 {
     /**
@@ -34,6 +38,11 @@ class Amqp implements ProcessInterface
     private $configReader;
 
     /**
+     * @var Deploy
+     */
+    private $stageConfig;
+
+    /**
      * Possible names for amqp relationship
      *
      * @var array
@@ -45,17 +54,20 @@ class Amqp implements ProcessInterface
      * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         ConfigReader $configReader,
         ConfigWriter $configWriter,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -72,7 +84,7 @@ class Amqp implements ProcessInterface
     public function execute()
     {
         $mqConfig = $this->getAmqpConfig();
-        $envQueueConfig = $this->environment->getJsonVariable(Environment::VAR_QUEUE_CONFIGURATION);
+        $envQueueConfig = $this->stageConfig->get(DeployInterface::VAR_QUEUE_CONFIGURATION);
         $config = $this->configReader->read();
 
         if (count($envQueueConfig)) {

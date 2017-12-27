@@ -26,12 +26,14 @@ interface StageConfigInterface
     const VAR_SCD_COMPRESSION_LEVEL = 'SCD_COMPRESSION_LEVEL';
     const VAR_SCD_STRATEGY = 'SCD_STRATEGY';
     const VAR_SKIP_SCD = 'SKIP_SCD';
+    const VAR_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
 
     /**
      * Retrieves environment configuration per stage.
      *
      * @param string $name The config name
      * @return string|bool|array|int The config value
+     * @throws \RuntimeException If config value was not defined
      */
     public function get(string $name);
 }

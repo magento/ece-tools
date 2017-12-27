@@ -6,11 +6,15 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class Redis implements ProcessInterface
 {
     /**
@@ -34,21 +38,29 @@ class Redis implements ProcessInterface
     private $configReader;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param Environment $environment
      * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         ConfigReader $configReader,
         ConfigWriter $configWriter,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -84,14 +96,14 @@ class Redis implements ProcessInterface
                 'host' => $redisConfig[0]['host'],
                 'port' => $redisConfig[0]['port'],
                 'database' => 0,
-                'disable_locking' => (int)$this->isLockingDisabled()
+                'disable_locking' => (int)$this->isLockingDisabled(),
             ];
             $config['session'] = [
                 'save' => 'redis',
                 'redis' => array_replace_recursive(
                     $config['session']['redis'] ?? [],
                     $redisSessionConfig
-                )
+                ),
             ];
         } else {
             $config = $this->removeRedisConfiguration($config);
@@ -137,8 +149,6 @@ class Redis implements ProcessInterface
      */
     private function isLockingDisabled(): bool
     {
-        $envValue = $this->environment->getVariable(Environment::VAR_REDIS_SESSION_DISABLE_LOCKING);
-
-        return $envValue !== Environment::VAL_DISABLED;
+        return $this->stageConfig->get(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING);
     }
 }

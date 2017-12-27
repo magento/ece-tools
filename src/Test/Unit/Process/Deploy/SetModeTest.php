@@ -7,12 +7,16 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Deploy\Writer as DeployConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\SetMode;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class SetModeTest extends TestCase
 {
     /**
@@ -40,20 +44,28 @@ class SetModeTest extends TestCase
      */
     private $deployConfigWriterMock;
 
+    /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->deployConfigWriterMock = $this->createMock(DeployConfigWriter::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new SetMode(
             $this->environmentMock,
             $this->loggerMock,
             $this->shellMock,
-            $this->deployConfigWriterMock
+            $this->deployConfigWriterMock,
+            $this->stageConfigMock
         );
     }
 
@@ -77,13 +89,14 @@ class SetModeTest extends TestCase
     public function testExecuteDeveloperMode()
     {
         $mode = Environment::MAGENTO_DEVELOPER_MODE;
-        $verbosity = ' -vvv ';
+        $verbosity = '-vvv';
 
         $this->environmentMock->expects($this->once())
             ->method('getApplicationMode')
             ->willReturn($mode);
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn($verbosity);
         $this->loggerMock->expects($this->once())
             ->method('info')

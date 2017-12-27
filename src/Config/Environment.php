@@ -32,14 +32,6 @@ class Environment
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
-     * Variables.
-     */
-    const VAR_QUEUE_CONFIGURATION = 'QUEUE_CONFIGURATION';
-    const VAR_SEARCH_CONFIGURATION = 'SEARCH_CONFIGURATION';
-    const VAR_REDIS_SESSION_DISABLE_LOCKING = 'REDIS_SESSION_DISABLE_LOCKING';
-    const VAR_SCD_COMPRESSION_LEVEL = Build::OPT_SCD_COMPRESSION_LEVEL;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -160,31 +152,6 @@ class Environment
     }
 
     /**
-     * Checks that static content symlink is on.
-     *
-     * If STATIC_CONTENT_SYMLINK == disabled return false
-     * Returns true by default
-     *
-     * @return bool
-     */
-    public function isStaticContentSymlinkOn(): bool
-    {
-        $var = $this->getVariables();
-
-        return isset($var['STATIC_CONTENT_SYMLINK']) && $var['STATIC_CONTENT_SYMLINK'] == 'disabled' ? false : true;
-    }
-
-    /**
-     * @return string
-     */
-    public function getVerbosityLevel(): string
-    {
-        $var = $this->getVariables();
-
-        return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
-    }
-
-    /**
      * @return string
      */
     public function getApplicationMode(): string
@@ -212,43 +179,7 @@ class Environment
      */
     public function isDeployStaticContent(): bool
     {
-        $var = $this->getVariables();
-
-        /**
-         * Can use environment variable to always disable.
-         * Default is to deploy static content if it was not deployed in the build step.
-         */
-        if (isset($var['DO_DEPLOY_STATIC_CONTENT']) && $var['DO_DEPLOY_STATIC_CONTENT'] == 'disabled') {
-            $flag = false;
-        } else {
-            $flag = !$this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists();
-        }
-
-        $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . ($flag ? 'enabled' : 'disabled'));
-
-        return $flag;
-    }
-
-    /**
-     * @return int
-     */
-    public function getStaticDeployThreadsCount(): int
-    {
-        /**
-         * Use 1 for PAAS environment.
-         */
-        $staticDeployThreads = 1;
-        $var = $this->getVariables();
-
-        if (isset($var['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$var['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['MAGENTO_CLOUD_MODE']) && $_ENV['MAGENTO_CLOUD_MODE'] === static::CLOUD_MODE_ENTERPRISE) {
-            $staticDeployThreads = 3;
-        }
-
-        return $staticDeployThreads;
+        return !$this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists();
     }
 
     /**
@@ -257,24 +188,6 @@ class Environment
     public function getAdminLocale(): string
     {
         return $this->getVariables()['ADMIN_LOCALE'] ?? 'en_US';
-    }
-
-    /**
-     * @return bool
-     */
-    public function doCleanStaticFiles(): bool
-    {
-        $var = $this->getVariables();
-
-        return !(isset($var['CLEAN_STATIC_FILES']) && $var['CLEAN_STATIC_FILES'] === static::VAL_DISABLED);
-    }
-
-    /**
-     * @return string
-     */
-    public function getStaticDeployExcludeThemes(): string
-    {
-        return $this->getVariable('STATIC_CONTENT_EXCLUDE_THEMES', '');
     }
 
     /**
@@ -358,24 +271,6 @@ class Environment
     }
 
     /**
-     * @return array
-     */
-    public function getCronConsumersRunner(): array
-    {
-        return $this->getJsonVariable('CRON_CONSUMERS_RUNNER');
-    }
-
-    /**
-     * @return bool
-     */
-    public function isUpdateUrlsEnabled(): bool
-    {
-        $var = $this->getVariables();
-
-        return isset($var['UPDATE_URLS']) && $var['UPDATE_URLS'] == 'disabled' ? false : true;
-    }
-
-    /**
      * @return string
      */
     public function getDefaultCurrency(): string
@@ -390,22 +285,5 @@ class Environment
     {
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
-    }
-
-    /**
-     * Returns variable that was set in json format.
-     *
-     * @param string $name
-     * @return array
-     */
-    public function getJsonVariable(string $name): array
-    {
-        $config = $this->getVariable($name, []);
-
-        if (!is_array($config)) {
-            $config = (array)json_decode($config, true);
-        }
-
-        return $config;
     }
 }
