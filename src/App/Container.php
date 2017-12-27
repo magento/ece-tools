@@ -20,6 +20,7 @@ use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
@@ -45,12 +46,11 @@ class Container implements ContainerInterface
     private $container;
 
     /**
-     * @param string $root
-     * @param array $config
+     * @param DirectoryList $directoryList
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(string $root, array $config)
+    public function __construct(DirectoryList $directoryList)
     {
         /**
          * Creating concrete container.
@@ -63,8 +63,8 @@ class Container implements ContainerInterface
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () use ($root, $config) {
-                return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $config);
+            function () use ($directoryList) {
+                return $directoryList;
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
@@ -102,12 +102,7 @@ class Container implements ContainerInterface
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Deploy::class);
-        $this->container->singleton(\Psr\Log\LoggerInterface::class, function () {
-            return new \Monolog\Logger(
-                'default',
-                $this->container->make(\Magento\MagentoCloud\App\Logger\Pool::class)->getHandlers()
-            );
-        });
+        $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
         $this->container->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
@@ -281,7 +276,6 @@ class Container implements ContainerInterface
                     'system/websites',
                 ];
             });
-        $this->container->when(DeployProcess\PreDeploy::class);
         $this->container->when(CronUnlock::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
