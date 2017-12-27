@@ -67,6 +67,7 @@ class BuildTest extends TestCase
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
@@ -117,9 +118,259 @@ class BuildTest extends TestCase
                     ],
                 ],
                 [
-                    Build::VAR_SCD_STRATEGY => 'quick',
+                    'scd_strategy' => 'quick',
                 ],
                 'quick',
+            ],
+            'default exclude_themes' => [
+                Build::VAR_SCD_EXCLUDE_THEMES,
+                [],
+                [],
+                '',
+            ],
+            'env configured exclude_themes' => [
+                Build::VAR_SCD_EXCLUDE_THEMES,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_SCD_EXCLUDE_THEMES => 'luma',
+                    ],
+                ],
+                [],
+                'luma',
+            ],
+            'global env exclude_themes' => [
+                Build::VAR_SCD_EXCLUDE_THEMES,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        Build::VAR_SCD_EXCLUDE_THEMES => 'luma',
+                    ],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                'luma',
+            ],
+            'default exclude_themes with parameter' => [
+                Build::VAR_SCD_EXCLUDE_THEMES,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                '',
+            ],
+            'build configured exclude_themes' => [
+                Build::VAR_SCD_EXCLUDE_THEMES,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_SCD_EXCLUDE_THEMES => 'luma',
+                    ],
+                ],
+                [
+                    'exclude_themes' => 'blank',
+                ],
+                'blank',
+            ],
+            'default compress level' => [
+                Build::VAR_SCD_COMPRESSION_LEVEL,
+                [],
+                [],
+                6,
+            ],
+            'env configured compress level' => [
+                Build::VAR_SCD_COMPRESSION_LEVEL,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_SCD_COMPRESSION_LEVEL => 5,
+                    ],
+                ],
+                [],
+                5,
+            ],
+            'global env compress level' => [
+                Build::VAR_SCD_COMPRESSION_LEVEL,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        Build::VAR_SCD_COMPRESSION_LEVEL => 5,
+                    ],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                5,
+            ],
+            'default compress level with parameter' => [
+                Build::VAR_SCD_COMPRESSION_LEVEL,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                6,
+            ],
+            'build configured compress level' => [
+                Build::VAR_SCD_COMPRESSION_LEVEL,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_SCD_COMPRESSION_LEVEL => 5,
+                    ],
+                ],
+                [
+                    'SCD_COMPRESSION_LEVEL' => 7,
+                ],
+                7,
+            ],
+            'default scd_threads' => [
+                Build::VAR_SCD_THREADS,
+                [],
+                [],
+                1,
+            ],
+            'env configured scd_threads' => [
+                Build::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_SCD_THREADS => 5,
+                    ],
+                ],
+                [],
+                5,
+            ],
+            'global env scd_threads' => [
+                Build::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        Build::VAR_SCD_THREADS => 5,
+                    ],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                5,
+            ],
+            'default scd_threads with parameter' => [
+                Build::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                1,
+            ],
+            'build configured scd_threads' => [
+                Build::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_SCD_THREADS => 5,
+                    ],
+                ],
+                [
+                    'scd_threads' => 7,
+                ],
+                7,
+            ],
+            'default skip_scd' => [
+                Build::VAR_SKIP_SCD,
+                [],
+                [],
+                false,
+            ],
+            'env configured skip_scd' => [
+                Build::VAR_SKIP_SCD,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_SKIP_SCD => true,
+                    ],
+                ],
+                [],
+                true,
+            ],
+            'global env skip_scd' => [
+                Build::VAR_SKIP_SCD,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        Build::VAR_SKIP_SCD => true,
+                    ],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                true,
+            ],
+            'default skip_scd with parameter' => [
+                Build::VAR_SKIP_SCD,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                false,
+            ],
+            'build configured skip_scd' => [
+                Build::VAR_SKIP_SCD,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_SKIP_SCD => false,
+                    ],
+                ],
+                [
+                    'skip_scd' => 'yes',
+                ],
+                true,
+            ],
+            'default verbose commands' => [
+                Build::VAR_VERBOSE_COMMANDS,
+                [],
+                [],
+                '',
+            ],
+            'env configured verbose commands' => [
+                Build::VAR_VERBOSE_COMMANDS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_VERBOSE_COMMANDS => '-v',
+                    ],
+                ],
+                [],
+                '-v',
+            ],
+            'global env verbose commands' => [
+                Build::VAR_VERBOSE_COMMANDS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        Build::VAR_VERBOSE_COMMANDS => '-v',
+                    ],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                '-v',
+            ],
+            'default verbose commands with parameter' => [
+                Build::VAR_VERBOSE_COMMANDS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [],
+                ],
+                [],
+                '',
+            ],
+            'build configured verbose commands' => [
+                Build::VAR_VERBOSE_COMMANDS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_BUILD => [
+                        Build::VAR_VERBOSE_COMMANDS => '-vvv',
+                    ],
+                ],
+                [
+                    'VERBOSE_COMMANDS' => 'enabled',
+                ],
+                '-vv',
             ],
         ];
     }
