@@ -65,10 +65,6 @@ class AdminCredentialTest extends TestCase
         $this->assertSame(0, $commandTester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Please fix configuration with given suggestions
-     */
     public function testInstallWithoutAdminEmail()
     {
         $application = $this->bootstrap->createApplication(['variables' => []]);
@@ -86,6 +82,7 @@ class AdminCredentialTest extends TestCase
         $commandTester->execute([]);
 
         $this->assertSame(1, $commandTester->getStatusCode());
+        $this->assertContains('Please fix', $commandTester->getDisplay());
     }
 
     /**
