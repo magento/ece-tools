@@ -9,8 +9,6 @@ use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -86,10 +84,10 @@ class BackupData implements ProcessInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
         $rootInitDir = $this->directoryList->getInit() . '/';
-        $this->flagManager->delete(Regenerate::KEY);
+        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
 
-        if ($this->flagManager->exists(StaticContentDeployInBuild::KEY)) {
-            $scdFlag = $this->flagManager->getFlag(StaticContentDeployInBuild::KEY);
+        if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
+            $scdFlagPath = $this->flagManager->getFlag(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
             $initPub = $rootInitDir . 'pub/';
             $initPubStatic = $initPub . 'static/';
             $originalPubStatic = $magentoRoot . 'pub/static/';
@@ -105,8 +103,8 @@ class BackupData implements ProcessInterface
             $this->file->createDirectory($initPubStatic);
             $this->file->copyDirectory($originalPubStatic, $initPubStatic);
             $this->file->copy(
-                $magentoRoot . $scdFlag->getPath(),
-                $rootInitDir . $scdFlag->getPath()
+                $magentoRoot . $scdFlagPath,
+                $rootInitDir . $scdFlagPath
             );
         } else {
             $this->logger->info('SCD not performed during build');

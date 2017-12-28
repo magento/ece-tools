@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\PreBuild;
 use Magento\MagentoCloud\Package\Manager;
@@ -81,7 +80,7 @@ class PreBuildTest extends TestCase
             );
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with(StaticContentDeployInBuild::KEY);
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('Some info.');

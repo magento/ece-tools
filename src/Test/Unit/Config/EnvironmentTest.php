@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -158,7 +157,7 @@ class EnvironmentTest extends TestCase
 
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployInBuild::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn($isExists);
         $this->loggerMock->expects($this->once())
             ->method('info')

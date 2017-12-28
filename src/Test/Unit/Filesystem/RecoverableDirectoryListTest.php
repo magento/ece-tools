@@ -6,8 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\Flag\Manager;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -25,14 +24,14 @@ class RecoverableDirectoryListTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var Manager|Mock
+     * @var FlagManager|Mock
      */
     private $flagManagerMock;
 
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->flagManagerMock = $this->createMock(Manager::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->recoverableDirectoryList = new RecoverableDirectoryList(
             $this->environmentMock,
@@ -54,7 +53,7 @@ class RecoverableDirectoryListTest extends TestCase
 
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployInBuild::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn($isStaticInBuild);
         $this->assertEquals(
             $expected,

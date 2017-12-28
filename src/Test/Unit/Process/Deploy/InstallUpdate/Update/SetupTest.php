@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -86,7 +85,7 @@ class SetupTest extends TestCase
             ->willReturn($installUpgradeLog);
         $this->flagManagerMock->expects($this->exactly(2))
             ->method('delete')
-            ->with(Regenerate::KEY);
+            ->with(FlagManager::FLAG_REGENERATE);
         $this->environmentMock->expects($this->once())
             ->method('getVerbosityLevel')
             ->willReturn('-v');
@@ -121,7 +120,7 @@ class SetupTest extends TestCase
     {
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with(Regenerate::KEY);
+            ->with(FlagManager::FLAG_REGENERATE);
         $this->shellMock->expects($this->at(0))
             ->method('execute')
             ->willThrowException(new \RuntimeException('Error during command execution'));

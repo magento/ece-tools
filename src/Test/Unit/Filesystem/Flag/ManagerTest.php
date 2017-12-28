@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Filesystem\Flag\FlagInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Filesystem\Flag\Pool;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -78,14 +77,13 @@ class ManagerTest extends TestCase
 
     public function testGetFlag()
     {
-        $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
         $this->flagPool->expects($this->once())
             ->method('get')
             ->with('some_flag')
-            ->willReturn($flagMock);
+            ->willReturn('flag/path');
 
-        $this->assertInstanceOf(
-            FlagInterface::class,
+        $this->assertEquals(
+            'flag/path',
             $this->manager->getFlag('some_flag')
         );
     }
@@ -101,10 +99,7 @@ class ManagerTest extends TestCase
             ->with('some_flag')
             ->willReturn(null);
 
-        $this->assertInstanceOf(
-            FlagInterface::class,
-            $this->manager->getFlag('some_flag')
-        );
+        $this->manager->getFlag('some_flag');
     }
 
     public function flagDataProvider()
@@ -123,14 +118,10 @@ class ManagerTest extends TestCase
      */
     public function testExists(string $key, string $path, bool $flagState)
     {
-        $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
-        $flagMock->expects($this->once())
-            ->method('getPath')
-            ->willReturn($path);
         $this->flagPool->expects($this->once())
             ->method('get')
             ->with($key)
-            ->willReturn($flagMock);
+            ->willReturn($path);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -150,14 +141,10 @@ class ManagerTest extends TestCase
      */
     public function testSet(string $key, string $path, bool $flagState)
     {
-        $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
-        $flagMock->expects($this->once())
-            ->method('getPath')
-            ->willReturn($path);
         $this->flagPool->expects($this->once())
             ->method('get')
             ->with($key)
-            ->willReturn($flagMock);
+            ->willReturn($path);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -194,14 +181,10 @@ class ManagerTest extends TestCase
         array $logs,
         bool$result
     ) {
-        $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
-        $flagMock->expects($this->any())
-            ->method('getPath')
-            ->willReturn($path);
         $this->flagPool->expects($this->any())
             ->method('get')
             ->with($key)
-            ->willReturn($flagMock);
+            ->willReturn($path);
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -258,14 +241,10 @@ class ManagerTest extends TestCase
     public function testExistsWithFileSystemException()
     {
         $path = 'path/that/doesnt/exist';
-        $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
-        $flagMock->expects($this->any())
-            ->method('getPath')
-            ->willReturn($path);
         $this->flagPool->expects($this->any())
             ->method('get')
             ->with('some_key')
-            ->willReturn($flagMock);
+            ->willReturn($path);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($this->magentoRoot);
@@ -282,14 +261,10 @@ class ManagerTest extends TestCase
     public function testSetWithFileSystemException()
     {
         $path = 'path/that/doesnt/exist';
-        $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
-        $flagMock->expects($this->any())
-            ->method('getPath')
-            ->willReturn($path);
         $this->flagPool->expects($this->any())
             ->method('get')
             ->with('some_key')
-            ->willReturn($flagMock);
+            ->willReturn($path);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -310,14 +285,10 @@ class ManagerTest extends TestCase
         $flag = 'magento_root/.some_flag';
         $flagState = true;
 
-        $flagMock = $this->getMockForAbstractClass(FlagInterface::class);
-        $flagMock->expects($this->any())
-            ->method('getPath')
-            ->willReturn($path);
         $this->flagPool->expects($this->any())
             ->method('get')
             ->with('some_key')
-            ->willReturn($flagMock);
+            ->willReturn($path);
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
             ->willReturn($root);

@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Build as BuildConfig;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
@@ -70,7 +69,7 @@ class CompressStaticContentTest extends TestCase
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployInBuild::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
         $this->buildConfigMock->expects($this->once())
             ->method('getVerbosityLevel')
@@ -94,7 +93,7 @@ class CompressStaticContentTest extends TestCase
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployInBuild::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')

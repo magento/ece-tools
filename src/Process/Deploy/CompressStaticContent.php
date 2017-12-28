@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployPending;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -74,7 +73,7 @@ class CompressStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->environment->isDeployStaticContent()) {
-            if ($this->flagManager->exists(StaticContentDeployPending::KEY)) {
+            if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)) {
                 $this->logger->info('Postpone static content compression until prestart');
                 return;
             }

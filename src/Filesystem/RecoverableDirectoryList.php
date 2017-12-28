@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 
 /**
@@ -60,7 +59,7 @@ class RecoverableDirectoryList
             ]
         ];
 
-        if ($this->flagManager->exists(StaticContentDeployInBuild::KEY)) {
+        if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             $recoverableDirs[] = [
                 self::OPTION_DIRECTORY => 'var/view_preprocessed',
                 self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY

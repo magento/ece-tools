@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -78,6 +77,6 @@ class RestoreWritableDirectories implements ProcessInterface
 
         // Restore mounted directories
         $this->logger->info('Recoverable directories were copied back.');
-        $this->flagManager->delete(Regenerate::KEY);
+        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
 }

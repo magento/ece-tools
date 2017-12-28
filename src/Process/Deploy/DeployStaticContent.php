@@ -8,8 +8,6 @@ namespace Magento\MagentoCloud\Process\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployPending;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
@@ -92,11 +90,11 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $this->flagManager->delete(StaticContentDeployPending::KEY);
+        $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING);
         if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
-            && !$this->flagManager->exists(StaticContentDeployInBuild::KEY)
+            && !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
         ) {
-            $this->flagManager->set(StaticContentDeployPending::KEY);
+            $this->flagManager->set(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING);
             $this->logger->info('Postpone static content deployment until prestart');
             return;
         }

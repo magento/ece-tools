@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -83,7 +82,7 @@ class Setup implements ProcessInterface
      */
     public function execute()
     {
-        $this->flagManager->delete(Regenerate::KEY);
+        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
 
         try {
             $verbosityLevel = $this->environment->getVerbosityLevel();
@@ -107,6 +106,6 @@ class Setup implements ProcessInterface
             throw new \RuntimeException($e->getMessage(), 6);
         }
 
-        $this->flagManager->delete(Regenerate::KEY);
+        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
 }

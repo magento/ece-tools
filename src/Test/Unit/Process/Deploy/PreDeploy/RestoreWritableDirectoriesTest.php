@@ -6,8 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Flag\Regenerate;
-use Magento\MagentoCloud\Filesystem\Flag\Manager;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\RestoreWritableDirectories;
 use Magento\MagentoCloud\Util\BuildDirCopier;
@@ -43,7 +42,7 @@ class RestoreWritableDirectoriesTest extends TestCase
     private $recoverableDirectoryListMock;
 
     /**
-     * @var Manager|Mock
+     * @var FlagManager|Mock
      */
     private $flagManagerMock;
 
@@ -56,7 +55,7 @@ class RestoreWritableDirectoriesTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagManagerMock = $this->createMock(Manager::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->process = new RestoreWritableDirectories(
             $this->loggerMock,
@@ -86,7 +85,7 @@ class RestoreWritableDirectoriesTest extends TestCase
             ->with('Recoverable directories were copied back.');
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with(Regenerate::KEY);
+            ->with(FlagManager::FLAG_REGENERATE);
 
         $this->process->execute();
     }

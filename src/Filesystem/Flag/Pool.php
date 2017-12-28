@@ -8,12 +8,12 @@ namespace Magento\MagentoCloud\Filesystem\Flag;
 class Pool
 {
     /**
-     * @var FlagInterface[]
+     * @var array[]
      */
     private $flags;
 
     /**
-     * @param FlagInterface[] $flags
+     * @param array $flags
      */
     public function __construct(array $flags)
     {
@@ -21,10 +21,10 @@ class Pool
     }
 
     /**
-     * Gets flag by key, returns null if flag not exists.
+     * Gets flag path by key, returns null if flag not exists.
      *
      * @param string $key
-     * @return FlagInterface|null
+     * @return string|null
      */
     public function get(string $key)
     {

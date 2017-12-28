@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanStaticContent;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -69,7 +68,7 @@ class CleanStaticContentTest extends TestCase
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployInBuild::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -91,7 +90,7 @@ class CleanStaticContentTest extends TestCase
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployInBuild::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
         $this->directoryListMock->expects($this->never())
             ->method('getMagentoRoot')

@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
@@ -68,7 +67,7 @@ class CleanStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->flagManager->exists(StaticContentDeployInBuild::KEY)) {
+        if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             return;
         }
 

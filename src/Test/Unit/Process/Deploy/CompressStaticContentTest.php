@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployPending;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
@@ -78,7 +77,7 @@ class CompressStaticContentTest extends TestCase
             ->willReturn(true);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployPending::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
             ->willReturn(false);
         $this->environmentMock->expects($this->once())
             ->method('getVerbosityLevel')
@@ -125,7 +124,7 @@ class CompressStaticContentTest extends TestCase
             ->willReturn(true);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployPending::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')

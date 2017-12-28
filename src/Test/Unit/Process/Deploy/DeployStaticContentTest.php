@@ -8,8 +8,6 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployPending;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -87,7 +85,7 @@ class DeployStaticContentTest extends TestCase
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with(StaticContentDeployPending::KEY);
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING);
 
         $this->process = new DeployStaticContent(
             $this->processMock,
@@ -234,11 +232,11 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(true);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(StaticContentDeployInBuild::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
         $this->flagManagerMock->expects($this->once())
             ->method('set')
-            ->with(StaticContentDeployPending::KEY)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')

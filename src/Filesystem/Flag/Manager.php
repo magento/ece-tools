@@ -16,6 +16,22 @@ use Psr\Log\LoggerInterface;
 class Manager
 {
     /**
+     * This flag is creating by magento for cleaning up generated/code, generated/metadata and var/cache directories
+     * for subsequent regeneration of this content.
+     */
+    const FLAG_REGENERATE = 'regenerate';
+
+    /**
+     * Used to mark that static content deployment was performed on build phase.
+     */
+    const FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD = 'scd_in_build';
+
+    /**
+     * Used for postponing static content deployment until prestart phase.
+     */
+    const FLAG_STATIC_CONTENT_DEPLOY_PENDING = 'scd_pending';
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -62,8 +78,7 @@ class Manager
      */
     public function exists(string $flagKey): bool
     {
-        $flag = $this->getFlag($flagKey);
-        $path = $this->directoryList->getMagentoRoot() . '/' . $flag->getPath();
+        $path = $this->directoryList->getMagentoRoot() . '/' . $this->getFlag($flagKey);
 
         try {
             return $this->file->isExists($path);
@@ -83,8 +98,7 @@ class Manager
      */
     public function set(string $flagKey): bool
     {
-        $flag = $this->getFlag($flagKey);
-        $flagPath = $flag->getPath();
+        $flagPath = $this->getFlag($flagKey);
         $path = $this->directoryList->getMagentoRoot() . '/' . $flagPath;
 
         try {
@@ -108,19 +122,18 @@ class Manager
      */
     public function delete(string $flagKey): bool
     {
-        $flag = $this->getFlag($flagKey);
-        $flagBasePath = $flag->getPath();
+        $flagPath = $this->getFlag($flagKey);
 
         if (!$this->exists($flagKey)) {
-            $this->logger->info(sprintf('Flag %s is already deleted.', $flagBasePath));
+            $this->logger->info(sprintf('Flag %s is already deleted.', $flagPath));
             return true;
         }
 
-        $path = $this->directoryList->getMagentoRoot() . '/' . $flagBasePath;
+        $path = $this->directoryList->getMagentoRoot() . '/' . $flagPath;
 
         try {
             if ($this->file->deleteFile($path)) {
-                $this->logger->info('Deleting flag: ' . $flagBasePath);
+                $this->logger->info('Deleting flag: ' . $flagPath);
                 return true;
             }
         } catch (FileSystemException $e) {
@@ -131,20 +144,20 @@ class Manager
     }
 
     /**
-     * Returns flag object by given flag key.
+     * Returns relative flag path by given flag key.
      *
      * @param string $flagKey
-     * @return FlagInterface
+     * @return string
      * @throws \RuntimeException If flag with given key is not registered
      */
-    public function getFlag(string $flagKey): FlagInterface
+    public function getFlag(string $flagKey): string
     {
-        $flag = $this->flagPool->get($flagKey);
+        $flagPath = $this->flagPool->get($flagKey);
 
-        if (!$flag instanceof FlagInterface) {
+        if (!$flagPath) {
             throw new \RuntimeException(sprintf('Flag with key %s is not registered in flagPool', $flagKey));
         }
 
-        return $flag;
+        return $flagPath;
     }
 }

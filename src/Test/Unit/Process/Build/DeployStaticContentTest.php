@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Build;
 use Magento\MagentoCloud\Config\Validator\Result;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -79,7 +78,7 @@ class DeployStaticContentTest extends TestCase
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with(StaticContentDeployInBuild::KEY);
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
 
         $this->process = new DeployStaticContent(
             $this->loggerMock,
@@ -106,7 +105,7 @@ class DeployStaticContentTest extends TestCase
             ->method('execute');
         $this->flagManagerMock->expects($this->once())
             ->method('set')
-            ->with(StaticContentDeployInBuild::KEY);
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
 
         $this->process->execute();
     }

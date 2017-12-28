@@ -10,7 +10,6 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
-use Magento\MagentoCloud\Filesystem\Flag\StaticContentDeployInBuild;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -77,7 +76,7 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $this->flagManager->delete(StaticContentDeployInBuild::KEY);
+        $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
 
         if ($this->stageConfig->get(StageConfigInterface::VAR_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
@@ -95,6 +94,6 @@ class DeployStaticContent implements ProcessInterface
 
         $this->process->execute();
 
-        $this->flagManager->set(StaticContentDeployInBuild::KEY);
+        $this->flagManager->set(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
     }
 }
