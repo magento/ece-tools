@@ -116,7 +116,9 @@ class Deploy implements DeployInterface
             $variables[self::VAR_SKIP_SCD] = true;
         }
 
-        $variables[self::VAR_SCD_THREADS] = $variables[self::VAR_SCD_THREADS] ?? $this->getScdThreads();
+        if ($scdThreads = $this->getScdThreads()) {
+            $variables[self::VAR_SCD_THREADS] = $scdThreads;
+        }
 
         return $variables;
     }
@@ -127,7 +129,7 @@ class Deploy implements DeployInterface
     private function getScdThreads(): int
     {
         $variables = $this->environmentConfig->getVariables();
-        $staticDeployThreads = 1;
+        $staticDeployThreads = 0;
 
         if (isset($variables['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
