@@ -374,4 +374,17 @@ class BuildTest extends TestCase
             ],
         ];
     }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Config value was not defined.
+     */
+    public function testNotExists()
+    {
+        $this->environmentReaderMock->expects($this->any())
+            ->method('read')
+            ->willReturn([]);
+
+        $this->config->get('NOT_EXISTS_VALUE');
+    }
 }

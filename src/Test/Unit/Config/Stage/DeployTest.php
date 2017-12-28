@@ -67,6 +67,7 @@ class DeployTest extends TestCase
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
@@ -130,6 +131,74 @@ class DeployTest extends TestCase
                 ],
                 [],
                 ['SOME_CONFIG' => 'some value'],
+            ],
+            'wrong json value' => [
+                Deploy::VAR_QUEUE_CONFIGURATION,
+                [
+                    Deploy::STAGE_DEPLOY => [
+                        Deploy::VAR_QUEUE_CONFIGURATION => '{"SOME_CONFIG": "some value',
+                    ],
+                ],
+                [],
+                '{"SOME_CONFIG": "some value',
+            ],
+            'disabled flow 1' => [
+                Deploy::VAR_REDIS_SESSION_DISABLE_LOCKING,
+                [],
+                [
+                    Deploy::VAR_REDIS_SESSION_DISABLE_LOCKING => EnvironmentConfig::VAL_DISABLED,
+                ],
+                false,
+            ],
+            'disabled flow 2' => [
+                Deploy::VAR_UPDATE_URLS,
+                [],
+                [
+                    Deploy::VAR_UPDATE_URLS => EnvironmentConfig::VAL_DISABLED,
+                ],
+                false,
+            ],
+            'deprecated do deploy scd' => [
+                Deploy::VAR_SKIP_SCD,
+                [],
+                [
+                    'DO_DEPLOY_STATIC_CONTENT' => EnvironmentConfig::VAL_DISABLED,
+                ],
+                true,
+            ],
+            'do deploy scd' => [
+                Deploy::VAR_SKIP_SCD,
+                [],
+                [],
+                false,
+            ],
+            'verbosity deprecated' => [
+                Deploy::VAR_VERBOSE_COMMANDS,
+                [],
+                [
+                    Deploy::VAR_VERBOSE_COMMANDS => EnvironmentConfig::VAL_ENABLED,
+                ],
+                '-vvv',
+            ],
+            'verbosity disabled deprecated' => [
+                Deploy::VAR_VERBOSE_COMMANDS,
+                [],
+                [],
+                '',
+            ],
+            'threads default' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [],
+                1,
+            ],
+            'threads deprecated' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 4,
+                ],
+                4,
             ],
         ];
     }

@@ -45,9 +45,11 @@ class Build implements BuildInterface
      */
     public function get(string $name)
     {
-        $config = $this->mergeConfig();
+        if (!array_key_exists($name, $this->getDefault())) {
+            throw new \RuntimeException('Config value was not defined.');
+        }
 
-        return $config[$name] ?? null;
+        return $this->mergeConfig()[$name];
     }
 
     /**

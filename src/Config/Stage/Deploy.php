@@ -43,18 +43,19 @@ class Deploy implements DeployInterface
      */
     public function get(string $name)
     {
-        $config = $this->mergeConfig();
-
-        if (!array_key_exists($name, $config)) {
+        if (!array_key_exists($name, $this->getDefault())) {
             throw new \RuntimeException('Config value was not defined.');
         }
 
-        $value = $config[$name];
+        $value = $this->mergeConfig()[$name];
 
         if (!is_string($value)) {
             return $value;
         }
 
+        /**
+         * Trying to determine json object in string.
+         */
         $decodedValue = json_decode($value, true);
 
         return $decodedValue !== null && json_last_error() === JSON_ERROR_NONE
@@ -74,7 +75,7 @@ class Deploy implements DeployInterface
                 $this->getDefault(),
                 $envConfig[self::STAGE_GLOBAL] ?? [],
                 $envConfig[self::STAGE_DEPLOY] ?? [],
-                $this->resolveEnvironmentValues()
+                $this->getEnvironmentConfig()
             );
         }
 
@@ -86,7 +87,7 @@ class Deploy implements DeployInterface
      *
      * @return array
      */
-    private function resolveEnvironmentValues(): array
+    private function getEnvironmentConfig(): array
     {
         $variables = $this->environmentConfig->getVariables();
 
@@ -161,6 +162,7 @@ class Deploy implements DeployInterface
             self::VAR_UPDATE_URLS => true,
             self::VAR_STATIC_CONTENT_EXCLUDE_THEMES => '',
             self::VAR_SKIP_SCD => false,
+            self::VAR_SCD_THREADS => 1,
         ];
     }
 }
