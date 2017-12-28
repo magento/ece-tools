@@ -20,6 +20,7 @@ use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -44,12 +45,11 @@ class Container implements ContainerInterface
     private $container;
 
     /**
-     * @param string $root
-     * @param array $config
+     * @param DirectoryList $directoryList
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(string $root, array $config)
+    public function __construct(DirectoryList $directoryList)
     {
         /**
          * Creating concrete container.
@@ -62,8 +62,8 @@ class Container implements ContainerInterface
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () use ($root, $config) {
-                return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $config);
+            function () use ($directoryList) {
+                return $directoryList;
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);

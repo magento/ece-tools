@@ -24,6 +24,7 @@ class DirectoryListTest extends TestCase
     protected function setUp()
     {
         $this->directoryList = new DirectoryList(
+            __DIR__ . '/_files/bp',
             __DIR__,
             ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
         );
@@ -48,11 +49,6 @@ class DirectoryListTest extends TestCase
     public function getPathDataProvider(): array
     {
         return [
-            'root' => [DirectoryList::DIR_ROOT, __DIR__],
-            'magento root' => [
-                DirectoryList::DIR_MAGENTO_ROOT,
-                __DIR__ . '/../../..',
-            ],
             'test var' => [
                 'test_var',
                 __DIR__ . '/_files/test/var',
@@ -81,7 +77,7 @@ class DirectoryListTest extends TestCase
     public function testGetRoot()
     {
         $this->assertSame(
-            __DIR__,
+            __DIR__ . '/_files/bp',
             $this->directoryList->getRoot()
         );
     }
@@ -89,7 +85,7 @@ class DirectoryListTest extends TestCase
     public function testGetMagentoRoot()
     {
         $this->assertSame(
-            __DIR__ . '/../../..',
+            __DIR__,
             $this->directoryList->getMagentoRoot()
         );
     }
@@ -97,7 +93,7 @@ class DirectoryListTest extends TestCase
     public function testGetInit()
     {
         $this->assertSame(
-            __DIR__ . '/../../../init',
+            __DIR__ . '/init',
             $this->directoryList->getInit()
         );
     }
@@ -105,7 +101,7 @@ class DirectoryListTest extends TestCase
     public function testGetVar()
     {
         $this->assertSame(
-            __DIR__ . '/../../../var',
+            __DIR__ . '/var',
             $this->directoryList->getVar()
         );
     }
@@ -113,7 +109,7 @@ class DirectoryListTest extends TestCase
     public function testGetLog()
     {
         $this->assertSame(
-            __DIR__ . '/../../../var/log',
+            __DIR__ . '/var/log',
             $this->directoryList->getLog()
         );
     }
