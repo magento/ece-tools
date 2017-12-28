@@ -11,15 +11,16 @@ namespace Magento\MagentoCloud\Config;
 interface StageConfigInterface
 {
     /**
-     * Deployment stages.
+     * Section of configuration file.
      */
-    const STAGE_BUILD = 'build';
-    const STAGE_DEPLOY = 'deploy';
+    const SECTION_STAGE = 'stage';
 
     /**
-     * Default, unified stage.
+     * Deployment stages.
      */
     const STAGE_GLOBAL = 'global';
+    const STAGE_BUILD = 'build';
+    const STAGE_DEPLOY = 'deploy';
 
     /**
      * Deployment variables.

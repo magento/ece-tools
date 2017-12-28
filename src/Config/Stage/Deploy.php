@@ -69,7 +69,7 @@ class Deploy implements DeployInterface
     private function mergeConfig(): array
     {
         if (null === $this->mergedConfig) {
-            $envConfig = $this->environmentReader->read();
+            $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
 
             $this->mergedConfig = array_replace(
                 $this->getDefault(),

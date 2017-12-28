@@ -57,7 +57,7 @@ class DeployTest extends TestCase
     {
         $this->environmentReaderMock->expects($this->any())
             ->method('read')
-            ->willReturn($envConfig);
+            ->willReturn([Deploy::SECTION_STAGE => $envConfig]);
         $this->environmentConfigMock->expects($this->any())
             ->method('getVariables')
             ->willReturn($envVarConfig);

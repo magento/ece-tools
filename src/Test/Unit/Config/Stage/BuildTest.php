@@ -57,7 +57,7 @@ class BuildTest extends TestCase
     {
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
-            ->willReturn($envConfig);
+            ->willReturn([Build::SECTION_STAGE => $envConfig]);
         $this->buildReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($buildConfig);
