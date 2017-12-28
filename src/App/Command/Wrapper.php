@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\App\Command;
 
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Wraps command execution to provide unified execution flow.
@@ -32,11 +33,13 @@ class Wrapper
      * Executes CLI command via callback.
      *
      * @param \Closure $closure
+     * @param OutputInterface $output
      * @return int
      */
-    public function execute(\Closure $closure): int
+    public function execute(\Closure $closure, OutputInterface $output): int
     {
         $exitCode = self::CODE_SUCCESS;
+        $exceptionMessage = null;
 
         try {
             \PHP_Timer::start();
@@ -45,11 +48,16 @@ class Wrapper
         } catch (\Exception $exception) {
             \PHP_Timer::stop();
 
-            $this->logger->critical(
-                $exception->getMessage()
-            );
-
+            $exceptionMessage = $exception->getMessage();
             $exitCode = max(self::CODE_FAILURE, (int)$exception->getCode());
+
+            $output->writeln(
+                '<error>' . $exceptionMessage . '</error>'
+            );
+        }
+
+        if ($exceptionMessage) {
+            $this->logger->critical($exceptionMessage);
         }
 
         $this->logger->debug(\PHP_Timer::resourceUsage());

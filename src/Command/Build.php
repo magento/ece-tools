@@ -71,6 +71,6 @@ class Build extends Command
             $this->logger->info('Starting build.');
             $this->process->execute();
             $this->logger->info('Building completed.');
-        });
+        }, $output);
     }
 }

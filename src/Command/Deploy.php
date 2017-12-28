@@ -73,6 +73,6 @@ class Deploy extends Command
             $this->logger->info('Starting deploy.');
             $this->process->execute();
             $this->logger->info('Deployment completed.');
-        });
+        }, $output);
     }
 }
