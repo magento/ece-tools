@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Class Deploy.
  */
-class Deploy
+class State
 {
     /**
      * @var LoggerInterface

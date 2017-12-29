@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy;
+use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\Deploy\AdminEmail;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -36,9 +36,9 @@ class AdminEmailTest extends TestCase
     private $resultFactoryMock;
 
     /**
-     * @var Deploy|Mock
+     * @var State|Mock
      */
-    private $deployMock;
+    private $stateMock;
 
     /**
      * @inheritdoc
@@ -47,18 +47,18 @@ class AdminEmailTest extends TestCase
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
-        $this->deployMock = $this->createMock(Deploy::class);
+        $this->stateMock = $this->createMock(State::class);
 
         $this->adminEmailValidator = new AdminEmail(
             $this->environmentMock,
             $this->resultFactoryMock,
-            $this->deployMock
+            $this->stateMock
         );
     }
 
     public function testValidate()
     {
-        $this->deployMock->expects($this->once())
+        $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(false);
         $this->environmentMock->expects($this->once())
@@ -76,7 +76,7 @@ class AdminEmailTest extends TestCase
 
     public function testValidateMagentoInstalled()
     {
-        $this->deployMock->expects($this->once())
+        $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
         $this->environmentMock->expects($this->never())
@@ -93,7 +93,7 @@ class AdminEmailTest extends TestCase
 
     public function testValidateAdminEmailNotExist()
     {
-        $this->deployMock->expects($this->once())
+        $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(false);
         $this->environmentMock->expects($this->once())
