@@ -13,7 +13,9 @@ use Magento\MagentoCloud\DB\ConnectionInterface;
 class JobUnlocker
 {
     const STATUS_RUNNING = 'running';
-    const STATUS_MISSED = 'missed';
+    const STATUS_ERROR = 'error';
+
+    const UPGRADE_UNLOCK_MESSAGE = 'The job is terminated due to system upgrade';
 
     /**
      * @var ConnectionInterface
@@ -31,17 +33,20 @@ class JobUnlocker
     /**
      * Moves all cron jobs from status running to status missed.
      *
+     * @param string $message
      * @return int Count of updated rows.
      */
-    public function unlockAll(): int
+    public function unlockAll(string $message = self::UPGRADE_UNLOCK_MESSAGE): int
     {
-        $updateCronStatusQuery = 'UPDATE `cron_schedule` SET `status` = :to_status WHERE `status` = :from_status';
+        $updateCronStatusQuery = 'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages'
+            . ' WHERE `status` = :from_status';
 
         return $this->connection->affectingQuery(
             $updateCronStatusQuery,
             [
-                ':to_status' => self::STATUS_MISSED,
-                ':from_status' => self::STATUS_RUNNING
+                ':to_status' => self::STATUS_ERROR,
+                ':from_status' => self::STATUS_RUNNING,
+                ':messages' => $message
             ]
         );
     }
@@ -50,19 +55,21 @@ class JobUnlocker
      * Moves cron jobs with given job_code from status running to status missed.
      *
      * @param string $jobCode Cron job code.
+     * @param string $message
      * @return int Count of updated rows.
      */
-    public function unlockByJobCode(string $jobCode): int
+    public function unlockByJobCode(string $jobCode, string $message = self::UPGRADE_UNLOCK_MESSAGE): int
     {
-        $updateCronStatusQuery = 'UPDATE `cron_schedule` SET `status` = :to_status WHERE `status` = :from_status'
-            . ' AND `job_code` = :job_code';
+        $updateCronStatusQuery = 'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages'
+            . ' WHERE `status` = :from_status AND `job_code` = :job_code';
 
         return $this->connection->affectingQuery(
             $updateCronStatusQuery,
             [
-                ':to_status' => self::STATUS_MISSED,
+                ':to_status' => self::STATUS_ERROR,
                 ':from_status' => self::STATUS_RUNNING,
-                ':job_code' => $jobCode
+                ':job_code' => $jobCode,
+                ':messages' => $message
             ]
         );
     }

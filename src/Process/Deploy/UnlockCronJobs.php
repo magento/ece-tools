@@ -55,7 +55,7 @@ class UnlockCronJobs implements ProcessInterface
                     '%d cron jobs were updated from status "%s" to status "%s"',
                     $updatedJobsCount,
                     JobUnlocker::STATUS_RUNNING,
-                    JobUnlocker::STATUS_MISSED
+                    JobUnlocker::STATUS_ERROR
                 )
             );
         }

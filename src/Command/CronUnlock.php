@@ -21,6 +21,8 @@ class CronUnlock extends Command
 
     const OPTION_JOB_CODE = 'job-code';
 
+    const UNLOCK_MESSAGE = 'The job is terminated by cron:unlock command';
+
     /**
      * @var LoggerInterface
      */
@@ -73,11 +75,11 @@ class CronUnlock extends Command
 
             if (count($jobCodesToUnlock)) {
                 foreach ($jobCodesToUnlock as $jobCode) {
-                    $this->jobUnlocker->unlockByJobCode($jobCode);
+                    $this->jobUnlocker->unlockByJobCode($jobCode, self::UNLOCK_MESSAGE);
                     $this->logger->info(sprintf('Unlocking cron jobs with code #%s.', $jobCode));
                 }
             } else {
-                $this->jobUnlocker->unlockAll();
+                $this->jobUnlocker->unlockAll(self::UNLOCK_MESSAGE);
                 $this->logger->info('Unlocking all cron jobs.');
             }
 

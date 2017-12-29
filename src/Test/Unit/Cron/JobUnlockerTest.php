@@ -34,15 +34,16 @@ class JobUnlockerTest extends TestCase
         $this->connectionMock->expects($this->once())
         ->method('affectingQuery')
         ->with(
-            'UPDATE `cron_schedule` SET `status` = :to_status WHERE `status` = :from_status',
+            'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages WHERE `status` = :from_status',
             [
-                ':to_status' => JobUnlocker::STATUS_MISSED,
-                ':from_status' => JobUnlocker::STATUS_RUNNING
+                ':to_status' => JobUnlocker::STATUS_ERROR,
+                ':from_status' => JobUnlocker::STATUS_RUNNING,
+                ':messages' => 'some message'
             ]
         )
         ->willReturn(3);
 
-        $this->assertEquals(3, $this->cronJobUnlocker->unlockAll());
+        $this->assertEquals(3, $this->cronJobUnlocker->unlockAll('some message'));
     }
 
     public function testUnlockByJobCode()
@@ -50,16 +51,17 @@ class JobUnlockerTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('affectingQuery')
             ->with(
-                'UPDATE `cron_schedule` SET `status` = :to_status WHERE `status` = :from_status'
-                . ' AND `job_code` = :job_code',
+                'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages'
+                    . ' WHERE `status` = :from_status AND `job_code` = :job_code',
                 [
-                    ':to_status' => JobUnlocker::STATUS_MISSED,
+                    ':to_status' => JobUnlocker::STATUS_ERROR,
                     ':from_status' => JobUnlocker::STATUS_RUNNING,
-                    ':job_code' => 'some_code'
+                    ':job_code' => 'some_code',
+                    ':messages' => 'some_message'
                 ]
             )
             ->willReturn(3);
 
-        $this->assertEquals(3, $this->cronJobUnlocker->unlockByJobCode('some_code'));
+        $this->assertEquals(3, $this->cronJobUnlocker->unlockByJobCode('some_code', 'some_message'));
     }
 }

@@ -53,7 +53,8 @@ class CronUnlockTest extends TestCase
                 ['Unlocking completed.']
             );
         $this->jobUnlockerMock->expects($this->once())
-            ->method('unlockAll');
+            ->method('unlockAll')
+            ->with(CronUnlock::UNLOCK_MESSAGE);
         $this->jobUnlockerMock->expects($this->never())
             ->method('unlockByJobCode');
 
@@ -80,8 +81,8 @@ class CronUnlockTest extends TestCase
         $this->jobUnlockerMock->expects($this->exactly(2))
             ->method('unlockByJobCode')
             ->withConsecutive(
-                ['code1'],
-                ['code2']
+                ['code1', CronUnlock::UNLOCK_MESSAGE],
+                ['code2', CronUnlock::UNLOCK_MESSAGE]
             );
 
         $tester = new CommandTester(
