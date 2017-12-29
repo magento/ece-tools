@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\CronUnlock;
-use Magento\MagentoCloud\Util\CronJobUnlocker;
+use Magento\MagentoCloud\Cron\JobUnlocker;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -20,9 +20,9 @@ class CronUnlockTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var CronJobUnlocker|Mock
+     * @var JobUnlocker|Mock
      */
-    private $cronJobUnlockerMock;
+    private $jobUnlockerMock;
 
     /**
      * @var CronUnlock
@@ -34,11 +34,11 @@ class CronUnlockTest extends TestCase
      */
     protected function setUp()
     {
-        $this->cronJobUnlockerMock = $this->createMock(CronJobUnlocker::class);
+        $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->cronUnlockCommand = new CronUnlock(
-            $this->cronJobUnlockerMock,
+            $this->jobUnlockerMock,
             $this->loggerMock
         );
     }
@@ -49,12 +49,12 @@ class CronUnlockTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Starting unlocking.'],
-                ['Unlocking all cron jobs..'],
+                ['Unlocking all cron jobs.'],
                 ['Unlocking completed.']
             );
-        $this->cronJobUnlockerMock->expects($this->once())
+        $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll');
-        $this->cronJobUnlockerMock->expects($this->never())
+        $this->jobUnlockerMock->expects($this->never())
             ->method('unlockByJobCode');
 
         $tester = new CommandTester(
@@ -71,13 +71,13 @@ class CronUnlockTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Starting unlocking.'],
-                ['Unlocking cron jobs with job_code #code1.'],
-                ['Unlocking cron jobs with job_code #code2.'],
+                ['Unlocking cron jobs with code #code1.'],
+                ['Unlocking cron jobs with code #code2.'],
                 ['Unlocking completed.']
             );
-        $this->cronJobUnlockerMock->expects($this->never())
+        $this->jobUnlockerMock->expects($this->never())
             ->method('unlockAll');
-        $this->cronJobUnlockerMock->expects($this->exactly(2))
+        $this->jobUnlockerMock->expects($this->exactly(2))
             ->method('unlockByJobCode')
             ->withConsecutive(
                 ['code1'],
@@ -88,7 +88,7 @@ class CronUnlockTest extends TestCase
             $this->cronUnlockCommand
         );
         $tester->execute([
-            '--job_code' => ['code1', 'code2']
+            '--job-code' => ['code1', 'code2']
         ]);
 
         $this->assertSame(0, $tester->getStatusCode());
@@ -106,7 +106,7 @@ class CronUnlockTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('critical')
             ->with('Some error');
-        $this->cronJobUnlockerMock->expects($this->once())
+        $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll')
             ->willThrowException(new \Exception('Some error'));
 

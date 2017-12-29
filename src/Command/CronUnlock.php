@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Util\CronJobUnlocker;
+use Magento\MagentoCloud\Cron\JobUnlocker;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,7 +19,7 @@ class CronUnlock extends Command
 {
     const NAME = 'cron:unlock';
 
-    const OPTION_JOB_CODE = 'job_code';
+    const OPTION_JOB_CODE = 'job-code';
 
     /**
      * @var LoggerInterface
@@ -27,17 +27,17 @@ class CronUnlock extends Command
     private $logger;
 
     /**
-     * @var CronJobUnlocker
+     * @var JobUnlocker
      */
-    private $cronJobUnlocker;
+    private $jobUnlocker;
 
     /**
-     * @param CronJobUnlocker $cronJobUnlocker
+     * @param JobUnlocker $jobUnlocker
      * @param LoggerInterface $logger
      */
-    public function __construct(CronJobUnlocker $cronJobUnlocker, LoggerInterface $logger)
+    public function __construct(JobUnlocker $jobUnlocker, LoggerInterface $logger)
     {
-        $this->cronJobUnlocker = $cronJobUnlocker;
+        $this->jobUnlocker = $jobUnlocker;
         $this->logger = $logger;
 
         parent::__construct();
@@ -73,12 +73,12 @@ class CronUnlock extends Command
 
             if (count($jobCodesToUnlock)) {
                 foreach ($jobCodesToUnlock as $jobCode) {
-                    $this->cronJobUnlocker->unlockByJobCode($jobCode);
-                    $this->logger->info(sprintf('Unlocking cron jobs with job_code #%s.', $jobCode));
+                    $this->jobUnlocker->unlockByJobCode($jobCode);
+                    $this->logger->info(sprintf('Unlocking cron jobs with code #%s.', $jobCode));
                 }
             } else {
-                $this->cronJobUnlocker->unlockAll();
-                $this->logger->info('Unlocking all cron jobs..');
+                $this->jobUnlocker->unlockAll();
+                $this->logger->info('Unlocking all cron jobs.');
             }
 
             $this->logger->info('Unlocking completed.');

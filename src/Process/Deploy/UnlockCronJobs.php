@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\CronJobUnlocker;
+use Magento\MagentoCloud\Cron\JobUnlocker;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,19 +24,19 @@ class UnlockCronJobs implements ProcessInterface
     private $logger;
 
     /**
-     * @var CronJobUnlocker
+     * @var JobUnlocker
      */
-    private $cronJobUnlocker;
+    private $jobUnlocker;
 
     /**
-     * @param CronJobUnlocker $cronJobUnlocker
+     * @param JobUnlocker $jobUnlocker
      * @param LoggerInterface $logger
      */
     public function __construct(
-        CronJobUnlocker $cronJobUnlocker,
+        JobUnlocker $jobUnlocker,
         LoggerInterface $logger
     ) {
-        $this->cronJobUnlocker = $cronJobUnlocker;
+        $this->jobUnlocker = $jobUnlocker;
         $this->logger = $logger;
     }
 
@@ -47,15 +47,15 @@ class UnlockCronJobs implements ProcessInterface
      */
     public function execute()
     {
-        $updatedJobsCount = $this->cronJobUnlocker->unlockAll();
+        $updatedJobsCount = $this->jobUnlocker->unlockAll();
 
         if ($updatedJobsCount) {
             $this->logger->info(
                 sprintf(
                     '%d cron jobs were updated from status "%s" to status "%s"',
                     $updatedJobsCount,
-                    CronJobUnlocker::STATUS_RUNNING,
-                    CronJobUnlocker::STATUS_MISSED
+                    JobUnlocker::STATUS_RUNNING,
+                    JobUnlocker::STATUS_MISSED
                 )
             );
         }

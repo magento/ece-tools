@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Process\Deploy\UnlockCronJobs;
-use Magento\MagentoCloud\Util\CronJobUnlocker;
+use Magento\MagentoCloud\Cron\JobUnlocker;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -19,9 +19,9 @@ class UnlockCronJobsTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var CronJobUnlocker|Mock
+     * @var JobUnlocker|Mock
      */
-    private $cronJobUnlockerMock;
+    private $jobUnlockerMock;
 
     /**
      * @var UnlockCronJobs
@@ -31,10 +31,10 @@ class UnlockCronJobsTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->cronJobUnlockerMock = $this->createMock(CronJobUnlocker::class);
+        $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
 
         $this->process = new UnlockCronJobs(
-            $this->cronJobUnlockerMock,
+            $this->jobUnlockerMock,
             $this->loggerMock
         );
     }
@@ -63,7 +63,7 @@ class UnlockCronJobsTest extends TestCase
      */
     private function updateCronJobs(int $updatedRowsCount)
     {
-        $this->cronJobUnlockerMock->expects($this->once())
+        $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll')
             ->willReturn($updatedRowsCount);
     }
