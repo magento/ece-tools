@@ -11,7 +11,7 @@ use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class Deploy.
+ * Describes the application state.
  */
 class State
 {
