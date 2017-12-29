@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Config\Stage;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
- * @inheritdoc
+ * Provides access to configuration of build stage.
  */
 interface BuildInterface extends StageConfigInterface
 {

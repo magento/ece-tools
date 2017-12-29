@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @inheritdoc
@@ -39,7 +41,10 @@ class Deploy implements DeployInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     * @throws \RuntimeException
+     * @throws ParseException;
+     * @throws FileSystemException;
      */
     public function get(string $name)
     {
@@ -65,6 +70,8 @@ class Deploy implements DeployInterface
 
     /**
      * @return array
+     * @throws ParseException;
+     * @throws FileSystemException;
      */
     private function mergeConfig(): array
     {
