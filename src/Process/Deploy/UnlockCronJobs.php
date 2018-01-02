@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Cron\JobUnlocker;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,28 +18,25 @@ use Psr\Log\LoggerInterface;
  */
 class UnlockCronJobs implements ProcessInterface
 {
-    const STATUS_RUNNING = 'running';
-    const STATUS_MISSED = 'missed';
-
-    /**
-     * @var ConnectionInterface
-     */
-    private $connection;
-
     /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @param ConnectionInterface $connection
+     * @var JobUnlocker
+     */
+    private $jobUnlocker;
+
+    /**
+     * @param JobUnlocker $jobUnlocker
      * @param LoggerInterface $logger
      */
     public function __construct(
-        ConnectionInterface $connection,
+        JobUnlocker $jobUnlocker,
         LoggerInterface $logger
     ) {
-        $this->connection = $connection;
+        $this->jobUnlocker = $jobUnlocker;
         $this->logger = $logger;
     }
 
@@ -50,23 +47,15 @@ class UnlockCronJobs implements ProcessInterface
      */
     public function execute()
     {
-        $updateCronStatusQuery = 'UPDATE `cron_schedule` SET `status` = :to_status WHERE `status` = :from_status';
-
-        $updatedJobsCount = $this->connection->affectingQuery(
-            $updateCronStatusQuery,
-            [
-                ':to_status' => self::STATUS_MISSED,
-                ':from_status' => self::STATUS_RUNNING
-            ]
-        );
+        $updatedJobsCount = $this->jobUnlocker->unlockAll();
 
         if ($updatedJobsCount) {
             $this->logger->info(
                 sprintf(
                     '%d cron jobs were updated from status "%s" to status "%s"',
                     $updatedJobsCount,
-                    self::STATUS_RUNNING,
-                    self::STATUS_MISSED
+                    JobUnlocker::STATUS_RUNNING,
+                    JobUnlocker::STATUS_ERROR
                 )
             );
         }

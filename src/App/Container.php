@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
-use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Prestart;
@@ -274,15 +273,6 @@ class Container implements ContainerInterface
                     'system/stores',
                     'system/websites',
                 ];
-            });
-        $this->container->when(CronUnlock::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\UnlockCronJobs::class),
-                    ],
-                ]);
             });
         $this->container->when(DeployProcess\PreDeploy::class)
             ->needs(ProcessInterface::class)
