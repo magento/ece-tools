@@ -42,7 +42,6 @@ ENV PHP_ENABLE_XDEBUG false
 ENV MAGENTO_ROOT /var/www/magento
 
 ENV DEBUG false
-ENV UPDATE_UID_GID false
 
 ADD etc/php-xdebug.ini /usr/local/etc/php/conf.d/zz-xdebug-settings.ini
 ADD etc/mail.ini /usr/local/etc/php/conf.d/zz-mail.ini

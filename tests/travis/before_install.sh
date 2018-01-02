@@ -46,8 +46,6 @@ case $TEST_SUITE in
         echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> composer.env
 
         mkdir magento
-        docker-compose run cli magento-installer
-        docker-compose up -d
         cd ../..;
         ;;
 esac

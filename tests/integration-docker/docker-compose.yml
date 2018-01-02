@@ -52,7 +52,6 @@ services:
       - MYSQL_DATABASE=magento2
       - MYSQL_USER=magento2
       - MYSQL_PASSWORD=magento2
-      - TERM=meh
 
   appdata:
     image: tianon/true
