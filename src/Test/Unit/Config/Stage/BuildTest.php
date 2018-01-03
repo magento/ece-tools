@@ -377,7 +377,7 @@ class BuildTest extends TestCase
 
     /**
      * @expectedException \RuntimeException
-     * @expectedExceptionMessage Config value was not defined.
+     * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
      */
     public function testNotExists()
     {

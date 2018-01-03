@@ -43,18 +43,26 @@ class Build implements BuildInterface
     }
 
     /**
-     * {@inheritdoc}
-     * @throws \RuntimeException
-     * @throws ParseException;
-     * @throws FileSystemException;
+     * @inheritdoc
      */
     public function get(string $name)
     {
         if (!array_key_exists($name, $this->getDefault())) {
-            throw new \RuntimeException('Config value was not defined.');
+            throw new \RuntimeException(sprintf(
+                'Config %s was not defined.',
+                $name
+            ));
         }
 
-        return $this->mergeConfig()[$name];
+        try {
+            return $this->mergeConfig()[$name];
+        } catch (\Exception $exception) {
+            throw new \RuntimeException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
+        }
     }
 
     /**

@@ -37,7 +37,7 @@ interface StageConfigInterface
      *
      * @param string $name The config name
      * @return string|bool|array|int The config value
-     * @throws \RuntimeException If config value was not defined
+     * @throws \RuntimeException If config value was not defined or can not be read
      */
     public function get(string $name);
 }

@@ -41,31 +41,37 @@ class Deploy implements DeployInterface
     }
 
     /**
-     * {@inheritdoc}
-     * @throws \RuntimeException
-     * @throws ParseException;
-     * @throws FileSystemException;
+     * @inheritdoc
      */
     public function get(string $name)
     {
         if (!array_key_exists($name, $this->getDefault())) {
-            throw new \RuntimeException('Config value was not defined.');
+            throw new \RuntimeException(sprintf(
+                'Config %s was not defined.',
+                $name
+            ));
         }
 
-        $value = $this->mergeConfig()[$name];
+        try {
+            $value = $this->mergeConfig()[$name];
 
-        if (!is_string($value)) {
-            return $value;
+            if (!is_string($value)) {
+                return $value;
+            }
+
+            /**
+             * Trying to determine json object in string.
+             */
+            $decodedValue = json_decode($value, true);
+
+            return $decodedValue !== null && json_last_error() === JSON_ERROR_NONE ? $decodedValue : $value;
+        } catch (\Exception $exception) {
+            throw new \RuntimeException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
         }
-
-        /**
-         * Trying to determine json object in string.
-         */
-        $decodedValue = json_decode($value, true);
-
-        return $decodedValue !== null && json_last_error() === JSON_ERROR_NONE
-            ? $decodedValue
-            : $value;
     }
 
     /**
