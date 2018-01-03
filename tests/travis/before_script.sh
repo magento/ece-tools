@@ -8,7 +8,6 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 
 case $TEST_SUITE in
     integration-docker)
-        docker-compose down -v
-        docker-compose up --abort-on-container-exit
+        docker-compose up --build --abort-on-container-exit
         ;;
 esac
