@@ -78,14 +78,6 @@ class EnvironmentTest extends TestCase
     }
 
     /**
-     * @param array $variables
-     */
-    private function setVariables(array $variables)
-    {
-        $_ENV['MAGENTO_CLOUD_VARIABLES'] = base64_encode(json_encode($variables));
-    }
-
-    /**
      * @param array $env
      * @param string $key
      * @param mixed $default
@@ -134,28 +126,12 @@ class EnvironmentTest extends TestCase
         );
     }
 
-    public function testIsDeployStaticContentDisabled()
-    {
-        $this->setVariables([
-            'DO_DEPLOY_STATIC_CONTENT' => 'disabled',
-        ]);
-
-        $this->assertSame(
-            false,
-            $this->environment->isDeployStaticContent()
-        );
-    }
-
     /**
      * @param bool $isExists
      * @dataProvider isDeployStaticContentToBeEnabledDataProvider
      */
     public function testIsDeployStaticContentToBeEnabled(bool $isExists)
     {
-        $this->setVariables([
-            'DO_DEPLOY_STATIC_CONTENT' => 'enabled',
-        ]);
-
         $flagMock = $this->getMockBuilder(FlagFileInterface::class)
             ->getMockForAbstractClass();
 
@@ -166,9 +142,6 @@ class EnvironmentTest extends TestCase
         $flagMock->expects($this->once())
             ->method('exists')
             ->willReturn($isExists);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . (!$isExists ? 'enabled' : 'disabled'));
 
         $this->assertSame(
             !$isExists,
@@ -187,75 +160,12 @@ class EnvironmentTest extends TestCase
         ];
     }
 
-    /**
-     * @param string $variableValue
-     * @param bool $expected
-     * @dataProvider doCleanStaticFilesDataProvider
-     */
-    public function testDoCleanStaticFiles(string $variableValue, bool $expected)
-    {
-        $this->setVariables([
-            'CLEAN_STATIC_FILES' => $variableValue,
-        ]);
-
-        $this->assertSame(
-            $expected,
-            $this->environment->doCleanStaticFiles()
-        );
-    }
-
-    public function doCleanStaticFilesDataProvider(): array
-    {
-        return [
-            [Environment::VAL_DISABLED, false],
-            [Environment::VAL_ENABLED, true],
-            ['', true],
-        ];
-    }
-
-    /**
-     * @param string $variableValue
-     * @param bool $expected
-     * @dataProvider isStaticContentSymlinkOnDataProvider
-     */
-    public function testIsStaticContentSymlinkOn(string $variableValue, bool $expected)
-    {
-        $this->setVariables([
-            'STATIC_CONTENT_SYMLINK' => $variableValue,
-        ]);
-
-        $this->assertSame(
-            $expected,
-            $this->environment->isStaticContentSymlinkOn()
-        );
-    }
-
-    public function isStaticContentSymlinkOnDataProvider()
-    {
-        return [
-            [Environment::VAL_DISABLED, false],
-            [Environment::VAL_ENABLED, true],
-            ['', true],
-        ];
-    }
-
     public function testGetDefaultCurrency()
     {
         $this->assertSame(
             'USD',
             $this->environment->getDefaultCurrency()
         );
-    }
-
-    /**
-     * @param array $variables
-     * @param array $expectedResult
-     * @dataProvider getCronConsumersRunnerDataProvider
-     */
-    public function testGetCronConsumersRunner(array $variables, array $expectedResult)
-    {
-        $this->setVariables($variables);
-        $this->assertEquals($expectedResult, $this->environment->getCronConsumersRunner());
     }
 
     /**
@@ -277,7 +187,7 @@ class EnvironmentTest extends TestCase
                     'cron_run' => 'false',
                     'max_messages' => '100',
                     'consumers' => ['test'],
-                ]
+                ],
             ],
             [
                 'variables' => [
@@ -287,69 +197,7 @@ class EnvironmentTest extends TestCase
                     'cron_run' => 'false',
                     'max_messages' => '100',
                     'consumers' => ['test'],
-                ]
-            ]
-        ];
-    }
-
-    /**
-     * @param array $variables
-     * @param array $expected
-     * @dataProvider getJsonVariableDataProvider
-     */
-    public function testGetJsonVariable(array $variables, array $expected)
-    {
-        $this->setVariables($variables);
-
-        $this->assertEquals(
-            $expected,
-            $this->environment->getJsonVariable('SOME_VARIABLE')
-        );
-    }
-
-    public function getJsonVariableDataProvider()
-    {
-        return [
-            [
-                [
-                    'SOME_VARIABLE' => ''
                 ],
-                []
-            ],
-            [
-                [
-                    'SOME_VARIABLE' => 'not json string'
-                ],
-                []
-            ],
-            [
-                [
-                    'SOME_VARIABLE' => 12345
-                ],
-                [
-                    12345
-                ]
-            ],
-            [
-                [
-                    'SOME_VARIABLE' => '{"option1":"value1", "option2":"value2"}'
-                ],
-                [
-                    'option1' => 'value1',
-                    'option2' => 'value2',
-                ]
-            ],
-            [
-                [
-                    'SOME_VARIABLE' => [
-                        'option1' => 'value1',
-                        'option2' => 'value2',
-                    ]
-                ],
-                [
-                    'option1' => 'value1',
-                    'option2' => 'value2',
-                ]
             ],
         ];
     }

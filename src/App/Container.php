@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
-use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Prestart;
@@ -99,8 +98,7 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\Dump::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Build::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Deploy::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
         $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
@@ -116,6 +114,14 @@ class Container implements ContainerInterface
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\RepositoryFactory::class);
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\BuildInterface::class,
+            \Magento\MagentoCloud\Config\Stage\Build::class
+        );
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\DeployInterface::class,
+            \Magento\MagentoCloud\Config\Stage\Deploy::class
+        );
         /**
          * Contextual binding.
          */
@@ -275,15 +281,6 @@ class Container implements ContainerInterface
                     'system/websites',
                 ];
             });
-        $this->container->when(CronUnlock::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\UnlockCronJobs::class),
-                    ],
-                ]);
-            });
         $this->container->when(DeployProcess\PreDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -314,9 +311,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(\Magento\MagentoCloud\Config\Build::class)
-            ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
-            ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
         $this->container->when(BuildProcess\DeployStaticContent::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -348,18 +342,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(BuildProcess\DeployStaticContent::class)
-            ->needs(StageConfigInterface::class)
-            ->give(BuildConfig::class);
-        $this->container->when(\Magento\MagentoCloud\StaticContent\Build\Option::class)
-            ->needs(StageConfigInterface::class)
-            ->give(BuildConfig::class);
-        $this->container->when(\Magento\MagentoCloud\StaticContent\Deploy\Option::class)
-            ->needs(StageConfigInterface::class)
-            ->give(DeployConfig::class);
-        $this->container->when(\Magento\MagentoCloud\StaticContent\Prestart\Option::class)
-            ->needs(StageConfigInterface::class)
-            ->give(BuildConfig::class);
     }
 
     /**

@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -30,11 +30,6 @@ class Generate implements ProcessInterface
     private $logger;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var File
      */
     private $file;
@@ -55,30 +50,35 @@ class Generate implements ProcessInterface
     private $deployOption;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
-     * @param Environment $environment
      * @param File $file
      * @param DirectoryList $directoryList
      * @param CommandFactory $commandFactory
      * @param Option $deployOption
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         ShellInterface $shell,
         LoggerInterface $logger,
-        Environment $environment,
         File $file,
         DirectoryList $directoryList,
         CommandFactory $commandFactory,
-        Option $deployOption
+        Option $deployOption,
+        DeployInterface $stageConfig
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
-        $this->environment = $environment;
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->commandFactory = $commandFactory;
         $this->deployOption = $deployOption;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -88,7 +88,9 @@ class Generate implements ProcessInterface
     {
         $this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt');
         $this->logger->info('Enabling Maintenance mode');
-        $this->shell->execute("php ./bin/magento maintenance:enable {$this->environment->getVerbosityLevel()}");
+        $this->shell->execute(
+            "php ./bin/magento maintenance:enable {$this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)}"
+        );
         $this->logger->info('Extracting locales');
 
         $logMessage = count($this->deployOption->getLocales()) ?
@@ -100,8 +102,10 @@ class Generate implements ProcessInterface
         $command = $this->commandFactory->create($this->deployOption);
 
         $this->shell->execute($command);
+        $this->shell->execute(
+            "php ./bin/magento maintenance:disable {$this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)}"
+        );
 
-        $this->shell->execute("php ./bin/magento maintenance:disable {$this->environment->getVerbosityLevel()}");
         $this->logger->info('Maintenance mode is disabled.');
     }
 }

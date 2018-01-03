@@ -5,10 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\PostDeploy\CleanCache;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -21,14 +22,14 @@ class CleanCacheTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ShellInterface|Mock
      */
     private $shellMock;
 
     /**
-     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
+     * @var DeployInterface|Mock
      */
-    private $environmentMock;
+    private $stageConfig;
 
     /**
      * @inheritdoc
@@ -36,19 +37,20 @@ class CleanCacheTest extends TestCase
     protected function setUp()
     {
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->stageConfig = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new CleanCache(
             $this->shellMock,
-            $this->environmentMock
+            $this->stageConfig
         );
     }
 
     public function testExecute()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
-            ->willReturn(' -vvv');
+        $this->stageConfig->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-vvv');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./bin/magento cache:flush -vvv');
@@ -58,12 +60,12 @@ class CleanCacheTest extends TestCase
 
     public function testExecuteNoVerbosity()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
+        $this->stageConfig->expects($this->once())
+            ->method('get')
             ->willReturn('');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento cache:flush');
+            ->with('php ./bin/magento cache:flush ');
 
         $this->process->execute();
     }

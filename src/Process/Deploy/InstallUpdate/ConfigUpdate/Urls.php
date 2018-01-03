@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -30,18 +31,26 @@ class Urls implements ProcessInterface
     private $logger;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param Environment $environment
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         ProcessInterface $process,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->process = $process;
         $this->logger = $logger;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -50,7 +59,7 @@ class Urls implements ProcessInterface
     public function execute()
     {
         if ($this->environment->isMasterBranch()
-            || !$this->environment->isUpdateUrlsEnabled() ) {
+            || !$this->stageConfig->get(DeployInterface::VAR_UPDATE_URLS)) {
             $this->logger->info('Skipping URL updates');
 
             return;

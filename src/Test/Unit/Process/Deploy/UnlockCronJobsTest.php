@@ -6,10 +6,10 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Process\Deploy\UnlockCronJobs;
+use Magento\MagentoCloud\Cron\JobUnlocker;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\DB\ConnectionInterface;
 
 class UnlockCronJobsTest extends TestCase
 {
@@ -19,9 +19,9 @@ class UnlockCronJobsTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ConnectionInterface|Mock
+     * @var JobUnlocker|Mock
      */
-    private $connectionMock;
+    private $jobUnlockerMock;
 
     /**
      * @var UnlockCronJobs
@@ -31,10 +31,10 @@ class UnlockCronJobsTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
 
         $this->process = new UnlockCronJobs(
-            $this->connectionMock,
+            $this->jobUnlockerMock,
             $this->loggerMock
         );
     }
@@ -44,7 +44,7 @@ class UnlockCronJobsTest extends TestCase
         $this->updateCronJobs(5);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('5 cron jobs were updated from status "running" to status "missed"');
+            ->with('5 cron jobs were updated from status "running" to status "error"');
 
         $this->process->execute();
     }
@@ -63,15 +63,8 @@ class UnlockCronJobsTest extends TestCase
      */
     private function updateCronJobs(int $updatedRowsCount)
     {
-        $this->connectionMock->expects($this->once())
-            ->method('affectingQuery')
-            ->with(
-                'UPDATE `cron_schedule` SET `status` = :to_status WHERE `status` = :from_status',
-                [
-                    ':to_status' => UnlockCronJobs::STATUS_MISSED,
-                    ':from_status' => UnlockCronJobs::STATUS_RUNNING
-                ]
-            )
+        $this->jobUnlockerMock->expects($this->once())
+            ->method('unlockAll')
             ->willReturn($updatedRowsCount);
     }
 }

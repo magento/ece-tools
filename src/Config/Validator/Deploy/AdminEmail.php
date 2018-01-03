@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy;
+use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -27,23 +27,23 @@ class AdminEmail implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var Deploy
+     * @var State
      */
-    private $deploy;
+    private $state;
 
     /**
      * @param Environment $environment
      * @param ResultFactory $resultFactory
-     * @param Deploy $deploy
+     * @param State $deploy
      */
     public function __construct(
         Environment $environment,
         ResultFactory $resultFactory,
-        Deploy $deploy
+        State $deploy
     ) {
         $this->environment = $environment;
         $this->resultFactory = $resultFactory;
-        $this->deploy = $deploy;
+        $this->state = $deploy;
     }
 
     /**
@@ -53,7 +53,7 @@ class AdminEmail implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        if (!$this->deploy->isInstalled() && !$this->environment->getAdminEmail()) {
+        if (!$this->state->isInstalled() && !$this->environment->getAdminEmail()) {
             return $this->resultFactory->create(
                 Validator\ResultInterface::ERROR,
                 [
