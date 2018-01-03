@@ -38,7 +38,7 @@ class Amqp implements ProcessInterface
     private $configReader;
 
     /**
-     * @var Deploy
+     * @var DeployInterface
      */
     private $stageConfig;
 
