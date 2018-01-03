@@ -179,6 +179,10 @@ class Bootstrap
             return $configFile;
         }
 
+        if (@$_ENV['environment'] === 'docker' && @file_exists($configFile . '.docker')) {
+            return $configFile . '.docker';
+        }
+
         if (@file_exists($configFile . '.dist')) {
             return $configFile . '.dist';
         }

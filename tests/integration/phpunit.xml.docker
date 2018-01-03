@@ -9,10 +9,12 @@
 >
     <testsuites>
         <testsuite name="Unit">
-            <directory suffix="Test.php">../../src/Test/IntegrationDocker</directory>
+            <directory suffix="AcceptanceTest.php">../../src/Test/Integration</directory>
         </testsuite>
     </testsuites>
     <php>
         <ini name="date.timezone" value="UTC"/>
+        <env name="environment" value="docker"/>
+        <env name="SANDBOX_KEY" value="docker"/>
     </php>
 </phpunit>

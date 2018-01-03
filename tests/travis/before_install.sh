@@ -40,12 +40,10 @@ case $TEST_SUITE in
         sudo service apache2 restart
         ;;
     integration-docker)
-        cd tests/integration-docker;
+        composer config -a -n -g http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
+        composer config -a -n -g http-basic.connect20-qa01.magedevteam.com ${CONNECT20_USERNAME} ${CONNECT20_PASSWORD}
+        composer require --dev hirak/prestissimo
 
-        echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> composer.env
-        echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> composer.env
-
-        mkdir magento
-        cd ../..;
+        docker-compose up -d
         ;;
 esac
