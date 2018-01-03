@@ -19,11 +19,8 @@ case $TEST_SUITE in
         phpunit --verbose --configuration tests/integration/phpunit.xml.dist;
         ;;
     integration-docker)
-        docker-compose run cli bash -c "composer install -d /var/www/magento"
-        docker-compose run cli bash -c "ls -la /var/www/magento"
-        docker-compose run cli bash -c "ls -la /var/www/magento/vendor"
-        docker-compose run cli bash -c "ls -la /var/www/magento/vendor/bin"
         docker-compose up --build --abort-on-container-exit
+        docker-compose run cli bash -c "composer install -d /var/www/magento"
         docker-compose run cli bash -c "/var/www/magento/vendor/bin/phpunit --verbose --configuration /var/www/magento/tests/integration/phpunit.xml.docker"
         ;;
 esac
