@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Config\Build;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Process\Build\CompileDi;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -32,9 +32,9 @@ class CompileDiTest extends TestCase
     private $shellMock;
 
     /**
-     * @var Build|\PHPUnit_Framework_MockObject_MockObject
+     * @var BuildInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $buildConfigMock;
+    private $stageConfigMock;
 
     /**
      * @inheritdoc
@@ -45,19 +45,21 @@ class CompileDiTest extends TestCase
             ->getMockForAbstractClass();
         $this->shellMock = $this->getMockBuilder(ShellInterface::class)
             ->getMockForAbstractClass();
-        $this->buildConfigMock = $this->createMock(Build::class);
+        $this->stageConfigMock = $this->getMockBuilder(BuildInterface::class)
+            ->getMockForAbstractClass();
 
         $this->process = new CompileDi(
             $this->loggerMock,
             $this->shellMock,
-            $this->buildConfigMock
+            $this->stageConfigMock
         );
     }
 
     public function testExecute()
     {
-        $this->buildConfigMock->expects($this->once())
-            ->method('getVerbosityLevel')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn('-vvv');
         $this->loggerMock->expects($this->once())
             ->method('info')

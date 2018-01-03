@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Build as BuildConfig;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 
 /**
  * @inheritdoc
@@ -26,23 +26,23 @@ class CompileDi implements ProcessInterface
     private $shell;
 
     /**
-     * @var BuildConfig
+     * @var BuildInterface
      */
-    private $buildConfig;
+    private $stageConfig;
 
     /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
-     * @param BuildConfig $buildConfig
+     * @param BuildInterface $stageConfig
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
-        BuildConfig $buildConfig
+        BuildInterface $stageConfig
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
-        $this->buildConfig = $buildConfig;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -51,7 +51,7 @@ class CompileDi implements ProcessInterface
      */
     public function execute()
     {
-        $verbosityLevel = $this->buildConfig->getVerbosityLevel();
+        $verbosityLevel = $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS);
 
         $this->logger->info('Running DI compilation');
         $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");

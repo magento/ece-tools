@@ -5,19 +5,23 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\CleanCache;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * {@inheritdoc}
+ * @deprecated
+ */
 class CleanCacheTest extends TestCase
 {
     /**
-     * @var Environment|Mock
+     * @var CleanCache
      */
-    private $environmentMock;
+    private $process;
 
     /**
      * @var LoggerInterface|Mock
@@ -30,28 +34,32 @@ class CleanCacheTest extends TestCase
     private $shellMock;
 
     /**
-     * @var CleanCache
+     * @var DeployInterface|Mock
      */
-    private $process;
+    private $stageConfigMock;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new CleanCache(
             $this->loggerMock,
-            $this->environmentMock,
-            $this->shellMock
+            $this->shellMock,
+            $this->stageConfigMock
         );
     }
 
     public function testExecute()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
-            ->willReturn(' -v');
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-v');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Clearing application cache.');

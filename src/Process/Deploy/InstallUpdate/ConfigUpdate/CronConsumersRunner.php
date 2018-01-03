@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Environment;
@@ -38,6 +39,11 @@ class CronConsumersRunner implements ProcessInterface
     private $configWriter;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * Max messages that will be processed by each consumer
      */
     const DEFAULT_MAX_MESSAGES = 10000;
@@ -47,17 +53,20 @@ class CronConsumersRunner implements ProcessInterface
      * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         ConfigReader $configReader,
         ConfigWriter $configWriter,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -67,12 +76,14 @@ class CronConsumersRunner implements ProcessInterface
     {
         $this->logger->info('Updating env.php cron consumers runner configuration.');
         $config = $this->configReader->read();
-        $cronConsumersRunnerConfig = new Repository($this->environment->getCronConsumersRunner());
+        $runnerConfig = new Repository(
+            $this->stageConfig->get(DeployInterface::VAR_CRON_CONSUMERS_RUNNER)
+        );
 
         $config['cron_consumers_runner'] = [
-            'cron_run' => $cronConsumersRunnerConfig->get('cron_run') === 'true',
-            'max_messages' => $cronConsumersRunnerConfig->get('max_messages', static::DEFAULT_MAX_MESSAGES),
-            'consumers' => $cronConsumersRunnerConfig->get('consumers', []),
+            'cron_run' => $runnerConfig->get('cron_run') === 'true',
+            'max_messages' => $runnerConfig->get('max_messages', static::DEFAULT_MAX_MESSAGES),
+            'consumers' => $runnerConfig->get('consumers', []),
         ];
 
         $this->configWriter->write($config);

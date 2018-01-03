@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Prestart;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
 use Magento\MagentoCloud\Filesystem\FlagFilePool;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -17,15 +18,6 @@ use Magento\MagentoCloud\Util\StaticContentCompressor;
  */
 class CompressStaticContent implements ProcessInterface
 {
-    /**
-     * Compression level to be used by gzip.
-     *
-     * This should be an integer between 1 and 9, inclusive.
-     * Compression level 4 is just as fast as level 1 on modern processors due to reduced filesystem I/O.
-     * Level 4 is appropriate for when we must finish compression as fast as possible, such as in this site
-     * deploy phase that brings the site down.
-     */
-
     /**
      * @var LoggerInterface
      */
@@ -47,20 +39,29 @@ class CompressStaticContent implements ProcessInterface
     private $flagFilePool;
 
     /**
-     * @param LoggerInterface         $logger
-     * @param Environment             $environment
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
+     * @param LoggerInterface $logger
+     * @param Environment $environment
      * @param StaticContentCompressor $staticContentCompressor
+     * @param FlagFilePool $flagFilePool
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         StaticContentCompressor $staticContentCompressor,
-        FlagFilePool $flagFilePool
+        FlagFilePool $flagFilePool,
+        DeployInterface $stageConfig
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->staticContentCompressor = $staticContentCompressor;
         $this->flagFilePool = $flagFilePool;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -70,11 +71,13 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->environment->isDeployStaticContent() &&
-            $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()) {
+        if (!$this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
+            && $this->environment->isDeployStaticContent()
+            && $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()
+        ) {
             $this->staticContentCompressor->process(
-                StaticContentCompressor::DEFAULT_COMPRESSION_LEVEL,
-                $this->environment->getVerbosityLevel()
+                $this->stageConfig->get(DeployInterface::VAR_SCD_COMPRESSION_LEVEL),
+                $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
             );
         } else {
             $this->logger->info(

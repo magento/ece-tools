@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -13,8 +14,16 @@ use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class CronConsumersRunnerTest extends TestCase
 {
+    /**
+     * @var CronConsumersRunner
+     */
+    private $cronConsumersRunner;
+
     /**
      * @var Environment|Mock
      */
@@ -36,9 +45,9 @@ class CronConsumersRunnerTest extends TestCase
     private $configWriterMock;
 
     /**
-     * @var CronConsumersRunner
+     * @var DeployInterface|Mock
      */
-    private $cronConsumersRunner;
+    private $stageConfigMock;
 
     /**
      * @inheritdoc
@@ -48,14 +57,15 @@ class CronConsumersRunnerTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->cronConsumersRunner = new CronConsumersRunner(
             $this->environmentMock,
             $this->configReaderMock,
             $this->configWriterMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -73,8 +83,9 @@ class CronConsumersRunnerTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
-        $this->environmentMock->expects($this->once())
-            ->method('getCronConsumersRunner')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_CRON_CONSUMERS_RUNNER)
             ->willReturn($configFromVariable);
         $this->configWriterMock->expects($this->once())
             ->method('write')
@@ -169,7 +180,7 @@ class CronConsumersRunnerTest extends TestCase
                 'configFromVariable' => [
                     'cron_run' => 'true',
                     'max_messages' => 200,
-                    'consumers' => ['test2', 'test3']
+                    'consumers' => ['test2', 'test3'],
                 ],
                 'expectedResult' => [
                     'someConfig' => 'someValue',

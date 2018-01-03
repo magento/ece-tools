@@ -76,11 +76,11 @@ class RemoteDiskIdentifierTest extends TestCase
             ->willReturn(
                 [
                     'Filesystem   512-blocks      Used Available Capacity iused      ifree %iused  Mounted on',
-                    '/dev/disk0s2  1 1 1    1% 1 1    0%   /',
+                    '/dev/rbd1  1 1 1    1% 1 1    0%   /',
                 ]
             );
 
-        $this->assertTrue($this-- > $this->remoteDiskIdentifier->isOnRemoteDisk($path));
+        $this->assertTrue($this->remoteDiskIdentifier->isOnRemoteDisk($path));
     }
 
     public function testIsOnLocalDisk()
@@ -105,10 +105,10 @@ class RemoteDiskIdentifierTest extends TestCase
             ->willReturn(
                 [
                     'Filesystem   512-blocks      Used Available Capacity iused      ifree %iused  Mounted on',
-                    '/dev/rbd1  1 1 1    1% 1 1    0%   /',
+                    '/dev/disk0s2  1 1 1    1% 1 1    0%   /',
                 ]
             );
 
-        $this->assertTrue($this-- > $this->remoteDiskIdentifier->isOnLocalDisk($path));
+        $this->assertTrue($this->remoteDiskIdentifier->isOnLocalDisk($path));
     }
 }

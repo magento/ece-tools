@@ -6,13 +6,12 @@
 namespace Magento\MagentoCloud\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 use Magento\MagentoCloud\Util\ArrayManager;
-use Magento\MagentoCloud\Config\Build as BuildConfig;
 
 /**
  * Options for static deploy command in deploy process
@@ -40,17 +39,12 @@ class Option implements OptionInterface
     private $fileList;
 
     /**
-     * @var BuildConfig
-     */
-    private $buildConfig;
-
-    /**
      * @var ThreadCountOptimizer
      */
     private $threadCountOptimizer;
 
     /**
-     * @var StageConfigInterface
+     * @var BuildInterface
      */
     private $stageConfig;
 
@@ -59,24 +53,21 @@ class Option implements OptionInterface
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
      * @param FileList $fileList
-     * @param BuildConfig $buildConfig
      * @param ThreadCountOptimizer $threadCountOptimizer
-     * @param StageConfigInterface $stageConfig
+     * @param BuildInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
         FileList $fileList,
-        BuildConfig $buildConfig,
         ThreadCountOptimizer $threadCountOptimizer,
-        StageConfigInterface $stageConfig
+        BuildInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->magentoVersion = $magentoVersion;
         $this->arrayManager = $arrayManager;
         $this->fileList = $fileList;
-        $this->buildConfig = $buildConfig;
         $this->threadCountOptimizer = $threadCountOptimizer;
         $this->stageConfig = $stageConfig;
     }
@@ -87,7 +78,7 @@ class Option implements OptionInterface
     public function getThreadCount(): int
     {
         return $this->threadCountOptimizer->optimize(
-            (int)$this->buildConfig->get(BuildConfig::OPT_SCD_THREADS, 1),
+            (int)$this->stageConfig->get(BuildInterface::VAR_SCD_THREADS),
             $this->getStrategy()
         );
     }
@@ -97,7 +88,7 @@ class Option implements OptionInterface
      */
     public function getExcludedThemes(): array
     {
-        $themes = preg_split('/[,]+/', $this->buildConfig->get(BuildConfig::OPT_SCD_EXCLUDE_THEMES));
+        $themes = preg_split('/[,]+/', $this->stageConfig->get(BuildInterface::VAR_SCD_EXCLUDE_THEMES));
 
         return array_filter(array_map('trim', $themes));
     }
@@ -107,7 +98,7 @@ class Option implements OptionInterface
      */
     public function getStrategy(): string
     {
-        return $this->stageConfig->get(StageConfigInterface::VAR_SCD_STRATEGY);
+        return $this->stageConfig->get(BuildInterface::VAR_SCD_STRATEGY);
     }
 
     /**
@@ -144,6 +135,6 @@ class Option implements OptionInterface
      */
     public function getVerbosityLevel(): string
     {
-        return $this->buildConfig->getVerbosityLevel();
+        return $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS);
     }
 }
