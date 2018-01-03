@@ -56,7 +56,6 @@ class AcceptanceTest extends TestCase
             )),
         ]);
 
-
         $container = new Container(new DirectoryList(
             ECE_BP,
             ECE_BP . '/tests/integration-docker/magento'

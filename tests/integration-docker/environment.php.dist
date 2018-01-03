@@ -6,11 +6,11 @@ return [
     'relationships' => [
         'database' => [
             0 => [
-                'host' => 'db',
+                'host' => '127.0.0.1',
                 'path' => 'magento2',
                 'password' => 'magento2',
                 'username' => 'magento2',
-                'port' => '3306',
+                'port' => '3308',
             ],
         ],
     ],
