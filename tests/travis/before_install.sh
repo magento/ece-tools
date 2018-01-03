@@ -40,7 +40,7 @@ case $TEST_SUITE in
         sudo service apache2 restart
         ;;
     integration-docker)
-        echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> docker/composer.env
-        echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> docker/composer.env
+        echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
+        echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
         ;;
 esac
