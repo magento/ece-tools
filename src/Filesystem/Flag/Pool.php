@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Filesystem\Flag;
 class Pool
 {
     /**
-     * @var array[]
+     * @var array
      */
     private $flags;
 

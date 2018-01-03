@@ -78,7 +78,7 @@ class Manager
      */
     public function exists(string $flagKey): bool
     {
-        $path = $this->directoryList->getMagentoRoot() . '/' . $this->getFlag($flagKey);
+        $path = $this->directoryList->getMagentoRoot() . '/' . $this->getFlagPath($flagKey);
 
         try {
             return $this->file->isExists($path);
@@ -93,12 +93,12 @@ class Manager
      * Sets a flag on the file system.
      *
      * @param string $flagKey
-     * @return bool
+     * @return bool Returns false if file for required flag was not created, otherwise returns true
      * @throws \RuntimeException If flag with given key is not registered
      */
     public function set(string $flagKey): bool
     {
-        $flagPath = $this->getFlag($flagKey);
+        $flagPath = $this->getFlagPath($flagKey);
         $path = $this->directoryList->getMagentoRoot() . '/' . $flagPath;
 
         try {
@@ -117,15 +117,15 @@ class Manager
      * Deletes a flag from the filesystem.
      *
      * @param string $flagKey
-     * @return bool
+     * @return bool Returns true if file does not exist or was removed by this method
      * @throws \RuntimeException If flag with given key is not registered
      */
     public function delete(string $flagKey): bool
     {
-        $flagPath = $this->getFlag($flagKey);
+        $flagPath = $this->getFlagPath($flagKey);
 
         if (!$this->exists($flagKey)) {
-            $this->logger->info(sprintf('Flag %s is already deleted.', $flagPath));
+            $this->logger->info(sprintf('Flag %s has already been deleted.', $flagPath));
             return true;
         }
 
@@ -150,7 +150,7 @@ class Manager
      * @return string
      * @throws \RuntimeException If flag with given key is not registered
      */
-    public function getFlag(string $flagKey): string
+    public function getFlagPath(string $flagKey): string
     {
         $flagPath = $this->flagPool->get($flagKey);
 

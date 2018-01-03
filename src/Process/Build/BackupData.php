@@ -87,7 +87,7 @@ class BackupData implements ProcessInterface
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
 
         if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            $scdFlagPath = $this->flagManager->getFlag(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
+            $scdFlagPath = $this->flagManager->getFlagPath(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
             $initPub = $rootInitDir . 'pub/';
             $initPubStatic = $initPub . 'static/';
             $originalPubStatic = $magentoRoot . 'pub/static/';

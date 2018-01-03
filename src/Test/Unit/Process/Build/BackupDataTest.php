@@ -141,7 +141,7 @@ class BackupDataTest extends TestCase
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
         $this->flagManagerMock->expects($this->once())
-            ->method('getFlag')
+            ->method('getFlagPath')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn('flag/path');
         $this->loggerMock->expects($this->exactly(3))
@@ -194,7 +194,7 @@ class BackupDataTest extends TestCase
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
         $this->flagManagerMock->expects($this->never())
-            ->method('getFlag');
+            ->method('getFlagPath');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -232,7 +232,7 @@ class BackupDataTest extends TestCase
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
         $this->flagManagerMock->expects($this->once())
-            ->method('getFlag')
+            ->method('getFlagPath')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn('flag/path');
         $this->loggerMock->expects($this->exactly(3))

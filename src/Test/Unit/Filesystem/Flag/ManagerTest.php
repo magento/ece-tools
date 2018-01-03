@@ -84,7 +84,7 @@ class ManagerTest extends TestCase
 
         $this->assertEquals(
             'flag/path',
-            $this->manager->getFlag('some_flag')
+            $this->manager->getFlagPath('some_flag')
         );
     }
 
@@ -99,7 +99,7 @@ class ManagerTest extends TestCase
             ->with('some_flag')
             ->willReturn(null);
 
-        $this->manager->getFlag('some_flag');
+        $this->manager->getFlagPath('some_flag');
     }
 
     public function flagDataProvider()
@@ -224,7 +224,7 @@ class ManagerTest extends TestCase
                 'path' => 'path/to/.some_flag2',
                 'flagState' => false,
                 'deleteResult' => false,
-                'logs' => ['Flag path/to/.some_flag2 is already deleted.'],
+                'logs' => ['Flag path/to/.some_flag2 has already been deleted.'],
                 'result' => true
             ],
             [
