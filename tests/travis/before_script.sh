@@ -11,9 +11,6 @@ case $TEST_SUITE in
         echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
         echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
 
-        rm -rf ./tests/integration/tmp/sandbox-docker
-        composer create-project --repository-url="https://repo.magento.com/" "magento/project-enterprise-edition" ./tests/integration/tmp/sandbox-docker "^2.2"
-
         docker-compose up --build --abort-on-container-exit
         docker-compose run cli bash -c "composer install -d /var/www/magento"
         ;;

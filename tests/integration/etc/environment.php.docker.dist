@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
- $baseUrl = 'magento2.docker';
+$baseUrl = 'localhost';
 
 return [
     'relationships' => [
@@ -31,19 +31,9 @@ return [
         'ADMIN_EMAIL' => 'admin@example.com',
     ],
     'deploy' => [
-        'types' => [
-            'git' => [
-                'repo' => 'https://github.com/magento/magento-cloud',
-                'version' => '2.2.0',
-            ],
-            'project' => [
-                'repo' => 'https://repo.magento.com/',
-                'name' => 'magento/project-enterprise-edition',
-                'version' => '^2.2',
-            ],
-
-        ],
-        'type' => 'project',
+        'repo' => 'https://repo.magento.com/',
+        'name' => 'magento/project-enterprise-edition',
+        'version' => '^2.2',
     ],
     'skip_front_check' => true,
 ];

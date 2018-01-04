@@ -15,10 +15,6 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
  */
 class Bootstrap
 {
-    const DEPLOY_TYPE = 'type';
-    const DEPLOY_TYPE_GIT = 'git';
-    const DEPLOY_TYPE_PROJECT = 'project';
-
     /**
      * @var Bootstrap
      */
@@ -48,54 +44,19 @@ class Bootstrap
         }
 
         $buildFile = $this->getConfigFile('build_options.ini');
-        $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
-        $deployType = getenv('DEPLOY_TYPE') ?: $deployConfig[static::DEPLOY_TYPE];
-
-        if (!$deployType || !array_key_exists($deployType, $deployConfig['types'])) {
-            throw new \Exception(
-                sprintf('Deploy type %s was not configured', $deployType)
-            );
-        }
+        $envConfig = $this->mergeConfig([]);
 
         if (!is_dir($sandboxDir)) {
             mkdir($sandboxDir, 0777, true);
         }
 
-        switch ($deployConfig[static::DEPLOY_TYPE]) {
-            case static::DEPLOY_TYPE_GIT:
-                $gitConfig = $deployConfig['types'][static::DEPLOY_TYPE_GIT];
-
-                $this->execute(
-                    sprintf(
-                        'cd %s && git clone %s .',
-                        $sandboxDir,
-                        $gitConfig['repo']
-                    )
-                );
-                $this->execute(
-                    sprintf(
-                        'cd %s && git checkout -b %s',
-                        $sandboxDir,
-                        $gitConfig['version']
-                    )
-                );
-                break;
-            case static::DEPLOY_TYPE_PROJECT:
-                $projectConfig = $deployConfig['types'][static::DEPLOY_TYPE_PROJECT];
-
-                $this->execute(
-                    sprintf(
-                        'composer create-project --repository-url=%s %s %s %s',
-                        $projectConfig['repo'],
-                        $projectConfig['name'],
-                        $sandboxDir,
-                        $projectConfig['version']
-                    )
-                );
-                break;
-            default:
-                throw new \Exception('Wrong deploy type');
-        }
+        $this->execute(sprintf(
+            'composer create-project --repository-url=%s %s %s %s',
+            $envConfig->get('deploy.repo'),
+            $envConfig->get('deploy.name'),
+            $sandboxDir,
+            $envConfig->get('deploy.version')
+        ));
 
         /**
          * Copying build options.
@@ -136,8 +97,7 @@ class Bootstrap
 
         $container = new Container(new DirectoryList(
             $this->getSandboxDir(),
-            $this->getSandboxDir(),
-            []
+            $this->getSandboxDir()
         ));
 
         return new Application($container);
@@ -160,10 +120,7 @@ class Bootstrap
      */
     public function getSandboxDir(): string
     {
-        $environmentFile = $this->getConfigFile('environment.php');
-        $sandboxKey = getenv('SANDBOX_KEY') ?: md5_file($environmentFile);
-
-        return ECE_BP . '/tests/integration/tmp/sandbox-' . $sandboxKey;
+        return ECE_BP . '/app';
     }
 
     /**
@@ -179,17 +136,16 @@ class Bootstrap
             return $configFile;
         }
 
-        if (@$_ENV['environment'] === 'docker' && @file_exists($configFile . '.docker')) {
-            return $configFile . '.docker';
-        }
+        $environment = getenv('environment') ?? '';
 
         if (@file_exists($configFile . '.dist')) {
-            return $configFile . '.dist';
+            return $configFile . $environment . '.dist';
         }
 
-        throw new \Exception(
-            sprintf('Config file %s can not be found', $file)
-        );
+        throw new \Exception(sprintf(
+            'Config file %s can not be found',
+            $file
+        ));
     }
 
     /**

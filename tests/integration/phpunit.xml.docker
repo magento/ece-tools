@@ -14,7 +14,6 @@
     </testsuites>
     <php>
         <ini name="date.timezone" value="UTC"/>
-        <env name="environment" value="docker"/>
-        <env name="SANDBOX_KEY" value="docker"/>
+        <env name="environment" value=".docker"/>
     </php>
 </phpunit>
