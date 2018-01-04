@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 
@@ -28,15 +29,23 @@ class RecoverableDirectoryList
     private $flagManager;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param Environment $environment
      * @param FlagManager $flagManager
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
-        FlagManager $flagManager
+        FlagManager $flagManager,
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->flagManager = $flagManager;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -46,7 +55,7 @@ class RecoverableDirectoryList
      */
     public function getList(): array
     {
-        $isSymlinkEnabled = $this->environment->isStaticContentSymlinkOn();
+        $isSymlinkEnabled = $this->stageConfig->get(DeployInterface::VAR_STATIC_CONTENT_SYMLINK);
 
         $recoverableDirs = [
             [

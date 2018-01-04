@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Config\Build;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\PreBuild;
 use Magento\MagentoCloud\Package\Manager;
@@ -24,9 +24,9 @@ class PreBuildTest extends TestCase
     private $process;
 
     /**
-     * @var Build|Mock
+     * @var BuildInterface|Mock
      */
-    private $buildConfigMock;
+    private $stageConfigMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -48,14 +48,15 @@ class PreBuildTest extends TestCase
      */
     protected function setUp()
     {
-        $this->buildConfigMock = $this->createMock(Build::class);
+        $this->stageConfigMock = $this->getMockBuilder(BuildInterface::class)
+            ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->packageManagerMock = $this->createMock(Manager::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->process = new PreBuild(
-            $this->buildConfigMock,
+            $this->stageConfigMock,
             $this->loggerMock,
             $this->packageManagerMock,
             $this->flagManagerMock
@@ -69,8 +70,9 @@ class PreBuildTest extends TestCase
      */
     public function testExecute(string $verbosity, string $expectedVerbosity)
     {
-        $this->buildConfigMock->expects($this->once())
-            ->method('getVerbosityLevel')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn($verbosity);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')

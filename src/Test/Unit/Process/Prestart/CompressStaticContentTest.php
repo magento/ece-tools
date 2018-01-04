@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Prestart;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Prestart\CompressStaticContent;
@@ -44,21 +45,27 @@ class CompressStaticContentTest extends TestCase
     private $flagManagerMock;
 
     /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
      * Setup the test environment.
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->environmentMock,
             $this->compressorMock,
-            $this->flagManagerMock
+            $this->flagManagerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -72,12 +79,13 @@ class CompressStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
             ->willReturn(true);
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
-            ->willReturn('');
-        $this->compressorMock->expects($this->once())
-            ->method('process')
-            ->with(StaticContentCompressor::DEFAULT_COMPRESSION_LEVEL);
+        $this->stageConfigMock->expects($this->exactly(3))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_SKIP_SCD, false],
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL, 4],
+                [DeployInterface::VAR_VERBOSE_COMMANDS, ''],
+            ]);
 
         $this->process->execute();
     }
@@ -91,7 +99,7 @@ class CompressStaticContentTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Static content deployment was performed during the build phase or disabled. Skipping prestart phase'
-            . ' static content compression.');
+                . ' static content compression.');
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->compressorMock

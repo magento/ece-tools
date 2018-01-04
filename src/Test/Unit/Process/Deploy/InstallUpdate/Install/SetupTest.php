@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -15,8 +16,16 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class SetupTest extends TestCase
 {
+    /**
+     * @var Setup
+     */
+    private $process;
+
     /**
      * @var ShellInterface|Mock
      */
@@ -48,10 +57,13 @@ class SetupTest extends TestCase
     private $fileListMock;
 
     /**
-     * @var Setup
+     * @var DeployInterface|Mock
      */
-    private $process;
+    private $stageConfigMock;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->environmentMock = $this->getMockBuilder(Environment::class)
@@ -65,6 +77,7 @@ class SetupTest extends TestCase
             ->getMockForAbstractClass();
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
         $this->fileListMock = $this->createMock(FileList::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new Setup(
             $this->loggerMock,
@@ -72,7 +85,8 @@ class SetupTest extends TestCase
             $this->environmentMock,
             $this->shellMock,
             $this->passwordGeneratorMock,
-            $this->fileListMock
+            $this->fileListMock,
+            $this->stageConfigMock
         );
     }
 
@@ -113,9 +127,10 @@ class SetupTest extends TestCase
         $this->urlManagerMock->expects($this->once())
             ->method('getSecureUrls')
             ->willReturn(['' => 'https://secure.url']);
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
-            ->willReturn(' -v');
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->willReturn(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-v');
         $this->environmentMock->expects($this->any())
             ->method('getRelationships')
             ->willReturn([
@@ -125,8 +140,8 @@ class SetupTest extends TestCase
                         'port' => '3306',
                         'path' => 'magento',
                         'username' => 'user',
-                        'password' => 'password'
-                    ]
+                        'password' => 'password',
+                    ],
                 ],
             ]);
         $this->environmentMock->expects($this->any())

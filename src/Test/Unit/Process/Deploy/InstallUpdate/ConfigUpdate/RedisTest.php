@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Redis;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
@@ -18,6 +19,11 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
  */
 class RedisTest extends TestCase
 {
+    /**
+     * @var Redis
+     */
+    private $process;
+
     /**
      * @var Environment|Mock
      */
@@ -39,9 +45,9 @@ class RedisTest extends TestCase
     private $configReaderMock;
 
     /**
-     * @var Redis
+     * @var Deploy|Mock
      */
-    private $process;
+    private $stageConfigMock;
 
     /**
      * @inheritdoc
@@ -56,12 +62,14 @@ class RedisTest extends TestCase
             ->getMockForAbstractClass();
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new Redis(
             $this->environmentMock,
             $this->configReaderMock,
             $this->configWriterMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -81,16 +89,16 @@ class RedisTest extends TestCase
                 'redis' => [
                     0 => [
                         'host' => '127.0.0.1',
-                        'port' => '6379'
-                    ]
+                        'port' => '6379',
+                    ],
                 ],
             ]);
         $this->environmentMock->expects($this->any())
             ->method('getAdminUrl')
             ->willReturn('admin');
-        $this->environmentMock->expects($this->once())
-            ->method('getVariable')
-            ->with(Environment::VAR_REDIS_SESSION_DISABLE_LOCKING)
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING)
             ->willReturn($envSessionLocking);
         $this->configReaderMock->expects($this->once())
             ->method('read')
@@ -125,7 +133,7 @@ class RedisTest extends TestCase
                         'host' => '127.0.0.1',
                         'port' => '6379',
                         'database' => 0,
-                        'disable_locking' => $expectedDisableLocking
+                        'disable_locking' => $expectedDisableLocking,
                     ],
                 ],
             ]);
@@ -133,21 +141,24 @@ class RedisTest extends TestCase
         $this->process->execute();
     }
 
-    public function executeDataProvider()
+    /**
+     * @return array
+     */
+    public function executeDataProvider(): array
     {
         return [
             [
-                '',
-                1
+                true,
+                1,
             ],
             [
-                Environment::VAL_DISABLED,
-                0
+                false,
+                0,
             ],
             [
-                Environment::VAL_ENABLED,
-                1
-            ]
+                true,
+                1,
+            ],
         ];
     }
 
@@ -221,17 +232,17 @@ class RedisTest extends TestCase
                 'redis' => [
                     0 => [
                         'host' => '127.0.0.1',
-                        'port' => '6379'
-                    ]
+                        'port' => '6379',
+                    ],
                 ],
             ]);
         $this->environmentMock->expects($this->any())
             ->method('getAdminUrl')
             ->willReturn('admin');
-        $this->environmentMock->expects($this->once())
-            ->method('getVariable')
-            ->with(Environment::VAR_REDIS_SESSION_DISABLE_LOCKING)
-            ->willReturn('');
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING)
+            ->willReturn(true);
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([
@@ -241,9 +252,9 @@ class RedisTest extends TestCase
                         'bot_first_lifetime' => 100,
                         'bot_lifetime' => 10000,
                         'min_lifetime' => 100,
-                        'max_lifetime' => 10000
-                    ]
-                ]
+                        'max_lifetime' => 10000,
+                    ],
+                ],
             ]);
 
         $this->configWriterMock->expects($this->once())
@@ -280,7 +291,7 @@ class RedisTest extends TestCase
                         'bot_first_lifetime' => 100,
                         'bot_lifetime' => 10000,
                         'min_lifetime' => 100,
-                        'max_lifetime' => 10000
+                        'max_lifetime' => 10000,
                     ],
                 ],
             ]);

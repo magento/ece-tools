@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Prestart;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -54,7 +55,11 @@ class DeployStaticContent implements ProcessInterface
     private $flagManager;
 
     /**
-     * DeployStaticContent constructor.
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param ProcessInterface $process
      * @param Environment $environment
      * @param LoggerInterface $logger
@@ -62,6 +67,7 @@ class DeployStaticContent implements ProcessInterface
      * @param DirectoryList $directoryList
      * @param RemoteDiskIdentifier $remoteDiskIdentifier
      * @param FlagManager $flagManager
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         ProcessInterface $process,
@@ -70,7 +76,8 @@ class DeployStaticContent implements ProcessInterface
         File $file,
         DirectoryList $directoryList,
         RemoteDiskIdentifier $remoteDiskIdentifier,
-        FlagManager $flagManager
+        FlagManager $flagManager,
+        DeployInterface $stageConfig
     ) {
         $this->process = $process;
         $this->environment = $environment;
@@ -79,6 +86,7 @@ class DeployStaticContent implements ProcessInterface
         $this->directoryList = $directoryList;
         $this->remoteDiskIdentifier = $remoteDiskIdentifier;
         $this->flagManager = $flagManager;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -95,13 +103,13 @@ class DeployStaticContent implements ProcessInterface
                 return;
             }
 
-            /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
-            if (!$this->environment->isDeployStaticContent()) {
+            if ($this->stageConfig->get(DeployInterface::VAR_SKIP_SCD) ||
+                !$this->environment->isDeployStaticContent()
+            ) {
                 return;
             }
 
-            // Clear old static content if necessary
-            if ($this->environment->doCleanStaticFiles()) {
+            if ($this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)) {
                 $magentoRoot = $this->directoryList->getMagentoRoot();
                 $this->logger->info('Clearing pub/static');
                 $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');

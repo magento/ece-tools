@@ -111,11 +111,7 @@ class GenerateTest extends TestCase
             ->willReturn('some parallel command');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with(
-                "printf 'some parallel command' | xargs -I CMD -P 3 bash -c CMD"
-            );
-        $this->environmentMock->method('getVerbosityLevel')
-            ->willReturn(' -vvv ');
+            ->with("printf 'some parallel command' | xargs -I CMD -P 3 bash -c CMD");
 
         $this->process->execute();
     }
