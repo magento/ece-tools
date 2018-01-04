@@ -8,11 +8,10 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -40,9 +39,9 @@ class EnvironmentTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFilePoolMock;
+    private $flagManagerMock;
 
     /**
      * @var array
@@ -59,13 +58,13 @@ class EnvironmentTest extends TestCase
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->environment = new Environment(
             $this->loggerMock,
             $this->fileMock,
             $this->directoryListMock,
-            $this->flagFilePoolMock
+            $this->flagManagerMock
         );
     }
 
@@ -132,15 +131,9 @@ class EnvironmentTest extends TestCase
      */
     public function testIsDeployStaticContentToBeEnabled(bool $isExists)
     {
-        $flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
-
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_in_build')
-            ->willReturn($flagMock);
-        $flagMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn($isExists);
 
         $this->assertSame(

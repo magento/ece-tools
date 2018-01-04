@@ -3,13 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Filesystem\FlagFile;
+namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 
-use JsonSchema\Exception\RuntimeException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Filesystem\FlagFile\Base;
+use Magento\MagentoCloud\Filesystem\Flag\Manager;
+use Magento\MagentoCloud\Filesystem\Flag\Pool;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -17,7 +17,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class BaseTest extends TestCase
+class ManagerTest extends TestCase
 {
     /**
      * @var LoggerInterface|Mock
@@ -35,9 +35,14 @@ class BaseTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var Base
+     * @var Pool|Mock
      */
-    private $base;
+    private $flagPool;
+
+    /**
+     * @var Manager
+     */
+    private $manager;
 
     private $magentoRoot = 'magento_root';
     private $backupRoot = 'magento_root/init';
@@ -51,6 +56,7 @@ class BaseTest extends TestCase
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->flagPool = $this->createMock(Pool::class);
 
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
@@ -59,28 +65,63 @@ class BaseTest extends TestCase
             ->method('getPath')
             ->willReturn($this->backupRoot);
 
-        $this->base = new Base(
+        $this->manager = new Manager(
             $this->loggerMock,
             $this->fileMock,
+            $this->flagPool,
             $this->directoryListMock
         );
 
         parent::setUp();
     }
 
+    public function testGetFlag()
+    {
+        $this->flagPool->expects($this->once())
+            ->method('get')
+            ->with('some_flag')
+            ->willReturn('flag/path');
+
+        $this->assertEquals(
+            'flag/path',
+            $this->manager->getFlagPath('some_flag')
+        );
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Flag with key some_flag is not registered in flagPool
+     */
+    public function testGetFlagWithException()
+    {
+        $this->flagPool->expects($this->once())
+            ->method('get')
+            ->with('some_flag')
+            ->willReturn(null);
+
+        $this->manager->getFlagPath('some_flag');
+    }
+
     public function flagDataProvider()
     {
         return [
-            ['path' => '.some_flag', 'flagState' => true],
-            ['path' => 'what/the/what/.some_flag', 'flagState' => false]
+            ['key' => 'key1', 'path' => '.some_flag', 'flagState' => true],
+            ['key' => 'key2', 'path' => 'what/the/what/.some_flag', 'flagState' => false]
         ];
     }
 
     /**
+     * @param string $key
+     * @param string $path
+     * @param bool $flagState
      * @dataProvider flagDataProvider
      */
-    public function testExists($path, $flagState)
+    public function testExists(string $key, string $path, bool $flagState)
     {
+        $this->flagPool->expects($this->once())
+            ->method('get')
+            ->with($key)
+            ->willReturn($path);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -89,14 +130,21 @@ class BaseTest extends TestCase
             ->with("magento_root/$path")
             ->willReturn($flagState);
 
-        $this->assertSame($flagState, $this->base->exists($path));
+        $this->assertSame($flagState, $this->manager->exists($key));
     }
 
     /**
+     * @param string $key
+     * @param string $path
+     * @param bool $flagState
      * @dataProvider flagDataProvider
      */
-    public function testSet($path, $flagState)
+    public function testSet(string $key, string $path, bool $flagState)
     {
+        $this->flagPool->expects($this->once())
+            ->method('get')
+            ->with($key)
+            ->willReturn($path);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -110,34 +158,78 @@ class BaseTest extends TestCase
                 ->with('Set flag: ' . $path);
         }
 
-        $this->assertSame($flagState, $this->base->set($path));
+        $this->assertSame(
+            $flagState,
+            $this->manager->set($key)
+        );
+    }
+
+    /**
+     * @param string $key
+     * @param string $path
+     * @param bool $flagState
+     * @param bool $deleteResult
+     * @param array $logs
+     * @param bool $result
+     * @dataProvider deleteDataProvider
+     */
+    public function testDelete(
+        string $key,
+        string $path,
+        bool $flagState,
+        bool $deleteResult,
+        array $logs,
+        bool$result
+    ) {
+        $this->flagPool->expects($this->any())
+            ->method('get')
+            ->with($key)
+            ->willReturn($path);
+        $this->directoryListMock->expects($this->any())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/' . $path)
+            ->willReturn($flagState);
+        if ($flagState) {
+            $this->fileMock->expects($this->once())
+                ->method('deleteFile')
+                ->with('magento_root/' . $path)
+                ->willReturn($deleteResult);
+        }
+        $this->loggerMock->expects($this->exactly(count($logs)))
+            ->method('info')
+            ->withConsecutive($logs);
+
+        $this->assertSame(
+            $result,
+            $this->manager->delete($key)
+        );
     }
 
     public function deleteDataProvider()
     {
         return [
             [
-                'root' => 'magento_root',
-                'path' => '.some_flag',
-                'flag' => 'magento_root/.some_flag',
+                'key' => '.some_flag1',
+                'path' => 'path/to/.some_flag1',
                 'flagState' => true,
                 'deleteResult' => true,
-                'logs' => ['Deleted flag: .some_flag'],
+                'logs' => ['Deleting flag: path/to/.some_flag1'],
                 'result' => true
             ],
             [
-                'root' => 'magento_root',
-                'path' => '.some_flag',
-                'flag' => 'magento_root/.some_flag',
+                'key' => '.some_flag2',
+                'path' => 'path/to/.some_flag2',
                 'flagState' => false,
                 'deleteResult' => false,
-                'logs' => ['Flag already deleted: .some_flag'],
+                'logs' => ['Flag path/to/.some_flag2 has already been deleted.'],
                 'result' => true
             ],
             [
-                'root' => 'magento_root',
-                'path' => '.some_flag',
-                'flag' => 'magento_root/.some_flag',
+                'key' => '.some_flag3',
+                'path' => 'path/to/.some_flag3',
                 'flagState' => true,
                 'deleteResult' => false,
                 'logs' => [],
@@ -146,34 +238,13 @@ class BaseTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider deleteDataProvider
-     */
-    public function testDelete($root, $path, $flag, $flagState, $deleteResult, $logs, $result)
-    {
-        $this->directoryListMock->expects($this->any())
-            ->method('getMagentoRoot')
-            ->willReturn($root);
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with($flag)
-            ->willReturn($flagState);
-        if ($flagState) {
-            $this->fileMock->expects($this->once())
-                ->method('deleteFile')
-                ->with("$flag")
-                ->willReturn($deleteResult);
-        }
-        $this->loggerMock->expects($this->exactly(count($logs)))
-            ->method('info')
-            ->withConsecutive($logs);
-
-        $this->assertSame($result, $this->base->delete($path));
-    }
-
-    public function testExistsException()
+    public function testExistsWithFileSystemException()
     {
         $path = 'path/that/doesnt/exist';
+        $this->flagPool->expects($this->any())
+            ->method('get')
+            ->with('some_key')
+            ->willReturn($path);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($this->magentoRoot);
@@ -184,12 +255,16 @@ class BaseTest extends TestCase
             ->method('notice')
             ->with('Error occurred during execution');
 
-        $this->assertFalse($this->base->exists($path));
+        $this->assertFalse($this->manager->exists('some_key'));
     }
 
-    public function testSetException()
+    public function testSetWithFileSystemException()
     {
         $path = 'path/that/doesnt/exist';
+        $this->flagPool->expects($this->any())
+            ->method('get')
+            ->with('some_key')
+            ->willReturn($path);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -200,16 +275,20 @@ class BaseTest extends TestCase
             ->method('notice')
             ->with('Error occurred during execution');
 
-        $this->assertFalse($this->base->set($path));
+        $this->assertFalse($this->manager->set('some_key'));
     }
 
-    public function testDeleteException()
+    public function testDeleteWithFileSystemException()
     {
         $root = $this->magentoRoot;
         $path = '.some_flag';
         $flag = 'magento_root/.some_flag';
         $flagState = true;
 
+        $this->flagPool->expects($this->any())
+            ->method('get')
+            ->with('some_key')
+            ->willReturn($path);
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
             ->willReturn($root);
@@ -224,6 +303,6 @@ class BaseTest extends TestCase
             ->method('notice')
             ->with('Error occurred during execution');
 
-        $this->assertFalse($this->base->delete($path));
+        $this->assertFalse($this->manager->delete('some_key'));
     }
 }

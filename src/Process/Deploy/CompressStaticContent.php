@@ -7,8 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
@@ -34,9 +33,9 @@ class CompressStaticContent implements ProcessInterface
     private $staticContentCompressor;
 
     /**
-     * @var FlagFilePool
+     * @var FlagManager
      */
-    private $flagFilePool;
+    private $flagManager;
 
     /**
      * @var DeployInterface
@@ -47,20 +46,20 @@ class CompressStaticContent implements ProcessInterface
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param StaticContentCompressor $staticContentCompressor
-     * @param FlagFilePool $flagFilePool
+     * @param FlagManager $flagManager
      * @param DeployInterface $stageConfig
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         StaticContentCompressor $staticContentCompressor,
-        FlagFilePool $flagFilePool,
+        FlagManager $flagManager,
         DeployInterface $stageConfig
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->staticContentCompressor = $staticContentCompressor;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
     }
 
@@ -74,9 +73,8 @@ class CompressStaticContent implements ProcessInterface
         if (!$this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
             && $this->environment->isDeployStaticContent()
         ) {
-            if ($this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()) {
+            if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)) {
                 $this->logger->info('Postpone static content compression until prestart');
-
                 return;
             }
             $this->staticContentCompressor->process(

@@ -7,8 +7,7 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -47,9 +46,9 @@ class Environment
     private $directoryList;
 
     /**
-     * @var FlagFilePool
+     * @var FlagManager
      */
-    private $flagFilePool;
+    private $flagManager;
 
     /**
      * @var array
@@ -60,18 +59,18 @@ class Environment
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
-     * @param FlagFilePool $flagFilePool
+     * @param FlagManager $flagManager
      */
     public function __construct(
         LoggerInterface $logger,
         File $file,
         DirectoryList $directoryList,
-        FlagFilePool $flagFilePool
+        FlagManager $flagManager
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -179,7 +178,7 @@ class Environment
      */
     public function isDeployStaticContent(): bool
     {
-        return !$this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists();
+        return !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
     }
 
     /**

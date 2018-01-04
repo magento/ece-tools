@@ -9,8 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -40,9 +39,9 @@ class DeployStaticContent implements ProcessInterface
     private $configFileStructureValidator;
 
     /**
-     * @var FlagFilePool
+     * @var FlagManager
      */
-    private $flagFilePool;
+    private $flagManager;
 
     /**
      * @param LoggerInterface $logger
@@ -50,7 +49,7 @@ class DeployStaticContent implements ProcessInterface
      * @param Environment $environment
      * @param ProcessInterface $process
      * @param ConfigFileStructure $configFileStructureValidator
-     * @param FlagFilePool $flagFilePool
+     * @param FlagManager $flagManager
      */
     public function __construct(
         LoggerInterface $logger,
@@ -58,14 +57,14 @@ class DeployStaticContent implements ProcessInterface
         Environment $environment,
         ProcessInterface $process,
         ConfigFileStructure $configFileStructureValidator,
-        FlagFilePool $flagFilePool
+        FlagManager $flagManager
     ) {
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
         $this->environment = $environment;
         $this->process = $process;
         $this->configFileStructureValidator = $configFileStructureValidator;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -73,8 +72,7 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $scdFlag = $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY);
-        $scdFlag->delete();
+        $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
 
         if ($this->stageConfig->get(BuildInterface::VAR_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
@@ -91,6 +89,7 @@ class DeployStaticContent implements ProcessInterface
         }
 
         $this->process->execute();
-        $scdFlag->set();
+
+        $this->flagManager->set(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
     }
 }

@@ -8,8 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Validator\Result;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
@@ -53,14 +52,9 @@ class DeployStaticContentTest extends TestCase
     private $configFileStructureMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface
-     */
-    private $flagMock;
+    private $flagManagerMock;
 
     /**
      * @inheritdoc
@@ -73,16 +67,10 @@ class DeployStaticContentTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->configFileStructureMock = $this->createMock(ConfigFileStructure::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
-
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_in_build')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
-            ->method('delete');
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
 
         $this->process = new DeployStaticContent(
             $this->loggerMock,
@@ -90,7 +78,7 @@ class DeployStaticContentTest extends TestCase
             $this->environmentMock,
             $this->processMock,
             $this->configFileStructureMock,
-            $this->flagFilePoolMock
+            $this->flagManagerMock
         );
     }
 
@@ -106,6 +94,9 @@ class DeployStaticContentTest extends TestCase
             ->willReturn($resultMock);
         $this->processMock->expects($this->once())
             ->method('execute');
+        $this->flagManagerMock->expects($this->once())
+            ->method('set')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
 
         $this->process->execute();
     }
