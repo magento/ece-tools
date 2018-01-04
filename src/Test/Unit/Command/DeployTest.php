@@ -66,6 +66,6 @@ class DeployTest extends TestCase
         );
         $tester->execute([]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
     }
 }

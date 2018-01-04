@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
@@ -41,7 +42,8 @@ class PrestartTest extends TestCase
 
         $this->command = new Prestart(
             $this->processMock,
-            $this->loggerMock
+            $this->loggerMock,
+            new Wrapper($this->loggerMock)
         );
     }
 
@@ -61,13 +63,9 @@ class PrestartTest extends TestCase
         );
         $tester->execute([]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
@@ -84,5 +82,8 @@ class PrestartTest extends TestCase
             $this->command
         );
         $tester->execute([]);
+
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Some error', $tester->getDisplay());
     }
 }

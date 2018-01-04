@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
-use Magento\MagentoCloud\Command\ScdDump;
+use Magento\MagentoCloud\App\Command\Wrapper;
+use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -14,10 +15,10 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @inheritdoc
  */
-class ScdDumpTest extends TestCase
+class ConfigDumpTest extends TestCase
 {
     /**
-     * @var ScdDump
+     * @var ConfigDump
      */
     private $command;
 
@@ -41,9 +42,10 @@ class ScdDumpTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
-        $this->command = new ScdDump(
+        $this->command = new ConfigDump(
             $this->processMock,
-            $this->loggerMock
+            $this->loggerMock,
+            new Wrapper($this->loggerMock)
         );
     }
 
@@ -63,13 +65,9 @@ class ScdDumpTest extends TestCase
         );
         $tester->execute([]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
@@ -86,5 +84,8 @@ class ScdDumpTest extends TestCase
             $this->command
         );
         $tester->execute([]);
+
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Some error', $tester->getDisplay());
     }
 }

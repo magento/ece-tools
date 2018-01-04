@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use PHPUnit\Framework\TestCase;
@@ -12,6 +13,9 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class CronUnlockTest extends TestCase
 {
     /**
@@ -39,7 +43,8 @@ class CronUnlockTest extends TestCase
 
         $this->cronUnlockCommand = new CronUnlock(
             $this->jobUnlockerMock,
-            $this->loggerMock
+            $this->loggerMock,
+            new Wrapper($this->loggerMock)
         );
     }
 
@@ -89,16 +94,12 @@ class CronUnlockTest extends TestCase
             $this->cronUnlockCommand
         );
         $tester->execute([
-            '--job-code' => ['code1', 'code2']
+            '--job-code' => ['code1', 'code2'],
         ]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
@@ -115,5 +116,8 @@ class CronUnlockTest extends TestCase
             $this->cronUnlockCommand
         );
         $tester->execute([]);
+
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Some error', $tester->getDisplay());
     }
 }

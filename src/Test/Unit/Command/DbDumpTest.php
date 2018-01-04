@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
@@ -64,7 +65,8 @@ class DbDumpTest extends TestCase
 
         $this->command = new DbDump(
             $this->processMock,
-            $this->loggerMock
+            $this->loggerMock,
+            new Wrapper($this->loggerMock)
         );
         $this->command->setHelperSet($this->helperSetMock);
     }
@@ -89,7 +91,7 @@ class DbDumpTest extends TestCase
         );
         $tester->execute([]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
     }
 
     public function testExecuteConfirmationDeny()
@@ -111,10 +113,6 @@ class DbDumpTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
         $this->questionMock->expects($this->once())
@@ -134,5 +132,8 @@ class DbDumpTest extends TestCase
             $this->command
         );
         $tester->execute([]);
+
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Some error', $tester->getDisplay());
     }
 }

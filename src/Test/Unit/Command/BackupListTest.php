@@ -61,7 +61,7 @@ class BackupListTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute([]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
         $this->assertSame($output, $tester->getDisplay());
     }
 
@@ -83,10 +83,6 @@ class BackupListTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedExceptionMessage Sorry error
-     * @expectedException \Exception
-     */
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
@@ -98,6 +94,7 @@ class BackupListTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute([]);
 
-        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Sorry error', $tester->getDisplay());
     }
 }

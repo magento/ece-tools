@@ -55,6 +55,7 @@ class DbDump extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
+            ->setAliases(['db-dump'])
             ->setDescription('Creates backup of database');
 
         parent::configure();

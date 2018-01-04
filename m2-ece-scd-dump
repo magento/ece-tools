@@ -7,5 +7,5 @@
 $container = require_once __DIR__ . '/bootstrap.php';
 
 $application = new \Magento\MagentoCloud\Application($container);
-$application->setDefaultCommand(\Magento\MagentoCloud\Command\ScdDump::NAME);
+$application->setDefaultCommand(\Magento\MagentoCloud\Command\ConfigDump::NAME);
 $application->run();

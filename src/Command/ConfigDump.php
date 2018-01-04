@@ -15,9 +15,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * CLI command for dumping SCD related config.
  */
-class ScdDump extends Command
+class ConfigDump extends Command
 {
-    const NAME = 'scd:dump';
+    const NAME = 'config:dump';
 
     /**
      * @var LoggerInterface
@@ -54,6 +54,7 @@ class ScdDump extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
+            ->setAliases(['dump'])
             ->setDescription('Dump static content');
 
         parent::configure();
