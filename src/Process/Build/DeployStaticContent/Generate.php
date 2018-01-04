@@ -70,7 +70,7 @@ class Generate implements ProcessInterface
         try {
             $locales = $this->buildOption->getLocales();
             $excludeThemes = $this->buildOption->getExcludedThemes();
-            $threadCount= $this->buildOption->getThreadCount();
+            $threadCount = $this->buildOption->getThreadCount();
 
             $logMessage = 'Generating static content for locales: ' . implode(' ', $locales);
 

@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 class ThreadCountOptimizerTest extends TestCase
 {
@@ -15,9 +17,16 @@ class ThreadCountOptimizerTest extends TestCase
      */
     private $optimizer;
 
+    /**
+     * @var LoggerInterface|Mock
+     */
+    private $loggerMock;
+
     protected function setUp()
     {
-        $this->optimizer = new ThreadCountOptimizer();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+
+        $this->optimizer = new ThreadCountOptimizer($this->loggerMock);
     }
 
     /**
@@ -56,5 +65,17 @@ class ThreadCountOptimizerTest extends TestCase
                 1
             ]
         ];
+    }
+
+    public function testOptimizeWithNotice()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Threads count was forced to 1 as compact strategy can\'t be run with more than one job');
+
+        $this->assertEquals(
+            1,
+            $this->optimizer->optimize(3, ThreadCountOptimizer::STRATEGY_COMPACT)
+        );
     }
 }
