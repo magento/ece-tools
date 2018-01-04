@@ -17,7 +17,7 @@ services:
       - HTTPS_METHOD=noredirect
 
   fpm:
-    hostname: magento2.docker
+    hostname: fpm.magento2.docker
     build: ./docker/7.0-fpm
     ports:
       - 9000

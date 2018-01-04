@@ -6,15 +6,15 @@
 set -e
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
+composer config -a -n -g http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
+composer config -a -n -g http-basic.connect20-qa01.magedevteam.com ${CONNECT20_USERNAME} ${CONNECT20_PASSWORD}
+
 case $TEST_SUITE in
     integration)
         export SANDBOX_KEY="$SANDBOX_KEY"
         export MAGENTO_HOST_NAME="$MAGENTO_HOST_NAME"
 
         mysql -e 'CREATE DATABASE IF NOT EXISTS integration_tests;'
-
-        composer config -a -n -g http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
-        composer config -a -n -g http-basic.connect20-qa01.magedevteam.com ${CONNECT20_USERNAME} ${CONNECT20_PASSWORD}
 
         # Install apache
         sudo apt-get update
@@ -38,9 +38,5 @@ case $TEST_SUITE in
 
         phpenv config-rm xdebug.ini
         sudo service apache2 restart
-        ;;
-    integration-docker)
-        echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
-        echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
         ;;
 esac
