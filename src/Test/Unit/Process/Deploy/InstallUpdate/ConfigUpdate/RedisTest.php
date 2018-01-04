@@ -45,7 +45,7 @@ class RedisTest extends TestCase
     private $configReaderMock;
 
     /**
-     * @var Deploy|Mock
+     * @var DeployInterface|Mock
      */
     private $stageConfigMock;
 

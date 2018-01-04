@@ -57,11 +57,6 @@ class SetupTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
-
-    /**
      * @var DeployInterface|Mock
      */
     private $stageConfigMock;
@@ -99,21 +94,13 @@ class SetupTest extends TestCase
         $this->fileListMock->expects($this->once())
             ->method('getInstallUpgradeLog')
             ->willReturn($installUpgradeLog);
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('regenerate')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->exactly(2))
-            ->method('delete');
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-v');
         $this->flagManagerMock->expects($this->exactly(2))
             ->method('delete')
             ->with(FlagManager::FLAG_REGENERATE);
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
-            ->willReturn('-v');
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
