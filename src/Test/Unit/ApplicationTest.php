@@ -10,7 +10,7 @@ use Composer\Package\PackageInterface;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command\BackupList;
 use Magento\MagentoCloud\Command\Build;
-use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\ScdDump;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\Prestart;
@@ -69,7 +69,7 @@ class ApplicationTest extends TestCase
          * Command mocks.
          */
         $buildCommandMock = $this->createMock(Build::class);
-        $configDumpCommandMock = $this->createMock(ConfigDump::class);
+        $configDumpCommandMock = $this->createMock(ScdDump::class);
         $cronUnlockCommandMock = $this->createMock(CronUnlock::class);
         $dbDumpCommandMock = $this->createMock(DbDump::class);
         $deployCommandMock = $this->createMock(Deploy::class);
@@ -79,7 +79,7 @@ class ApplicationTest extends TestCase
         $backupListCommandMock = $this->createMock(BackupList::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
-        $this->mockCommand($configDumpCommandMock, ConfigDump::NAME);
+        $this->mockCommand($configDumpCommandMock, ScdDump::NAME);
         $this->mockCommand($cronUnlockCommandMock, CronUnlock::NAME);
         $this->mockCommand($dbDumpCommandMock, DbDump::NAME);
         $this->mockCommand($deployCommandMock, Deploy::NAME);
@@ -93,7 +93,7 @@ class ApplicationTest extends TestCase
                 [Composer::class, $this->composerMock],
                 [Build::class, $buildCommandMock],
                 [Deploy::class, $deployCommandMock],
-                [ConfigDump::class, $configDumpCommandMock],
+                [ScdDump::class, $configDumpCommandMock],
                 [PostDeploy::class, $postDeployCommandMock],
                 [Prestart::class, $prestartCommandMock],
                 [DbDump::class, $dbDumpCommandMock],
@@ -136,7 +136,7 @@ class ApplicationTest extends TestCase
         $this->assertTrue($this->application->has(Build::NAME));
         $this->assertTrue($this->application->has(Deploy::NAME));
         $this->assertTrue($this->application->has(DbDump::NAME));
-        $this->assertTrue($this->application->has(ConfigDump::NAME));
+        $this->assertTrue($this->application->has(ScdDump::NAME));
         $this->assertTrue($this->application->has(Prestart::NAME));
         $this->assertTrue($this->application->has(PostDeploy::NAME));
     }

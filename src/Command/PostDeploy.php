@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -30,13 +31,19 @@ class PostDeploy extends Command
     private $logger;
 
     /**
+     * @var Wrapper $wrapper
+     */
+    private $wrapper;
+
+    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
+    public function __construct(ProcessInterface $process, LoggerInterface $logger, Wrapper $wrapper)
     {
         $this->process = $process;
         $this->logger = $logger;
+        $this->wrapper = $wrapper;
 
         parent::__construct();
     }
@@ -57,14 +64,10 @@ class PostDeploy extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
+        return $this->wrapper->execute(function () {
             $this->logger->info('Starting post-deploy.');
             $this->process->execute();
             $this->logger->info('Post-deploy is complete.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            throw $exception;
-        }
+        }, $output);
     }
 }

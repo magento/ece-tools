@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -34,13 +35,20 @@ class CronUnlock extends Command
     private $jobUnlocker;
 
     /**
+     * @var Wrapper
+     */
+    private $wrapper;
+
+    /**
      * @param JobUnlocker $jobUnlocker
      * @param LoggerInterface $logger
+     * @param Wrapper $wrapper
      */
-    public function __construct(JobUnlocker $jobUnlocker, LoggerInterface $logger)
+    public function __construct(JobUnlocker $jobUnlocker, LoggerInterface $logger, Wrapper $wrapper)
     {
         $this->jobUnlocker = $jobUnlocker;
         $this->logger = $logger;
+        $this->wrapper = $wrapper;
 
         parent::__construct();
     }
@@ -68,7 +76,7 @@ class CronUnlock extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
+        return $this->wrapper->execute(function () use ($input) {
             $this->logger->info('Starting unlocking.');
 
             $jobCodesToUnlock = array_filter($input->getOption(self::OPTION_JOB_CODE));
@@ -84,10 +92,6 @@ class CronUnlock extends Command
             }
 
             $this->logger->info('Unlocking completed.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            throw $exception;
-        }
+        }, $output);
     }
 }

@@ -8,14 +8,11 @@ namespace Magento\MagentoCloud\App;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\ScdDump;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
-use Magento\MagentoCloud\Config\Stage\Build as BuildConfig;
-use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
@@ -244,7 +241,7 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(ConfigDump::class)
+        $this->container->when(ScdDump::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
                 return $this->container->make(ProcessComposite::class, [

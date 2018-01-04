@@ -39,12 +39,13 @@ class Wrapper
     public function execute(\Closure $closure, OutputInterface $output): int
     {
         $exitCode = self::CODE_SUCCESS;
-        $exceptionMessage = null;
 
         try {
             \PHP_Timer::start();
             $closure();
             \PHP_Timer::stop();
+
+            $this->logger->debug(\PHP_Timer::resourceUsage());
         } catch (\Exception $exception) {
             \PHP_Timer::stop();
 
@@ -52,11 +53,8 @@ class Wrapper
             $exitCode = max(self::CODE_FAILURE, (int)$exception->getCode());
 
             $this->logger->critical($exceptionMessage);
-        }
+            $this->logger->debug(\PHP_Timer::resourceUsage());
 
-        $this->logger->debug(\PHP_Timer::resourceUsage());
-
-        if ($exceptionMessage) {
             $output->writeln('<error>' . $exceptionMessage . '</error>');
         }
 

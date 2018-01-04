@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Command\BackupRestore;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\ScdDump;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
@@ -58,7 +58,7 @@ class Application extends \Symfony\Component\Console\Application
             [
                 $this->container->get(Build::class),
                 $this->container->get(Deploy::class),
-                $this->container->get(ConfigDump::class),
+                $this->container->get(ScdDump::class),
                 $this->container->get(Prestart::class),
                 $this->container->get(DbDump::class),
                 $this->container->get(PostDeploy::class),

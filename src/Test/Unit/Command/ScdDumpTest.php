@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
-use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\ScdDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -14,10 +14,10 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @inheritdoc
  */
-class ConfigDumpTest extends TestCase
+class ScdDumpTest extends TestCase
 {
     /**
-     * @var ConfigDump
+     * @var ScdDump
      */
     private $command;
 
@@ -41,7 +41,7 @@ class ConfigDumpTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
-        $this->command = new ConfigDump(
+        $this->command = new ScdDump(
             $this->processMock,
             $this->loggerMock
         );

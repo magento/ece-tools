@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\BackupList;
 use Symfony\Component\Console\Tester\CommandTester;
 use PHPUnit\Framework\TestCase;
@@ -38,7 +39,11 @@ class BackupListTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
-        $this->command = new BackupList($this->backupFilesListMock, $this->loggerMock);
+        $this->command = new BackupList(
+            $this->backupFilesListMock,
+            $this->loggerMock,
+            new Wrapper($this->loggerMock)
+        );
     }
 
     /**
