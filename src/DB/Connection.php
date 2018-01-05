@@ -134,7 +134,7 @@ class Connection implements ConnectionInterface
 
         try {
             $this->pdo->prepare('SELECT 1')->execute();
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             if (stripos($e->getMessage(), 'server has gone away') === false) {
                 throw $e;
             }
