@@ -53,7 +53,6 @@ class Wrapper
             $exitCode = max(self::CODE_FAILURE, (int)$exception->getCode());
 
             $this->logger->critical($exceptionMessage);
-            $this->logger->debug(\PHP_Timer::resourceUsage());
 
             $output->writeln('<error>' . $exceptionMessage . '</error>');
         }

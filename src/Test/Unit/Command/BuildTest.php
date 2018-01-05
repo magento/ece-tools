@@ -34,17 +34,23 @@ class BuildTest extends TestCase
     private $processMock;
 
     /**
+     * @var Wrapper|Mock
+     */
+    private $wrapperMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->command = new Build(
             $this->processMock,
             $this->loggerMock,
-            new Wrapper($this->loggerMock)
+            $this->wrapperMock
         );
     }
 

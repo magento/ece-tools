@@ -33,17 +33,23 @@ class PrestartTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var Wrapper|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $wrapperMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->command = new Prestart(
             $this->processMock,
             $this->loggerMock,
-            new Wrapper($this->loggerMock)
+            $this->wrapperMock
         );
     }
 

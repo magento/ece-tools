@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -23,29 +24,33 @@ class ConfigDumpTest extends TestCase
     private $command;
 
     /**
-     * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ProcessInterface|Mock
      */
     private $processMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
+
+    /**
+     * @var Wrapper|Mock
+     */
+    private $wrapperMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->command = new ConfigDump(
             $this->processMock,
             $this->loggerMock,
-            new Wrapper($this->loggerMock)
+            $this->wrapperMock
         );
     }
 

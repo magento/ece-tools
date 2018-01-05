@@ -54,6 +54,8 @@ class WrapperTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('debug');
+        $this->loggerMock->expects($this->never())
+            ->method('critical');
 
         $this->assertSame(
             Wrapper::CODE_SUCCESS,
@@ -69,9 +71,36 @@ class WrapperTest extends TestCase
 
         $this->loggerMock->expects($this->never())
             ->method('debug');
+        $this->loggerMock->expects($this->once())
+            ->method('critical')
+            ->with('Some error');
+        $this->outputMock->expects($this->once())
+            ->method('writeln')
+            ->with('<error>Some error</error>');
 
         $this->assertSame(
-            Wrapper::CODE_SUCCESS,
+            Wrapper::CODE_FAILURE,
+            $this->wrapper->execute($callback, $this->outputMock)
+        );
+    }
+
+    public function testExecuteWithCustomCodeInException()
+    {
+        $callback = function () {
+            throw new \RuntimeException('Some error', 5);
+        };
+
+        $this->loggerMock->expects($this->never())
+            ->method('debug');
+        $this->loggerMock->expects($this->once())
+            ->method('critical')
+            ->with('Some error');
+        $this->outputMock->expects($this->once())
+            ->method('writeln')
+            ->with('<error>Some error</error>');
+
+        $this->assertSame(
+            5,
             $this->wrapper->execute($callback, $this->outputMock)
         );
     }

@@ -19,6 +19,11 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class CronUnlockTest extends TestCase
 {
     /**
+     * @var CronUnlock
+     */
+    private $cronUnlockCommand;
+
+    /**
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
@@ -29,9 +34,9 @@ class CronUnlockTest extends TestCase
     private $jobUnlockerMock;
 
     /**
-     * @var CronUnlock
+     * @var Wrapper|Mock
      */
-    private $cronUnlockCommand;
+    private $wrapperMock;
 
     /**
      * @inheritdoc
@@ -40,11 +45,12 @@ class CronUnlockTest extends TestCase
     {
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->cronUnlockCommand = new CronUnlock(
             $this->jobUnlockerMock,
             $this->loggerMock,
-            new Wrapper($this->loggerMock)
+            $this->wrapperMock
         );
     }
 

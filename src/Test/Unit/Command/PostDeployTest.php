@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -23,14 +24,19 @@ class PostDeployTest extends TestCase
     private $command;
 
     /**
-     * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ProcessInterface|Mock
      */
     private $processMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
+
+    /**
+     * @var Wrapper|Mock
+     */
+    private $wrapperMock;
 
     /**
      * @inheritdoc
@@ -39,11 +45,12 @@ class PostDeployTest extends TestCase
     {
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->command = new PostDeploy(
             $this->processMock,
             $this->loggerMock,
-            new Wrapper($this->loggerMock)
+            $this->wrapperMock
         );
     }
 

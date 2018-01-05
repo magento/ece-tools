@@ -34,17 +34,23 @@ class DeployTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var Wrapper|Mock
+     */
+    private $wrapperMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->command = new Deploy(
             $this->processMock,
             $this->loggerMock,
-            new Wrapper($this->loggerMock)
+            $this->wrapperMock
         );
     }
 

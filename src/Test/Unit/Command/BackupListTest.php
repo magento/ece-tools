@@ -13,8 +13,16 @@ use Magento\MagentoCloud\Command\Backup\FileList as BackupFilesList;
 use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class BackupListTest extends TestCase
 {
+    /**
+     * @var BackupList
+     */
+    private $command;
+
     /**
      * @var BackupFilesList|Mock
      */
@@ -26,9 +34,9 @@ class BackupListTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var BackupList
+     * @var Wrapper|Mock
      */
-    private $command;
+    private $wrapperMock;
 
     /**
      * @inheritdoc
@@ -36,13 +44,13 @@ class BackupListTest extends TestCase
     protected function setUp()
     {
         $this->backupFilesListMock = $this->createMock(BackupFilesList::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->command = new BackupList(
             $this->backupFilesListMock,
             $this->loggerMock,
-            new Wrapper($this->loggerMock)
+            $this->wrapperMock
         );
     }
 

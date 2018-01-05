@@ -21,6 +21,11 @@ use Symfony\Component\Console\Helper\QuestionHelper;
 class BackupRestoreTest extends TestCase
 {
     /**
+     * @var BackupRestore
+     */
+    private $command;
+
+    /**
      * @var Restore|Mock
      */
     private $restoreMock;
@@ -41,9 +46,9 @@ class BackupRestoreTest extends TestCase
     private $questionMock;
 
     /**
-     * @var BackupRestore
+     * @var Wrapper|Mock
      */
-    private $command;
+    private $wrapperMock;
 
     /**
      * @inheritdoc
@@ -57,11 +62,12 @@ class BackupRestoreTest extends TestCase
             ->setMethods(['ask'])
             ->getMock();
         $this->helperSetMock = $this->createMock(HelperSet::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->command = new BackupRestore(
             $this->restoreMock,
             $this->loggerMock,
-            new Wrapper($this->loggerMock)
+            $this->wrapperMock
         );
         $this->command->setHelperSet($this->helperSetMock);
     }
