@@ -130,17 +130,41 @@ class Connection implements ConnectionInterface
      */
     public function getPdo(): \PDO
     {
-        if (null === $this->pdo) {
-            $environment = $this->environment;
+        $this->connect();
 
-            $this->pdo = new \PDO(
-                sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
-                $environment->getDbUser(),
-                $environment->getDbPassword()
-            );
+        try {
+            $this->pdo->prepare('SELECT 1')->execute();
+        } catch(\Exception $e) {
+            if (stripos($e->getMessage(), 'server has gone away') === false) {
+                throw $e;
+            }
+
+            $this->pdo = null;
+            $this->connect();
         }
 
         return $this->pdo;
+    }
+
+    /**
+     * Create PDO connection.
+     */
+    private function connect()
+    {
+        if ($this->pdo instanceof \PDO) {
+            return;
+        }
+
+        $environment = $this->environment;
+
+        $this->pdo = new \PDO(
+            sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
+            $environment->getDbUser(),
+            $environment->getDbPassword(),
+            [
+                \PDO::ATTR_PERSISTENT => true
+            ]
+        );
     }
 
     /**
