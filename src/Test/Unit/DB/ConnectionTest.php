@@ -118,6 +118,9 @@ class ConnectionTest extends TestCase
             ->method('query')
             ->with('SELECT 1')
             ->willThrowException(new \Exception('Some exception'));
+        $this->pdoMock->expects($this->once())
+            ->method('errorCode')
+            ->willReturn(0);
 
         $this->connection->getPdo();
     }

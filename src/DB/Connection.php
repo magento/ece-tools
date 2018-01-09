@@ -13,6 +13,8 @@ use Psr\Log\LoggerInterface;
  */
 class Connection implements ConnectionInterface
 {
+    const MYSQL_ERROR_CODE_SERVER_GONE_AWAY = 2006;
+
     /**
      * @var \PDO
      */
@@ -135,10 +137,11 @@ class Connection implements ConnectionInterface
         try {
             $this->pdo->query('SELECT 1');
         } catch (\Exception $e) {
-            if (stripos($e->getMessage(), 'server has gone away') === false) {
+            if ($this->pdo->errorCode() !== self::MYSQL_ERROR_CODE_SERVER_GONE_AWAY) {
                 throw $e;
             }
 
+            $this->logger->notice('Lost connection to Mysql server. Reconnecting.');
             $this->pdo = null;
             $this->connect();
         }
