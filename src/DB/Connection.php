@@ -137,7 +137,7 @@ class Connection implements ConnectionInterface
         try {
             $this->pdo->query('SELECT 1');
         } catch (\Exception $e) {
-            if ($this->pdo->errorCode() !== self::MYSQL_ERROR_CODE_SERVER_GONE_AWAY) {
+            if ($this->pdo->errorInfo()[1] !== self::MYSQL_ERROR_CODE_SERVER_GONE_AWAY) {
                 throw $e;
             }
 
