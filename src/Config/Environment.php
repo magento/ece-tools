@@ -284,7 +284,8 @@ class Environment
     }
 
     /**
-     * Checks that environment use the main branch depending on environment variable MAGENTO_CLOUD_ENVIRONMENT.
+     * Checks that environment uses the main branch depending on environment variable MAGENTO_CLOUD_ENVIRONMENT
+     * which contain the name of the git branch.
      *
      * @return bool
      */
