@@ -162,36 +162,62 @@ class EnvironmentTest extends TestCase
     }
 
     /**
+     * @param bool $expectedResult
+     * @param string $branchName
+     * @dataProvider isMasterBranchDataProvider
+     */
+    public function testIsMasterBranch(bool $expectedResult, string $branchName)
+    {
+        $_ENV['MAGENTO_CLOUD_ENVIRONMENT'] = $branchName;
+
+        $this->assertSame(
+            $expectedResult,
+            $this->environment->isMasterBranch()
+        );
+    }
+
+    /**
      * @return array
      */
-    public function getCronConsumersRunnerDataProvider(): array
+    public function isMasterBranchDataProvider(): array
     {
         return [
-            ['variables' => [], 'expectedResult' => []],
             [
-                'variables' => [
-                    'CRON_CONSUMERS_RUNNER' => [
-                        'cron_run' => 'false',
-                        'max_messages' => '100',
-                        'consumers' => ['test'],
-                    ],
-                ],
-                'expectedResult' => [
-                    'cron_run' => 'false',
-                    'max_messages' => '100',
-                    'consumers' => ['test'],
-                ],
+                false,
+                'branch213'
             ],
             [
-                'variables' => [
-                    'CRON_CONSUMERS_RUNNER' => '{"cron_run":"false", "max_messages":"100", "consumers":["test"]}',
-                ],
-                'expectedResult' => [
-                    'cron_run' => 'false',
-                    'max_messages' => '100',
-                    'consumers' => ['test'],
-                ],
+                false,
+                'prod-branch'
             ],
+            [
+                false,
+                'stage'
+            ],
+            [
+                false,
+                'product'
+            ],
+            [
+                true,
+                'staging'
+            ],
+            [
+                true,
+                'staging-ba3ma'
+            ],
+            [
+                true,
+                'master'
+            ],
+            [
+                true,
+                'production'
+            ],
+            [
+                true,
+                'production-lad13m'
+            ]
         ];
     }
 }

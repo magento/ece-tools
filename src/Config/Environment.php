@@ -18,7 +18,7 @@ class Environment
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
 
-    const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
+    const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)(?:-[a-z0-9]+)?$/i';
 
     const CLOUD_MODE_ENTERPRISE = 'enterprise';
 
