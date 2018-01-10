@@ -182,42 +182,19 @@ class EnvironmentTest extends TestCase
     public function isMasterBranchDataProvider(): array
     {
         return [
-            [
-                false,
-                'branch213'
-            ],
-            [
-                false,
-                'prod-branch'
-            ],
-            [
-                false,
-                'stage'
-            ],
-            [
-                false,
-                'product'
-            ],
-            [
-                true,
-                'staging'
-            ],
-            [
-                true,
-                'staging-ba3ma'
-            ],
-            [
-                true,
-                'master'
-            ],
-            [
-                true,
-                'production'
-            ],
-            [
-                true,
-                'production-lad13m'
-            ]
+            [false, 'branch213'],
+            [false, 'prod-branch'],
+            [false, 'stage'],
+            [false, 'branch-production-lad13m'],
+            [false, 'branch-staging-lad13m'],
+            [false, 'branch-master-lad13m'],
+            [false, 'product'],
+            [true, 'staging'],
+            [true, 'staging-ba3ma'],
+            [true, 'master'],
+            [true, 'master-ad123m'],
+            [true, 'production'],
+            [true, 'production-lad13m'],
         ];
     }
 }
