@@ -10,7 +10,7 @@ use Magento\MagentoCloud\StaticContent\OptionInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
-class CommandTest extends TestCase
+class CommandFactoryTest extends TestCase
 {
     /**
      * @var CommandFactory
@@ -32,19 +32,6 @@ class CommandTest extends TestCase
         $this->assertEquals(
             $expected,
             $this->commandFactory->create($this->createOption($optionConfig))
-        );
-    }
-
-    /**
-     * @param array $optionConfig
-     * @param $expected
-     * @dataProvider createParallelDataProvider
-     */
-    public function testCreateParallel(array $optionConfig, $expected)
-    {
-        $this->assertEquals(
-            $expected,
-            $this->commandFactory->createParallel($this->createOption($optionConfig))
         );
     }
 
@@ -76,37 +63,6 @@ class CommandTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1'
-            ],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    public function createParallelDataProvider()
-    {
-        return [
-            [
-                [
-                    'excluded_themes' => ['theme1'],
-                    'strategy' => 'quick',
-                    'locales' => ['en_US', 'fr_FR', 'de_DE'],
-                    'is_force' => true,
-                    'verbosity_level' => '-v',
-                ],
-                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 -s quick -v en_US' . PHP_EOL .
-                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 -s quick -v fr_FR' . PHP_EOL .
-                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 -s quick -v de_DE' . PHP_EOL
-            ],
-            [
-                [
-                    'excluded_themes' => ['theme1'],
-                    'strategy' => 'quick',
-                    'locales' => ['en_US'],
-                    'is_force' => false,
-                    'verbosity_level' => '-v',
-                ],
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US' . PHP_EOL
             ],
         ];
     }

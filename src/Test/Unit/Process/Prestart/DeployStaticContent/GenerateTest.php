@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Prestart\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\StaticContent\Prestart\Option;
+use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -59,7 +59,7 @@ class GenerateTest extends TestCase
     /**
      * @var Option|Mock
      */
-    private $prestartOptionMock;
+    private $deployOptionMock;
 
     /**
      * @inheritdoc
@@ -74,7 +74,7 @@ class GenerateTest extends TestCase
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->commandFactoryMock = $this->createMock(CommandFactory::class);
-        $this->prestartOptionMock = $this->createMock(Option::class);
+        $this->deployOptionMock = $this->createMock(Option::class);
 
         $this->process = new Generate(
             $this->shellMock,
@@ -83,18 +83,15 @@ class GenerateTest extends TestCase
             $this->fileMock,
             $this->directoryListMock,
             $this->commandFactoryMock,
-            $this->prestartOptionMock
+            $this->deployOptionMock
         );
     }
 
     public function testExecute()
     {
-        $this->prestartOptionMock->expects($this->once())
+        $this->deployOptionMock->expects($this->once())
             ->method('getLocales')
             ->willReturn(['ua_UA', 'fr_FR', 'es_ES', 'en_US']);
-        $this->prestartOptionMock->expects($this->once())
-            ->method('getThreadCount')
-            ->willReturn(3);
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
@@ -106,12 +103,12 @@ class GenerateTest extends TestCase
                 ['Generating static content for locales: en_GB fr_FR']
             );
         $this->commandFactoryMock->expects($this->once())
-            ->method('createParallel')
-            ->with($this->prestartOptionMock)
-            ->willReturn('some parallel command');
+            ->method('create')
+            ->with($this->deployOptionMock)
+            ->willReturn('some command');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with("printf 'some parallel command' | xargs -I CMD -P 3 bash -c CMD");
+            ->with('some command');
 
         $this->process->execute();
     }

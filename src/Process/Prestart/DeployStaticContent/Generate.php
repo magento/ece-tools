@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
-use Magento\MagentoCloud\StaticContent\Prestart\Option;
+use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -52,7 +52,7 @@ class Generate implements ProcessInterface
     /**
      * @var Option
      */
-    private $prestartOption;
+    private $deployOption;
 
     /**
      * @param ShellInterface $shell
@@ -61,7 +61,7 @@ class Generate implements ProcessInterface
      * @param File $file
      * @param DirectoryList $directoryList
      * @param CommandFactory $commandFactory
-     * @param Option $prestartOption
+     * @param Option $deployOption
      */
     public function __construct(
         ShellInterface $shell,
@@ -70,7 +70,7 @@ class Generate implements ProcessInterface
         File $file,
         DirectoryList $directoryList,
         CommandFactory $commandFactory,
-        Option $prestartOption
+        Option $deployOption
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
@@ -78,7 +78,7 @@ class Generate implements ProcessInterface
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->commandFactory = $commandFactory;
-        $this->prestartOption = $prestartOption;
+        $this->deployOption = $deployOption;
     }
 
     /**
@@ -89,20 +89,14 @@ class Generate implements ProcessInterface
         $this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt');
         $this->logger->info('Extracting locales');
 
-        $locales = $this->prestartOption->getLocales();
+        $locales = $this->deployOption->getLocales();
         $logMessage = count($locales) ?
             'Generating static content for locales: ' . implode(' ', $locales) :
             'Generating static content';
 
         $this->logger->info($logMessage);
 
-        $threadCount= $this->prestartOption->getThreadCount();
-        $parallelCommands = $this->commandFactory->createParallel($this->prestartOption);
-
-        $this->shell->execute(sprintf(
-            "printf '%s' | xargs -I CMD -P %d bash -c CMD",
-            $parallelCommands,
-            $threadCount
-        ));
+        $command = $this->commandFactory->create($this->deployOption);
+        $this->shell->execute($command);
     }
 }
