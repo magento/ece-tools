@@ -63,11 +63,10 @@ class Session implements ProcessInterface
         $this->stageConfig = $stageConfig;
     }
 
-
     /**
-     * Executes the process.
+     * Saves or removes session configuration to env.php.
      *
-     * @return void
+     * {@inheritdoc}
      */
     public function execute()
     {
@@ -119,7 +118,7 @@ class Session implements ProcessInterface
     }
 
     /**
-     * Checks that given redis configuration is valid.
+     * Checks that given session configuration is valid.
      *
      * @param array $sessionConfiguration
      * @return bool
@@ -140,5 +139,4 @@ class Session implements ProcessInterface
     {
         return $this->stageConfig->get(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING);
     }
-
 }

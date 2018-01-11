@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Redis;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
@@ -17,10 +17,10 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 /**
  * @inheritdoc
  */
-class RedisTest extends TestCase
+class SessionTest extends TestCase
 {
     /**
-     * @var Redis
+     * @var Session
      */
     private $process;
 
@@ -64,7 +64,7 @@ class RedisTest extends TestCase
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
-        $this->process = new Redis(
+        $this->process = new Session(
             $this->environmentMock,
             $this->configReaderMock,
             $this->configWriterMock,
@@ -107,26 +107,6 @@ class RedisTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('write')
             ->with([
-                'cache' => [
-                    'frontend' => [
-                        'default' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                        'page_cache' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                    ],
-                ],
                 'session' => [
                     'save' => 'redis',
                     'redis' => [
@@ -177,26 +157,6 @@ class RedisTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([
-                'cache' => [
-                    'frontend' => [
-                        'default' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                        'page_cache' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                    ],
-                ],
                 'session' => [
                     'save' => 'redis',
                     'redis' => [
@@ -210,9 +170,6 @@ class RedisTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('write')
             ->with([
-                'cache' => [
-                    'frontend' => [],
-                ],
                 'session' => [
                     'save' => 'db',
                 ],
@@ -260,26 +217,6 @@ class RedisTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('write')
             ->with([
-                'cache' => [
-                    'frontend' => [
-                        'default' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                        'page_cache' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                    ],
-                ],
                 'session' => [
                     'save' => 'redis',
                     'redis' => [
