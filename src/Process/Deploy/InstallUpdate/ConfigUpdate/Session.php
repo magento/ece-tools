@@ -13,9 +13,9 @@ use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * Processes configuration for session.
  */
-class Redis implements ProcessInterface
+class Session implements ProcessInterface
 {
     /**
      * @var Environment
@@ -63,40 +63,20 @@ class Redis implements ProcessInterface
         $this->stageConfig = $stageConfig;
     }
 
+
     /**
-     * @inheritdoc
+     * Executes the process.
+     *
+     * @return void
      */
     public function execute()
     {
-        $envRedisConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_REDIS_CONFIGURATION);
-        if ($this->isRedisConfigurationValid($envRedisConfiguration)) {
-            $redisConfig = $envRedisConfiguration;
-        }
-
-        $redisConfig = $this->environment->getRelationship('redis');
         $config = $this->configReader->read();
 
-        if (count($redisConfig)) {
-            $this->logger->info('Updating env.php Redis cache configuration.');
-            $redisCache = [
-                'backend' => 'Cm_Cache_Backend_Redis',
-                'backend_options' => [
-                    'server' => $redisConfig[0]['host'],
-                    'port' => $redisConfig[0]['port'],
-                    'database' => 1,
-                ],
-            ];
-            $cacheConfig = [
-                'frontend' => [
-                    'default' => $redisCache,
-                    'page_cache' => $redisCache,
-                ],
-            ];
-
-            $config['cache'] = empty($config['cache'])
-                ? $cacheConfig
-                : array_replace_recursive($config['cache'], $cacheConfig);
-
+        $envSessionConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_SESSION_CONFIGURATION);
+        if ($this->isSessionConfigurationValid($envSessionConfiguration)) {
+            $config['session'] = $envSessionConfiguration;
+        } elseif (count($redisConfig = $this->environment->getRelationship('redis'))) {
             $redisSessionConfig = [
                 'host' => $redisConfig[0]['host'],
                 'port' => $redisConfig[0]['port'],
@@ -111,21 +91,22 @@ class Redis implements ProcessInterface
                 ),
             ];
         } else {
-            $config = $this->removeRedisConfiguration($config);
+            $config = $this->removeRedisSessionConfiguration($config);
         }
 
         $this->configWriter->write($config);
     }
 
+
     /**
-     * Clears configuration from redis usages.
+     * Clears session configuration from redis usages.
      *
      * @param array $config An array of application configuration
      * @return array
      */
-    private function removeRedisConfiguration($config)
+    private function removeRedisSessionConfiguration($config)
     {
-        $this->logger->info('Removing redis cache and session configuration from env.php.');
+        $this->logger->info('Removing redis session configuration from env.php.');
 
         if (isset($config['session']['save']) && $config['session']['save'] == 'redis') {
             $config['session']['save'] = 'db';
@@ -134,15 +115,18 @@ class Redis implements ProcessInterface
             }
         }
 
-        if (isset($config['cache']['frontend'])) {
-            foreach ($config['cache']['frontend'] as $cacheName => $cacheData) {
-                if (isset($cacheData['backend']) && $cacheData['backend'] == 'Cm_Cache_Backend_Redis') {
-                    unset($config['cache']['frontend'][$cacheName]);
-                }
-            }
-        }
-
         return $config;
+    }
+
+    /**
+     * Checks that given redis configuration is valid.
+     *
+     * @param array $sessionConfiguration
+     * @return bool
+     */
+    private function isSessionConfigurationValid(array $sessionConfiguration): bool
+    {
+        return !empty($sessionConfiguration) && isset($sessionConfiguration['save']);
     }
 
     /**
@@ -157,14 +141,4 @@ class Redis implements ProcessInterface
         return $this->stageConfig->get(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING);
     }
 
-    /**
-     * Checks that given redis configuration is valid.
-     *
-     * @param array $redisConfiguration
-     * @return bool
-     */
-    private function isRedisConfigurationValid(array $redisConfiguration): bool
-    {
-        return !empty($redisConfiguration) && isset($redisConfiguration['host'], $redisConfiguration['port']);
-    }
 }
