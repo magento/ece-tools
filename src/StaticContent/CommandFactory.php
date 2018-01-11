@@ -18,46 +18,6 @@ class CommandFactory
      */
     public function create(OptionInterface $option): string
     {
-        $command = $this->createBaseCommand($option);
-
-        $locales = $option->getLocales();
-        if (count($locales)) {
-            $command .= ' ' . implode(' ', $locales);
-        }
-
-        $treadCount = $option->getThreadCount();
-        if ($treadCount) {
-            $command .= ' --jobs=' . $treadCount;
-        }
-
-        return $command;
-    }
-
-    /**
-     * Creates static deploy command for running in parallel for xargs command
-     *
-     * @param OptionInterface $option
-     * @return string
-     * @deprecated This method should be removed after replacing xargs with --jobs parameter in build phase
-     */
-    public function createParallel(OptionInterface $option): string
-    {
-        $command = $this->createBaseCommand($option);
-
-        $parallelCommands = '';
-        foreach ($option->getLocales() as $locale) {
-            $parallelCommands .= $command . ' ' . $locale . PHP_EOL;
-        }
-
-        return $parallelCommands;
-    }
-
-    /**
-     * @param OptionInterface $option
-     * @return string
-     */
-    private function createBaseCommand(OptionInterface $option): string
-    {
         $command = 'php ./bin/magento setup:static-content:deploy';
 
         if ($option->isForce()) {
@@ -79,6 +39,16 @@ class CommandFactory
         $verbosityLevel = $option->getVerbosityLevel();
         if ($verbosityLevel) {
             $command .= ' ' . $verbosityLevel;
+        }
+
+        $locales = $option->getLocales();
+        if (count($locales)) {
+            $command .= ' ' . implode(' ', $locales);
+        }
+
+        $treadCount = $option->getThreadCount();
+        if ($treadCount) {
+            $command .= ' --jobs=' . $treadCount;
         }
 
         return $command;
