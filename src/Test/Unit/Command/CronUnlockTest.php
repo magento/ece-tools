@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use PHPUnit\Framework\TestCase;
@@ -12,8 +13,16 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class CronUnlockTest extends TestCase
 {
+    /**
+     * @var CronUnlock
+     */
+    private $cronUnlockCommand;
+
     /**
      * @var LoggerInterface|Mock
      */
@@ -25,9 +34,9 @@ class CronUnlockTest extends TestCase
     private $jobUnlockerMock;
 
     /**
-     * @var CronUnlock
+     * @var Wrapper|Mock
      */
-    private $cronUnlockCommand;
+    private $wrapperMock;
 
     /**
      * @inheritdoc
@@ -36,10 +45,12 @@ class CronUnlockTest extends TestCase
     {
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
         $this->cronUnlockCommand = new CronUnlock(
             $this->jobUnlockerMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->wrapperMock
         );
     }
 
@@ -89,16 +100,12 @@ class CronUnlockTest extends TestCase
             $this->cronUnlockCommand
         );
         $tester->execute([
-            '--job-code' => ['code1', 'code2']
+            '--job-code' => ['code1', 'code2'],
         ]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
@@ -115,5 +122,8 @@ class CronUnlockTest extends TestCase
             $this->cronUnlockCommand
         );
         $tester->execute([]);
+
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Some error', $tester->getDisplay());
     }
 }

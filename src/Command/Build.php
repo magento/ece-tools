@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,15 +30,23 @@ class Build extends Command
     private $logger;
 
     /**
+     * @var Wrapper
+     */
+    private $wrapper;
+
+    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
+     * @param Wrapper $wrapper
      */
     public function __construct(
         ProcessInterface $process,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        Wrapper $wrapper
     ) {
         $this->process = $process;
         $this->logger = $logger;
+        $this->wrapper = $wrapper;
 
         parent::__construct();
     }
@@ -58,14 +67,10 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
+        return $this->wrapper->execute(function () {
             $this->logger->info('Starting build.');
             $this->process->execute();
             $this->logger->info('Building completed.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            throw $exception;
-        }
+        }, $output);
     }
 }

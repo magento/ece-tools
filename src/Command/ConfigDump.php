@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -16,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ConfigDump extends Command
 {
-    const NAME = 'dump';
+    const NAME = 'config:dump';
 
     /**
      * @var LoggerInterface
@@ -29,13 +30,20 @@ class ConfigDump extends Command
     private $process;
 
     /**
+     * @var Wrapper
+     */
+    private $wrapper;
+
+    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
+     * @param Wrapper $wrapper
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
+    public function __construct(ProcessInterface $process, LoggerInterface $logger, Wrapper $wrapper)
     {
         $this->process = $process;
         $this->logger = $logger;
+        $this->wrapper = $wrapper;
 
         parent::__construct();
     }
@@ -46,6 +54,7 @@ class ConfigDump extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
+            ->setAliases(['dump'])
             ->setDescription('Dump static content');
 
         parent::configure();
@@ -56,14 +65,10 @@ class ConfigDump extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
+        return $this->wrapper->execute(function () {
             $this->logger->info('Starting dump.');
             $this->process->execute();
             $this->logger->info('Dump completed.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            throw $exception;
-        }
+        }, $output);
     }
 }

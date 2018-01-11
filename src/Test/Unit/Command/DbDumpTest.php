@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
@@ -12,6 +13,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,39 +26,43 @@ class DbDumpTest extends TestCase
     private $command;
 
     /**
-     * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ProcessInterface|Mock
      */
     private $processMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var HelperSet|\PHPUnit_Framework_MockObject_MockObject
+     * @var HelperSet|Mock
      */
     private $helperSetMock;
 
     /**
-     * @var QuestionHelper|\PHPUnit_Framework_MockObject_MockObject
+     * @var QuestionHelper|Mock
      */
     private $questionMock;
+
+    /**
+     * @var Wrapper|Mock
+     */
+    private $wrapperMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
             ->setMethods(['ask'])
             ->getMock();
         $this->helperSetMock = $this->createMock(HelperSet::class);
+
         $this->helperSetMock->expects($this->once())
             ->method('get')
             ->with('question')
@@ -64,7 +70,8 @@ class DbDumpTest extends TestCase
 
         $this->command = new DbDump(
             $this->processMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->wrapperMock
         );
         $this->command->setHelperSet($this->helperSetMock);
     }
@@ -89,7 +96,7 @@ class DbDumpTest extends TestCase
         );
         $tester->execute([]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
     }
 
     public function testExecuteConfirmationDeny()
@@ -111,10 +118,6 @@ class DbDumpTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
         $this->questionMock->expects($this->once())
@@ -134,5 +137,8 @@ class DbDumpTest extends TestCase
             $this->command
         );
         $tester->execute([]);
+
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Some error', $tester->getDisplay());
     }
 }

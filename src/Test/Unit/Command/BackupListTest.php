@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\BackupList;
 use Symfony\Component\Console\Tester\CommandTester;
 use PHPUnit\Framework\TestCase;
@@ -12,8 +13,16 @@ use Magento\MagentoCloud\Command\Backup\FileList as BackupFilesList;
 use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class BackupListTest extends TestCase
 {
+    /**
+     * @var BackupList
+     */
+    private $command;
+
     /**
      * @var BackupFilesList|Mock
      */
@@ -25,9 +34,9 @@ class BackupListTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var BackupList
+     * @var Wrapper|Mock
      */
-    private $command;
+    private $wrapperMock;
 
     /**
      * @inheritdoc
@@ -35,10 +44,14 @@ class BackupListTest extends TestCase
     protected function setUp()
     {
         $this->backupFilesListMock = $this->createMock(BackupFilesList::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
-        $this->command = new BackupList($this->backupFilesListMock, $this->loggerMock);
+        $this->command = new BackupList(
+            $this->backupFilesListMock,
+            $this->loggerMock,
+            $this->wrapperMock
+        );
     }
 
     /**
@@ -56,7 +69,7 @@ class BackupListTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute([]);
 
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
         $this->assertSame($output, $tester->getDisplay());
     }
 
@@ -78,10 +91,6 @@ class BackupListTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedExceptionMessage Sorry error
-     * @expectedException \Exception
-     */
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
@@ -93,6 +102,7 @@ class BackupListTest extends TestCase
         $tester = new CommandTester($this->command);
         $tester->execute([]);
 
-        $this->assertSame(1, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Sorry error', $tester->getDisplay());
     }
 }

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Command\BackupRestore;
 use Magento\MagentoCloud\Command\Backup\Restore;
 use Psr\Log\LoggerInterface;
@@ -14,8 +15,16 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
 
+/**
+ * @inheritdoc
+ */
 class BackupRestoreTest extends TestCase
 {
+    /**
+     * @var BackupRestore
+     */
+    private $command;
+
     /**
      * @var Restore|Mock
      */
@@ -37,9 +46,9 @@ class BackupRestoreTest extends TestCase
     private $questionMock;
 
     /**
-     * @var BackupRestore
+     * @var Wrapper|Mock
      */
-    private $command;
+    private $wrapperMock;
 
     /**
      * @inheritdoc
@@ -53,8 +62,13 @@ class BackupRestoreTest extends TestCase
             ->setMethods(['ask'])
             ->getMock();
         $this->helperSetMock = $this->createMock(HelperSet::class);
+        $this->wrapperMock = $this->createTestProxy(Wrapper::class, [$this->loggerMock]);
 
-        $this->command = new BackupRestore($this->restoreMock, $this->loggerMock);
+        $this->command = new BackupRestore(
+            $this->restoreMock,
+            $this->loggerMock,
+            $this->wrapperMock
+        );
         $this->command->setHelperSet($this->helperSetMock);
     }
 
@@ -80,7 +94,7 @@ class BackupRestoreTest extends TestCase
             ->method('critical');
         $tester = new CommandTester($this->command);
         $tester->execute($options);
-        $this->assertSame(0, $tester->getStatusCode());
+        $this->assertSame(Wrapper::CODE_SUCCESS, $tester->getStatusCode());
     }
 
     /**
@@ -89,19 +103,15 @@ class BackupRestoreTest extends TestCase
     public function executeDataProvider(): array
     {
         return [
-            ['askExpected' => 0,'askAnswer' => true, 'options' => [], 'runExpected' => 1],
-            ['askExpected' => 0,'askAnswer' => false, 'options' => [], 'runExpected' => 1],
-            ['askExpected' => 1,'askAnswer' => false, 'options' => ['-f' => true], 'runExpected' => 0],
-            ['askExpected' => 1,'askAnswer' => true, 'options' => ['-f' => true], 'runExpected' => 1],
-            ['askExpected' => 1,'askAnswer' => false, 'options' => ['--force' => true], 'runExpected' => 0],
-            ['askExpected' => 1,'askAnswer' => true, 'options' => ['--force' => true], 'runExpected' => 1],
+            ['askExpected' => 0, 'askAnswer' => true, 'options' => [], 'runExpected' => 1],
+            ['askExpected' => 0, 'askAnswer' => false, 'options' => [], 'runExpected' => 1],
+            ['askExpected' => 1, 'askAnswer' => false, 'options' => ['-f' => true], 'runExpected' => 0],
+            ['askExpected' => 1, 'askAnswer' => true, 'options' => ['-f' => true], 'runExpected' => 1],
+            ['askExpected' => 1, 'askAnswer' => false, 'options' => ['--force' => true], 'runExpected' => 0],
+            ['askExpected' => 1, 'askAnswer' => true, 'options' => ['--force' => true], 'runExpected' => 1],
         ];
     }
 
-    /**
-     * @expectedExceptionMessage Sorry error
-     * @expectedException \Exception
-     */
     public function testExecuteWithException()
     {
         $this->helperSetMock->expects($this->never())
@@ -118,6 +128,8 @@ class BackupRestoreTest extends TestCase
             ->with('Sorry error');
         $tester = new CommandTester($this->command);
         $tester->execute([]);
-        $this->assertSame(1, $tester->getStatusCode());
+
+        $this->assertSame(Wrapper::CODE_FAILURE, $tester->getStatusCode());
+        $this->assertContains('Sorry error', $tester->getDisplay());
     }
 }

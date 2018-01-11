@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\App\Command\Wrapper;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -17,7 +18,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
  */
 class DbDump extends Command
 {
-    const NAME = 'db-dump';
+    const NAME = 'db:dump';
 
     /**
      * @var LoggerInterface
@@ -30,13 +31,20 @@ class DbDump extends Command
     private $process;
 
     /**
+     * @var Wrapper
+     */
+    private $wrapper;
+
+    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
+     * @param Wrapper $wrapper
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
+    public function __construct(ProcessInterface $process, LoggerInterface $logger, Wrapper $wrapper)
     {
         $this->process = $process;
         $this->logger = $logger;
+        $this->wrapper = $wrapper;
 
         parent::__construct();
     }
@@ -47,6 +55,7 @@ class DbDump extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
+            ->setAliases(['db-dump'])
             ->setDescription('Creates backup of database');
 
         parent::configure();
@@ -60,22 +69,19 @@ class DbDump extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion(
-            'We suggest to enable maintenance mode before running this command. Do you want to continue [y/N]?',
-            false
-        );
-        if (!$helper->ask($input, $output, $question) && $input->isInteractive()) {
-            return null;
-        }
-        try {
+        return $this->wrapper->execute(function () use ($input, $output) {
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(
+                'We suggest to enable maintenance mode before running this command. Do you want to continue [y/N]?',
+                false
+            );
+            if (!$helper->ask($input, $output, $question) && $input->isInteractive()) {
+                return null;
+            }
+
             $this->logger->info('Starting backup.');
             $this->process->execute();
             $this->logger->info('Backup completed.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            throw $exception;
-        }
+        }, $output);
     }
 }
