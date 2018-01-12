@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -14,13 +15,16 @@ use Psr\Log\LoggerInterface;
  */
 class Environment
 {
-    const STATIC_CONTENT_DEPLOY_FLAG = '.static_content_deploy';
-    const REGENERATE_FLAG = 'var/.regenerate';
-
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
 
-    const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
+    /**
+     * Regex pattern for detecting main branch.
+     * The name of the main branch must be started from one of three prefixes:
+     *   master - is for integration environment;
+     *   production and staging are for production and staging environments respectively.
+     */
+    const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)(?:-[a-z0-9]+)?$/i';
 
     const CLOUD_MODE_ENTERPRISE = 'enterprise';
 
@@ -31,13 +35,6 @@ class Environment
     const DEFAULT_ADMIN_NAME = 'admin';
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
-
-    /**
-     * Variables.
-     */
-    const VAR_REDIS_SESSION_DISABLE_LOCKING = 'REDIS_SESSION_DISABLE_LOCKING';
-    const VAR_SCD_STRATEGY = Build::OPT_SCD_STRATEGY;
-    const VAR_SCD_COMPRESSION_LEVEL = Build::OPT_SCD_COMPRESSION_LEVEL;
 
     /**
      * @var LoggerInterface
@@ -55,6 +52,11 @@ class Environment
     private $directoryList;
 
     /**
+     * @var FlagManager
+     */
+    private $flagManager;
+
+    /**
      * @var array
      */
     private $data = [];
@@ -63,12 +65,18 @@ class Environment
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param FlagManager $flagManager
      */
-    public function __construct(LoggerInterface $logger, File $file, DirectoryList $directoryList)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        File $file,
+        DirectoryList $directoryList,
+        FlagManager $flagManager
+    ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -149,31 +157,6 @@ class Environment
     }
 
     /**
-     * Checks that static content symlink is on.
-     *
-     * If STATIC_CONTENT_SYMLINK == disabled return false
-     * Returns true by default
-     *
-     * @return bool
-     */
-    public function isStaticContentSymlinkOn(): bool
-    {
-        $var = $this->getVariables();
-
-        return isset($var['STATIC_CONTENT_SYMLINK']) && $var['STATIC_CONTENT_SYMLINK'] == 'disabled' ? false : true;
-    }
-
-    /**
-     * @return string
-     */
-    public function getVerbosityLevel(): string
-    {
-        $var = $this->getVariables();
-
-        return isset($var['VERBOSE_COMMANDS']) && $var['VERBOSE_COMMANDS'] == 'enabled' ? ' -vvv ' : '';
-    }
-
-    /**
      * @return string
      */
     public function getApplicationMode(): string
@@ -184,46 +167,6 @@ class Environment
         return in_array($mode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
             ? $mode
             : self::MAGENTO_PRODUCTION_MODE;
-    }
-
-    /**
-     * Sets flag that static content was generated in build phase.
-     *
-     * @return void
-     */
-    public function setFlagStaticDeployInBuild()
-    {
-        $this->logger->info('Setting flag file ' . static::STATIC_CONTENT_DEPLOY_FLAG);
-        $this->file->touch(
-            $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-        );
-    }
-
-    /**
-     * Removes flag that static content was generated in build phase.
-     *
-     * @return void
-     */
-    public function removeFlagStaticContentInBuild()
-    {
-        if ($this->isStaticDeployInBuild()) {
-            $this->logger->info('Removing flag file ' . static::STATIC_CONTENT_DEPLOY_FLAG);
-            $this->file->deleteFile(
-                $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-            );
-        }
-    }
-
-    /**
-     * Checks if static content generates during build process.
-     *
-     * @return bool
-     */
-    public function isStaticDeployInBuild(): bool
-    {
-        return $this->file->isExists(
-            $this->directoryList->getMagentoRoot() . '/' . static::STATIC_CONTENT_DEPLOY_FLAG
-        );
     }
 
     /**
@@ -241,43 +184,7 @@ class Environment
      */
     public function isDeployStaticContent(): bool
     {
-        $var = $this->getVariables();
-
-        /**
-         * Can use environment variable to always disable.
-         * Default is to deploy static content if it was not deployed in the build step.
-         */
-        if (isset($var['DO_DEPLOY_STATIC_CONTENT']) && $var['DO_DEPLOY_STATIC_CONTENT'] == 'disabled') {
-            $flag = false;
-        } else {
-            $flag = !$this->isStaticDeployInBuild();
-        }
-
-        $this->logger->info('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . ($flag ? 'enabled' : 'disabled'));
-
-        return $flag;
-    }
-
-    /**
-     * @return int
-     */
-    public function getStaticDeployThreadsCount(): int
-    {
-        /**
-         * Use 1 for PAAS environment.
-         */
-        $staticDeployThreads = 1;
-        $var = $this->getVariables();
-
-        if (isset($var['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$var['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['MAGENTO_CLOUD_MODE']) && $_ENV['MAGENTO_CLOUD_MODE'] === static::CLOUD_MODE_ENTERPRISE) {
-            $staticDeployThreads = 3;
-        }
-
-        return $staticDeployThreads;
+        return !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
     }
 
     /**
@@ -286,24 +193,6 @@ class Environment
     public function getAdminLocale(): string
     {
         return $this->getVariables()['ADMIN_LOCALE'] ?? 'en_US';
-    }
-
-    /**
-     * @return bool
-     */
-    public function doCleanStaticFiles(): bool
-    {
-        $var = $this->getVariables();
-
-        return !(isset($var['CLEAN_STATIC_FILES']) && $var['CLEAN_STATIC_FILES'] === static::VAL_DISABLED);
-    }
-
-    /**
-     * @return string
-     */
-    public function getStaticDeployExcludeThemes(): string
-    {
-        return $this->getVariable('STATIC_CONTENT_EXCLUDE_THEMES', '');
     }
 
     /**
@@ -387,30 +276,6 @@ class Environment
     }
 
     /**
-     * @return array
-     */
-    public function getCronConsumersRunner(): array
-    {
-        $config = $this->getVariable('CRON_CONSUMERS_RUNNER', []);
-
-        if (!is_array($config)) {
-            $config = json_decode($config, true);
-        }
-
-        return $config;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isUpdateUrlsEnabled(): bool
-    {
-        $var = $this->getVariables();
-
-        return isset($var['UPDATE_URLS']) && $var['UPDATE_URLS'] == 'disabled' ? false : true;
-    }
-
-    /**
      * @return string
      */
     public function getDefaultCurrency(): string
@@ -419,6 +284,9 @@ class Environment
     }
 
     /**
+     * Checks that environment uses the main branch depending on environment variable MAGENTO_CLOUD_ENVIRONMENT
+     * which contains the name of the git branch.
+     *
      * @return bool
      */
     public function isMasterBranch(): bool

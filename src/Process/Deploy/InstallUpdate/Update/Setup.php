@@ -6,10 +6,12 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,9 +36,15 @@ class Setup implements ProcessInterface
     private $shell;
 
     /**
-     * @var File
+     * @var FlagManager
      */
-    private $file;
+
+    private $flagManager;
+
+    /**
+     * @var FileList
+     */
+    private $fileList;
 
     /**
      * @var DirectoryList
@@ -44,24 +52,35 @@ class Setup implements ProcessInterface
     private $directoryList;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param ShellInterface $shell
-     * @param File $file
      * @param DirectoryList $directoryList
+     * @param FileList $fileList
+     * @param FlagManager $flagManager
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         ShellInterface $shell,
-        File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        FileList $fileList,
+        FlagManager $flagManager,
+        DeployInterface $stageConfig
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->shell = $shell;
-        $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
+        $this->flagManager = $flagManager;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -71,18 +90,21 @@ class Setup implements ProcessInterface
      */
     public function execute()
     {
-        $this->removeRegenerateFlag();
+        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
 
         try {
-            $verbosityLevel = $this->environment->getVerbosityLevel();
-            /* Enable maintenance mode */
+            $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+
             $this->logger->notice('Enabling Maintenance mode.');
             $this->shell->execute('php ./bin/magento maintenance:enable ' . $verbosityLevel);
-
             $this->logger->info('Running setup upgrade.');
-            $this->shell->execute('php ./bin/magento setup:upgrade --keep-generated -n ' . $verbosityLevel);
 
-            /* Disable maintenance mode */
+            $this->shell->execute(sprintf(
+                '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
+                'php ./bin/magento setup:upgrade --keep-generated -n ' . $verbosityLevel,
+                $this->fileList->getInstallUpgradeLog()
+            ));
+
             $this->shell->execute('php ./bin/magento maintenance:disable ' . $verbosityLevel);
             $this->logger->notice('Maintenance mode is disabled.');
         } catch (\RuntimeException $e) {
@@ -90,19 +112,6 @@ class Setup implements ProcessInterface
             throw new \RuntimeException($e->getMessage(), 6);
         }
 
-        $this->removeRegenerateFlag();
-    }
-
-    /**
-     * Removes regenerate flag file if such file exists
-     */
-    private function removeRegenerateFlag()
-    {
-        $magentoRoot = $this->directoryList->getMagentoRoot();
-
-        if ($this->file->isExists($magentoRoot . '/' . Environment::REGENERATE_FLAG)) {
-            $this->logger->info('Removing .regenerate flag');
-            $this->file->deleteFile($magentoRoot . '/' . Environment::REGENERATE_FLAG);
-        }
+        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
 }

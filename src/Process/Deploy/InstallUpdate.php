@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -22,7 +22,7 @@ class InstallUpdate implements ProcessInterface
     private $logger;
 
     /**
-     * @var DeployConfig
+     * @var State
      */
     private $deployConfig;
 
@@ -37,18 +37,18 @@ class InstallUpdate implements ProcessInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param DeployConfig $deployConfig
+     * @param State $state
      * @param Install $installProcess
      * @param Update $updateProcess
      */
     public function __construct(
         LoggerInterface $logger,
-        DeployConfig $deployConfig,
+        State $state,
         Install $installProcess,
         Update $updateProcess
     ) {
         $this->logger = $logger;
-        $this->deployConfig = $deployConfig;
+        $this->deployConfig = $state;
         $this->installProcess = $installProcess;
         $this->updateProcess = $updateProcess;
     }

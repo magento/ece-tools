@@ -5,12 +5,14 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -18,29 +20,34 @@ use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp;
 class AmqpTest extends TestCase
 {
     /**
-     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
+     * @var Amqp
+     */
+    private $amqp;
+
+    /**
+     * @var Environment|Mock
      */
     private $environmentMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|\PHPUnit_Framework_MockObject_MockObject
+     * @var ConfigWriter|Mock
      */
     private $configWriterMock;
 
     /**
-     * @var ConfigReader|\PHPUnit_Framework_MockObject_MockObject
+     * @var ConfigReader|Mock
      */
     private $configReaderMock;
 
     /**
-     * @var Amqp
+     * @var DeployInterface|Mock
      */
-    private $amqp;
+    private $stageConfigMock;
 
     /**
      * @inheritdoc
@@ -48,16 +55,17 @@ class AmqpTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->amqp = new Amqp(
             $this->environmentMock,
             $this->configReaderMock,
             $this->configWriterMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -67,6 +75,10 @@ class AmqpTest extends TestCase
     public function testExecuteWithoutAmqp()
     {
         $config = ['some config'];
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_QUEUE_CONFIGURATION)
+            ->willReturn([]);
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
             ->with($this->anything())
@@ -85,11 +97,22 @@ class AmqpTest extends TestCase
 
     /**
      * @param array $config
+     * @param array $envQueueConfig
+     * @param array $amqpConfig
+     * @param array $resultConfig
      * @return void
      * @dataProvider executeAddUpdateDataProvider
      */
-    public function testExecuteAddUpdate(array $config, array $amqpConfig, array $resultConfig)
-    {
+    public function testExecuteAddUpdate(
+        array $config,
+        array $envQueueConfig,
+        array $amqpConfig,
+        array $resultConfig
+    ) {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_QUEUE_CONFIGURATION)
+            ->willReturn($envQueueConfig);
         $this->environmentMock->expects($this->exactly(2))
             ->method('getRelationship')
             ->withConsecutive(
@@ -115,19 +138,23 @@ class AmqpTest extends TestCase
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function executeAddUpdateDataProvider(): array
     {
         return [
             [
                 ['some config'],
-                [[
-                    'host' => 'localhost',
-                    'port' => '777',
-                    'username' => 'login',
-                    'password' => 'pswd',
-                    'vhost' => 'virtualhost'
-                ]],
+                [],
+                [
+                    [
+                        'host' => 'localhost',
+                        'port' => '777',
+                        'username' => 'login',
+                        'password' => 'pswd',
+                        'vhost' => 'virtualhost',
+                    ],
+                ],
                 [
                     'some config',
                     'queue' => [
@@ -138,18 +165,21 @@ class AmqpTest extends TestCase
                             'password' => 'pswd',
                             'virtualhost' => 'virtualhost',
                             'ssl' => '',
-                        ]
+                        ],
                     ],
-                ]
+                ],
             ],
             [
                 ['some config'],
-                [[
-                    'host' => 'localhost',
-                    'port' => '777',
-                    'username' => 'login',
-                    'password' => 'pswd',
-                ]],
+                [],
+                [
+                    [
+                        'host' => 'localhost',
+                        'port' => '777',
+                        'username' => 'login',
+                        'password' => 'pswd',
+                    ],
+                ],
                 [
                     'some config',
                     'queue' => [
@@ -160,9 +190,9 @@ class AmqpTest extends TestCase
                             'password' => 'pswd',
                             'virtualhost' => '/',
                             'ssl' => '',
-                        ]
+                        ],
                     ],
-                ]
+                ],
             ],
             [
                 [
@@ -175,16 +205,19 @@ class AmqpTest extends TestCase
                             'password' => 'mysqwwd',
                             'virtualhost' => 'virtualhost',
                             'ssl' => '1',
-                        ]
+                        ],
                     ],
                 ],
-                [[
-                    'host' => 'localhost',
-                    'port' => '777',
-                    'username' => 'login',
-                    'password' => 'pswd',
-                    'vhost' => 'virtualhost'
-                ]],
+                [],
+                [
+                    [
+                        'host' => 'localhost',
+                        'port' => '777',
+                        'username' => 'login',
+                        'password' => 'pswd',
+                        'vhost' => 'virtualhost',
+                    ],
+                ],
                 [
                     'some config',
                     'queue' => [
@@ -195,10 +228,53 @@ class AmqpTest extends TestCase
                             'password' => 'pswd',
                             'virtualhost' => 'virtualhost',
                             'ssl' => '',
-                        ]
+                        ],
                     ],
-                ]
-            ]
+                ],
+            ],
+            [
+                [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'some-host',
+                            'port' => '888',
+                            'user' => 'mylogin',
+                            'password' => 'mysqwwd',
+                            'virtualhost' => 'virtualhost',
+                            'ssl' => '1',
+                        ],
+                    ],
+                ],
+                [
+                    'amqp' => [
+                        'host' => 'env-config-host',
+                        'port' => 'env-config-port',
+                        'user' => 'env-config-user',
+                        'password' => 'env-config-password',
+                    ],
+                ],
+                [
+                    [
+                        'host' => 'localhost',
+                        'port' => '777',
+                        'username' => 'login',
+                        'password' => 'pswd',
+                        'vhost' => 'virtualhost',
+                    ],
+                ],
+                [
+                    'some config',
+                    'queue' => [
+                        'amqp' => [
+                            'host' => 'env-config-host',
+                            'port' => 'env-config-port',
+                            'user' => 'env-config-user',
+                            'password' => 'env-config-password',
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -210,6 +286,10 @@ class AmqpTest extends TestCase
      */
     public function testExecuteRemoveAmqp(array $config, array $expectedConfig)
     {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_QUEUE_CONFIGURATION)
+            ->willReturn([]);
         $this->environmentMock->expects($this->any())
             ->method('getRelationship')
             ->with($this->anything())
@@ -244,10 +324,10 @@ class AmqpTest extends TestCase
                             'password' => 'pswd',
                             'virtualhost' => '/',
                             'ssl' => '',
-                        ]
+                        ],
                     ],
                 ],
-                'expectedConfig' => ['some config',]
+                'expectedConfig' => ['some config',],
             ],
             [
                 'config' => [
@@ -261,16 +341,16 @@ class AmqpTest extends TestCase
                             'virtualhost' => '/',
                             'ssl' => '',
                         ],
-                        'someQueue' => ['some queue config']
+                        'someQueue' => ['some queue config'],
                     ],
                 ],
                 'expectedConfig' => [
                     'some config',
                     'queue' => [
-                        'someQueue' => ['some queue config']
-                    ]
-                ]
-            ]
+                        'someQueue' => ['some queue config'],
+                    ],
+                ],
+            ],
         ];
     }
 }

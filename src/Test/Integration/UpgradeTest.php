@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\Prestart;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -54,6 +55,10 @@ class UpgradeTest extends TestCase
         }
 
         $executeAndAssert = function ($commandName) use ($application) {
+            $application->getContainer()->set(
+                \Psr\Log\LoggerInterface::class,
+                \Magento\MagentoCloud\App\Logger::class
+            );
             $commandTester = new CommandTester($application->get($commandName));
             $commandTester->execute([]);
             $this->assertSame(0, $commandTester->getStatusCode());
@@ -63,12 +68,14 @@ class UpgradeTest extends TestCase
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
+        $executeAndAssert(Prestart::NAME);
         $this->assertContentPresence();
 
         $this->updateToVersion($toVersion);
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
+        $executeAndAssert(Prestart::NAME);
         $this->assertContentPresence();
     }
 

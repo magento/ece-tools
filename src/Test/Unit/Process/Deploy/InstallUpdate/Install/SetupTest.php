@@ -6,16 +6,26 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
+use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class SetupTest extends TestCase
 {
+    /**
+     * @var Setup
+     */
+    private $process;
+
     /**
      * @var ShellInterface|Mock
      */
@@ -42,10 +52,18 @@ class SetupTest extends TestCase
     private $passwordGeneratorMock;
 
     /**
-     * @var Setup
+     * @var FileList|Mock
      */
-    private $process;
+    private $fileListMock;
 
+    /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->environmentMock = $this->getMockBuilder(Environment::class)
@@ -58,13 +76,17 @@ class SetupTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
+        $this->fileListMock = $this->createMock(FileList::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new Setup(
             $this->loggerMock,
             $this->urlManagerMock,
             $this->environmentMock,
             $this->shellMock,
-            $this->passwordGeneratorMock
+            $this->passwordGeneratorMock,
+            $this->fileListMock,
+            $this->stageConfigMock
         );
     }
 
@@ -94,6 +116,8 @@ class SetupTest extends TestCase
         $adminFirstnameExpected,
         $adminLastnameExpected
     ) {
+        $installUpgradeLog = '/tmp/log.log';
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Installing Magento.');
@@ -103,9 +127,10 @@ class SetupTest extends TestCase
         $this->urlManagerMock->expects($this->once())
             ->method('getSecureUrls')
             ->willReturn(['' => 'https://secure.url']);
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
-            ->willReturn(' -v');
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->willReturn(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-v');
         $this->environmentMock->expects($this->any())
             ->method('getRelationships')
             ->willReturn([
@@ -115,8 +140,8 @@ class SetupTest extends TestCase
                         'port' => '3306',
                         'path' => 'magento',
                         'username' => 'user',
-                        'password' => 'password'
-                    ]
+                        'password' => 'password',
+                    ],
                 ],
             ]);
         $this->environmentMock->expects($this->any())
@@ -135,10 +160,15 @@ class SetupTest extends TestCase
             ->method('generateRandomPassword')
             ->willReturn($adminPasswordExpected);
 
+        $this->fileListMock->expects($this->once())
+            ->method('getInstallUpgradeLog')
+            ->willReturn($installUpgradeLog);
+
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with(
-                'php ./bin/magento setup:install --session-save=db --cleanup-database --currency=\'USD\''
+                '/bin/bash -c "set -o pipefail;'
+                . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
                 . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\' --language=\'fr_FR\''
                 . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
                 . ' --backend-frontname=\'' . $adminUrlExpected . '\' --admin-user=\'' . $adminNameExpected . '\''
@@ -146,6 +176,7 @@ class SetupTest extends TestCase
                 . '\' --admin-email=\'admin@example.com\' --admin-password=\'' . $adminPasswordExpected . '\''
                 . ' --use-secure-admin=1'
                 . ' --db-password=\'password\' -v'
+                . ' | tee -a ' . $installUpgradeLog . '"'
             );
 
         $this->process->execute();

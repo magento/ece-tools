@@ -18,8 +18,6 @@ class DirectoryList
     /**
      * Directory codes.
      */
-    const DIR_ROOT = 'root';
-    const DIR_MAGENTO_ROOT = 'magento_root';
     const DIR_INIT = 'init';
     const DIR_VAR = 'var';
     const DIR_LOG = 'log';
@@ -30,17 +28,24 @@ class DirectoryList
     private $root;
 
     /**
+     * @var string
+     */
+    private $magentoRoot;
+
+    /**
      * @var array
      */
     private $directories;
 
     /**
-     * @param string $root
-     * @param array $config
+     * @param string $root The ECE Tools root directory
+     * @param string $magentoRoot The Magento root directory
+     * @param array $config Directory configuration
      */
-    public function __construct(string $root, array $config = [])
+    public function __construct(string $root, string $magentoRoot, array $config = [])
     {
         $this->root = $root;
+        $this->magentoRoot = $magentoRoot;
         $this->directories = $config + static::getDefaultConfig();
     }
 
@@ -52,7 +57,7 @@ class DirectoryList
      */
     public function getPath(string $code): string
     {
-        $root = $this->getRoot();
+        $magentoRoot = $this->getMagentoRoot();
         $directories = $this->getDirectories();
 
         if (!array_key_exists($code, $directories)) {
@@ -66,7 +71,7 @@ class DirectoryList
         }
 
         $path = $directories[$code][self::PATH];
-        $normalizedPath = $root . ($root && $path ? '/' : '') . $path;
+        $normalizedPath = $magentoRoot . ($magentoRoot && $path ? '/' : '') . $path;
 
         return $normalizedPath;
     }
@@ -92,7 +97,7 @@ class DirectoryList
      */
     public function getMagentoRoot(): string
     {
-        return $this->getPath(static::DIR_MAGENTO_ROOT);
+        return $this->magentoRoot;
     }
 
     /**
@@ -125,14 +130,9 @@ class DirectoryList
     public static function getDefaultConfig(): array
     {
         return [
-            static::DIR_ROOT => [static::PATH => ''],
-            /*
-             * Magento application's vendor folder.
-             */
-            static::DIR_MAGENTO_ROOT => [static::PATH => '../../..'],
-            static::DIR_INIT => [static::PATH => '../../../init'],
-            static::DIR_VAR => [static::PATH => '../../../var'],
-            static::DIR_LOG => [static::PATH => '../../../var/log'],
+            static::DIR_INIT => [static::PATH => 'init'],
+            static::DIR_VAR => [static::PATH => 'var'],
+            static::DIR_LOG => [static::PATH => 'var/log'],
         ];
     }
 }

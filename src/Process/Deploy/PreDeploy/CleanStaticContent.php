@@ -6,8 +6,10 @@
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\StaticContentCleaner;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 
 class CleanStaticContent implements ProcessInterface
@@ -23,23 +25,39 @@ class CleanStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var StaticContentCleaner
+     * @var FlagManager
      */
-    private $staticContentCleaner;
+    private $flagManager;
+
+    /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
 
     /**
      * @param LoggerInterface $logger
      * @param Environment $env
-     * @param StaticContentCleaner $staticContentCleaner
+     * @param File $file
+     * @param DirectoryList $directoryList
+     * @param FlagManager $flagManager
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $env,
-        StaticContentCleaner $staticContentCleaner
+        File $file,
+        DirectoryList $directoryList,
+        FlagManager $flagManager
     ) {
         $this->logger = $logger;
         $this->env = $env;
-        $this->staticContentCleaner = $staticContentCleaner;
+        $this->file = $file;
+        $this->directoryList = $directoryList;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -49,12 +67,13 @@ class CleanStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->env->isStaticDeployInBuild()) {
+        if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             return;
         }
 
         $this->logger->info('Static content deployment was performed during build hook, cleaning old content.');
-        $this->staticContentCleaner->cleanPubStatic();
-        $this->staticContentCleaner->cleanViewPreprocessed();
+        $magentoRoot = $this->directoryList->getMagentoRoot();
+        $this->logger->info('Clearing pub/static');
+        $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
     }
 }

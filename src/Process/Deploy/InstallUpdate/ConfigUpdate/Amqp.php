@@ -6,11 +6,15 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class Amqp implements ProcessInterface
 {
     /**
@@ -34,6 +38,11 @@ class Amqp implements ProcessInterface
     private $configReader;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * Possible names for amqp relationship
      *
      * @var array
@@ -45,28 +54,43 @@ class Amqp implements ProcessInterface
      * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         ConfigReader $configReader,
         ConfigWriter $configWriter,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
-     * @inheritdoc
+     * Saves configuration for queue services.
+     *
+     * This method set queue configuration from environment variable QUEUE_CONFIGURATION.
+     * If QUEUE_CONFIGURATION variable is not set then configuration gets from relationships.
+     *
+     * Removes old queue configuration from env.php if there is no any queue configuration in
+     * relationships or environment variable.
+     *
+     * {@inheritdoc}
      */
     public function execute()
     {
         $mqConfig = $this->getAmqpConfig();
+        $envQueueConfig = $this->stageConfig->get(DeployInterface::VAR_QUEUE_CONFIGURATION);
         $config = $this->configReader->read();
 
-        if (count($mqConfig)) {
+        if (count($envQueueConfig)) {
+            $this->logger->info('Updating env.php AMQP configuration.');
+            $config['queue'] = $envQueueConfig;
+        } elseif (count($mqConfig)) {
             $this->logger->info('Updating env.php AMQP configuration.');
             $amqpConfig = $mqConfig[0];
             $config['queue']['amqp']['host'] = $amqpConfig['host'];

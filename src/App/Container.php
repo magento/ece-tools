@@ -7,21 +7,24 @@ namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
-use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
+use Magento\MagentoCloud\Process\Prestart as PrestartProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
 use Magento\MagentoCloud\Process;
@@ -39,12 +42,11 @@ class Container implements ContainerInterface
     private $container;
 
     /**
-     * @param string $root
-     * @param array $config
+     * @param DirectoryList $directoryList
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(string $root, array $config)
+    public function __construct(DirectoryList $directoryList)
     {
         /**
          * Creating concrete container.
@@ -57,8 +59,8 @@ class Container implements ContainerInterface
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () use ($root, $config) {
-                return new \Magento\MagentoCloud\Filesystem\DirectoryList($root, $config);
+            function () use ($directoryList) {
+                return $directoryList;
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
@@ -70,6 +72,16 @@ class Container implements ContainerInterface
                 $fileList->getComposer()
             );
         });
+        $this->container->singleton(
+            Flag\Pool::class,
+            function () {
+                return new Flag\Pool([
+                    Flag\Manager::FLAG_REGENERATE => 'var/.regenerate',
+                    Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
+                    Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_PENDING => 'var/.static_content_deploy_pending',
+                ]);
+            }
+        );
         /**
          * Interface to implementation binding.
          */
@@ -82,14 +94,8 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\Dump::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Build::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Deploy::class);
-        $this->container->singleton(\Psr\Log\LoggerInterface::class, function () {
-            return new \Monolog\Logger(
-                'default',
-                $this->container->make(\Magento\MagentoCloud\App\Logger\Pool::class)->getHandlers()
-            );
-        });
+        $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
+        $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
         $this->container->singleton(\Magento\MagentoCloud\Util\UrlManager::class);
@@ -101,6 +107,17 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\CopyStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\RepositoryFactory::class);
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\BuildInterface::class,
+            \Magento\MagentoCloud\Config\Stage\Build::class
+        );
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\DeployInterface::class,
+            \Magento\MagentoCloud\Config\Stage\Deploy::class
+        );
         /**
          * Contextual binding.
          */
@@ -154,6 +171,10 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
                         /**
+                         * Remove this line after implementation post-deploy hook
+                         */
+                        $this->container->make(PostDeployProcess\Backup::class),
+                        /**
                          * Cache clean process must remain the last one in deploy chain.
                          * Do not add any processes after it.
                          */
@@ -196,6 +217,16 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Redis::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                    ],
+                ]);
+            });
+        $this->container->when(Prestart::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(PrestartProcess\DeployStaticContent::class),
+                        $this->container->make(PrestartProcess\CompressStaticContent::class),
                     ],
                 ]);
             });
@@ -246,16 +277,6 @@ class Container implements ContainerInterface
                     'system/websites',
                 ];
             });
-        $this->container->when(DeployProcess\PreDeploy::class);
-        $this->container->when(CronUnlock::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\UnlockCronJobs::class),
-                    ],
-                ]);
-            });
         $this->container->when(DeployProcess\PreDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -277,9 +298,15 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(\Magento\MagentoCloud\Config\Build::class)
-            ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
-            ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
+        $this->container->when(PrestartProcess\DeployStaticContent::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->get(PrestartProcess\DeployStaticContent\Generate::class),
+                    ],
+                ]);
+            });
         $this->container->when(BuildProcess\DeployStaticContent::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -306,6 +333,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->make(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);
@@ -340,5 +368,17 @@ class Container implements ContainerInterface
     {
         $this->container->forgetInstance($abstract);
         $this->container->bind($abstract, $concrete, $shared);
+    }
+
+    /**
+     * Creates instance with params.
+     *
+     * @param string $abstract The class name to create
+     * @param array $params Associative array of constructor params
+     * @return object The resolved object
+     */
+    public function create(string $abstract, array $params = [])
+    {
+        return $this->container->make($abstract, $params);
     }
 }

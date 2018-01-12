@@ -10,6 +10,7 @@
     "php": "^7.0",
     "monolog/monolog": "^1.17",
     "symfony/console": "^2.6",
+    "illuminate/contracts": "^5.5",
     "illuminate/container": "^5.5",
     "illuminate/config": "^5.5",
     "psr/log": "^1.0",
@@ -36,13 +37,19 @@
       "Magento\\MagentoCloud\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Magento\\MagentoCloud\\Test\\": "tests/static/"
+    }
+  },
   "scripts": {
     "test": [
       "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
       "phpmd src xml tests/static/phpmd-ruleset.xml",
       "phpunit --configuration tests/unit/phpunit.xml.dist"
     ],
-    "test-coverage": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-html tests/unit/tmp/coverage"
+    "test-coverage": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml 85",
+    "test-coverage-generate": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-html tests/unit/tmp/coverage"
   },
   "prefer-stable": true
 }

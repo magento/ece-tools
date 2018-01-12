@@ -5,14 +5,15 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- *
  * Writable directories will be erased when the writable filesystem is mounted to them. This
  * step backs them up to ./init/
  *
@@ -41,21 +42,39 @@ class BackupData implements ProcessInterface
     private $directoryList;
 
     /**
+     * @var FlagManager
+     */
+    private $flagManager;
+
+    /**
+     * @var LoggerPool
+     */
+    private $loggerPool;
+
+    /**
+     * BackupData constructor.
+     *
      * @param File $file
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param DirectoryList $directoryList
+     * @param FlagManager $flagManager
+     * @param LoggerPool $loggerPool
      */
     public function __construct(
         File $file,
         LoggerInterface $logger,
         Environment $environment,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        FlagManager $flagManager,
+        LoggerPool $loggerPool
     ) {
         $this->file = $file;
         $this->logger = $logger;
         $this->environment = $environment;
         $this->directoryList = $directoryList;
+        $this->flagManager = $flagManager;
+        $this->loggerPool = $loggerPool;
     }
 
     /**
@@ -65,13 +84,10 @@ class BackupData implements ProcessInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
         $rootInitDir = $this->directoryList->getInit() . '/';
+        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
 
-        if ($this->file->isExists($magentoRoot . Environment::REGENERATE_FLAG)) {
-            $this->logger->info('Removing .regenerate flag');
-            $this->file->deleteFile($magentoRoot . Environment::REGENERATE_FLAG);
-        }
-
-        if ($this->environment->isStaticDeployInBuild()) {
+        if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
+            $scdFlagPath = $this->flagManager->getFlagPath(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
             $initPub = $rootInitDir . 'pub/';
             $initPubStatic = $initPub . 'static/';
             $originalPubStatic = $magentoRoot . 'pub/static/';
@@ -87,14 +103,16 @@ class BackupData implements ProcessInterface
             $this->file->createDirectory($initPubStatic);
             $this->file->copyDirectory($originalPubStatic, $initPubStatic);
             $this->file->copy(
-                $magentoRoot . Environment::STATIC_CONTENT_DEPLOY_FLAG,
-                $rootInitDir . Environment::STATIC_CONTENT_DEPLOY_FLAG
+                $magentoRoot . $scdFlagPath,
+                $rootInitDir . $scdFlagPath
             );
         } else {
-            $this->logger->info('No file ' . Environment::STATIC_CONTENT_DEPLOY_FLAG);
+            $this->logger->info('SCD not performed during build');
         }
 
         $this->logger->info('Copying writable directories to temp directory.');
+
+        $this->stopLogging();
 
         foreach ($this->environment->getWritableDirectories() as $dir) {
             $originalDir = $magentoRoot . $dir;
@@ -109,5 +127,26 @@ class BackupData implements ProcessInterface
                 $this->file->createDirectory($originalDir);
             }
         }
+
+        $this->restoreLogging();
+    }
+
+    /**
+     * Removes all log handlers for closing all connections to files that are opened for logging.
+     *
+     * It's done for avoiding file system exceptions while file opened for writing is not physically exists
+     * and some process trying to write into that file.
+     */
+    private function stopLogging()
+    {
+        $this->logger->setHandlers([]);
+    }
+
+    /**
+     * Restore all log handlers.
+     */
+    private function restoreLogging()
+    {
+        $this->logger->setHandlers($this->loggerPool->getHandlers());
     }
 }

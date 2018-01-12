@@ -6,10 +6,15 @@
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class RecoverableDirectoryListTest extends TestCase
 {
     /**
@@ -22,12 +27,29 @@ class RecoverableDirectoryListTest extends TestCase
      */
     private $environmentMock;
 
+    /**
+     * @var FlagManager|Mock
+     */
+    private $flagManagerMock;
+
+    /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->recoverableDirectoryList = new RecoverableDirectoryList(
-            $this->environmentMock
+            $this->environmentMock,
+            $this->flagManagerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -39,20 +61,24 @@ class RecoverableDirectoryListTest extends TestCase
      */
     public function testGetList(bool $isSymlinkOn, bool $isStaticInBuild, array $expected)
     {
-        $this->environmentMock->expects($this->once())
-            ->method('isStaticContentSymlinkOn')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_STATIC_CONTENT_SYMLINK)
             ->willReturn($isSymlinkOn);
-        $this->environmentMock->expects($this->once())
-            ->method('isStaticDeployInBuild')
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn($isStaticInBuild);
-
         $this->assertEquals(
             $expected,
             $this->recoverableDirectoryList->getList()
         );
     }
 
-    public function getListDataProvider()
+    /**
+     * @return array
+     */
+    public function getListDataProvider(): array
     {
         return [
             [
@@ -61,21 +87,21 @@ class RecoverableDirectoryListTest extends TestCase
                 [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => 'sub_symlink'
+                        'strategy' => 'sub_symlink',
                     ],
-                ]
+                ],
             ],
             [
                 false,
@@ -83,21 +109,21 @@ class RecoverableDirectoryListTest extends TestCase
                 [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
-                ]
+                ],
             ],
             [
                 true,
@@ -105,14 +131,14 @@ class RecoverableDirectoryListTest extends TestCase
                 [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => 'copy'
+                        'strategy' => 'copy',
                     ],
-                ]
-            ]
+                ],
+            ],
         ];
     }
 }

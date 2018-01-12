@@ -61,12 +61,7 @@ class Deploy extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            /**
-             * This is the beginning of the deploy phase.
-             * But we cannot log information about starting it on this place because of specific work with log file
-             * after build phase.
-             * Please, see Magento\MagentoCloud\Process\Deploy\PreDeploy::execute()
-             */
+            $this->logger->info('Starting deploy.');
             $this->process->execute();
             $this->logger->info('Deployment completed.');
         } catch (\Exception $exception) {

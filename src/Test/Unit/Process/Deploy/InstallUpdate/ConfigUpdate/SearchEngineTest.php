@@ -6,14 +6,23 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class SearchEngineTest extends TestCase
 {
+    /**
+     * @var SearchEngine
+     */
+    private $process;
+
     /**
      * @var Environment|Mock
      */
@@ -30,26 +39,32 @@ class SearchEngineTest extends TestCase
     private $writerMock;
 
     /**
-     * @var SearchEngine
+     * @var DeployInterface|Mock
      */
-    private $process;
+    private $stageConfigMock;
 
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->writerMock = $this->createMock(Writer::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new SearchEngine(
             $this->environmentMock,
             $this->loggerMock,
-            $this->writerMock
+            $this->writerMock,
+            $this->stageConfigMock
         );
     }
 
     public function testExecute()
     {
         $config['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn([]);
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
             ->willReturn([]);
@@ -71,9 +86,13 @@ class SearchEngineTest extends TestCase
         $config['system']['default']['catalog']['search'] = [
             'engine' => 'elasticsearch',
             'elasticsearch_server_hostname' => 'localhost',
-            'elasticsearch_server_port' => 1234
+            'elasticsearch_server_port' => 1234,
         ];
 
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn([]);
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
             ->willReturn(
@@ -81,9 +100,9 @@ class SearchEngineTest extends TestCase
                     'elasticsearch' => [
                         [
                             'host' => 'localhost',
-                            'port' => 1234
-                        ]
-                    ]
+                            'port' => 1234,
+                        ],
+                    ],
                 ]
             );
         $this->writerMock->expects($this->once())
@@ -106,8 +125,13 @@ class SearchEngineTest extends TestCase
             'solr_server_hostname' => 'localhost',
             'solr_server_port' => 1234,
             'solr_server_username' => 'scheme',
-            'solr_server_path' => 'path'
+            'solr_server_path' => 'path',
         ];
+
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn([]);
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
             ->willReturn(
@@ -118,8 +142,8 @@ class SearchEngineTest extends TestCase
                             'port' => 1234,
                             'scheme' => 'scheme',
                             'path' => 'path',
-                        ]
-                    ]
+                        ],
+                    ],
                 ]
             );
         $this->writerMock->expects($this->once())
@@ -130,6 +154,38 @@ class SearchEngineTest extends TestCase
             ->withConsecutive(
                 ['Updating search engine configuration.'],
                 ['Set search engine to: solr']
+            );
+
+        $this->process->execute();
+    }
+
+    public function testExecuteEnvironmentConfiguration()
+    {
+        $config['system']['default']['catalog']['search'] = [
+            'engine' => 'elasticsearch',
+            'elasticsearch_server_hostname' => 'elasticsearch_host',
+            'elasticsearch_server_port' => 'elasticsearch_port',
+        ];
+
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn([
+                'engine' => 'elasticsearch',
+                'elasticsearch_server_hostname' => 'elasticsearch_host',
+                'elasticsearch_server_port' => 'elasticsearch_port',
+            ]);
+        $this->environmentMock->expects($this->never())
+            ->method('getRelationships');
+
+        $this->writerMock->expects($this->once())
+            ->method('update')
+            ->with($config);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Updating search engine configuration.'],
+                ['Set search engine to: elasticsearch']
             );
 
         $this->process->execute();

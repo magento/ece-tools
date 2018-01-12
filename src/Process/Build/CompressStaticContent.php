@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Config\Build as BuildConfig;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 
 /**
  * Compress static content at build time.
@@ -33,36 +33,37 @@ class CompressStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
-     * @var BuildConfig
-     */
-    private $buildConfig;
-
-    /**
      * @var StaticContentCompressor
      */
     private $staticContentCompressor;
 
     /**
-     * @param LoggerInterface         $logger
-     * @param Environment             $environment
-     * @param BuildConfig             $buildConfig
+     * @var FlagManager
+     */
+    private $flagManager;
+
+    /**
+     * @var BuildInterface
+     */
+    private $stageConfig;
+
+    /**
+     * CompressStaticContent constructor.
+     * @param LoggerInterface $logger
      * @param StaticContentCompressor $staticContentCompressor
+     * @param FlagManager $flagManager
+     * @param BuildInterface $stageConfig
      */
     public function __construct(
         LoggerInterface $logger,
-        Environment $environment,
-        BuildConfig $buildConfig,
-        StaticContentCompressor $staticContentCompressor
+        StaticContentCompressor $staticContentCompressor,
+        FlagManager $flagManager,
+        BuildInterface $stageConfig
     ) {
         $this->logger = $logger;
-        $this->environment = $environment;
-        $this->buildConfig = $buildConfig;
         $this->staticContentCompressor = $staticContentCompressor;
+        $this->flagManager = $flagManager;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -72,10 +73,10 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->environment->isStaticDeployInBuild()) {
+        if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             $this->staticContentCompressor->process(
-                $this->buildConfig->get(BuildConfig::OPT_SCD_COMPRESSION_LEVEL, static::COMPRESSION_LEVEL),
-                $this->buildConfig->getVerbosityLevel()
+                $this->stageConfig->get(BuildInterface::VAR_SCD_COMPRESSION_LEVEL),
+                $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS)
             );
         } else {
             $this->logger->info(

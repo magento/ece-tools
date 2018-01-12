@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
@@ -13,6 +14,9 @@ use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class OptionTest extends TestCase
 {
     /**
@@ -40,36 +44,42 @@ class OptionTest extends TestCase
      */
     private $threadCountOptimizerMock;
 
+    /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->connectionMock = $this->createMock(Connection::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->option = new Option(
             $this->environmentMock,
             $this->connectionMock,
             $this->magentoVersionMock,
-            $this->threadCountOptimizerMock
+            $this->threadCountOptimizerMock,
+            $this->stageConfigMock
         );
     }
 
     public function testGetThreadCount()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getStaticDeployThreadsCount')
-            ->willReturn(3);
-        $this->environmentMock->expects($this->once())
-            ->method('getVariable')
-            ->with(Environment::VAR_SCD_STRATEGY)
-            ->willReturn('strategyName');
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_SCD_STRATEGY, 'strategyName'],
+                [DeployInterface::VAR_SCD_THREADS, 3],
+            ]);
         $this->threadCountOptimizerMock->expects($this->once())
             ->method('optimize')
             ->with(3, 'strategyName')
             ->willReturn(3);
 
-        $this->assertEquals(3, $this->option->getTreadCount());
+        $this->assertEquals(3, $this->option->getThreadCount());
     }
 
     /**
@@ -79,8 +89,9 @@ class OptionTest extends TestCase
      */
     public function testGetExcludedThemes($themes, $expected)
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getStaticDeployExcludeThemes')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_STATIC_CONTENT_EXCLUDE_THEMES)
             ->willReturn($themes);
 
         $this->assertEquals(
@@ -89,29 +100,32 @@ class OptionTest extends TestCase
         );
     }
 
-    public function excludedThemesDataProvider()
+    /**
+     * @return array
+     */
+    public function excludedThemesDataProvider(): array
     {
         return [
             [
                 '',
-                []
+                [],
             ],
             [
                 'theme1, theme2 ,,  theme3 ',
-                ['theme1', 'theme2', 'theme3']
+                ['theme1', 'theme2', 'theme3'],
             ],
             [
                 'theme3,,theme4,,,,theme5',
-                ['theme3', 'theme4', 'theme5']
-            ]
+                ['theme3', 'theme4', 'theme5'],
+            ],
         ];
     }
 
     public function testGetStrategy()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getVariable')
-            ->with(Environment::VAR_SCD_STRATEGY)
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SCD_STRATEGY)
             ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());
@@ -147,7 +161,7 @@ class OptionTest extends TestCase
             [
                 'fr_FR',
                 'de_DE',
-                'en_US'
+                'en_US',
             ],
             $this->option->getLocales()
         );
@@ -180,8 +194,9 @@ class OptionTest extends TestCase
 
     public function testGetVerbosityLevel()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getVerbosityLevel')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn('-vv');
 
         $this->assertEquals('-vv', $this->option->getVerbosityLevel());

@@ -71,25 +71,24 @@ class GenerateTest extends TestCase
 
     public function testExecute()
     {
+        $command = 'setup:static-content:deploy with locales';
         $this->optionMock->expects($this->once())
             ->method('getLocales')
             ->willReturn(['ua_UA', 'fr_FR', 'es_ES', 'en_US']);
         $this->optionMock->expects($this->once())
-            ->method('getTreadCount')
+            ->method('getThreadCount')
             ->willReturn(3);
         $this->loggerMock->method('info')
             ->withConsecutive(
                 ["Generating static content for locales: ua_UA fr_FR es_ES en_US\nUsing 3 Threads"]
             );
         $this->commandFactoryMock->expects($this->once())
-            ->method('createParallel')
+            ->method('create')
             ->with($this->optionMock)
-            ->willReturn('some parallel command');
+            ->willReturn($command);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with(
-                "printf 'some parallel command' | xargs -I CMD -P 3 bash -c CMD"
-            );
+            ->with($command);
 
         $this->process->execute();
     }

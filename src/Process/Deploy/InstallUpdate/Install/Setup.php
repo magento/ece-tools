@@ -6,12 +6,17 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class Setup implements ProcessInterface
 {
     /**
@@ -35,9 +40,19 @@ class Setup implements ProcessInterface
     private $shell;
 
     /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
      * @var PasswordGenerator
      */
     private $passwordGenerator;
+
+    /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
 
     /**
      * @param LoggerInterface $logger
@@ -45,19 +60,25 @@ class Setup implements ProcessInterface
      * @param Environment $environment
      * @param ShellInterface $shell
      * @param PasswordGenerator $passwordGenerator
+     * @param FileList $fileList
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         LoggerInterface $logger,
         UrlManager $urlManager,
         Environment $environment,
         ShellInterface $shell,
-        PasswordGenerator $passwordGenerator
+        PasswordGenerator $passwordGenerator,
+        FileList $fileList,
+        DeployInterface $stageConfig
     ) {
         $this->logger = $logger;
         $this->urlManager = $urlManager;
         $this->environment = $environment;
         $this->shell = $shell;
         $this->passwordGenerator = $passwordGenerator;
+        $this->fileList = $fileList;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -72,7 +93,7 @@ class Setup implements ProcessInterface
 
         $command =
             'php ./bin/magento setup:install'
-            . ' --session-save=db --cleanup-database'
+            . ' -n --session-save=db --cleanup-database'
             . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
             . ' --base-url=' . escapeshellarg($urlUnsecure)
             . ' --base-url-secure=' . escapeshellarg($urlSecure)
@@ -99,8 +120,14 @@ class Setup implements ProcessInterface
             $command .= ' --db-password=' . escapeshellarg($dbPassword);
         }
 
-        $command .= $this->environment->getVerbosityLevel();
+        if ($this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)) {
+            $command .= ' ' . $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+        }
 
-        $this->shell->execute(escapeshellcmd($command));
+        $this->shell->execute(sprintf(
+            '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
+            escapeshellcmd($command),
+            $this->fileList->getInstallUpgradeLog()
+        ));
     }
 }

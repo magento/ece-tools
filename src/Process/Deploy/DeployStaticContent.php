@@ -6,8 +6,12 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\StaticContentCleaner;
+use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -31,26 +35,58 @@ class DeployStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var StaticContentCleaner
+     * @var File
      */
-    private $staticContentCleaner;
+    private $file;
+
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @var RemoteDiskIdentifier
+     */
+    private $remoteDiskIdentifier;
+
+    /**
+     * @var FlagManager
+     */
+    private $flagManager;
+
+    /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
 
     /**
      * @param ProcessInterface $process
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param StaticContentCleaner $staticContentCleaner
+     * @param File $file
+     * @param DirectoryList $directoryList
+     * @param RemoteDiskIdentifier $remoteDiskIdentifier
+     * @param FlagManager $flagManager
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         ProcessInterface $process,
         Environment $environment,
         LoggerInterface $logger,
-        StaticContentCleaner $staticContentCleaner
+        File $file,
+        DirectoryList $directoryList,
+        RemoteDiskIdentifier $remoteDiskIdentifier,
+        FlagManager $flagManager,
+        DeployInterface $stageConfig
     ) {
         $this->process = $process;
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->staticContentCleaner = $staticContentCleaner;
+        $this->file = $file;
+        $this->directoryList = $directoryList;
+        $this->remoteDiskIdentifier = $remoteDiskIdentifier;
+        $this->flagManager = $flagManager;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -62,6 +98,16 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
+        $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING);
+        if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
+            && !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+        ) {
+            $this->flagManager->set(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING);
+            $this->logger->info('Postpone static content deployment until prestart');
+
+            return;
+        }
+
         $applicationMode = $this->environment->getApplicationMode();
         $this->logger->info('Application mode is ' . $applicationMode);
 
@@ -69,15 +115,18 @@ class DeployStaticContent implements ProcessInterface
             return;
         }
 
-        /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
-        if (!$this->environment->isDeployStaticContent()) {
+        if ($this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
+            || !$this->environment->isDeployStaticContent()
+        ) {
             return;
         }
 
-        // Clear old static content if necessary
-        if ($this->environment->doCleanStaticFiles()) {
-            $this->staticContentCleaner->cleanPubStatic();
-            $this->staticContentCleaner->cleanViewPreprocessed();
+        if ($this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)) {
+            $magentoRoot = $this->directoryList->getMagentoRoot();
+            $this->logger->info('Clearing pub/static');
+            $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
+            $this->logger->info('Clearing var/view_preprocessed');
+            $this->file->backgroundClearDirectory($magentoRoot . '/var/view_preprocessed');
         }
 
         $this->logger->info('Generating fresh static content');

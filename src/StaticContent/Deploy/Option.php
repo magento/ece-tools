@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
@@ -37,31 +38,39 @@ class Option implements OptionInterface
     private $threadCountOptimizer;
 
     /**
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param Environment $environment
      * @param ConnectionInterface $connection
      * @param MagentoVersion $magentoVersion
      * @param ThreadCountOptimizer $threadCountOptimizer
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         ConnectionInterface $connection,
         MagentoVersion $magentoVersion,
-        ThreadCountOptimizer $threadCountOptimizer
+        ThreadCountOptimizer $threadCountOptimizer,
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->connection = $connection;
         $this->magentoVersion = $magentoVersion;
         $this->threadCountOptimizer = $threadCountOptimizer;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
      * @inheritdoc
      */
-    public function getTreadCount(): int
+    public function getThreadCount(): int
     {
         return $this->threadCountOptimizer->optimize(
-            $this->environment->getStaticDeployThreadsCount(),
-            $this->getStrategy()
+            $this->stageConfig->get(DeployInterface::VAR_SCD_THREADS),
+            $this->stageConfig->get(DeployInterface::VAR_SCD_STRATEGY)
         );
     }
 
@@ -70,7 +79,7 @@ class Option implements OptionInterface
      */
     public function getExcludedThemes(): array
     {
-        $themes = preg_split("/[,]+/", $this->environment->getStaticDeployExcludeThemes());
+        $themes = preg_split("/[,]+/", $this->stageConfig->get(DeployInterface::VAR_STATIC_CONTENT_EXCLUDE_THEMES));
 
         return array_filter(array_map('trim', $themes));
     }
@@ -80,7 +89,7 @@ class Option implements OptionInterface
      */
     public function getStrategy(): string
     {
-        return $this->environment->getVariable(Environment::VAR_SCD_STRATEGY, '');
+        return $this->stageConfig->get(DeployInterface::VAR_SCD_STRATEGY);
     }
 
     /**
@@ -124,6 +133,6 @@ class Option implements OptionInterface
      */
     public function getVerbosityLevel(): string
     {
-        return $this->environment->getVerbosityLevel();
+        return $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
     }
 }
