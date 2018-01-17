@@ -119,8 +119,8 @@ class RecoverableDirectoryListTest extends TestCase
     {
         return [
             [
-                true, // $isSymlinkOn
-                true, // $isStaticInBuild
+                'isSymlinkOn' => true,
+                'isStaticInBuild' => true,
                 [
                     [
                         'directory' => 'app/etc',
@@ -141,8 +141,8 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             [
-                false, // $isSymlinkOn
-                true, // $isStaticInBuild
+                'isSymlinkOn' => false,
+                'isStaticInBuild' =>true,
                 [
                     [
                         'directory' => 'app/etc',
@@ -163,8 +163,8 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             [
-                true, // $isSymlinkOn
-                false, // $isStaticInBuild
+                'isSymlinkOn' => true,
+                'isStaticInBuild' => false,
                 [
                     [
                         'directory' => 'app/etc',
@@ -182,8 +182,8 @@ class RecoverableDirectoryListTest extends TestCase
     {
         return [
             [
-                true, // $isSymlinkOn
-                true, // $isStaticInBuild
+                'isSymlinkOn' => true,
+                'isStaticInBuild' => true,
                 [
                     [
                         'directory' => 'app/etc',
@@ -212,8 +212,8 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             [
-                false, // $isSymlinkOn
-                true, // $isStaticInBuild
+                'isSymlinkOn' => false,
+                'isStaticInBuild' => true,
                 [
                     [
                         'directory' => 'app/etc',
@@ -242,8 +242,8 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             [
-                true, // $isSymlinkOn
-                false, // $isStaticInBuild
+                'isSymlinkOn' => true,
+                'isStaticInBuild' => false,
                 [
                     [
                         'directory' => 'app/etc',
