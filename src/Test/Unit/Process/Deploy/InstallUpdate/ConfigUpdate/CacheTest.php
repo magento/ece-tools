@@ -5,10 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Cache;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Psr\Log\LoggerInterface;
@@ -23,11 +21,6 @@ class CacheTest extends TestCase
      * @var Cache
      */
     private $process;
-
-    /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -45,256 +38,66 @@ class CacheTest extends TestCase
     private $configReaderMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var Cache\Config|Mock
      */
-    private $stageConfigMock;
+    private $cacheConfigMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->setMethods(['getRelationships', 'getAdminUrl', 'getVariable'])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->cacheConfigMock = $this->createMock(Cache\Config::class);
 
         $this->process = new Cache(
-            $this->environmentMock,
             $this->configReaderMock,
             $this->configWriterMock,
             $this->loggerMock,
-            $this->stageConfigMock
+            $this->cacheConfigMock
         );
     }
 
-    /**
-     * @param $envSessionLocking
-     * @param int $expectedDisableLocking
-     * @dataProvider executeDataProvider
-     */
-    public function testExecute($envSessionLocking, int $expectedDisableLocking)
+    public function testExecute()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Updating env.php Redis cache configuration.');
-        $this->environmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn([
-                'redis' => [
-                    0 => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                    ],
-                ],
-            ]);
-        $this->environmentMock->expects($this->any())
-            ->method('getAdminUrl')
-            ->willReturn('admin');
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING)
-            ->willReturn($envSessionLocking);
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
-
+        $this->cacheConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'frontend' => ['cache_options'],
+            ]);
         $this->configWriterMock->expects($this->once())
             ->method('write')
-            ->with([
-                'cache' => [
-                    'frontend' => [
-                        'default' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                        'page_cache' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                    ],
-                ],
-                'session' => [
-                    'save' => 'redis',
-                    'redis' => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                        'database' => 0,
-                        'disable_locking' => $expectedDisableLocking,
-                    ],
-                ],
-            ]);
+            ->with(['cache' => [
+                'frontend' => ['cache_options'],
+            ]]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cache configuration.');
 
         $this->process->execute();
     }
 
-    /**
-     * @return array
-     */
-    public function executeDataProvider(): array
+    public function testExecuteEmptyConfig()
     {
-        return [
-            [
-                true,
-                1,
-            ],
-            [
-                false,
-                0,
-            ],
-            [
-                true,
-                1,
-            ],
-        ];
-    }
-
-    public function testExecuteRemovingRedis()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Removing redis cache and session configuration from env.php.');
-        $this->environmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn([]);
-        $this->environmentMock->expects($this->any())
-            ->method('getAdminUrl')
-            ->willReturn('admin');
-
         $this->configReaderMock->expects($this->once())
             ->method('read')
-            ->willReturn([
-                'cache' => [
-                    'frontend' => [
-                        'default' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                        'page_cache' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                    ],
-                ],
-                'session' => [
-                    'save' => 'redis',
-                    'redis' => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                        'database' => 0,
-                    ],
-                ],
-            ]);
-
-        $this->configWriterMock->expects($this->once())
-            ->method('write')
-            ->with([
-                'cache' => [
-                    'frontend' => [],
-                ],
-                'session' => [
-                    'save' => 'db',
-                ],
-            ]);
-
-        $this->process->execute();
-    }
-
-    public function testExecuteWithDifferentRedisOptions()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Updating env.php Redis cache configuration.');
-        $this->environmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn([
-                'redis' => [
-                    0 => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                    ],
-                ],
-            ]);
-        $this->environmentMock->expects($this->any())
-            ->method('getAdminUrl')
-            ->willReturn('admin');
-        $this->stageConfigMock->expects($this->once())
+            ->willReturn(['cache' => [
+                'frontend' => ['cache_options'],
+            ]]);
+        $this->cacheConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING)
-            ->willReturn(true);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([
-                'session' => [
-                    'redis' => [
-                        'max_concurrency' => 10,
-                        'bot_first_lifetime' => 100,
-                        'bot_lifetime' => 10000,
-                        'min_lifetime' => 100,
-                        'max_lifetime' => 10000,
-                    ],
-                ],
-            ]);
-
+            ->willReturn([]);
         $this->configWriterMock->expects($this->once())
             ->method('write')
-            ->with([
-                'cache' => [
-                    'frontend' => [
-                        'default' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                        'page_cache' => [
-                            'backend' => 'Cm_Cache_Backend_Redis',
-                            'backend_options' => [
-                                'server' => '127.0.0.1',
-                                'port' => '6379',
-                                'database' => 1,
-                            ],
-                        ],
-                    ],
-                ],
-                'session' => [
-                    'save' => 'redis',
-                    'redis' => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                        'database' => 0,
-                        'disable_locking' => 1,
-                        'max_concurrency' => 10,
-                        'bot_first_lifetime' => 100,
-                        'bot_lifetime' => 10000,
-                        'min_lifetime' => 100,
-                        'max_lifetime' => 10000,
-                    ],
-                ],
-            ]);
+            ->with(['cache' => []]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Cache configuration not found. Removing cache configuration.');
 
         $this->process->execute();
     }

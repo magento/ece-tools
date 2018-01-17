@@ -5,10 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\CloudPatches\Config\Config;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Psr\Log\LoggerInterface;
@@ -23,11 +22,6 @@ class SessionTest extends TestCase
      * @var Session
      */
     private $process;
-
-    /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -45,193 +39,70 @@ class SessionTest extends TestCase
     private $configReaderMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var Session\Config|Mock
      */
-    private $stageConfigMock;
+    private $sessionConfigMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->setMethods(['getRelationships', 'getAdminUrl', 'getVariable'])
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->sessionConfigMock = $this->createMock(Session\Config::class);
 
         $this->process = new Session(
-            $this->environmentMock,
             $this->configReaderMock,
             $this->configWriterMock,
             $this->loggerMock,
-            $this->stageConfigMock
+            $this->sessionConfigMock
         );
     }
 
-    /**
-     * @param $envSessionLocking
-     * @param int $expectedDisableLocking
-     * @dataProvider executeDataProvider
-     */
-    public function testExecute($envSessionLocking, int $expectedDisableLocking)
+    public function testExecute()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Updating env.php Redis cache configuration.');
-        $this->environmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn([
-                'redis' => [
-                    0 => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                    ],
-                ],
-            ]);
-        $this->environmentMock->expects($this->any())
-            ->method('getAdminUrl')
-            ->willReturn('admin');
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING)
-            ->willReturn($envSessionLocking);
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
-
+        $this->sessionConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'save' => 'redis',
+                'redis' => [
+                    'host' => 'redis_host'
+                ]
+            ]);
         $this->configWriterMock->expects($this->once())
             ->method('write')
-            ->with([
-                'session' => [
-                    'save' => 'redis',
-                    'redis' => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                        'database' => 0,
-                        'disable_locking' => $expectedDisableLocking,
-                    ],
-                ],
-            ]);
+            ->with(['session' => [
+                'save' => 'redis',
+                'redis' => [
+                    'host' => 'redis_host'
+                ]
+            ]]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating session configuration.');
 
         $this->process->execute();
     }
 
-    /**
-     * @return array
-     */
-    public function executeDataProvider(): array
+    public function testExecuteEmptyConfig()
     {
-        return [
-            [
-                true,
-                1,
-            ],
-            [
-                false,
-                0,
-            ],
-            [
-                true,
-                1,
-            ],
-        ];
-    }
-
-    public function testExecuteRemovingRedis()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Removing redis cache and session configuration from env.php.');
-        $this->environmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn([]);
-        $this->environmentMock->expects($this->any())
-            ->method('getAdminUrl')
-            ->willReturn('admin');
-
         $this->configReaderMock->expects($this->once())
             ->method('read')
-            ->willReturn([
-                'session' => [
-                    'save' => 'redis',
-                    'redis' => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                        'database' => 0,
-                    ],
-                ],
-            ]);
-
-        $this->configWriterMock->expects($this->once())
-            ->method('write')
-            ->with([
-                'session' => [
-                    'save' => 'db',
-                ],
-            ]);
-
-        $this->process->execute();
-    }
-
-    public function testExecuteWithDifferentRedisOptions()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Updating env.php Redis cache configuration.');
-        $this->environmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn([
-                'redis' => [
-                    0 => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                    ],
-                ],
-            ]);
-        $this->environmentMock->expects($this->any())
-            ->method('getAdminUrl')
-            ->willReturn('admin');
-        $this->stageConfigMock->expects($this->once())
+            ->willReturn(['session' => ['save' => 'redis']]);
+        $this->sessionConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING)
-            ->willReturn(true);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([
-                'session' => [
-                    'redis' => [
-                        'max_concurrency' => 10,
-                        'bot_first_lifetime' => 100,
-                        'bot_lifetime' => 10000,
-                        'min_lifetime' => 100,
-                        'max_lifetime' => 10000,
-                    ],
-                ],
-            ]);
-
+            ->willReturn([]);
         $this->configWriterMock->expects($this->once())
             ->method('write')
-            ->with([
-                'session' => [
-                    'save' => 'redis',
-                    'redis' => [
-                        'host' => '127.0.0.1',
-                        'port' => '6379',
-                        'database' => 0,
-                        'disable_locking' => 1,
-                        'max_concurrency' => 10,
-                        'bot_first_lifetime' => 100,
-                        'bot_lifetime' => 10000,
-                        'min_lifetime' => 100,
-                        'max_lifetime' => 10000,
-                    ],
-                ],
-            ]);
+            ->with(['session' => ['save' => 'db']]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Removing session configuration from env.php.');
 
         $this->process->execute();
     }
