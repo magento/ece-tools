@@ -157,6 +157,10 @@ class Deploy implements DeployInterface
         return $staticDeployThreads;
     }
 
+    private function getScdAllowedStrategies() {
+        return [];
+    }
+
     /**
      * Resolves default configuration value if other was not provided.
      *
@@ -166,6 +170,7 @@ class Deploy implements DeployInterface
     {
         return [
             self::VAR_SCD_STRATEGY => '',
+            self::VAR_SCD_ALLOWED_STRATEGIES => $this->getScdAllowedStrategies(),
             self::VAR_SCD_COMPRESSION_LEVEL => 4,
             self::VAR_REDIS_SESSION_DISABLE_LOCKING => true,
             self::VAR_SEARCH_CONFIGURATION => [],

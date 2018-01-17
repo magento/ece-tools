@@ -86,6 +86,10 @@ class Build implements BuildInterface
         return $this->mergedConfig;
     }
 
+    private function getScdAllowedStrategies() {
+        return [];
+    }
+
     /**
      * Resolves default configuration value if other was not provided.
      *
@@ -95,6 +99,7 @@ class Build implements BuildInterface
     {
         return [
             self::VAR_SCD_STRATEGY => '',
+            self::VAR_SCD_ALLOWED_STRATEGIES => $this->getScdAllowedStrategies(),
             self::VAR_SKIP_SCD => false,
             self::VAR_SCD_COMPRESSION_LEVEL => 6,
             self::VAR_SCD_THREADS => 1,
@@ -115,6 +120,10 @@ class Build implements BuildInterface
 
         if (isset($buildConfig['scd_strategy'])) {
             $result[self::VAR_SCD_STRATEGY] = $buildConfig['scd_strategy'];
+        }
+
+        if (isset($buildConfig['SCD_ALLOWED_STRATEGIES'])) {
+            $result[self::VAR_SCD_ALLOWED_STRATEGIES] = $buildConfig['SCD_ALLOWED_STRATEGIES'];
         }
 
         if (isset($buildConfig['exclude_themes'])) {
