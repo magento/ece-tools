@@ -67,7 +67,6 @@ class RecoverableDirectoryListTest extends TestCase
      * @param array $expected
      * @dataProvider getListDataProvider22
      * @dataProvider getListDataProvider21
-     * @group 2.1
      */
     public function testGetList(bool $isSymlinkOn, bool $isStaticInBuild, bool $is22, bool $is21, array $expected)
     {
