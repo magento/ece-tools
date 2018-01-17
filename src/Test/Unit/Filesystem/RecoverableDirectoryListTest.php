@@ -67,6 +67,7 @@ class RecoverableDirectoryListTest extends TestCase
      * @param array $expected
      * @dataProvider getListDataProvider22
      * @dataProvider getListDataProvider21
+     * @group 2.1
      */
     public function testGetList(bool $isSymlinkOn, bool $isStaticInBuild, bool $is22, bool $is21, array $expected)
     {
@@ -95,10 +96,10 @@ class RecoverableDirectoryListTest extends TestCase
     {
         return [
             [
-                true,
-                true,
-                true,
-                true,
+                true, // $isSymlinkOn
+                true, // $isStaticInBuild
+                true, // $is22
+                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -119,10 +120,10 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             [
-                false,
-                true,
-                true,
-                true,
+                false, // $isSymlinkOn
+                true, // $isStaticInBuild
+                true, // $is22
+                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -143,10 +144,10 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             [
-                true,
-                false,
-                true,
-                true,
+                true, // $isSymlinkOn
+                false, // $isStaticInBuild
+                true, // $is22
+                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -160,15 +161,15 @@ class RecoverableDirectoryListTest extends TestCase
             ],
         ];
     }
-    
+
     public function getListDataProvider21(): array
     {
         return [
             [
-                true,
-                true,
-                false,
-                true,
+                true, // $isSymlinkOn
+                true, // $isStaticInBuild
+                false, // $is22
+                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -197,10 +198,10 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             [
-                false,
-                true,
-                false,
-                true,
+                false, // $isSymlinkOn
+                true, // $isStaticInBuild
+                false, // $is22
+                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -229,10 +230,10 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             [
-                true,
-                false,
-                false,
-                true,
+                true, // $isSymlinkOn
+                false, // $isStaticInBuild
+                false, // $is22
+                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
