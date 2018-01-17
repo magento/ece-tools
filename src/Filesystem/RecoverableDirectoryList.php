@@ -80,12 +80,12 @@ class RecoverableDirectoryList
         
         if ($this->magentoVersion->isGreaterOrEqual('2.1') && !$this->magentoVersion->isGreaterOrEqual('2.2')) {
             $recoverableDirs[] = [
-                    self::OPTION_DIRECTORY => 'var/di',
-                    self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
+                self::OPTION_DIRECTORY => 'var/di',
+                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
             ];
             $recoverableDirs[] = [
-                    self::OPTION_DIRECTORY => 'var/generation',
-                    self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
+                self::OPTION_DIRECTORY => 'var/generation',
+                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
             ];
         }
 
