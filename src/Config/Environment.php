@@ -18,7 +18,13 @@ class Environment
     const MAGENTO_PRODUCTION_MODE = 'production';
     const MAGENTO_DEVELOPER_MODE = 'developer';
 
-    const GIT_MASTER_BRANCH_RE = '/^master(?:-[a-z0-9]+)?$/i';
+    /**
+     * Regex pattern for detecting main branch.
+     * The name of the main branch must be started from one of three prefixes:
+     *   master - is for integration environment;
+     *   production and staging are for production and staging environments respectively.
+     */
+    const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)(?:-[a-z0-9]+)?$/i';
 
     const CLOUD_MODE_ENTERPRISE = 'enterprise';
 
@@ -278,6 +284,9 @@ class Environment
     }
 
     /**
+     * Checks that environment uses the main branch depending on environment variable MAGENTO_CLOUD_ENVIRONMENT
+     * which contains the name of the git branch.
+     *
      * @return bool
      */
     public function isMasterBranch(): bool

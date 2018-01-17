@@ -126,7 +126,7 @@ class ConfigFileStructureTest extends TestCase
                 [
                     'error' => 'No stores/website/locales found in config.php',
                     'suggestion' => 'To speed up the deploy process, please run the following commands:' . PHP_EOL
-                        . '1. bin/magento app:config:dump' . PHP_EOL
+                        . '1. php ./vendor/bin/ece-tools config:dump' . PHP_EOL
                         . '2. git add -f app/etc/config.php' . PHP_EOL
                         . '3. git commit -m \'Updating config.php\'' . PHP_EOL
                         . '4. git push'

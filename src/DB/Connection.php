@@ -13,6 +13,8 @@ use Psr\Log\LoggerInterface;
  */
 class Connection implements ConnectionInterface
 {
+    const MYSQL_ERROR_CODE_SERVER_GONE_AWAY = 2006;
+
     /**
      * @var \PDO
      */
@@ -130,17 +132,42 @@ class Connection implements ConnectionInterface
      */
     public function getPdo(): \PDO
     {
-        if (null === $this->pdo) {
-            $environment = $this->environment;
+        $this->connect();
 
-            $this->pdo = new \PDO(
-                sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
-                $environment->getDbUser(),
-                $environment->getDbPassword()
-            );
+        try {
+            $this->pdo->query('SELECT 1');
+        } catch (\Exception $e) {
+            if ($this->pdo->errorInfo()[1] !== self::MYSQL_ERROR_CODE_SERVER_GONE_AWAY) {
+                throw $e;
+            }
+
+            $this->logger->notice('Lost connection to Mysql server. Reconnecting.');
+            $this->pdo = null;
+            $this->connect();
         }
 
         return $this->pdo;
+    }
+
+    /**
+     * Create PDO connection.
+     */
+    private function connect()
+    {
+        if ($this->pdo instanceof \PDO) {
+            return;
+        }
+
+        $environment = $this->environment;
+
+        $this->pdo = new \PDO(
+            sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
+            $environment->getDbUser(),
+            $environment->getDbPassword(),
+            [
+                \PDO::ATTR_PERSISTENT => true
+            ]
+        );
     }
 
     /**
