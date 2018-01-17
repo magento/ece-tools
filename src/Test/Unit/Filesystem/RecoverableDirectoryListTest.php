@@ -65,10 +65,10 @@ class RecoverableDirectoryListTest extends TestCase
      * @param bool $isSymlinkOn
      * @param bool $isStaticInBuild
      * @param array $expected
-     * @dataProvider getListDataProvider22
      * @dataProvider getListDataProvider21
+     * @group 2.1
      */
-    public function testGetList(bool $isSymlinkOn, bool $isStaticInBuild, bool $is22, bool $is21, array $expected)
+    public function testGetList21(bool $isSymlinkOn, bool $isStaticInBuild, array $expected)
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -77,7 +77,7 @@ class RecoverableDirectoryListTest extends TestCase
         $this->magentoVersionMock->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
             ->withConsecutive(['2.1'], ['2.2'])
-            ->willReturnOnConsecutiveCalls($is21, $is22);
+            ->willReturnOnConsecutiveCalls(true, false);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
@@ -89,16 +89,38 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
-     * @return array
+     * @param bool $isSymlinkOn
+     * @param bool $isStaticInBuild
+     * @param array $expected
+     * @dataProvider getListDataProvider22
+     * @group 2.2
      */
+    public function testGetList22(bool $isSymlinkOn, bool $isStaticInBuild, array $expected)
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_STATIC_CONTENT_SYMLINK)
+            ->willReturn($isSymlinkOn);
+        $this->magentoVersionMock->expects($this->exactly(2))
+            ->method('isGreaterOrEqual')
+            ->withConsecutive(['2.1'], ['2.2'])
+            ->willReturnOnConsecutiveCalls(true, true);
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn($isStaticInBuild);
+        $this->assertEquals(
+            $expected,
+            $this->recoverableDirectoryList->getList()
+        );
+    }
+
     public function getListDataProvider22(): array
     {
         return [
             [
                 true, // $isSymlinkOn
                 true, // $isStaticInBuild
-                true, // $is22
-                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -121,8 +143,6 @@ class RecoverableDirectoryListTest extends TestCase
             [
                 false, // $isSymlinkOn
                 true, // $isStaticInBuild
-                true, // $is22
-                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -145,8 +165,6 @@ class RecoverableDirectoryListTest extends TestCase
             [
                 true, // $isSymlinkOn
                 false, // $isStaticInBuild
-                true, // $is22
-                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -160,15 +178,12 @@ class RecoverableDirectoryListTest extends TestCase
             ],
         ];
     }
-
     public function getListDataProvider21(): array
     {
         return [
             [
                 true, // $isSymlinkOn
                 true, // $isStaticInBuild
-                false, // $is22
-                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -199,8 +214,6 @@ class RecoverableDirectoryListTest extends TestCase
             [
                 false, // $isSymlinkOn
                 true, // $isStaticInBuild
-                false, // $is22
-                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
@@ -231,8 +244,6 @@ class RecoverableDirectoryListTest extends TestCase
             [
                 true, // $isSymlinkOn
                 false, // $isStaticInBuild
-                false, // $is22
-                true, // $is21
                 [
                     [
                         'directory' => 'app/etc',
