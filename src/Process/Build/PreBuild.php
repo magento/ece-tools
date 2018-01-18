@@ -77,10 +77,9 @@ class PreBuild implements ProcessInterface
     public function execute()
     {
         $verbosityLevel = $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS);
-        $magentoRoot = $this->directoryList->getMagentoRoot();
         
-        $generatedCode = $magentoRoot . '/generated/code/';
-        $generatedMetadata = $magentoRoot . '/generated/metadata/';
+        $generatedCode     = $this->directoryList->getGeneratedCode();
+        $generatedMetadata = $this->directoryList->getGeneratedMetaData();
         
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
         

@@ -73,8 +73,11 @@ class PreBuildTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->directoryListMock->method('getMagentoRoot')
-            ->willReturn('magento_root');
+        $this->directoryListMock->method('getGeneratedCode')
+            ->willReturn('generated_code');
+
+        $this->directoryListMock->method('getGeneratedMetadata')
+            ->willReturn('generated_metadata');
 
         $this->process = new PreBuild(
             $this->stageConfigMock,
@@ -131,8 +134,8 @@ class PreBuildTest extends TestCase
      */
     public function testExecuteClearDirectories(bool $isExists, int $callCount)
     {
-        $generatedCode = 'magento_root/generated/code/';
-        $generatedMetadata = 'magento_root/generated/metadata/';
+        $generatedCode     = 'generated_code';
+        $generatedMetadata = 'generated_metadata';
         
         $this->fileMock->expects($this->exactly($callCount))
             ->method('clearDirectory')
