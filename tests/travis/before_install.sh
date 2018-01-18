@@ -8,6 +8,7 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 
 case $TEST_SUITE in
     integration)
+        echo -e "machine github.com\n  login $GH_TOKEN" >> ~/.netrc
         export SANDBOX_KEY="$SANDBOX_KEY"
         export MAGENTO_HOST_NAME="$MAGENTO_HOST_NAME"
 
