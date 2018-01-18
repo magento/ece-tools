@@ -45,7 +45,7 @@ class Bootstrap
         $sandboxDir = $this->getSandboxDir();
 
         if (file_exists($sandboxDir . '/composer.lock')) {
-            return;
+            //return;
         }
 
         $buildFile = $this->getConfigFile('build_options.ini');
@@ -149,6 +149,9 @@ class Bootstrap
             'composer install -n -d %s --no-dev --no-progress',
             $sandboxDir
         ));
+
+        var_dump($this->execute('ls ' . $sandboxDir . '/vendor/magento'));
+        die();
     }
 
     /**
