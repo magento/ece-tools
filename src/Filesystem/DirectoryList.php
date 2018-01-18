@@ -21,6 +21,9 @@ class DirectoryList
     const DIR_INIT = 'init';
     const DIR_VAR = 'var';
     const DIR_LOG = 'log';
+    const DIR_GENERATED = 'generated';
+    const DIR_GENERATED_CODE = 'code';
+    const DIR_GENERATED_METADATA = 'metadata';
 
     /**
      * @var string
@@ -125,14 +128,41 @@ class DirectoryList
     }
 
     /**
+     * @return string
+     */
+    public function getGenerated(): string
+    {
+        return $this->getPath(static::DIR_GENERATED);
+    }
+
+    /**
+     * @return string
+     */
+    public function getGeneratedCode(): string
+    {
+        return $this->getPath(static::DIR_GENERATED_CODE);
+    }
+
+    /**
+     * @return string
+     */
+    public function getGeneratedMetadata(): string
+    {
+        return $this->getPath(static::DIR_GENERATED_METADATA);
+    }
+
+    /**
      * @return array
      */
     public static function getDefaultConfig(): array
     {
         return [
-            static::DIR_INIT => [static::PATH => 'init'],
-            static::DIR_VAR => [static::PATH => 'var'],
-            static::DIR_LOG => [static::PATH => 'var/log'],
+            static::DIR_INIT               => [static::PATH => 'init'],
+            static::DIR_VAR                => [static::PATH => 'var'],
+            static::DIR_LOG                => [static::PATH => 'var/log'],
+            static::DIR_GENERATED          => [static::PATH => 'generated'],
+            static::DIR_GENERATED_CODE     => [static::PATH => 'generated/code'],
+            static::DIR_GENERATED_METADATA => [static::PATH => 'generated/metadata'],
         ];
     }
 }

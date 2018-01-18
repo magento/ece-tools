@@ -83,4 +83,16 @@ class MagentoVersionTest extends TestCase
             ['2.2-dev', '2.2-dev', true],
         ];
     }
+    
+    public function testGetVersion()
+    {
+        $this->managerMock->method('get')
+            ->with('magento/magento2-base')
+            ->willReturn($this->packageMock);
+        $this->packageMock->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('2.2.1');
+        
+        $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
+    }
 }
