@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\ConfigDump;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -25,12 +26,20 @@ class Import implements ProcessInterface
     private $magentoVersion;
 
     /**
-     * @param ShellInterface $shell
+     * @var LoggerInterface
      */
-    public function __construct(ShellInterface $shell, MagentoVersion $magentoVersion)
+    private $logger;
+
+    /**
+     * @param ShellInterface $shell
+     * @param MagentoVersion $magentoVersion
+     * @param LoggerInterface $logger
+     */
+    public function __construct(ShellInterface $shell, MagentoVersion $magentoVersion, LoggerInterface $logger)
     {
         $this->shell = $shell;
         $this->magentoVersion = $magentoVersion;
+        $this->logger = $logger;
     }
 
     /**
