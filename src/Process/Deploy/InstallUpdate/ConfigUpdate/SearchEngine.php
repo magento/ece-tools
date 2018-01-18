@@ -70,7 +70,10 @@ class SearchEngine implements ProcessInterface
     public function execute()
     {
         if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $this->logger->info('Skipping update to search engine configuration.');
+            $version = $this->magentoVersion->getVersion();
+            $this->logger->info(
+                sprintf('Updating search engine configuration is not supported in Magento %s, skipping.', $version)
+            );
             return;
         }
         

@@ -53,7 +53,8 @@ class ConfigImport implements ProcessInterface
     public function execute()
     {
         if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $this->logger->info('Skipping config import.');
+            $version = $this->magentoVersion->getVersion();
+            $this->logger->info(sprintf('Importing config is not supported in Magento %s, skipping.', $version));
             return;
         }
         

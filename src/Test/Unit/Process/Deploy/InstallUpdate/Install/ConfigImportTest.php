@@ -74,9 +74,13 @@ class ConfigImportTest extends TestCase
             ->with('2.2')
             ->willReturn(false);
 
+        $this->magentoVersionMock->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('2.1.7');
+
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Skipping config import.');
+            ->with('Importing config is not supported in Magento 2.1.7, skipping.');
         $this->shellMock->expects($this->never())
             ->method('execute');
         

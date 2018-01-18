@@ -220,10 +220,14 @@ class SearchEngineTest extends TestCase
             ->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn(false);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('2.1.7');
         
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Skipping update to search engine configuration.');
+            ->with('Updating search engine configuration is not supported in Magento 2.1.7, skipping.');
         $this->stageConfigMock->expects($this->never())
             ->method('get');
         $this->environmentMock->expects($this->never())
