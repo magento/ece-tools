@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Package;
 
 use Composer\Semver\Comparator;
+use Composer\Semver\Semver;
 
 class MagentoVersion
 {
@@ -20,13 +21,19 @@ class MagentoVersion
     private $comparator;
 
     /**
+     * @var Semver
+     */
+    private $semver;
+
+    /**
      * @param Manager $manager
      * @param Comparator $comparator
      */
-    public function __construct(Manager $manager, Comparator $comparator)
+    public function __construct(Manager $manager, Comparator $comparator, Semver $semver)
     {
         $this->manager = $manager;
         $this->comparator = $comparator;
+        $this->semver = $semver;
     }
 
     /**
@@ -38,5 +45,17 @@ class MagentoVersion
         $package = $this->manager->get('magento/magento2-base');
 
         return $this->comparator::compare($package->getVersion(), '>=', $version);
+    }
+
+    /**
+     * Check if a given version matches a Composer constraint string.
+     *
+     * @param string $version
+     * @param string $constraints
+     *
+     * @return bool
+     */
+    public function satisfies(string $version, string $constraints): bool {
+        return $this->semver::satisfies($version, $constraints);
     }
 }
