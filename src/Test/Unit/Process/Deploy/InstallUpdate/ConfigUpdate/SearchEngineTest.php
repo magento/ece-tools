@@ -5,10 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
-use Magento\MagentoCloud\Config\Deploy\Writer;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -43,23 +44,36 @@ class SearchEngineTest extends TestCase
      */
     private $stageConfigMock;
 
+    /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->writerMock = $this->createMock(Writer::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->process = new SearchEngine(
             $this->environmentMock,
             $this->loggerMock,
             $this->writerMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->magentoVersionMock
         );
     }
 
     public function testExecute()
     {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        
         $config['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -89,6 +103,9 @@ class SearchEngineTest extends TestCase
             'elasticsearch_server_port' => 1234,
         ];
 
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -128,6 +145,9 @@ class SearchEngineTest extends TestCase
             'solr_server_path' => 'path',
         ];
 
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -167,6 +187,9 @@ class SearchEngineTest extends TestCase
             'elasticsearch_server_port' => 'elasticsearch_port',
         ];
 
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -188,6 +211,26 @@ class SearchEngineTest extends TestCase
                 ['Set search engine to: elasticsearch']
             );
 
+        $this->process->execute();
+    }
+    
+    public function testSkipExecute()
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(false);
+        
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Skipping update to search engine configuration.');
+        $this->stageConfigMock->expects($this->never())
+            ->method('get');
+        $this->environmentMock->expects($this->never())
+            ->method('getRelationships');
+        $this->writerMock->expects($this->never())
+            ->method('update');
+    
         $this->process->execute();
     }
 }
