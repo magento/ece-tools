@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Build\Reader as BuildReader;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -30,16 +31,20 @@ class Build implements BuildInterface
      */
     private $mergedConfig;
 
+    private $scdStrategyChecker;
+
     /**
      * @param EnvironmentReader $environmentReader
      * @param BuildReader $buildReader
      */
     public function __construct(
         EnvironmentReader $environmentReader,
-        BuildReader $buildReader
+        BuildReader $buildReader,
+        ScdStrategyChecker $scdStrategyChecker
     ) {
         $this->environmentReader = $environmentReader;
         $this->buildReader = $buildReader;
+        $this->scdStrategyChecker = $scdStrategyChecker;
     }
 
     /**
@@ -86,10 +91,6 @@ class Build implements BuildInterface
         return $this->mergedConfig;
     }
 
-    private function getScdAllowedStrategies() {
-        return [];
-    }
-
     /**
      * Resolves default configuration value if other was not provided.
      *
@@ -99,7 +100,7 @@ class Build implements BuildInterface
     {
         return [
             self::VAR_SCD_STRATEGY => '',
-            self::VAR_SCD_ALLOWED_STRATEGIES => $this->getScdAllowedStrategies(),
+            self::VAR_SCD_ALLOWED_STRATEGIES => $this->scdStrategyChecker->getAllowedStrategies(),
             self::VAR_SKIP_SCD => false,
             self::VAR_SCD_COMPRESSION_LEVEL => 6,
             self::VAR_SCD_THREADS => 1,
