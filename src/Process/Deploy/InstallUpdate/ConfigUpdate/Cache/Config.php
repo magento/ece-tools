@@ -83,6 +83,6 @@ class Config
      */
     private function isCacheConfigurationValid(array $cacheConfiguration): bool
     {
-        return !empty($cacheConfiguration);
+        return !empty($cacheConfiguration) && isset($cacheConfiguration['frontend']);
     }
 }

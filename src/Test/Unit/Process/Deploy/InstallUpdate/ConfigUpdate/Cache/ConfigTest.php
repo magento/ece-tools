@@ -47,13 +47,13 @@ class ConfigTest extends TestCase
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_CACHE_CONFIGURATION)
-            ->willReturn(['cache_option' => 'value']);
+            ->willReturn(['frontend' => ['cache_option' => 'value']]);
         $this->environmentMock->expects($this->never())
             ->method('getRelationship')
             ->with('redis');
 
         $this->assertEquals(
-            ['cache_option' => 'value'],
+            ['frontend' => ['cache_option' => 'value']],
             $this->config->get()
         );
     }

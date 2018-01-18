@@ -94,7 +94,7 @@ class CacheTest extends TestCase
             ->willReturn([]);
         $this->configWriterMock->expects($this->once())
             ->method('write')
-            ->with(['cache' => []]);
+            ->with([]);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Cache configuration not found. Removing cache configuration.');
