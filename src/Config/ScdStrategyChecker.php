@@ -53,6 +53,9 @@ class ScdStrategyChecker
      * @return bool|string
      */
     private function getCurrentMatchingVersion() {
+        $currentVersion = $this->magentoVersion->satisfies();
+
+        // TODO: END
         $matchCounts = [];
 
         // Assume the associative array is unsorted
