@@ -48,12 +48,21 @@ class Bootstrap
         }
 
         $buildFile = $this->getConfigFile('build_options.ini');
-        $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
+        $envConfig = require $this->getConfigFile('environment.php');
+        $deployConfig = $envConfig['deploy'];
+        $ecePatches = $envConfig['ece-patches'];
         $deployType = getenv('DEPLOY_TYPE') ?: $deployConfig[static::DEPLOY_TYPE];
+        $deployTypeEcePatches = getenv('ECE_PATCHES_DEPLOY_TYPE') ?: $ecePatches[static::DEPLOY_TYPE];
 
         if (!$deployType || !array_key_exists($deployType, $deployConfig['types'])) {
             throw new \Exception(
                 sprintf('Deploy type %s was not configured', $deployType)
+            );
+        }
+
+        if (!$deployTypeEcePatches || !array_key_exists($deployTypeEcePatches, $ecePatches['types'])) {
+            throw new \Exception(
+                sprintf('Deploy type for ece-patches %s was not configured', $deployTypeEcePatches)
             );
         }
 
@@ -96,6 +105,33 @@ class Bootstrap
             default:
                 throw new \Exception('Wrong deploy type');
         }
+
+        /**
+         * Add ece-patches
+         */
+        $ecePatchesConfig = $ecePatches['types'][$deployTypeEcePatches];
+        $this->execute(
+            sprintf(
+                'cd %s && composer config repositories.ece-patches-repo vcs %s',
+                $sandboxDir,
+                $ecePatchesConfig['repo']
+            )
+        );
+        $this->execute(
+            sprintf(
+                'cd %s && composer require %s:%s --no-update',
+                $sandboxDir,
+                $ecePatchesConfig['name'],
+                $ecePatchesConfig['version']
+            )
+        );
+        $this->execute(
+            sprintf(
+                'cd %s && composer update %s',
+                $sandboxDir,
+                $ecePatchesConfig['name']
+            )
+        );
 
         /**
          * Copying build options.
