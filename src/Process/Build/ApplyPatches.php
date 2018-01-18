@@ -63,6 +63,8 @@ class ApplyPatches implements ProcessInterface
 
         $patchScript = $this->directoryList->getMagentoRoot() . '/vendor/bin/m2-apply-patches';
 
+        var_dump($patchScript);
+
         if (!$this->file->isExists($patchScript)) {
             $this->logger->warning('Package with patches was not found.');
 
