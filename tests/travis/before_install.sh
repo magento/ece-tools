@@ -8,7 +8,6 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 
 case $TEST_SUITE in
     integration)
-        echo -e "machine github.com\n  login $GH_TOKEN" >> ~/.netrc
         export SANDBOX_KEY="$SANDBOX_KEY"
         export MAGENTO_HOST_NAME="$MAGENTO_HOST_NAME"
 
@@ -16,6 +15,7 @@ case $TEST_SUITE in
 
         composer config -a -n -g http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
         composer config -a -n -g http-basic.connect20-qa01.magedevteam.com ${CONNECT20_USERNAME} ${CONNECT20_PASSWORD}
+        composer config -a -n -g github-oauth.github.com ${GH_TOKEN}
 
         # Install apache
         sudo apt-get update
