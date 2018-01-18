@@ -38,6 +38,7 @@ class Bootstrap
 
     /**
      * @throws \Exception
+     * @SuppressWarnings(PHPMD)
      */
     public function run()
     {
@@ -107,7 +108,7 @@ class Bootstrap
         }
 
         /**
-         * Add ece-patches
+         * Adding ece-patches
          */
         $ecePatchesConfig = $ecePatches['types'][$deployTypeEcePatches];
         $this->execute(
