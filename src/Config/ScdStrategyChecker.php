@@ -56,6 +56,13 @@ class ScdStrategyChecker
         $this->fallbackStrategies = ['standard'];
     }
 
+    public function getStrategy(string $desiredStrategy, array $allowedStrategies): string {
+        if (in_array($desiredStrategy, $allowedStrategies)) {
+            return $desiredStrategy;
+        }
+        return $allowedStrategies[0];
+    }
+
     /**
      * Get allowed SCD strategies for the installed Magento version if possible.
      *
