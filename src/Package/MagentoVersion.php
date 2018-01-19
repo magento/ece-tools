@@ -38,13 +38,14 @@ class MagentoVersion
 
     /**
      * @param string $version
+     *
      * @return bool
      */
     public function isGreaterOrEqual(string $version): bool
     {
         return $this->comparator::compare($this->getVersion(), '>=', $version);
     }
-    
+
     /**
      * @return string
      */
@@ -60,7 +61,8 @@ class MagentoVersion
      *
      * @return bool
      */
-    public function satisfies(string $constraints): bool {
+    public function satisfies(string $constraints): bool
+    {
         return $this->semver::satisfies($this->getVersion(), $constraints);
     }
 }
