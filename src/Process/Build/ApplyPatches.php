@@ -65,7 +65,7 @@ class ApplyPatches implements ProcessInterface
 
         var_dump('--myinfo--');
         var_dump($patchScript);
-        var_dump($this->shell->execute('ls ' . $this->directoryList->getMagentoRoot() . '/vendor/bin/'));
+        //var_dump($this->shell->execute('ls ' . $this->directoryList->getMagentoRoot() . '/vendor/bin/'));
         var_dump($this->shell->execute('ls ' . $this->directoryList->getMagentoRoot() . '/vendor/'));
 
 
