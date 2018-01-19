@@ -153,6 +153,7 @@ class Bootstrap
         var_dump('--myinfo--');
         var_dump($sandboxDir);
         var_dump($this->execute('ls ' . $sandboxDir . '/vendor/magento'));
+        var_dump($this->execute('ls ' . ECE_BP . '/vendor/bin'));
         var_dump($this->execute('ls ' . $sandboxDir . '/vendor/bin'));
     }
 
