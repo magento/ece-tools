@@ -150,8 +150,10 @@ class Bootstrap
             $sandboxDir
         ));
 
+        var_dump('--myinfo--');
         var_dump($sandboxDir);
         var_dump($this->execute('ls ' . $sandboxDir . '/vendor/magento'));
+        var_dump($this->execute('ls ' . $sandboxDir . '/vendor/bin'));
     }
 
     /**
