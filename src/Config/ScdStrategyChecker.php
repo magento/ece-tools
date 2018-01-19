@@ -8,17 +8,40 @@ namespace Magento\MagentoCloud\Config;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
-// SCD stands for Static Content Deployment
+
+/**
+ * Determine which SCD strategies are allowed in the installed version of Magento.
+ *
+ * SCD stands for Static Content Deployment.
+ *
+ * @package Magento\MagentoCloud\Config
+ */
 class ScdStrategyChecker
 {
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
+    /**
+     * @var MagentoVersion
+     */
     private $magentoVersion;
 
+    /**
+     * @var array
+     */
     private $defaultStrategies;
 
+    /**
+     * @var array
+     */
     private $fallbackStrategies;
 
+    /**
+     * @param LoggerInterface $logger
+     * @param MagentoVersion  $magentoVersion
+     */
     public function __construct(
         LoggerInterface $logger,
         MagentoVersion $magentoVersion
