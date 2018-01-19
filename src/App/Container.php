@@ -94,6 +94,7 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\Dump::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\ScdStrategyChecker::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
         $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
