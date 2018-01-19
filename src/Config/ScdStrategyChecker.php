@@ -27,8 +27,8 @@ class ScdStrategyChecker
         $this->magentoVersion = $magentoVersion;
 
         $this->defaultStrategies = [
-            '2.1' => ['standard'],
-            '2.2' => ['standard', 'quick', 'compact'],
+            '2.1.*' => ['standard'],
+            '2.2.*' => ['standard', 'quick', 'compact'],
         ];
         $this->fallbackStrategies = ['standard'];
     }
@@ -36,7 +36,7 @@ class ScdStrategyChecker
     /**
      * Get allowed SCD strategies for the installed Magento version if possible.
      *
-     * @return string[]
+     * @return string[] List of SCD strategies allowed in the current version of Magento.
      */
     public function getAllowedStrategies(): array {
         $currentMatchingVersion = $this->getCurrentMatchingVersion();
@@ -53,40 +53,12 @@ class ScdStrategyChecker
      * @return bool|string
      */
     private function getCurrentMatchingVersion() {
-        $currentVersion = $this->magentoVersion->satisfies();
-
-        // TODO: END
-        $matchCounts = [];
-
-        // Assume the associative array is unsorted
-        foreach (array_keys($this->defaultStrategies) as $searchVersion) {
-            if (!array_key_exists($searchVersion, $matchCounts)) {
-                $matchCounts[$searchVersion] = 0;
-            }
-
-            if ($this->magentoVersion->isGreaterOrEqual($searchVersion)) {
-                $matchCounts[$searchVersion]++;
+        foreach (array_keys($this->defaultStrategies) as $versionConstraint) {
+            if ($this->magentoVersion->satisfies($versionConstraint)) {
+                return $versionConstraint;
             }
         }
 
-        $lowestCount = null;
-        $lowestVersion = null;
-
-        // Find the lowest version that still matches magentoVersion->isGreaterOrEqual()
-        foreach ($matchCounts as $matchVersion => $count) {
-            if ($count === 0) {
-                continue;
-            }
-
-            if (is_null($lowestCount) || $lowestCount > $count) {
-                $lowestCount = $count;
-                $lowestVersion = $matchVersion;
-            }
-        }
-
-        if ($lowestVersion) {
-            return $lowestVersion;
-        }
         return false;
     }
 
@@ -99,10 +71,12 @@ class ScdStrategyChecker
      */
     private function getStrategiesByVersion(string $detectedVersion) {
         foreach ($this->defaultStrategies as $thisVersion => $theseStrategies) {
+            // Testing strict equality on strpos() is preferred to regular expressions in this simple case.
             if (strpos($detectedVersion, $thisVersion) === 0) {
                 return $theseStrategies;
             }
         }
+
         return false;
     }
 }
