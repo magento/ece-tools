@@ -5,11 +5,14 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Process\ConfigDump\Export;
+use Magento\MagentoCloud\Process\ConfigDump\Generate;
+use Magento\MagentoCloud\Process\ConfigDump\Import;
 
 /**
  * CLI command for dumping SCD related config.
@@ -17,6 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ConfigDump extends Command
 {
     const NAME = 'config:dump';
+    const OPTION_KEEP_CONFIG = 'keep-config';
 
     /**
      * @var LoggerInterface
@@ -24,19 +28,39 @@ class ConfigDump extends Command
     private $logger;
 
     /**
-     * @var ProcessInterface
+     * @var Export
      */
-    private $process;
+    private $export;
 
     /**
-     * @param ProcessInterface $process
-     * @param LoggerInterface $logger
+     * @var Generate
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
-    {
-        $this->process = $process;
-        $this->logger = $logger;
+    private $generate;
 
+    /**
+     * @var Import
+     */
+    private $import;
+
+    /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
+     * @param Export $export
+     * @param Generate $generate
+     * @param Import $import
+     * @param LoggerInterface $logger
+     * @param MagentoVersion $magentoVersion
+     */
+    public function __construct(Export $export, Generate $generate, Import $import, LoggerInterface $logger, MagentoVersion $magentoVersion)
+    {
+        $this->export = $export;
+        $this->generate = $generate;
+        $this->import = $import;
+        $this->logger = $logger;
+        $this->magentoVersion = $magentoVersion;
         parent::__construct();
     }
 
@@ -45,10 +69,18 @@ class ConfigDump extends Command
      */
     protected function configure()
     {
+        $options = [
+            new InputOption(
+                self::KEEP_CONFIG,
+                null,
+                InputOption::VALUE_NONE,
+                'Prevents existing config being overwritten. ' . PHP_EOL
+            )
+        ];
         $this->setName(static::NAME)
             ->setDescription('Dump configuration for static content deployment.')
-            ->setAliases(['dump']);
-
+            ->setAliases(['dump'])
+            ->setDefinition($options);
         parent::configure();
     }
 
@@ -57,13 +89,20 @@ class ConfigDump extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $doExport = ! $input->getOption(self::KEEP_CONFIG);
+        $doImport = $this->magentoVersion->isGreaterOrEqual('2.2');
         try {
             $this->logger->info('Starting dump.');
-            $this->process->execute();
+            if ($doExport) {
+                $this->export->execute();
+            }
+            $this->generate->execute();
+            if ($doImport) {
+                $this->import->execute();
+            }
             $this->logger->info('Dump completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
-
             throw $exception;
         }
     }

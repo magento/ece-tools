@@ -240,17 +240,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(ConfigDump::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->make(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(ConfigDumpProcess\Export::class),
-                        $this->container->make(ConfigDumpProcess\Generate::class),
-                        $this->container->make(ConfigDumpProcess\Import::class),
-                    ],
-                ]);
-            });
         $this->container->when(ConfigDumpProcess\Export::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
