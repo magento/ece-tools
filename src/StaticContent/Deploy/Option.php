@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -21,6 +22,8 @@ class Option implements OptionInterface
      * @var Environment
      */
     private $environment;
+
+    private $scdStrategyChecker;
 
     /**
      * @var ConnectionInterface
@@ -51,12 +54,14 @@ class Option implements OptionInterface
      */
     public function __construct(
         Environment $environment,
+        ScdStrategyChecker $scdStrategyChecker,
         ConnectionInterface $connection,
         MagentoVersion $magentoVersion,
         ThreadCountOptimizer $threadCountOptimizer,
         DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
+        $this->scdStrategyChecker = $scdStrategyChecker;
         $this->connection = $connection;
         $this->magentoVersion = $magentoVersion;
         $this->threadCountOptimizer = $threadCountOptimizer;
@@ -89,7 +94,10 @@ class Option implements OptionInterface
      */
     public function getStrategy(): string
     {
-        return $this->stageConfig->get(DeployInterface::VAR_SCD_STRATEGY);
+        $desiredStrategy = $this->stageConfig->get(DeployInterface::VAR_SCD_STRATEGY);
+        $allowedStrategies = $this->stageConfig->get(DeployInterface::VAR_SCD_ALLOWED_STRATEGIES);
+
+        return $this->scdStrategyChecker->getStrategy($desiredStrategy, $allowedStrategies);
     }
 
     /**

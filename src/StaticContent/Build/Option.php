@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -22,6 +23,8 @@ class Option implements OptionInterface
      * @var Environment
      */
     private $environment;
+
+    private $scdStrategyChecker;
 
     /**
      * @var MagentoVersion
@@ -58,6 +61,7 @@ class Option implements OptionInterface
      */
     public function __construct(
         Environment $environment,
+        ScdStrategyChecker $scdStrategyChecker,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
         FileList $fileList,
@@ -65,6 +69,7 @@ class Option implements OptionInterface
         BuildInterface $stageConfig
     ) {
         $this->environment = $environment;
+        $this->scdStrategyChecker = $scdStrategyChecker;
         $this->magentoVersion = $magentoVersion;
         $this->arrayManager = $arrayManager;
         $this->fileList = $fileList;
@@ -98,7 +103,10 @@ class Option implements OptionInterface
      */
     public function getStrategy(): string
     {
-        return $this->stageConfig->get(BuildInterface::VAR_SCD_STRATEGY);
+        $desiredStrategy = $this->stageConfig->get(BuildInterface::VAR_SCD_STRATEGY);
+        $allowedStrategies = $this->stageConfig->get(BuildInterface::VAR_SCD_ALLOWED_STRATEGIES);
+
+        return $this->scdStrategyChecker->getStrategy($desiredStrategy, $allowedStrategies);
     }
 
     /**
