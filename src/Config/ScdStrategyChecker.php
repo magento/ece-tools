@@ -9,7 +9,7 @@ use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
- * Determine which SCD strategies are allowed in the installed version of Magento.
+ * Determine which SCD strategies are allowed and should be used in the installed version of Magento.
  *
  * SCD stands for Static Content Deployment.
  *
@@ -17,6 +17,9 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class ScdStrategyChecker
 {
+    /**
+     * Default index for the allowed strategies arrays.
+     */
     const FALLBACK_OFFSET = 0;
 
     /**
@@ -32,12 +35,12 @@ class ScdStrategyChecker
     /**
      * @var array
      */
-    private $defaultStrategies;
+    private $defaultAllowedStrategies;
 
     /**
      * @var array
      */
-    private $fallbackStrategies;
+    private $fallbackAllowedStrategies;
 
     /**
      * @param Logger         $logger
@@ -52,11 +55,11 @@ class ScdStrategyChecker
 
         // The first strategy (at array index 0) for a given version
         // is the one used if the user specifies an invalid strategy.
-        $this->defaultStrategies = [
+        $this->defaultAllowedStrategies = [
             '2.1.*' => ['standard'],
             '2.2.*' => ['standard', 'quick', 'compact'],
         ];
-        $this->fallbackStrategies = ['standard'];
+        $this->fallbackAllowedStrategies = ['standard'];
     }
 
     public function getStrategy(string $desiredStrategy, array $allowedStrategies): string
@@ -97,10 +100,10 @@ class ScdStrategyChecker
     {
         $currentMatchingVersion = $this->getCurrentMatchingVersion();
         if ($currentMatchingVersion) {
-            return $this->getStrategiesByVersion($currentMatchingVersion);
+            return $this->getAllowedStrategiesByVersion($currentMatchingVersion);
         }
 
-        return $this->fallbackStrategies;
+        return $this->fallbackAllowedStrategies;
     }
 
     /**
@@ -110,7 +113,7 @@ class ScdStrategyChecker
      */
     private function getCurrentMatchingVersion()
     {
-        foreach (array_keys($this->defaultStrategies) as $versionConstraint) {
+        foreach (array_keys($this->defaultAllowedStrategies) as $versionConstraint) {
             if ($this->magentoVersion->satisfies($versionConstraint)) {
                 return $versionConstraint;
             }
@@ -126,9 +129,9 @@ class ScdStrategyChecker
      *
      * @return bool|string[]
      */
-    private function getStrategiesByVersion(string $detectedVersion)
+    private function getAllowedStrategiesByVersion(string $detectedVersion)
     {
-        foreach ($this->defaultStrategies as $thisVersion => $theseStrategies) {
+        foreach ($this->defaultAllowedStrategies as $thisVersion => $theseStrategies) {
             // Testing strict equality on strpos() is preferred to regular expressions in this simple case.
             if (strpos($detectedVersion, $thisVersion) === 0) {
                 return $theseStrategies;
