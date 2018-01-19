@@ -27,11 +27,14 @@ class Deploy implements DeployInterface
     private $environmentConfig;
 
     /**
+     * @var ScdStrategyChecker
+     */
+    private $scdStrategyChecker;
+
+    /**
      * @var array
      */
     private $mergedConfig;
-
-    private $scdStrategyChecker;
 
     /**
      * @param EnvironmentReader $environmentReader

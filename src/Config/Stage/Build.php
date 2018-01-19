@@ -27,11 +27,14 @@ class Build implements BuildInterface
     private $buildReader;
 
     /**
+     * @var ScdStrategyChecker
+     */
+    private $scdStrategyChecker;
+
+    /**
      * @var array
      */
     private $mergedConfig;
-
-    private $scdStrategyChecker;
 
     /**
      * @param EnvironmentReader $environmentReader

@@ -23,6 +23,9 @@ class Option implements OptionInterface
      */
     private $environment;
 
+    /**
+     * @var ScdStrategyChecker
+     */
     private $scdStrategyChecker;
 
     /**
