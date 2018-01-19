@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\ConfigDump;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ArrayManager;
 
@@ -42,24 +43,56 @@ class Generate implements ProcessInterface
     private $configKeys;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param ConnectionInterface $connection
      * @param FileList $fileList
      * @param File $file
      * @param ArrayManager $arrayManager
-     * @param array $configKeys
+     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         ConnectionInterface $connection,
         FileList $fileList,
         File $file,
         ArrayManager $arrayManager,
-        array $configKeys
+        MagentoVersion $magentoVersion
     ) {
         $this->connection = $connection;
         $this->fileList = $fileList;
         $this->file = $file;
         $this->arrayManager = $arrayManager;
-        $this->configKeys = $configKeys;
+        $this->magentoVersion = $magentoVersion;
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $this->configKeys = [
+                'modules',
+                'scopes',
+                'system/default/general/locale/code',
+                'system/default/dev/static/sign',
+                'system/default/dev/front_end_development_workflow',
+                'system/default/dev/template',
+                'system/default/dev/js',
+                'system/default/dev/css',
+                'system/default/advanced/modules_disable_output',
+                'system/stores',
+                'system/websites',
+            ];
+        } else {  // Magento 2.0 and 2.1
+            $this->configKeys = [
+                'scopes',
+                'system/default/general/locale/code',
+                'system/default/dev/static/sign',
+                'system/default/dev/front_end_development_workflow',
+                'system/default/dev/template',
+                'system/default/dev/js',
+                'system/default/dev/css',
+                'system/default/advanced/modules_disable_output',
+                'system/stores',
+            ];
+        }
     }
 
     /**

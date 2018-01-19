@@ -260,23 +260,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(ConfigDumpProcess\Generate::class)
-            ->needs('$configKeys')
-            ->give(function () {
-                return [
-                    'modules',
-                    'scopes',
-                    'system/default/general/locale/code',
-                    'system/default/dev/static/sign',
-                    'system/default/dev/front_end_development_workflow',
-                    'system/default/dev/template',
-                    'system/default/dev/js',
-                    'system/default/dev/css',
-                    'system/default/advanced/modules_disable_output',
-                    'system/stores',
-                    'system/websites',
-                ];
-            });
         $this->container->when(DeployProcess\PreDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
