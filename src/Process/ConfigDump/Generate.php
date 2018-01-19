@@ -66,7 +66,7 @@ class Generate implements ProcessInterface
         $this->file = $file;
         $this->arrayManager = $arrayManager;
         $this->magentoVersion = $magentoVersion;
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
             $this->configKeys = [
                 'modules',
                 'scopes',

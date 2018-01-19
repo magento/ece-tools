@@ -51,6 +51,7 @@ class Import implements ProcessInterface
             $this->logger->info(
                 sprintf('The magento app:config:import command not supported in Magento %s, skipping.', $version)
             );
+            return;
         }
         $this->shell->execute('php ./bin/magento app:config:import -n');
     }
