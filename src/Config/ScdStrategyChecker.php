@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
 
@@ -18,8 +18,10 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class ScdStrategyChecker
 {
+    const FALLBACK_OFFSET = 0;
+
     /**
-     * @var LoggerInterface
+     * @var Logger
      */
     private $logger;
 
@@ -39,16 +41,18 @@ class ScdStrategyChecker
     private $fallbackStrategies;
 
     /**
-     * @param LoggerInterface $logger
+     * @param Logger $logger
      * @param MagentoVersion  $magentoVersion
      */
     public function __construct(
-        LoggerInterface $logger,
+        Logger $logger,
         MagentoVersion $magentoVersion
     ) {
         $this->logger = $logger;
         $this->magentoVersion = $magentoVersion;
 
+        // The first strategy (at array index 0) for a given version
+        // is the one used if the user specifies an invalid strategy.
         $this->defaultStrategies = [
             '2.1.*' => ['standard'],
             '2.2.*' => ['standard', 'quick', 'compact'],
@@ -60,7 +64,18 @@ class ScdStrategyChecker
         if (in_array($desiredStrategy, $allowedStrategies)) {
             return $desiredStrategy;
         }
-        return $allowedStrategies[0];
+
+        if (!array_key_exists(static::FALLBACK_OFFSET, $allowedStrategies))
+
+        $usedStrategy = str($allowedStrategies[static::FALLBACK_OFFSET]);
+
+        $this->logger->warning("The desired static content deployment strategy is not on the list of allowed strategies. Make sure that the desired strategy is valid for this version of Magento. The default strategy for this version of Magento will be used instead.", [
+            "desiredStrategy" => $desiredStrategy,
+            "allowedStrategies" => $allowedStrategies,
+            "usedStrategy" => $usedStrategy,
+        ]);
+
+        return $usedStrategy;
     }
 
     /**
