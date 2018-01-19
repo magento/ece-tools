@@ -43,7 +43,7 @@ class ScdStrategyChecker
     private $fallbackAllowedStrategies;
 
     /**
-     * @param Logger         $logger
+     * @param Logger $logger
      * @param MagentoVersion $magentoVersion
      */
     public function __construct(
@@ -66,7 +66,7 @@ class ScdStrategyChecker
      * Decide on a single SCD strategy, considering user preference and allowed strategies.
      *
      * @param string $desiredStrategy
-     * @param array  $allowedStrategies
+     * @param array $allowedStrategies
      *
      * @return string
      */
