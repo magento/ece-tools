@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ConfigDump\Export;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -37,6 +38,11 @@ class ExportTest extends TestCase
     private $fileListMock;
 
     /**
+     * @var MagentoVersion|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $magentoVersionMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -44,11 +50,12 @@ class ExportTest extends TestCase
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
-
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->process = new Export(
             $this->shellMock,
             $this->fileMock,
-            $this->fileListMock
+            $this->fileListMock,
+            $this->magentoVersionMock
         );
     }
 
@@ -66,6 +73,10 @@ class ExportTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(true);
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
+
 
         $this->process->execute();
     }
@@ -87,6 +98,9 @@ class ExportTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(false);
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willReturn(true);
 
         $this->process->execute();
     }

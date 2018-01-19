@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Command;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ConfigDump\Export;
@@ -54,8 +55,13 @@ class ConfigDump extends Command
      * @param LoggerInterface $logger
      * @param MagentoVersion $magentoVersion
      */
-    public function __construct(Export $export, Generate $generate, Import $import, LoggerInterface $logger, MagentoVersion $magentoVersion)
-    {
+    public function __construct(
+        Export $export,
+        Generate $generate,
+        Import $import,
+        LoggerInterface $logger,
+        MagentoVersion $magentoVersion
+    ) {
         $this->export = $export;
         $this->generate = $generate;
         $this->import = $import;
@@ -71,7 +77,7 @@ class ConfigDump extends Command
     {
         $options = [
             new InputOption(
-                self::KEEP_CONFIG,
+                static::OPTION_KEEP_CONFIG,
                 null,
                 InputOption::VALUE_NONE,
                 'Prevents existing config being overwritten. ' . PHP_EOL
@@ -89,7 +95,7 @@ class ConfigDump extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $doExport = ! $input->getOption(self::KEEP_CONFIG);
+        $doExport = ! $input->getOption(static::OPTION_KEEP_CONFIG);
         $doImport = $this->magentoVersion->isGreaterOrEqual('2.2');
         try {
             $this->logger->info('Starting dump.');

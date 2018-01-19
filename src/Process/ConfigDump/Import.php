@@ -45,7 +45,8 @@ class Import implements ProcessInterface
     /**
      * @inheritdoc
      */
-    public function execute() {
+    public function execute()
+    {
         if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
             $version = $this->magentoVersion->getVersion();
             $this->logger->info(
