@@ -66,8 +66,13 @@ class ScdStrategyChecker
         }
 
         if (!array_key_exists(static::FALLBACK_OFFSET, $allowedStrategies)) {
-            $usedStrategy = str($allowedStrategies[static::FALLBACK_OFFSET]);
+            throw new \OutOfRangeException(
+                "Tried to access an index of \$allowedStrategies that doesn't exist. "
+                . "Ensure that the class constant FALLBACK_OFFSET is defined appropriately."
+            );
         }
+
+        $usedStrategy = (string) $allowedStrategies[static::FALLBACK_OFFSET];
 
         $this->logger->warning(
             "The desired static content deployment strategy is not on the list of allowed strategies. "
