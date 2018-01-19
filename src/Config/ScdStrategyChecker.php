@@ -53,7 +53,7 @@ class ScdStrategyChecker
         $this->logger = $logger;
         $this->magentoVersion = $magentoVersion;
 
-        // The first strategy (at array index 0) for a given version
+        // The first strategy (at array index self::FALLBACK_OFFSET) for a given version
         // is the one used if the user specifies an invalid strategy.
         $this->defaultAllowedStrategies = [
             '2.1.*' => ['standard'],
@@ -62,6 +62,14 @@ class ScdStrategyChecker
         $this->fallbackAllowedStrategies = ['standard'];
     }
 
+    /**
+     * Decide on a single SCD strategy, considering user preference and allowed strategies.
+     *
+     * @param string $desiredStrategy
+     * @param array  $allowedStrategies
+     *
+     * @return string
+     */
     public function getStrategy(string $desiredStrategy, array $allowedStrategies): string
     {
         if (in_array($desiredStrategy, $allowedStrategies)) {
