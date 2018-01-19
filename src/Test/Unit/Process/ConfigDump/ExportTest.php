@@ -77,6 +77,26 @@ class ExportTest extends TestCase
             ->method('isGreaterOrEqual')
             ->willReturn(true);
 
+        $this->process->execute();
+    }
+
+    public function testProcessMagento21()
+    {
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->withConsecutive(
+                ['php ./bin/magento app:config:dump']
+            );
+        $this->fileListMock->expects($this->once())
+            ->method('getConfigLocal')
+            ->willReturn('magento_root/app/etc/config.local.php');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/app/etc/config.local.php')
+            ->willReturn(true);
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willReturn(false);
 
         $this->process->execute();
     }

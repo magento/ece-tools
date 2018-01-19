@@ -92,6 +92,29 @@ class ConfigDumpTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
+    public function testExecuteMagento21()
+    {
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Starting dump.'],
+                ['Dump completed.']
+            );
+        $this->exportMock->expects($this->once())->method('execute');
+        $this->generateMock->expects($this->once())->method('execute');
+        $this->importMock->expects($this->never())->method('execute');
+        $tester = new CommandTester(
+            $this->command
+        );
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willReturn(false);
+
+        $tester->execute([]);
+
+        $this->assertSame(0, $tester->getStatusCode());
+    }
+
     /**
      * @expectedException \Exception
      * @expectedExceptionMessage Some error

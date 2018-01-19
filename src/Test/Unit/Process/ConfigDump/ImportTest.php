@@ -61,4 +61,14 @@ class ImportTest extends TestCase
 
         $this->process->execute();
     }
+
+    public function testExecuteMagento21()
+    {
+        $this->shellMock->expects($this->never())->method('execute');
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willReturn(false);
+
+        $this->process->execute();
+    }
 }
