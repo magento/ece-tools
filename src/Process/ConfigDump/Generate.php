@@ -100,7 +100,11 @@ class Generate implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = $this->fileList->getConfig();
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $configFile = $this->fileList->getConfig();
+        } else { // In 2.0 and 2.1, we use config.local.php instead
+            $configFile = $this->fileList->getConfigLocal();
+        }
         $oldConfig = require $configFile;
         $newConfig = [];
 
