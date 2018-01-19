@@ -54,14 +54,13 @@ class MagentoVersion
     }
 
     /**
-     * Check if a given version matches a Composer constraint string.
+     * Check the current Magento version against Composer-style constraints.
      *
-     * @param string $version
      * @param string $constraints
      *
      * @return bool
      */
-    public function satisfies(string $version, string $constraints): bool {
-        return $this->semver::satisfies($version, $constraints);
+    public function satisfies(string $constraints): bool {
+        return $this->semver::satisfies($this->getVersion(), $constraints);
     }
 }
