@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
@@ -55,6 +56,11 @@ class OptionTest extends TestCase
      */
     private $stageConfigMock;
 
+    /**
+     * @var ScdStrategyChecker|Mock;
+     */
+    private $scdStrategyCheckerMock;
+
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -63,9 +69,11 @@ class OptionTest extends TestCase
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
+        $this->scdStrategyCheckerMock = $this->createMock(ScdStrategyChecker::class);
 
         $this->option = new Option(
             $this->environmentMock,
+            $this->scdStrategyCheckerMock,
             $this->arrayManagerMock,
             $this->magentoVersionMock,
             $this->fileListMock,

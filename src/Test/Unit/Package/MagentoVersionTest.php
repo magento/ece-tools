@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Package;
 
 use Composer\Package\PackageInterface;
 use Composer\Semver\Comparator;
+use Composer\Semver\Semver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
@@ -44,7 +45,8 @@ class MagentoVersionTest extends TestCase
 
         $this->magentoVersion = new MagentoVersion(
             $this->managerMock,
-            new Comparator()
+            new Comparator(),
+            new Semver()
         );
     }
 
