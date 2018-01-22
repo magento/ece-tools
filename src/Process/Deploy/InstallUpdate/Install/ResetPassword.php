@@ -76,7 +76,7 @@ class ResetPassword implements ProcessInterface
 
         $credentialsFile = $this->directoryList->getMagentoRoot() . '/var/credentials_email.txt';
         $urls = $this->urlManager->getUrls();
-        $adminUrl = $urls['secure'][''] . ($this->environment->getAdminUrl() ?: Environment::DEFAULT_ADMIN_URL);
+        $adminUrl = $urls['secure'][''] . $this->environment->getAdminUrl();
         $adminEmail = $this->environment->getAdminEmail();
         $adminUsername = $this->environment->getAdminUsername() ?: Environment::DEFAULT_ADMIN_NAME;
 

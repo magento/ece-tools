@@ -272,7 +272,7 @@ class Environment
      */
     public function getAdminUrl(): string
     {
-        return $this->getVariables()['ADMIN_URL'] ?? '';
+        return @$this->getVariables()['ADMIN_URL'] ?: self::DEFAULT_ADMIN_URL;
     }
 
     /**
