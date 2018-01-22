@@ -57,7 +57,7 @@ class OptionTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var ScdStrategyChecker|Mock;
+     * @var ScdStrategyChecker|Mock
      */
     private $scdStrategyCheckerMock;
 
@@ -84,12 +84,16 @@ class OptionTest extends TestCase
 
     public function testGetThreadCount()
     {
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->exactly(3))
             ->method('get')
             ->willReturnMap([
                 [BuildInterface::VAR_SCD_STRATEGY, 'strategyName'],
-                [BuildInterface::VAR_SCD_THREADS, 3],
+                [BuildInterface::VAR_SCD_ALLOWED_STRATEGIES, ['strategyName']],
+                [BuildInterface::VAR_SCD_THREADS, 3]
             ]);
+        $this->scdStrategyCheckerMock->expects($this->once())
+            ->method('getStrategy')
+            ->willReturn('strategyName');
         $this->threadCountOptimizerMock->expects($this->once())
             ->method('optimize')
             ->with(3, 'strategyName')
@@ -136,9 +140,15 @@ class OptionTest extends TestCase
 
     public function testGetStrategy()
     {
-        $this->stageConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(BuildInterface::VAR_SCD_STRATEGY)
+            ->withConsecutive(
+                [BuildInterface::VAR_SCD_STRATEGY],
+                [BuildInterface::VAR_SCD_ALLOWED_STRATEGIES]
+            )
+            ->willReturn('strategy', ['strategy']);
+        $this->scdStrategyCheckerMock->expects($this->once())
+            ->method('getStrategy')
             ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());
