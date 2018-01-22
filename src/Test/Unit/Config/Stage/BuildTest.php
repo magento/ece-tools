@@ -380,7 +380,7 @@ class BuildTest extends TestCase
                 ],
                 '-vv',
             ],
-            'allowed strategies value' => [
+            'allowed scd strategies value' => [
                 Build::VAR_SCD_ALLOWED_STRATEGIES,
                 [],
                 [
@@ -388,7 +388,7 @@ class BuildTest extends TestCase
                 ],
                 ['default']
             ],
-            'strategy default' => [
+            'scd strategy default' => [
                 Build::VAR_SCD_STRATEGY,
                 [],
                 [],

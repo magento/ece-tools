@@ -207,7 +207,7 @@ class DeployTest extends TestCase
                 ],
                 4,
             ],
-            'allowed strategies value' => [
+            'allowed scd strategies value' => [
                 Deploy::VAR_SCD_ALLOWED_STRATEGIES,
                 [],
                 [
@@ -215,7 +215,7 @@ class DeployTest extends TestCase
                 ],
                 ['default']
             ],
-            'strategy default' => [
+            'scd strategy default' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [],
                 [],
