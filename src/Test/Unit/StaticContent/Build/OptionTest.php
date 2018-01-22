@@ -146,7 +146,10 @@ class OptionTest extends TestCase
                 [BuildInterface::VAR_SCD_STRATEGY],
                 [BuildInterface::VAR_SCD_ALLOWED_STRATEGIES]
             )
-            ->willReturn('strategy', ['strategy']);
+            ->willReturn(
+                'strategy',
+                ['strategy']
+            );
         $this->scdStrategyCheckerMock->expects($this->once())
             ->method('getStrategy')
             ->willReturn('strategy');

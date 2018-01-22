@@ -131,9 +131,18 @@ class OptionTest extends TestCase
 
     public function testGetStrategy()
     {
-        $this->stageConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(DeployInterface::VAR_SCD_STRATEGY)
+            ->withConsecutive(
+                [DeployInterface::VAR_SCD_STRATEGY],
+                [DeployInterface::VAR_SCD_ALLOWED_STRATEGIES]
+            )
+            ->willReturn(
+                'strategy',
+                ['strategy']
+            );
+        $this->scdStrategyCheckerMock->expects($this->once())
+            ->method('getStrategy')
             ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());
