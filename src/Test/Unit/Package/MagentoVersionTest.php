@@ -97,4 +97,22 @@ class MagentoVersionTest extends TestCase
         
         $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
     }
+
+    public function testSatisfies()
+    {
+        $this->managerMock->expects($this->exactly(6))
+            ->method('get')
+            ->willReturn($this->packageMock);
+        $this->packageMock->expects($this->exactly(6))
+            ->method('getVersion')
+            ->willReturn('2.2.1');
+
+        foreach (['2.2.1', '2.2.*', '~2.2.0'] as $constraint) {
+            $this->assertTrue($this->magentoVersion->satisfies($constraint));
+        }
+
+        foreach (['2.2.0', '2.1.*', '~2.1.0'] as $constraint) {
+            $this->assertFalse($this->magentoVersion->satisfies($constraint));
+        }
+    }
 }
