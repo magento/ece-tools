@@ -12,8 +12,14 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class CommandFactory
 {
+    /**
+     * @var MagentoVersion
+     */
     private $magentoVersion;
 
+    /**
+     * @param MagentoVersion $magentoVersion
+     */
     public function __construct(MagentoVersion $magentoVersion)
     {
         $this->magentoVersion = $magentoVersion;
