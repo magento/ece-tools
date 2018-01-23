@@ -46,7 +46,7 @@ class Container implements ContainerInterface
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(DirectoryList $directoryList)
+    public function __construct()
     {
         /**
          * Creating concrete container.
@@ -59,8 +59,8 @@ class Container implements ContainerInterface
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () use ($directoryList) {
-                return $directoryList;
+            function () {
+                return new \Magento\MagentoCloud\Filesystem\DirectoryList(ECE_BP, BP, $_SERVER['DIRS_CONFIG'] ?? []);
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);

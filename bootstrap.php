@@ -13,6 +13,4 @@ set_error_handler([$handler, 'handle']);
 
 $config = $_SERVER['DIRS_CONFIG'] ?? [];
 
-return new \Magento\MagentoCloud\App\Container(
-    new \Magento\MagentoCloud\Filesystem\DirectoryList(ECE_BP, BP, $config)
-);
+return new \Magento\MagentoCloud\App\Container();
