@@ -18,6 +18,12 @@ use \PHPUnit_Framework_MockObject_MockObject as Mock;
  */
 class ScdStrategyCheckerTest extends TestCase
 {
+    const ALLOWED_STRATEGIES = [
+        '2.1.*' => ['standard'],
+        '2.2.*' => ['standard', 'quick', 'compact'],
+    ];
+
+    const FALLBACK_STRATEGY = ['standard'];
     /**
      * @var Logger|Mock
      */
@@ -44,11 +50,8 @@ class ScdStrategyCheckerTest extends TestCase
         $this->scdStrategyChecker = new ScdStrategyChecker(
             $this->loggerMock,
             $this->magentoVersionMock,
-            [
-                '2.1.*' => ['standard'],
-                '2.2.*' => ['standard', 'quick', 'compact'],
-            ],
-            ['standard']
+            static::ALLOWED_STRATEGIES,
+            static::FALLBACK_STRATEGY
         );
     }
 
@@ -65,48 +68,54 @@ class ScdStrategyCheckerTest extends TestCase
 
     /**
      * Get strategies when in the trivial case, when it's straightforward.
+     *
+     * @dataProvider getStrategyTrivialProvider
      */
-    public function testGetStrategyTrivial()
+    public function testGetStrategyTrivial($expectedStrategy, $desiredStrategy, $availableStrategies)
     {
         $this->loggerMock
             ->expects($this->exactly(0))
             ->method($this->anything());
 
         $this->assertEquals(
-            'strategy',
-            $this->scdStrategyChecker->getStrategy('strategy', ['strategy'])
+            $expectedStrategy,
+            $this->scdStrategyChecker->getStrategy($desiredStrategy, $availableStrategies)
         );
-        $this->assertEquals(
-            'strategy',
-            $this->scdStrategyChecker->getStrategy('strategy', ['redHerring', 'strategy'])
-        );
-        $this->assertEquals(
-            'strategy',
-            $this->scdStrategyChecker->getStrategy('strategy', ['strategy', 'redHerring'])
-        );
+    }
+
+    public function getStrategyTrivialProvider()
+    {
+        return [
+            ['strategy', 'strategy', ['strategy']],
+            ['strategy', 'strategy', ['redHerring', 'strategy']],
+            ['strategy', 'strategy', ['strategy', 'redHerring']],
+        ];
     }
 
     /**
      * Get strategies in the fallback case when the desired strategy is not available.
+     *
+     * @dataProvider getStrategyFallbackProvider
      */
-    public function testGetStrategyFallback()
+    public function testGetStrategyFallback($expectedStrategy, $desiredStrategy, $availableStrategies)
     {
         $this->loggerMock
-            ->expects($this->exactly(3))
+            ->expects($this->exactly(1))
             ->method('warning');
 
         $this->assertEquals(
-            'firstStrategy',
-            $this->scdStrategyChecker->getStrategy('strategy', ['firstStrategy', 'redHerring'])
+            $expectedStrategy,
+            $this->scdStrategyChecker->getStrategy($desiredStrategy, $availableStrategies)
         );
-        $this->assertEquals(
-            'firstStrategy',
-            $this->scdStrategyChecker->getStrategy('', ['firstStrategy', 'redHerring'])
-        );
-        $this->assertEquals(
-            '',
-            $this->scdStrategyChecker->getStrategy('strategy', ['', 'redHerring'])
-        );
+    }
+
+    public function getStrategyFallbackProvider()
+    {
+        return [
+            ['firstStrategy', 'strategy', ['firstStrategy', 'redHerring']],
+            ['firstStrategy', '', ['firstStrategy', 'redHerring']],
+            ['', 'strategy', ['', 'redHerring']],
+        ];
     }
 
     /**
@@ -155,15 +164,12 @@ class ScdStrategyCheckerTest extends TestCase
     }
 
     /**
-     * Get allowed strategies when Magento is on 2.1.
+     * Get allowed strategies depending on the apparent Magento version.
+     *
+     * @dataProvider allowedStrategiesProvider
      */
-    public function testAllowedStrategiesFirst()
+    public function testAllowedStrategies($versionMap, $expectedAllowedStrategies)
     {
-        $versionMap = [
-            ['2.1.*', true],
-            ['2.2.*', false]
-        ];
-
         $this->magentoVersionMock
             ->expects($this->atLeast(1))
             ->method('satisfies')
@@ -171,30 +177,31 @@ class ScdStrategyCheckerTest extends TestCase
             ->willReturnMap($versionMap);
 
         $this->assertEquals(
-            ['standard'],
+            $expectedAllowedStrategies,
             $this->scdStrategyChecker->getAllowedStrategies()
         );
     }
 
     /**
-     * Get allowed strategies when Magento is on 2.2.
+     * @return array Version strings and strategies to test against the allowed strategies method.
      */
-    public function testAllowedStrategiesSecond()
+    public function allowedStrategiesProvider()
     {
-        $versionMap = [
-            ['2.1.*', false],
-            ['2.2.*', true]
+        return [
+            [
+                [
+                    ['2.1.*', true],
+                    ['2.2.*', false],
+                ],
+                ['standard'],
+            ],
+            [
+                [
+                    ['2.1.*', false],
+                    ['2.2.*', true],
+                ],
+                ['standard', 'quick', 'compact']
+            ],
         ];
-
-        $this->magentoVersionMock
-            ->expects($this->atLeast(1))
-            ->method('satisfies')
-            ->with($this->stringContains('.'))
-            ->willReturnMap($versionMap);
-
-        $this->assertEquals(
-            ['standard', 'quick', 'compact'],
-            $this->scdStrategyChecker->getAllowedStrategies()
-        );
     }
 }
