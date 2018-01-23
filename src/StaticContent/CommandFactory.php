@@ -5,11 +5,20 @@
  */
 namespace Magento\MagentoCloud\StaticContent;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
+
 /**
  * Creates static deploy command
  */
 class CommandFactory
 {
+    private $magentoVersion;
+
+    public function __construct(MagentoVersion $magentoVersion)
+    {
+        $this->magentoVersion = $magentoVersion;
+    }
+
     /**
      * Creates static deploy command based on given options
      *
@@ -31,9 +40,11 @@ class CommandFactory
             $command .= ' --exclude-theme=' . implode(' --exclude-theme=', $excludedThemes);
         }
 
-        $strategy = $option->getStrategy();
-        if (!empty($strategy)) {
-            $command .= ' -s ' . $strategy;
+        if (!$this->magentoVersion->satisfies('<2.2')) {
+            $strategy = $option->getStrategy();
+            if (!empty($strategy)) {
+                $command .= ' -s ' . $strategy;
+            }
         }
 
         $verbosityLevel = $option->getVerbosityLevel();

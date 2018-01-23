@@ -7,11 +7,17 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 class CommandFactoryTest extends TestCase
 {
+    /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
     /**
      * @var CommandFactory
      */
@@ -19,12 +25,16 @@ class CommandFactoryTest extends TestCase
 
     public function setUp()
     {
-        $this->commandFactory = new CommandFactory();
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->commandFactory = new CommandFactory(
+            $this->magentoVersionMock
+        );
     }
 
     /**
      * @param array $optionConfig
      * @param $expected
+     *
      * @dataProvider createDataProvider
      */
     public function testCreate(array $optionConfig, $expected)
@@ -69,6 +79,7 @@ class CommandFactoryTest extends TestCase
 
     /**
      * @param array $optionConfig
+     *
      * @return Mock|OptionInterface
      */
     private function createOption(array $optionConfig)
