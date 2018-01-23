@@ -5,8 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Cron\JobUnlocker;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,6 +28,11 @@ class UnlockCronJobs implements ProcessInterface
      * @var JobUnlocker
      */
     private $jobUnlocker;
+    
+    /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
 
     /**
      * @param JobUnlocker $jobUnlocker
@@ -34,10 +40,12 @@ class UnlockCronJobs implements ProcessInterface
      */
     public function __construct(
         JobUnlocker $jobUnlocker,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        MagentoVersion $version
     ) {
-        $this->jobUnlocker = $jobUnlocker;
-        $this->logger = $logger;
+        $this->jobUnlocker    = $jobUnlocker;
+        $this->logger         = $logger;
+        $this->magentoVersion = $version;
     }
 
     /**
@@ -47,6 +55,12 @@ class UnlockCronJobs implements ProcessInterface
      */
     public function execute()
     {
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $version = $this->magentoVersion->getVersion();
+            $this->logger->info(sprintf('Unlocking cron jobs is not supported in Magento %s, skipping.', $version));
+            return;
+        }
+        
         $updatedJobsCount = $this->jobUnlocker->unlockAll();
 
         if ($updatedJobsCount) {
