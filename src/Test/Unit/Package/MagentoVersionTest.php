@@ -103,22 +103,35 @@ class MagentoVersionTest extends TestCase
 
     /**
      * Test the constraint matcher using various Composer-style version constraints.
+     *
+     * @param string $assertion Method name of the assertion to call
+     * @param string $constraint Composer-style version constraint string
+     * @dataProvider satisfiesDataProvider
      */
-    public function testSatisfies()
+    public function testSatisfies(string $assertion, string $constraint)
     {
-        $this->managerMock->expects($this->exactly(6))
+        $this->managerMock->expects($this->exactly(1))
             ->method('get')
             ->willReturn($this->packageMock);
-        $this->packageMock->expects($this->exactly(6))
+        $this->packageMock->expects($this->exactly(1))
             ->method('getVersion')
             ->willReturn('2.2.1');
 
-        foreach (['2.2.1', '2.2.*', '~2.2.0'] as $constraint) {
-            $this->assertTrue($this->magentoVersion->satisfies($constraint));
-        }
+        $this->$assertion($this->magentoVersion->satisfies($constraint));
+    }
 
-        foreach (['2.2.0', '2.1.*', '~2.1.0'] as $constraint) {
-            $this->assertFalse($this->magentoVersion->satisfies($constraint));
-        }
+    /**
+     * @return array[]
+     */
+    public function satisfiesDataProvider()
+    {
+        return [
+            ['assertTrue', '2.2.1'],
+            ['assertTrue', '2.2.*'],
+            ['assertTrue', '~2.2.0'],
+            ['assertFalse', '2.2.0'],
+            ['assertFalse', '2.1.*'],
+            ['assertFalse', '~2.1.0'],
+        ];
     }
 }
