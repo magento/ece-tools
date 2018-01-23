@@ -79,16 +79,17 @@ class ScdStrategyChecker
         if (!array_key_exists(static::FALLBACK_OFFSET, $allowedStrategies)) {
             throw new \OutOfRangeException(
                 "Tried to access an index of \$allowedStrategies that doesn't exist. "
-                . "Ensure that the class constant FALLBACK_OFFSET is defined appropriately."
+                . "Ensure that there's at least one allowed strategy and that the "
+                . "class constant FALLBACK_OFFSET is defined appropriately . "
             );
         }
 
         $usedStrategy = (string) $allowedStrategies[static::FALLBACK_OFFSET];
 
         $this->logger->warning(
-            "The desired static content deployment strategy is not on the list of allowed strategies. "
-            . "Make sure that the desired strategy is valid for this version of Magento. "
-            . "The default strategy for this version of Magento will be used instead.",
+            "The desired static content deployment strategy is not on the list of allowed strategies . "
+            . "Make sure that the desired strategy is valid for this version of Magento . "
+            . "The default strategy for this version of Magento will be used instead . ",
             [
                 "desiredStrategy"   => $desiredStrategy,
                 "allowedStrategies" => $allowedStrategies,

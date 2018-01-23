@@ -46,4 +46,79 @@ class ScdStrategyCheckerTest extends TestCase
             $this->magentoVersionMock
         );
     }
+
+    public function testFallbackOffset()
+    {
+        $this->assertEquals(
+            0,
+            $this->scdStrategyChecker::FALLBACK_OFFSET
+        );
+    }
+
+    /**
+     *
+     */
+    public function testGetStrategyTrivial()
+    {
+        $this->loggerMock
+            ->expects($this->exactly(0))
+            ->method('warning');
+
+        $this->assertEquals(
+            'strategy',
+            $this->scdStrategyChecker->getStrategy('strategy', ['strategy'])
+        );
+        $this->assertEquals(
+            'strategy',
+            $this->scdStrategyChecker->getStrategy('strategy', ['redHerring', 'strategy'])
+        );
+        $this->assertEquals(
+            'strategy',
+            $this->scdStrategyChecker->getStrategy('strategy', ['strategy', 'redHerring'])
+        );
+    }
+
+    public function testGetStrategyFallback()
+    {
+        $this->loggerMock
+            ->expects($this->exactly(3))
+            ->method('warning');
+
+        $this->assertEquals(
+            'firstStrategy',
+            $this->scdStrategyChecker->getStrategy('strategy', ['firstStrategy', 'redHerring'])
+        );
+        $this->assertEquals(
+            'firstStrategy',
+            $this->scdStrategyChecker->getStrategy('', ['firstStrategy', 'redHerring'])
+        );
+        $this->assertEquals(
+            '',
+            $this->scdStrategyChecker->getStrategy('strategy', ['', 'redHerring'])
+        );
+    }
+
+    public function testGetStrategyOutOfBounds()
+    {
+        $this->loggerMock
+            ->expects($this->exactly(0))
+            ->method('warning');
+
+        $this->expectException(\OutOfRangeException::class);
+        $this->scdStrategyChecker->getStrategy('strategy', []);
+    }
+
+    public function testGetStrategyBadConversion()
+    {
+        $this->loggerMock
+            ->expects($this->exactly(0))
+            ->method('warning');
+
+        $this->expectExceptionMessage('Array to string conversion');
+        $this->scdStrategyChecker->getStrategy('strategy', [[], []]);
+    }
+
+    public function testAllowedStrategies()
+    {
+    }
 }
