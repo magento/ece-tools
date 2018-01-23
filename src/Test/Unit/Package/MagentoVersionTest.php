@@ -85,7 +85,10 @@ class MagentoVersionTest extends TestCase
             ['2.2-dev', '2.2-dev', true],
         ];
     }
-    
+
+    /**
+     * Test getting the version number from the installed version of Magento.
+     */
     public function testGetVersion()
     {
         $this->managerMock->method('get')
@@ -98,6 +101,9 @@ class MagentoVersionTest extends TestCase
         $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
     }
 
+    /**
+     * Test the constraint matcher, using various Composer-style version constraints.
+     */
     public function testSatisfies()
     {
         $this->managerMock->expects($this->exactly(6))
