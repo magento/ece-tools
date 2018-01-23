@@ -41,6 +41,7 @@ class CommandFactory
         }
 
         if (!$this->magentoVersion->satisfies('<2.2')) {
+            // Magento 2.1 doesn't have a -s option and can't take a strategy option.
             $strategy = $option->getStrategy();
             if (!empty($strategy)) {
                 $command .= ' -s ' . $strategy;
