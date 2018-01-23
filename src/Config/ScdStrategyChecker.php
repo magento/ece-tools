@@ -23,6 +23,19 @@ class ScdStrategyChecker
     const FALLBACK_OFFSET = 0;
 
     /**
+     * Default strategies that are allowed by the selector.
+     */
+    const DEFAULT_ALLOWED_STRATEGIES = [
+        '2.1.*' => ['standard'],
+        '>=2.2' => ['standard', 'quick', 'compact'],
+    ];
+
+    /**
+     * Default fallback used if the current version doesn't match any in the default allowed list.
+     */
+    const FALLBACK_ALLOWED_STRATEGIES = ['standard'];
+
+    /**
      * @var Logger
      */
     private $logger;
@@ -48,18 +61,17 @@ class ScdStrategyChecker
      */
     public function __construct(
         Logger $logger,
-        MagentoVersion $magentoVersion
+        MagentoVersion $magentoVersion,
+        array $defaultAllowedStrategies = self::DEFAULT_ALLOWED_STRATEGIES,
+        array $fallbackAllowedStrategies = self::FALLBACK_ALLOWED_STRATEGIES
     ) {
         $this->logger = $logger;
         $this->magentoVersion = $magentoVersion;
 
         // The first strategy (at array index self::FALLBACK_OFFSET) for a given version
         // is the one used if the user specifies an invalid strategy.
-        $this->defaultAllowedStrategies = [
-            '2.1.*' => ['standard'],
-            '2.2.*' => ['standard', 'quick', 'compact'],
-        ];
-        $this->fallbackAllowedStrategies = ['standard'];
+        $this->defaultAllowedStrategies = $defaultAllowedStrategies;
+        $this->fallbackAllowedStrategies = $fallbackAllowedStrategies;
     }
 
     /**
@@ -78,9 +90,8 @@ class ScdStrategyChecker
 
         if (!array_key_exists(static::FALLBACK_OFFSET, $allowedStrategies)) {
             throw new \OutOfRangeException(
-                "Tried to access an index of \$allowedStrategies that doesn't exist. "
-                . "Ensure that there's at least one allowed strategy and that the "
-                . "class constant FALLBACK_OFFSET is defined appropriately . "
+                "Tried to access an allowed strategy that doesn't exist. "
+                . "Ensure that there's at least one allowed strategy."
             );
         }
 

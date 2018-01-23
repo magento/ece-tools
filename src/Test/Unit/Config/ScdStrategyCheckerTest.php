@@ -43,7 +43,12 @@ class ScdStrategyCheckerTest extends TestCase
 
         $this->scdStrategyChecker = new ScdStrategyChecker(
             $this->loggerMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            [
+                '2.1.*' => ['standard'],
+                '2.2.*' => ['standard', 'quick', 'compact'],
+            ],
+            ['standard']
         );
     }
 
@@ -138,12 +143,7 @@ class ScdStrategyCheckerTest extends TestCase
         $this->magentoVersionMock
             ->expects($this->atLeast(1))
             ->method('satisfies')
-            ->with(
-                $this->logicalAnd(
-                    $this->stringContains('2.'),
-                    $this->stringContains('*')
-                )
-            );
+            ->with($this->stringContains('.'));
 
         $this->assertEquals(
             ['standard'],
@@ -158,18 +158,13 @@ class ScdStrategyCheckerTest extends TestCase
     {
         $versionMap = [
             ['2.1.*', true],
-            ['2.2.*', false],
+            ['2.2.*', false]
         ];
 
         $this->magentoVersionMock
             ->expects($this->atLeast(1))
             ->method('satisfies')
-            ->with(
-                $this->logicalAnd(
-                    $this->stringContains('2.'),
-                    $this->stringContains('*')
-                )
-            )
+            ->with($this->stringContains('.'))
             ->willReturnMap($versionMap);
 
         $this->assertEquals(
@@ -185,18 +180,13 @@ class ScdStrategyCheckerTest extends TestCase
     {
         $versionMap = [
             ['2.1.*', false],
-            ['2.2.*', true],
+            ['2.2.*', true]
         ];
 
         $this->magentoVersionMock
             ->expects($this->atLeast(1))
             ->method('satisfies')
-            ->with(
-                $this->logicalAnd(
-                    $this->stringContains('2.'),
-                    $this->stringContains('*')
-                )
-            )
+            ->with($this->stringContains('.'))
             ->willReturnMap($versionMap);
 
         $this->assertEquals(
