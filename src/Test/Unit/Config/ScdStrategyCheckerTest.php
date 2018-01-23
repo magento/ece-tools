@@ -121,8 +121,14 @@ class ScdStrategyCheckerTest extends TestCase
         string $desiredStrategy,
         array $availableStrategies
     ) {
+        $warningCount = 0;
+        if ($desiredStrategy != '') {
+            // There won't be a warning unless the desired strategy string has a positive size.
+            $warningCount = 1;
+        }
+
         $this->loggerMock
-            ->expects($this->exactly(1))
+            ->expects($this->exactly($warningCount))
             ->method('warning');
 
         $this->assertEquals(

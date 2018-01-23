@@ -97,16 +97,19 @@ class ScdStrategyChecker
 
         $usedStrategy = (string) $allowedStrategies[static::FALLBACK_OFFSET];
 
-        $this->logger->warning(
-            "The desired static content deployment strategy is not on the list of allowed strategies . "
-            . "Make sure that the desired strategy is valid for this version of Magento . "
-            . "The default strategy for this version of Magento will be used instead . ",
-            [
-                "desiredStrategy"   => $desiredStrategy,
-                "allowedStrategies" => $allowedStrategies,
-                "usedStrategy"      => $usedStrategy,
-            ]
-        );
+        if ($desiredStrategy) {
+            // Only log a warning if the user has an SCD strategy preference.
+            $this->logger->warning(
+                "The desired static content deployment strategy is not on the list of allowed strategies . "
+                . "Make sure that the desired strategy is valid for this version of Magento . "
+                . "The default strategy for this version of Magento will be used instead . ",
+                [
+                    "desiredStrategy"   => $desiredStrategy,
+                    "allowedStrategies" => $allowedStrategies,
+                    "usedStrategy"      => $usedStrategy,
+                ]
+            );
+        }
 
         return $usedStrategy;
     }
