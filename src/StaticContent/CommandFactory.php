@@ -13,6 +13,11 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 class CommandFactory
 {
     /**
+     * A composer version constraint of versions that cannot use a static content deployment strategy.
+     */
+    const NO_SCD_VERSION_CONSTRAINT = "<2.2";
+
+    /**
      * @var MagentoVersion
      */
     private $magentoVersion;
@@ -46,8 +51,8 @@ class CommandFactory
             $command .= ' --exclude-theme=' . implode(' --exclude-theme=', $excludedThemes);
         }
 
-        if (!$this->magentoVersion->satisfies('<2.2')) {
-            // Magento 2.1 doesn't have a -s option and can't take a strategy option.
+        if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)) {
+            // Magento 2.1 doesn't have a "-s" option and can't take a strategy option.
             $strategy = $option->getStrategy();
             if (!empty($strategy)) {
                 $command .= ' -s ' . $strategy;
