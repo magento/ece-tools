@@ -147,8 +147,8 @@ class CronUnlockTest extends TestCase
             ->willReturn('2.1.7');
         
         $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Unlocking crons is not supported in Magento 2.1.7, skipping.');
+            ->method('error')
+            ->with('Unlocking crons is not supported in Magento 2.1.7.');
         
         $this->jobUnlockerMock->expects($this->never())
             ->method('unlockByJobCode');

@@ -78,7 +78,7 @@ class CronUnlock extends Command
     {
         if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
             $version = $this->magentoVersion->getVersion();
-            $this->logger->info(sprintf('Unlocking crons is not supported in Magento %s, skipping.', $version));
+            $this->logger->error(sprintf('Unlocking crons is not supported in Magento %s.', $version));
             return;
         }
         
