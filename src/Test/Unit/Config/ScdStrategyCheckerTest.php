@@ -18,11 +18,17 @@ use \PHPUnit_Framework_MockObject_MockObject as Mock;
  */
 class ScdStrategyCheckerTest extends TestCase
 {
+    /**
+     * Allowed strategies to use during testing.
+     */
     const ALLOWED_STRATEGIES = [
         '2.1.*' => ['standard'],
         '2.2.*' => ['standard', 'quick', 'compact'],
     ];
 
+    /**
+     * Fallback allowed strategies to be used during testing.
+     */
     const FALLBACK_STRATEGY = ['standard'];
     /**
      * @var Logger|Mock
@@ -83,6 +89,9 @@ class ScdStrategyCheckerTest extends TestCase
         );
     }
 
+    /**
+     * @return array
+     */
     public function getStrategyTrivialProvider()
     {
         return [
@@ -109,6 +118,9 @@ class ScdStrategyCheckerTest extends TestCase
         );
     }
 
+    /**
+     * @return array
+     */
     public function getStrategyFallbackProvider()
     {
         return [
@@ -133,7 +145,7 @@ class ScdStrategyCheckerTest extends TestCase
     }
 
     /**
-     * Throw an exception when the strategies are given as something other than strings.
+     * Throw an exception when the allowed strategies are given as something other than strings.
      *
      * @expectedException \Exception
      * @expectedExceptionMessage Array to string conversion
@@ -148,7 +160,7 @@ class ScdStrategyCheckerTest extends TestCase
     }
 
     /**
-     * Get allowed strategies when the list is empty.
+     * Get fallback allowed strategies when the list is empty.
      */
     public function testAllowedStrategiesFallback()
     {
