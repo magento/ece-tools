@@ -62,7 +62,7 @@ class ScdStrategyCheckerTest extends TestCase
     {
         $this->loggerMock
             ->expects($this->exactly(0))
-            ->method('warning');
+            ->method($this->anything());
 
         $this->assertEquals(
             'strategy',
@@ -102,7 +102,7 @@ class ScdStrategyCheckerTest extends TestCase
     {
         $this->loggerMock
             ->expects($this->exactly(0))
-            ->method('warning');
+            ->method($this->anything());
 
         $this->expectException(\OutOfRangeException::class);
         $this->scdStrategyChecker->getStrategy('strategy', []);
@@ -112,13 +112,75 @@ class ScdStrategyCheckerTest extends TestCase
     {
         $this->loggerMock
             ->expects($this->exactly(0))
-            ->method('warning');
+            ->method($this->anything());
 
         $this->expectExceptionMessage('Array to string conversion');
         $this->scdStrategyChecker->getStrategy('strategy', [[], []]);
     }
 
-    public function testAllowedStrategies()
+    public function testAllowedStrategiesFallback()
     {
+        $this->magentoVersionMock
+            ->expects($this->atLeast(1))
+            ->method('satisfies')
+            ->with(
+                $this->logicalAnd(
+                    $this->stringContains('2.'),
+                    $this->stringContains('*')
+                )
+            );
+
+        $this->assertEquals(
+            ['standard'],
+            $this->scdStrategyChecker->getAllowedStrategies()
+        );
+    }
+
+    public function testAllowedStrategiesFirst()
+    {
+        $versionMap = [
+            ['2.1.*', true],
+            ['2.2.*', false],
+        ];
+
+        $this->magentoVersionMock
+            ->expects($this->atLeast(1))
+            ->method('satisfies')
+            ->with(
+                $this->logicalAnd(
+                    $this->stringContains('2.'),
+                    $this->stringContains('*')
+                )
+            )
+            ->willReturnMap($versionMap);
+
+        $this->assertEquals(
+            ['standard'],
+            $this->scdStrategyChecker->getAllowedStrategies()
+        );
+    }
+
+    public function testAllowedStrategiesSecond()
+    {
+        $versionMap = [
+            ['2.1.*', false],
+            ['2.2.*', true],
+        ];
+
+        $this->magentoVersionMock
+            ->expects($this->atLeast(1))
+            ->method('satisfies')
+            ->with(
+                $this->logicalAnd(
+                    $this->stringContains('2.'),
+                    $this->stringContains('*')
+                )
+            )
+            ->willReturnMap($versionMap);
+
+        $this->assertEquals(
+            ['standard', 'quick', 'compact'],
+            $this->scdStrategyChecker->getAllowedStrategies()
+        );
     }
 }
