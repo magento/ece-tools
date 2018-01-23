@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -39,22 +40,25 @@ class UrlsTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->environmentMock = $this->createMock(Environment::class);
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new Urls(
             $this->environmentMock,
             $this->processMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -66,8 +70,9 @@ class UrlsTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
             ->willReturn(false);
-        $this->environmentMock->expects($this->once())
-            ->method('isUpdateUrlsEnabled')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_UPDATE_URLS)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -90,8 +95,9 @@ class UrlsTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
             ->willReturn($envIsMasterBranchWillReturn);
-        $this->environmentMock->expects($envIsUpdateUrlsEnabledExpects)
-            ->method('isUpdateUrlsEnabled')
+        $this->stageConfigMock->expects($envIsUpdateUrlsEnabledExpects)
+            ->method('get')
+            ->with(DeployInterface::VAR_UPDATE_URLS)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')

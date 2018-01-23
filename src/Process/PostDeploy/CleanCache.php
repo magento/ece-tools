@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
@@ -20,18 +20,18 @@ class CleanCache implements ProcessInterface
     private $shell;
 
     /**
-     * @var Environment
+     * @var DeployInterface
      */
-    private $environment;
+    private $stageConfig;
 
     /**
      * @param ShellInterface $shell
-     * @param Environment $environment
+     * @param DeployInterface $stageConfig
      */
-    public function __construct(ShellInterface $shell, Environment $environment)
+    public function __construct(ShellInterface $shell, DeployInterface $stageConfig)
     {
         $this->shell = $shell;
-        $this->environment = $environment;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -39,6 +39,8 @@ class CleanCache implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute('php ./bin/magento cache:flush' . $this->environment->getVerbosityLevel());
+        $this->shell->execute(
+            'php ./bin/magento cache:flush ' . $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
+        );
     }
 }

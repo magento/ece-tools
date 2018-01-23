@@ -5,9 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
-use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
+use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -55,10 +54,10 @@ class DeployTest extends TestCase
      */
     public function testGet(string $name, array $envConfig, array $envVarConfig, $expectedValue)
     {
-        $this->environmentReaderMock->expects($this->once())
+        $this->environmentReaderMock->expects($this->any())
             ->method('read')
-            ->willReturn($envConfig);
-        $this->environmentConfigMock->expects($this->once())
+            ->willReturn([Deploy::SECTION_STAGE => $envConfig]);
+        $this->environmentConfigMock->expects($this->any())
             ->method('getVariables')
             ->willReturn($envVarConfig);
 
@@ -67,6 +66,7 @@ class DeployTest extends TestCase
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
@@ -80,8 +80,8 @@ class DeployTest extends TestCase
             'env configured strategy' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_DEPLOY => [
+                    Deploy::STAGE_GLOBAL => [],
+                    Deploy::STAGE_DEPLOY => [
                         Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
                 ],
@@ -91,10 +91,10 @@ class DeployTest extends TestCase
             'global env strategy' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [
-                    StageConfigInterface::STAGE_GLOBAL => [
+                    Deploy::STAGE_GLOBAL => [
                         Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
-                    StageConfigInterface::STAGE_DEPLOY => [],
+                    Deploy::STAGE_DEPLOY => [],
                 ],
                 [],
                 'simple',
@@ -102,8 +102,8 @@ class DeployTest extends TestCase
             'default strategy with parameter' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_DEPLOY => [],
+                    Deploy::STAGE_GLOBAL => [],
+                    Deploy::STAGE_DEPLOY => [],
                 ],
                 [],
                 '',
@@ -111,8 +111,8 @@ class DeployTest extends TestCase
             'env var configured strategy' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_DEPLOY => [
+                    Deploy::STAGE_GLOBAL => [],
+                    Deploy::STAGE_DEPLOY => [
                         Deploy::VAR_SCD_STRATEGY => 'simple',
                     ],
                 ],
@@ -121,6 +121,100 @@ class DeployTest extends TestCase
                 ],
                 'quick',
             ],
+            'json value' => [
+                Deploy::VAR_QUEUE_CONFIGURATION,
+                [
+                    Deploy::STAGE_DEPLOY => [
+                        Deploy::VAR_QUEUE_CONFIGURATION => '{"SOME_CONFIG": "some value"}',
+                    ],
+                ],
+                [],
+                ['SOME_CONFIG' => 'some value'],
+            ],
+            'wrong json value' => [
+                Deploy::VAR_QUEUE_CONFIGURATION,
+                [
+                    Deploy::STAGE_DEPLOY => [
+                        Deploy::VAR_QUEUE_CONFIGURATION => '{"SOME_CONFIG": "some value',
+                    ],
+                ],
+                [],
+                '{"SOME_CONFIG": "some value',
+            ],
+            'disabled flow 1' => [
+                Deploy::VAR_REDIS_SESSION_DISABLE_LOCKING,
+                [],
+                [
+                    Deploy::VAR_REDIS_SESSION_DISABLE_LOCKING => EnvironmentConfig::VAL_DISABLED,
+                ],
+                false,
+            ],
+            'disabled flow 2' => [
+                Deploy::VAR_UPDATE_URLS,
+                [],
+                [
+                    Deploy::VAR_UPDATE_URLS => EnvironmentConfig::VAL_DISABLED,
+                ],
+                false,
+            ],
+            'deprecated do deploy scd' => [
+                Deploy::VAR_SKIP_SCD,
+                [],
+                [
+                    'DO_DEPLOY_STATIC_CONTENT' => EnvironmentConfig::VAL_DISABLED,
+                ],
+                true,
+            ],
+            'do deploy scd' => [
+                Deploy::VAR_SKIP_SCD,
+                [],
+                [],
+                false,
+            ],
+            'verbosity deprecated' => [
+                Deploy::VAR_VERBOSE_COMMANDS,
+                [],
+                [
+                    Deploy::VAR_VERBOSE_COMMANDS => EnvironmentConfig::VAL_ENABLED,
+                ],
+                '-vvv',
+            ],
+            'verbosity disabled deprecated' => [
+                Deploy::VAR_VERBOSE_COMMANDS,
+                [],
+                [],
+                '',
+            ],
+            'threads default' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [],
+                1,
+            ],
+            'threads deprecated' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 4,
+                ],
+                4,
+            ],
         ];
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
+     */
+    public function testNotExists()
+    {
+        $this->environmentReaderMock->expects($this->any())
+            ->method('read')
+            ->willReturn([]);
+        $this->environmentConfigMock->expects($this->any())
+            ->method('getVariables')
+            ->willReturn([]);
+
+        $this->config->get('NOT_EXISTS_VALUE');
     }
 }

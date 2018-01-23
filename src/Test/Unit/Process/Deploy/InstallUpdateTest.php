@@ -5,12 +5,15 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
+use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class InstallUpdateTest extends TestCase
 {
     /**
@@ -19,9 +22,9 @@ class InstallUpdateTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var DeployConfig|Mock
+     * @var State|Mock
      */
-    private $deployConfigMock;
+    private $stateMock;
 
     /**
      * @var InstallUpdate\Install|Mock
@@ -42,12 +45,12 @@ class InstallUpdateTest extends TestCase
     {
         $this->installProcessMock = $this->createMock(InstallUpdate\Install::class);
         $this->updateProcessMock = $this->createMock(InstallUpdate\Update::class);
-        $this->deployConfigMock = $this->createMock(DeployConfig::class);
+        $this->stateMock = $this->createMock(State::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->process = new InstallUpdate(
             $this->loggerMock,
-            $this->deployConfigMock,
+            $this->stateMock,
             $this->installProcessMock,
             $this->updateProcessMock
         );
@@ -55,7 +58,7 @@ class InstallUpdateTest extends TestCase
 
     public function testExecuteInstall()
     {
-        $this->deployConfigMock->expects($this->once())
+        $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
@@ -71,7 +74,7 @@ class InstallUpdateTest extends TestCase
 
     public function testExecuteUpdate()
     {
-        $this->deployConfigMock->expects($this->once())
+        $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
         $this->loggerMock->expects($this->once())

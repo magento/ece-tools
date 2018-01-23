@@ -6,10 +6,10 @@
 namespace Magento\MagentoCloud\Process\Prestart;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
 use Psr\Log\LoggerInterface;
@@ -50,19 +50,24 @@ class DeployStaticContent implements ProcessInterface
     private $remoteDiskIdentifier;
 
     /**
-     * @var FlagFilePool
+     * @var FlagManager
      */
-    private $flagFilePool;
+    private $flagManager;
 
     /**
-     * DeployStaticContent constructor.
+     * @var DeployInterface
+     */
+    private $stageConfig;
+
+    /**
      * @param ProcessInterface $process
      * @param Environment $environment
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
      * @param RemoteDiskIdentifier $remoteDiskIdentifier
-     * @param FlagFilePool $flagFilePool
+     * @param FlagManager $flagManager
+     * @param DeployInterface $stageConfig
      */
     public function __construct(
         ProcessInterface $process,
@@ -71,7 +76,8 @@ class DeployStaticContent implements ProcessInterface
         File $file,
         DirectoryList $directoryList,
         RemoteDiskIdentifier $remoteDiskIdentifier,
-        FlagFilePool $flagFilePool
+        FlagManager $flagManager,
+        DeployInterface $stageConfig
     ) {
         $this->process = $process;
         $this->environment = $environment;
@@ -79,7 +85,8 @@ class DeployStaticContent implements ProcessInterface
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->remoteDiskIdentifier = $remoteDiskIdentifier;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagManager = $flagManager;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -90,19 +97,19 @@ class DeployStaticContent implements ProcessInterface
     public function execute()
     {
         if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
-            && $this->flagFilePool->getFlag(StaticContentDeployPendingFlag::KEY)->exists()
+            && $this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
         ) {
             if (Environment::MAGENTO_PRODUCTION_MODE !== $this->environment->getApplicationMode()) {
                 return;
             }
 
-            /* Workaround for MAGETWO-58594: disable redis cache before running static deploy, re-enable after */
-            if (!$this->environment->isDeployStaticContent()) {
+            if ($this->stageConfig->get(DeployInterface::VAR_SKIP_SCD) ||
+                !$this->environment->isDeployStaticContent()
+            ) {
                 return;
             }
 
-            // Clear old static content if necessary
-            if ($this->environment->doCleanStaticFiles()) {
+            if ($this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)) {
                 $magentoRoot = $this->directoryList->getMagentoRoot();
                 $this->logger->info('Clearing pub/static');
                 $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');

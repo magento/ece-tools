@@ -5,12 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\RestoreWritableDirectories;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use PHPUnit\Framework\TestCase;
@@ -45,14 +42,9 @@ class RestoreWritableDirectoriesTest extends TestCase
     private $recoverableDirectoryListMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
+    private $flagManagerMock;
 
     protected function setUp()
     {
@@ -63,16 +55,14 @@ class RestoreWritableDirectoriesTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->process = new RestoreWritableDirectories(
             $this->loggerMock,
             $this->buildDirCopierMock,
             $this->recoverableDirectoryListMock,
             $this->directoryListMock,
-            $this->flagFilePoolMock
+            $this->flagManagerMock
         );
     }
 
@@ -93,13 +83,9 @@ class RestoreWritableDirectoriesTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Recoverable directories were copied back.');
-
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('regenerate')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
-            ->method('delete');
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(FlagManager::FLAG_REGENERATE);
 
         $this->process->execute();
     }

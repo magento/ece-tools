@@ -7,9 +7,8 @@ namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 
@@ -26,29 +25,39 @@ class CleanStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var FlagFilePool
+     * @var FlagManager
      */
-    private $flagFilePool;
+    private $flagManager;
+
+    /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
 
     /**
      * @param LoggerInterface $logger
      * @param Environment $env
      * @param File $file
      * @param DirectoryList $directoryList
-     * @param FlagFilePool $flagFilePool
+     * @param FlagManager $flagManager
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $env,
         File $file,
         DirectoryList $directoryList,
-        FlagFilePool $flagFilePool
+        FlagManager $flagManager
     ) {
         $this->logger = $logger;
         $this->env = $env;
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -58,7 +67,7 @@ class CleanStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->exists()) {
+        if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             return;
         }
 

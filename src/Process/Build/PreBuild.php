@@ -5,10 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Config\Build as BuildConfig;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Psr\Log\LoggerInterface;
 
@@ -18,9 +17,9 @@ use Psr\Log\LoggerInterface;
 class PreBuild implements ProcessInterface
 {
     /**
-     * @var BuildConfig
+     * @var BuildInterface
      */
-    private $buildConfig;
+    private $stageConfig;
 
     /**
      * @var LoggerInterface
@@ -33,27 +32,27 @@ class PreBuild implements ProcessInterface
     private $packageManager;
 
     /**
-     * @var FlagFilePool
+     * @var FlagManager
      */
-    private $flagFilePool;
+    private $flagManager;
 
     /**
      * PreBuild constructor.
-     * @param BuildConfig $buildConfig
+     * @param BuildInterface $stageConfig
      * @param LoggerInterface $logger
      * @param Manager $packageManager
-     * @param FlagFilePool $flagFilePool
+     * @param FlagManager $flagManager
      */
     public function __construct(
-        BuildConfig $buildConfig,
+        BuildInterface $stageConfig,
         LoggerInterface $logger,
         Manager $packageManager,
-        FlagFilePool $flagFilePool
+        FlagManager $flagManager
     ) {
-        $this->buildConfig = $buildConfig;
+        $this->stageConfig = $stageConfig;
         $this->logger = $logger;
         $this->packageManager = $packageManager;
-        $this->flagFilePool = $flagFilePool;
+        $this->flagManager = $flagManager;
     }
 
     /**
@@ -61,10 +60,10 @@ class PreBuild implements ProcessInterface
      */
     public function execute()
     {
-        $verbosityLevel = $this->buildConfig->getVerbosityLevel();
+        $verbosityLevel = $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS);
 
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
-        $this->flagFilePool->getFlag(StaticContentDeployFlag::KEY)->delete();
+        $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
         $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }
 }

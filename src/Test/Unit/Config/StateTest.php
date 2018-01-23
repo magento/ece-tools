@@ -5,16 +5,18 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\Config\Deploy\Reader;
+use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Deploy;
+use Magento\MagentoCloud\Config\State;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
  */
-class DeployTest extends TestCase
+class StateTest extends TestCase
 {
     use \phpmock\phpunit\PHPMock;
 
@@ -29,19 +31,19 @@ class DeployTest extends TestCase
     private $connectionMock;
 
     /**
-     * @var Deploy\Reader|Mock
+     * @var Reader|Mock
      */
     private $readerMock;
 
     /**
-     * @var Deploy\Writer|Mock
+     * @var Writer|Mock
      */
     private $writerMock;
 
     /**
-     * @var Deploy
+     * @var State
      */
-    private $deploy;
+    private $state;
 
     /**
      * @inheritdoc
@@ -52,10 +54,10 @@ class DeployTest extends TestCase
             ->getMockForAbstractClass();
         $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
             ->getMockForAbstractClass();
-        $this->readerMock = $this->createMock(Deploy\Reader::class);
-        $this->writerMock = $this->createMock(Deploy\Writer::class);
+        $this->readerMock = $this->createMock(Reader::class);
+        $this->writerMock = $this->createMock(Writer::class);
 
-        $this->deploy = new Deploy(
+        $this->state = new State(
             $this->loggerMock,
             $this->connectionMock,
             $this->readerMock,
@@ -78,7 +80,7 @@ class DeployTest extends TestCase
         $this->writerMock->expects($this->never())
             ->method('update');
 
-        $this->assertFalse($this->deploy->isInstalled());
+        $this->assertFalse($this->state->isInstalled());
     }
 
     /**
@@ -106,7 +108,7 @@ class DeployTest extends TestCase
         $this->writerMock->expects($this->never())
             ->method('update');
 
-        $this->deploy->isInstalled();
+        $this->state->isInstalled();
     }
 
     /**
@@ -144,7 +146,7 @@ class DeployTest extends TestCase
             ->with('r')
             ->willReturn($date);
 
-        $this->assertTrue($this->deploy->isInstalled());
+        $this->assertTrue($this->state->isInstalled());
     }
 
     public function testIsInstalledConfigFileWithDate()
@@ -167,6 +169,6 @@ class DeployTest extends TestCase
         $this->writerMock->expects($this->never())
             ->method('update');
 
-        $this->assertTrue($this->deploy->isInstalled());
+        $this->assertTrue($this->state->isInstalled());
     }
 }

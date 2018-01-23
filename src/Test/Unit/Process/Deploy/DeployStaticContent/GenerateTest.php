@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\DeployStaticContent;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate;
@@ -37,11 +37,6 @@ class GenerateTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
-
-    /**
      * @var File|Mock
      */
     private $fileMock;
@@ -62,28 +57,31 @@ class GenerateTest extends TestCase
     private $deployOption;
 
     /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->commandFactoryMock = $this->createMock(CommandFactory::class);
         $this->deployOption = $this->createMock(Option::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->process = new Generate(
             $this->shellMock,
             $this->loggerMock,
-            $this->environmentMock,
             $this->fileMock,
             $this->directoryListMock,
             $this->commandFactoryMock,
-            $this->deployOption
+            $this->deployOption,
+            $this->stageConfigMock
         );
     }
 
@@ -107,12 +105,13 @@ class GenerateTest extends TestCase
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
-                ['php ./bin/magento maintenance:enable  -vvv '],
+                ['php ./bin/magento maintenance:enable -vvv'],
                 ['php ./bin/magento static:content:deploy:command'],
-                ['php ./bin/magento maintenance:disable  -vvv ']
+                ['php ./bin/magento maintenance:disable -vvv']
             );
-        $this->environmentMock->method('getVerbosityLevel')
-            ->willReturn(' -vvv ');
+        $this->stageConfigMock->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-vvv');
 
         $this->process->execute();
     }

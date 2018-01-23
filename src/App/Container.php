@@ -11,15 +11,13 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
-use Magento\MagentoCloud\Config\Stage\Build as BuildConfig;
-use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -75,14 +73,12 @@ class Container implements ContainerInterface
             );
         });
         $this->container->singleton(
-            \Magento\MagentoCloud\Filesystem\FlagFilePool::class,
+            Flag\Pool::class,
             function () {
-                return new \Magento\MagentoCloud\Filesystem\FlagFilePool([
-                    $this->container->make(\Magento\MagentoCloud\Filesystem\FlagFile\RegenerateFlag::class),
-                    $this->container->make(\Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployFlag::class),
-                    $this->container->make(
-                        \Magento\MagentoCloud\Filesystem\FlagFile\StaticContentDeployPendingFlag::class
-                    ),
+                return new Flag\Pool([
+                    Flag\Manager::FLAG_REGENERATE => 'var/.regenerate',
+                    Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
+                    Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_PENDING => 'var/.static_content_deploy_pending',
                 ]);
             }
         );
@@ -98,8 +94,7 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\Dump::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Build::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Deploy::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
         $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
@@ -115,6 +110,14 @@ class Container implements ContainerInterface
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\RepositoryFactory::class);
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\BuildInterface::class,
+            \Magento\MagentoCloud\Config\Stage\Build::class
+        );
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\DeployInterface::class,
+            \Magento\MagentoCloud\Config\Stage\Deploy::class
+        );
         /**
          * Contextual binding.
          */
@@ -304,9 +307,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(\Magento\MagentoCloud\Config\Build::class)
-            ->needs(\Magento\MagentoCloud\Filesystem\Reader\ReaderInterface::class)
-            ->give(\Magento\MagentoCloud\Config\Build\Reader::class);
         $this->container->when(BuildProcess\DeployStaticContent::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -338,18 +338,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(BuildProcess\DeployStaticContent::class)
-            ->needs(StageConfigInterface::class)
-            ->give(BuildConfig::class);
-        $this->container->when(\Magento\MagentoCloud\StaticContent\Build\Option::class)
-            ->needs(StageConfigInterface::class)
-            ->give(BuildConfig::class);
-        $this->container->when(\Magento\MagentoCloud\StaticContent\Deploy\Option::class)
-            ->needs(StageConfigInterface::class)
-            ->give(DeployConfig::class);
-        $this->container->when(\Magento\MagentoCloud\StaticContent\Prestart\Option::class)
-            ->needs(StageConfigInterface::class)
-            ->give(BuildConfig::class);
     }
 
     /**

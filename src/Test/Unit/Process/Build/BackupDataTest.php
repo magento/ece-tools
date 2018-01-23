@@ -9,8 +9,7 @@ use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\BackupData;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -47,14 +46,9 @@ class BackupDataTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
+    private $flagManagerMock;
 
     /**
      * @var string
@@ -96,9 +90,7 @@ class BackupDataTest extends TestCase
             ->getMockForAbstractClass();
         $this->environmentMock = $this->createMock(Environment::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->rootInitDir = 'magento_root/init';
         $this->pubStatic = 'magento_root/pub/static/';
         $this->initPubStatic = 'magento_root/init/pub/static/';
@@ -118,14 +110,9 @@ class BackupDataTest extends TestCase
         $this->directoryListMock->expects($this->once())
             ->method('getInit')
             ->willReturn('magento_root/init');
-        $this->flagFilePoolMock->expects($this->exactly(2))
-            ->method('getFlag')
-            ->willReturnMap([
-                ['regenerate', $this->flagMock],
-                ['scd_in_build', $this->flagMock],
-            ]);
-        $this->flagMock->expects($this->once())
-            ->method('delete');
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(FlagManager::FLAG_REGENERATE);
 
         $this->loggerPoolMock->expects($this->once())
             ->method('getHandlers')
@@ -142,16 +129,21 @@ class BackupDataTest extends TestCase
             $this->loggerMock,
             $this->environmentMock,
             $this->directoryListMock,
-            $this->flagFilePoolMock,
+            $this->flagManagerMock,
             $this->loggerPoolMock
         );
     }
 
     public function testExecute()
     {
-        $this->flagMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
+        $this->flagManagerMock->expects($this->once())
+            ->method('getFlagPath')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn('flag/path');
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(
@@ -197,9 +189,12 @@ class BackupDataTest extends TestCase
 
     public function testExecuteSCDInDeploy()
     {
-        $this->flagMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
+        $this->flagManagerMock->expects($this->never())
+            ->method('getFlagPath');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -232,9 +227,14 @@ class BackupDataTest extends TestCase
 
     public function testExecuteNoWritableDirs()
     {
-        $this->flagMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
+        $this->flagManagerMock->expects($this->once())
+            ->method('getFlagPath')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn('flag/path');
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(

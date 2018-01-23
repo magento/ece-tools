@@ -8,11 +8,10 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -40,9 +39,9 @@ class EnvironmentTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFilePoolMock;
+    private $flagManagerMock;
 
     /**
      * @var array
@@ -59,13 +58,13 @@ class EnvironmentTest extends TestCase
             ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->environment = new Environment(
             $this->loggerMock,
             $this->fileMock,
             $this->directoryListMock,
-            $this->flagFilePoolMock
+            $this->flagManagerMock
         );
     }
 
@@ -75,14 +74,6 @@ class EnvironmentTest extends TestCase
     protected function tearDown()
     {
         $_ENV = $this->environmentData;
-    }
-
-    /**
-     * @param array $variables
-     */
-    private function setVariables(array $variables)
-    {
-        $_ENV['MAGENTO_CLOUD_VARIABLES'] = base64_encode(json_encode($variables));
     }
 
     /**
@@ -134,41 +125,16 @@ class EnvironmentTest extends TestCase
         );
     }
 
-    public function testIsDeployStaticContentDisabled()
-    {
-        $this->setVariables([
-            'DO_DEPLOY_STATIC_CONTENT' => 'disabled',
-        ]);
-
-        $this->assertSame(
-            false,
-            $this->environment->isDeployStaticContent()
-        );
-    }
-
     /**
      * @param bool $isExists
      * @dataProvider isDeployStaticContentToBeEnabledDataProvider
      */
     public function testIsDeployStaticContentToBeEnabled(bool $isExists)
     {
-        $this->setVariables([
-            'DO_DEPLOY_STATIC_CONTENT' => 'enabled',
-        ]);
-
-        $flagMock = $this->getMockBuilder(FlagFileInterface::class)
-            ->getMockForAbstractClass();
-
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_in_build')
-            ->willReturn($flagMock);
-        $flagMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn($isExists);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Flag DO_DEPLOY_STATIC_CONTENT is set to ' . (!$isExists ? 'enabled' : 'disabled'));
 
         $this->assertSame(
             !$isExists,
@@ -187,58 +153,6 @@ class EnvironmentTest extends TestCase
         ];
     }
 
-    /**
-     * @param string $variableValue
-     * @param bool $expected
-     * @dataProvider doCleanStaticFilesDataProvider
-     */
-    public function testDoCleanStaticFiles(string $variableValue, bool $expected)
-    {
-        $this->setVariables([
-            'CLEAN_STATIC_FILES' => $variableValue,
-        ]);
-
-        $this->assertSame(
-            $expected,
-            $this->environment->doCleanStaticFiles()
-        );
-    }
-
-    public function doCleanStaticFilesDataProvider(): array
-    {
-        return [
-            [Environment::VAL_DISABLED, false],
-            [Environment::VAL_ENABLED, true],
-            ['', true],
-        ];
-    }
-
-    /**
-     * @param string $variableValue
-     * @param bool $expected
-     * @dataProvider isStaticContentSymlinkOnDataProvider
-     */
-    public function testIsStaticContentSymlinkOn(string $variableValue, bool $expected)
-    {
-        $this->setVariables([
-            'STATIC_CONTENT_SYMLINK' => $variableValue,
-        ]);
-
-        $this->assertSame(
-            $expected,
-            $this->environment->isStaticContentSymlinkOn()
-        );
-    }
-
-    public function isStaticContentSymlinkOnDataProvider()
-    {
-        return [
-            [Environment::VAL_DISABLED, false],
-            [Environment::VAL_ENABLED, true],
-            ['', true],
-        ];
-    }
-
     public function testGetDefaultCurrency()
     {
         $this->assertSame(
@@ -248,109 +162,42 @@ class EnvironmentTest extends TestCase
     }
 
     /**
-     * @param array $variables
-     * @param array $expectedResult
-     * @dataProvider getCronConsumersRunnerDataProvider
+     * @param bool $expectedResult
+     * @param string $branchName
+     * @dataProvider isMasterBranchDataProvider
      */
-    public function testGetCronConsumersRunner(array $variables, array $expectedResult)
+    public function testIsMasterBranch(bool $expectedResult, string $branchName)
     {
-        $this->setVariables($variables);
-        $this->assertEquals($expectedResult, $this->environment->getCronConsumersRunner());
+        $_ENV['MAGENTO_CLOUD_ENVIRONMENT'] = $branchName;
+
+        $this->assertSame(
+            $expectedResult,
+            $this->environment->isMasterBranch()
+        );
     }
 
     /**
      * @return array
      */
-    public function getCronConsumersRunnerDataProvider(): array
+    public function isMasterBranchDataProvider(): array
     {
         return [
-            ['variables' => [], 'expectedResult' => []],
-            [
-                'variables' => [
-                    'CRON_CONSUMERS_RUNNER' => [
-                        'cron_run' => 'false',
-                        'max_messages' => '100',
-                        'consumers' => ['test'],
-                    ],
-                ],
-                'expectedResult' => [
-                    'cron_run' => 'false',
-                    'max_messages' => '100',
-                    'consumers' => ['test'],
-                ]
-            ],
-            [
-                'variables' => [
-                    'CRON_CONSUMERS_RUNNER' => '{"cron_run":"false", "max_messages":"100", "consumers":["test"]}',
-                ],
-                'expectedResult' => [
-                    'cron_run' => 'false',
-                    'max_messages' => '100',
-                    'consumers' => ['test'],
-                ]
-            ]
-        ];
-    }
-
-    /**
-     * @param array $variables
-     * @param array $expected
-     * @dataProvider getJsonVariableDataProvider
-     */
-    public function testGetJsonVariable(array $variables, array $expected)
-    {
-        $this->setVariables($variables);
-
-        $this->assertEquals(
-            $expected,
-            $this->environment->getJsonVariable('SOME_VARIABLE')
-        );
-    }
-
-    public function getJsonVariableDataProvider()
-    {
-        return [
-            [
-                [
-                    'SOME_VARIABLE' => ''
-                ],
-                []
-            ],
-            [
-                [
-                    'SOME_VARIABLE' => 'not json string'
-                ],
-                []
-            ],
-            [
-                [
-                    'SOME_VARIABLE' => 12345
-                ],
-                [
-                    12345
-                ]
-            ],
-            [
-                [
-                    'SOME_VARIABLE' => '{"option1":"value1", "option2":"value2"}'
-                ],
-                [
-                    'option1' => 'value1',
-                    'option2' => 'value2',
-                ]
-            ],
-            [
-                [
-                    'SOME_VARIABLE' => [
-                        'option1' => 'value1',
-                        'option2' => 'value2',
-                    ]
-                ],
-                [
-                    'option1' => 'value1',
-                    'option2' => 'value2',
-                ]
-            ],
+            [false, 'branch213'],
+            [false, 'prod-branch'],
+            [false, 'stage'],
+            [false, 'branch-production-lad13m'],
+            [false, 'branch-staging-lad13m'],
+            [false, 'branch-master-lad13m'],
+            [false, 'branch-production'],
+            [false, 'branch-staging'],
+            [false, 'branch-master'],
+            [false, 'product'],
+            [true, 'staging'],
+            [true, 'staging-ba3ma'],
+            [true, 'master'],
+            [true, 'master-ad123m'],
+            [true, 'production'],
+            [true, 'production-lad13m'],
         ];
     }
 }

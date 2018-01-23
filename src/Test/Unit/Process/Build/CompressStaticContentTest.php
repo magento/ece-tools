@@ -5,12 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Filesystem\FlagFileInterface;
-use Magento\MagentoCloud\Filesystem\FlagFilePool;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
-use Magento\MagentoCloud\Config\Build as BuildConfig;
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -31,9 +29,9 @@ class CompressStaticContentTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var BuildConfig|Mock
+     * @var BuildInterface|Mock
      */
-    private $buildConfigMock;
+    private $stageConfigMock;
 
     /**
      * @var StaticContentCompressor|Mock
@@ -41,14 +39,9 @@ class CompressStaticContentTest extends TestCase
     private $compressorMock;
 
     /**
-     * @var FlagFilePool|Mock
+     * @var FlagManager|Mock
      */
-    private $flagFilePoolMock;
-
-    /**
-     * @var FlagFileInterface|Mock
-     */
-    private $flagMock;
+    private $flagManagerMock;
 
     /**
      * Setup the test environment.
@@ -57,17 +50,16 @@ class CompressStaticContentTest extends TestCase
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->buildConfigMock = $this->createMock(BuildConfig::class);
-        $this->compressorMock = $this->createMock(StaticContentCompressor::class);
-        $this->flagFilePoolMock = $this->createMock(FlagFilePool::class);
-        $this->flagMock = $this->getMockBuilder(FlagFileInterface::class)
+        $this->stageConfigMock = $this->getMockBuilder(BuildInterface::class)
             ->getMockForAbstractClass();
+        $this->compressorMock = $this->createMock(StaticContentCompressor::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
-            $this->buildConfigMock,
             $this->compressorMock,
-            $this->flagFilePoolMock
+            $this->flagManagerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -76,20 +68,16 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecute()
     {
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_in_build')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
-        $this->buildConfigMock->expects($this->once())
-            ->method('getVerbosityLevel')
-            ->willReturn('');
-        $this->buildConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(BuildConfig::OPT_SCD_COMPRESSION_LEVEL, CompressStaticContent::COMPRESSION_LEVEL)
-            ->willReturn(6);
+            ->willReturnMap([
+                [BuildInterface::VAR_SCD_COMPRESSION_LEVEL, 6],
+                [BuildInterface::VAR_VERBOSE_COMMANDS, ''],
+            ]);
         $this->compressorMock
             ->expects($this->once())
             ->method('process')
@@ -103,20 +91,17 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecuteNoCompress()
     {
-        $this->flagFilePoolMock->expects($this->once())
-            ->method('getFlag')
-            ->with('scd_in_build')
-            ->willReturn($this->flagMock);
-        $this->flagMock->expects($this->once())
+        $this->flagManagerMock->expects($this->once())
             ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with(
                 'Skipping build-time static content compression because static content deployment hasn\'t happened.'
             );
-        $this->buildConfigMock->expects($this->never())
-            ->method('getVerbosityLevel');
+        $this->stageConfigMock->expects($this->never())
+            ->method('get');
         $this->compressorMock
             ->expects($this->never())
             ->method('process');
