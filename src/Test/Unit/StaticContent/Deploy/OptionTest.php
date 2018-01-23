@@ -129,6 +129,9 @@ class OptionTest extends TestCase
         ];
     }
 
+    /**
+     * Test getting the SCD strategy from the strategy checker.
+     */
     public function testGetStrategy()
     {
         $this->stageConfigMock->expects($this->exactly(2))
