@@ -156,7 +156,7 @@ class ScdStrategyChecker
     {
         foreach ($this->defaultAllowedStrategies as $thisVersion => $theseStrategies) {
             // Testing strict equality on strpos() is preferred to regular expressions in this simple case.
-            if (strpos($detectedVersion, $thisVersion) === 0) {
+            if ($detectedVersion === $thisVersion) {
                 return $theseStrategies;
             }
         }
