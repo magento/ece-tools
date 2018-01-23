@@ -60,7 +60,12 @@ class Container implements ContainerInterface
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
             function () {
-                return new \Magento\MagentoCloud\Filesystem\DirectoryList(ECE_BP, BP, $_SERVER['DIRS_CONFIG'] ?? []);
+                return new \Magento\MagentoCloud\Filesystem\DirectoryList(
+                    ECE_BP,
+                    BP,
+                    $this->get(\Magento\MagentoCloud\Package\MagentoVersion::class),
+                    $_SERVER['DIRS_CONFIG'] ?? []
+                );
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
