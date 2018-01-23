@@ -15,6 +15,7 @@ case $TEST_SUITE in
 
         composer config -a -n -g http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
         composer config -a -n -g http-basic.connect20-qa01.magedevteam.com ${CONNECT20_USERNAME} ${CONNECT20_PASSWORD}
+        composer config -a -n -g github-oauth.github.com ${GH_TOKEN}
 
         # Install apache
         sudo apt-get update

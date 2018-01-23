@@ -42,5 +42,20 @@ return [
         ],
         'type' => 'project',
     ],
+    'ece-patches' => [
+        'types' => [
+            'git' => [
+                'repo' => 'https://github.com/magento/ece-patches',
+                'name' => 'magento/ece-patches',
+                'version' => 'dev-develop',
+            ],
+            'project' => [
+                'repo' => 'https://repo.magento.com/',
+                'name' => 'magento/ece-patches',
+                'version' => '102.0.*',
+            ],
+        ],
+        'type' => 'git',
+    ],
     'skip_front_check' => false,
 ];

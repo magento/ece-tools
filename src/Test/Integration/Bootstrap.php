@@ -38,6 +38,7 @@ class Bootstrap
 
     /**
      * @throws \Exception
+     * @SuppressWarnings(PHPMD)
      */
     public function run()
     {
@@ -48,12 +49,21 @@ class Bootstrap
         }
 
         $buildFile = $this->getConfigFile('build_options.ini');
-        $deployConfig = (require $this->getConfigFile('environment.php'))['deploy'];
+        $envConfig = require $this->getConfigFile('environment.php');
+        $deployConfig = $envConfig['deploy'];
+        $ecePatches = $envConfig['ece-patches'];
         $deployType = getenv('DEPLOY_TYPE') ?: $deployConfig[static::DEPLOY_TYPE];
+        $deployTypeEcePatches = getenv('ECE_PATCHES_DEPLOY_TYPE') ?: $ecePatches[static::DEPLOY_TYPE];
 
         if (!$deployType || !array_key_exists($deployType, $deployConfig['types'])) {
             throw new \Exception(
                 sprintf('Deploy type %s was not configured', $deployType)
+            );
+        }
+
+        if (!$deployTypeEcePatches || !array_key_exists($deployTypeEcePatches, $ecePatches['types'])) {
+            throw new \Exception(
+                sprintf('Deploy type for ece-patches %s was not configured', $deployTypeEcePatches)
             );
         }
 
@@ -98,6 +108,33 @@ class Bootstrap
         }
 
         /**
+         * Adding ece-patches
+         */
+        $ecePatchesConfig = $ecePatches['types'][$deployTypeEcePatches];
+        $this->execute(
+            sprintf(
+                'cd %s && composer config repositories.ece-patches-repo vcs %s',
+                $sandboxDir,
+                $ecePatchesConfig['repo']
+            )
+        );
+        $this->execute(
+            sprintf(
+                'cd %s && composer require %s:%s --no-update',
+                $sandboxDir,
+                $ecePatchesConfig['name'],
+                $ecePatchesConfig['version']
+            )
+        );
+        $this->execute(
+            sprintf(
+                'cd %s && composer update %s',
+                $sandboxDir,
+                $ecePatchesConfig['name']
+            )
+        );
+
+        /**
          * Copying build options.
          */
         $this->execute(sprintf(
@@ -112,6 +149,13 @@ class Bootstrap
             'composer install -n -d %s --no-dev --no-progress',
             $sandboxDir
         ));
+
+        var_dump('--myinfo--');
+        var_dump($sandboxDir);
+        var_dump($this->execute('ls ' . $sandboxDir . '/vendor/magento'));
+        var_dump($this->execute('ls ' . $sandboxDir . '/vendor'));
+        var_dump($this->execute('ls ' . ECE_BP . '/vendor/bin'));
+        //var_dump($this->execute('ls ' . $sandboxDir . '/vendor/bin'));
     }
 
     /**
