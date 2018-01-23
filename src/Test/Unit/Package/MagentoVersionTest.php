@@ -102,7 +102,7 @@ class MagentoVersionTest extends TestCase
     }
 
     /**
-     * Test the constraint matcher, using various Composer-style version constraints.
+     * Test the constraint matcher using various Composer-style version constraints.
      */
     public function testSatisfies()
     {

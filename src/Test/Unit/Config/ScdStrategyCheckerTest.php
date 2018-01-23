@@ -21,10 +21,11 @@ class ScdStrategyCheckerTest extends TestCase
     /**
      * Allowed strategies to use during testing.
      */
-    const ALLOWED_STRATEGIES = [
-        '2.1.*' => ['standard'],
-        '2.2.*' => ['standard', 'quick', 'compact'],
-    ];
+    const ALLOWED_STRATEGIES
+        = [
+            '2.1.*' => ['standard'],
+            '2.2.*' => ['standard', 'quick', 'compact'],
+        ];
 
     /**
      * Fallback allowed strategies to be used during testing.
@@ -75,10 +76,16 @@ class ScdStrategyCheckerTest extends TestCase
     /**
      * Get strategies when in the trivial case, when it's straightforward.
      *
+     * @param string $expectedStrategy
+     * @param string $desiredStrategy
+     * @param string[] $availableStrategies
      * @dataProvider getStrategyTrivialProvider
      */
-    public function testGetStrategyTrivial($expectedStrategy, $desiredStrategy, $availableStrategies)
-    {
+    public function testGetStrategyTrivial(
+        string $expectedStrategy,
+        string $desiredStrategy,
+        array $availableStrategies
+    ) {
         $this->loggerMock
             ->expects($this->exactly(0))
             ->method($this->anything());
@@ -104,10 +111,16 @@ class ScdStrategyCheckerTest extends TestCase
     /**
      * Get strategies in the fallback case when the desired strategy is not available.
      *
+     * @param string $expectedStrategy
+     * @param string $desiredStrategy
+     * @param string[] $availableStrategies
      * @dataProvider getStrategyFallbackProvider
      */
-    public function testGetStrategyFallback($expectedStrategy, $desiredStrategy, $availableStrategies)
-    {
+    public function testGetStrategyFallback(
+        string $expectedStrategy,
+        string $desiredStrategy,
+        array $availableStrategies
+    ) {
         $this->loggerMock
             ->expects($this->exactly(1))
             ->method('warning');
@@ -178,9 +191,11 @@ class ScdStrategyCheckerTest extends TestCase
     /**
      * Get allowed strategies depending on the apparent Magento version.
      *
+     * @param array[] $versionMap
+     * @param string[] $expectedAllowedStrategies
      * @dataProvider allowedStrategiesProvider
      */
-    public function testAllowedStrategies($versionMap, $expectedAllowedStrategies)
+    public function testAllowedStrategies(array $versionMap, array $expectedAllowedStrategies)
     {
         $this->magentoVersionMock
             ->expects($this->atLeast(1))
