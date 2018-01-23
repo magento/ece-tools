@@ -21,19 +21,13 @@ class MagentoVersion
     private $comparator;
 
     /**
-     * @var Semver
-     */
-    private $semver;
-
-    /**
      * @param Manager $manager
      * @param Comparator $comparator
      */
-    public function __construct(Manager $manager, Comparator $comparator, Semver $semver)
+    public function __construct(Manager $manager, Comparator $comparator)
     {
         $this->manager = $manager;
         $this->comparator = $comparator;
-        $this->semver = $semver;
     }
 
     /**
@@ -63,6 +57,6 @@ class MagentoVersion
      */
     public function satisfies(string $constraints): bool
     {
-        return $this->semver::satisfies($this->getVersion(), $constraints);
+        return Semver::satisfies($this->getVersion(), $constraints);
     }
 }
