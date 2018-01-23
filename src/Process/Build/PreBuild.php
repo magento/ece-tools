@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
@@ -37,6 +39,16 @@ class PreBuild implements ProcessInterface
     private $flagManager;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * PreBuild constructor.
      * @param BuildInterface $stageConfig
      * @param LoggerInterface $logger
@@ -47,12 +59,16 @@ class PreBuild implements ProcessInterface
         BuildInterface $stageConfig,
         LoggerInterface $logger,
         Manager $packageManager,
-        FlagManager $flagManager
+        FlagManager $flagManager,
+        File $file,
+        DirectoryList $directoryList
     ) {
         $this->stageConfig = $stageConfig;
         $this->logger = $logger;
         $this->packageManager = $packageManager;
         $this->flagManager = $flagManager;
+        $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -61,9 +77,22 @@ class PreBuild implements ProcessInterface
     public function execute()
     {
         $verbosityLevel = $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS);
-
+        
+        $generatedCode     = $this->directoryList->getGeneratedCode();
+        $generatedMetadata = $this->directoryList->getGeneratedMetaData();
+        
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
+        
         $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
+        
+        if ($this->file->isExists($generatedCode)) {
+            $this->file->clearDirectory($generatedCode);
+        }
+
+        if ($this->file->isExists($generatedMetadata)) {
+            $this->file->clearDirectory($generatedMetadata);
+        }
+        
         $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }
 }
