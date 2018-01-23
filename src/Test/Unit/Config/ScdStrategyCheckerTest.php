@@ -111,6 +111,8 @@ class ScdStrategyCheckerTest extends TestCase
 
     /**
      * Throw an exception when the list of allowed strategies is empty.
+     *
+     * @expectedException \OutOfRangeException
      */
     public function testGetStrategyOutOfBounds()
     {
@@ -118,12 +120,14 @@ class ScdStrategyCheckerTest extends TestCase
             ->expects($this->exactly(0))
             ->method($this->anything());
 
-        $this->expectException(\OutOfRangeException::class);
         $this->scdStrategyChecker->getStrategy('strategy', []);
     }
 
     /**
      * Throw an exception when the strategies are given as something other than strings.
+     *
+     * @expectedException \Exception
+     * @expectedExceptionMessage Array to string conversion
      */
     public function testGetStrategyBadConversion()
     {
@@ -131,7 +135,6 @@ class ScdStrategyCheckerTest extends TestCase
             ->expects($this->exactly(0))
             ->method($this->anything());
 
-        $this->expectExceptionMessage('Array to string conversion');
         $this->scdStrategyChecker->getStrategy('strategy', [[], []]);
     }
 
