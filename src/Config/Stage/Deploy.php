@@ -146,7 +146,24 @@ class Deploy implements DeployInterface
 
         if (isset($variables['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
+        } elseif ($envScThreads = $this->getEnvScdThreads()) {
+            $staticDeployThreads = $envScThreads;
+        }
+
+        return $staticDeployThreads;
+    }
+
+    /**
+     * Retrieves SCd threads configuration from raw environment data.
+     *
+     * @return int
+     * @deprecated Environment variable STATIC_CONTENT_THREADS must be used instead
+     */
+    private function getEnvScdThreads(): int
+    {
+        $staticDeployThreads = 0;
+
+        if (isset($_ENV['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
         } elseif (isset($_ENV['MAGENTO_CLOUD_MODE'])
             && $_ENV['MAGENTO_CLOUD_MODE'] === EnvironmentConfig::CLOUD_MODE_ENTERPRISE
