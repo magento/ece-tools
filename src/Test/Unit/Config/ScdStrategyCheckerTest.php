@@ -34,7 +34,7 @@ class ScdStrategyCheckerTest extends TestCase
     private $scdStrategyChecker;
 
     /**
-     *
+     * Set up the test object.
      */
     protected function setUp()
     {
@@ -47,6 +47,9 @@ class ScdStrategyCheckerTest extends TestCase
         );
     }
 
+    /**
+     * Ensure the fallback offset set properly.
+     */
     public function testFallbackOffset()
     {
         $this->assertEquals(
@@ -56,7 +59,7 @@ class ScdStrategyCheckerTest extends TestCase
     }
 
     /**
-     *
+     * Get strategies when in the trivial case, when it's straightforward.
      */
     public function testGetStrategyTrivial()
     {
@@ -78,6 +81,9 @@ class ScdStrategyCheckerTest extends TestCase
         );
     }
 
+    /**
+     * Get strategies in the fallback case when the desired strategy is not available.
+     */
     public function testGetStrategyFallback()
     {
         $this->loggerMock
@@ -98,6 +104,9 @@ class ScdStrategyCheckerTest extends TestCase
         );
     }
 
+    /**
+     * Throw an exception when the list of allowed strategies is empty.
+     */
     public function testGetStrategyOutOfBounds()
     {
         $this->loggerMock
@@ -108,6 +117,9 @@ class ScdStrategyCheckerTest extends TestCase
         $this->scdStrategyChecker->getStrategy('strategy', []);
     }
 
+    /**
+     * Throw an exception when the strategies are given as something other than strings.
+     */
     public function testGetStrategyBadConversion()
     {
         $this->loggerMock
@@ -118,6 +130,9 @@ class ScdStrategyCheckerTest extends TestCase
         $this->scdStrategyChecker->getStrategy('strategy', [[], []]);
     }
 
+    /**
+     * Get allowed strategies when the list is empty.
+     */
     public function testAllowedStrategiesFallback()
     {
         $this->magentoVersionMock
@@ -136,6 +151,9 @@ class ScdStrategyCheckerTest extends TestCase
         );
     }
 
+    /**
+     * Get allowed strategies when Magento is on 2.1.
+     */
     public function testAllowedStrategiesFirst()
     {
         $versionMap = [
@@ -160,6 +178,9 @@ class ScdStrategyCheckerTest extends TestCase
         );
     }
 
+    /**
+     * Get allowed strategies when Magento is on 2.2.
+     */
     public function testAllowedStrategiesSecond()
     {
         $versionMap = [
