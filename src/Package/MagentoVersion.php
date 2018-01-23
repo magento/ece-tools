@@ -16,18 +16,20 @@ class MagentoVersion
     private $manager;
 
     /**
-     * @var Comparator
-     */
-    private $comparator;
-
-    /**
      * @param Manager $manager
      * @param Comparator $comparator
      */
-    public function __construct(Manager $manager, Comparator $comparator)
+    public function __construct(Manager $manager)
     {
         $this->manager = $manager;
-        $this->comparator = $comparator;
+    }
+
+    /**
+     * @return string
+     */
+    public function getVersion(): string
+    {
+        return $this->manager->get('magento/magento2-base')->getVersion();
     }
 
     /**
@@ -37,15 +39,7 @@ class MagentoVersion
      */
     public function isGreaterOrEqual(string $version): bool
     {
-        return $this->comparator::compare($this->getVersion(), '>=', $version);
-    }
-
-    /**
-     * @return string
-     */
-    public function getVersion(): string
-    {
-        return $this->manager->get('magento/magento2-base')->getVersion();
+        return Comparator::compare($this->getVersion(), '>=', $version);
     }
 
     /**
