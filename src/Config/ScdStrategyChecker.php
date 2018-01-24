@@ -58,6 +58,8 @@ class ScdStrategyChecker
     /**
      * @param Logger $logger
      * @param MagentoVersion $magentoVersion
+     * @param array $defaultAllowedStrategies
+     * @param array $fallbackAllowedStrategies
      */
     public function __construct(
         Logger $logger,
@@ -154,11 +156,8 @@ class ScdStrategyChecker
      */
     private function getAllowedStrategiesByVersion(string $detectedVersion)
     {
-        foreach ($this->defaultAllowedStrategies as $thisVersion => $theseStrategies) {
-            // Testing strict equality on strpos() is preferred to regular expressions in this simple case.
-            if ($detectedVersion === $thisVersion) {
-                return $theseStrategies;
-            }
+        if (array_key_exists($detectedVersion, $this->defaultAllowedStrategies)) {
+            return $this->defaultAllowedStrategies[$detectedVersion];
         }
 
         return false;
