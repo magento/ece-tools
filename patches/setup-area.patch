@@ -1,0 +1,15 @@
+Ticket MAGETWO-45357
+diff --git a/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php b/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php
+index 844d3f0..d087d07 100644
+--- a/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php
++++ b/vendor/magento/framework/App/ObjectManager/ConfigLoader/Compiled.php
+@@ -37,6 +37,9 @@ class Compiled implements ConfigLoaderInterface
+      */
+     public static function getFilePath($area)
+     {
++        if ($area == 'setup') {
++            $area = 'global';
++        }
+         return BP . '/var/di/' . $area . '.ser';
+     }
+ }
