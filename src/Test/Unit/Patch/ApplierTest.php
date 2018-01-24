@@ -94,7 +94,6 @@ class ApplierTest extends TestCase
             ->method('isExists')
             ->with($path)
             ->willReturn(true);
-
         $this->localRepositoryMock->expects($this->once())
             ->method('findPackage')
             ->with($packageName, $constraint)
