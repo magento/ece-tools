@@ -50,6 +50,7 @@ class Manager
      * @param LoggerInterface $logger
      * @param File $file
      * @param FileList $fileList
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         Applier $applier,

@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -15,11 +14,6 @@ use Psr\Log\LoggerInterface;
  */
 class ApplyPatches implements ProcessInterface
 {
-    /**
-     * @var ShellInterface
-     */
-    private $shell;
-
     /**
      * @var LoggerInterface
      */

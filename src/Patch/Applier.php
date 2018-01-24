@@ -6,9 +6,10 @@
 namespace Magento\MagentoCloud\Patch;
 
 use Composer\Composer;
-use Composer\Config;
 use Composer\Package\PackageInterface;
 use Composer\Repository\WritableRepositoryInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -28,11 +29,6 @@ class Applier
     private $shell;
 
     /**
-     * @var Config
-     */
-    private $config;
-
-    /**
      * @var Composer
      */
     private $composer;
@@ -43,16 +39,35 @@ class Applier
     private $logger;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @param Composer $composer
      * @param ShellInterface $shell
+     * @param LoggerInterface $logger
+     * @param DirectoryList $directoryList
+     * @param File $file
      */
-    public function __construct(Composer $composer, ShellInterface $shell, LoggerInterface $logger)
-    {
+    public function __construct(
+        Composer $composer,
+        ShellInterface $shell,
+        LoggerInterface $logger,
+        DirectoryList $directoryList,
+        File $file
+    ) {
         $this->composer = $composer;
         $this->repository = $composer->getRepositoryManager()->getLocalRepository();
-        $this->config = $composer->getConfig();
         $this->shell = $shell;
         $this->logger = $logger;
+        $this->directoryList = $directoryList;
+        $this->file = $file;
     }
 
     /**
@@ -72,9 +87,8 @@ class Applier
         /**
          * Support for relative paths.
          */
-        if (!file_exists($path)) {
-            $vendorRoot = $this->config->get('vendor-dir');
-            $path = $vendorRoot . '/magento/ece-patches/' . $path;
+        if (!$this->file->isExists($path)) {
+            $path = $this->directoryList->getRoot() . '/patches/' . $path;
         }
 
         $this->logger->info(sprintf(

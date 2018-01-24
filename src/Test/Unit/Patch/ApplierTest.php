@@ -6,10 +6,11 @@
 namespace Magento\MagentoCloud\Test\Unit\Patch;
 
 use Composer\Composer;
-use Composer\Config;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryManager;
 use Composer\Repository\WritableRepositoryInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Patch\Applier;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -21,8 +22,6 @@ use Psr\Log\LoggerInterface;
  */
 class ApplierTest extends TestCase
 {
-    use \phpmock\phpunit\PHPMock;
-
     /**
      * @var Applier
      */
@@ -49,19 +48,24 @@ class ApplierTest extends TestCase
     private $localRepositoryMock;
 
     /**
-     * @var Config|Mock
+     * @var DirectoryList|Mock
      */
-    private $composerConfigMock;
+    private $directoryListMock;
+
+    /**
+     * @var File|Mock
+     */
+    private $fileMock;
 
     protected function setUp()
     {
-        $this->markTestIncomplete();
         $this->composerMock = $this->createMock(Composer::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->localRepositoryMock = $this->getMockForAbstractClass(WritableRepositoryInterface::class);
-        $this->composerConfigMock = $this->createMock(Config::class);
         $repositoryManagerMock = $this->createMock(RepositoryManager::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileMock = $this->createMock(File::class);
 
         $repositoryManagerMock->expects($this->once())
             ->method('getLocalRepository')
@@ -69,14 +73,13 @@ class ApplierTest extends TestCase
         $this->composerMock->expects($this->once())
             ->method('getRepositoryManager')
             ->willReturn($repositoryManagerMock);
-        $this->composerMock->expects($this->once())
-            ->method('getConfig')
-            ->willReturn($this->composerConfigMock);
 
         $this->applier = new Applier(
             $this->composerMock,
             $this->shellMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->directoryListMock,
+            $this->fileMock
         );
     }
 
@@ -87,8 +90,8 @@ class ApplierTest extends TestCase
         $packageName = 'packageName';
         $constraint = '1.0';
 
-        $fileExistsMock = $this->getFunctionMock('Magento\CloudPatches\Patch', 'file_exists');
-        $fileExistsMock->expects($this->once())
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
             ->with($path)
             ->willReturn(true);
 
@@ -107,8 +110,6 @@ class ApplierTest extends TestCase
             );
         $this->loggerMock->expects($this->never())
             ->method('notice');
-        $this->composerConfigMock->expects($this->never())
-            ->method('get');
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
@@ -120,22 +121,17 @@ class ApplierTest extends TestCase
         $packageName = 'packageName';
         $constraint = '1.0';
 
-        $execMock = $this->getFunctionMock('Magento\CloudPatches\Patch', 'file_exists');
-        $execMock->expects($this->once())
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
             ->with($path)
             ->willReturn(false);
-
-        $this->composerConfigMock->expects($this->once())
-            ->method('get')
-            ->with('vendor-dir')
-            ->willReturn('/root');
         $this->localRepositoryMock->expects($this->once())
             ->method('findPackage')
             ->with($packageName, $constraint)
             ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('git apply /root/magento/ece-patches/' . $path);
+            ->with('git apply root/patches/' . $path);
         $this->loggerMock->expects($this->never())
             ->method('notice');
         $this->loggerMock->expects($this->exactly(2))
@@ -144,6 +140,9 @@ class ApplierTest extends TestCase
                 ['Applying patch patchName 1.0.'],
                 ['Done.']
             );
+        $this->directoryListMock->expects($this->once())
+            ->method('getRoot')
+            ->willReturn('root');
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
@@ -155,15 +154,10 @@ class ApplierTest extends TestCase
         $packageName = 'packageName';
         $constraint = '1.0';
 
-        $execMock = $this->getFunctionMock('Magento\CloudPatches\Patch', 'file_exists');
-        $execMock->expects($this->once())
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
             ->with($path)
             ->willReturn(false);
-
-        $this->composerConfigMock->expects($this->once())
-            ->method('get')
-            ->with('vendor-dir')
-            ->willReturn('/root');
         $this->localRepositoryMock->expects($this->once())
             ->method('findPackage')
             ->with($packageName, $constraint)

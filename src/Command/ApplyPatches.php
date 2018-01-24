@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ApplyPatches extends Command
 {
-    const NAME = 'patch:apply';
+    const NAME = 'patch';
 
     /**
      * @var LoggerInterface
@@ -60,11 +60,14 @@ class ApplyPatches extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->logger->info('Patching started.');
+        try {
+            $this->logger->info('Patching started.');
+            $this->manager->apply();
+            $this->logger->info('Patching finished.');
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception->getMessage());
 
-        $this->manager->apply();
-
-        $this->logger->info('Patching finished.');
+            throw $exception;
+        }
     }
-
 }
