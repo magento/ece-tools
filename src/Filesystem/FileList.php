@@ -111,6 +111,6 @@ class FileList
      */
     public function getPatches(): string
     {
-        return $this->directoryList->getRoot() . '/config/patches.json';
+        return $this->directoryList->getRoot() . '/patches.json';
     }
 }
