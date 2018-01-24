@@ -88,7 +88,7 @@ class Applier
          * Support for relative paths.
          */
         if (!$this->file->isExists($path)) {
-            $path = $this->directoryList->getRoot() . '/patches/' . $path;
+            $path = $this->directoryList->getRoot() . '/' . $path;
         }
 
         $this->logger->info(sprintf(

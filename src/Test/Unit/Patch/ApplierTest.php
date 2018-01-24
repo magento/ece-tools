@@ -130,7 +130,7 @@ class ApplierTest extends TestCase
             ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('git apply root/patches/' . $path);
+            ->with('git apply root/' . $path);
         $this->loggerMock->expects($this->never())
             ->method('notice');
         $this->loggerMock->expects($this->exactly(2))
