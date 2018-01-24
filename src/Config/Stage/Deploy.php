@@ -39,6 +39,7 @@ class Deploy implements DeployInterface
     /**
      * @param EnvironmentReader $environmentReader
      * @param EnvironmentConfig $environmentConfig
+     * @param ScdStrategyChecker $scdStrategyChecker
      */
     public function __construct(
         EnvironmentReader $environmentReader,
