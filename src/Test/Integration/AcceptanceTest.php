@@ -63,6 +63,7 @@ class AcceptanceTest extends TestCase
      * @param array $environment
      * @param array $expectedConsumersRunnerConfig
      * @dataProvider defaultDataProvider
+     * @group frontCheck
      */
     public function testDefault(array $environment, array $expectedConsumersRunnerConfig)
     {
@@ -207,8 +208,13 @@ class AcceptanceTest extends TestCase
             return;
         }
 
-        $routes = array_keys($routes);
-        $defaultRoute = reset($routes);
+        if (empty($config->get('APPLICATION_URL'))) {
+            $routes = array_keys($routes);
+            $defaultRoute = reset($routes);
+        } else {
+            $defaultRoute = $config->get('APPLICATION_URL');
+        }
+
         $pageContent = file_get_contents($defaultRoute);
 
         $this->assertContains(
