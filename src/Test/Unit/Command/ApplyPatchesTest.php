@@ -52,7 +52,7 @@ class ApplyPatchesTest extends TestCase
                 ['Patching finished.']
             );
         $this->managerMock->expects($this->once())
-            ->method('apply');
+            ->method('applyAll');
 
         $tester = new CommandTester(
             $this->command
@@ -75,7 +75,7 @@ class ApplyPatchesTest extends TestCase
             ->method('critical')
             ->with('Some error');
         $this->managerMock->expects($this->once())
-            ->method('apply')
+            ->method('applyAll')
             ->willThrowException(new \Exception('Some error'));
 
         $tester = new CommandTester(

@@ -66,7 +66,10 @@ class Manager
         $this->directoryList = $directoryList;
     }
 
-    public function apply()
+    /**
+     * Applies all needed patches.
+     */
+    public function applyAll()
     {
         $this->copyStaticFile();
         $this->applyComposerPatches();
@@ -156,7 +159,7 @@ class Manager
 
         $this->logger->info('Applying hot-fixes.');
 
-        $files = glob($hotFixesDir . '/*.patch', GLOB_NOSORT);
+        $files = glob($hotFixesDir . '/*.patch');
         sort($files);
 
         foreach ($files as $file) {

@@ -54,7 +54,7 @@ class ApplyPatchesTest extends TestCase
             ->method('info')
             ->with('Applying patches.');
         $this->managerMock->expects($this->once())
-            ->method('apply');
+            ->method('applyAll');
 
         $this->process->execute();
     }

@@ -42,6 +42,6 @@ class ApplyPatches implements ProcessInterface
     public function execute()
     {
         $this->logger->info('Applying patches.');
-        $this->manager->apply();
+        $this->manager->applyAll();
     }
 }

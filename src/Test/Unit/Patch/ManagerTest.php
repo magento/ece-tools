@@ -93,7 +93,7 @@ class ManagerTest extends TestCase
                 ['File static.php was copied.']
             );
 
-        $this->manager->apply();
+        $this->manager->applyAll();
     }
 
     public function testExecuteApplyComposerPatches()
@@ -129,7 +129,7 @@ class ManagerTest extends TestCase
                 ['patchPath4', 'patchName4', 'package3', '*']
             );
 
-        $this->manager->apply();
+        $this->manager->applyAll();
     }
 
     public function testExecuteApplyHotFixes()
@@ -152,6 +152,6 @@ class ManagerTest extends TestCase
                 ['Applying hot-fixes.']
             );
 
-        $this->manager->apply();
+        $this->manager->applyAll();
     }
 }

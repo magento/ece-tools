@@ -62,7 +62,7 @@ class ApplyPatches extends Command
     {
         try {
             $this->logger->info('Patching started.');
-            $this->manager->apply();
+            $this->manager->applyAll();
             $this->logger->info('Patching finished.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
