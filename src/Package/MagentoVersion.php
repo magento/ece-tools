@@ -8,6 +8,11 @@ namespace Magento\MagentoCloud\Package;
 use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
 
+/**
+ * Class MagentoVersion
+ *
+ * @package Magento\MagentoCloud\Package
+ */
 class MagentoVersion
 {
     /**
@@ -16,12 +21,25 @@ class MagentoVersion
     private $manager;
 
     /**
+     * @var Comparator
+     */
+    private $comparator;
+
+    /**
+     * @var Semver
+     */
+    private $semver;
+
+    /**
      * @param Manager $manager
      * @param Comparator $comparator
+     * @param Semver $semver
      */
-    public function __construct(Manager $manager)
+    public function __construct(Manager $manager, Comparator $comparator, Semver $semver)
     {
         $this->manager = $manager;
+        $this->comparator = $comparator;
+        $this->semver = $semver;
     }
 
     /**
@@ -39,7 +57,7 @@ class MagentoVersion
      */
     public function isGreaterOrEqual(string $version): bool
     {
-        return Comparator::compare($this->getVersion(), '>=', $version);
+        return $this->comparator::compare($this->getVersion(), '>=', $version);
     }
 
     /**
@@ -51,6 +69,6 @@ class MagentoVersion
      */
     public function satisfies(string $constraints): bool
     {
-        return Semver::satisfies($this->getVersion(), $constraints);
+        return $this->semver::satisfies($this->getVersion(), $constraints);
     }
 }

@@ -44,7 +44,9 @@ class MagentoVersionTest extends TestCase
             ->getMockForAbstractClass();
 
         $this->magentoVersion = new MagentoVersion(
-            $this->managerMock
+            $this->managerMock,
+            new Comparator(),
+            new Semver()
         );
     }
 
