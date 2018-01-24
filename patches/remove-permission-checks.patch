@@ -1,0 +1,43 @@
+diff -Naur b/vendor/magento/framework/Setup/FilePermissions.php a/vendor/magento/framework/Setup/FilePermissions.php
+--- b/vendor/magento/framework/Setup/FilePermissions.php	2016-09-23 16:01:12.000000000 -0500
++++ a/vendor/magento/framework/Setup/FilePermissions.php	2016-09-23 16:22:09.000000000 -0500
+@@ -233,26 +233,8 @@
+      */
+     public function getMissingWritablePathsForInstallation($associative = false)
+     {
+-        $required = $this->getInstallationWritableDirectories();
+-        $current = $this->getInstallationCurrentWritableDirectories();
+-        $missingPaths = [];
+-        foreach (array_diff($required, $current) as $missingPath) {
+-            if (isset($this->nonWritablePathsInDirectories[$missingPath])) {
+-                if ($associative) {
+-                    $missingPaths[$missingPath] = $this->nonWritablePathsInDirectories[$missingPath];
+-                } else {
+-                    $missingPaths = array_merge(
+-                        $missingPaths,
+-                        $this->nonWritablePathsInDirectories[$missingPath]
+-                    );
+-                }
+-            }
+-        }
+-        if ($associative) {
+-            $required = array_flip($required);
+-            $missingPaths = array_merge($required, $missingPaths);
+-        }
+-        return $missingPaths;
++        // Unnecessary check in controlled environment
++        return [];
+     }
+ 
+     /**
+@@ -275,8 +257,7 @@
+      */
+     public function getUnnecessaryWritableDirectoriesForApplication()
+     {
+-        $required = $this->getApplicationNonWritableDirectories();
+-        $current = $this->getApplicationCurrentNonWritableDirectories();
+-        return array_diff($required, $current);
++        // Unnecessary check in controlled environment
++        return [];
+     }
+ }
