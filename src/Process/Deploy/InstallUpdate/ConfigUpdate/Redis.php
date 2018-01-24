@@ -104,6 +104,11 @@ class Redis implements ProcessInterface
                     $redisSessionConfig
                 ),
             ];
+
+            if (isset($config['session']['redis']['disable_locking'])) {
+                $this->logger->info('Removing disable_locking configuration.');
+                unset($config['session']['redis'] ['disable_locking']);
+            }
         } else {
             $config = $this->removeRedisConfiguration($config);
         }
