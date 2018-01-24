@@ -67,6 +67,7 @@ class ConfigDump extends Command
         $this->import = $import;
         $this->logger = $logger;
         $this->magentoVersion = $magentoVersion;
+
         parent::__construct();
     }
 
@@ -80,13 +81,14 @@ class ConfigDump extends Command
                 static::OPTION_KEEP_CONFIG,
                 null,
                 InputOption::VALUE_NONE,
-                'Prevents existing config being overwritten. ' . PHP_EOL
+                'Prevents existing config being overwritten.'
             )
         ];
         $this->setName(static::NAME)
             ->setDescription('Dump configuration for static content deployment.')
             ->setAliases(['dump'])
             ->setDefinition($options);
+
         parent::configure();
     }
 
