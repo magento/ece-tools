@@ -11,4 +11,4 @@ require_once __DIR__ . '/autoload.php';
 $handler = new \Magento\MagentoCloud\App\ErrorHandler();
 set_error_handler([$handler, 'handle']);
 
-return new \Magento\MagentoCloud\App\Container();
+return new \Magento\MagentoCloud\App\Container(ECE_BP, BP);

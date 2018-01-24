@@ -46,7 +46,7 @@ class Container implements ContainerInterface
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct()
+    public function __construct(string $eceBasePath, $magentoBasePath)
     {
         /**
          * Creating concrete container.
@@ -59,10 +59,10 @@ class Container implements ContainerInterface
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () {
+            function () use ($eceBasePath, $magentoBasePath) {
                 return new \Magento\MagentoCloud\Filesystem\DirectoryList(
-                    ECE_BP,
-                    BP,
+                    $eceBasePath,
+                    $magentoBasePath,
                     $this->get(\Magento\MagentoCloud\Package\MagentoVersion::class),
                     $_SERVER['DIRS_CONFIG'] ?? []
                 );
