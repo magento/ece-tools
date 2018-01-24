@@ -272,7 +272,7 @@ class RedisTest extends TestCase
                     'Updating env.php Redis cache configuration.',
                 ],
                 [
-                    'Removing disable_locking configuration.'
+                    'Removing disable_locking env.php.'
                 ]
             );
         $this->environmentMock->expects($this->any())
@@ -293,11 +293,6 @@ class RedisTest extends TestCase
             ->willReturn([
                 'session' => [
                     'redis' => [
-                        'max_concurrency' => 10,
-                        'bot_first_lifetime' => 100,
-                        'bot_lifetime' => 10000,
-                        'min_lifetime' => 100,
-                        'max_lifetime' => 10000,
                         'disable_locking' => '1',
                     ],
                 ],
@@ -332,11 +327,6 @@ class RedisTest extends TestCase
                         'host' => '127.0.0.1',
                         'port' => '6379',
                         'database' => 0,
-                        'max_concurrency' => 10,
-                        'bot_first_lifetime' => 100,
-                        'bot_lifetime' => 10000,
-                        'min_lifetime' => 100,
-                        'max_lifetime' => 10000,
                     ],
                 ],
             ]);
