@@ -72,74 +72,32 @@ class ConfigTest extends TestCase
         $this->assertEmpty($this->config->get());
     }
 
-    /**
-     * @param array $redisConfig
-     * @param bool $isLockingDisabled
-     * @param array $expected
-     * @dataProvider getWithRedisDataProvider
-     */
-    public function testGetWithRedisAndNotValidEnvConfig(array $redisConfig, bool $isLockingDisabled, array $expected)
+    public function testGetWithRedisAndNotValidEnvConfig()
     {
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_SESSION_CONFIGURATION],
-                [DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING]
-            )
-            ->willReturn(
-                ['some_key' => 'some_storage'],
-                $isLockingDisabled
-            );
+            ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
+            ->willReturn(['some_key' => 'some_storage']);
         $this->environmentMock->expects($this->once())
             ->method('getRelationship')
             ->with('redis')
-            ->willReturn($redisConfig);
+            ->willReturn([
+                [
+                    'host' => 'redis_host',
+                    'port' => '1234'
+                ]
+            ]);
 
         $this->assertEquals(
-            $expected,
+            [
+                'save' => 'redis',
+                'redis' => [
+                    'host' => 'redis_host',
+                    'port' => '1234',
+                    'database' => 0
+                ]
+            ],
             $this->config->get()
         );
-    }
-
-    public function getWithRedisDataProvider()
-    {
-        return [
-            [
-                [
-                    [
-                        'host' => 'redis_host',
-                        'port' => '1234'
-                    ]
-                ],
-                false,
-                [
-                    'save' => 'redis',
-                    'redis' => [
-                        'host' => 'redis_host',
-                        'port' => '1234',
-                        'database' => 0,
-                        'disable_locking' => 0
-                    ]
-                ]
-            ],
-            [
-                [
-                    [
-                        'host' => 'redis_host',
-                        'port' => '1234'
-                    ]
-                ],
-                true,
-                [
-                    'save' => 'redis',
-                    'redis' => [
-                        'host' => 'redis_host',
-                        'port' => '1234',
-                        'database' => 0,
-                        'disable_locking' => 1
-                    ]
-                ]
-            ],
-        ];
     }
 }

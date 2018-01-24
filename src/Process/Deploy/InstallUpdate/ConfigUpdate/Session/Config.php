@@ -63,22 +63,9 @@ class Config
             'redis' => [
                 'host' => $redisConfig[0]['host'],
                 'port' => $redisConfig[0]['port'],
-                'database' => 0,
-                'disable_locking' => (int)$this->isLockingDisabled(),
+                'database' => 0
             ]
         ];
-    }
-
-    /**
-     * Checks if disable_locking options is enabled.
-     * By default this method returns true and disable_locking options will be set to 1.
-     * For turning this option off environment variable 'REDIS_SESSION_DISABLE_LOCKING' should have value 'disabled'.
-     *
-     * @return bool
-     */
-    private function isLockingDisabled(): bool
-    {
-        return $this->stageConfig->get(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING);
     }
 
     /**

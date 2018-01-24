@@ -142,14 +142,6 @@ class DeployTest extends TestCase
                 '{"SOME_CONFIG": "some value',
             ],
             'disabled flow 1' => [
-                Deploy::VAR_REDIS_SESSION_DISABLE_LOCKING,
-                [],
-                [
-                    Deploy::VAR_REDIS_SESSION_DISABLE_LOCKING => EnvironmentConfig::VAL_DISABLED,
-                ],
-                false,
-            ],
-            'disabled flow 2' => [
                 Deploy::VAR_UPDATE_URLS,
                 [],
                 [
