@@ -156,10 +156,6 @@ class ScdStrategyChecker
      */
     private function getAllowedStrategiesByVersion(string $detectedVersion)
     {
-        if (array_key_exists($detectedVersion, $this->defaultAllowedStrategies)) {
-            return $this->defaultAllowedStrategies[$detectedVersion];
-        }
-
-        return false;
+        return $this->defaultAllowedStrategies[$detectedVersion] ?? false;
     }
 }
