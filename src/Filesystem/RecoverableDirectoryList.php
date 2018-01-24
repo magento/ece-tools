@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
  * Returns list of recoverable directories
@@ -35,27 +34,18 @@ class RecoverableDirectoryList
     private $stageConfig;
 
     /**
-     *
-     * @var MagentoVersion
-     */
-    private $magentoVersion;
-    
-    /**
      * @param Environment $environment
      * @param FlagManager $flagManager
      * @param DeployInterface $stageConfig
-     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         Environment $environment,
         FlagManager $flagManager,
-        DeployInterface $stageConfig,
-        MagentoVersion $magentoVersion
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
-        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -77,17 +67,6 @@ class RecoverableDirectoryList
                 self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
             ]
         ];
-        
-        if ($this->magentoVersion->isGreaterOrEqual('2.1') && !$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $recoverableDirs[] = [
-                self::OPTION_DIRECTORY => 'var/di',
-                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
-            ];
-            $recoverableDirs[] = [
-                self::OPTION_DIRECTORY => 'var/generation',
-                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY
-            ];
-        }
 
         if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             $recoverableDirs[] = [
