@@ -36,5 +36,5 @@ return [
         'version' => '^2.2',
     ],
     'skip_front_check' => false,
-    'APPLICATION_URL' => 'http://web/',
+    'APPLICATION_URL' => 'http://php-docker.local/',
 ];
