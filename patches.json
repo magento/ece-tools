@@ -9,7 +9,7 @@
       "101.0.*": "patches/locker-process.patch"
     },
     "Fix locker process (Magento 2.1)": {
-      "100.1.*": "2.1/patches/locker-process.magento-2.1.patch"
+      "100.1.*": "patches/2.1/locker-process.magento-2.1.patch"
     },
     "Remove permissions check": {
       "101.0.*": "patches/remove-permission-checks.patch"
@@ -18,28 +18,28 @@
       "101.0.0||101.0.1": "patches/fix-redis-session-manager-locking.patch"
     },
     "Remove permissions check (Magento 2.1)": {
-      "100.1.*": "2.1/patches/remove-permission-checks.patch"
+      "100.1.*": "patches/2.1/remove-permission-checks.patch"
     },
     "Vendor path workaround because /app/etc/ not available before deploy": {
-      "100.1.*": "2.1/patches/change-vendor-path.patch"
+      "100.1.*": "patches/2.1/change-vendor-path.patch"
     },
     "Static Assets controller changes for cloud relating to rewrite rule in the nginx configuration": {
-      "100.1.*": "2.1/patches/fix-static-assets-controller.patch"
+      "100.1.*": "patches/2.1/fix-static-assets-controller.patch"
     },
     "/var/di compiled path for area in cloud": {
-      "100.1.*": "2.1/patches/setup-area.patch"
+      "100.1.*": "patches/2.1/setup-area.patch"
     },
     "bin/magento checks for var/generation write permission": {
-      "100.1.*": "2.1/patches/generation-not-writable.patch"
+      "100.1.*": "patches/2.1/generation-not-writable.patch"
     },
     "Multiple plugins cannot be run in setup area": {
-      "100.1.*": "2.1/patches/setup-area-plugins.patch"
+      "100.1.*": "patches/2.1/setup-area-plugins.patch"
     },
     "[2.1 backport] SCD does not work when multiple languages are specified.": {
-      "100.1.4 - 101.1.7": "2.1/patches/flyweightfactory.patch"
+      "100.1.4 - 101.1.7": "patches/2.1/flyweightfactory.patch"
     },
     "Fixed: When SCD is in build, js resources do not load in admin": {
-      "100.1.4 - 101.1.7": "2.1/patches/secure-static-resource.patch"
+      "100.1.4 - 101.1.7": "patches/2.1/secure-static-resource.patch"
     }
   },
   "magento/module-customer-import-export": {
@@ -47,30 +47,30 @@
       ">=100.2.0": "patches/fix-oom-during-import-customers-and-addresses.patch"
     },
     "Fix out of memory during import of customers and addresses (Magento 2.1)": {
-      "100.1.1": "2.1/patches/fix-oom-during-import-customers-and-addresses.magento-2.1.4.patch"
+      "100.1.1": "patches/2.1/fix-oom-during-import-customers-and-addresses.magento-2.1.4.patch"
     },
     "Fix out of memory during import of customers and addresses (Magento 2.1.5 - 2.1.10)": {
-      "100.1.2 - 100.1.4": "2.1/patches/fix-oom-during-import-customers-and-addresses.magento-2.1.5.patch"
+      "100.1.2 - 100.1.4": "patches/2.1/fix-oom-during-import-customers-and-addresses.magento-2.1.5.patch"
     },
     "Fix out of memory during import of customers and addresses (Magento 2.1.11)": {
-      "100.1.5": "2.1/patches/fix-oom-during-import-customers-and-addresses.magento-2.1.11.patch"
+      "100.1.5": "patches/2.1/fix-oom-during-import-customers-and-addresses.magento-2.1.11.patch"
     }
   },
   "magento/product-community-edition": {
     "PayPal TPV tracking for Magento Cloud": {
-      "~2.1.8": "2.1/patches/MAGETWO-53941.patch"
+      "~2.1.8": "patches/2.1/MAGETWO-53941.patch"
     },
     "Mview does not work with Staging (Magento 2.1.4)": {
-      "2.1.4": "2.1/patches/mview_staging_fix-magento-2.1.4.patch"
+      "2.1.4": "patches/2.1/mview_staging_fix-magento-2.1.4.patch"
     },
     "Mview does not work with Staging (Magento 2.1.5 - 2.1.9)": {
-      "2.1.5 - 2.1.9": "2.1/patches/mview_staging_fix-magento-2.1.5.patch"
+      "2.1.5 - 2.1.9": "patches/2.1/mview_staging_fix-magento-2.1.5.patch"
     },
     "Mview does not work with Staging (Magento 2.1.10)": {
-      "2.1.10": "2.1/patches/mview_staging_fix-magento-2.1.10.patch"
+      "2.1.10": "patches/2.1/mview_staging_fix-magento-2.1.10.patch"
     },
     "Images not sized properly after upgrade to 2.1.6": {
-      "2.1.6": "2.1/patches/MAGETWO-67805.hotfix.git-composer-compatible.patch"
+      "2.1.6": "patches/2.1/MAGETWO-67805.hotfix.git-composer-compatible.patch"
     }
   },
   "magento/module-config": {
@@ -80,7 +80,7 @@
   },
   "magento/module-cms": {
     "Fix cannot upgrade 2.0 => 2.1 with auto_increment > 1": {
-      "101.0.3 - 101.0.5": "2.1/patches/MAGETWO-57799.patch"
+      "101.0.3 - 101.0.5": "patches/2.1/MAGETWO-57799.patch"
     }
   }
 }
