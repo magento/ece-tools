@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -26,6 +27,11 @@ class Deploy implements DeployInterface
     private $environmentConfig;
 
     /**
+     * @var ScdStrategyChecker
+     */
+    private $scdStrategyChecker;
+
+    /**
      * @var array
      */
     private $mergedConfig;
@@ -33,11 +39,16 @@ class Deploy implements DeployInterface
     /**
      * @param EnvironmentReader $environmentReader
      * @param EnvironmentConfig $environmentConfig
+     * @param ScdStrategyChecker $scdStrategyChecker
      */
-    public function __construct(EnvironmentReader $environmentReader, EnvironmentConfig $environmentConfig)
-    {
+    public function __construct(
+        EnvironmentReader $environmentReader,
+        EnvironmentConfig $environmentConfig,
+        ScdStrategyChecker $scdStrategyChecker
+    ) {
         $this->environmentReader = $environmentReader;
         $this->environmentConfig = $environmentConfig;
+        $this->scdStrategyChecker = $scdStrategyChecker;
     }
 
     /**
@@ -166,6 +177,7 @@ class Deploy implements DeployInterface
     {
         return [
             self::VAR_SCD_STRATEGY => '',
+            self::VAR_SCD_ALLOWED_STRATEGIES => $this->scdStrategyChecker->getAllowedStrategies(),
             self::VAR_SCD_COMPRESSION_LEVEL => 4,
             self::VAR_REDIS_SESSION_DISABLE_LOCKING => true,
             self::VAR_SEARCH_CONFIGURATION => [],

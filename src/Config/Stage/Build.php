@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Build\Reader as BuildReader;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -26,6 +27,11 @@ class Build implements BuildInterface
     private $buildReader;
 
     /**
+     * @var ScdStrategyChecker
+     */
+    private $scdStrategyChecker;
+
+    /**
      * @var array
      */
     private $mergedConfig;
@@ -36,10 +42,12 @@ class Build implements BuildInterface
      */
     public function __construct(
         EnvironmentReader $environmentReader,
-        BuildReader $buildReader
+        BuildReader $buildReader,
+        ScdStrategyChecker $scdStrategyChecker
     ) {
         $this->environmentReader = $environmentReader;
         $this->buildReader = $buildReader;
+        $this->scdStrategyChecker = $scdStrategyChecker;
     }
 
     /**
@@ -95,6 +103,7 @@ class Build implements BuildInterface
     {
         return [
             self::VAR_SCD_STRATEGY => '',
+            self::VAR_SCD_ALLOWED_STRATEGIES => $this->scdStrategyChecker->getAllowedStrategies(),
             self::VAR_SKIP_SCD => false,
             self::VAR_SCD_COMPRESSION_LEVEL => 6,
             self::VAR_SCD_THREADS => 1,
@@ -115,6 +124,10 @@ class Build implements BuildInterface
 
         if (isset($buildConfig['scd_strategy'])) {
             $result[self::VAR_SCD_STRATEGY] = $buildConfig['scd_strategy'];
+        }
+
+        if (isset($buildConfig['SCD_ALLOWED_STRATEGIES'])) {
+            $result[self::VAR_SCD_ALLOWED_STRATEGIES] = $buildConfig['SCD_ALLOWED_STRATEGIES'];
         }
 
         if (isset($buildConfig['exclude_themes'])) {

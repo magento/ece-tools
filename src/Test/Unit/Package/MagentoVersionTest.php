@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Package;
 
 use Composer\Package\PackageInterface;
 use Composer\Semver\Comparator;
+use Composer\Semver\Semver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
@@ -44,7 +45,8 @@ class MagentoVersionTest extends TestCase
 
         $this->magentoVersion = new MagentoVersion(
             $this->managerMock,
-            new Comparator()
+            new Comparator(),
+            new Semver()
         );
     }
 
@@ -83,7 +85,10 @@ class MagentoVersionTest extends TestCase
             ['2.2-dev', '2.2-dev', true],
         ];
     }
-    
+
+    /**
+     * Test getting the version number from the installed version of Magento.
+     */
     public function testGetVersion()
     {
         $this->managerMock->method('get')
@@ -94,5 +99,39 @@ class MagentoVersionTest extends TestCase
             ->willReturn('2.2.1');
         
         $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
+    }
+
+    /**
+     * Test the constraint matcher using various Composer-style version constraints.
+     *
+     * @param string $assertion Method name of the assertion to call
+     * @param string $constraint Composer-style version constraint string
+     * @dataProvider satisfiesDataProvider
+     */
+    public function testSatisfies(string $assertion, string $constraint)
+    {
+        $this->managerMock->expects($this->exactly(1))
+            ->method('get')
+            ->willReturn($this->packageMock);
+        $this->packageMock->expects($this->exactly(1))
+            ->method('getVersion')
+            ->willReturn('2.2.1');
+
+        $this->$assertion($this->magentoVersion->satisfies($constraint));
+    }
+
+    /**
+     * @return array[]
+     */
+    public function satisfiesDataProvider()
+    {
+        return [
+            ['assertTrue', '2.2.1'],
+            ['assertTrue', '2.2.*'],
+            ['assertTrue', '~2.2.0'],
+            ['assertFalse', '2.2.0'],
+            ['assertFalse', '2.1.*'],
+            ['assertFalse', '~2.1.0'],
+        ];
     }
 }

@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -32,16 +33,23 @@ class DeployTest extends TestCase
     private $environmentConfigMock;
 
     /**
+     * @var ScdStrategyChecker|Mock
+     */
+    private $scdStrategyCheckerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);
+        $this->scdStrategyCheckerMock = $this->createMock(ScdStrategyChecker::class);
 
         $this->config = new Deploy(
             $this->environmentReaderMock,
-            $this->environmentConfigMock
+            $this->environmentConfigMock,
+            $this->scdStrategyCheckerMock
         );
     }
 
@@ -198,6 +206,20 @@ class DeployTest extends TestCase
                     'STATIC_CONTENT_THREADS' => 4,
                 ],
                 4,
+            ],
+            'allowed scd strategies value' => [
+                Deploy::VAR_SCD_ALLOWED_STRATEGIES,
+                [],
+                [
+                    Deploy::VAR_SCD_ALLOWED_STRATEGIES => ['default']
+                ],
+                ['default']
+            ],
+            'scd strategy default' => [
+                Deploy::VAR_SCD_STRATEGY,
+                [],
+                [],
+                ''
             ],
         ];
     }
