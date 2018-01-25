@@ -54,9 +54,7 @@ class ApplyPatches extends Command
     }
 
     /**
-     * {@inheritdoc
-     *
-     * @throws \RuntimeException
+     * @inheritdoc
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
