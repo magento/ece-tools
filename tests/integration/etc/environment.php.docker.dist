@@ -35,5 +35,6 @@ return [
         'name' => 'magento/project-enterprise-edition',
         'version' => '^2.2',
     ],
-    'skip_front_check' => true,
+    'skip_front_check' => false,
+    'APPLICATION_URL' => 'http://web/',
 ];
