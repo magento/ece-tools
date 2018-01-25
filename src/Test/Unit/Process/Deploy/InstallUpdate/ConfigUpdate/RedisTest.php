@@ -262,4 +262,75 @@ class RedisTest extends TestCase
 
         $this->process->execute();
     }
+
+    public function testRemoveDisableLocking()
+    {
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                [
+                    'Updating env.php Redis cache configuration.',
+                ],
+                [
+                    'Removing disable_locking env.php.'
+                ]
+            );
+        $this->environmentMock->expects($this->any())
+            ->method('getRelationships')
+            ->willReturn([
+                'redis' => [
+                    0 => [
+                        'host' => '127.0.0.1',
+                        'port' => '6379',
+                    ],
+                ],
+            ]);
+        $this->environmentMock->expects($this->any())
+            ->method('getAdminUrl')
+            ->willReturn('admin');
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'session' => [
+                    'redis' => [
+                        'disable_locking' => '1',
+                    ],
+                ],
+            ]);
+
+        $this->configWriterMock->expects($this->once())
+            ->method('write')
+            ->with([
+                'cache' => [
+                    'frontend' => [
+                        'default' => [
+                            'backend' => 'Cm_Cache_Backend_Redis',
+                            'backend_options' => [
+                                'server' => '127.0.0.1',
+                                'port' => '6379',
+                                'database' => 1,
+                            ],
+                        ],
+                        'page_cache' => [
+                            'backend' => 'Cm_Cache_Backend_Redis',
+                            'backend_options' => [
+                                'server' => '127.0.0.1',
+                                'port' => '6379',
+                                'database' => 1,
+                            ],
+                        ],
+                    ],
+                ],
+                'session' => [
+                    'save' => 'redis',
+                    'redis' => [
+                        'host' => '127.0.0.1',
+                        'port' => '6379',
+                        'database' => 0,
+                    ],
+                ],
+            ]);
+
+        $this->process->execute();
+    }
 }
