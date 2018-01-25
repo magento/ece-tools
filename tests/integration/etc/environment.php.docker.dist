@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-$baseUrl = 'localhost';
+$baseUrl = 'php-docker.local';
 
 return [
     'relationships' => [
@@ -36,5 +36,4 @@ return [
         'version' => '^2.2',
     ],
     'skip_front_check' => false,
-    'APPLICATION_URL' => 'http://php-docker.local/',
 ];
