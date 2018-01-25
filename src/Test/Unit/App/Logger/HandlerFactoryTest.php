@@ -5,13 +5,17 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
+use Gelf\Transport\UdpTransport;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
+use Monolog\Handler\GelfHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\SyslogHandler;
+use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Logger;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use PHPUnit\Framework\TestCase;
@@ -149,6 +153,43 @@ class HandlerFactoryTest extends TestCase
                     ['min_level', '', ''],
                 ],
                 'expectedClass' => NativeMailerHandler::class,
+            ],
+            [
+                'handler' => HandlerFactory::HANDLER_SYSLOG,
+                'repositoryMockGetExpects' => 5,
+                'repositoryMockReturnMap' => [
+                    ['ident', null, 'user@example.com'],
+                    ['facility', LOG_USER, LOG_USER],
+                    ['bubble', true, false],
+                    ['logopts', LOG_PID, LOG_PERROR],
+                    ['min_level', '', ''],
+                ],
+                'expectedClass' => SyslogHandler::class,
+            ],
+            [
+                'handler' => HandlerFactory::HANDLER_SYSLOG_UDP,
+                'repositoryMockGetExpects' => 6,
+                'repositoryMockReturnMap' => [
+                    ['host', null, UdpTransport::DEFAULT_HOST],
+                    ['port', null, UdpTransport::DEFAULT_PORT],
+                    ['facility', LOG_USER, LOG_USER],
+                    ['bubble', true, false],
+                    ['ident', 'php', 'php'],
+                    ['min_level', '', ''],
+                ],
+                'expectedClass' => SyslogUdpHandler::class,
+            ],
+            [
+                'handler' => HandlerFactory::HANDLER_GELF,
+                'repositoryMockGetExpects' => 5,
+                'repositoryMockReturnMap' => [
+                    ['host', null, UdpTransport::DEFAULT_HOST],
+                    ['port', null, UdpTransport::DEFAULT_PORT],
+                    ['chunk_size', null, UdpTransport::CHUNK_SIZE_WAN],
+                    ['bubble', true, false],
+                    ['min_level', '', ''],
+                ],
+                'expectedClass' => GelfHandler::class,
             ],
         ];
     }

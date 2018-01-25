@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\App\Logger;
 
+use Gelf\Publisher;
+use Gelf\Transport\UdpTransport;
 use Monolog\Handler\GelfHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
@@ -100,7 +102,12 @@ class HandlerFactory
                 );
                 break;
             case static::HANDLER_GELF:
-                $publisher = new Publisher();
+                $transport = new UdpTransport(
+                    $configuration->get('host', UdpTransport::DEFAULT_HOST),
+                    $configuration->get('port', UdpTransport::DEFAULT_PORT),
+                    $configuration->get('chunk_size', UdpTransport::CHUNK_SIZE_WAN)
+                );
+                $publisher = new Publisher($transport);
 
                 $handlerInstance = new GelfHandler(
                     $publisher,
