@@ -143,7 +143,7 @@ class Build implements BuildInterface
         }
 
         if (isset($buildConfig['skip_scd'])) {
-            $result[self::VAR_SKIP_SCD] = $buildConfig['skip_scd'] === 'yes';
+            $result[self::VAR_SKIP_SCD] = $buildConfig['skip_scd'] === '1';
         }
 
         if (isset($buildConfig['VERBOSE_COMMANDS'])) {

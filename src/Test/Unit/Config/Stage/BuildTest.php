@@ -326,7 +326,7 @@ class BuildTest extends TestCase
                     ],
                 ],
                 [
-                    'skip_scd' => 'yes',
+                    'skip_scd' => '1',
                 ],
                 true,
             ],
