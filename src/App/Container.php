@@ -46,7 +46,7 @@ class Container implements ContainerInterface
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(DirectoryList $directoryList)
+    public function __construct(string $eceBasePath, $magentoBasePath)
     {
         /**
          * Creating concrete container.
@@ -59,17 +59,26 @@ class Container implements ContainerInterface
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () use ($directoryList) {
-                return $directoryList;
+            function () use ($eceBasePath, $magentoBasePath) {
+                return new \Magento\MagentoCloud\Filesystem\DirectoryList(
+                    $eceBasePath,
+                    $magentoBasePath,
+                    $this->get(\Magento\MagentoCloud\Package\MagentoVersion::class),
+                    $_SERVER['DIRS_CONFIG'] ?? []
+                );
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
-        $this->container->singleton(\Composer\Composer::class, function () {
-            $fileList = $this->get(\Magento\MagentoCloud\Filesystem\FileList::class);
+        $this->container->singleton(\Composer\Composer::class, function () use ($eceBasePath, $magentoBasePath) {
+            $composerJson = $magentoBasePath . '/composer.json';
+
+            if (!file_exists($composerJson)) {
+                $composerJson = $eceBasePath . '/composer.json';
+            }
 
             return \Composer\Factory::create(
                 new \Composer\IO\BufferIO(),
-                $fileList->getComposer()
+                $composerJson
             );
         });
         $this->container->singleton(

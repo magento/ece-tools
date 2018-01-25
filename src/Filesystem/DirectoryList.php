@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
+
 /**
  * Directory path configurations.
  */
@@ -24,6 +26,9 @@ class DirectoryList
     const DIR_GENERATED = 'generated';
     const DIR_GENERATED_CODE = 'code';
     const DIR_GENERATED_METADATA = 'metadata';
+    const DIR_ETC = 'etc';
+    const DIR_MEDIA = 'media';
+    const DIR_VIEW_PREPROCESSED = 'view-preprocessed';
 
     /**
      * @var string
@@ -36,6 +41,11 @@ class DirectoryList
     private $magentoRoot;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @var array
      */
     private $directories;
@@ -43,13 +53,15 @@ class DirectoryList
     /**
      * @param string $root The ECE Tools root directory
      * @param string $magentoRoot The Magento root directory
+     * @param MagentoVersion $version
      * @param array $config Directory configuration
      */
-    public function __construct(string $root, string $magentoRoot, array $config = [])
+    public function __construct(string $root, string $magentoRoot, MagentoVersion $version, array $config = [])
     {
         $this->root = $root;
         $this->magentoRoot = $magentoRoot;
-        $this->directories = $config + static::getDefaultConfig();
+        $this->magentoVersion = $version;
+        $this->directories = $config + $this->getDefaultConfig();
     }
 
     /**
@@ -152,17 +164,76 @@ class DirectoryList
     }
 
     /**
+     * Retrieves writable directories.
+     *
      * @return array
      */
-    public static function getDefaultConfig(): array
+    public function getWritableDirectories(): array
+    {
+        $writableDirs = [static::DIR_VAR, static::DIR_ETC, static::DIR_MEDIA];
+
+        if (!$this->magentoVersion->isGreaterOrEqual(2.2)) {
+            $writableDirs = [
+                static::DIR_GENERATED_METADATA,
+                static::DIR_GENERATED_CODE,
+                static::DIR_ETC,
+                static::DIR_MEDIA,
+                static::DIR_VIEW_PREPROCESSED,
+            ];
+        }
+
+        return array_map(
+            [$this, 'getPath'],
+            array_filter(array_keys($this->getDirectories()), function ($key) use ($writableDirs) {
+                return in_array($key, $writableDirs);
+            })
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefaultConfig(): array
+    {
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+            return $this->getDefault21Config();
+        }
+
+        return $this->getDefault22Config();
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefault22Config(): array
     {
         return [
             static::DIR_INIT               => [static::PATH => 'init'],
             static::DIR_VAR                => [static::PATH => 'var'],
             static::DIR_LOG                => [static::PATH => 'var/log'],
+            static::DIR_VIEW_PREPROCESSED  => [static::PATH => 'var/view_preprocessed'],
             static::DIR_GENERATED          => [static::PATH => 'generated'],
             static::DIR_GENERATED_CODE     => [static::PATH => 'generated/code'],
             static::DIR_GENERATED_METADATA => [static::PATH => 'generated/metadata'],
+            static::DIR_ETC                => [static::PATH => 'app/etc'],
+            static::DIR_MEDIA              => [static::PATH => 'pub/media'],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefault21Config(): array
+    {
+        return [
+            static::DIR_INIT               => [static::PATH => 'init'],
+            static::DIR_VAR                => [static::PATH => 'var'],
+            static::DIR_LOG                => [static::PATH => 'var/log'],
+            static::DIR_GENERATED_CODE     => [static::PATH => 'var/generation'],
+            static::DIR_GENERATED_METADATA => [static::PATH => 'var/di'],
+            static::DIR_VIEW_PREPROCESSED  => [static::PATH => 'var/view_preprocessed'],
+            static::DIR_ETC                => [static::PATH => 'app/etc'],
+            static::DIR_MEDIA              => [static::PATH => 'pub/media'],
         ];
     }
 }
