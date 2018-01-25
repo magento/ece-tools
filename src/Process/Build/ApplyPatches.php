@@ -5,10 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -17,41 +15,25 @@ use Psr\Log\LoggerInterface;
 class ApplyPatches implements ProcessInterface
 {
     /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var File
+     * @var Manager
      */
-    private $file;
+    private $manager;
 
     /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
-     * @param ShellInterface $shell
      * @param LoggerInterface $logger
-     * @param File $file
-     * @param DirectoryList $directoryList
+     * @param Manager $manager
      */
     public function __construct(
-        ShellInterface $shell,
         LoggerInterface $logger,
-        File $file,
-        DirectoryList $directoryList
+        Manager $manager
     ) {
-        $this->shell = $shell;
         $this->logger = $logger;
-        $this->file = $file;
-        $this->directoryList = $directoryList;
+        $this->manager = $manager;
     }
 
     /**
@@ -60,15 +42,6 @@ class ApplyPatches implements ProcessInterface
     public function execute()
     {
         $this->logger->info('Applying patches.');
-
-        $patchScript = $this->directoryList->getMagentoRoot() . '/vendor/bin/m2-apply-patches';
-
-        if (!$this->file->isExists($patchScript)) {
-            $this->logger->warning('Package with patches was not found.');
-
-            return;
-        }
-
-        $this->shell->execute('php ' . $patchScript);
+        $this->manager->applyAll();
     }
 }
