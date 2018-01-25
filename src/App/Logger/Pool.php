@@ -50,13 +50,17 @@ class Pool
 
     /**
      * @return HandlerInterface[]
+     * @throws \Exception If can't create handlers from config.
      */
     public function getHandlers(): array
     {
         if (null === $this->handlers) {
-            foreach ($this->logConfig->getHandlers() as $handler) {
-                $this->handlers[] = $this->handlerFactory->create($handler)
-                    ->setFormatter($this->lineFormatterFactory->create());
+            foreach ($this->logConfig->getHandlers() as $handlerName => $handlerConfig) {
+                $this->handlers[$handlerName] = $this->handlerFactory->create($handlerName);
+
+                if (!isset($handlerConfig['use_default_formatter']) || !$handlerConfig['use_default_formatter']) {
+                    $this->handlers[$handlerName]->setFormatter($this->lineFormatterFactory->create());
+                }
             }
         }
 
