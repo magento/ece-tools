@@ -73,12 +73,7 @@ class RedisTest extends TestCase
         );
     }
 
-    /**
-     * @param $envSessionLocking
-     * @param int $expectedDisableLocking
-     * @dataProvider executeDataProvider
-     */
-    public function testExecute($envSessionLocking, int $expectedDisableLocking)
+    public function testExecute()
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -96,10 +91,6 @@ class RedisTest extends TestCase
         $this->environmentMock->expects($this->any())
             ->method('getAdminUrl')
             ->willReturn('admin');
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING)
-            ->willReturn($envSessionLocking);
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
@@ -133,33 +124,11 @@ class RedisTest extends TestCase
                         'host' => '127.0.0.1',
                         'port' => '6379',
                         'database' => 0,
-                        'disable_locking' => $expectedDisableLocking,
                     ],
                 ],
             ]);
 
         $this->process->execute();
-    }
-
-    /**
-     * @return array
-     */
-    public function executeDataProvider(): array
-    {
-        return [
-            [
-                true,
-                1,
-            ],
-            [
-                false,
-                0,
-            ],
-            [
-                true,
-                1,
-            ],
-        ];
     }
 
     public function testExecuteRemovingRedis()
@@ -239,10 +208,6 @@ class RedisTest extends TestCase
         $this->environmentMock->expects($this->any())
             ->method('getAdminUrl')
             ->willReturn('admin');
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_REDIS_SESSION_DISABLE_LOCKING)
-            ->willReturn(true);
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([
@@ -286,7 +251,6 @@ class RedisTest extends TestCase
                         'host' => '127.0.0.1',
                         'port' => '6379',
                         'database' => 0,
-                        'disable_locking' => 1,
                         'max_concurrency' => 10,
                         'bot_first_lifetime' => 100,
                         'bot_lifetime' => 10000,
