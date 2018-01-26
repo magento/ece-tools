@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Cron\JobUnlocker;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -34,13 +35,20 @@ class CronUnlock extends Command
     private $jobUnlocker;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param JobUnlocker $jobUnlocker
      * @param LoggerInterface $logger
+     * @param MagentoVersion $version
      */
-    public function __construct(JobUnlocker $jobUnlocker, LoggerInterface $logger)
+    public function __construct(JobUnlocker $jobUnlocker, LoggerInterface $logger, MagentoVersion $version)
     {
         $this->jobUnlocker = $jobUnlocker;
         $this->logger = $logger;
+        $this->magentoVersion = $version;
 
         parent::__construct();
     }
@@ -68,6 +76,12 @@ class CronUnlock extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $version = $this->magentoVersion->getVersion();
+            $this->logger->error(sprintf('Unlocking crons is not supported in Magento %s.', $version));
+            return;
+        }
+        
         try {
             $this->logger->info('Starting unlocking.');
 

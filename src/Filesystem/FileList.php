@@ -43,6 +43,14 @@ class FileList
     /**
      * @return string
      */
+    public function getConfigLocal(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/app/etc/config.local.php';
+    }
+
+    /**
+     * @return string
+     */
     public function getEnv(): string
     {
         return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
