@@ -63,7 +63,6 @@ class AcceptanceTest extends TestCase
      * @param array $environment
      * @param array $expectedConsumersRunnerConfig
      * @dataProvider defaultDataProvider
-     * @group frontCheck
      */
     public function testDefault(array $environment, array $expectedConsumersRunnerConfig)
     {
