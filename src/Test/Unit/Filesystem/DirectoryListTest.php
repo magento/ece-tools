@@ -204,4 +204,28 @@ class DirectoryListTest extends TestCase
             ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
         );
     }
+
+    public function testGetGenerated()
+    {
+        $this->assertSame(
+            __DIR__ . '/generated',
+            $this->directoryList->getGenerated()
+        );
+    }
+
+    public function testGetGeneratedCode()
+    {
+        $this->assertSame(
+            __DIR__ . '/generated/code',
+            $this->directoryList->getGeneratedCode()
+        );
+    }
+
+    public function testGetGeneratedMetadata()
+    {
+        $this->assertSame(
+            __DIR__ . '/generated/metadata',
+            $this->directoryList->getGeneratedMetadata()
+        );
+    }
 }

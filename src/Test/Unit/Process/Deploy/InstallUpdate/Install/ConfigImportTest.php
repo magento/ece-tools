@@ -5,11 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ConfigImport;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Psr\Log\LoggerInterface;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 class ConfigImportTest extends TestCase
 {
@@ -29,6 +30,11 @@ class ConfigImportTest extends TestCase
     private $configImport;
 
     /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -38,7 +44,9 @@ class ConfigImportTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
-        $this->configImport = new ConfigImport($this->shellMock, $this->loggerMock);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+
+        $this->configImport = new ConfigImport($this->shellMock, $this->loggerMock, $this->magentoVersionMock);
     }
 
     /**
@@ -46,6 +54,9 @@ class ConfigImportTest extends TestCase
      */
     public function testExecute()
     {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Run app:config:import command');
@@ -53,6 +64,26 @@ class ConfigImportTest extends TestCase
             ->method('execute')
             ->with('php ./bin/magento app:config:import -n');
 
+        $this->configImport->execute();
+    }
+    
+    public function testSkipExecute()
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(false);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('2.1.7');
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Importing config is not supported in Magento 2.1.7, skipping.');
+        $this->shellMock->expects($this->never())
+            ->method('execute');
+        
         $this->configImport->execute();
     }
 }
