@@ -80,7 +80,7 @@ class Applier
      * @return void
      * @throws \RuntimeException
      */
-    public function apply(string $path, $name, $packageName, $constraint)
+    public function apply(string $path, string $name = null, string $packageName = null, $constraint = null)
     {
         /**
          * Support for relative paths.
@@ -113,7 +113,7 @@ class Applier
                 throw $applyException;
             }
 
-            $this->logger->notice("Patch $name $constraint was already applied.");
+            $this->logger->notice("Patch $name was already applied.");
         }
 
         $this->logger->info('Done.');

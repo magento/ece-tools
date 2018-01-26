@@ -213,7 +213,7 @@ class ApplierTest extends TestCase
             );
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with("Patch $name $constraint was already applied.");
+            ->with("Patch $name was already applied.");
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
