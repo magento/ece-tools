@@ -35,5 +35,5 @@ return [
         'name' => 'magento/project-enterprise-edition',
         'version' => '^2.2',
     ],
-    'skip_front_check' => false,
+    'skip_front_check' => true,
 ];
