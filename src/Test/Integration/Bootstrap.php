@@ -96,8 +96,9 @@ class Bootstrap
         ]);
 
         $container = new Container(new DirectoryList(
+            ECE_BP,
             $this->getSandboxDir(),
-            $this->getSandboxDir()
+            []
         ));
 
         return new Application($container);
