@@ -180,4 +180,101 @@ class ApplierTest extends TestCase
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
+
+    public function testApplyPatchAlreadyApplied()
+    {
+        $path = 'path/to/patch';
+        $name = 'patchName';
+        $packageName = 'packageName';
+        $constraint = '1.0';
+
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($path)
+            ->willReturn(true);
+        $this->localRepositoryMock->expects($this->once())
+            ->method('findPackage')
+            ->with($packageName, $constraint)
+            ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
+
+        $this->shellMock->expects($this->exactly(2))
+            ->method('execute')
+            ->withConsecutive(
+                ['git apply ' . $path],
+                ['git apply --check --reverse ' . $path]
+            )
+            ->will($this->returnCallback([$this, 'shellMockReverseCallback']));
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Applying patch patchName 1.0.'],
+                ['Done.']
+            );
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with("Patch $name $constraint was already applied.");
+
+        $this->applier->apply($path, $name, $packageName, $constraint);
+    }
+
+    /**
+     * @param string $command
+     */
+    public function shellMockReverseCallback(string $command)
+    {
+        if (strpos($command, '--reverse') !== false && strpos($command, '--check') !== false) {
+            // command was the reverse check, it's all good
+            return;
+        }
+
+        // Not a reverse, better throw an exception
+        throw new \RuntimeException('Applying the patch has failed for some reason');
+    }
+
+    /**
+     * @expectedException RuntimeException
+     * @expectedExceptionMessage Applying the patch has failed for some reason
+     */
+    public function testApplyPatchError()
+    {
+        $path = 'path/to/patch';
+        $name = 'patchName';
+        $packageName = 'packageName';
+        $constraint = '1.0';
+
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($path)
+            ->willReturn(true);
+        $this->localRepositoryMock->expects($this->once())
+            ->method('findPackage')
+            ->with($packageName, $constraint)
+            ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
+
+        $this->shellMock->expects($this->exactly(2))
+            ->method('execute')
+            ->withConsecutive(
+                ['git apply ' . $path],
+                ['git apply --check --reverse ' . $path]
+            )
+            ->will($this->returnCallback([$this, 'shellMockErrorCallback']));
+
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Applying patch patchName 1.0.');
+
+        $this->applier->apply($path, $name, $packageName, $constraint);
+    }
+
+    public function shellMockErrorCallback(string $command)
+    {
+        if (strpos($command, '--reverse') !== false && strpos($command, '--check') !== false) {
+            // command was the reverse check, still throw an error
+            throw new \RuntimeException('Checking the reverse of the patch has also failed for some reason');
+        }
+
+        // Not a reverse, better throw an exception
+        throw new \RuntimeException('Applying the patch has failed for some reason');
+    }
 }

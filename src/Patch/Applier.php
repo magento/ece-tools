@@ -102,7 +102,20 @@ class Applier
             $constraint
         ));
 
-        $this->shell->execute('git apply ' . $path);
+        try {
+            $this->shell->execute('git apply ' . $path);
+        } catch (\RuntimeException $applyException) {
+            try {
+                // Has this patch already been applied?
+                $this->shell->execute('git apply --check --reverse ' . $path);
+            } catch (\RuntimeException $reverseException) {
+                // Applying the patch in reverse also failed, so something else was wrong
+                throw $applyException;
+            }
+
+            $this->logger->notice("Patch $name $constraint was already applied.");
+        }
+
         $this->logger->info('Done.');
     }
 
