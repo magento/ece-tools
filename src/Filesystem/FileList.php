@@ -105,4 +105,12 @@ class FileList
     {
         return $this->directoryList->getLog() . '/install_upgrade.log';
     }
+
+    /**
+     * @return string
+     */
+    public function getPatches(): string
+    {
+        return $this->directoryList->getRoot() . '/patches.json';
+    }
 }

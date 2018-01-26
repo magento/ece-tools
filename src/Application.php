@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud;
 
 use Composer\Composer;
+use Magento\MagentoCloud\Command\ApplyPatches;
 use Magento\MagentoCloud\Command\BackupList;
 use Magento\MagentoCloud\Command\BackupRestore;
 use Magento\MagentoCloud\Command\Build;
@@ -65,6 +66,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(CronUnlock::class),
                 $this->container->get(BackupRestore::class),
                 $this->container->get(BackupList::class),
+                $this->container->get(ApplyPatches::class),
             ]
         );
     }
