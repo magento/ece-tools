@@ -36,10 +36,10 @@
       "100.1.*": "patches/2.1/setup-area-plugins.patch"
     },
     "[2.1 backport] SCD does not work when multiple languages are specified.": {
-      "100.1.4 - 101.1.7": "patches/2.1/flyweightfactory.patch"
+      "100.1.4 - 100.1.7": "patches/2.1/flyweightfactory.patch"
     },
     "Fixed: When SCD is in build, js resources do not load in admin": {
-      "100.1.4 - 101.1.7": "patches/2.1/secure-static-resource.patch"
+      "100.1.4 - 100.1.7": "patches/2.1/secure-static-resource.patch"
     }
   },
   "magento/module-customer-import-export": {
