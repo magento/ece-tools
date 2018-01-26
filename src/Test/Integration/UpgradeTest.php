@@ -93,12 +93,7 @@ class UpgradeTest extends TestCase
             return;
         }
 
-        if (empty($config->get('APPLICATION_URL'))) {
-            $defaultRoute = array_keys($routes)[0];
-        } else {
-            $defaultRoute = $config->get('APPLICATION_URL');
-        }
-
+        $defaultRoute = array_keys($routes)[0];
         $pageContent = file_get_contents($defaultRoute);
 
         $this->assertContains('Home Page', $pageContent, 'Check "Home Page" phrase presence');
