@@ -98,8 +98,8 @@ class AcceptanceTest extends TestCase
                         'cron_run' => false,
                         'max_messages' => 10000,
                         'consumers' => [],
-                    ]
-                ]
+                    ],
+                ],
             ],
             'test cron_consumers_runner with array' => [
                 'environment' => [
@@ -109,7 +109,7 @@ class AcceptanceTest extends TestCase
                             'cron_run' => "true",
                             'max_messages' => 5000,
                             'consumers' => ['test'],
-                        ]
+                        ],
                     ],
                 ],
                 'expectedConsumersRunnerConfig' => [
@@ -117,8 +117,8 @@ class AcceptanceTest extends TestCase
                         'cron_run' => true,
                         'max_messages' => 5000,
                         'consumers' => ['test'],
-                    ]
-                ]
+                    ],
+                ],
             ],
             'test cron_consumers_runner with string' => [
                 'environment' => [
@@ -132,8 +132,8 @@ class AcceptanceTest extends TestCase
                         'cron_run' => true,
                         'max_messages' => 100,
                         'consumers' => ['test2'],
-                    ]
-                ]
+                    ],
+                ],
             ],
             'disabled static content symlinks 3 jobs' => [
                 'environment' => [
@@ -148,7 +148,7 @@ class AcceptanceTest extends TestCase
                         'cron_run' => false,
                         'max_messages' => 10000,
                         'consumers' => [],
-                    ]
+                    ],
                 ],
             ],
         ];

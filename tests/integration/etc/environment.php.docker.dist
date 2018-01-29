@@ -3,16 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-$baseUrl = getenv('MAGENTO_HOST_NAME') ?: 'localhost';
+$baseUrl = 'php-docker.local';
 
 return [
     'relationships' => [
         'database' => [
             0 => [
-                'host' => '127.0.0.1',
-                'path' => 'integration_tests',
-                'password' => '',
-                'username' => 'root',
+                'host' => 'db',
+                'path' => 'magento2',
+                'password' => 'magento2',
+                'username' => 'magento2',
                 'port' => '3306',
             ],
         ],
@@ -35,5 +35,5 @@ return [
         'name' => 'magento/project-enterprise-edition',
         'version' => '^2.2',
     ],
-    'skip_front_check' => false,
+    'skip_front_check' => true,
 ];
