@@ -168,6 +168,7 @@ class BackupDataTest extends TestCase
             );
         $this->directoryListMock->expects($this->once())
             ->method('getWritableDirectories')
+            ->with(true)
             ->willReturn(['some_dir']);
         $this->fileMock->expects($this->once())
             ->method('scanDir')
@@ -192,6 +193,7 @@ class BackupDataTest extends TestCase
             );
         $this->directoryListMock->expects($this->once())
             ->method('getWritableDirectories')
+            ->with(true)
             ->willReturn(['some_dir']);
         $this->fileMock->expects($this->exactly(3))
             ->method('createDirectory')

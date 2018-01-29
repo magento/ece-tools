@@ -70,9 +70,9 @@ class DirectoryList
      * @param string $code
      * @return string
      */
-    public function getPath(string $code): string
+    public function getPath(string $code, bool $relativePath = false): string
     {
-        $magentoRoot = $this->getMagentoRoot();
+        $magentoRoot = $relativePath ? '' : $this->getMagentoRoot();
         $directories = $this->getDirectories();
 
         if (!array_key_exists($code, $directories)) {
@@ -168,26 +168,25 @@ class DirectoryList
      *
      * @return array
      */
-    public function getWritableDirectories(): array
+    public function getWritableDirectories(bool $relativePath = false): array
     {
-        $writableDirs = [static::DIR_VAR, static::DIR_ETC, static::DIR_MEDIA];
+        $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
 
-        if (!$this->magentoVersion->isGreaterOrEqual(2.2)) {
-            $writableDirs = [
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $magento21Dirs = [
                 static::DIR_GENERATED_METADATA,
                 static::DIR_GENERATED_CODE,
-                static::DIR_ETC,
-                static::DIR_MEDIA,
                 static::DIR_VIEW_PREPROCESSED,
             ];
+
+            $writableDirs = array_merge($writableDirs, $magento21Dirs);
+        } else {
+            $writableDirs[] = static::DIR_VAR;
         }
 
-        return array_map(
-            [$this, 'getPath'],
-            array_filter(array_keys($this->getDirectories()), function ($key) use ($writableDirs) {
-                return in_array($key, $writableDirs);
-            })
-        );
+        return array_map(function ($path) use ($relativePath) {
+            return $this->getPath($path, $relativePath);
+        }, $writableDirs);
     }
 
     /**
@@ -199,14 +198,6 @@ class DirectoryList
             return $this->getDefault21Config();
         }
 
-        return $this->getDefault22Config();
-    }
-
-    /**
-     * @return array
-     */
-    public function getDefault22Config(): array
-    {
         return [
             static::DIR_INIT               => [static::PATH => 'init'],
             static::DIR_VAR                => [static::PATH => 'var'],
@@ -223,7 +214,7 @@ class DirectoryList
     /**
      * @return array
      */
-    public function getDefault21Config(): array
+    private function getDefault21Config(): array
     {
         return [
             static::DIR_INIT               => [static::PATH => 'init'],
