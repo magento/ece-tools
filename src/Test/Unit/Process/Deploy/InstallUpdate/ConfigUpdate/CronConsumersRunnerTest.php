@@ -5,14 +5,15 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner;
-use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -50,6 +51,11 @@ class CronConsumersRunnerTest extends TestCase
     private $stageConfigMock;
 
     /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -59,13 +65,15 @@ class CronConsumersRunnerTest extends TestCase
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->cronConsumersRunner = new CronConsumersRunner(
             $this->environmentMock,
             $this->configReaderMock,
             $this->configWriterMock,
             $this->loggerMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->magentoVersionMock
         );
     }
 
@@ -77,6 +85,9 @@ class CronConsumersRunnerTest extends TestCase
      */
     public function testExecute(array $config, array $configFromVariable, array $expectedResult)
     {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php cron consumers runner configuration.');
@@ -192,5 +203,29 @@ class CronConsumersRunnerTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    public function testSkipExecute()
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(false);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('2.1.7');
+        
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating cron consumer runner is not supported in Magento 2.1.7, skipping.');
+        $this->configReaderMock->expects($this->never())
+            ->method('read');
+        $this->stageConfigMock->expects($this->never())
+            ->method('get');
+        $this->configWriterMock->expects($this->never())
+            ->method('write');
+        
+        $this->cronConsumersRunner->execute();
     }
 }

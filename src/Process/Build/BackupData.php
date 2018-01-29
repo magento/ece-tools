@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -32,11 +31,6 @@ class BackupData implements ProcessInterface
     private $logger;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var DirectoryList
      */
     private $directoryList;
@@ -56,7 +50,6 @@ class BackupData implements ProcessInterface
      *
      * @param File $file
      * @param LoggerInterface $logger
-     * @param Environment $environment
      * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
      * @param LoggerPool $loggerPool
@@ -64,14 +57,12 @@ class BackupData implements ProcessInterface
     public function __construct(
         File $file,
         LoggerInterface $logger,
-        Environment $environment,
         DirectoryList $directoryList,
         FlagManager $flagManager,
         LoggerPool $loggerPool
     ) {
         $this->file = $file;
         $this->logger = $logger;
-        $this->environment = $environment;
         $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;
         $this->loggerPool = $loggerPool;
@@ -114,9 +105,9 @@ class BackupData implements ProcessInterface
 
         $this->stopLogging();
 
-        foreach ($this->environment->getWritableDirectories() as $dir) {
+        foreach ($this->directoryList->getWritableDirectories(true) as $dir) {
             $originalDir = $magentoRoot . $dir;
-            $initDir = $rootInitDir . $dir;
+            $initDir     = $rootInitDir . $dir;
 
             $this->file->createDirectory($initDir);
             $this->file->createDirectory($originalDir);

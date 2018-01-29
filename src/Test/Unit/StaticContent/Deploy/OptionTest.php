@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
@@ -49,6 +50,11 @@ class OptionTest extends TestCase
      */
     private $stageConfigMock;
 
+    /**
+     * @var ScdStrategyChecker|Mock
+     */
+    private $scdStrategyCheckerMock;
+
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -56,9 +62,11 @@ class OptionTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->scdStrategyCheckerMock= $this->createMock(ScdStrategyChecker::class);
 
         $this->option = new Option(
             $this->environmentMock,
+            $this->scdStrategyCheckerMock,
             $this->connectionMock,
             $this->magentoVersionMock,
             $this->threadCountOptimizerMock,
@@ -121,11 +129,23 @@ class OptionTest extends TestCase
         ];
     }
 
+    /**
+     * Test getting the SCD strategy from the strategy checker.
+     */
     public function testGetStrategy()
     {
-        $this->stageConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(DeployInterface::VAR_SCD_STRATEGY)
+            ->withConsecutive(
+                [DeployInterface::VAR_SCD_STRATEGY],
+                [DeployInterface::VAR_SCD_ALLOWED_STRATEGIES]
+            )
+            ->willReturn(
+                'strategy',
+                ['strategy']
+            );
+        $this->scdStrategyCheckerMock->expects($this->once())
+            ->method('getStrategy')
             ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());

@@ -46,7 +46,7 @@ class Container implements ContainerInterface
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(DirectoryList $directoryList)
+    public function __construct(string $eceBasePath, $magentoBasePath)
     {
         /**
          * Creating concrete container.
@@ -59,17 +59,26 @@ class Container implements ContainerInterface
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
             \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () use ($directoryList) {
-                return $directoryList;
+            function () use ($eceBasePath, $magentoBasePath) {
+                return new \Magento\MagentoCloud\Filesystem\DirectoryList(
+                    $eceBasePath,
+                    $magentoBasePath,
+                    $this->get(\Magento\MagentoCloud\Package\MagentoVersion::class),
+                    $_SERVER['DIRS_CONFIG'] ?? []
+                );
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
-        $this->container->singleton(\Composer\Composer::class, function () {
-            $fileList = $this->get(\Magento\MagentoCloud\Filesystem\FileList::class);
+        $this->container->singleton(\Composer\Composer::class, function () use ($eceBasePath, $magentoBasePath) {
+            $composerJson = $magentoBasePath . '/composer.json';
+
+            if (!file_exists($composerJson)) {
+                $composerJson = $eceBasePath . '/composer.json';
+            }
 
             return \Composer\Factory::create(
                 new \Composer\IO\BufferIO(),
-                $fileList->getComposer()
+                $composerJson
             );
         });
         $this->container->singleton(
@@ -94,6 +103,7 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\Dump::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\ScdStrategyChecker::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
         $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
@@ -240,17 +250,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(ConfigDump::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->make(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(ConfigDumpProcess\Export::class),
-                        $this->container->make(ConfigDumpProcess\Generate::class),
-                        $this->container->make(ConfigDumpProcess\Import::class),
-                    ],
-                ]);
-            });
         $this->container->when(ConfigDumpProcess\Export::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -259,23 +258,6 @@ class Container implements ContainerInterface
                         $this->container->make(ConfigDumpProcess\Generate::class),
                     ],
                 ]);
-            });
-        $this->container->when(ConfigDumpProcess\Generate::class)
-            ->needs('$configKeys')
-            ->give(function () {
-                return [
-                    'modules',
-                    'scopes',
-                    'system/default/general/locale/code',
-                    'system/default/dev/static/sign',
-                    'system/default/dev/front_end_development_workflow',
-                    'system/default/dev/template',
-                    'system/default/dev/js',
-                    'system/default/dev/css',
-                    'system/default/advanced/modules_disable_output',
-                    'system/stores',
-                    'system/websites',
-                ];
             });
         $this->container->when(DeployProcess\PreDeploy::class)
             ->needs(ProcessInterface::class)

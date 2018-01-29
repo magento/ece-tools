@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -34,11 +33,6 @@ class BackupDataTest extends TestCase
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
-
-    /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
 
     /**
      * @var DirectoryList|Mock
@@ -88,7 +82,6 @@ class BackupDataTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->setMethods(['setHandlers', 'info'])
             ->getMockForAbstractClass();
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->rootInitDir = 'magento_root/init';
@@ -96,9 +89,6 @@ class BackupDataTest extends TestCase
         $this->initPubStatic = 'magento_root/init/pub/static/';
         $this->someDir = 'magento_root/some_dir';
         $this->initSomeDir = 'magento_root/init/some_dir';
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->disableOriginalConstructor()
-            ->getMock();
         $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -127,7 +117,6 @@ class BackupDataTest extends TestCase
         $this->process = new BackupData(
             $this->fileMock,
             $this->loggerMock,
-            $this->environmentMock,
             $this->directoryListMock,
             $this->flagManagerMock,
             $this->loggerPoolMock
@@ -177,8 +166,9 @@ class BackupDataTest extends TestCase
                 [$this->pubStatic, $this->initPubStatic],
                 [$this->someDir, $this->initSomeDir]
             );
-        $this->environmentMock->expects($this->once())
+        $this->directoryListMock->expects($this->once())
             ->method('getWritableDirectories')
+            ->with(true)
             ->willReturn(['some_dir']);
         $this->fileMock->expects($this->once())
             ->method('scanDir')
@@ -201,8 +191,9 @@ class BackupDataTest extends TestCase
                 ['SCD not performed during build'],
                 ['Copying writable directories to temp directory.']
             );
-        $this->environmentMock->expects($this->once())
+        $this->directoryListMock->expects($this->once())
             ->method('getWritableDirectories')
+            ->with(true)
             ->willReturn(['some_dir']);
         $this->fileMock->expects($this->exactly(3))
             ->method('createDirectory')
@@ -259,7 +250,7 @@ class BackupDataTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('copyDirectory')
             ->with($this->pubStatic, $this->initPubStatic);
-        $this->environmentMock->expects($this->once())
+        $this->directoryListMock->expects($this->once())
             ->method('getWritableDirectories')
             ->willReturn([]);
         $this->fileMock->expects($this->never())
