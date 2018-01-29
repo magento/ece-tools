@@ -172,7 +172,7 @@ class DirectoryList
     {
         $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
 
-        if ($this->magentoVersion->satisfies('2.1.*')) {
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
             $magento21Dirs = [
                 static::DIR_GENERATED_METADATA,
                 static::DIR_GENERATED_CODE,
@@ -180,9 +180,7 @@ class DirectoryList
             ];
 
             $writableDirs = array_merge($writableDirs, $magento21Dirs);
-        }
-
-        if ($this->magentoVersion->satisfies('2.2.*')) {
+        } else {
             $writableDirs[] = static::DIR_VAR;
         }
 
@@ -200,14 +198,6 @@ class DirectoryList
             return $this->getDefault21Config();
         }
 
-        return $this->getDefault22Config();
-    }
-
-    /**
-     * @return array
-     */
-    public function getDefault22Config(): array
-    {
         return [
             static::DIR_INIT               => [static::PATH => 'init'],
             static::DIR_VAR                => [static::PATH => 'var'],
@@ -224,7 +214,7 @@ class DirectoryList
     /**
      * @return array
      */
-    public function getDefault21Config(): array
+    private function getDefault21Config(): array
     {
         return [
             static::DIR_INIT               => [static::PATH => 'init'],
