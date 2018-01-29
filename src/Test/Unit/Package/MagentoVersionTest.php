@@ -97,7 +97,7 @@ class MagentoVersionTest extends TestCase
         $this->packageMock->expects($this->once())
             ->method('getVersion')
             ->willReturn('2.2.1');
-        
+
         $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
     }
 
@@ -132,6 +132,41 @@ class MagentoVersionTest extends TestCase
             ['assertFalse', '2.2.0'],
             ['assertFalse', '2.1.*'],
             ['assertFalse', '~2.1.0'],
+        ];
+    }
+
+    /**
+     * @param string $versionFrom
+     * @param string $versionTo
+     * @param string $packageVersion
+     * @param bool $expected
+     * @dataProvider isBetweenDataDataProvider
+     */
+    public function testIsBetween(string $versionFrom, string $versionTo, string $packageVersion, bool $expected)
+    {
+        $this->managerMock->method('get')
+            ->with('magento/magento2-base')
+            ->willReturn($this->packageMock);
+        $this->packageMock->expects($this->exactly(2))
+            ->method('getVersion')
+            ->willReturn($packageVersion);
+
+        $this->assertSame(
+            $expected,
+            $this->magentoVersion->isBetween($versionFrom, $versionTo)
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function isBetweenDataDataProvider(): array
+    {
+        return [
+            ['2.1', '2.2', '2.1.9', true],
+            ['2.1', '2.2', '2.2', false],
+            ['2.1', '2.2', '2.1', true],
+            ['2.1', '2.2', '2.2-dev', true],
         ];
     }
 }

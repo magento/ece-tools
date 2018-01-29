@@ -61,6 +61,19 @@ class MagentoVersion
     }
 
     /**
+     * Compares version between 2 constraints.
+     *
+     * @param string $versionFrom
+     * @param string $versionTo
+     * @return bool
+     */
+    public function isBetween(string $versionFrom, string $versionTo): bool
+    {
+        return $this->comparator::compare($this->getVersion(), '>=', $versionFrom)
+            && $this->comparator::compare($this->getVersion(), '<', $versionTo);
+    }
+
+    /**
      * Check the current Magento version against Composer-style constraints.
      *
      * @param string $constraints
