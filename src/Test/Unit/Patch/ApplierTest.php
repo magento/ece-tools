@@ -203,7 +203,7 @@ class ApplierTest extends TestCase
                 ['git apply ' . $path],
                 ['git apply --check --reverse ' . $path]
             )
-            ->will($this->returnCallback([$this, 'shellMockReverseCallback']));
+            ->willReturnCallback([$this, 'shellMockReverseCallback']);
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -213,22 +213,23 @@ class ApplierTest extends TestCase
             );
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with("Patch $name was already applied.");
+            ->with("Patch {$name} was already applied.");
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
 
     /**
      * @param string $command
+     * @throws RuntimeException when the command isn't a reverse
      */
     public function shellMockReverseCallback(string $command)
     {
         if (strpos($command, '--reverse') !== false && strpos($command, '--check') !== false) {
-            // command was the reverse check, it's all good
+            // Command was the reverse check, it's all good.
             return;
         }
 
-        // Not a reverse, better throw an exception
+        // Not a reverse, better throw an exception.
         throw new \RuntimeException('Applying the patch has failed for some reason');
     }
 
@@ -267,14 +268,18 @@ class ApplierTest extends TestCase
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
 
+    /**
+     * @param string $command
+     * @throws RuntimeException
+     */
     public function shellMockErrorCallback(string $command)
     {
         if (strpos($command, '--reverse') !== false && strpos($command, '--check') !== false) {
-            // command was the reverse check, still throw an error
+            // Command was the reverse check, still throw an error.
             throw new \RuntimeException('Checking the reverse of the patch has also failed for some reason');
         }
 
-        // Not a reverse, better throw an exception
+        // Not a reverse, better throw an exception.
         throw new \RuntimeException('Applying the patch has failed for some reason');
     }
 }

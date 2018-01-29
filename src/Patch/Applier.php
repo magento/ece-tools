@@ -73,6 +73,8 @@ class Applier
     /**
      * Applies patch, using 'git apply' command.
      *
+     * If the patch fails to apply, checks if it has already been applied which is considered ok.
+     *
      * @param string $path Path to patch
      * @param string|null $name Name of patch
      * @param string|null $packageName Name of package to be patched
@@ -106,14 +108,12 @@ class Applier
             $this->shell->execute('git apply ' . $path);
         } catch (\RuntimeException $applyException) {
             try {
-                // Has this patch already been applied?
                 $this->shell->execute('git apply --check --reverse ' . $path);
             } catch (\RuntimeException $reverseException) {
-                // Applying the patch in reverse also failed, so something else was wrong
                 throw $applyException;
             }
 
-            $this->logger->notice("Patch $name was already applied.");
+            $this->logger->notice("Patch {$name} was already applied.");
         }
 
         $this->logger->info('Done.');

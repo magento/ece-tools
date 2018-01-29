@@ -3,17 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Integration;
+namespace Magento\MagentoCloud\Test\Integration\Patch;
 
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Patch\Applier;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Test\Integration\Bootstrap;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
-class ApplyPatchTest extends TestCase
+class ApplierTest extends TestCase
 {
     private $bootstrap;
 
@@ -42,12 +43,12 @@ class ApplyPatchTest extends TestCase
         $this->fileList = $application->getContainer()
             ->get(FileList::class);
 
-        $this->patchFile  = realpath(__DIR__ . '/_files/patches/patch.diff');
+        $this->patchFile  = realpath(__DIR__ . '/../_files/patches/patch.diff');
 
         // Make sure our target file is in its original state
         $this->bootstrap->execute(sprintf(
             'cp -f %s %s',
-            __DIR__ . '/_files/patches/target_file.md',
+            __DIR__ . '/../_files/patches/target_file.md',
             $this->bootstrap->getSandboxDir() . '/target_file.md'
         ));
     }
@@ -78,12 +79,18 @@ class ApplyPatchTest extends TestCase
         $this->assertContains("NOTICE: Patch $this->patchFile was already applied.", $log);
     }
 
-    private function getTargetFileContents()
+    /**
+     * @return string
+     */
+    private function getTargetFileContents(): string
     {
         return file_get_contents($this->bootstrap->getSandboxDir() . '/target_file.md');
     }
 
-    private function getLogContent()
+    /**
+     * @return string
+     */
+    private function getLogContent(): string
     {
         return file_get_contents($this->fileList->getCloudLog());
     }
