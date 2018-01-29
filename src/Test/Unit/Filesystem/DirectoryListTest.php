@@ -20,7 +20,7 @@ class DirectoryListTest extends TestCase
      */
     public function testGetPath()
     {
-        $directoryList = $this->get22DirectoryList();
+        $directoryList = $this->get22DirectoryListWithIsGreator();
 
         $this->assertSame(
             __DIR__ . '/_files/test/var',
@@ -34,7 +34,7 @@ class DirectoryListTest extends TestCase
      */
     public function testGetPathWithException()
     {
-        $this->get22DirectoryList()->getPath('some_code');
+        $this->get22DirectoryListWithIsGreator()->getPath('some_code');
     }
 
     /**
@@ -43,12 +43,12 @@ class DirectoryListTest extends TestCase
      */
     public function testGetPathWithEmptyPathException()
     {
-        $this->get22DirectoryList()->getPath('empty_path');
+        $this->get22DirectoryListWithIsGreator()->getPath('empty_path');
     }
 
     public function testGetRoot()
     {
-        $directoryList = $this->get22DirectoryList();
+        $directoryList = $this->get22DirectoryListWithIsGreator();
 
         $this->assertSame(
             __DIR__ . '/_files/bp',
@@ -58,7 +58,7 @@ class DirectoryListTest extends TestCase
 
     public function testGetMagentoRoot()
     {
-        $directoryList = $this->get22DirectoryList();
+        $directoryList = $this->get22DirectoryListWithIsGreator();
 
         $this->assertSame(
             __DIR__,
@@ -68,7 +68,7 @@ class DirectoryListTest extends TestCase
 
     public function testGetInit()
     {
-        $directoryList = $this->get22DirectoryList();
+        $directoryList = $this->get22DirectoryListWithIsGreator();
 
         $this->assertSame(
             __DIR__ . '/init',
@@ -78,7 +78,7 @@ class DirectoryListTest extends TestCase
 
     public function testGetVar()
     {
-        $directoryList = $this->get22DirectoryList();
+        $directoryList = $this->get22DirectoryListWithIsGreator();
 
         $this->assertSame(
             __DIR__ . '/var',
@@ -88,7 +88,7 @@ class DirectoryListTest extends TestCase
 
     public function testGetLog()
     {
-        $directoryList = $this->get22DirectoryList();
+        $directoryList = $this->get22DirectoryListWithIsGreator();
 
         $this->assertSame(
             __DIR__ . '/var/log',
@@ -98,7 +98,7 @@ class DirectoryListTest extends TestCase
 
     public function testGetGenerated()
     {
-        $directoryList = $this->get22DirectoryList();
+        $directoryList = $this->get22DirectoryListWithIsGreator();
 
         $this->assertSame(
             __DIR__ . '/generated',
@@ -119,8 +119,8 @@ class DirectoryListTest extends TestCase
     public function getGeneratedCodeDataProvider(): array
     {
         return [
-            [$this->get21DirectoryList(), __DIR__ . '/var/generation'],
-            [$this->get22DirectoryList(), __DIR__ . '/generated/code'],
+            [$this->get21DirectoryListWithIsGreator(), __DIR__ . '/var/generation'],
+            [$this->get22DirectoryListWithIsGreator(), __DIR__ . '/generated/code'],
         ];
     }
 
@@ -137,8 +137,8 @@ class DirectoryListTest extends TestCase
     public function getGeneratedMetadataDataProvider(): array
     {
         return [
-            [$this->get21DirectoryList(), __DIR__ . '/var/di'],
-            [$this->get22DirectoryList(), __DIR__ . '/generated/metadata'],
+            [$this->get21DirectoryListWithIsGreator(), __DIR__ . '/var/di'],
+            [$this->get22DirectoryListWithIsGreator(), __DIR__ . '/generated/metadata'],
         ];
     }
 
@@ -168,12 +168,12 @@ class DirectoryListTest extends TestCase
         $paths22 = [__DIR__ . '/var', __DIR__ . '/app/etc', __DIR__ . '/pub/media'];
 
         return [
-            [$this->get21DirectoryList(), $paths21],
-            [$this->get22DirectoryList(), $paths22],
+            [$this->get21DirectoryListWithSatisfies(), $paths21],
+            [$this->get22DirectoryListWithSatisfies(), $paths22],
         ];
     }
 
-    private function get21DirectoryList()
+    private function get21DirectoryListWithIsGreator()
     {
         $magentoVersionMock = $this->createMock(MagentoVersion::class);
 
@@ -189,13 +189,49 @@ class DirectoryListTest extends TestCase
         );
     }
 
-    private function get22DirectoryList()
+    private function get21DirectoryListWithSatisfies()
+    {
+        $magentoVersionMock = $this->createMock(MagentoVersion::class);
+
+        $magentoVersionMock->method('satisfies')
+            ->willReturnMap([
+                ['2.1.*', true],
+                ['2.2.*', false],
+            ]);
+
+        return new DirectoryList(
+            __DIR__ . '/_files/bp',
+            __DIR__,
+            $magentoVersionMock,
+            ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
+        );
+    }
+
+    private function get22DirectoryListWithIsGreator()
     {
         $magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $magentoVersionMock->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn(true);
+
+        return new DirectoryList(
+            __DIR__ . '/_files/bp',
+            __DIR__,
+            $magentoVersionMock,
+            ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
+        );
+    }
+
+    private function get22DirectoryListWithSatisfies()
+    {
+        $magentoVersionMock = $this->createMock(MagentoVersion::class);
+
+        $magentoVersionMock->method('satisfies')
+            ->willReturnMap([
+                ['2.1.*', false],
+                ['2.2.*', true],
+            ]);
 
         return new DirectoryList(
             __DIR__ . '/_files/bp',

@@ -170,24 +170,23 @@ class DirectoryList
      */
     public function getWritableDirectories(): array
     {
-        $writableDirs = [static::DIR_VAR, static::DIR_ETC, static::DIR_MEDIA];
+        $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
 
-        if (!$this->magentoVersion->isGreaterOrEqual(2.2)) {
-            $writableDirs = [
+        if ($this->magentoVersion->satisfies('2.1.*')) {
+            $magento21Dirs = [
                 static::DIR_GENERATED_METADATA,
                 static::DIR_GENERATED_CODE,
-                static::DIR_ETC,
-                static::DIR_MEDIA,
                 static::DIR_VIEW_PREPROCESSED,
             ];
+
+            $writableDirs = array_merge($writableDirs, $magento21Dirs);
         }
 
-        return array_map(
-            [$this, 'getPath'],
-            array_filter(array_keys($this->getDirectories()), function ($key) use ($writableDirs) {
-                return in_array($key, $writableDirs);
-            })
-        );
+        if ($this->magentoVersion->satisfies('2.2.*')) {
+            $writableDirs[] = static::DIR_VAR;
+        }
+
+        return array_map([$this, 'getPath'], $writableDirs);
     }
 
     /**

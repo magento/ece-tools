@@ -105,9 +105,8 @@ class BackupData implements ProcessInterface
 
         $this->stopLogging();
 
-        foreach ($this->directoryList->getWritableDirectories() as $dir) {
-            $originalDir = $magentoRoot . $dir;
-            $initDir = $rootInitDir . $dir;
+        foreach ($this->directoryList->getWritableDirectories() as $originalDir) {
+            $initDir = $rootInitDir . substr($originalDir, strlen($magentoRoot));
 
             $this->file->createDirectory($initDir);
             $this->file->createDirectory($originalDir);
