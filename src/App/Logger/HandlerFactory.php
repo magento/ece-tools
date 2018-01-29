@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\App\Logger;
 
 use Gelf\Publisher;
-use Gelf\Transport\UdpTransport;
 use Monolog\Handler\GelfHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
@@ -40,13 +39,23 @@ class HandlerFactory
     private $logConfig;
 
     /**
+     * @var GelfTransportFactory
+     */
+    private $gelfTransportFactory;
+
+    /**
      * @param LevelResolver $levelResolver
      * @param LogConfig $logConfig
+     * @param GelfTransportFactory $gelfTransportFactory
      */
-    public function __construct(LevelResolver $levelResolver, LogConfig $logConfig)
-    {
+    public function __construct(
+        LevelResolver $levelResolver,
+        LogConfig $logConfig,
+        GelfTransportFactory $gelfTransportFactory
+    ) {
         $this->levelResolver = $levelResolver;
         $this->logConfig = $logConfig;
+        $this->gelfTransportFactory = $gelfTransportFactory;
     }
 
     /**
@@ -87,7 +96,7 @@ class HandlerFactory
                     $configuration->get('ident'),
                     $configuration->get('facility', LOG_USER),
                     $minLevel,
-                    $configuration->get('bubble', true),
+                    true,
                     $configuration->get('logopts', LOG_PID)
                 );
                 break;
@@ -97,22 +106,20 @@ class HandlerFactory
                     $configuration->get('port'),
                     $configuration->get('facility', LOG_USER),
                     $minLevel,
-                    $configuration->get('bubble', true),
+                    true,
                     $configuration->get('ident', 'php')
                 );
                 break;
             case static::HANDLER_GELF:
-                $transport = new UdpTransport(
-                    $configuration->get('host', UdpTransport::DEFAULT_HOST),
-                    $configuration->get('port', UdpTransport::DEFAULT_PORT),
-                    $configuration->get('chunk_size', UdpTransport::CHUNK_SIZE_WAN)
-                );
-                $publisher = new Publisher($transport);
-
+                $publisher = new Publisher();
+                foreach ($configuration->get('transport') as $transportType => $transportConfig) {
+                    $publisher->addTransport(
+                        $this->gelfTransportFactory->create($transportType, $transportConfig)
+                    );
+                }
                 $handlerInstance = new GelfHandler(
                     $publisher,
-                    $minLevel,
-                    $configuration->get('bubble', true)
+                    $minLevel
                 );
                 break;
             default:
