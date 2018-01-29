@@ -168,7 +168,8 @@ class BackupDataTest extends TestCase
             );
         $this->directoryListMock->expects($this->once())
             ->method('getWritableDirectories')
-            ->willReturn(['magento_root/some_dir']);
+            ->with(true)
+            ->willReturn(['some_dir']);
         $this->fileMock->expects($this->once())
             ->method('scanDir')
             ->willReturn(['dir1', 'dir2', 'dir3']);
@@ -192,7 +193,8 @@ class BackupDataTest extends TestCase
             );
         $this->directoryListMock->expects($this->once())
             ->method('getWritableDirectories')
-            ->willReturn(['magento_root/some_dir']);
+            ->with(true)
+            ->willReturn(['some_dir']);
         $this->fileMock->expects($this->exactly(3))
             ->method('createDirectory')
             ->withConsecutive(

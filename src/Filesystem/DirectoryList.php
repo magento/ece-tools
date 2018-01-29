@@ -70,9 +70,9 @@ class DirectoryList
      * @param string $code
      * @return string
      */
-    public function getPath(string $code): string
+    public function getPath(string $code, bool $relativePath = false): string
     {
-        $magentoRoot = $this->getMagentoRoot();
+        $magentoRoot = $relativePath ? '' : $this->getMagentoRoot();
         $directories = $this->getDirectories();
 
         if (!array_key_exists($code, $directories)) {
@@ -168,7 +168,7 @@ class DirectoryList
      *
      * @return array
      */
-    public function getWritableDirectories(): array
+    public function getWritableDirectories(bool $relativePath = false): array
     {
         $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
 
@@ -186,7 +186,9 @@ class DirectoryList
             $writableDirs[] = static::DIR_VAR;
         }
 
-        return array_map([$this, 'getPath'], $writableDirs);
+        return array_map(function ($path) use ($relativePath) {
+            return $this->getPath($path, $relativePath);
+        }, $writableDirs);
     }
 
     /**
