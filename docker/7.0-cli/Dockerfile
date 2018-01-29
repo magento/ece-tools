@@ -42,7 +42,6 @@ ENV PHP_ENABLE_XDEBUG false
 ENV MAGENTO_ROOT /var/www/magento
 
 ENV DEBUG false
-ENV UPDATE_UID_GID false
 
 ADD etc/php-xdebug.ini /usr/local/etc/php/conf.d/zz-xdebug-settings.ini
 ADD etc/mail.ini /usr/local/etc/php/conf.d/zz-mail.ini
@@ -54,11 +53,6 @@ RUN ["chmod", "+x", "/docker-entrypoint.sh"]
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 ENV COMPOSER_ALLOW_SUPERUSER 1
-ENV COMPOSER_GITHUB_TOKEN ""
-ENV COMPOSER_MAGENTO_USERNAME ""
-ENV COMPOSER_MAGENTO_PASSWORD ""
-ENV COMPOSER_BITBUCKET_KEY ""
-ENV COMPOSER_BITBUCKET_SECRET ""
 
 VOLUME /root/.composer/cache
 
@@ -66,11 +60,5 @@ ADD etc/php-cli.ini /usr/local/etc/php/conf.d/zz-magento.ini
 
 # Get composer installed to /usr/local/bin/composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-ADD bin/* /usr/local/bin/
-
-RUN ["chmod", "+x", "/usr/local/bin/magento-installer"]
-RUN ["chmod", "+x", "/usr/local/bin/magento-command"]
-RUN ["chmod", "+x", "/usr/local/bin/run-cron"]
 
 CMD ["bash"]
