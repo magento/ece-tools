@@ -14,10 +14,6 @@ use PHPUnit\Framework\TestCase;
  */
 class DirectoryListTest extends TestCase
 {
-    /**
-     * @param string $code
-     * @param string $expected
-     */
     public function testGetPath()
     {
         $directoryList = $this->get22DirectoryList();
@@ -25,6 +21,11 @@ class DirectoryListTest extends TestCase
         $this->assertSame(
             __DIR__ . '/_files/test/var',
             $directoryList->getPath('test_var')
+        );
+
+        $this->assertSame(
+            '_files/test/var',
+            $directoryList->getPath('test_var', true)
         );
     }
 
@@ -147,29 +148,39 @@ class DirectoryListTest extends TestCase
      * @param array $paths
      * @dataProvider getWritableDirectoriesDataProvider
      */
-    public function testGetGetWritableDirectories(DirectoryList $directoryList, array $paths)
+    public function testGetGetWritableDirectories(DirectoryList $directoryList, array $paths, bool $relativePath)
     {
-        $result = $directoryList->getWritableDirectories();
+        $result = $directoryList->getWritableDirectories($relativePath);
         sort($result);
         sort($paths);
-        $this->assertEquals($paths, $result);
+        $this->assertSame($paths, $result);
     }
 
     public function getWritableDirectoriesDataProvider()
     {
-        $paths21 = [
+        $abs21Paths = [
             __DIR__ . '/var/di',
             __DIR__ . '/var/generation',
             __DIR__ . '/var/view_preprocessed',
             __DIR__ . '/app/etc',
             __DIR__ . '/pub/media'
         ];
+        $relative21Paths = [
+            'var/di',
+            'var/generation',
+            'var/view_preprocessed',
+            'app/etc',
+            'pub/media'
+        ];
 
-        $paths22 = [__DIR__ . '/var', __DIR__ . '/app/etc', __DIR__ . '/pub/media'];
+        $abs22Paths      = [__DIR__ . '/var', __DIR__ . '/app/etc', __DIR__ . '/pub/media'];
+        $relative22Paths = ['var', 'app/etc', 'pub/media'];
 
         return [
-            [$this->get21DirectoryList(), $paths21],
-            [$this->get22DirectoryList(), $paths22],
+            [$this->get21DirectoryList(), $abs21Paths,      false],
+            [$this->get22DirectoryList(), $abs22Paths,      false],
+            [$this->get21DirectoryList(), $relative21Paths, true],
+            [$this->get22DirectoryList(), $relative22Paths, true],
         ];
     }
 
