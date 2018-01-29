@@ -49,7 +49,10 @@
       "phpunit --configuration tests/unit/phpunit.xml.dist"
     ],
     "test-coverage": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml 85",
-    "test-coverage-generate": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-html tests/unit/tmp/coverage"
+    "test-coverage-generate": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-html tests/unit/tmp/coverage",
+    "test-2.1": "phpunit --configuration tests/unit/phpunit.xml.dist --group 2.1",
+    "test-2.2": "phpunit --configuration tests/unit/phpunit.xml.dist --group 2.2"
+
   },
   "prefer-stable": true
 }
