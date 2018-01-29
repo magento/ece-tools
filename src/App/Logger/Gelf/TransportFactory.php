@@ -3,14 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\App\Logger;
+namespace Magento\MagentoCloud\App\Logger\Gelf;
 
 use Gelf\Transport\AbstractTransport;
 use Gelf\Transport\HttpTransport;
 use Gelf\Transport\TcpTransport;
 use Gelf\Transport\UdpTransport;
 
-class GelfTransportFactory
+class TransportFactory
 {
     const TRANSPORT_HTTP = 'http';
     const TRANSPORT_UDP = 'udp';

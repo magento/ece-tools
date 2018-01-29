@@ -6,6 +6,8 @@
 namespace Magento\MagentoCloud\App\Logger;
 
 use Gelf\Publisher;
+use Magento\MagentoCloud\App\Logger\Gelf\MessageFormatter;
+use Magento\MagentoCloud\App\Logger\Gelf\TransportFactory;
 use Monolog\Handler\GelfHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
@@ -39,19 +41,19 @@ class HandlerFactory
     private $logConfig;
 
     /**
-     * @var GelfTransportFactory
+     * @var TransportFactory
      */
     private $gelfTransportFactory;
 
     /**
      * @param LevelResolver $levelResolver
      * @param LogConfig $logConfig
-     * @param GelfTransportFactory $gelfTransportFactory
+     * @param TransportFactory $gelfTransportFactory
      */
     public function __construct(
         LevelResolver $levelResolver,
         LogConfig $logConfig,
-        GelfTransportFactory $gelfTransportFactory
+        TransportFactory $gelfTransportFactory
     ) {
         $this->levelResolver = $levelResolver;
         $this->logConfig = $logConfig;
@@ -117,10 +119,14 @@ class HandlerFactory
                         $this->gelfTransportFactory->create($transportType, $transportConfig)
                     );
                 }
+                $messageFormatter = new MessageFormatter();
+                $messageFormatter->setAdditional($configuration->get('additional', []));
+
                 $handlerInstance = new GelfHandler(
                     $publisher,
                     $minLevel
                 );
+                $handlerInstance->setFormatter($messageFormatter);
                 break;
             default:
                 throw new \Exception('Unknown type of log handler: ' . $handler);
