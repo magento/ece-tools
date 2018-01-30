@@ -7,6 +7,10 @@ namespace Magento\MagentoCloud\App\Logger\Gelf;
 
 use Monolog\Formatter\GelfMessageFormatter;
 
+/**
+ * Extends functionality of GelfMessageFormatter.
+ * Adds possibility to set additional data for all messages that used current formatter.
+ */
 class MessageFormatter extends GelfMessageFormatter
 {
     /**
@@ -15,6 +19,8 @@ class MessageFormatter extends GelfMessageFormatter
     private $additional;
 
     /**
+     * Sets additional data that will be applied to all messages.
+     *
      * @param array $additional
      */
     public function setAdditional(array $additional)

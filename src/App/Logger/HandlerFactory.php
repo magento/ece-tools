@@ -5,10 +5,6 @@
  */
 namespace Magento\MagentoCloud\App\Logger;
 
-use Gelf\Publisher;
-use Magento\MagentoCloud\App\Logger\Gelf\Handler as GelfHandler;
-use Magento\MagentoCloud\App\Logger\Gelf\MessageFormatter;
-use Magento\MagentoCloud\App\Logger\Gelf\TransportFactory;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\NativeMailerHandler;
@@ -16,6 +12,7 @@ use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\SyslogUdpHandler;
+use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
 
 /**
  * The handler factory.
@@ -41,23 +38,23 @@ class HandlerFactory
     private $logConfig;
 
     /**
-     * @var TransportFactory
+     * @var GelfHandlerFactory
      */
-    private $gelfTransportFactory;
+    private $gelfHandlerFactory;
 
     /**
      * @param LevelResolver $levelResolver
      * @param LogConfig $logConfig
-     * @param TransportFactory $gelfTransportFactory
+     * @param GelfHandlerFactory $gelfHandlerFactory
      */
     public function __construct(
         LevelResolver $levelResolver,
         LogConfig $logConfig,
-        TransportFactory $gelfTransportFactory
+        GelfHandlerFactory $gelfHandlerFactory
     ) {
         $this->levelResolver = $levelResolver;
         $this->logConfig = $logConfig;
-        $this->gelfTransportFactory = $gelfTransportFactory;
+        $this->gelfHandlerFactory = $gelfHandlerFactory;
     }
 
     /**
@@ -113,21 +110,7 @@ class HandlerFactory
                 );
                 break;
             case static::HANDLER_GELF:
-                ini_set('default_socket_timeout', 36000);
-                $publisher = new Publisher();
-                foreach ($configuration->get('transport') as $transportType => $transportConfig) {
-                    $publisher->addTransport(
-                        $this->gelfTransportFactory->create($transportType, $transportConfig)
-                    );
-                }
-                $messageFormatter = new MessageFormatter();
-                $messageFormatter->setAdditional($configuration->get('additional', []));
-
-                $handlerInstance = new GelfHandler(
-                    $publisher,
-                    $minLevel
-                );
-                $handlerInstance->setFormatter($messageFormatter);
+                $handlerInstance = $this->gelfHandlerFactory->create($configuration, $minLevel);
                 break;
             default:
                 throw new \Exception('Unknown type of log handler: ' . $handler);

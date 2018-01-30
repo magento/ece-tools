@@ -7,8 +7,17 @@ namespace Magento\MagentoCloud\App\Logger\Gelf;
 
 use Monolog\Handler\GelfHandler;
 
+/**
+ * Wrapper for GelfHandler class.
+ */
 class Handler extends GelfHandler
 {
+    /**
+     * This method wraps parent method with try catch for avoiding stopping deploy process after
+     * losing connection to graylog server.
+     *
+     * @param array $record
+     */
     protected function write(array $record)
     {
         try {

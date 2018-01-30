@@ -32,8 +32,8 @@ class TransportFactory
                     $config['port'] ?? null,
                     $config['path'] ?? null
                 );
-                if (isset($config['timeout'])) {
-                    $transport->setConnectTimeout($config['timeout']);
+                if (isset($config['connection_timeout'])) {
+                    $transport->setConnectTimeout($config['connection_timeout']);
                 }
                 break;
             case self::TRANSPORT_TCP:
@@ -41,8 +41,8 @@ class TransportFactory
                     $config['host'] ?? null,
                     $config['port'] ?? null
                 );
-                if (isset($config['timeout'])) {
-                    $transport->setConnectTimeout($config['timeout']);
+                if (isset($config['connection_timeout'])) {
+                    $transport->setConnectTimeout($config['connection_timeout']);
                 }
                 break;
             case self::TRANSPORT_UDP:
