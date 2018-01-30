@@ -64,7 +64,7 @@ class ApplierTest extends TestCase
     public function testApplyingExistingPatch()
     {
         $this->bootstrap->execute(sprintf(
-            'git apply -p0 --unsafe-paths --directory=%s %s',
+            'patch --directory=%s < %s',
             $this->bootstrap->getSandboxDir(),
             $this->patchFile
         ));
