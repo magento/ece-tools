@@ -104,20 +104,23 @@ class MagentoVersionTest extends TestCase
     /**
      * Test the constraint matcher using various Composer-style version constraints.
      *
-     * @param string $assertion Method name of the assertion to call
      * @param string $constraint Composer-style version constraint string
+     * @param bool $expected Method name of the assertion to call
      * @dataProvider satisfiesDataProvider
      */
-    public function testSatisfies(string $assertion, string $constraint)
+    public function testSatisfies(string $constraint, string $packageVersion, bool $expected)
     {
         $this->managerMock->expects($this->exactly(1))
             ->method('get')
             ->willReturn($this->packageMock);
         $this->packageMock->expects($this->exactly(1))
             ->method('getVersion')
-            ->willReturn('2.2.1');
+            ->willReturn($packageVersion);
 
-        $this->$assertion($this->magentoVersion->satisfies($constraint));
+        $this->assertSame(
+            $expected,
+            $this->magentoVersion->satisfies($constraint)
+        );
     }
 
     /**
@@ -126,47 +129,15 @@ class MagentoVersionTest extends TestCase
     public function satisfiesDataProvider()
     {
         return [
-            ['assertTrue', '2.2.1'],
-            ['assertTrue', '2.2.*'],
-            ['assertTrue', '~2.2.0'],
-            ['assertFalse', '2.2.0'],
-            ['assertFalse', '2.1.*'],
-            ['assertFalse', '~2.1.0'],
-        ];
-    }
-
-    /**
-     * @param string $versionFrom
-     * @param string $versionTo
-     * @param string $packageVersion
-     * @param bool $expected
-     * @dataProvider isBetweenDataDataProvider
-     */
-    public function testIsBetween(string $versionFrom, string $versionTo, string $packageVersion, bool $expected)
-    {
-        $this->managerMock->method('get')
-            ->with('magento/magento2-base')
-            ->willReturn($this->packageMock);
-        $this->packageMock->expects($this->exactly(2))
-            ->method('getVersion')
-            ->willReturn($packageVersion);
-
-        $this->assertSame(
-            $expected,
-            $this->magentoVersion->isBetween($versionFrom, $versionTo)
-        );
-    }
-
-    /**
-     * @return array
-     */
-    public function isBetweenDataDataProvider(): array
-    {
-        return [
-            ['2.1', '2.2', '2.1.9', true],
-            ['2.1', '2.2', '2.2', false],
-            ['2.1', '2.2', '2.1', true],
-            ['2.1', '2.2', '2.2-dev', true],
+            ['2.2.1', '2.2.1', true],
+            ['2.2.*', '2.2.1', true],
+            ['~2.2.0', '2.2.1', true],
+            ['2.2.0', '2.2.1', false],
+            ['2.1.*', '2.2.1', false],
+            ['~2.1.0', '2.2.1', false],
+            ['~2.1.0', '2.1.1', true],
+            ['~2.2.0', '2.1.1', false],
+            ['~2.2', '2.1', false],
         ];
     }
 }

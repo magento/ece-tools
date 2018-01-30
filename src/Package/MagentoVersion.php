@@ -9,9 +9,7 @@ use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
 
 /**
- * Class MagentoVersion
- *
- * @package Magento\MagentoCloud\Package
+ * Defines methods for comparing version constraints with base Magento package.
  */
 class MagentoVersion
 {
@@ -58,19 +56,6 @@ class MagentoVersion
     public function isGreaterOrEqual(string $version): bool
     {
         return $this->comparator::compare($this->getVersion(), '>=', $version);
-    }
-
-    /**
-     * Compares version between 2 constraints.
-     *
-     * @param string $versionFrom
-     * @param string $versionTo
-     * @return bool
-     */
-    public function isBetween(string $versionFrom, string $versionTo): bool
-    {
-        return $this->comparator::compare($this->getVersion(), '>=', $versionFrom)
-            && $this->comparator::compare($this->getVersion(), '<', $versionTo);
     }
 
     /**

@@ -76,9 +76,9 @@ class RecoverableDirectoryListTest extends TestCase
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
             ]);
         $this->magentoVersionMock->expects($this->once())
-            ->method('isBetween')
+            ->method('satisfies')
             ->willReturnMap([
-                ['2.1', '2.2', false],
+                ['~2.1', false],
             ]);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -174,9 +174,9 @@ class RecoverableDirectoryListTest extends TestCase
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK, $isGeneratedSymlinkOn],
             ]);
         $this->magentoVersionMock->expects($this->once())
-            ->method('isBetween')
+            ->method('satisfies')
             ->willReturnMap([
-                ['2.1', '2.2', true],
+                ['~2.1', true],
             ]);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')

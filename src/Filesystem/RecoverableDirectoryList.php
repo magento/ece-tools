@@ -93,7 +93,7 @@ class RecoverableDirectoryList
         /**
          * Magento 2.1 related directories.
          */
-        if ($this->magentoVersion->isBetween('2.1', '2.2')) {
+        if ($this->magentoVersion->satisfies('~2.1')) {
             $diStrategy = $this->stageConfig->get(DeployInterface::VAR_GENERATED_CODE_SYMLINK)
                 ? StrategyInterface::STRATEGY_SYMLINK
                 : StrategyInterface::STRATEGY_COPY;
