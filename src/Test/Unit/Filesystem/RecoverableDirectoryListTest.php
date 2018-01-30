@@ -78,7 +78,7 @@ class RecoverableDirectoryListTest extends TestCase
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
             ->willReturnMap([
-                ['~2.1', false],
+                ['2.1.*', false],
             ]);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -176,7 +176,7 @@ class RecoverableDirectoryListTest extends TestCase
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
             ->willReturnMap([
-                ['~2.1', true],
+                ['2.1.*', true],
             ]);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
