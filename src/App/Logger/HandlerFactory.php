@@ -6,9 +6,9 @@
 namespace Magento\MagentoCloud\App\Logger;
 
 use Gelf\Publisher;
+use Magento\MagentoCloud\App\Logger\Gelf\Handler as GelfHandler;
 use Magento\MagentoCloud\App\Logger\Gelf\MessageFormatter;
 use Magento\MagentoCloud\App\Logger\Gelf\TransportFactory;
-use Monolog\Handler\GelfHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\NativeMailerHandler;
