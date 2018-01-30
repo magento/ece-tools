@@ -25,7 +25,6 @@ class TransportFactory
      */
     public function create(string $type, array $config): AbstractTransport
     {
-        $connectionTimeout = 3600;
         switch ($type) {
             case self::TRANSPORT_HTTP:
                 $transport = new HttpTransport(
@@ -33,14 +32,18 @@ class TransportFactory
                     $config['port'] ?? null,
                     $config['path'] ?? null
                 );
-                $transport->setConnectTimeout($connectionTimeout);
+                if (isset($config['timeout'])) {
+                    $transport->setConnectTimeout($config['timeout']);
+                }
                 break;
             case self::TRANSPORT_TCP:
                 $transport = new TcpTransport(
                     $config['host'] ?? null,
                     $config['port'] ?? null
                 );
-                $transport->setConnectTimeout($connectionTimeout);
+                if (isset($config['timeout'])) {
+                    $transport->setConnectTimeout($config['timeout']);
+                }
                 break;
             case self::TRANSPORT_UDP:
                 $transport = new UdpTransport(
