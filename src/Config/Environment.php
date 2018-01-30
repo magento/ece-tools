@@ -15,9 +15,6 @@ use Psr\Log\LoggerInterface;
  */
 class Environment
 {
-    const MAGENTO_PRODUCTION_MODE = 'production';
-    const MAGENTO_DEVELOPER_MODE = 'developer';
-
     /**
      * Regex pattern for detecting main branch.
      * The name of the main branch must be started from one of three prefixes:
