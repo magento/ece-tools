@@ -113,6 +113,7 @@ class HandlerFactory
                 );
                 break;
             case static::HANDLER_GELF:
+                ini_set('default_socket_timeout', 36000);
                 $publisher = new Publisher();
                 foreach ($configuration->get('transport') as $transportType => $transportConfig) {
                     $publisher->addTransport(
