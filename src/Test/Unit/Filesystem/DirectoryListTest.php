@@ -113,28 +113,4 @@ class DirectoryListTest extends TestCase
             $this->directoryList->getLog()
         );
     }
-
-    public function testGetGenerated()
-    {
-        $this->assertSame(
-            __DIR__ . '/generated',
-            $this->directoryList->getGenerated()
-        );
-    }
-
-    public function testGetGeneratedCode()
-    {
-        $this->assertSame(
-            __DIR__ . '/generated/code',
-            $this->directoryList->getGeneratedCode()
-        );
-    }
-
-    public function testGetGeneratedMetadata()
-    {
-        $this->assertSame(
-            __DIR__ . '/generated/metadata',
-            $this->directoryList->getGeneratedMetadata()
-        );
-    }
 }

@@ -48,11 +48,6 @@ class UpgradeTest extends TestCase
     public function testDefault(string $fromVersion, string $toVersion)
     {
         $application = $this->bootstrap->createApplication([]);
-        $config = $this->bootstrap->mergeConfig([]);
-
-        if ($config->get('deploy.type') !== Bootstrap::DEPLOY_TYPE_PROJECT) {
-            $this->markTestIncomplete('Git upgrades does not supported.');
-        }
 
         $executeAndAssert = function ($commandName) use ($application) {
             $application->getContainer()->set(

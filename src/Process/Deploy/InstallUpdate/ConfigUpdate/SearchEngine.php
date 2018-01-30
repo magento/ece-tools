@@ -5,11 +5,10 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -38,11 +37,6 @@ class SearchEngine implements ProcessInterface
     private $stageConfig;
 
     /**
-     * @var MagentoVersion
-     */
-    private $magentoVersion;
-
-    /**
      * @param Environment $environment
      * @param LoggerInterface $logger
      * @param Writer $writer
@@ -52,14 +46,12 @@ class SearchEngine implements ProcessInterface
         Environment $environment,
         LoggerInterface $logger,
         Writer $writer,
-        DeployInterface $stageConfig,
-        MagentoVersion $version
+        DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
         $this->writer = $writer;
         $this->stageConfig = $stageConfig;
-        $this->magentoVersion = $version;
     }
 
     /**
@@ -69,14 +61,6 @@ class SearchEngine implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $version = $this->magentoVersion->getVersion();
-            $this->logger->info(
-                sprintf('Updating search engine configuration is not supported in Magento %s, skipping.', $version)
-            );
-            return;
-        }
-        
         $this->logger->info('Updating search engine configuration.');
 
         $searchConfig = $this->getSearchConfiguration();

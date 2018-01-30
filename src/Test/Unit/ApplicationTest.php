@@ -3,11 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Unit;
+namespace Magento\MagentoCloud\Test\Unit;
 
 use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Magento\MagentoCloud\Application;
+use Magento\MagentoCloud\Command\ApplyPatches;
 use Magento\MagentoCloud\Command\BackupList;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
@@ -77,6 +78,7 @@ class ApplicationTest extends TestCase
         $postDeployCommandMock = $this->createMock(PostDeploy::class);
         $backupRestoreCommandMock = $this->createMock(BackupRestore::class);
         $backupListCommandMock = $this->createMock(BackupList::class);
+        $applyPatchesCommandMock = $this->createMock(ApplyPatches::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
         $this->mockCommand($configDumpCommandMock, ConfigDump::NAME);
@@ -87,6 +89,7 @@ class ApplicationTest extends TestCase
         $this->mockCommand($prestartCommandMock, Prestart::NAME);
         $this->mockCommand($backupRestoreCommandMock, BackupRestore::class);
         $this->mockCommand($backupListCommandMock, BackupList::class);
+        $this->mockCommand($applyPatchesCommandMock, ApplyPatches::class);
 
         $this->containerMock->method('get')
             ->willReturnMap([
@@ -100,6 +103,7 @@ class ApplicationTest extends TestCase
                 [CronUnlock::class, $cronUnlockCommandMock],
                 [BackupRestore::class, $backupRestoreCommandMock],
                 [BackupList::class, $backupListCommandMock],
+                [ApplyPatches::class, $applyPatchesCommandMock],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
