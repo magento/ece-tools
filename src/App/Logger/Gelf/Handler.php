@@ -23,7 +23,7 @@ class Handler extends GelfHandler
         try {
             parent::write($record);
         } catch (\RuntimeException $e) {
-            fwrite(STDERR, 'Can\'t send message to graylog: ' . $e->getMessage());
+            fwrite(STDERR, 'Can\'t send log message: ' . $e->getMessage());
         }
     }
 }

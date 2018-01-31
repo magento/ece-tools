@@ -5,9 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
-use Gelf\Transport\UdpTransport;
 use Illuminate\Config\Repository;
-use Magento\MagentoCloud\App\Logger\Gelf\Handler;
+use Magento\MagentoCloud\App\Logger\Gelf\Handler as GelfHandler;
 use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
@@ -24,6 +23,8 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class HandlerFactoryTest extends TestCase
 {
@@ -95,7 +96,7 @@ class HandlerFactoryTest extends TestCase
     public function testCreateGelfHandler()
     {
         $handler = 'gelf';
-        $handlerMock = $this->createMock(Handler::class);
+        $handlerMock = $this->createMock(GelfHandler::class);
         $this->logConfigMock->expects($this->once())
             ->method('get')
             ->with($handler)
@@ -108,7 +109,7 @@ class HandlerFactoryTest extends TestCase
             ->method('create')
             ->willReturn($handlerMock);
 
-       $this->assertInstanceOf(Handler::class, $this->handlerFactory->create($handler));
+        $this->assertInstanceOf(GelfHandler::class, $this->handlerFactory->create($handler));
     }
 
     /**
@@ -200,8 +201,8 @@ class HandlerFactoryTest extends TestCase
                 'handler' => HandlerFactory::HANDLER_SYSLOG_UDP,
                 'repositoryMockGetExpects' => 5,
                 'repositoryMockReturnMap' => [
-                    ['host', null, UdpTransport::DEFAULT_HOST],
-                    ['port', null, UdpTransport::DEFAULT_PORT],
+                    ['host', null, '127.0.0.1'],
+                    ['port', null, 12201],
                     ['facility', LOG_USER, LOG_USER],
                     ['bubble', true, false],
                     ['ident', 'php', 'php'],

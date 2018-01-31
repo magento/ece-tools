@@ -16,7 +16,6 @@ class TransportFactory
     const TRANSPORT_UDP = 'udp';
     const TRANSPORT_TCP = 'tcp';
 
-
     /**
      * @param string $type
      * @param array $config
