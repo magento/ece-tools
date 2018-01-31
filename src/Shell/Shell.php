@@ -70,16 +70,4 @@ class Shell implements ShellInterface
 
         return $output;
     }
-
-    /**
-     * @inheritdoc
-     */
-    public function backgroundExecute(string $command)
-    {
-        $command = "nohup {$command} 1>/dev/null 2>&1 &";
-
-        $this->logger->info('Execute command in background: ' . $command);
-
-        shell_exec($command);
-    }
 }

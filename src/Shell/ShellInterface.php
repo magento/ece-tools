@@ -18,11 +18,4 @@ interface ShellInterface
      * @throws \RuntimeException If command was executed with error
      */
     public function execute(string $command);
-
-    /**
-     * Runs shell command in background.
-     *
-     * @param string $command The command.
-     */
-    public function backgroundExecute(string $command);
 }

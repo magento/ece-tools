@@ -139,6 +139,15 @@ class LoggerTest extends TestCase
                 'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => 1,
                 'fileMockCopyExpects' => 0,
+            ],
+            [
+                'fileMockFileGetContentsExpects' => 0,
+                'buildPhaseLogContent' => '',
+                'buildLogFileExists' => false,
+                'deployLogContent' => 'some log the build phase log was applied some log',
+                'deployLogFileExists' => true,
+                'fileMockFilePutContentsExpects' => 0,
+                'fileMockCopyExpects' => 0,
             ]
         ];
     }
