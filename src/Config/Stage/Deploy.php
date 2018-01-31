@@ -111,7 +111,6 @@ class Deploy implements DeployInterface
         }
 
         $disabledFlow = [
-            self::VAR_REDIS_SESSION_DISABLE_LOCKING,
             self::VAR_CLEAN_STATIC_FILES,
             self::VAR_STATIC_CONTENT_SYMLINK,
             self::VAR_UPDATE_URLS,
@@ -187,7 +186,6 @@ class Deploy implements DeployInterface
         return [
             self::VAR_SCD_STRATEGY => '',
             self::VAR_SCD_COMPRESSION_LEVEL => 4,
-            self::VAR_REDIS_SESSION_DISABLE_LOCKING => true,
             self::VAR_SEARCH_CONFIGURATION => [],
             self::VAR_QUEUE_CONFIGURATION => [],
             self::VAR_VERBOSE_COMMANDS => '',
