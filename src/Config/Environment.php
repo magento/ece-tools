@@ -26,6 +26,9 @@ class Environment
      */
     const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)(?:-[a-z0-9]+)?$/i';
 
+    /**
+     * @deprecated Threads environment variables must be used.
+     */
     const CLOUD_MODE_ENTERPRISE = 'enterprise';
 
     const VAL_ENABLED = 'enabled';
