@@ -104,8 +104,6 @@ class DeployStaticContentTest extends TestCase
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->environmentMock->expects($this->never())
-            ->method('getApplicationMode');
-        $this->environmentMock->expects($this->never())
             ->method('isDeployStaticContent');
         $this->directoryListMock->expects($this->never())
             ->method('getMagentoRoot');
@@ -125,9 +123,6 @@ class DeployStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
             ->willReturn(true);
-        $this->environmentMock->expects($this->once())
-            ->method('getApplicationMode')
-            ->willReturn(Environment::MAGENTO_PRODUCTION_MODE);
         $this->environmentMock->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(true);
@@ -151,27 +146,6 @@ class DeployStaticContentTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteOnLocalNonProductionMode()
-    {
-        $this->remoteDiskIdentifierMock->expects($this->once())
-            ->method('isOnLocalDisk')
-            ->with('pub/static')
-            ->willReturn(true);
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
-            ->willReturn(true);
-        $this->environmentMock->expects($this->once())
-            ->method('getApplicationMode')
-            ->willReturn('Developer');
-        $this->environmentMock->expects($this->never())
-            ->method('isDeployStaticContent');
-        $this->loggerMock->expects($this->never())
-            ->method('info');
-
-        $this->process->execute();
-    }
-
     public function testExecuteOnLocalDoNotDeploy()
     {
         $this->remoteDiskIdentifierMock->expects($this->once())
@@ -182,9 +156,6 @@ class DeployStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
             ->willReturn(true);
-        $this->environmentMock->expects($this->once())
-            ->method('getApplicationMode')
-            ->willReturn(Environment::MAGENTO_PRODUCTION_MODE);
         $this->environmentMock->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(false);
@@ -209,9 +180,6 @@ class DeployStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
             ->willReturn(true);
-        $this->environmentMock->expects($this->once())
-            ->method('getApplicationMode')
-            ->willReturn(Environment::MAGENTO_PRODUCTION_MODE);
         $this->environmentMock->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(true);

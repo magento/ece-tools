@@ -99,10 +99,6 @@ class DeployStaticContent implements ProcessInterface
         if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
             && $this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
         ) {
-            if (Environment::MAGENTO_PRODUCTION_MODE !== $this->environment->getApplicationMode()) {
-                return;
-            }
-
             if ($this->stageConfig->get(DeployInterface::VAR_SKIP_SCD) ||
                 !$this->environment->isDeployStaticContent()
             ) {

@@ -15,9 +15,6 @@ use Psr\Log\LoggerInterface;
  */
 class Environment
 {
-    const MAGENTO_PRODUCTION_MODE = 'production';
-    const MAGENTO_DEVELOPER_MODE = 'developer';
-
     /**
      * Regex pattern for detecting main branch.
      * The name of the main branch must be started from one of three prefixes:
@@ -157,19 +154,6 @@ class Environment
     public function getVariable($name, $default = null)
     {
         return $this->getVariables()[$name] ?? $default;
-    }
-
-    /**
-     * @return string
-     */
-    public function getApplicationMode(): string
-    {
-        $var = $this->getVariables();
-        $mode = isset($var['APPLICATION_MODE']) ? $var['APPLICATION_MODE'] : false;
-
-        return in_array($mode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
-            ? $mode
-            : self::MAGENTO_PRODUCTION_MODE;
     }
 
     /**
