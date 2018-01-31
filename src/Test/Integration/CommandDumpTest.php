@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Util\ArrayManager;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -18,13 +17,8 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 /**
  * @inheritdoc
  */
-class CommandDumpTest extends TestCase
+class CommandDumpTest extends AbstractTest
 {
-    /**
-     * @var Bootstrap
-     */
-    private $bootstrap;
-
     /**
      * @var ArrayManager
      */
@@ -35,19 +29,9 @@ class CommandDumpTest extends TestCase
      */
     protected function setUp()
     {
-        $this->bootstrap = Bootstrap::create();
-        $this->arrayManager = new ArrayManager();
-    }
+        parent::setUp();
 
-    /**
-     * @inheritdoc
-     */
-    protected function tearDown()
-    {
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento setup:uninstall -n',
-            $this->bootstrap->getSandboxDir()
-        ));
+        $this->arrayManager = new ArrayManager();
     }
 
     public function testDump()

@@ -7,20 +7,14 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
  */
-class AdminCredentialTest extends TestCase
+class AdminCredentialTest extends AbstractTest
 {
-    /**
-     * @var Bootstrap
-     */
-    private $bootstrap;
-
     /**
      * @var array
      */
@@ -31,7 +25,7 @@ class AdminCredentialTest extends TestCase
      */
     protected function setUp()
     {
-        $this->bootstrap = Bootstrap::create();
+        parent::setUp();
 
         $this->env = $_ENV;
     }
@@ -41,10 +35,7 @@ class AdminCredentialTest extends TestCase
      */
     protected function tearDown()
     {
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento setup:uninstall -n',
-            $this->bootstrap->getSandboxDir()
-        ));
+        parent::tearDown();
 
         $_ENV = $this->env;
     }

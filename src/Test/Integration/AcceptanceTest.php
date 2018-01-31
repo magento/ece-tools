@@ -11,38 +11,13 @@ use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
  */
-class AcceptanceTest extends TestCase
+class AcceptanceTest extends AbstractTest
 {
-    /**
-     * @var Bootstrap
-     */
-    private $bootstrap;
-
-    /**
-     * @inheritdoc
-     */
-    protected function setUp()
-    {
-        $this->bootstrap = Bootstrap::create();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function tearDown()
-    {
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento setup:uninstall -n',
-            $this->bootstrap->getSandboxDir()
-        ));
-    }
-
     /**
      * @param string $commandName
      * @param Application $application
