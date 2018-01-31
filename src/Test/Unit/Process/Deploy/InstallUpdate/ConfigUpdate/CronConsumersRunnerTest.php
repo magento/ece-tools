@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Illuminate\Config\Repository;
+use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner;
 use PHPUnit\Framework\TestCase;
@@ -50,6 +52,11 @@ class CronConsumersRunnerTest extends TestCase
     private $stageConfigMock;
 
     /**
+     * @var RepositoryFactory|Mock
+     */
+    private $repositoryFactoryMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -59,13 +66,15 @@ class CronConsumersRunnerTest extends TestCase
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
 
         $this->cronConsumersRunner = new CronConsumersRunner(
             $this->environmentMock,
             $this->configReaderMock,
             $this->configWriterMock,
             $this->loggerMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->repositoryFactoryMock
         );
     }
 
@@ -90,6 +99,10 @@ class CronConsumersRunnerTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('write')
             ->with($expectedResult);
+        $this->repositoryFactoryMock->expects($this->once())
+            ->method('create')
+            ->with($configFromVariable)
+            ->willReturn(new Repository($configFromVariable));
 
         $this->cronConsumersRunner->execute();
     }
