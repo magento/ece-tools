@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
+use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -35,9 +36,14 @@ class SearchEngineTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Writer|Mock
+     * @var EnvWriter|Mock
      */
-    private $writerMock;
+    private $envWriterMock;
+
+    /**
+     * @var SharedWriter|Mock
+     */
+    private $sharedWriterMock;
 
     /**
      * @var DeployInterface|Mock
@@ -55,7 +61,8 @@ class SearchEngineTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->writerMock = $this->createMock(Writer::class);
+        $this->envWriterMock = $this->createMock(EnvWriter::class);
+        $this->sharedWriterMock = $this->createMock(SharedWriter::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -63,7 +70,8 @@ class SearchEngineTest extends TestCase
         $this->process = new SearchEngine(
             $this->environmentMock,
             $this->loggerMock,
-            $this->writerMock,
+            $this->envWriterMock,
+            $this->sharedWriterMock,
             $this->stageConfigMock,
             $this->magentoVersionMock
         );
@@ -71,9 +79,6 @@ class SearchEngineTest extends TestCase
 
     public function testExecute()
     {
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
-        
         $config['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -82,7 +87,9 @@ class SearchEngineTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
             ->willReturn([]);
-        $this->writerMock->expects($this->once())
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        $this->envWriterMock->expects($this->once())
             ->method('update')
             ->with($config);
         $this->loggerMock->expects($this->exactly(2))
@@ -95,7 +102,22 @@ class SearchEngineTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteWithElasticSearch()
+    /**
+     * @return array
+     */
+    public function magentoVersionTestDataProvider(): array
+    {
+        return [
+            [ 'newVersion' => true ],
+            [ 'newVersion' => false ],
+        ];
+    }
+
+    /**
+     * @param bool newVersion
+     * @dataProvider magentoVersionTestDataProvider
+     */
+    public function testExecuteWithElasticSearch(bool $newVersion)
     {
         $config['system']['default']['catalog']['search'] = [
             'engine' => 'elasticsearch',
@@ -104,7 +126,7 @@ class SearchEngineTest extends TestCase
         ];
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
+            ->willReturn($newVersion);
         
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -122,9 +144,15 @@ class SearchEngineTest extends TestCase
                     ],
                 ]
             );
-        $this->writerMock->expects($this->once())
-            ->method('update')
-            ->with($config);
+        if ($newVersion) {
+            $this->envWriterMock->expects($this->once())
+                ->method('update')
+                ->with($config);
+        } else {
+            $this->sharedWriterMock->expects($this->once())
+                ->method('update')
+                ->with($config);
+        }
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -135,7 +163,11 @@ class SearchEngineTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteWithElasticSolr()
+    /**
+     * @param bool newVersion
+     * @dataProvider magentoVersionTestDataProvider
+     */
+    public function testExecuteWithElasticSolr(bool $newVersion)
     {
         $config['system']['default']['catalog']['search'] = [
             'engine' => 'solr',
@@ -146,7 +178,7 @@ class SearchEngineTest extends TestCase
         ];
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
+            ->willReturn($newVersion);
         
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -166,9 +198,15 @@ class SearchEngineTest extends TestCase
                     ],
                 ]
             );
-        $this->writerMock->expects($this->once())
-            ->method('update')
-            ->with($config);
+        if ($newVersion) {
+            $this->envWriterMock->expects($this->once())
+                ->method('update')
+                ->with($config);
+        } else {
+            $this->sharedWriterMock->expects($this->once())
+                ->method('update')
+                ->with($config);
+        }
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -179,7 +217,11 @@ class SearchEngineTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteEnvironmentConfiguration()
+    /**
+     * @param bool newVersion
+     * @dataProvider magentoVersionTestDataProvider
+     */
+    public function testExecuteEnvironmentConfiguration(bool $newVersion)
     {
         $config['system']['default']['catalog']['search'] = [
             'engine' => 'elasticsearch',
@@ -188,7 +230,7 @@ class SearchEngineTest extends TestCase
         ];
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
+            ->willReturn($newVersion);
         
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -200,10 +242,15 @@ class SearchEngineTest extends TestCase
             ]);
         $this->environmentMock->expects($this->never())
             ->method('getRelationships');
-
-        $this->writerMock->expects($this->once())
-            ->method('update')
-            ->with($config);
+        if ($newVersion) {
+            $this->envWriterMock->expects($this->once())
+                ->method('update')
+                ->with($config);
+        } else {
+            $this->sharedWriterMock->expects($this->once())
+                ->method('update')
+                ->with($config);
+        }
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -211,30 +258,6 @@ class SearchEngineTest extends TestCase
                 ['Set search engine to: elasticsearch']
             );
 
-        $this->process->execute();
-    }
-    
-    public function testSkipExecute()
-    {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
-
-        $this->magentoVersionMock->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('2.1.7');
-        
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Updating search engine configuration is not supported in Magento 2.1.7, skipping.');
-        $this->stageConfigMock->expects($this->never())
-            ->method('get');
-        $this->environmentMock->expects($this->never())
-            ->method('getRelationships');
-        $this->writerMock->expects($this->never())
-            ->method('update');
-    
         $this->process->execute();
     }
 }
