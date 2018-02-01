@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class CryptKey implements ProcessInterface
+class SetCryptKey implements ProcessInterface
 {
     /**
      * @var Environment

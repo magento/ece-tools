@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\Deploy\CryptKey;
+use Magento\MagentoCloud\Process\Deploy\SetCryptKey;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -44,7 +44,7 @@ class CryptKeyTest extends TestCase
             ->getMockForAbstractClass();
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
 
-        $this->process = new CryptKey(
+        $this->process = new SetCryptKey(
             $this->environmentMock,
             $this->loggerMock,
             $this->configWriterMock
