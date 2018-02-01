@@ -4,11 +4,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
+namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\CryptKey;
+use Magento\MagentoCloud\Process\Deploy\CryptKey;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
