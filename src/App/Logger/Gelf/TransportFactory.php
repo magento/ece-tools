@@ -37,8 +37,8 @@ class TransportFactory
                 break;
             case self::TRANSPORT_TCP:
                 $transport = new TcpTransport(
-                    $config['host'] ?? null,
-                    $config['port'] ?? null
+                    $config['host'] ?? TcpTransport::DEFAULT_HOST,
+                    $config['port'] ?? TcpTransport::DEFAULT_PORT
                 );
                 if (isset($config['connection_timeout'])) {
                     $transport->setConnectTimeout($config['connection_timeout']);
@@ -46,9 +46,9 @@ class TransportFactory
                 break;
             case self::TRANSPORT_UDP:
                 $transport = new UdpTransport(
-                    $config['host'] ?? null,
-                    $config['port'] ?? null,
-                    $config['chunk_size'] ?? null
+                    $config['host'] ?? UdpTransport::DEFAULT_HOST,
+                    $config['port'] ?? UdpTransport::DEFAULT_PORT,
+                    $config['chunk_size'] ?? UdpTransport::CHUNK_SIZE_WAN
                 );
                 break;
             default:
