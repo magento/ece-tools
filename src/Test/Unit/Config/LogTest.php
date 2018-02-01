@@ -88,22 +88,42 @@ class LogTest extends TestCase
     public function getHandlersDataProvider()
     {
         return [
-            ['config' => [], 'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE]],
+            [
+                'config' => [],
+                'expectedResult' => [
+                    HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
+                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath']
+                ]
+            ],
             [
                 'config' => ['someConfig' => ['someConfig']],
-                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE],
+                'expectedResult' => [
+                    HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
+                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath']
+                ],
             ],
             [
                 'config' => ['log' => []],
-                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE],
+                'expectedResult' => [
+                    HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
+                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath']
+                ],
             ],
             [
                 'config' => ['log' => ['SomeHandler' => ['SomeConfig']]],
-                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE, 'SomeHandler'],
+                'expectedResult' => [
+                    HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
+                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath'],
+                    'SomeHandler' => ['SomeConfig']
+                ],
             ],
             [
                 'config' => ['log' => ['SomeHandler' => ['SomeConfig']], 'someConfig' => ['someConfig']],
-                'expectedResult' => [HandlerFactory::HANDLER_STREAM, HandlerFactory::HANDLER_FILE, 'SomeHandler'],
+                'expectedResult' => [
+                    HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
+                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath'],
+                    'SomeHandler' => ['SomeConfig']
+                ],
             ],
         ];
     }

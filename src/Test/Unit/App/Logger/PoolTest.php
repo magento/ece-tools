@@ -55,7 +55,7 @@ class PoolTest extends TestCase
     {
         $this->logConfigMock->expects($this->once())
             ->method('getHandlers')
-            ->willReturn(['slack', 'email']);
+            ->willReturn(['slack' => [], 'email' => []]);
 
         $formatterMock = $this->createMock(LineFormatter::class);
         $this->lineFormatterFactoryMock->expects($this->exactly(2))
