@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -44,6 +45,11 @@ class CronConsumersRunner implements ProcessInterface
     private $stageConfig;
 
     /**
+     * @var RepositoryFactory
+     */
+    private $repositoryFactory;
+
+    /**
      * Max messages that will be processed by each consumer
      */
     const DEFAULT_MAX_MESSAGES = 10000;
@@ -54,19 +60,22 @@ class CronConsumersRunner implements ProcessInterface
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
+     * @param RepositoryFactory $repositoryFactory
      */
     public function __construct(
         Environment $environment,
         ConfigReader $configReader,
         ConfigWriter $configWriter,
         LoggerInterface $logger,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        RepositoryFactory $repositoryFactory
     ) {
         $this->environment = $environment;
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
+        $this->repositoryFactory = $repositoryFactory;
     }
 
     /**
@@ -76,7 +85,7 @@ class CronConsumersRunner implements ProcessInterface
     {
         $this->logger->info('Updating env.php cron consumers runner configuration.');
         $config = $this->configReader->read();
-        $runnerConfig = new Repository(
+        $runnerConfig = $this->repositoryFactory->create(
             $this->stageConfig->get(DeployInterface::VAR_CRON_CONSUMERS_RUNNER)
         );
 

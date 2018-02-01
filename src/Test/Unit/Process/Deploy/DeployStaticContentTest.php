@@ -113,15 +113,11 @@ class DeployStaticContentTest extends TestCase
             ->with('pub/static')
             ->willReturn(false);
         $this->environmentMock->expects($this->once())
-            ->method('getApplicationMode')
-            ->willReturn(Environment::MAGENTO_PRODUCTION_MODE);
-        $this->environmentMock->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(true);
-        $this->loggerMock->expects($this->exactly(4))
+        $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(
-                ['Application mode is ' . Environment::MAGENTO_PRODUCTION_MODE],
                 ['Clearing pub/static'],
                 ['Clearing var/view_preprocessed'],
                 ['Generating fresh static content']
@@ -130,7 +126,7 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_CLEAN_STATIC_FILES, true],
-                [DeployInterface::VAR_SKIP_SCD, false]
+                [DeployInterface::VAR_SKIP_SCD, false],
             ]);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -158,51 +154,23 @@ class DeployStaticContentTest extends TestCase
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->environmentMock->expects($this->once())
-            ->method('getApplicationMode')
-            ->willReturn(Environment::MAGENTO_PRODUCTION_MODE);
-        $this->environmentMock->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(true);
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
             ->withConsecutive(
-                ['Application mode is ' . Environment::MAGENTO_PRODUCTION_MODE],
                 ['Generating fresh static content']
             );
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_CLEAN_STATIC_FILES, false],
-                [DeployInterface::VAR_SKIP_SCD, false]
+                [DeployInterface::VAR_SKIP_SCD, false],
             ]);
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory');
         $this->processMock->expects($this->once())
             ->method('execute');
-
-        $this->process->execute();
-    }
-
-    public function testExecuteOnRemoteNonProductionMode()
-    {
-        $this->remoteDiskIdentifierMock->expects($this->once())
-            ->method('isOnLocalDisk')
-            ->with('pub/static')
-            ->willReturn(false);
-        $this->flagManagerMock->expects($this->never())
-            ->method('set');
-        $this->flagManagerMock->expects($this->never())
-            ->method('exists');
-        $this->environmentMock->expects($this->once())
-            ->method('getApplicationMode')
-            ->willReturn('Developer');
-        $this->environmentMock->expects($this->never())
-            ->method('isDeployStaticContent');
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Application mode is Developer');
-        $this->fileMock->expects($this->never())
-            ->method('backgroundClearDirectory');
 
         $this->process->execute();
     }
@@ -218,16 +186,8 @@ class DeployStaticContentTest extends TestCase
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->environmentMock->expects($this->once())
-            ->method('getApplicationMode')
-            ->willReturn(Environment::MAGENTO_PRODUCTION_MODE);
-        $this->environmentMock->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(false);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->withConsecutive(
-                ['Application mode is ' . Environment::MAGENTO_PRODUCTION_MODE]
-            );
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory');
 
@@ -251,8 +211,6 @@ class DeployStaticContentTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Postpone static content deployment until prestart');
-        $this->environmentMock->expects($this->never())
-            ->method('getApplicationMode');
         $this->environmentMock->expects($this->never())
             ->method('isDeployStaticContent');
         $this->fileMock->expects($this->never())
