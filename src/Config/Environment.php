@@ -271,6 +271,14 @@ class Environment
     }
 
     /**
+     * @return string
+     */
+    public function getCryptKey(): string
+    {
+        return $this->getVariable()['CRYPT_KEY'] ?? '';
+    }
+
+    /**
      * Checks that environment uses the main branch depending on environment variable MAGENTO_CLOUD_ENVIRONMENT
      * which contains the name of the git branch.
      *
