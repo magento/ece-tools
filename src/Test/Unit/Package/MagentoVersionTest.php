@@ -97,27 +97,30 @@ class MagentoVersionTest extends TestCase
         $this->packageMock->expects($this->once())
             ->method('getVersion')
             ->willReturn('2.2.1');
-        
+
         $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
     }
 
     /**
      * Test the constraint matcher using various Composer-style version constraints.
      *
-     * @param string $assertion Method name of the assertion to call
      * @param string $constraint Composer-style version constraint string
+     * @param bool $expected Method name of the assertion to call
      * @dataProvider satisfiesDataProvider
      */
-    public function testSatisfies(string $assertion, string $constraint)
+    public function testSatisfies(string $constraint, string $packageVersion, bool $expected)
     {
         $this->managerMock->expects($this->exactly(1))
             ->method('get')
             ->willReturn($this->packageMock);
         $this->packageMock->expects($this->exactly(1))
             ->method('getVersion')
-            ->willReturn('2.2.1');
+            ->willReturn($packageVersion);
 
-        $this->$assertion($this->magentoVersion->satisfies($constraint));
+        $this->assertSame(
+            $expected,
+            $this->magentoVersion->satisfies($constraint)
+        );
     }
 
     /**
@@ -126,12 +129,15 @@ class MagentoVersionTest extends TestCase
     public function satisfiesDataProvider()
     {
         return [
-            ['assertTrue', '2.2.1'],
-            ['assertTrue', '2.2.*'],
-            ['assertTrue', '~2.2.0'],
-            ['assertFalse', '2.2.0'],
-            ['assertFalse', '2.1.*'],
-            ['assertFalse', '~2.1.0'],
+            ['2.2.1', '2.2.1', true],
+            ['2.2.*', '2.2.1', true],
+            ['~2.2.0', '2.2.1', true],
+            ['2.2.0', '2.2.1', false],
+            ['2.1.*', '2.2.1', false],
+            ['~2.1.0', '2.2.1', false],
+            ['~2.1.0', '2.1.1', true],
+            ['~2.2.0', '2.1.1', false],
+            ['2.1.*', '2.2', false],
         ];
     }
 }

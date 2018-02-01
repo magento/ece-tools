@@ -9,9 +9,7 @@ use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
 
 /**
- * Class MagentoVersion
- *
- * @package Magento\MagentoCloud\Package
+ * Defines methods for comparing version constraints with base Magento package.
  */
 class MagentoVersion
 {

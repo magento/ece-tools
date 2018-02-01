@@ -125,6 +125,7 @@ class Deploy implements DeployInterface
             self::VAR_CLEAN_STATIC_FILES,
             self::VAR_STATIC_CONTENT_SYMLINK,
             self::VAR_UPDATE_URLS,
+            self::VAR_GENERATED_CODE_SYMLINK,
         ];
 
         foreach ($disabledFlow as $disabledVar) {
@@ -188,6 +189,7 @@ class Deploy implements DeployInterface
             self::VAR_STATIC_CONTENT_EXCLUDE_THEMES => '',
             self::VAR_SKIP_SCD => false,
             self::VAR_SCD_THREADS => 1,
+            self::VAR_GENERATED_CODE_SYMLINK => true,
         ];
     }
 }

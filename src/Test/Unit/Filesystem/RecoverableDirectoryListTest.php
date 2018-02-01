@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -42,7 +43,7 @@ class RecoverableDirectoryListTest extends TestCase
      * @var MagentoVersion|Mock
      */
     private $magentoVersionMock;
-    
+
     /**
      * @inheritdoc
      */
@@ -66,22 +67,24 @@ class RecoverableDirectoryListTest extends TestCase
      * @param bool $isStaticInBuild
      * @param array $expected
      * @dataProvider getListDataProvider22
-     * @dataProvider getListDataProvider21
      */
-    public function testGetList(bool $isSymlinkOn, bool $isStaticInBuild, bool $is22, bool $is21, array $expected)
+    public function testGetList22(bool $isSymlinkOn, bool $isStaticInBuild, array $expected)
     {
-        $this->stageConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->any())
             ->method('get')
-            ->with(DeployInterface::VAR_STATIC_CONTENT_SYMLINK)
-            ->willReturn($isSymlinkOn);
-        $this->magentoVersionMock->expects($this->exactly(2))
-            ->method('isGreaterOrEqual')
-            ->withConsecutive(['2.1'], ['2.2'])
-            ->willReturnOnConsecutiveCalls($is21, $is22);
+            ->willReturnMap([
+                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
+            ]);
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->willReturnMap([
+                ['2.1.*', false],
+            ]);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn($isStaticInBuild);
+
         $this->assertEquals(
             $expected,
             $this->recoverableDirectoryList->getList()
@@ -94,161 +97,210 @@ class RecoverableDirectoryListTest extends TestCase
     public function getListDataProvider22(): array
     {
         return [
-            [
-                true, // $isSymlinkOn
-                true, // $isStaticInBuild
-                true, // $is22
-                true, // $is21
-                [
+            'symlink and static in build' => [
+                'isSymlinkOn' => true,
+                'isStaticInBuild' => true,
+                'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => 'sub_symlink',
+                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ],
                 ],
             ],
-            [
-                false, // $isSymlinkOn
-                true, // $isStaticInBuild
-                true, // $is22
-                true, // $is21
-                [
+            'no symlink and static in build' => [
+                'isSymlinkOn' => false,
+                'isStaticInBuild' => true,
+                'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                 ],
             ],
-            [
-                true, // $isSymlinkOn
-                false, // $isStaticInBuild
-                true, // $is22
-                true, // $is21
-                [
+            'symlink and no static in build' => [
+                'isSymlinkOn' => true,
+                'isStaticInBuild' => false,
+                'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                 ],
             ],
         ];
     }
 
+    /**
+     * @param bool $isSymlinkOn
+     * @param bool $isStaticInBuild
+     * @param bool $isGeneratedSymlinkOn
+     * @param array $expected
+     * @dataProvider getListDataProvider21
+     */
+    public function testGetList21(bool $isSymlinkOn, bool $isGeneratedSymlinkOn, bool $isStaticInBuild, array $expected)
+    {
+        $this->stageConfigMock->expects($this->any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
+                [DeployInterface::VAR_GENERATED_CODE_SYMLINK, $isGeneratedSymlinkOn],
+            ]);
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->willReturnMap([
+                ['2.1.*', true],
+            ]);
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn($isStaticInBuild);
+
+        $this->assertEquals(
+            $expected,
+            $this->recoverableDirectoryList->getList()
+        );
+    }
+
+    /**
+     * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
     public function getListDataProvider21(): array
     {
         return [
-            [
-                true, // $isSymlinkOn
-                true, // $isStaticInBuild
-                false, // $is22
-                true, // $is21
-                [
+            'static symlink, no generated symlink, static in build' => [
+                'isSymlinkOn' => true,
+                'isGeneratedSymlinkOn' => false,
+                'isStaticInBuild' => true,
+                'expected' => [
                     [
                         'directory' => 'app/etc',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/media',
-                        'strategy' => 'copy',
-                    ],
-                    [
-                        'directory' => 'var/di',
-                        'strategy' => 'copy',
-                    ],
-                    [
-                        'directory' => 'var/generation',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => 'sub_symlink',
-                    ],
-                ],
-            ],
-            [
-                false, // $isSymlinkOn
-                true, // $isStaticInBuild
-                false, // $is22
-                true, // $is21
-                [
-                    [
-                        'directory' => 'app/etc',
-                        'strategy' => 'copy',
-                    ],
-                    [
-                        'directory' => 'pub/media',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ],
                     [
                         'directory' => 'var/di',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/generation',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                ],
+            ],
+            'no static symlink, no generated symlink, static in build' => [
+                'isSymlinkOn' => false,
+                'isGeneratedSymlinkOn' => false,
+                'isStaticInBuild' => true,
+                'expected' => [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/view_preprocessed',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => 'copy',
-                    ],
-                ],
-            ],
-            [
-                true, // $isSymlinkOn
-                false, // $isStaticInBuild
-                false, // $is22
-                true, // $is21
-                [
-                    [
-                        'directory' => 'app/etc',
-                        'strategy' => 'copy',
-                    ],
-                    [
-                        'directory' => 'pub/media',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/di',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
                     ],
                     [
                         'directory' => 'var/generation',
-                        'strategy' => 'copy',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                ],
+            ],
+            'static symlink, no generated symlink, no static in build' => [
+                'isSymlinkOn' => true,
+                'isGeneratedSymlinkOn' => false,
+                'isStaticInBuild' => false,
+                'expected' => [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'var/di',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'var/generation',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                ],
+            ],
+            'static symlink, generated symlink, no static in build' => [
+                'isSymlinkOn' => true,
+                'isGeneratedSymlinkOn' => true,
+                'isStaticInBuild' => false,
+                'expected' => [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'var/di',
+                        'strategy' => StrategyInterface::STRATEGY_SYMLINK,
+                    ],
+                    [
+                        'directory' => 'var/generation',
+                        'strategy' => StrategyInterface::STRATEGY_SYMLINK,
                     ],
                 ],
             ],
