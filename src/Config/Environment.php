@@ -275,7 +275,7 @@ class Environment
      */
     public function getCryptKey(): string
     {
-        return $this->getVariable()['CRYPT_KEY'] ?? '';
+        return $this->getVariable('CRYPT_KEY', '');
     }
 
     /**
