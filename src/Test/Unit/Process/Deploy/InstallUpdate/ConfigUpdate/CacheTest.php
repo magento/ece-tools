@@ -97,7 +97,7 @@ class CacheTest extends TestCase
             ->with([]);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Cache configuration not found. Removing cache configuration.');
+            ->with('Cache configuration was not found. Removing cache configuration.');
 
         $this->process->execute();
     }

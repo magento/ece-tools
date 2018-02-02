@@ -60,14 +60,13 @@ class Cache implements ProcessInterface
     public function execute()
     {
         $config = $this->configReader->read();
-
         $cacheConfig = $this->cacheConfig->get();
 
         if (!empty($cacheConfig)) {
             $this->logger->info('Updating cache configuration.');
             $config['cache'] = $cacheConfig;
         } else {
-            $this->logger->info('Cache configuration not found. Removing cache configuration.');
+            $this->logger->info('Cache configuration was not found. Removing cache configuration.');
             unset($config['cache']);
         }
 

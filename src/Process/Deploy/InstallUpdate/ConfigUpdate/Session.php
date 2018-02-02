@@ -62,7 +62,6 @@ class Session implements ProcessInterface
     public function execute()
     {
         $config = $this->configReader->read();
-
         $sessionConfig = $this->sessionConfig->get();
 
         if (!empty($sessionConfig)) {
