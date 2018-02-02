@@ -196,6 +196,10 @@ class DirectoryListTest extends TestCase
         );
     }
 
+    /**
+     * Data Provider returning both directory lists
+     * @return array
+     */
     public function getDirectoryLists()
     {
         return [
