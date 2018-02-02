@@ -58,7 +58,7 @@ class Pool
             foreach ($this->logConfig->getHandlers() as $handlerName => $handlerConfig) {
                 $this->handlers[$handlerName] = $this->handlerFactory->create($handlerName);
 
-                if (!isset($handlerConfig['use_default_formatter']) || !$handlerConfig['use_default_formatter']) {
+                if (empty($handlerConfig['use_default_formatter'])) {
                     $this->handlers[$handlerName]->setFormatter($this->lineFormatterFactory->create());
                 }
             }
