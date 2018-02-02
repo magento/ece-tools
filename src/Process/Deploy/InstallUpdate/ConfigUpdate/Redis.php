@@ -113,7 +113,7 @@ class Redis implements ProcessInterface
             $config = $this->removeRedisConfiguration($config);
         }
 
-        $this->configWriter->write($config);
+        $this->configWriter->create($config);
     }
 
     /**

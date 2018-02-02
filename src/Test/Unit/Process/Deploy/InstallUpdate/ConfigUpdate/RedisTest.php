@@ -96,7 +96,7 @@ class RedisTest extends TestCase
             ->willReturn([]);
 
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with([
                 'cache' => [
                     'frontend' => [
@@ -177,7 +177,7 @@ class RedisTest extends TestCase
             ]);
 
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with([
                 'cache' => [
                     'frontend' => [],
@@ -223,7 +223,7 @@ class RedisTest extends TestCase
             ]);
 
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with([
                 'cache' => [
                     'frontend' => [
@@ -299,7 +299,7 @@ class RedisTest extends TestCase
             ]);
 
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with([
                 'cache' => [
                     'frontend' => [

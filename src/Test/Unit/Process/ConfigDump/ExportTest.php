@@ -5,11 +5,14 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump;
 
+use Magento\MagentoCloud\Config\Deploy\Reader;
+use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Process\ConfigDump\Export;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -22,19 +25,29 @@ class ExportTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ShellInterface|Mock
      */
     private $shellMock;
 
     /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     * @var File|Mock
      */
     private $fileMock;
 
     /**
-     * @var FileList|\PHPUnit_Framework_MockObject_MockObject
+     * @var FileList|Mock
      */
     private $fileListMock;
+
+    /**
+     * @var Reader|Mock
+     */
+    private $readerMock;
+
+    /**
+     * @var Writer|Mock
+     */
+    private $writerMock;
 
     /**
      * @inheritdoc
@@ -44,11 +57,15 @@ class ExportTest extends TestCase
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
+        $this->readerMock = $this->createMock(Reader::class);
+        $this->writerMock = $this->createMock(Writer::class);
 
         $this->process = new Export(
             $this->shellMock,
             $this->fileMock,
-            $this->fileListMock
+            $this->fileListMock,
+            $this->readerMock,
+            $this->writerMock
         );
     }
 
@@ -66,6 +83,16 @@ class ExportTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(true);
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'some' => 'config',
+            ]);
+        $this->writerMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'some' => 'config',
+            ]);
 
         $this->process->execute();
     }
@@ -87,6 +114,16 @@ class ExportTest extends TestCase
             ->method('isExists')
             ->with('magento_root/app/etc/config.php')
             ->willReturn(false);
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'some' => 'config',
+            ]);
+        $this->writerMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'some' => 'config',
+            ]);
 
         $this->process->execute();
     }
