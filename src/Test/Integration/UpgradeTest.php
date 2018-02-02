@@ -8,38 +8,13 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\Prestart;
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
  */
-class UpgradeTest extends TestCase
+class UpgradeTest extends AbstractTest
 {
-    /**
-     * @var Bootstrap
-     */
-    private $bootstrap;
-
-    /**
-     * @inheritdoc
-     */
-    protected function setUp()
-    {
-        $this->bootstrap = Bootstrap::create();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function tearDown()
-    {
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento setup:uninstall -n',
-            $this->bootstrap->getSandboxDir()
-        ));
-    }
-
     /**
      * @param string $fromVersion
      * @param string $toVersion

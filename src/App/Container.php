@@ -66,10 +66,14 @@ class Container implements ContainerInterface
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
         $this->container->singleton(\Composer\Composer::class, function () {
             $fileList = $this->get(\Magento\MagentoCloud\Filesystem\FileList::class);
+            $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
+            $composerFactory = new \Composer\Factory();
 
-            return \Composer\Factory::create(
+            return $composerFactory->createComposer(
                 new \Composer\IO\BufferIO(),
-                $fileList->getComposer()
+                $fileList->getComposer(),
+                false,
+                $directoryList->getMagentoRoot()
             );
         });
         $this->container->singleton(
