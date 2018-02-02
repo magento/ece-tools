@@ -93,12 +93,13 @@ class Amqp implements ProcessInterface
         } elseif (count($mqConfig)) {
             $this->logger->info('Updating env.php AMQP configuration.');
             $amqpConfig = $mqConfig[0];
-            $config['queue']['amqp']['host'] = $amqpConfig['host'];
-            $config['queue']['amqp']['port'] = $amqpConfig['port'];
-            $config['queue']['amqp']['user'] = $amqpConfig['username'];
-            $config['queue']['amqp']['password'] = $amqpConfig['password'];
-            $config['queue']['amqp']['virtualhost'] = isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/';
-            $config['queue']['amqp']['ssl'] = '';
+            $config['queue']['amqp'] = [
+                'host' => $amqpConfig['host'],
+                'port' => $amqpConfig['port'],
+                'user' => $amqpConfig['username'],
+                'password' => $amqpConfig['password'],
+                'virtualhost' => isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/',
+            ];
         } else {
             $config = $this->removeAmqpConfig($config);
         }
