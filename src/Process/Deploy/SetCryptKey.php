@@ -6,6 +6,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -32,25 +33,38 @@ class SetCryptKey implements ProcessInterface
     private $configWriter;
 
     /**
+     * @var ConfigReader
+     */
+    private $configReader;
+
+    /**
      * @param Environment $environment
      * @param LoggerInterface $logger
+     * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
+        ConfigReader $configReader,
         ConfigWriter $configWriter
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
+        $this->configReader = $configReader;
         $this->configWriter = $configWriter;
     }
 
     /**
-     * @inheritdoc
+     * Update crypt/key in app/etc/env.php with CRYPT_KEY value from environment.
+     * Will not change anything if the value is already set.
      */
     public function execute()
     {
+        if (!empty($this->configReader->read()['crypt']['key'])) {
+            return;
+        }
+
         $key = $this->environment->getCryptKey();
 
         if (!empty($key)) {

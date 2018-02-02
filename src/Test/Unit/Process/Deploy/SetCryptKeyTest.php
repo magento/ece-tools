@@ -6,6 +6,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\Deploy\SetCryptKey;
@@ -15,7 +16,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class CryptKeyTest extends TestCase
+class SetCryptKeyTest extends TestCase
 {
     /**
      * @var Environment|Mock
@@ -26,6 +27,11 @@ class CryptKeyTest extends TestCase
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
+
+    /**
+     * @var ConfigReader|Mock
+     */
+    private $configReaderMock;
 
     /**
      * @var ConfigWriter|Mock
@@ -42,17 +48,23 @@ class CryptKeyTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
+        $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
 
         $this->process = new SetCryptKey(
             $this->environmentMock,
             $this->loggerMock,
+            $this->configReaderMock,
             $this->configWriterMock
         );
     }
 
     public function testConfigUpdated()
     {
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('TWFnZW50byBSb3g=');
@@ -68,11 +80,33 @@ class CryptKeyTest extends TestCase
         $this->process->execute();
     }
 
-    public function testUpdateSkipped()
+    public function testEnvironmentVariableNotSet()
     {
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([]);
+
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('');
+
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+
+        $this->configWriterMock->expects($this->never())
+            ->method('update');
+
+        $this->process->execute();
+    }
+
+    public function testKeyAlreadySet()
+    {
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn(['crypt' => ['key' => 'QmVuIHd1eiBoZXJl']]);
+
+        $this->environmentMock->expects($this->never())
+            ->method('getCryptKey');
 
         $this->loggerMock->expects($this->never())
             ->method('info');
