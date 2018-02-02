@@ -45,9 +45,7 @@ class Writer implements WriterInterface
     }
 
     /**
-     * Writes given configuration to file.
-     *
-     * @param array $config
+     * @inheritdoc
      */
     public function create(array $config)
     {
@@ -57,9 +55,7 @@ class Writer implements WriterInterface
     }
 
     /**
-     * Updates existence configuration.
-     *
-     * @param array $config
+     * @inheritdoc
      */
     public function update(array $config)
     {
