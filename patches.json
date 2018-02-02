@@ -1,18 +1,18 @@
 {
   "colinmollenhour/credis": {
     "Fix Redis issue": {
-      "1.6": "patches/redis-pipeline.patch"
+      "1.6": "redis-pipeline.patch"
     }
   },
   "magento/framework": {
     "Fix locker process": {
-      "101.0.*": "patches/locker-process.patch"
+      "101.0.*": "locker-process.patch"
     },
     "Fix locker process (Magento 2.1)": {
       "100.1.*": "patches/2.1/locker-process.magento-2.1.patch"
     },
     "Remove permissions check": {
-      "101.0.*": "patches/remove-permission-checks.patch"
+      "101.0.*": "remove-permission-checks.patch"
     },
     "Fix redis session locking for 2.2.0 and 2.2.1": {
       "101.0.0||101.0.1": "patches/fix-redis-session-manager-locking.patch"
@@ -71,11 +71,12 @@
     },
     "Images not sized properly after upgrade to 2.1.6": {
       "2.1.6": "patches/2.1/MAGETWO-67805.hotfix.git-composer-compatible.patch"
+      ">=100.2.0": "fix-oom-during-import-customers-and-addresses.patch"
     }
   },
   "magento/module-config": {
     "Fix app:config:import for Magento 2.2.2": {
-      "=101.0.2": "patches/fix-app-config-import.patch"
+      "101.0.2": "fix-app-config-import.patch"
     }
   },
   "magento/module-cms": {

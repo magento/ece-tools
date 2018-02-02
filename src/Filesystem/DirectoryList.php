@@ -227,4 +227,12 @@ class DirectoryList
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
         ];
     }
+
+    /**
+     * @return string
+     */
+    public function getPatches(): string
+    {
+        return $this->getRoot() . '/patches';
+    }
 }

@@ -140,7 +140,7 @@ class ApplierTest extends TestCase
                 ['Done.']
             );
         $this->directoryListMock->expects($this->once())
-            ->method('getRoot')
+            ->method('getPatches')
             ->willReturn('root');
 
         $this->applier->apply($path, $name, $packageName, $constraint);

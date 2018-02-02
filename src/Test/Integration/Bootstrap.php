@@ -65,13 +65,6 @@ class Bootstrap
             $buildFile,
             $sandboxDir . '/build_options.ini'
         ));
-        /**
-         * Install without dev dependencies.
-         */
-        $this->execute(sprintf(
-            'composer install -n -d %s --no-dev --no-progress',
-            $sandboxDir
-        ));
     }
 
     /**

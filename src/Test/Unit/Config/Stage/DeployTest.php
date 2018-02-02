@@ -217,6 +217,79 @@ class DeployTest extends TestCase
     }
 
     /**
+     * @param string $name
+     * @param array $envConfig
+     * @param array $envVarConfig
+     * @param array $rawEnv
+     * @param int $expectedValue
+     * @dataProvider getDeprecatedScdThreadsDataProvider
+     */
+    public function testGetDeprecatedScdThreads(
+        string $name,
+        array $envConfig,
+        array $envVarConfig,
+        array $rawEnv,
+        int $expectedValue
+    ) {
+        $this->environmentReaderMock->expects($this->any())
+            ->method('read')
+            ->willReturn([Deploy::SECTION_STAGE => $envConfig]);
+        $this->environmentConfigMock->expects($this->any())
+            ->method('getVariables')
+            ->willReturn($envVarConfig);
+        $_ENV = $rawEnv;
+
+        $this->assertSame($expectedValue, $this->config->get($name));
+    }
+
+    /**
+     * @return array
+     */
+    public function getDeprecatedScdThreadsDataProvider(): array
+    {
+        return [
+            'threads' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 4,
+                ],
+                [],
+                4,
+            ],
+            'threads raw' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 4,
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 3,
+                ],
+                4,
+            ],
+            'threads mode none' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [],
+                [
+                    'MAGENTO_CLOUD_MODE' => '',
+                ],
+                1,
+            ],
+            'threads mode enterprise' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                3,
+            ],
+        ];
+    }
+
+    /**
      * @expectedException \RuntimeException
      * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
      */

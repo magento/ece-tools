@@ -75,8 +75,8 @@ class Container implements ContainerInterface
             if (!file_exists($composerJson)) {
                 $composerJson = $eceBasePath . '/composer.json';
             }
-
-            return \Composer\Factory::create(
+            $composerFactory = new \Composer\Factory();
+            return $composerFactory->createComposer(
                 new \Composer\IO\BufferIO(),
                 $composerJson
             );

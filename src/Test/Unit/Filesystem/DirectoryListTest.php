@@ -184,6 +184,30 @@ class DirectoryListTest extends TestCase
         ];
     }
 
+    /**
+     * @param DirectoryList $directoryList
+     * @dataProvider getDirectoryLists
+     */
+    public function testGetPatches(DirectoryList $directoryList)
+    {
+        $this->assertSame(
+            __DIR__ . '/_files/bp/patches',
+            $directoryList->getPatches()
+        );
+    }
+
+    public function getDirectoryLists()
+    {
+        return [
+            [
+                $this->get21DirectoryList(),
+            ],
+            [
+                $this->get22DirectoryList(),
+            ]
+        ];
+    }
+
     private function get21DirectoryList()
     {
         $magentoVersionMock = $this->createMock(MagentoVersion::class);

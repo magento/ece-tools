@@ -6,10 +6,11 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Illuminate\Config\Repository;
+use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -50,6 +51,11 @@ class CronConsumersRunner implements ProcessInterface
     private $magentoVersion;
 
     /**
+     * @var RepositoryFactory
+     */
+    private $repositoryFactory;
+
+    /**
      * Max messages that will be processed by each consumer
      */
     const DEFAULT_MAX_MESSAGES = 10000;
@@ -60,6 +66,8 @@ class CronConsumersRunner implements ProcessInterface
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
+     * @param MagentoVersion $version
+     * @param RepositoryFactory $repositoryFactory
      */
     public function __construct(
         Environment $environment,
@@ -67,7 +75,8 @@ class CronConsumersRunner implements ProcessInterface
         ConfigWriter $configWriter,
         LoggerInterface $logger,
         DeployInterface $stageConfig,
-        MagentoVersion $version
+        MagentoVersion $version,
+        RepositoryFactory $repositoryFactory
     ) {
         $this->environment = $environment;
         $this->configReader = $configReader;
@@ -75,6 +84,7 @@ class CronConsumersRunner implements ProcessInterface
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
         $this->magentoVersion = $version;
+        $this->repositoryFactory = $repositoryFactory;
     }
 
     /**
@@ -92,7 +102,7 @@ class CronConsumersRunner implements ProcessInterface
         
         $this->logger->info('Updating env.php cron consumers runner configuration.');
         $config = $this->configReader->read();
-        $runnerConfig = new Repository(
+        $runnerConfig = $this->repositoryFactory->create(
             $this->stageConfig->get(DeployInterface::VAR_CRON_CONSUMERS_RUNNER)
         );
 

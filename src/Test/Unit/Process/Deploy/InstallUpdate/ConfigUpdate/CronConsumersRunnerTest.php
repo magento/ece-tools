@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
+use Illuminate\Config\Repository;
+use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner;
@@ -56,6 +58,11 @@ class CronConsumersRunnerTest extends TestCase
     private $magentoVersionMock;
 
     /**
+     * @var RepositoryFactory|Mock
+     */
+    private $repositoryFactoryMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -66,6 +73,7 @@ class CronConsumersRunnerTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
 
         $this->cronConsumersRunner = new CronConsumersRunner(
             $this->environmentMock,
@@ -73,7 +81,8 @@ class CronConsumersRunnerTest extends TestCase
             $this->configWriterMock,
             $this->loggerMock,
             $this->stageConfigMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->repositoryFactoryMock
         );
     }
 
@@ -101,6 +110,10 @@ class CronConsumersRunnerTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('write')
             ->with($expectedResult);
+        $this->repositoryFactoryMock->expects($this->once())
+            ->method('create')
+            ->with($configFromVariable)
+            ->willReturn(new Repository($configFromVariable));
 
         $this->cronConsumersRunner->execute();
     }
