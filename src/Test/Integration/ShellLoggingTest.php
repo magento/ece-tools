@@ -5,14 +5,13 @@
  */
 namespace Magento\MagentoCloud\Test\Integration;
 
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 
 /**
  * @inheritdoc
  */
-class ShellLoggingTest extends TestCase
+class ShellLoggingTest extends AbstractTest
 {
     /**
      * @var ShellInterface
@@ -29,8 +28,9 @@ class ShellLoggingTest extends TestCase
      */
     protected function setUp()
     {
-        $application = Bootstrap::create()
-            ->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
+        parent::setUp();
+
+        $application = $this->bootstrap->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
         $this->shell = $application->getContainer()
             ->get(ShellInterface::class);
         $this->fileList = $application->getContainer()

@@ -125,6 +125,14 @@ class DirectoryList
     }
 
     /**
+     * @return string
+     */
+    public function getPatches(): string
+    {
+        return $this->getRoot() . '/patches';
+    }
+
+    /**
      * @return array
      */
     public static function getDefaultConfig(): array

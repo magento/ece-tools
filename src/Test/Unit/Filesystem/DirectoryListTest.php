@@ -113,4 +113,12 @@ class DirectoryListTest extends TestCase
             $this->directoryList->getLog()
         );
     }
+
+    public function testGetPatches()
+    {
+        $this->assertSame(
+            __DIR__ . '/_files/bp/patches',
+            $this->directoryList->getPatches()
+        );
+    }
 }
