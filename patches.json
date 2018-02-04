@@ -40,6 +40,12 @@
     },
     "Fixed: When SCD is in build, js resources do not load in admin": {
       "100.1.4 - 100.1.7": "patches/2.1/secure-static-resource.patch"
+    },
+    "Fixed Static Assets deployment throws errors when redis is used for cache (2.1)": {
+      "100.1.*": "patches/2.1/MAGETWO-69847-2.1.x.patch"
+    },
+    "Fixed Static Assets deployment throws errors when redis is used for cache (2.2)": {
+      "100.2.*": "patches/MAGETWO-69847-2.2.x.patch"
     }
   },
   "magento/module-customer-import-export": {
