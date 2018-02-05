@@ -28,7 +28,7 @@ class UnlockCronJobs implements ProcessInterface
      * @var JobUnlocker
      */
     private $jobUnlocker;
-    
+
     /**
      * @var MagentoVersion
      */
@@ -37,14 +37,15 @@ class UnlockCronJobs implements ProcessInterface
     /**
      * @param JobUnlocker $jobUnlocker
      * @param LoggerInterface $logger
+     * @param MagentoVersion $version
      */
     public function __construct(
         JobUnlocker $jobUnlocker,
         LoggerInterface $logger,
         MagentoVersion $version
     ) {
-        $this->jobUnlocker    = $jobUnlocker;
-        $this->logger         = $logger;
+        $this->jobUnlocker = $jobUnlocker;
+        $this->logger = $logger;
         $this->magentoVersion = $version;
     }
 
@@ -58,9 +59,10 @@ class UnlockCronJobs implements ProcessInterface
         if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
             $version = $this->magentoVersion->getVersion();
             $this->logger->info(sprintf('Unlocking cron jobs is not supported in Magento %s, skipping.', $version));
+
             return;
         }
-        
+
         $updatedJobsCount = $this->jobUnlocker->unlockAll();
 
         if ($updatedJobsCount) {

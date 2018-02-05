@@ -45,7 +45,6 @@ class CronUnlockTest extends TestCase
     {
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->cronUnlockCommand = new CronUnlock(
