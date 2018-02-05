@@ -35,7 +35,6 @@ class CommandFactoryTest extends TestCase
      * @param array $optionConfig
      * @param bool $useScdStrategy
      * @param string $expected
-     *
      * @dataProvider createDataProvider
      */
     public function testCreate(array $optionConfig, bool $useScdStrategy, string $expected)
@@ -47,14 +46,14 @@ class CommandFactoryTest extends TestCase
 
         $this->assertEquals(
             $expected,
-            $this->commandFactory->create($this->createOption($optionConfig, (int) $useScdStrategy))
+            $this->commandFactory->create($this->createOption($optionConfig, (int)$useScdStrategy))
         );
     }
 
     /**
-     * @return array[]
+     * @return array
      */
-    public function createDataProvider()
+    public function createDataProvider(): array
     {
         return [
             [
@@ -68,7 +67,7 @@ class CommandFactoryTest extends TestCase
                 ],
                 true,
                 'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 -s ' .
-                'quick -v en_US --jobs=3'
+                'quick -v en_US --jobs=3',
             ],
             [
                 [
@@ -80,7 +79,7 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1'
+                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1',
             ],
             [
                 [
@@ -93,7 +92,7 @@ class CommandFactoryTest extends TestCase
                 ],
                 false,
                 'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 ' .
-                '-v en_US --jobs=3'
+                '-v en_US --jobs=3',
             ],
             [
                 [
@@ -105,7 +104,7 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -v en_US de_DE --jobs=1'
+                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -v en_US de_DE --jobs=1',
             ],
         ];
     }

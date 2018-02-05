@@ -107,7 +107,7 @@ class BackupData implements ProcessInterface
 
         foreach ($this->directoryList->getWritableDirectories(true) as $dir) {
             $originalDir = $magentoRoot . $dir;
-            $initDir     = $rootInitDir . $dir;
+            $initDir = $rootInitDir . $dir;
 
             $this->file->createDirectory($initDir);
             $this->file->createDirectory($originalDir);

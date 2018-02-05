@@ -56,6 +56,7 @@ class Option implements OptionInterface
 
     /**
      * @param Environment $environment
+     * @param ScdStrategyChecker $scdStrategyChecker
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
      * @param FileList $fileList
@@ -86,7 +87,7 @@ class Option implements OptionInterface
     public function getThreadCount(): int
     {
         return $this->threadCountOptimizer->optimize(
-            (int) $this->stageConfig->get(BuildInterface::VAR_SCD_THREADS),
+            (int)$this->stageConfig->get(BuildInterface::VAR_SCD_THREADS),
             $this->getStrategy()
         );
     }

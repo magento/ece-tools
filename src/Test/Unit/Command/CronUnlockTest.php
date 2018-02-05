@@ -13,6 +13,9 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class CronUnlockTest extends TestCase
 {
     /**
@@ -42,9 +45,8 @@ class CronUnlockTest extends TestCase
     {
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        
+
         $this->cronUnlockCommand = new CronUnlock(
             $this->jobUnlockerMock,
             $this->loggerMock,
@@ -54,9 +56,6 @@ class CronUnlockTest extends TestCase
 
     public function testExecute()
     {
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
-        
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(
@@ -80,9 +79,6 @@ class CronUnlockTest extends TestCase
 
     public function testExecuteWithJobCode()
     {
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
-        
         $this->loggerMock->expects($this->exactly(4))
             ->method('info')
             ->withConsecutive(
@@ -104,7 +100,7 @@ class CronUnlockTest extends TestCase
             $this->cronUnlockCommand
         );
         $tester->execute([
-            '--job-code' => ['code1', 'code2']
+            '--job-code' => ['code1', 'code2'],
         ]);
 
         $this->assertSame(0, $tester->getStatusCode());
@@ -116,9 +112,6 @@ class CronUnlockTest extends TestCase
      */
     public function testExecuteWithException()
     {
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
-        
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting unlocking.');
@@ -129,32 +122,6 @@ class CronUnlockTest extends TestCase
             ->method('unlockAll')
             ->willThrowException(new \Exception('Some error'));
 
-        $tester = new CommandTester(
-            $this->cronUnlockCommand
-        );
-        $tester->execute([]);
-    }
-    
-    public function testSkipExecute()
-    {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
-            
-        $this->magentoVersionMock->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('2.1.7');
-        
-        $this->loggerMock->expects($this->once())
-            ->method('error')
-            ->with('Unlocking crons is not supported in Magento 2.1.7.');
-        
-        $this->jobUnlockerMock->expects($this->never())
-            ->method('unlockByJobCode');
-        $this->jobUnlockerMock->expects($this->never())
-            ->method('unlockAll');
-        
         $tester = new CommandTester(
             $this->cronUnlockCommand
         );

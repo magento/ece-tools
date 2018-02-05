@@ -49,11 +49,12 @@ class PreBuild implements ProcessInterface
     private $directoryList;
 
     /**
-     * PreBuild constructor.
      * @param BuildInterface $stageConfig
      * @param LoggerInterface $logger
      * @param Manager $packageManager
      * @param FlagManager $flagManager
+     * @param File $file
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         BuildInterface $stageConfig,
@@ -77,14 +78,14 @@ class PreBuild implements ProcessInterface
     public function execute()
     {
         $verbosityLevel = $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS);
-        
-        $generatedCode     = $this->directoryList->getGeneratedCode();
+
+        $generatedCode = $this->directoryList->getGeneratedCode();
         $generatedMetadata = $this->directoryList->getGeneratedMetaData();
-        
+
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
-        
+
         $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
-        
+
         if ($this->file->isExists($generatedCode)) {
             $this->file->clearDirectory($generatedCode);
         }
@@ -92,7 +93,7 @@ class PreBuild implements ProcessInterface
         if ($this->file->isExists($generatedMetadata)) {
             $this->file->clearDirectory($generatedMetadata);
         }
-        
+
         $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }
 }
