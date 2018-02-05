@@ -79,7 +79,7 @@ class Option implements OptionInterface
      */
     public function getExcludedThemes(): array
     {
-        $themes = preg_split("/[,]+/", $this->stageConfig->get(DeployInterface::VAR_STATIC_CONTENT_EXCLUDE_THEMES));
+        $themes = preg_split("/[,]+/", $this->stageConfig->get(DeployInterface::VAR_SCD_EXCLUDE_THEMES));
 
         return array_filter(array_map('trim', $themes));
     }

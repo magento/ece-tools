@@ -191,6 +191,23 @@ class DeployTest extends TestCase
                 ],
                 4,
             ],
+            'exclude themes deprecated' => [
+                Deploy::VAR_SCD_EXCLUDE_THEMES,
+                [],
+                [
+                    'STATIC_CONTENT_EXCLUDE_THEMES' => 'some theme',
+                    Deploy::VAR_SCD_EXCLUDE_THEMES => 'some theme 2',
+                ],
+                'some theme',
+            ],
+            'exclude themes' => [
+                Deploy::VAR_SCD_EXCLUDE_THEMES,
+                [],
+                [
+                    Deploy::VAR_SCD_EXCLUDE_THEMES => 'some theme 2',
+                ],
+                'some theme 2',
+            ],
         ];
     }
 
