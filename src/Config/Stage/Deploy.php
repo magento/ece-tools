@@ -188,6 +188,8 @@ class Deploy implements DeployInterface
             self::VAR_SCD_COMPRESSION_LEVEL => 4,
             self::VAR_SEARCH_CONFIGURATION => [],
             self::VAR_QUEUE_CONFIGURATION => [],
+            self::VAR_CACHE_CONFIGURATION => [],
+            self::VAR_SESSION_CONFIGURATION => [],
             self::VAR_VERBOSE_COMMANDS => '',
             self::VAR_CRON_CONSUMERS_RUNNER => [],
             self::VAR_CLEAN_STATIC_FILES => true,

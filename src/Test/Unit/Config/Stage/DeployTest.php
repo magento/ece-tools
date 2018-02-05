@@ -141,7 +141,7 @@ class DeployTest extends TestCase
                 [],
                 '{"SOME_CONFIG": "some value',
             ],
-            'disabled flow 2' => [
+            'disabled flow 1' => [
                 Deploy::VAR_UPDATE_URLS,
                 [],
                 [
