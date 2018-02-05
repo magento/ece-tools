@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\TestCase;
 
@@ -228,14 +229,20 @@ class DirectoryListTest extends TestCase
     private function get21DirectoryList(): DirectoryList
     {
         $magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $systemMock = $this->createMock(SystemList::class);
 
         $magentoVersionMock->method('satisfies')
             ->with('2.1.*')
             ->willReturn(true);
+        $systemMock->expects($this->any())
+            ->method('getRoot')
+            ->willReturn(__DIR__ . '/_files/bp');
+        $systemMock->expects($this->any())
+            ->method('getMagentoRoot')
+            ->willReturn(__DIR__);
 
         return new DirectoryList(
-            __DIR__ . '/_files/bp',
-            __DIR__,
+            $systemMock,
             $magentoVersionMock,
             ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
         );
@@ -247,14 +254,20 @@ class DirectoryListTest extends TestCase
     private function get22DirectoryList(): DirectoryList
     {
         $magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $systemMock = $this->createMock(SystemList::class);
 
         $magentoVersionMock->method('satisfies')
             ->with('2.1.*')
             ->willReturn(false);
+        $systemMock->expects($this->any())
+            ->method('getRoot')
+            ->willReturn(__DIR__ . '/_files/bp');
+        $systemMock->expects($this->any())
+            ->method('getMagentoRoot')
+            ->willReturn(__DIR__);
 
         return new DirectoryList(
-            __DIR__ . '/_files/bp',
-            __DIR__,
+            $systemMock,
             $magentoVersionMock,
             ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
         );

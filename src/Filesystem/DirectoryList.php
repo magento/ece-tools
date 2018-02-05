@@ -51,15 +51,14 @@ class DirectoryList
     private $directories;
 
     /**
-     * @param string $root The ECE Tools root directory
-     * @param string $magentoRoot The Magento root directory
+     * @param SystemList $systemList
      * @param MagentoVersion $version
-     * @param array $config Directory configuration
+     * @param array $config
      */
-    public function __construct(string $root, string $magentoRoot, MagentoVersion $version, array $config = [])
+    public function __construct(SystemList $systemList, MagentoVersion $version, array $config = [])
     {
-        $this->root = $root;
-        $this->magentoRoot = $magentoRoot;
+        $this->root = $systemList->getRoot();
+        $this->magentoRoot = $systemList->getMagentoRoot();
         $this->magentoVersion = $version;
         $this->directories = $config + $this->getDefaultConfig();
     }
@@ -190,30 +189,25 @@ class DirectoryList
      */
     public function getDefaultConfig(): array
     {
-        if ($this->magentoVersion->satisfies('2.1.*')) {
-            return [
-                static::DIR_INIT => [static::PATH => 'init'],
-                static::DIR_VAR => [static::PATH => 'var'],
-                static::DIR_LOG => [static::PATH => 'var/log'],
-                static::DIR_GENERATED_CODE => [static::PATH => 'var/generation'],
-                static::DIR_GENERATED_METADATA => [static::PATH => 'var/di'],
-                static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
-                static::DIR_ETC => [static::PATH => 'app/etc'],
-                static::DIR_MEDIA => [static::PATH => 'pub/media'],
-            ];
-        }
-
-        return [
+        $config = [
             static::DIR_INIT => [static::PATH => 'init'],
             static::DIR_VAR => [static::PATH => 'var'],
             static::DIR_LOG => [static::PATH => 'var/log'],
-            static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
-            static::DIR_GENERATED => [static::PATH => 'generated'],
-            static::DIR_GENERATED_CODE => [static::PATH => 'generated/code'],
-            static::DIR_GENERATED_METADATA => [static::PATH => 'generated/metadata'],
             static::DIR_ETC => [static::PATH => 'app/etc'],
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
+            static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
         ];
+
+        if ($this->magentoVersion->satisfies('2.1.*')) {
+            $config[static::DIR_GENERATED_CODE] = [static::PATH => 'var/generation'];
+            $config[static::DIR_GENERATED_METADATA] = [static::PATH => 'var/di'];
+        } else {
+            $config[static::DIR_GENERATED] = [static::PATH => 'generated'];
+            $config[static::DIR_GENERATED_CODE] = [static::PATH => 'generated/code'];
+            $config[static::DIR_GENERATED_METADATA] = [static::PATH => 'generated/metadata'];
+        }
+
+        return $config;
     }
 
     /**

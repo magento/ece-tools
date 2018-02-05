@@ -17,7 +17,9 @@ use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag;
+use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
@@ -54,28 +56,30 @@ class Container implements ContainerInterface
          */
         $this->container = new \Illuminate\Container\Container();
 
+        $systemList = new SystemList($toolsBasePath, $magentoBasePath);
+
         /**
          * Instance configuration.
          */
         $this->container->instance(ContainerInterface::class, $this);
-        $this->container->singleton(
-            DirectoryList::class,
-            function () use ($toolsBasePath, $magentoBasePath) {
-                return new DirectoryList(
-                    $toolsBasePath,
-                    $magentoBasePath,
-                    $this->get(\Magento\MagentoCloud\Package\MagentoVersion::class)
-                );
-            }
-        );
-        $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
-        $this->container->singleton(\Composer\Composer::class, function () use ($toolsBasePath, $magentoBasePath) {
-            $composerJson = $magentoBasePath . '/composer.json';
+        $this->container->instance(SystemList::class, $systemList);
+
+        /**
+         * Binding.
+         */
+        $this->container->singleton(DirectoryList::class);
+        $this->container->singleton(FileList::class);
+        $this->container->singleton(\Composer\Composer::class, function () use ($systemList) {
             $composerFactory = new \Composer\Factory();
+            $composerFile = file_exists($systemList->getMagentoRoot() . '/composer.json')
+                ? $systemList->getMagentoRoot() . '/composer.json'
+                : $systemList->getRoot() . '/composer.json';
 
             return $composerFactory->createComposer(
                 new \Composer\IO\BufferIO(),
-                $composerJson
+                $composerFile,
+                false,
+                $systemList->getMagentoRoot()
             );
         });
         $this->container->singleton(
@@ -110,7 +114,6 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\ConnectionInterface::class,
             \Magento\MagentoCloud\DB\Connection::class
         );
-        $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
         $this->container->singleton(DirectoryCopier\CopyStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);

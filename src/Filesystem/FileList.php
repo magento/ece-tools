@@ -66,24 +66,6 @@ class FileList
 
     /**
      * @return string
-     * @throws FileSystemException
-     */
-    public function getComposer(): string
-    {
-        $magentoComposer = $this->directoryList->getMagentoRoot() . '/composer.json';
-
-        if ($this->file->isExists($magentoComposer)) {
-            return $magentoComposer;
-        }
-
-        /**
-         * Workaround for local development.
-         */
-        return $this->directoryList->getRoot() . '/composer.json';
-    }
-
-    /**
-     * @return string
      */
     public function getEnvConfig(): string
     {
