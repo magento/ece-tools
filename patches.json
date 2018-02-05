@@ -71,7 +71,6 @@
     },
     "Images not sized properly after upgrade to 2.1.6": {
       "2.1.6": "2.1/MAGETWO-67805.hotfix.git-composer-compatible.patch"
-      ">=100.2.0": "fix-oom-during-import-customers-and-addresses.patch"
     }
   },
   "magento/module-config": {
