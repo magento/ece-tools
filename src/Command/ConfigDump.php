@@ -97,7 +97,7 @@ class ConfigDump extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $doExport = ! $input->getOption(static::OPTION_KEEP_CONFIG);
+        $doExport = !$input->getOption(static::OPTION_KEEP_CONFIG);
         $doImport = $this->magentoVersion->isGreaterOrEqual('2.2');
         try {
             $this->logger->info('Starting dump.');
