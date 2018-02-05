@@ -110,6 +110,7 @@ class Deploy implements DeployInterface
      * Resolves environment values with and adds custom mappings.
      *
      * @return array
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function getEnvironmentConfig(): array
     {
@@ -142,6 +143,10 @@ class Deploy implements DeployInterface
 
         if ($scdThreads = $this->getScdThreads()) {
             $variables[self::VAR_SCD_THREADS] = $scdThreads;
+        }
+
+        if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
+            $variables[self::VAR_SCD_EXCLUDE_THEMES] = $variables['STATIC_CONTENT_EXCLUDE_THEMES'];
         }
 
         return $variables;
@@ -201,15 +206,17 @@ class Deploy implements DeployInterface
             self::VAR_SCD_COMPRESSION_LEVEL => 4,
             self::VAR_SEARCH_CONFIGURATION => [],
             self::VAR_QUEUE_CONFIGURATION => [],
+            self::VAR_CACHE_CONFIGURATION => [],
+            self::VAR_SESSION_CONFIGURATION => [],
             self::VAR_VERBOSE_COMMANDS => '',
             self::VAR_CRON_CONSUMERS_RUNNER => [],
             self::VAR_CLEAN_STATIC_FILES => true,
             self::VAR_STATIC_CONTENT_SYMLINK => true,
             self::VAR_UPDATE_URLS => true,
-            self::VAR_STATIC_CONTENT_EXCLUDE_THEMES => '',
             self::VAR_SKIP_SCD => false,
             self::VAR_SCD_THREADS => 1,
             self::VAR_GENERATED_CODE_SYMLINK => true,
+            self::VAR_SCD_EXCLUDE_THEMES => '',
         ];
     }
 }

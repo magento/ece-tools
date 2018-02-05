@@ -99,7 +99,7 @@ class OptionTest extends TestCase
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_STATIC_CONTENT_EXCLUDE_THEMES)
+            ->with(DeployInterface::VAR_SCD_EXCLUDE_THEMES)
             ->willReturn($themes);
 
         $this->assertEquals(
