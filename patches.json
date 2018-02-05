@@ -8,14 +8,14 @@
     "Fix locker process": {
       "101.0.*": "locker-process.patch"
     },
-    "Fix locker process (Magento 2.1)": {
-      "100.1.*": "2.1/locker-process.magento-2.1.patch"
-    },
     "Remove permissions check": {
       "101.0.*": "remove-permission-checks.patch"
     },
     "Fix redis session locking for 2.2.0 and 2.2.1": {
       "101.0.0||101.0.1": "fix-redis-session-manager-locking.patch"
+    },
+    "Fix locker process (Magento 2.1)": {
+      "100.1.*": "2.1/locker-process.magento-2.1.patch"
     },
     "Remove permissions check (Magento 2.1)": {
       "100.1.*": "2.1/remove-permission-checks.patch"
