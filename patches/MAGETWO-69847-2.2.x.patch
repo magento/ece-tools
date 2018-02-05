@@ -30,10 +30,10 @@ index 4c539da096..8477d94f28 100644
          );
          $result = $this->_applyDecorators($result);
 diff --git a/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php b/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php
-index c8917a0996..f99468b20a 100644
+index c8917a0996..fe9dc2f453 100644
 --- a/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php
 +++ b/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php
-@@ -16,11 +16,27 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -16,11 +16,32 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
      protected $_frontend;
  
      /**
@@ -48,13 +48,18 @@ index c8917a0996..f99468b20a 100644
 +     * The pid that owns the $_frontend object
 +     *
 +     * @var int
-      */
--    public function __construct(\Zend_Cache_Core $frontend)
++     */
 +    protected $_pid;
 +
 +    /**
-+     * @param \Closure $frontendFactory
++     * @var \Zend_Cache_Core[]
 +     */
++    static protected $_parentFrontends = [];
++
++    /**
++     * @param \Closure $frontendFactory
+      */
+-    public function __construct(\Zend_Cache_Core $frontend)
 +    public function __construct(\Closure $frontendFactory)
      {
 -        $this->_frontend = $frontend;
@@ -64,7 +69,7 @@ index c8917a0996..f99468b20a 100644
      }
  
      /**
-@@ -28,7 +44,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -28,7 +49,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
       */
      public function test($identifier)
      {
@@ -73,7 +78,7 @@ index c8917a0996..f99468b20a 100644
      }
  
      /**
-@@ -36,7 +52,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -36,7 +57,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
       */
      public function load($identifier)
      {
@@ -82,7 +87,7 @@ index c8917a0996..f99468b20a 100644
      }
  
      /**
-@@ -44,7 +60,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -44,7 +65,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
       */
      public function save($data, $identifier, array $tags = [], $lifeTime = null)
      {
@@ -91,7 +96,7 @@ index c8917a0996..f99468b20a 100644
      }
  
      /**
-@@ -52,7 +68,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -52,7 +73,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
       */
      public function remove($identifier)
      {
@@ -100,7 +105,7 @@ index c8917a0996..f99468b20a 100644
      }
  
      /**
-@@ -76,7 +92,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -76,7 +97,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
                  "Magento cache frontend does not support the cleaning mode '{$mode}'."
              );
          }
@@ -109,7 +114,7 @@ index c8917a0996..f99468b20a 100644
      }
  
      /**
-@@ -84,7 +100,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -84,7 +105,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
       */
      public function getBackend()
      {
@@ -118,7 +123,7 @@ index c8917a0996..f99468b20a 100644
      }
  
      /**
-@@ -92,7 +108,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -92,7 +113,7 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
       */
      public function getLowLevelFrontend()
      {
@@ -127,7 +132,7 @@ index c8917a0996..f99468b20a 100644
      }
  
      /**
-@@ -119,4 +135,20 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
+@@ -119,4 +140,34 @@ class Zend implements \Magento\Framework\Cache\FrontendInterface
          }
          return $ids;
      }
@@ -142,9 +147,23 @@ index c8917a0996..f99468b20a 100644
 +        if (getmypid() === $this->_pid) {
 +            return $this->_frontend;
 +        }
++        static::$_parentFrontends[] = $this->_frontend;
 +        $frontendFactory = $this->_frontendFactory;
 +        $this->_frontend = $frontendFactory();
 +        $this->_pid = getmypid();
 +        return $this->_frontend;
++    }
++
++    /**
++     * If the current _frontend is owned by a different pid, add it to $_parentFrontends so that the
++     * destructor isn't called on it.
++     *
++     * @return void
++     */
++    public function __destruct()
++    {
++        if (getmypid() !== $this->_pid) {
++            static::$_parentFrontends[] = $this->_frontend;
++        }
 +    }
  }
