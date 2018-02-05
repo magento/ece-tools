@@ -117,6 +117,9 @@ class DirectoryListTest extends TestCase
         $this->assertSame($path, $directoryList->getGeneratedCode());
     }
 
+    /**
+     * @return array
+     */
     public function getGeneratedCodeDataProvider(): array
     {
         return [
@@ -135,6 +138,9 @@ class DirectoryListTest extends TestCase
         $this->assertSame($path, $directoryList->getGeneratedMetadata());
     }
 
+    /**
+     * @return array
+     */
     public function getGeneratedMetadataDataProvider(): array
     {
         return [
@@ -156,29 +162,32 @@ class DirectoryListTest extends TestCase
         $this->assertSame($paths, $result);
     }
 
-    public function getWritableDirectoriesDataProvider()
+    /**
+     * @return array
+     */
+    public function getWritableDirectoriesDataProvider(): array
     {
         $abs21Paths = [
             __DIR__ . '/var/di',
             __DIR__ . '/var/generation',
             __DIR__ . '/var/view_preprocessed',
             __DIR__ . '/app/etc',
-            __DIR__ . '/pub/media'
+            __DIR__ . '/pub/media',
         ];
         $relative21Paths = [
             'var/di',
             'var/generation',
             'var/view_preprocessed',
             'app/etc',
-            'pub/media'
+            'pub/media',
         ];
 
-        $abs22Paths      = [__DIR__ . '/var', __DIR__ . '/app/etc', __DIR__ . '/pub/media'];
+        $abs22Paths = [__DIR__ . '/var', __DIR__ . '/app/etc', __DIR__ . '/pub/media'];
         $relative22Paths = ['var', 'app/etc', 'pub/media'];
 
         return [
-            [$this->get21DirectoryList(), $abs21Paths,      false],
-            [$this->get22DirectoryList(), $abs22Paths,      false],
+            [$this->get21DirectoryList(), $abs21Paths, false],
+            [$this->get22DirectoryList(), $abs22Paths, false],
             [$this->get21DirectoryList(), $relative21Paths, true],
             [$this->get22DirectoryList(), $relative22Paths, true],
         ];
@@ -198,6 +207,7 @@ class DirectoryListTest extends TestCase
 
     /**
      * Data Provider returning both directory lists
+     *
      * @return array
      */
     public function getDirectoryLists()
@@ -208,17 +218,20 @@ class DirectoryListTest extends TestCase
             ],
             [
                 $this->get22DirectoryList(),
-            ]
+            ],
         ];
     }
 
-    private function get21DirectoryList()
+    /**
+     * @return DirectoryList
+     */
+    private function get21DirectoryList(): DirectoryList
     {
         $magentoVersionMock = $this->createMock(MagentoVersion::class);
 
-        $magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
+        $magentoVersionMock->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(true);
 
         return new DirectoryList(
             __DIR__ . '/_files/bp',
@@ -228,13 +241,16 @@ class DirectoryListTest extends TestCase
         );
     }
 
-    private function get22DirectoryList()
+    /**
+     * @return DirectoryList
+     */
+    private function get22DirectoryList(): DirectoryList
     {
         $magentoVersionMock = $this->createMock(MagentoVersion::class);
 
-        $magentoVersionMock->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
+        $magentoVersionMock->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(false);
 
         return new DirectoryList(
             __DIR__ . '/_files/bp',

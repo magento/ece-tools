@@ -172,14 +172,10 @@ class DirectoryList
     {
         $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
 
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $magento21Dirs = [
-                static::DIR_GENERATED_METADATA,
-                static::DIR_GENERATED_CODE,
-                static::DIR_VIEW_PREPROCESSED,
-            ];
-
-            $writableDirs = array_merge($writableDirs, $magento21Dirs);
+        if ($this->magentoVersion->satisfies('2.1.*')) {
+            $writableDirs[] = static::DIR_GENERATED_METADATA;
+            $writableDirs[] = static::DIR_GENERATED_CODE;
+            $writableDirs[] = static::DIR_VIEW_PREPROCESSED;
         } else {
             $writableDirs[] = static::DIR_VAR;
         }
@@ -194,8 +190,17 @@ class DirectoryList
      */
     public function getDefaultConfig(): array
     {
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            return $this->getDefault21Config();
+        if ($this->magentoVersion->satisfies('2.1.*')) {
+            return [
+                static::DIR_INIT => [static::PATH => 'init'],
+                static::DIR_VAR => [static::PATH => 'var'],
+                static::DIR_LOG => [static::PATH => 'var/log'],
+                static::DIR_GENERATED_CODE => [static::PATH => 'var/generation'],
+                static::DIR_GENERATED_METADATA => [static::PATH => 'var/di'],
+                static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
+                static::DIR_ETC => [static::PATH => 'app/etc'],
+                static::DIR_MEDIA => [static::PATH => 'pub/media'],
+            ];
         }
 
         return [
@@ -206,23 +211,6 @@ class DirectoryList
             static::DIR_GENERATED => [static::PATH => 'generated'],
             static::DIR_GENERATED_CODE => [static::PATH => 'generated/code'],
             static::DIR_GENERATED_METADATA => [static::PATH => 'generated/metadata'],
-            static::DIR_ETC => [static::PATH => 'app/etc'],
-            static::DIR_MEDIA => [static::PATH => 'pub/media'],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    private function getDefault21Config(): array
-    {
-        return [
-            static::DIR_INIT => [static::PATH => 'init'],
-            static::DIR_VAR => [static::PATH => 'var'],
-            static::DIR_LOG => [static::PATH => 'var/log'],
-            static::DIR_GENERATED_CODE => [static::PATH => 'var/generation'],
-            static::DIR_GENERATED_METADATA => [static::PATH => 'var/di'],
-            static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
             static::DIR_ETC => [static::PATH => 'app/etc'],
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
         ];

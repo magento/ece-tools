@@ -28,6 +28,10 @@ class ProcessComposite implements ProcessInterface
      */
     public function execute()
     {
+        array_filter($this->processes, function (ProcessInterface $process) {
+            return !$process instanceof VersionAwareProcessInterface || $process->isAvailable();
+        });
+
         ksort($this->processes);
 
         array_walk($this->processes, function (ProcessInterface $processor) {

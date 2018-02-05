@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\ConfigDump;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Process\VersionAwareProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Psr\Log\LoggerInterface;
@@ -13,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class Import implements ProcessInterface
+class Import implements ProcessInterface, VersionAwareProcessInterface
 {
     /**
      * @var ShellInterface
@@ -45,15 +46,16 @@ class Import implements ProcessInterface
     /**
      * @inheritdoc
      */
+    public function isAvailable(): bool
+    {
+        return $this->magentoVersion->isGreaterOrEqual('2.2');
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $version = $this->magentoVersion->getVersion();
-            $this->logger->info(
-                sprintf('The magento app:config:import command not supported in Magento %s, skipping.', $version)
-            );
-            return;
-        }
         $this->shell->execute('php ./bin/magento app:config:import -n');
     }
 }

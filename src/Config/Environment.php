@@ -157,19 +157,6 @@ class Environment
     }
 
     /**
-     * @return string
-     */
-    public function getApplicationMode(): string
-    {
-        $var = $this->getVariables();
-        $mode = isset($var['APPLICATION_MODE']) ? $var['APPLICATION_MODE'] : false;
-
-        return in_array($mode, [self::MAGENTO_DEVELOPER_MODE, self::MAGENTO_PRODUCTION_MODE])
-            ? $mode
-            : self::MAGENTO_PRODUCTION_MODE;
-    }
-
-    /**
      * Retrieves writable directories.
      *
      * @return array

@@ -66,32 +66,21 @@ class Generate implements ProcessInterface
         $this->file = $file;
         $this->arrayManager = $arrayManager;
         $this->magentoVersion = $magentoVersion;
+        $this->configKeys = [
+            'scopes',
+            'system/default/general/locale/code',
+            'system/default/dev/static/sign',
+            'system/default/dev/front_end_development_workflow',
+            'system/default/dev/template',
+            'system/default/dev/js',
+            'system/default/dev/css',
+            'system/default/advanced/modules_disable_output',
+            'system/stores',
+        ];
+
         if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $this->configKeys = [
-                'modules',
-                'scopes',
-                'system/default/general/locale/code',
-                'system/default/dev/static/sign',
-                'system/default/dev/front_end_development_workflow',
-                'system/default/dev/template',
-                'system/default/dev/js',
-                'system/default/dev/css',
-                'system/default/advanced/modules_disable_output',
-                'system/stores',
-                'system/websites',
-            ];
-        } else {  // Magento 2.0 and 2.1
-            $this->configKeys = [
-                'scopes',
-                'system/default/general/locale/code',
-                'system/default/dev/static/sign',
-                'system/default/dev/front_end_development_workflow',
-                'system/default/dev/template',
-                'system/default/dev/js',
-                'system/default/dev/css',
-                'system/default/advanced/modules_disable_output',
-                'system/stores',
-            ];
+            $this->configKeys[] = 'modules';
+            $this->configKeys[] = 'system/websites';
         }
     }
 

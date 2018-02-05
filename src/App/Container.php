@@ -42,11 +42,12 @@ class Container implements ContainerInterface
     private $container;
 
     /**
-     * @param DirectoryList $directoryList
+     * @param string $toolsBasePath
+     * @param string $magentoBasePath
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function __construct(string $eceBasePath, $magentoBasePath)
+    public function __construct(string $toolsBasePath, string $magentoBasePath)
     {
         /**
          * Creating concrete container.
@@ -58,27 +59,26 @@ class Container implements ContainerInterface
          */
         $this->container->instance(ContainerInterface::class, $this);
         $this->container->singleton(
-            \Magento\MagentoCloud\Filesystem\DirectoryList::class,
-            function () use ($eceBasePath, $magentoBasePath) {
-                return new \Magento\MagentoCloud\Filesystem\DirectoryList(
-                    $eceBasePath,
+            DirectoryList::class,
+            function () use ($toolsBasePath, $magentoBasePath) {
+                return new DirectoryList(
+                    $toolsBasePath,
                     $magentoBasePath,
-                    $this->get(\Magento\MagentoCloud\Package\MagentoVersion::class),
-                    $_SERVER['DIRS_CONFIG'] ?? []
+                    $this->get(\Magento\MagentoCloud\Package\MagentoVersion::class)
                 );
             }
         );
         $this->container->singleton(\Magento\MagentoCloud\Filesystem\FileList::class);
-        $this->container->singleton(\Composer\Composer::class, function () use ($eceBasePath, $magentoBasePath) {
-            $composerJson = $magentoBasePath . '/composer.json';
-
-            if (!file_exists($composerJson)) {
-                $composerJson = $eceBasePath . '/composer.json';
-            }
+        $this->container->singleton(\Composer\Composer::class, function () {
+            $fileList = $this->get(\Magento\MagentoCloud\Filesystem\FileList::class);
+            $directoryList = $this->get(\Magento\MagentoCloud\Filesystem\DirectoryList::class);
             $composerFactory = new \Composer\Factory();
+
             return $composerFactory->createComposer(
                 new \Composer\IO\BufferIO(),
-                $composerJson
+                $fileList->getComposer(),
+                false,
+                $directoryList->getMagentoRoot()
             );
         });
         $this->container->singleton(
