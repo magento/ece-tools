@@ -72,6 +72,6 @@ class Session implements ProcessInterface
             $config['session'] = ['save' => 'db'];
         }
 
-        $this->configWriter->write($config);
+        $this->configWriter->create($config);
     }
 }
