@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -60,6 +61,11 @@ class DeployStaticContent implements ProcessInterface
     private $stageConfig;
 
     /**
+     * @var GlobalConfig
+     */
+    private $globalConfig;
+
+    /**
      * @param ProcessInterface $process
      * @param Environment $environment
      * @param LoggerInterface $logger
@@ -68,6 +74,7 @@ class DeployStaticContent implements ProcessInterface
      * @param RemoteDiskIdentifier $remoteDiskIdentifier
      * @param FlagManager $flagManager
      * @param DeployInterface $stageConfig
+     * @param GlobalConfig $globalConfig
      */
     public function __construct(
         ProcessInterface $process,
@@ -77,7 +84,8 @@ class DeployStaticContent implements ProcessInterface
         DirectoryList $directoryList,
         RemoteDiskIdentifier $remoteDiskIdentifier,
         FlagManager $flagManager,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        GlobalConfig $globalConfig
     ) {
         $this->process = $process;
         $this->environment = $environment;
@@ -87,6 +95,7 @@ class DeployStaticContent implements ProcessInterface
         $this->remoteDiskIdentifier = $remoteDiskIdentifier;
         $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
+        $this->globalConfig = $globalConfig;
     }
 
     /**
@@ -99,6 +108,13 @@ class DeployStaticContent implements ProcessInterface
     public function execute()
     {
         $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING);
+
+        if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND_IN_PRODUCTION)) {
+            $this->logger->notice('Skipping static content deploy. Enabled static content deploy on demand.');
+
+            return;
+        }
+
         if ($this->remoteDiskIdentifier->isOnLocalDisk('pub/static')
             && !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
         ) {

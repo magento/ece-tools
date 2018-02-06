@@ -13,6 +13,10 @@
     },
     "Fix redis session locking for 2.2.0 and 2.2.1": {
       "101.0.0||101.0.1": "fix-redis-session-manager-locking.patch"
+    },
+    "Enable scd on demand in production": {
+      "*": "front-static.patch",
+      "101.0.*": "scd-on-demand-in-production.patch"
     }
   },
   "magento/module-customer-import-export": {
