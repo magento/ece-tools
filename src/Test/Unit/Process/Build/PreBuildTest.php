@@ -136,7 +136,10 @@ class PreBuildTest extends TestCase
     {
         $generatedCode     = 'generated_code';
         $generatedMetadata = 'generated_metadata';
-        
+
+        $this->loggerMock->expects($this->exactly($callCount + 2))
+            ->method('info');
+
         $this->fileMock->expects($this->exactly($callCount))
             ->method('clearDirectory')
             ->withConsecutive(

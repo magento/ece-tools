@@ -87,10 +87,18 @@ class PreBuild implements ProcessInterface
         $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
 
         if ($this->file->isExists($generatedCode)) {
+            $this->logger->info(
+                "Generated code exists from an old deployment - clearing it now.",
+                ['metadataPath' => $generatedCode]
+            );
             $this->file->clearDirectory($generatedCode);
         }
 
         if ($this->file->isExists($generatedMetadata)) {
+            $this->logger->info(
+                "Generated metadata exists from an old deployment - clearing it now.",
+                ['metadataPath' => $generatedMetadata]
+            );
             $this->file->clearDirectory($generatedMetadata);
         }
 
