@@ -58,6 +58,8 @@ class ConfigImportTest extends TestCase
      */
     public function testExecute()
     {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Run app:config:import command');
@@ -70,6 +72,25 @@ class ConfigImportTest extends TestCase
 
     public function testIsAvailable()
     {
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
+
+        $this->assertSame(
+            true,
+            $this->process->isAvailable()
+        );
+    }
+
+    public function testIsNotAvailable()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info');
+
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->with('2.2')

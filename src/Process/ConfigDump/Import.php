@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class Import implements ProcessInterface, VersionAwareProcessInterface
+class Import implements ProcessInterface
 {
     /**
      * @var ShellInterface
@@ -48,7 +48,12 @@ class Import implements ProcessInterface, VersionAwareProcessInterface
      */
     public function isAvailable(): bool
     {
-        return $this->magentoVersion->isGreaterOrEqual('2.2');
+        $neededVersion = '2.2';
+        if ($this->magentoVersion->isGreaterOrEqual($neededVersion)) {
+            return true;
+        }
+        $this->logger->info("Skipping " . get_class($this) . " because Magento is below version $neededVersion.");
+        return false;
     }
 
     /**
@@ -56,6 +61,10 @@ class Import implements ProcessInterface, VersionAwareProcessInterface
      */
     public function execute()
     {
+        if (!$this->isAvailable()) {
+            return;
+        }
+
         $this->shell->execute('php ./bin/magento app:config:import -n');
     }
 }

@@ -54,6 +54,8 @@ class ImportTest extends TestCase
 
     public function testExecute()
     {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./bin/magento app:config:import -n');
@@ -63,10 +65,25 @@ class ImportTest extends TestCase
 
     public function testIsAvailable()
     {
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->willReturn(true);
 
         $this->assertSame(true, $this->process->isAvailable());
+    }
+
+    public function testIsNotAvailable()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info');
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->willReturn(false);
+
+        $this->assertSame(false, $this->process->isAvailable());
     }
 }

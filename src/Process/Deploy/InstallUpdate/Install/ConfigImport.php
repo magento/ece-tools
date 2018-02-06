@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
  *
  * {@inheritdoc}
  */
-class ConfigImport implements ProcessInterface, VersionAwareProcessInterface
+class ConfigImport implements ProcessInterface
 {
     /**
      * @var ShellInterface
@@ -53,7 +53,12 @@ class ConfigImport implements ProcessInterface, VersionAwareProcessInterface
      */
     public function isAvailable(): bool
     {
-        return $this->magentoVersion->isGreaterOrEqual('2.2');
+        $neededVersion = '2.2';
+        if ($this->magentoVersion->isGreaterOrEqual($neededVersion)) {
+            return true;
+        }
+        $this->logger->info("Skipping " . get_class($this) . " because Magento is below version $neededVersion.");
+        return false;
     }
 
     /**
@@ -61,6 +66,10 @@ class ConfigImport implements ProcessInterface, VersionAwareProcessInterface
      */
     public function execute()
     {
+        if (!$this->isAvailable()) {
+            return;
+        }
+
         $this->logger->info('Run app:config:import command');
         $this->shell->execute('php ./bin/magento app:config:import -n');
     }
