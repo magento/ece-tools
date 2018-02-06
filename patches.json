@@ -23,6 +23,9 @@
   "magento/module-config": {
     "Fix app:config:import for Magento 2.2.2": {
       "101.0.2": "fix-app-config-import.patch"
+    },
+    "Fixed Bogus emails generated when the recipient name contains special characters": {
+      "<101.0.1": "MDVA-8695_EE_2.1.8_COMPOSER_v1.patch"
     }
   }
 }
