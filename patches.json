@@ -40,6 +40,9 @@
     },
     "Fixed: When SCD is in build, js resources do not load in admin": {
       "100.1.4 - 100.1.7": "2.1/secure-static-resource.patch"
+    },
+    "Fixed Bogus emails generated when the recipient name contains special characters": {
+      "<101.0.1": "MDVA-8695_EE_2.1.8_COMPOSER_v1.patch"
     }
   },
   "magento/module-customer-import-export": {
