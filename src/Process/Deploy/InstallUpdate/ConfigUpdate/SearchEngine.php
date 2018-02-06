@@ -107,7 +107,7 @@ class SearchEngine implements ProcessInterface
 
         if (isset($relationships['elasticsearch'])) {
             $searchConfig = $this->getElasticSearchConfiguration($relationships['elasticsearch'][0]);
-        } elseif (isset($relationships['solr'])) {
+        } elseif (isset($relationships['solr']) && $this->magentoVersion->satisfies('<2.2')) {
             $searchConfig = $this->getSolrConfiguration($relationships['solr'][0]);
         } else {
             $searchConfig = ['engine' => 'mysql'];
