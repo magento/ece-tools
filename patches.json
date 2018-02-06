@@ -13,6 +13,12 @@
     },
     "Fix redis session locking for 2.2.0 and 2.2.1": {
       "101.0.0||101.0.1": "fix-redis-session-manager-locking.patch"
+    },
+    "Fixed Static Assets deployment throws errors when redis is used for cache (2.1)": {
+      "100.1.*": "2.1/MAGETWO-69847-2.1.x.patch"
+    },
+    "Fixed Static Assets deployment throws errors when redis is used for cache (2.2)": {
+      ">=101.0.0": "MAGETWO-69847-2.2.x.patch"
     }
   },
   "magento/module-customer-import-export": {
