@@ -20,10 +20,6 @@ class CommandFactory
     {
         $command = 'php ./bin/magento setup:static-content:deploy';
 
-        if ($option->isForce()) {
-            $command .= ' -f';
-        }
-
         $excludedThemes = $option->getExcludedThemes();
         if (count($excludedThemes) == 1) {
             $command .= ' --exclude-theme=' . $excludedThemes[0];

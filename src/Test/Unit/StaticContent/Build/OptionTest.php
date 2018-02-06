@@ -108,7 +108,10 @@ class OptionTest extends TestCase
         );
     }
 
-    public function excludedThemesDataProvider()
+    /**
+     * @return array
+     */
+    public function excludedThemesDataProvider(): array
     {
         return [
             [
@@ -134,16 +137,6 @@ class OptionTest extends TestCase
             ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());
-    }
-
-    public function testIsForce()
-    {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-
-        $this->assertTrue($this->option->isForce());
     }
 
     public function testGetLocales()
