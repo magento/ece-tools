@@ -224,11 +224,9 @@ class CronConsumersRunnerTest extends TestCase
             ->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn(false);
-
         $this->magentoVersionMock->expects($this->once())
             ->method('getVersion')
             ->willReturn('2.1.7');
-        
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating cron consumer runner is not supported in Magento 2.1.7, skipping.');
@@ -237,7 +235,7 @@ class CronConsumersRunnerTest extends TestCase
         $this->stageConfigMock->expects($this->never())
             ->method('get');
         $this->configWriterMock->expects($this->never())
-            ->method('write');
+            ->method('create');
         
         $this->cronConsumersRunner->execute();
     }
