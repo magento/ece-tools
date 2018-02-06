@@ -55,7 +55,6 @@ class UpgradeTest extends AbstractTest
     public function defaultDataProvider(): array
     {
         return [
-            ['^2.1', '2.2.0'],
             ['2.2.0', '^2.2'],
         ];
     }
