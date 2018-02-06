@@ -71,7 +71,7 @@ class StrategyResolverTest extends TestCase
     /**
      * @return array
      */
-    public function getStrategyDataProvider()
+    public function getStrategyDataProvider(): array
     {
         return [
             [[['2.1.*', true]], 'some', StrategyResolver::DEFAULT_STRATEGY],

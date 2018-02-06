@@ -6,14 +6,10 @@
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\ConfigDump;
-use Magento\MagentoCloud\Process\ConfigDump\Export;
-use Magento\MagentoCloud\Process\ConfigDump\Generate;
-use Magento\MagentoCloud\Process\ConfigDump\Import;
-use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,47 +22,28 @@ class ConfigDumpTest extends TestCase
     private $command;
 
     /**
-     * @var Export|Mock
+     * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $exportMock;
+    private $processMock;
 
     /**
-     * @var Generate|Mock
-     */
-    private $generateMock;
-
-    /**
-     * @var Import|Mock
-     */
-    private $importMock;
-
-    /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $loggerMock;
-
-    /**
-     * @var MagentoVersion|Mock
-     */
-    private $magentoVersionMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->exportMock = $this->createMock(Export::class);
-        $this->generateMock = $this->createMock(Generate::class);
-        $this->importMock = $this->createMock(Import::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
+            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
+            ->getMockForAbstractClass();
 
         $this->command = new ConfigDump(
-            $this->exportMock,
-            $this->generateMock,
-            $this->importMock,
-            $this->loggerMock,
-            $this->magentoVersionMock
+            $this->processMock,
+            $this->loggerMock
         );
     }
 
@@ -78,35 +55,8 @@ class ConfigDumpTest extends TestCase
                 ['Starting dump.'],
                 ['Dump completed.']
             );
-        $this->exportMock->expects($this->once())->method('execute');
-        $this->generateMock->expects($this->once())->method('execute');
-        $this->importMock->expects($this->once())->method('execute');
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->willReturn(true);
-
-        $tester = new CommandTester(
-            $this->command
-        );
-        $tester->execute([]);
-
-        $this->assertSame(0, $tester->getStatusCode());
-    }
-
-    public function testExecuteMagento21()
-    {
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Starting dump.'],
-                ['Dump completed.']
-            );
-        $this->exportMock->expects($this->once())->method('execute');
-        $this->generateMock->expects($this->once())->method('execute');
-        $this->importMock->expects($this->never())->method('execute');
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->willReturn(false);
+        $this->processMock->expects($this->once())
+            ->method('execute');
 
         $tester = new CommandTester(
             $this->command
@@ -128,7 +78,7 @@ class ConfigDumpTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('critical')
             ->with('Some error');
-        $this->exportMock->expects($this->once())
+        $this->processMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new \Exception('Some error'));
 

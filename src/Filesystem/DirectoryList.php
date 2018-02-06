@@ -23,7 +23,6 @@ class DirectoryList
     const DIR_INIT = 'init';
     const DIR_VAR = 'var';
     const DIR_LOG = 'log';
-    const DIR_GENERATED = 'generated';
     const DIR_GENERATED_CODE = 'code';
     const DIR_GENERATED_METADATA = 'metadata';
     const DIR_ETC = 'etc';
@@ -64,9 +63,10 @@ class DirectoryList
     }
 
     /**
-     * Gets a filesystem path of a directory
+     * Gets a filesystem path of a directory.
      *
      * @param string $code
+     * @param bool $relativePath
      * @return string
      */
     public function getPath(string $code, bool $relativePath = false): string
@@ -141,14 +141,6 @@ class DirectoryList
     /**
      * @return string
      */
-    public function getGenerated(): string
-    {
-        return $this->getPath(static::DIR_GENERATED);
-    }
-
-    /**
-     * @return string
-     */
     public function getGeneratedCode(): string
     {
         return $this->getPath(static::DIR_GENERATED_CODE);
@@ -167,7 +159,7 @@ class DirectoryList
      *
      * @return array
      */
-    public function getWritableDirectories(bool $relativePath = false): array
+    public function getWritableDirectories(): array
     {
         $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
 
@@ -179,8 +171,8 @@ class DirectoryList
             $writableDirs[] = static::DIR_VAR;
         }
 
-        return array_map(function ($path) use ($relativePath) {
-            return $this->getPath($path, $relativePath);
+        return array_map(function ($path) {
+            return $this->getPath($path, true);
         }, $writableDirs);
     }
 
@@ -202,7 +194,6 @@ class DirectoryList
             $config[static::DIR_GENERATED_CODE] = [static::PATH => 'var/generation'];
             $config[static::DIR_GENERATED_METADATA] = [static::PATH => 'var/di'];
         } else {
-            $config[static::DIR_GENERATED] = [static::PATH => 'generated'];
             $config[static::DIR_GENERATED_CODE] = [static::PATH => 'generated/code'];
             $config[static::DIR_GENERATED_METADATA] = [static::PATH => 'generated/metadata'];
         }
