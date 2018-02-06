@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\StaticContent;
 
+/**
+ * Static content deployment options toolset.
+ */
 interface OptionInterface
 {
     /**
@@ -34,11 +37,6 @@ interface OptionInterface
      * ```
      */
     public function getLocales(): array;
-
-    /**
-     * @return bool
-     */
-    public function isForce(): bool;
 
     /**
      * @return string

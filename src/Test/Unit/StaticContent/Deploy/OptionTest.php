@@ -131,16 +131,6 @@ class OptionTest extends TestCase
         $this->assertEquals('strategy', $this->option->getStrategy());
     }
 
-    public function testIsForce()
-    {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-
-        $this->assertTrue($this->option->isForce());
-    }
-
     public function testGetLocales()
     {
         $this->connectionMock->expects($this->once())

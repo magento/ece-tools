@@ -10,6 +10,9 @@ use Magento\MagentoCloud\StaticContent\OptionInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class CommandFactoryTest extends TestCase
 {
     /**
@@ -50,8 +53,8 @@ class CommandFactoryTest extends TestCase
                     'is_force' => true,
                     'verbosity_level' => '-v',
                 ],
-                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 -s ' .
-                'quick -v en_US --jobs=3'
+                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 --exclude-theme=theme2 -s ' .
+                'quick -v en_US --jobs=3',
             ],
             [
                 [
@@ -62,7 +65,7 @@ class CommandFactoryTest extends TestCase
                     'is_force' => false,
                     'verbosity_level' => '-v',
                 ],
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1'
+                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1',
             ],
         ];
     }
@@ -90,9 +93,6 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->once())
             ->method('getLocales')
             ->willReturn($optionConfig['locales']);
-        $optionMock->expects($this->once())
-            ->method('isForce')
-            ->willReturn($optionConfig['is_force']);
         $optionMock->expects($this->once())
             ->method('getVerbosityLevel')
             ->willReturn($optionConfig['verbosity_level']);

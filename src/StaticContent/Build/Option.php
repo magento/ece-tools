@@ -104,14 +104,6 @@ class Option implements OptionInterface
     /**
      * @inheritdoc
      */
-    public function isForce(): bool
-    {
-        return $this->magentoVersion->isGreaterOrEqual('2.2');
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getLocales(): array
     {
         $configPath = $this->fileList->getConfig();

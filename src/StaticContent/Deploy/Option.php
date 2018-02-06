@@ -93,14 +93,6 @@ class Option implements OptionInterface
     }
 
     /**
-     * @inheritdoc
-     */
-    public function isForce(): bool
-    {
-        return $this->magentoVersion->isGreaterOrEqual('2.2');
-    }
-
-    /**
      * Gets locales from DB which are set to stores and admin users.
      * Adds additional default 'en_US' locale to result, if it does't exist yet in defined list.
      *
