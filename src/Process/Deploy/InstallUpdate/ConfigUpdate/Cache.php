@@ -70,6 +70,6 @@ class Cache implements ProcessInterface
             unset($config['cache']);
         }
 
-        $this->configWriter->write($config);
+        $this->configWriter->create($config);
     }
 }
