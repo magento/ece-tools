@@ -103,7 +103,7 @@ class Amqp implements ProcessInterface
             $config = $this->removeAmqpConfig($config);
         }
 
-        $this->configWriter->write($config);
+        $this->configWriter->create($config);
     }
 
     /**

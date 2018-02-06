@@ -95,6 +95,6 @@ class CronConsumersRunner implements ProcessInterface
             'consumers' => $runnerConfig->get('consumers', []),
         ];
 
-        $this->configWriter->write($config);
+        $this->configWriter->create($config);
     }
 }

@@ -71,7 +71,7 @@ class CacheTest extends TestCase
                 'frontend' => ['cache_options'],
             ]);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with(['cache' => [
                 'frontend' => ['cache_options'],
             ]]);
@@ -93,7 +93,7 @@ class CacheTest extends TestCase
             ->method('get')
             ->willReturn([]);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with([]);
         $this->loggerMock->expects($this->once())
             ->method('info')

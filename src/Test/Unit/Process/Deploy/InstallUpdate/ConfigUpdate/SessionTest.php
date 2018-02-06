@@ -75,7 +75,7 @@ class SessionTest extends TestCase
                 ]
             ]);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with(['session' => [
                 'save' => 'redis',
                 'redis' => [
@@ -98,7 +98,7 @@ class SessionTest extends TestCase
             ->method('get')
             ->willReturn([]);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with(['session' => ['save' => 'db']]);
         $this->loggerMock->expects($this->once())
             ->method('info')
