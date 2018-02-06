@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\ScdStrategyChecker;
+use Magento\MagentoCloud\StaticContent\StrategyResolver;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -24,9 +24,9 @@ class Option implements OptionInterface
     private $environment;
 
     /**
-     * @var ScdStrategyChecker
+     * @var StrategyResolver
      */
-    private $scdStrategyChecker;
+    private $strategyResolver;
 
     /**
      * @var ConnectionInterface
@@ -50,6 +50,7 @@ class Option implements OptionInterface
 
     /**
      * @param Environment $environment
+     * @param StrategyResolver $strategyResolver
      * @param ConnectionInterface $connection
      * @param MagentoVersion $magentoVersion
      * @param ThreadCountOptimizer $threadCountOptimizer
@@ -57,14 +58,14 @@ class Option implements OptionInterface
      */
     public function __construct(
         Environment $environment,
-        ScdStrategyChecker $scdStrategyChecker,
+        StrategyResolver $strategyResolver,
         ConnectionInterface $connection,
         MagentoVersion $magentoVersion,
         ThreadCountOptimizer $threadCountOptimizer,
         DeployInterface $stageConfig
     ) {
         $this->environment = $environment;
-        $this->scdStrategyChecker = $scdStrategyChecker;
+        $this->strategyResolver = $strategyResolver;
         $this->connection = $connection;
         $this->magentoVersion = $magentoVersion;
         $this->threadCountOptimizer = $threadCountOptimizer;
@@ -98,9 +99,8 @@ class Option implements OptionInterface
     public function getStrategy(): string
     {
         $desiredStrategy = $this->stageConfig->get(DeployInterface::VAR_SCD_STRATEGY);
-        $allowedStrategies = $this->stageConfig->get(DeployInterface::VAR_SCD_ALLOWED_STRATEGIES);
 
-        return $this->scdStrategyChecker->getStrategy($desiredStrategy, $allowedStrategies);
+        return $this->strategyResolver->getStrategy($desiredStrategy);
     }
 
     /**

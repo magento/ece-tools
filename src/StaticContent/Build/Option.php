@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\ScdStrategyChecker;
+use Magento\MagentoCloud\StaticContent\StrategyResolver;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -25,9 +25,9 @@ class Option implements OptionInterface
     private $environment;
 
     /**
-     * @var ScdStrategyChecker
+     * @var StrategyResolver
      */
-    private $scdStrategyChecker;
+    private $strategyResolver;
 
     /**
      * @var MagentoVersion
@@ -56,7 +56,7 @@ class Option implements OptionInterface
 
     /**
      * @param Environment $environment
-     * @param ScdStrategyChecker $scdStrategyChecker
+     * @param StrategyResolver $strategyResolver
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
      * @param FileList $fileList
@@ -65,7 +65,7 @@ class Option implements OptionInterface
      */
     public function __construct(
         Environment $environment,
-        ScdStrategyChecker $scdStrategyChecker,
+        StrategyResolver $strategyResolver,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
         FileList $fileList,
@@ -73,7 +73,7 @@ class Option implements OptionInterface
         BuildInterface $stageConfig
     ) {
         $this->environment = $environment;
-        $this->scdStrategyChecker = $scdStrategyChecker;
+        $this->strategyResolver = $strategyResolver;
         $this->magentoVersion = $magentoVersion;
         $this->arrayManager = $arrayManager;
         $this->fileList = $fileList;
@@ -108,9 +108,8 @@ class Option implements OptionInterface
     public function getStrategy(): string
     {
         $desiredStrategy = $this->stageConfig->get(BuildInterface::VAR_SCD_STRATEGY);
-        $allowedStrategies = $this->stageConfig->get(BuildInterface::VAR_SCD_ALLOWED_STRATEGIES);
 
-        return $this->scdStrategyChecker->getStrategy($desiredStrategy, $allowedStrategies);
+        return $this->strategyResolver->getStrategy($desiredStrategy);
     }
 
     /**

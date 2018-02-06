@@ -10,7 +10,6 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Build\Reader as BuildReader;
-use Magento\MagentoCloud\Config\ScdStrategyChecker;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -34,23 +33,16 @@ class BuildTest extends TestCase
     private $buildReaderMock;
 
     /**
-     * @var ScdStrategyChecker|Mock
-     */
-    private $scdStrategyCheckerMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->buildReaderMock = $this->createMock(BuildReader::class);
-        $this->scdStrategyCheckerMock = $this->createMock(ScdStrategyChecker::class);
 
         $this->config = new Build(
             $this->environmentReaderMock,
-            $this->buildReaderMock,
-            $this->scdStrategyCheckerMock
+            $this->buildReaderMock
         );
     }
 
@@ -379,14 +371,6 @@ class BuildTest extends TestCase
                     'VERBOSE_COMMANDS' => 'enabled',
                 ],
                 '-vv',
-            ],
-            'allowed scd strategies value' => [
-                Build::VAR_SCD_ALLOWED_STRATEGIES,
-                [],
-                [
-                    Build::VAR_SCD_ALLOWED_STRATEGIES => ['default']
-                ],
-                ['default']
             ],
             'scd strategy default' => [
                 Build::VAR_SCD_STRATEGY,

@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Config\ScdStrategyChecker;
+use Magento\MagentoCloud\StaticContent\StrategyResolver;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
@@ -57,10 +57,13 @@ class OptionTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var ScdStrategyChecker|Mock
+     * @var StrategyResolver|Mock
      */
-    private $scdStrategyCheckerMock;
+    private $strategyResolverMock;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -69,11 +72,11 @@ class OptionTest extends TestCase
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
-        $this->scdStrategyCheckerMock = $this->createMock(ScdStrategyChecker::class);
+        $this->strategyResolverMock = $this->createMock(StrategyResolver::class);
 
         $this->option = new Option(
             $this->environmentMock,
-            $this->scdStrategyCheckerMock,
+            $this->strategyResolverMock,
             $this->arrayManagerMock,
             $this->magentoVersionMock,
             $this->fileListMock,
@@ -84,14 +87,13 @@ class OptionTest extends TestCase
 
     public function testGetThreadCount()
     {
-        $this->stageConfigMock->expects($this->exactly(3))
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
             ->willReturnMap([
                 [BuildInterface::VAR_SCD_STRATEGY, 'strategyName'],
-                [BuildInterface::VAR_SCD_ALLOWED_STRATEGIES, ['strategyName']],
-                [BuildInterface::VAR_SCD_THREADS, 3]
+                [BuildInterface::VAR_SCD_THREADS, 3],
             ]);
-        $this->scdStrategyCheckerMock->expects($this->once())
+        $this->strategyResolverMock->expects($this->once())
             ->method('getStrategy')
             ->willReturn('strategyName');
         $this->threadCountOptimizerMock->expects($this->once())
@@ -143,17 +145,16 @@ class OptionTest extends TestCase
      */
     public function testGetStrategy()
     {
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->withConsecutive(
-                [BuildInterface::VAR_SCD_STRATEGY],
-                [BuildInterface::VAR_SCD_ALLOWED_STRATEGIES]
+                [BuildInterface::VAR_SCD_STRATEGY]
             )
             ->willReturn(
                 'strategy',
                 ['strategy']
             );
-        $this->scdStrategyCheckerMock->expects($this->once())
+        $this->strategyResolverMock->expects($this->once())
             ->method('getStrategy')
             ->willReturn('strategy');
 
