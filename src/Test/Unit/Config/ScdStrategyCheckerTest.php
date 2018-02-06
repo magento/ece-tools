@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
-use \Magento\MagentoCloud\Config\ScdStrategyChecker;
-use \Magento\MagentoCloud\App\Logger;
-use \Magento\MagentoCloud\Package\MagentoVersion;
-use \PHPUnit\Framework\TestCase;
-use \PHPUnit_Framework_MockObject_MockObject as Mock;
+use Magento\MagentoCloud\Config\ScdStrategyChecker;
+use Magento\MagentoCloud\App\Logger;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * Class ScdStrategyCheckerTest
@@ -233,7 +233,7 @@ class ScdStrategyCheckerTest extends TestCase
                     ['2.1.*', false],
                     ['2.2.*', true],
                 ],
-                ['standard', 'quick', 'compact']
+                ['standard', 'quick', 'compact'],
             ],
         ];
     }

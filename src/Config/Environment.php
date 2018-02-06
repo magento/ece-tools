@@ -157,16 +157,6 @@ class Environment
     }
 
     /**
-     * Retrieves writable directories.
-     *
-     * @return array
-     */
-    public function getWritableDirectories(): array
-    {
-        return ['var', 'app/etc', 'pub/media'];
-    }
-
-    /**
      * @return bool
      */
     public function isDeployStaticContent(): bool
