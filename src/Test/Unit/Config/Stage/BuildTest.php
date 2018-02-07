@@ -372,6 +372,12 @@ class BuildTest extends TestCase
                 ],
                 '-vv',
             ],
+            'scd strategy default' => [
+                Build::VAR_SCD_STRATEGY,
+                [],
+                [],
+                ''
+            ],
         ];
     }
 
