@@ -97,7 +97,7 @@ class CronConsumersRunnerTest extends TestCase
             ->with(DeployInterface::VAR_CRON_CONSUMERS_RUNNER)
             ->willReturn($configFromVariable);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with($expectedResult);
         $this->repositoryFactoryMock->expects($this->once())
             ->method('create')

@@ -96,7 +96,7 @@ class EnvironmentTest extends TestCase
             ->method('getUrls')
             ->willReturn($urlManagerGetUrlsWillReturn);
         $this->writerMock->expects($writerWriteExpects)
-            ->method('write')
+            ->method('create')
             ->with([
                 'system' => [
                     'default' => [

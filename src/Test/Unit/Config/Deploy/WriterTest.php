@@ -12,6 +12,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class WriterTest extends TestCase
 {
     /**
@@ -34,6 +37,9 @@ class WriterTest extends TestCase
      */
     private $writer;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
@@ -50,9 +56,9 @@ class WriterTest extends TestCase
     /**
      * @param array $config
      * @param string $updatedConfig
-     * @dataProvider writeDataProvider
+     * @dataProvider createDataProvider
      */
-    public function testWrite(array $config, $updatedConfig)
+    public function testCreate(array $config, $updatedConfig)
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
@@ -62,27 +68,27 @@ class WriterTest extends TestCase
             ->method('filePutContents')
             ->with($filePath, $updatedConfig);
 
-        $this->writer->write($config);
+        $this->writer->create($config);
     }
 
     /**
      * @return array
      */
-    public function writeDataProvider()
+    public function createDataProvider()
     {
         return [
             [
                 [],
-                "<?php\nreturn array (\n);"
+                "<?php\nreturn array (\n);",
             ],
             [
                 ['key' => 'value'],
-                "<?php\nreturn array (\n  'key' => 'value',\n);"
+                "<?php\nreturn array (\n  'key' => 'value',\n);",
             ],
             [
                 ['key1' => 'value1', 'key2' => 'value2'],
-                "<?php\nreturn array (\n  'key1' => 'value1',\n  'key2' => 'value2',\n);"
-            ]
+                "<?php\nreturn array (\n  'key1' => 'value1',\n  'key2' => 'value2',\n);",
+            ],
         ];
     }
 
@@ -117,18 +123,18 @@ class WriterTest extends TestCase
             [
                 [],
                 [],
-                "<?php\nreturn array (\n);"
+                "<?php\nreturn array (\n);",
             ],
             [
                 ['key' => 'value'],
                 ['key1' => 'value1'],
-                "<?php\nreturn array (\n  'key1' => 'value1',\n  'key' => 'value',\n);"
+                "<?php\nreturn array (\n  'key1' => 'value1',\n  'key' => 'value',\n);",
             ],
             [
                 ['key1' => 'value1', 'key2' => 'value2'],
                 ['key1' => 'value0', 'key3' => 'value3'],
-                "<?php\nreturn array (\n  'key1' => 'value1',\n  'key3' => 'value3',\n  'key2' => 'value2',\n);"
-            ]
+                "<?php\nreturn array (\n  'key1' => 'value1',\n  'key3' => 'value3',\n  'key2' => 'value2',\n);",
+            ],
         ];
     }
 }

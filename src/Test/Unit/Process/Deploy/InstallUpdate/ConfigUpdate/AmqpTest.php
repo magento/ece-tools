@@ -87,7 +87,7 @@ class AmqpTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with($config);
         $this->loggerMock->expects($this->never())
             ->method('info');
@@ -127,7 +127,7 @@ class AmqpTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with($resultConfig);
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -298,7 +298,7 @@ class AmqpTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with($expectedConfig);
         $this->loggerMock->expects($this->once())
             ->method('info')
