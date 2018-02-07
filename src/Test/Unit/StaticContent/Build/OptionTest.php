@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\StaticContent\StrategyResolver;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
@@ -57,11 +56,6 @@ class OptionTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var StrategyResolver|Mock
-     */
-    private $strategyResolverMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -72,11 +66,9 @@ class OptionTest extends TestCase
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
-        $this->strategyResolverMock = $this->createMock(StrategyResolver::class);
 
         $this->option = new Option(
             $this->environmentMock,
-            $this->strategyResolverMock,
             $this->arrayManagerMock,
             $this->magentoVersionMock,
             $this->fileListMock,
@@ -93,9 +85,6 @@ class OptionTest extends TestCase
                 [BuildInterface::VAR_SCD_STRATEGY, 'strategyName'],
                 [BuildInterface::VAR_SCD_THREADS, 3],
             ]);
-        $this->strategyResolverMock->expects($this->once())
-            ->method('getStrategy')
-            ->willReturn('strategyName');
         $this->threadCountOptimizerMock->expects($this->once())
             ->method('optimize')
             ->with(3, 'strategyName')
@@ -122,7 +111,10 @@ class OptionTest extends TestCase
         );
     }
 
-    public function excludedThemesDataProvider()
+    /**
+     * @return array
+     */
+    public function excludedThemesDataProvider(): array
     {
         return [
             [
@@ -154,9 +146,6 @@ class OptionTest extends TestCase
                 'strategy',
                 ['strategy']
             );
-        $this->strategyResolverMock->expects($this->once())
-            ->method('getStrategy')
-            ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());
     }

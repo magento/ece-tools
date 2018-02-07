@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\StaticContent\StrategyResolver;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
@@ -51,11 +50,6 @@ class OptionTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var StrategyResolver|Mock
-     */
-    private $strategyResolverMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -65,11 +59,9 @@ class OptionTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->strategyResolverMock = $this->createMock(StrategyResolver::class);
 
         $this->option = new Option(
             $this->environmentMock,
-            $this->strategyResolverMock,
             $this->connectionMock,
             $this->magentoVersionMock,
             $this->threadCountOptimizerMock,
@@ -146,9 +138,6 @@ class OptionTest extends TestCase
                 'strategy',
                 ['strategy']
             );
-        $this->strategyResolverMock->expects($this->once())
-            ->method('getStrategy')
-            ->willReturn('strategy');
 
         $this->assertEquals('strategy', $this->option->getStrategy());
     }

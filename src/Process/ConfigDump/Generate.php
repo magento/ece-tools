@@ -40,7 +40,17 @@ class Generate implements ProcessInterface
     /**
      * @var array
      */
-    private $configKeys;
+    private $configKeys = [
+        'scopes',
+        'system/default/general/locale/code',
+        'system/default/dev/static/sign',
+        'system/default/dev/front_end_development_workflow',
+        'system/default/dev/template',
+        'system/default/dev/js',
+        'system/default/dev/css',
+        'system/default/advanced/modules_disable_output',
+        'system/stores',
+    ];
 
     /**
      * @var MagentoVersion
@@ -66,17 +76,6 @@ class Generate implements ProcessInterface
         $this->file = $file;
         $this->arrayManager = $arrayManager;
         $this->magentoVersion = $magentoVersion;
-        $this->configKeys = [
-            'scopes',
-            'system/default/general/locale/code',
-            'system/default/dev/static/sign',
-            'system/default/dev/front_end_development_workflow',
-            'system/default/dev/template',
-            'system/default/dev/js',
-            'system/default/dev/css',
-            'system/default/advanced/modules_disable_output',
-            'system/stores',
-        ];
 
         if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
             $this->configKeys[] = 'modules';
