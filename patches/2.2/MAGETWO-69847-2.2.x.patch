@@ -42,19 +42,19 @@ index c8917a0996..fe9dc2f453 100644
 +     *
 +     * @var \Closure
 +     */
-+    protected $_frontendFactory;
++    private $_frontendFactory;
 +
 +    /**
 +     * The pid that owns the $_frontend object
 +     *
 +     * @var int
 +     */
-+    protected $_pid;
++    private $_pid;
 +
 +    /**
 +     * @var \Zend_Cache_Core[]
 +     */
-+    static protected $_parentFrontends = [];
++    static private $_parentFrontends = [];
 +
 +    /**
 +     * @param \Closure $frontendFactory
@@ -142,7 +142,7 @@ index c8917a0996..fe9dc2f453 100644
 +     *
 +     * @return \Zend_Cache_Core
 +     */
-+    protected function _getFrontEnd()
++    private function _getFrontEnd()
 +    {
 +        if (getmypid() === $this->_pid) {
 +            return $this->_frontend;
