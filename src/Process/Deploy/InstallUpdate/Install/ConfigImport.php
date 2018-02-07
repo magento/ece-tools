@@ -51,22 +51,9 @@ class ConfigImport implements ProcessInterface
     /**
      * @inheritdoc
      */
-    public function isAvailable(): bool
-    {
-        $neededVersion = '2.2';
-        if ($this->magentoVersion->isGreaterOrEqual($neededVersion)) {
-            return true;
-        }
-        $this->logger->info("Skipping " . get_class($this) . " because Magento is below version $neededVersion.");
-        return false;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function execute()
     {
-        if (!$this->isAvailable()) {
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
             return;
         }
 

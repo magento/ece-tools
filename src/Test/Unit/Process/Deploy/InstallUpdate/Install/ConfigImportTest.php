@@ -53,9 +53,6 @@ class ConfigImportTest extends TestCase
         );
     }
 
-    /**
-     * return void
-     */
     public function testExecute()
     {
         $this->magentoVersionMock->method('isGreaterOrEqual')
@@ -70,35 +67,15 @@ class ConfigImportTest extends TestCase
         $this->process->execute();
     }
 
-    public function testIsAvailable()
+    public function testExecuteNotAvailable()
     {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(false);
         $this->loggerMock->expects($this->never())
             ->method('info');
+        $this->shellMock->expects($this->never())
+            ->method('execute');
 
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-
-        $this->assertSame(
-            true,
-            $this->process->isAvailable()
-        );
-    }
-
-    public function testIsNotAvailable()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('info');
-
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
-
-        $this->assertSame(
-            false,
-            $this->process->isAvailable()
-        );
+        $this->process->execute();
     }
 }

@@ -93,10 +93,6 @@ class CronConsumersRunner implements ProcessInterface
     public function execute()
     {
         if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $version = $this->magentoVersion->getVersion();
-            $this->logger->info(
-                sprintf('Updating cron consumer runner is not supported in Magento %s, skipping.', $version)
-            );
             return;
         }
         
