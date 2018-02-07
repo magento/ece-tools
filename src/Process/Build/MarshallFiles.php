@@ -45,17 +45,7 @@ class MarshallFiles implements ProcessInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
         $enterpriseFolder = $magentoRoot . '/app/enterprise';
-        $generatedCode = $magentoRoot . '/generated/code/';
-        $generatedMetadata = $magentoRoot . '/generated/metadata/';
         $varCache = $magentoRoot . '/var/cache/';
-
-        if ($this->file->isExists($generatedCode)) {
-            $this->file->clearDirectory($generatedCode);
-        }
-
-        if ($this->file->isExists($generatedMetadata)) {
-            $this->file->clearDirectory($generatedMetadata);
-        }
 
         if ($this->file->isExists($varCache)) {
             $this->file->deleteDirectory($varCache);

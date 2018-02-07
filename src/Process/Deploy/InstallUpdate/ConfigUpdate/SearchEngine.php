@@ -5,10 +5,12 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
+use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,9 +29,14 @@ class SearchEngine implements ProcessInterface
     private $logger;
 
     /**
-     * @var Writer
+     * @var EnvWriter
      */
-    private $writer;
+    private $envWriter;
+
+    /**
+     * @var SharedWriter
+     */
+    private $sharedWriter;
 
     /**
      * @var DeployInterface
@@ -37,21 +44,31 @@ class SearchEngine implements ProcessInterface
     private $stageConfig;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param Writer $writer
+     * @param EnvWriter $envWriter
+     * @param SharedWriter $sharedWriter
      * @param DeployInterface $stageConfig
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        Writer $writer,
-        DeployInterface $stageConfig
+        EnvWriter $envWriter,
+        SharedWriter $sharedWriter,
+        DeployInterface $stageConfig,
+        MagentoVersion $version
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->writer = $writer;
+        $this->envWriter = $envWriter;
+        $this->sharedWriter = $sharedWriter;
         $this->stageConfig = $stageConfig;
+        $this->magentoVersion = $version;
     }
 
     /**
@@ -67,7 +84,13 @@ class SearchEngine implements ProcessInterface
 
         $this->logger->info('Set search engine to: ' . $searchConfig['engine']);
         $config['system']['default']['catalog']['search'] = $searchConfig;
-        $this->writer->update($config);
+
+        // 2.1.x requires search config to be written to the shared config file: MAGECLOUD-1317
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $this->sharedWriter->update($config);
+            return;
+        }
+        $this->envWriter->update($config);
     }
 
     /**

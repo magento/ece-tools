@@ -53,25 +53,15 @@ class MarshallFilesTest extends TestCase
 
     /**
      * @param bool $isExist
-     * @param int $clearDirectory
      * @param int $deleteDirectory
      * @param int $createDirectory
      * @dataProvider executeDataProvider
      */
-    public function testExecute($isExist, $clearDirectory, $deleteDirectory, $createDirectory)
+    public function testExecute($isExist, $deleteDirectory, $createDirectory)
     {
         $enterpriseFolder = 'magento_root/app/enterprise';
-        $generatedCode = 'magento_root/generated/code/';
-        $generatedMetadata = 'magento_root/generated/metadata/';
         $varCache = 'magento_root/var/cache/';
 
-        $this->fileMock->expects($this->exactly($clearDirectory))
-            ->method('clearDirectory')
-            ->withConsecutive(
-                [$generatedCode],
-                [$generatedMetadata]
-            )
-            ->willReturn(true);
         $this->fileMock->expects($this->exactly($deleteDirectory))
             ->method('deleteDirectory')
             ->with($varCache)
@@ -86,11 +76,9 @@ class MarshallFilesTest extends TestCase
                 ['magento_root/app/etc/di.xml', 'magento_root/app/di.xml'],
                 ['magento_root/app/etc/enterprise/di.xml', 'magento_root/app/enterprise/di.xml']
             );
-        $this->fileMock->expects($this->exactly(5))
+        $this->fileMock->expects($this->exactly(3))
             ->method('isExists')
             ->willReturnMap([
-                [$generatedCode, $isExist],
-                [$generatedMetadata, $isExist],
                 [$varCache, $isExist],
                 [$enterpriseFolder, $isExist],
                 ['magento_root/app/etc/enterprise/di.xml', true],
@@ -105,8 +93,8 @@ class MarshallFilesTest extends TestCase
     public function executeDataProvider()
     {
         return [
-            ['isExist' => true, 'clearDirectory' => 2, 'deleteDirectory' => 1, 'createDirectory' => 0],
-            ['isExist' => false, 'clearDirectory' => 0, 'deleteDirectory' => 0, 'createDirectory' => 1],
+            ['isExist' => true, 'deleteDirectory' => 1, 'createDirectory' => 0],
+            ['isExist' => false, 'deleteDirectory' => 0, 'createDirectory' => 1],
         ];
     }
 }

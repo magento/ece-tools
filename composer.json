@@ -8,7 +8,7 @@
   ],
   "require": {
     "php": "^7.0",
-    "monolog/monolog": "^1.17",
+    "monolog/monolog": "^1.16",
     "symfony/console": "^2.6",
     "illuminate/contracts": "^5.5",
     "illuminate/container": "^5.5",
