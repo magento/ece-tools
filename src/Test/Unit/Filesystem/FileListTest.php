@@ -73,29 +73,6 @@ class FileListTest extends TestCase
         $this->assertSame('magento_root/build_options.ini', $this->fileList->getBuildConfig());
     }
 
-    /**
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
-     */
-    public function testGetComposer()
-    {
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/composer.json')
-            ->willReturn(true);
-
-        $this->assertSame('magento_root/composer.json', $this->fileList->getComposer());
-    }
-
-    public function testGetComposerPackage()
-    {
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/composer.json')
-            ->willReturn(false);
-
-        $this->assertSame('root/composer.json', $this->fileList->getComposer());
-    }
-
     public function testGetToolsConfig()
     {
         $this->assertSame('magento_root/.magento.env.yaml', $this->fileList->getEnvConfig());

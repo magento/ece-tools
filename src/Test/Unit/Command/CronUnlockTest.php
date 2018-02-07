@@ -7,11 +7,15 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Cron\JobUnlocker;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class CronUnlockTest extends TestCase
 {
     /**
@@ -25,6 +29,11 @@ class CronUnlockTest extends TestCase
     private $jobUnlockerMock;
 
     /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
+    /**
      * @var CronUnlock
      */
     private $cronUnlockCommand;
@@ -36,10 +45,12 @@ class CronUnlockTest extends TestCase
     {
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->cronUnlockCommand = new CronUnlock(
             $this->jobUnlockerMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->magentoVersionMock
         );
     }
 
@@ -89,7 +100,7 @@ class CronUnlockTest extends TestCase
             $this->cronUnlockCommand
         );
         $tester->execute([
-            '--job-code' => ['code1', 'code2']
+            '--job-code' => ['code1', 'code2'],
         ]);
 
         $this->assertSame(0, $tester->getStatusCode());

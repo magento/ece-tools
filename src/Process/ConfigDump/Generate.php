@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\ConfigDump;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ArrayManager;
 
@@ -39,27 +40,47 @@ class Generate implements ProcessInterface
     /**
      * @var array
      */
-    private $configKeys;
+    private $configKeys = [
+        'scopes',
+        'system/default/general/locale/code',
+        'system/default/dev/static/sign',
+        'system/default/dev/front_end_development_workflow',
+        'system/default/dev/template',
+        'system/default/dev/js',
+        'system/default/dev/css',
+        'system/default/advanced/modules_disable_output',
+        'system/stores',
+    ];
+
+    /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
 
     /**
      * @param ConnectionInterface $connection
      * @param FileList $fileList
      * @param File $file
      * @param ArrayManager $arrayManager
-     * @param array $configKeys
+     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         ConnectionInterface $connection,
         FileList $fileList,
         File $file,
         ArrayManager $arrayManager,
-        array $configKeys
+        MagentoVersion $magentoVersion
     ) {
         $this->connection = $connection;
         $this->fileList = $fileList;
         $this->file = $file;
         $this->arrayManager = $arrayManager;
-        $this->configKeys = $configKeys;
+        $this->magentoVersion = $magentoVersion;
+
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $this->configKeys[] = 'modules';
+            $this->configKeys[] = 'system/websites';
+        }
     }
 
     /**
@@ -67,7 +88,11 @@ class Generate implements ProcessInterface
      */
     public function execute()
     {
-        $configFile = $this->fileList->getConfig();
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $configFile = $this->fileList->getConfig();
+        } else { // In 2.0 and 2.1, we use config.local.php instead
+            $configFile = $this->fileList->getConfigLocal();
+        }
         $oldConfig = require $configFile;
         $newConfig = [];
 
@@ -121,7 +146,6 @@ class Generate implements ProcessInterface
         );
 
         $updatedConfig = '<?php' . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
-
         $this->file->filePutContents($configFile, $updatedConfig);
     }
 }
