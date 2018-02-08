@@ -44,7 +44,14 @@ class ManagerTest extends TestCase
      */
     private $manager;
 
+    /**
+     * @var string
+     */
     private $magentoRoot = 'magento_root';
+
+    /**
+     * @var string
+     */
     private $backupRoot = 'magento_root/init';
 
     /**
@@ -106,7 +113,7 @@ class ManagerTest extends TestCase
     {
         return [
             ['key' => 'key1', 'path' => '.some_flag', 'flagState' => true],
-            ['key' => 'key2', 'path' => 'what/the/what/.some_flag', 'flagState' => false]
+            ['key' => 'key2', 'path' => 'what/the/what/.some_flag', 'flagState' => false],
         ];
     }
 
@@ -179,7 +186,7 @@ class ManagerTest extends TestCase
         bool $flagState,
         bool $deleteResult,
         array $logs,
-        bool$result
+        bool $result
     ) {
         $this->flagPool->expects($this->any())
             ->method('get')
@@ -217,7 +224,7 @@ class ManagerTest extends TestCase
                 'flagState' => true,
                 'deleteResult' => true,
                 'logs' => ['Deleting flag: path/to/.some_flag1'],
-                'result' => true
+                'result' => true,
             ],
             [
                 'key' => '.some_flag2',
@@ -225,7 +232,7 @@ class ManagerTest extends TestCase
                 'flagState' => false,
                 'deleteResult' => false,
                 'logs' => ['Flag path/to/.some_flag2 has already been deleted.'],
-                'result' => true
+                'result' => true,
             ],
             [
                 'key' => '.some_flag3',
@@ -233,7 +240,7 @@ class ManagerTest extends TestCase
                 'flagState' => true,
                 'deleteResult' => false,
                 'logs' => [],
-                'result' => false
+                'result' => false,
             ],
         ];
     }

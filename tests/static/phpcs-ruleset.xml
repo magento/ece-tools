@@ -22,4 +22,6 @@
     <rule ref="Squiz.Commenting.DocCommentAlignment"/>
     <rule ref="Squiz.Functions.GlobalFunction"/>
     <rule ref="Squiz.WhiteSpace.LogicalOperatorSpacing"/>
+    <rule ref="Squiz.Commenting.VariableComment" />
+    <rule ref="Squiz.Commenting.ClassComment" />
 </ruleset>

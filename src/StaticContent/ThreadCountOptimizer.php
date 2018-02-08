@@ -7,6 +7,9 @@ namespace Magento\MagentoCloud\StaticContent;
 
 use Psr\Log\LoggerInterface;
 
+/**
+ * Performs thread optimization according to the strategy.
+ */
 class ThreadCountOptimizer
 {
     /**

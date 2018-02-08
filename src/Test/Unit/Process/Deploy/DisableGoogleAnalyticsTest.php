@@ -12,6 +12,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class DisableGoogleAnalyticsTest extends TestCase
 {
     /**

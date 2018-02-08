@@ -8,6 +8,9 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Updates application configs.
+ */
 class ConfigUpdate implements ProcessInterface
 {
     /**

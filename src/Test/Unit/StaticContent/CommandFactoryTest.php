@@ -11,6 +11,9 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class CommandFactoryTest extends TestCase
 {
     /**

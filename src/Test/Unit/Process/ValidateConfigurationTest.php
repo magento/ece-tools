@@ -12,6 +12,9 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class ValidateConfigurationTest extends TestCase
 {
     /**
@@ -67,11 +70,11 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_CRITICAL => [
-                    $criticalValidator
+                    $criticalValidator,
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
-                    $warningValidator
-                ]
+                    $warningValidator,
+                ],
             ]
         );
 
@@ -106,11 +109,11 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_CRITICAL => [
-                    $criticalValidator
+                    $criticalValidator,
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
-                    $warningValidator
-                ]
+                    $warningValidator,
+                ],
             ]
         );
 
