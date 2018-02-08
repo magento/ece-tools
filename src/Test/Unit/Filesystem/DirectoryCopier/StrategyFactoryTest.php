@@ -14,6 +14,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @inheritdoc
+ */
 class StrategyFactoryTest extends TestCase
 {
     /**

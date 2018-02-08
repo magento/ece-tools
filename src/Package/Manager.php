@@ -9,6 +9,9 @@ use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Composer\Repository\RepositoryInterface;
 
+/**
+ * Composer packages repository manager.
+ */
 class Manager
 {
     /**
@@ -92,6 +95,7 @@ class Manager
         foreach ($this->composer->getPackage()->getRequires() as $link) {
             $packages[] = $link->getTarget();
         }
+
         return $packages;
     }
 }

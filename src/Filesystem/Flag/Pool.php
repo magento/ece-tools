@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Filesystem\Flag;
 
+/**
+ * The pool of available flags.
+ */
 class Pool
 {
     /**

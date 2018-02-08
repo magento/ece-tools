@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Cleans Redis cache.
+ */
 class CleanRedisCache implements ProcessInterface
 {
     /**

@@ -15,6 +15,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class BuildDirCopierTest extends TestCase
 {
     /**
@@ -98,16 +101,16 @@ class BuildDirCopierTest extends TestCase
             [
                 true,
                 'info',
-                'Directory dir was copied with strategy: copy'
+                'Directory dir was copied with strategy: copy',
             ],
             [
                 false,
                 'notice',
-                'Can\'t copy directory dir with strategy: copy'
-            ]
+                'Can\'t copy directory dir with strategy: copy',
+            ],
         ];
     }
-   
+
     public function testCopyMissingDestDirectory()
     {
         $strategy = 'copy';
@@ -144,7 +147,7 @@ class BuildDirCopierTest extends TestCase
             ->willReturn(false);
         $fileMock->expects($this->once())
             ->method('copyDirectory')
-            ->with($rootInitDir, $rootDir . '/' .$dir)
+            ->with($rootInitDir, $rootDir . '/' . $dir)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')

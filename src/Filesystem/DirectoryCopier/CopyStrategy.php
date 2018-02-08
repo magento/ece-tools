@@ -9,6 +9,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class CopyStrategy implements StrategyInterface
 {
     /**
@@ -46,6 +49,7 @@ class CopyStrategy implements StrategyInterface
 
         if ($this->file->isEmptyDirectory($fromDirectory)) {
             $this->logger->info(sprintf("%s is empty. Nothing to restore", $fromDirectory));
+
             return false;
         }
 
