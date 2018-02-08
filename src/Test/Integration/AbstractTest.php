@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * Adds sandbox project installation and cleanup abstract features.
  */
 abstract class AbstractTest extends TestCase
 {

@@ -43,8 +43,6 @@ class RestoreWritableDirectories implements ProcessInterface
     private $flagManager;
 
     /**
-     * RestoreWritableDirectories constructor.
-     *
      * @param LoggerInterface $logger
      * @param BuildDirCopier $buildDirCopier
      * @param RecoverableDirectoryList $recoverableDirectoryList
@@ -79,7 +77,7 @@ class RestoreWritableDirectories implements ProcessInterface
             );
         }
 
-        // Restore mounted directories
+        // Restore mounted directories.
         $this->logger->info('Recoverable directories were copied back.');
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
