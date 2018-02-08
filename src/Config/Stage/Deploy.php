@@ -152,7 +152,7 @@ class Deploy implements DeployInterface
     private function getScdThreads(): int
     {
         $variables = $this->environmentConfig->getVariables();
-        $staticDeployThreads = 1;
+        $staticDeployThreads = 0;
 
         if (isset($variables['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
@@ -171,7 +171,7 @@ class Deploy implements DeployInterface
      */
     private function getEnvScdThreads(): int
     {
-        $staticDeployThreads = 1;
+        $staticDeployThreads = 0;
 
         if (isset($_ENV['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
