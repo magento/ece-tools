@@ -299,7 +299,7 @@ class AmqpTest extends TestCase
             ->with($expectedConfig);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Removing AMQP configuration from env.php.');
+            ->with('Removing queue configuration from env.php.');
 
         $this->amqp->execute();
     }
@@ -341,9 +341,6 @@ class AmqpTest extends TestCase
                 ],
                 'expectedConfig' => [
                     'some config',
-                    'queue' => [
-                        'someQueue' => ['some queue config'],
-                    ],
                 ],
             ],
         ];
