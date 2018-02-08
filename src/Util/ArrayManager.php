@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Util;
 
+/**
+ * Provides additional functionality for array manipulations.
+ */
 class ArrayManager
 {
     /**

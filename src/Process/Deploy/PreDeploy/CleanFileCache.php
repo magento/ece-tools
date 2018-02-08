@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Cleans file caches.
+ */
 class CleanFileCache implements ProcessInterface
 {
     /**

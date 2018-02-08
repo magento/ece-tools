@@ -7,6 +7,9 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 abstract class AbstractTest extends TestCase
 {
     /**

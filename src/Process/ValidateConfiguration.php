@@ -9,6 +9,9 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Validates configuration with given validators.
+ */
 class ValidateConfiguration implements ProcessInterface
 {
     /**
@@ -52,7 +55,7 @@ class ValidateConfiguration implements ProcessInterface
                     $message = $result->getError();
 
                     if (!empty($result->getSuggestion())) {
-                        $message .= PHP_EOL . 'SUGGESTION:' . PHP_EOL .  $result->getSuggestion();
+                        $message .= PHP_EOL . 'SUGGESTION:' . PHP_EOL . $result->getSuggestion();
                     }
 
                     $this->logger->log($level, $message);

@@ -14,6 +14,9 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\QuestionHelper;
 
+/**
+ * @inheritdoc
+ */
 class BackupRestoreTest extends TestCase
 {
     /**

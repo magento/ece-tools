@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Provides functionality to copy directories on build phase.
+ */
 class BuildDirCopier
 {
     /**
@@ -44,7 +47,7 @@ class BuildDirCopier
 
     /**
      * @param string $dir The directory to copy. Pass in its normal location relative to Magento root with no prepending
-     *                    or trailing slashes
+     * or trailing slashes
      * @param string $strategyName Name of strategy that will be used for copying directories
      */
     public function copy(string $dir, string $strategyName)

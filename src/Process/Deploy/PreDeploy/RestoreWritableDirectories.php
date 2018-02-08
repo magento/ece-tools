@@ -12,6 +12,9 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\BuildDirCopier;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Restoring writable directories.
+ */
 class RestoreWritableDirectories implements ProcessInterface
 {
     /**
@@ -41,6 +44,7 @@ class RestoreWritableDirectories implements ProcessInterface
 
     /**
      * RestoreWritableDirectories constructor.
+     *
      * @param LoggerInterface $logger
      * @param BuildDirCopier $buildDirCopier
      * @param RecoverableDirectoryList $recoverableDirectoryList

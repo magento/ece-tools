@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Cron\JobUnlocker;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class JobUnlockerTest extends TestCase
 {
     /**
