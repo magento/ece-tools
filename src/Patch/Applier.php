@@ -91,21 +91,19 @@ class Applier
             $path = $this->directoryList->getPatches() . '/' . $path;
         }
 
+        if ($packageName && !$this->matchConstraint($packageName, $constraint)) {
+            return;
+        }
+
+        $format = $constraint
+            ? 'Applying patch %s %s.'
+            : 'Applying patch %s.';
+
         $this->logger->info(sprintf(
-            'Applying patch %s %s.',
+            $format,
             $name,
             $constraint
         ));
-
-        if ($packageName && !$this->matchConstraint($packageName, $constraint)) {
-            $this->logger->notice(sprintf(
-                'Constraint %s %s was not found.',
-                $packageName,
-                $constraint
-            ));
-
-            return;
-        }
 
         $this->shell->execute('git apply ' . $path);
         $this->logger->info('Done.');
