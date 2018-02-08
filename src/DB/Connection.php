@@ -31,7 +31,7 @@ class Connection implements ConnectionInterface
     private $environment;
 
     /**
-     * @var int
+     * @var integer
      */
     private $fetchMode = \PDO::FETCH_ASSOC;
 

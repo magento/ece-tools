@@ -11,6 +11,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class ConfigUpdateTest extends TestCase
 {
     /**
@@ -28,10 +31,13 @@ class ConfigUpdateTest extends TestCase
      */
     private $process;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->process = new ConfigUpdate(
             $this->loggerMock,
