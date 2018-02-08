@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
+
 /**
  * Directory path configurations.
  */
@@ -21,6 +23,11 @@ class DirectoryList
     const DIR_INIT = 'init';
     const DIR_VAR = 'var';
     const DIR_LOG = 'log';
+    const DIR_GENERATED_CODE = 'code';
+    const DIR_GENERATED_METADATA = 'metadata';
+    const DIR_ETC = 'etc';
+    const DIR_MEDIA = 'media';
+    const DIR_VIEW_PREPROCESSED = 'view-preprocessed';
 
     /**
      * @var string
@@ -33,31 +40,38 @@ class DirectoryList
     private $magentoRoot;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @var array
      */
     private $directories;
 
     /**
-     * @param string $root The ECE Tools root directory
-     * @param string $magentoRoot The Magento root directory
-     * @param array $config Directory configuration
+     * @param SystemList $systemList
+     * @param MagentoVersion $version
+     * @param array $config
      */
-    public function __construct(string $root, string $magentoRoot, array $config = [])
+    public function __construct(SystemList $systemList, MagentoVersion $version, array $config = [])
     {
-        $this->root = $root;
-        $this->magentoRoot = $magentoRoot;
-        $this->directories = $config + static::getDefaultConfig();
+        $this->root = $systemList->getRoot();
+        $this->magentoRoot = $systemList->getMagentoRoot();
+        $this->magentoVersion = $version;
+        $this->directories = $config + $this->getDefaultConfig();
     }
 
     /**
-     * Gets a filesystem path of a directory
+     * Gets a filesystem path of a directory.
      *
      * @param string $code
+     * @param bool $relativePath
      * @return string
      */
-    public function getPath(string $code): string
+    public function getPath(string $code, bool $relativePath = false): string
     {
-        $magentoRoot = $this->getMagentoRoot();
+        $magentoRoot = $relativePath ? '' : $this->getMagentoRoot();
         $directories = $this->getDirectories();
 
         if (!array_key_exists($code, $directories)) {
@@ -127,20 +141,71 @@ class DirectoryList
     /**
      * @return string
      */
-    public function getPatches(): string
+    public function getGeneratedCode(): string
     {
-        return $this->getRoot() . '/patches';
+        return $this->getPath(static::DIR_GENERATED_CODE);
+    }
+
+    /**
+     * @return string
+     */
+    public function getGeneratedMetadata(): string
+    {
+        return $this->getPath(static::DIR_GENERATED_METADATA);
+    }
+
+    /**
+     * Retrieves writable directories.
+     *
+     * @return array
+     */
+    public function getWritableDirectories(): array
+    {
+        $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
+
+        if ($this->magentoVersion->satisfies('2.1.*')) {
+            $writableDirs[] = static::DIR_GENERATED_METADATA;
+            $writableDirs[] = static::DIR_GENERATED_CODE;
+            $writableDirs[] = static::DIR_VIEW_PREPROCESSED;
+        } else {
+            $writableDirs[] = static::DIR_VAR;
+        }
+
+        return array_map(function ($path) {
+            return $this->getPath($path, true);
+        }, $writableDirs);
     }
 
     /**
      * @return array
      */
-    public static function getDefaultConfig(): array
+    public function getDefaultConfig(): array
     {
-        return [
+        $config = [
             static::DIR_INIT => [static::PATH => 'init'],
             static::DIR_VAR => [static::PATH => 'var'],
             static::DIR_LOG => [static::PATH => 'var/log'],
+            static::DIR_ETC => [static::PATH => 'app/etc'],
+            static::DIR_MEDIA => [static::PATH => 'pub/media'],
+            static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
         ];
+
+        if ($this->magentoVersion->satisfies('2.1.*')) {
+            $config[static::DIR_GENERATED_CODE] = [static::PATH => 'var/generation'];
+            $config[static::DIR_GENERATED_METADATA] = [static::PATH => 'var/di'];
+        } else {
+            $config[static::DIR_GENERATED_CODE] = [static::PATH => 'generated/code'];
+            $config[static::DIR_GENERATED_METADATA] = [static::PATH => 'generated/metadata'];
+        }
+
+        return $config;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPatches(): string
+    {
+        return $this->getRoot() . '/patches';
     }
 }

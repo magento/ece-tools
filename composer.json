@@ -8,7 +8,7 @@
   ],
   "require": {
     "php": "^7.0",
-    "monolog/monolog": "^1.17",
+    "monolog/monolog": "^1.16",
     "symfony/console": "^2.6",
     "illuminate/contracts": "^5.5",
     "illuminate/container": "^5.5",
@@ -25,6 +25,9 @@
     "phpmd/phpmd": "@stable",
     "php-mock/php-mock-phpunit": "^2.0",
     "phpunit/php-code-coverage": "^5.2"
+  },
+  "replace": {
+    "magento/ece-patches": "*"
   },
   "bin": [
     "bin/ece-tools",

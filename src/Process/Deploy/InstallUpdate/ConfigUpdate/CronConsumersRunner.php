@@ -5,14 +5,15 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
-use Illuminate\Config\Repository;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Process\ProcessInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -45,6 +46,11 @@ class CronConsumersRunner implements ProcessInterface
     private $stageConfig;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @var RepositoryFactory
      */
     private $repositoryFactory;
@@ -60,6 +66,7 @@ class CronConsumersRunner implements ProcessInterface
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
+     * @param MagentoVersion $version
      * @param RepositoryFactory $repositoryFactory
      */
     public function __construct(
@@ -68,6 +75,7 @@ class CronConsumersRunner implements ProcessInterface
         ConfigWriter $configWriter,
         LoggerInterface $logger,
         DeployInterface $stageConfig,
+        MagentoVersion $version,
         RepositoryFactory $repositoryFactory
     ) {
         $this->environment = $environment;
@@ -75,6 +83,7 @@ class CronConsumersRunner implements ProcessInterface
         $this->configWriter = $configWriter;
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
+        $this->magentoVersion = $version;
         $this->repositoryFactory = $repositoryFactory;
     }
 
@@ -83,6 +92,10 @@ class CronConsumersRunner implements ProcessInterface
      */
     public function execute()
     {
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+            return;
+        }
+        
         $this->logger->info('Updating env.php cron consumers runner configuration.');
         $config = $this->configReader->read();
         $runnerConfig = $this->repositoryFactory->create(
@@ -95,6 +108,6 @@ class CronConsumersRunner implements ProcessInterface
             'consumers' => $runnerConfig->get('consumers', []),
         ];
 
-        $this->configWriter->write($config);
+        $this->configWriter->create($config);
     }
 }

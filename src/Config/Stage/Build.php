@@ -67,8 +67,8 @@ class Build implements BuildInterface
 
     /**
      * @return array
-     * @throws ParseException;
-     * @throws FileSystemException;
+     * @throws ParseException
+     * @throws FileSystemException
      */
     private function mergeConfig(): array
     {

@@ -103,7 +103,7 @@ class Environment implements ProcessInterface
 
         if ($urlsChanged) {
             $this->logger->info('Write the updating base URLs configuration in the app/etc/env.php file');
-            $this->writer->write($config);
+            $this->writer->create($config);
         }
     }
 
