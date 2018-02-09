@@ -82,8 +82,6 @@ class Applier
      */
     public function apply(string $path, $name, $packageName, $constraint)
     {
-        $name = $name ? sprintf('%s (%s)', $name, $path) : $path;
-
         /**
          * Support for relative paths.
          */
@@ -95,6 +93,9 @@ class Applier
             return;
         }
 
+        $name = $name
+            ? sprintf('%s (%s)', $name, $path)
+            : $path;
         $format = $constraint
             ? 'Applying patch %s %s.'
             : 'Applying patch %s.';
