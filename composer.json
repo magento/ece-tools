@@ -27,7 +27,8 @@
     "phpunit/php-code-coverage": "^5.2"
   },
   "replace": {
-    "magento/ece-patches": "*"
+    "magento/ece-patches": "*",
+    "magento/magento-cloud-configuration": "*"
   },
   "bin": [
     "bin/ece-tools",
