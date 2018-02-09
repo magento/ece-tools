@@ -79,10 +79,12 @@ class RecoverableDirectoryList
         ];
 
         if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            $recoverableDirs[] = [
-                self::OPTION_DIRECTORY => 'var/view_preprocessed',
-                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY,
-            ];
+            if (!$this->stageConfig->get(DeployInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR)) {
+                $recoverableDirs[] = [
+                    self::OPTION_DIRECTORY => 'var/view_preprocessed',
+                    self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY,
+                ];
+            }
             $recoverableDirs[] = [
                 self::OPTION_DIRECTORY => 'pub/static',
                 self::OPTION_STRATEGY => $isSymlinkEnabled ?

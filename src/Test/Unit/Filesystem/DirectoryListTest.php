@@ -145,7 +145,7 @@ class DirectoryListTest extends TestCase
      * @param array $paths
      * @dataProvider getWritableDirectoriesDataProvider
      */
-    public function testGetGetWritableDirectories(DirectoryList $directoryList, array $paths)
+    public function testGetWritableDirectories(DirectoryList $directoryList, array $paths)
     {
         $result = $directoryList->getWritableDirectories();
         sort($result);
@@ -161,12 +161,18 @@ class DirectoryListTest extends TestCase
         $relative21Paths = [
             'var/di',
             'var/generation',
+            'var/log',
             'var/view_preprocessed',
             'app/etc',
             'pub/media',
         ];
 
-        $relative22Paths = ['var', 'app/etc', 'pub/media'];
+        $relative22Paths = [
+            'var/view_preprocessed',
+            'var/log',
+            'app/etc',
+            'pub/media'
+        ];
 
         return [
             [$this->get21DirectoryList(), $relative21Paths],

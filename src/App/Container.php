@@ -276,6 +276,7 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
+                        $this->container->make(DeployProcess\PreDeploy\CleanViewPreprocessed::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),

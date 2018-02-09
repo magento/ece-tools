@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -213,6 +214,34 @@ class DeployTest extends TestCase
                     Deploy::VAR_SCD_EXCLUDE_THEMES => 'some theme 2',
                 ],
                 'some theme 2',
+            ],
+            'default skip copying view_preprocessed dir' => [
+                StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                [],
+                [],
+                false,
+            ],
+            'deploy skip copying view_preprocessed dir' => [
+                StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true,
+                    ],
+                ],
+                [],
+                true,
+            ],
+            'global skip copying view_preprocessed dir' => [
+                StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true,
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+                [],
+                true,
             ],
         ];
     }

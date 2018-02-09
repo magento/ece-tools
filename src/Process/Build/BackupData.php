@@ -6,11 +6,11 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Process\Build\BackupData\StaticContent;
+use Magento\MagentoCloud\Process\Build\BackupData\WritableDirectories;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
+use Monolog\Logger;
 
 /**
  * Writable directories will be erased when the writable filesystem is mounted to them. This
@@ -21,24 +21,18 @@ use Psr\Log\LoggerInterface;
 class BackupData implements ProcessInterface
 {
     /**
-     * @var File
+     * @var StaticContent
      */
-    private $file;
+    private $backupStaticContentProcess;
 
     /**
-     * @var LoggerInterface
+     * @var WritableDirectories
+     */
+    private $backupWritableDirectoriesProcess;
+    /**
+     * @var LoggerInterface|Logger
      */
     private $logger;
-
-    /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
-     * @var FlagManager
-     */
-    private $flagManager;
 
     /**
      * @var LoggerPool
@@ -48,23 +42,20 @@ class BackupData implements ProcessInterface
     /**
      * BackupData constructor.
      *
-     * @param File $file
+     * @param StaticContent $backupStaticContentProcess
+     * @param WritableDirectories $backupWritableDirectories
      * @param LoggerInterface $logger
-     * @param DirectoryList $directoryList
-     * @param FlagManager $flagManager
      * @param LoggerPool $loggerPool
      */
     public function __construct(
-        File $file,
+        StaticContent $backupStaticContentProcess,
+        WritableDirectories $backupWritableDirectories,
         LoggerInterface $logger,
-        DirectoryList $directoryList,
-        FlagManager $flagManager,
         LoggerPool $loggerPool
     ) {
-        $this->file = $file;
+        $this->backupStaticContentProcess = $backupStaticContentProcess;
+        $this->backupWritableDirectoriesProcess = $backupWritableDirectories;
         $this->logger = $logger;
-        $this->directoryList = $directoryList;
-        $this->flagManager = $flagManager;
         $this->loggerPool = $loggerPool;
     }
 
@@ -73,52 +64,9 @@ class BackupData implements ProcessInterface
      */
     public function execute()
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
-        $rootInitDir = $this->directoryList->getInit() . '/';
-        $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
-
-        if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            $scdFlagPath = $this->flagManager->getFlagPath(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
-            $initPub = $rootInitDir . 'pub/';
-            $initPubStatic = $initPub . 'static/';
-            $originalPubStatic = $magentoRoot . 'pub/static/';
-
-            $this->logger->info('Moving static content to init directory');
-            $this->file->createDirectory($initPub);
-
-            if ($this->file->isExists($initPubStatic)) {
-                $this->logger->info('Remove ./init/pub/static');
-                $this->file->deleteDirectory($initPubStatic);
-            }
-
-            $this->file->createDirectory($initPubStatic);
-            $this->file->copyDirectory($originalPubStatic, $initPubStatic);
-            $this->file->copy(
-                $magentoRoot . $scdFlagPath,
-                $rootInitDir . $scdFlagPath
-            );
-        } else {
-            $this->logger->info('SCD not performed during build');
-        }
-
-        $this->logger->info('Copying writable directories to temp directory.');
-
+        $this->backupStaticContentProcess->execute();
         $this->stopLogging();
-
-        foreach ($this->directoryList->getWritableDirectories() as $dir) {
-            $originalDir = $magentoRoot . $dir;
-            $initDir = $rootInitDir . $dir;
-
-            $this->file->createDirectory($initDir);
-            $this->file->createDirectory($originalDir);
-
-            if (count($this->file->scanDir($originalDir)) > 2) {
-                $this->file->copyDirectory($originalDir, $initDir);
-                $this->file->deleteDirectory($originalDir);
-                $this->file->createDirectory($originalDir);
-            }
-        }
-
+        $this->backupWritableDirectoriesProcess->execute();
         $this->restoreLogging();
     }
 

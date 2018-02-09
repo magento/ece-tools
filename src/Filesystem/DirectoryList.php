@@ -161,14 +161,16 @@ class DirectoryList
      */
     public function getWritableDirectories(): array
     {
-        $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
+        $writableDirs = [
+            static::DIR_ETC,
+            static::DIR_MEDIA,
+            static::DIR_LOG,
+            static::DIR_VIEW_PREPROCESSED,
+        ];
 
         if ($this->magentoVersion->satisfies('2.1.*')) {
             $writableDirs[] = static::DIR_GENERATED_METADATA;
             $writableDirs[] = static::DIR_GENERATED_CODE;
-            $writableDirs[] = static::DIR_VIEW_PREPROCESSED;
-        } else {
-            $writableDirs[] = static::DIR_VAR;
         }
 
         return array_map(function ($path) {

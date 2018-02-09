@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -302,6 +303,83 @@ class RecoverableDirectoryListTest extends TestCase
                         'directory' => 'var/generation',
                         'strategy' => StrategyInterface::STRATEGY_SYMLINK,
                     ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param bool $skipCopyingViewPreprocessed
+     * @param array $expectedResult
+     * @dataProvider GetListDataSkipCopyingVarViewPreprocessedDataProvider
+     */
+    public function testGetListDataSkipCopyingVarViewPreprocessed($skipCopyingViewPreprocessed, $expectedResult)
+    {
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->withConsecutive(
+                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK],
+                [DeployInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR]
+            )
+            ->willReturnOnConsecutiveCalls(
+                false,
+                $skipCopyingViewPreprocessed
+            );
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->willReturnMap([
+                ['2.1.*', false],
+            ]);
+        $this->assertEquals(
+            $expectedResult,
+            $this->recoverableDirectoryList->getList()
+        );
+    }
+
+    public function getListDataSkipCopyingVarViewPreprocessedDataProvider()
+    {
+        return [
+            'copying view preprocessed dir' => [
+                'skipCopyingViewPreprocessed' => false,
+                'expectedResult' => [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'var/view_preprocessed',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/static',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ]
+                ],
+            ],
+            'skip copying view preprocessed dir' => [
+                'skipCopyingViewPreprocessed' => true,
+                'expectedResult' => [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/static',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ]
                 ],
             ],
         ];
