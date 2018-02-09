@@ -93,12 +93,8 @@ class Applier
             return;
         }
 
-        $name = $name
-            ? sprintf('%s (%s)', $name, $path)
-            : $path;
-        $format = $constraint
-            ? 'Applying patch %s %s.'
-            : 'Applying patch %s.';
+        $name = $name ? sprintf('%s (%s)', $name, $path) : $path;
+        $format = 'Applying patch ' . ($constraint ? '%s %s.' : '%s.');
 
         $this->logger->info(sprintf(
             $format,
