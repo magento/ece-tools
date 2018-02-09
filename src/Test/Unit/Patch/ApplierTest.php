@@ -122,7 +122,7 @@ class ApplierTest extends TestCase
     public function applyDataProvider(): array
     {
         return [
-            ['path/to/patch', 'patchName', 'packageName', '1.0', 'Applying patch patchName 1.0.'],
+            ['path/to/patch', 'patchName', 'packageName', '1.0', 'Applying patch patchName (path/to/patch) 1.0.'],
             ['path/to/patch2', null, null, null, 'Applying patch path/to/patch2.'],
         ];
     }
@@ -150,7 +150,7 @@ class ApplierTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Applying patch patchName 1.0.'],
+                ['Applying patch patchName (path/to/patch) 1.0.'],
                 ['Done.']
             );
         $this->directoryListMock->expects($this->once())

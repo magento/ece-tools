@@ -82,7 +82,7 @@ class Applier
      */
     public function apply(string $path, $name, $packageName, $constraint)
     {
-        $name = $name ?: $path;
+        $name = $name ? sprintf('%s (%s)', $name, $path) : $path;
 
         /**
          * Support for relative paths.
