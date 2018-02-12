@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class SearchEngineTest extends TestCase
 {
     /**

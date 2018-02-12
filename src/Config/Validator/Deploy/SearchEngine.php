@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 
+/**
+ * Validates Solr has not been configured for project
+ */
 class SearchEngine implements ValidatorInterface
 {
     /**
