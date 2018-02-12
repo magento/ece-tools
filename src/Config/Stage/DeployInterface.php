@@ -20,4 +20,10 @@ interface DeployInterface extends StageConfigInterface
     const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
     const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
     const VAR_UPDATE_URLS = 'UPDATE_URLS';
+    const VAR_STATIC_CONTENT_EXCLUDE_THEMES = 'STATIC_CONTENT_EXCLUDE_THEMES';
+
+    /**
+     * @deprecated 2.1 specific variable.
+     */
+    const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';
 }

@@ -34,8 +34,10 @@ class Deploy implements DeployInterface
      * @param EnvironmentReader $environmentReader
      * @param EnvironmentConfig $environmentConfig
      */
-    public function __construct(EnvironmentReader $environmentReader, EnvironmentConfig $environmentConfig)
-    {
+    public function __construct(
+        EnvironmentReader $environmentReader,
+        EnvironmentConfig $environmentConfig
+    ) {
         $this->environmentReader = $environmentReader;
         $this->environmentConfig = $environmentConfig;
     }
@@ -115,6 +117,7 @@ class Deploy implements DeployInterface
             self::VAR_CLEAN_STATIC_FILES,
             self::VAR_STATIC_CONTENT_SYMLINK,
             self::VAR_UPDATE_URLS,
+            self::VAR_GENERATED_CODE_SYMLINK,
         ];
 
         foreach ($disabledFlow as $disabledVar) {
@@ -149,7 +152,7 @@ class Deploy implements DeployInterface
     private function getScdThreads(): int
     {
         $variables = $this->environmentConfig->getVariables();
-        $staticDeployThreads = 1;
+        $staticDeployThreads = 0;
 
         if (isset($variables['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
@@ -168,7 +171,7 @@ class Deploy implements DeployInterface
      */
     private function getEnvScdThreads(): int
     {
-        $staticDeployThreads = 1;
+        $staticDeployThreads = 0;
 
         if (isset($_ENV['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
@@ -202,6 +205,7 @@ class Deploy implements DeployInterface
             self::VAR_UPDATE_URLS => true,
             self::VAR_SKIP_SCD => false,
             self::VAR_SCD_THREADS => 1,
+            self::VAR_GENERATED_CODE_SYMLINK => true,
             self::VAR_SCD_EXCLUDE_THEMES => '',
         ];
     }

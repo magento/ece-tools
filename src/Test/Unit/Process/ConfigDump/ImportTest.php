@@ -5,9 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ConfigDump\Import;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,9 +23,19 @@ class ImportTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ShellInterface|Mock
      */
     private $shellMock;
+
+    /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
+    /**
+     * @var LoggerInterface|Mock
+     */
+    private $loggerMock;
 
     /**
      * @inheritdoc
@@ -30,16 +43,25 @@ class ImportTest extends TestCase
     protected function setUp()
     {
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->process = new Import(
-            $this->shellMock
+            $this->shellMock,
+            $this->magentoVersionMock,
+            $this->loggerMock
         );
     }
 
     public function testExecute()
     {
-        $this->shellMock->method('execute')
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        $this->shellMock->expects($this->once())
+            ->method('execute')
             ->with('php ./bin/magento app:config:import -n');
+        $this->magentoVersionMock->expects($this->once())
+        ->method('isGreaterOrEqual')
+        ->willReturn(true);
 
         $this->process->execute();
     }

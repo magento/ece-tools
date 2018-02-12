@@ -191,6 +191,12 @@ class DeployTest extends TestCase
                 ],
                 4,
             ],
+            'scd strategy default' => [
+                Deploy::VAR_SCD_STRATEGY,
+                [],
+                [],
+                ''
+            ],
             'exclude themes deprecated' => [
                 Deploy::VAR_SCD_EXCLUDE_THEMES,
                 [],

@@ -12,6 +12,9 @@ use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class BackupTest extends TestCase
 {
     /**

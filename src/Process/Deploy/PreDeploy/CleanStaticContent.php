@@ -12,6 +12,9 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Cleans static content.
+ */
 class CleanStaticContent implements ProcessInterface
 {
     /**

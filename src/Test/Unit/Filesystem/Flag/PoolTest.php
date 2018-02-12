@@ -8,6 +8,9 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\Flag\Pool;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class PoolTest extends TestCase
 {
     /**

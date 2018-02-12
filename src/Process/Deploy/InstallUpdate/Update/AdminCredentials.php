@@ -11,6 +11,9 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 
+/**
+ * Updates admin credentials.
+ */
 class AdminCredentials implements ProcessInterface
 {
     /**
