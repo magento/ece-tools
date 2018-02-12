@@ -167,62 +167,6 @@ class SearchEngineTest extends TestCase
      * @param bool newVersion
      * @dataProvider magentoVersionTestDataProvider
      */
-    public function testExecuteWithElasticSolr(bool $newVersion)
-    {
-        $config['system']['default']['catalog']['search'] = [
-            'engine' => 'solr',
-            'solr_server_hostname' => 'localhost',
-            'solr_server_port' => 1234,
-            'solr_server_username' => 'scheme',
-            'solr_server_path' => 'path',
-        ];
-
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn($newVersion);
-        $this->magentoVersionMock->method('satisfies')
-            ->willReturn(true);
-
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
-            ->willReturn([]);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationships')
-            ->willReturn(
-                [
-                    'solr' => [
-                        [
-                            'host' => 'localhost',
-                            'port' => 1234,
-                            'scheme' => 'scheme',
-                            'path' => 'path',
-                        ],
-                    ],
-                ]
-            );
-        if ($newVersion) {
-            $this->envWriterMock->expects($this->once())
-                ->method('update')
-                ->with($config);
-        } else {
-            $this->sharedWriterMock->expects($this->once())
-                ->method('update')
-                ->with($config);
-        }
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Updating search engine configuration.'],
-                ['Set search engine to: solr']
-            );
-
-        $this->process->execute();
-    }
-
-    /**
-     * @param bool newVersion
-     * @dataProvider magentoVersionTestDataProvider
-     */
     public function testExecuteEnvironmentConfiguration(bool $newVersion)
     {
         $config['system']['default']['catalog']['search'] = [
