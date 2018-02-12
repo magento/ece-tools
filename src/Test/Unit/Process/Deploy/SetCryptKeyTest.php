@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
@@ -64,15 +63,12 @@ class SetCryptKeyTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
-
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('TWFnZW50byBSb3g=');
-
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Setting encryption key');
-
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']]);
@@ -85,14 +81,11 @@ class SetCryptKeyTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
-
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('');
-
         $this->loggerMock->expects($this->never())
             ->method('info');
-
         $this->configWriterMock->expects($this->never())
             ->method('update');
 
@@ -104,13 +97,10 @@ class SetCryptKeyTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn(['crypt' => ['key' => 'QmVuIHd1eiBoZXJl']]);
-
         $this->environmentMock->expects($this->never())
             ->method('getCryptKey');
-
         $this->loggerMock->expects($this->never())
             ->method('info');
-
         $this->configWriterMock->expects($this->never())
             ->method('update');
 
