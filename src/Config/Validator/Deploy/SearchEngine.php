@@ -45,9 +45,9 @@ class SearchEngine implements ValidatorInterface
             return $this->resultFactory->create(
                 ResultInterface::ERROR,
                 [
-                    'error' => 'Configuration for Solr was found.',
+                    'error' => 'Configuration for Solr was found in .magento.app.yaml.',
                     'suggestion' => 'Solr is no longer supported by Magento 2.1 or later. ' .
-                        'You should remove this relationship configuration from your .magento.app.yaml file.',
+                        'You should remove this relationship and use either MySQL or Elasticsearch.',
                 ]
             );
         }
