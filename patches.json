@@ -49,6 +49,10 @@
     },
     "Fixed Bogus emails generated when the recipient name contains special characters": {
       "<101.0.1": "MDVA-8695_EE_2.1.8_COMPOSER_v1.patch"
+    },
+    "Enable scd on demand in production": {
+      "*": "front-static.patch",
+      "101.0.*": "scd-on-demand-in-production.patch"
     }
   },
   "magento/module-customer-import-export": {
