@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
+
 /**
  * Class contains the list of files for backup
  */
@@ -21,11 +23,18 @@ class BackupList
     const BACKUP_SUFFIX = '.bak';
 
     /**
-     * @param FileList $fileList
+     * @var MagentoVersion
      */
-    public function __construct(FileList $fileList)
+    private $magentoVersion;
+
+    /**
+     * @param FileList $fileList
+     * @param MagentoVersion $magentoVersion
+     */
+    public function __construct(FileList $fileList, MagentoVersion $magentoVersion)
     {
         $this->fileList = $fileList;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -35,9 +44,15 @@ class BackupList
      */
     public function getList(): array
     {
-        return [
+        $fileList = [
             'app/etc/env.php' => $this->fileList->getEnv(),
             'app/etc/config.php' => $this->fileList->getConfig(),
         ];
+
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $fileList['app/etc/config.local.php'] = $this->fileList->getConfigLocal();
+        }
+
+        return $fileList;
     }
 }
