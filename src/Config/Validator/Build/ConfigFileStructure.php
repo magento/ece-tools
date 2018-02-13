@@ -85,7 +85,7 @@ class ConfigFileStructure implements ValidatorInterface
         $stores = $this->arrayManager->filter($flattenedConfig, 'scopes/stores', false);
 
         if (count($stores) === 0 && count($websites) === 0) {
-            $error = 'No stores/website/locales found in config.php';
+            $error = 'No stores/website/locales found in ' . $configFileName;
             $suggestion = implode(
                 PHP_EOL,
                 [

@@ -197,7 +197,7 @@ class ConfigFileStructureTest extends TestCase
             ->with(
                 ResultInterface::ERROR,
                 [
-                    'error' => 'No stores/website/locales found in config.php',
+                    'error' => 'No stores/website/locales found in config.local.php',
                     'suggestion' => 'To speed up the deploy process, please run the following commands:' . PHP_EOL
                         . '1. php ./vendor/bin/ece-tools config:dump' . PHP_EOL
                         . '2. git add -f app/etc/config.local.php' . PHP_EOL
