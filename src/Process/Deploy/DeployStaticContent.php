@@ -111,6 +111,7 @@ class DeployStaticContent implements ProcessInterface
 
         if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND_IN_PRODUCTION)) {
             $this->logger->notice('Skipping static content deploy. Enabled static content deploy on demand.');
+            $this->cleanStaticFiles();
 
             return;
         }
@@ -131,14 +132,22 @@ class DeployStaticContent implements ProcessInterface
         }
 
         if ($this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)) {
-            $magentoRoot = $this->directoryList->getMagentoRoot();
-            $this->logger->info('Clearing pub/static');
-            $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
-            $this->logger->info('Clearing var/view_preprocessed');
-            $this->file->backgroundClearDirectory($magentoRoot . '/var/view_preprocessed');
+            $this->cleanStaticFiles();
         }
 
         $this->logger->info('Generating fresh static content');
         $this->process->execute();
+    }
+
+    /**
+     * Cleans static files on the background
+     */
+    private function cleanStaticFiles()
+    {
+        $magentoRoot = $this->directoryList->getMagentoRoot();
+        $this->logger->info('Clearing pub/static');
+        $this->file->backgroundClearDirectory($magentoRoot . '/pub/static');
+        $this->logger->info('Clearing var/view_preprocessed');
+        $this->file->backgroundClearDirectory($magentoRoot . '/var/view_preprocessed');
     }
 }

@@ -245,16 +245,21 @@ class DeployStaticContentTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Skipping static content deploy. Enabled static content deploy on demand.');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(['Clearing pub/static'], ['Clearing var/view_preprocessed']);
         $this->remoteDiskIdentifierMock->expects($this->never())
             ->method('isOnLocalDisk');
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
-        $this->directoryListMock->expects($this->never())
-            ->method('getMagentoRoot');
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->environmentMock->expects($this->never())
             ->method('isDeployStaticContent');
-        $this->fileMock->expects($this->never())
-            ->method('backgroundClearDirectory');
+        $this->fileMock->expects($this->exactly(2))
+            ->method('backgroundClearDirectory')
+            ->withConsecutive(['magento_root/pub/static'], ['magento_root/var/view_preprocessed']);
 
         $this->process->execute();
     }
