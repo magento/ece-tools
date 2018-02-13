@@ -161,4 +161,12 @@ class ApplicationTest extends TestCase
         );
         $this->assertTrue($this->application->has(CronUnlock::NAME));
     }
+
+    public function testGetComposer()
+    {
+        $this->assertInstanceOf(
+            ContainerInterface::class,
+            $this->application->getContainer()
+        );
+    }
 }
