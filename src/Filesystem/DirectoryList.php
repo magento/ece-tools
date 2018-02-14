@@ -167,6 +167,7 @@ class DirectoryList
             $writableDirs[] = static::DIR_GENERATED_METADATA;
             $writableDirs[] = static::DIR_GENERATED_CODE;
             $writableDirs[] = static::DIR_VIEW_PREPROCESSED;
+            $writableDirs[] = static::DIR_LOG;
         } else {
             $writableDirs[] = static::DIR_VAR;
         }
