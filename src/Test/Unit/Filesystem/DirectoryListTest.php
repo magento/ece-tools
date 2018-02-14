@@ -162,6 +162,7 @@ class DirectoryListTest extends TestCase
             'var/di',
             'var/generation',
             'var/view_preprocessed',
+            'var/log',
             'app/etc',
             'pub/media',
         ];
