@@ -93,12 +93,15 @@ class Amqp implements ProcessInterface
         } elseif (count($mqConfig)) {
             $this->logger->info('Updating env.php AMQP configuration.');
             $amqpConfig = $mqConfig[0];
-            $config['queue']['amqp']['host'] = $amqpConfig['host'];
-            $config['queue']['amqp']['port'] = $amqpConfig['port'];
-            $config['queue']['amqp']['user'] = $amqpConfig['username'];
-            $config['queue']['amqp']['password'] = $amqpConfig['password'];
-            $config['queue']['amqp']['virtualhost'] = isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/';
-            $config['queue']['amqp']['ssl'] = '';
+            $config['queue'] = [
+                'amqp' => [
+                    'host' => $amqpConfig['host'],
+                    'port' => $amqpConfig['port'],
+                    'user' => $amqpConfig['username'],
+                    'password' => $amqpConfig['password'],
+                    'virtualhost' => isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/',
+                ]
+            ];
         } else {
             $config = $this->removeAmqpConfig($config);
         }
@@ -114,14 +117,9 @@ class Amqp implements ProcessInterface
      */
     private function removeAmqpConfig(array $config)
     {
-        if (isset($config['queue']['amqp'])) {
-            $this->logger->info('Removing AMQP configuration from env.php.');
-
-            if (count($config['queue']) > 1) {
-                unset($config['queue']['amqp']);
-            } else {
-                unset($config['queue']);
-            }
+        if (isset($config['queue'])) {
+            $this->logger->info('Removing queue configuration from env.php.');
+            unset($config['queue']);
         }
 
         return $config;

@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class ThreadCountOptimizerTest extends TestCase
 {
     /**
@@ -52,18 +55,18 @@ class ThreadCountOptimizerTest extends TestCase
             [
                 3,
                 ThreadCountOptimizer::STRATEGY_COMPACT,
-                1
+                1,
             ],
             [
                 5,
                 'SomeStrategy',
-                5
+                5,
             ],
             [
                 1,
                 'SomeStrategy',
-                1
-            ]
+                1,
+            ],
         ];
     }
 

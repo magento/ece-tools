@@ -11,6 +11,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class SubSymlinkStrategyTest extends TestCase
 {
     /**
@@ -56,7 +59,7 @@ class SubSymlinkStrategyTest extends TestCase
         $this->mockIterator($directoryIteratorMock, [
             $splFileInfoOne,
             $splFileInfoTwo,
-            $splFileInfoDot
+            $splFileInfoDot,
         ]);
         $this->fileMock->expects($this->once())
             ->method('getDirectoryIterator')

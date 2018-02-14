@@ -40,6 +40,15 @@
     },
     "Fixed: When SCD is in build, js resources do not load in admin": {
       "100.1.4 - 100.1.7": "2.1/secure-static-resource.patch"
+    },
+    "Fixed Static Assets deployment throws errors when redis is used for cache (2.1)": {
+      "100.1.*": "2.1/MAGETWO-69847-2.1.x.patch"
+    },
+    "Fixed Static Assets deployment throws errors when redis is used for cache (2.2)": {
+      ">=101.0.0": "2.2/MAGETWO-69847-2.2.x.patch"
+    },
+    "Fixed Bogus emails generated when the recipient name contains special characters": {
+      "<101.0.1": "2.2/MDVA-8695_EE_2.1.8_COMPOSER_v1.patch"
     }
   },
   "magento/module-customer-import-export": {

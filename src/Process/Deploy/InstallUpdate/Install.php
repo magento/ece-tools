@@ -7,6 +7,9 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
 
+/**
+ * Performs application installation.
+ */
 class Install implements ProcessInterface
 {
     /**
