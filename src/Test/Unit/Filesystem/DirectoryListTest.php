@@ -163,7 +163,6 @@ class DirectoryListTest extends TestCase
             'var/generation',
             'var/log',
             'var/view_preprocessed',
-            'var/log',
             'app/etc',
             'pub/media',
         ];
