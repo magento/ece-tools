@@ -191,7 +191,6 @@ class DirectoryList
             static::DIR_ETC => [static::PATH => 'app/etc'],
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
             static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
-            static::DIR_STATIC => [static::PATH => 'pub/static'],
         ];
 
         if ($this->magentoVersion->satisfies('2.1.*')) {
