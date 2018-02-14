@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Process\Build\BackupData\StaticContent;
 
+/**
+ * @inheritdoc
+ */
 class StaticContentTest extends TestCase
 {
     /**
@@ -43,22 +46,17 @@ class StaticContentTest extends TestCase
     /**
      * @var string
      */
-    private $magentoRoot = 'magento_root';
-
-    /**
-     * @var string
-     */
     private $rootInitDir = 'magento_root/init';
 
     /**
      * @var string
      */
-    private $initPubStaticPath = 'magento_root/init/pub/static/';
+    private $initPubStaticPath = 'magento_root/init/pub/static';
 
     /**
      * @var string
      */
-    private $originalPubStaticPath = 'magento_root/pub/static/';
+    private $originalPubStaticPath = 'magento_root/pub/static';
 
     protected function setUp()
     {
@@ -88,13 +86,12 @@ class StaticContentTest extends TestCase
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
 
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn($this->magentoRoot);
-
-        $this->directoryListMock->expects($this->once())
-            ->method('getInit')
-            ->willReturn($this->rootInitDir);
+        $this->directoryListMock->expects($this->exactly(2))
+            ->method('getPath')
+            ->willReturnMap([
+                [DirectoryList::DIR_STATIC, false, $this->originalPubStaticPath],
+                [DirectoryList::DIR_INIT, false, $this->rootInitDir]
+            ]);
 
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -130,13 +127,12 @@ class StaticContentTest extends TestCase
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
 
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn($this->magentoRoot);
-
-        $this->directoryListMock->expects($this->once())
-            ->method('getInit')
-            ->willReturn($this->rootInitDir);
+        $this->directoryListMock->expects($this->exactly(2))
+            ->method('getPath')
+            ->willReturnMap([
+                [DirectoryList::DIR_STATIC, false, $this->originalPubStaticPath],
+                [DirectoryList::DIR_INIT, false, $this->rootInitDir]
+            ]);
 
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -173,10 +169,7 @@ class StaticContentTest extends TestCase
             ->willReturn(false);
 
         $this->directoryListMock->expects($this->never())
-            ->method('getMagentoRoot');
-
-        $this->directoryListMock->expects($this->never())
-            ->method('getInit');
+            ->method('getPath');
 
         $this->fileMock->expects($this->never())
             ->method('isExists');

@@ -13,6 +13,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class CleanViewPreprocessedTest extends TestCase
 {
     /**
@@ -68,7 +71,7 @@ class CleanViewPreprocessedTest extends TestCase
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->directoryListMock->expects($this->never())
-            ->method('getMagentoRoot');
+            ->method('getPath');
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory');
 
@@ -87,8 +90,8 @@ class CleanViewPreprocessedTest extends TestCase
                 ['Clearing ./var/view_preprocessed']
             );
         $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+            ->method('getPath')
+            ->willReturn('magento_root/var/view_preprocessed');
 
         $this->fileMock->expects($this->once())
             ->method('backgroundClearDirectory')

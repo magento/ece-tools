@@ -61,10 +61,8 @@ class StaticContent implements ProcessInterface
     {
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
         if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
-            $rootInitDir = $this->directoryList->getInit() . '/';
-            $initPubStatic = $rootInitDir . 'pub/static/';
-            $originalPubStatic = $magentoRoot . 'pub/static/';
+            $initPubStatic = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/pub/static';
+            $originalPubStatic = $this->directoryList->getPath(DirectoryList::DIR_STATIC);
 
             if ($this->file->isExists($initPubStatic)) {
                 $this->logger->info('Clear ./init/pub/static');

@@ -11,6 +11,9 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
+/**
+ * Cleans the directory var/view_preprocessed
+ */
 class CleanViewPreprocessed implements ProcessInterface
 {
     /**
@@ -63,8 +66,8 @@ class CleanViewPreprocessed implements ProcessInterface
         }
 
         $this->logger->info('Skip copying directory ./var/view_preprocessed.');
-        $magentoRoot = $this->directoryList->getMagentoRoot();
         $this->logger->info('Clearing ./var/view_preprocessed');
-        $this->file->backgroundClearDirectory($magentoRoot . '/var/view_preprocessed');
+        $viewPreprocessedPath = $this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED);
+        $this->file->backgroundClearDirectory($viewPreprocessedPath);
     }
 }
