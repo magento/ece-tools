@@ -109,9 +109,28 @@ class SearchEngine implements ProcessInterface
 
         if (isset($relationships['elasticsearch'])) {
             $searchConfig = $this->getElasticSearchConfiguration($relationships['elasticsearch'][0]);
+        } elseif (isset($relationships['solr']) && $this->magentoVersion->satisfies('<2.2')) {
+            $searchConfig = $this->getSolrConfiguration($relationships['solr'][0]);
         }
 
         return $searchConfig;
+    }
+
+    /**
+     * Returns SOLR configuration
+     *
+     * @param array $config Solr connection configuration
+     * @return array
+     */
+    private function getSolrConfiguration(array $config)
+    {
+        return [
+            'engine' => 'solr',
+            'solr_server_hostname' => $config['host'],
+            'solr_server_port' => $config['port'],
+            'solr_server_username' => $config['scheme'],
+            'solr_server_path' => $config['path'],
+        ];
     }
 
     /**
