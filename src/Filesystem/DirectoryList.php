@@ -28,6 +28,7 @@ class DirectoryList
     const DIR_ETC = 'etc';
     const DIR_MEDIA = 'media';
     const DIR_VIEW_PREPROCESSED = 'view-preprocessed';
+    const DIR_STATIC = 'static';
 
     /**
      * @var string
@@ -188,6 +189,7 @@ class DirectoryList
             static::DIR_LOG => [static::PATH => 'var/log'],
             static::DIR_ETC => [static::PATH => 'app/etc'],
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
+            static::DIR_STATIC => [static::PATH => 'pub/static'],
             static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
         ];
 

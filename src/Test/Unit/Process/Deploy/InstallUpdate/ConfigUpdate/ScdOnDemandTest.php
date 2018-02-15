@@ -63,18 +63,14 @@ class ScdOnDemandTest extends TestCase
 
     /**
      * @param bool $scdOnDemand
-     * @param array $config
      * @param array $expectedResult
      * @dataProvider executeDataProvider
      */
-    public function testExecute(bool $scdOnDemand, array $config, array $expectedResult)
+    public function testExecute(bool $scdOnDemand, array $expectedResult)
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php SCD on demand in production.');
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($config);
         $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
@@ -94,33 +90,11 @@ class ScdOnDemandTest extends TestCase
         return [
             [
                 'scdOnDemand' => false,
-                'config' => [],
                 'expectedResult' => ['static_content_on_demand_in_production' => 0]
             ],
             [
                 'scdOnDemand' => true,
-                'config' => [],
                 'expectedResult' => ['static_content_on_demand_in_production' => 1]
-            ],
-            [
-                'scdOnDemand' => false,
-                'config' => ['static_content_on_demand_in_production' => 1],
-                'expectedResult' => ['static_content_on_demand_in_production' => 0]
-            ],
-            [
-                'scdOnDemand' => true,
-                'config' => ['static_content_on_demand_in_production' => 0],
-                'expectedResult' => ['static_content_on_demand_in_production' => 1]
-            ],
-            [
-                'scdOnDemand' => false,
-                'config' => ['something' => true],
-                'expectedResult' => ['something' => true, 'static_content_on_demand_in_production' => 0]
-            ],
-            [
-                'scdOnDemand' => true,
-                'config' => ['something' => false],
-                'expectedResult' => ['something' => false, 'static_content_on_demand_in_production' => 1]
             ],
         ];
     }
