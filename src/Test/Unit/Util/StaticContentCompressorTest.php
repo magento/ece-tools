@@ -35,7 +35,7 @@ class StaticContentCompressorTest extends TestCase
     /**
      * @var UtilityManager|Mock
      */
-    private $utilityManager;
+    private $utilityManagerMock;
 
     /**
      * Setup the test environment.
@@ -44,12 +44,12 @@ class StaticContentCompressorTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
-        $this->utilityManager = $this->createMock(UtilityManager::class);
+        $this->utilityManagerMock = $this->createMock(UtilityManager::class);
 
         $this->staticContentCompressor = new StaticContentCompressor(
             $this->loggerMock,
             $this->shellMock,
-            $this->utilityManager
+            $this->utilityManagerMock
         );
     }
 
@@ -68,9 +68,9 @@ class StaticContentCompressorTest extends TestCase
                 $this->stringContains($expectedCommand),
                 $this->stringContains(" -{$compressionLevel}")
             ));
-        $this->utilityManager->method('has')
+        $this->utilityManagerMock->method('has')
             ->willReturn(true);
-        $this->utilityManager->method('get')
+        $this->utilityManagerMock->method('get')
             ->willReturnMap([
                 [UtilityManager::UTILITY_TIMEOUT, '/usr/bin/timeout'],
                 [UtilityManager::UTILITY_BASH, '/bin/bash'],
@@ -96,5 +96,18 @@ class StaticContentCompressorTest extends TestCase
             ->with('Static content compression was disabled.');
 
         $this->staticContentCompressor->process(0);
+    }
+
+    public function testUtilityNotFound()
+    {
+        $this->utilityManagerMock->expects($this->once())
+            ->method('has')
+            ->with(UtilityManager::UTILITY_TIMEOUT)
+            ->willReturn(false);
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Timeout utility not found in the system.');
+
+        $this->staticContentCompressor->process(1);
     }
 }

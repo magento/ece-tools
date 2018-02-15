@@ -159,7 +159,6 @@ class ApplicationTest extends TestCase
             $this->applicationVersion,
             $this->application->getVersion()
         );
-        $this->assertTrue($this->application->has(CronUnlock::NAME));
     }
 
     public function testGetContainer()

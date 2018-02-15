@@ -76,7 +76,8 @@ class UtilityManager
 
             foreach ($list as $name) {
                 try {
-                    $this->utilities[$name] = $this->shell->execute('which ' . $name);
+                    $output = $this->shell->execute('which ' . $name);
+                    $this->utilities[$name] = implode(PHP_EOL, $output);
                 } catch (\Exception $exception) {
                     // No utility. Skip.
                 }
