@@ -82,8 +82,6 @@ class Applier
      */
     public function apply(string $path, $name, $packageName, $constraint)
     {
-        $name = $name ?: $path;
-
         /**
          * Support for relative paths.
          */
@@ -91,21 +89,18 @@ class Applier
             $path = $this->directoryList->getPatches() . '/' . $path;
         }
 
+        if ($packageName && !$this->matchConstraint($packageName, $constraint)) {
+            return;
+        }
+
+        $name = $name ? sprintf('%s (%s)', $name, $path) : $path;
+        $format = 'Applying patch ' . ($constraint ? '%s %s.' : '%s.');
+
         $this->logger->info(sprintf(
-            'Applying patch %s %s.',
+            $format,
             $name,
             $constraint
         ));
-
-        if ($packageName && !$this->matchConstraint($packageName, $constraint)) {
-            $this->logger->notice(sprintf(
-                'Constraint %s %s was not found.',
-                $packageName,
-                $constraint
-            ));
-
-            return;
-        }
 
         $this->shell->execute('git apply ' . $path);
         $this->logger->info('Done.');

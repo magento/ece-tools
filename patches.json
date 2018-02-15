@@ -48,7 +48,7 @@
       ">=101.0.0": "2.2/MAGETWO-69847-2.2.x.patch"
     },
     "Fixed Bogus emails generated when the recipient name contains special characters": {
-      "<101.0.1": "MDVA-8695_EE_2.1.8_COMPOSER_v1.patch"
+      "<101.0.1": "2.2/MDVA-8695_EE_2.1.8_COMPOSER_v1.patch"
     },
     "Enable scd on demand in production": {
       "*": "front-static.patch",
