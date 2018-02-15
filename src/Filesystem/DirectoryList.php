@@ -190,6 +190,7 @@ class DirectoryList
             static::DIR_LOG => [static::PATH => 'var/log'],
             static::DIR_ETC => [static::PATH => 'app/etc'],
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
+            static::DIR_STATIC => [static::PATH => 'pub/static'],
             static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
         ];
 
