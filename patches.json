@@ -52,7 +52,8 @@
     },
     "Enable scd on demand in production": {
       "*": "front-static.patch",
-      "101.0.*": "scd-on-demand-in-production.patch"
+      "101.0.0 - 101.0.3": "2.2/scd-on-demand-in-production.patch",
+      "100.1.*": "2.1/scd-on-demand-in-production.patch"
     }
   },
   "magento/module-customer-import-export": {
