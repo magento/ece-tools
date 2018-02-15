@@ -162,7 +162,7 @@ class ApplicationTest extends TestCase
         $this->assertTrue($this->application->has(CronUnlock::NAME));
     }
 
-    public function testGetComposer()
+    public function testGetContainer()
     {
         $this->assertInstanceOf(
             ContainerInterface::class,
