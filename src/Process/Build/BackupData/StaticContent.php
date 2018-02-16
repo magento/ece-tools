@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Copies the directory pub/static to ./init/pub/static
+ * Copies the directory ./pub/static to ./init/pub/static
  */
 class StaticContent implements ProcessInterface
 {
@@ -60,23 +60,24 @@ class StaticContent implements ProcessInterface
     public function execute()
     {
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
-        if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            $initPubStatic = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/pub/static';
-            $originalPubStatic = $this->directoryList->getPath(DirectoryList::DIR_STATIC);
 
-            if ($this->file->isExists($initPubStatic)) {
-                $this->logger->info('Clear ./init/pub/static');
-                $this->file->backgroundClearDirectory($initPubStatic);
-            } else {
-                $this->logger->info('Create ./init/pub/static');
-                $this->file->createDirectory($initPubStatic);
-            }
-
-            $this->logger->info('Moving static content to init directory');
-
-            $this->file->copyDirectory($originalPubStatic, $initPubStatic);
-        } else {
+        if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             $this->logger->info('SCD not performed during build');
+            return;
         }
+
+        $initPubStatic = $this->directoryList->getPath(DirectoryList::DIR_INIT) . '/pub/static';
+        $originalPubStatic = $this->directoryList->getPath(DirectoryList::DIR_STATIC);
+
+        if ($this->file->isExists($initPubStatic)) {
+            $this->logger->info('Clear ./init/pub/static');
+            $this->file->backgroundClearDirectory($initPubStatic);
+        } else {
+            $this->logger->info('Create ./init/pub/static');
+            $this->file->createDirectory($initPubStatic);
+        }
+
+        $this->logger->info('Moving static content to init directory');
+        $this->file->copyDirectory($originalPubStatic, $initPubStatic);
     }
 }

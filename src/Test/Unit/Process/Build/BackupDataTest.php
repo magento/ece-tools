@@ -5,13 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Process\Build\BackupData;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Process\Build\BackupData\StaticContent;
-use Magento\MagentoCloud\Process\Build\BackupData\WritableDirectories;
 
 /**
  * @inheritdoc
@@ -24,60 +22,37 @@ class BackupDataTest extends TestCase
     private $process;
 
     /**
-     * @var StaticContent|Mock
-     */
-    private $backupStaticContentProcessMock;
-
-    /**
-     * @var WritableDirectories|Mock
-     */
-    private $backupWritableDirectoriesProcessMock;
-
-    /**
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var LoggerPool|Mock
+     * @var ProcessInterface|Mock
      */
-    private $loggerPoolMock;
+    private $processesMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->backupStaticContentProcessMock = $this->createMock(StaticContent::class);
-        $this->backupWritableDirectoriesProcessMock = $this->createMock(WritableDirectories::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->setMethods(['setHandlers'])
-            ->getMockForAbstractClass();
-        $this->loggerPoolMock = $this->createMock(LoggerPool::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->processesMock = $this->getMockForAbstractClass(ProcessInterface::class);
 
         $this->process = new BackupData(
-            $this->backupStaticContentProcessMock,
-            $this->backupWritableDirectoriesProcessMock,
             $this->loggerMock,
-            $this->loggerPoolMock
+            $this->processesMock
         );
     }
 
     public function testExecute()
     {
-        $this->backupStaticContentProcessMock->expects($this->once())
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Copying data to the ./init directory');
+
+        $this->processesMock->expects($this->once())
             ->method('execute');
-        $this->backupWritableDirectoriesProcessMock->expects($this->once())
-            ->method('execute');
-        $this->loggerPoolMock->expects($this->once())
-            ->method('getHandlers')
-            ->willReturn(['handler1', 'handler2']);
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('setHandlers')
-            ->withConsecutive(
-                [[]],
-                [['handler1', 'handler2']]
-            );
 
         $this->process->execute();
     }

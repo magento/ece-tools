@@ -5,58 +5,34 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
-use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
-use Magento\MagentoCloud\Process\Build\BackupData\StaticContent;
-use Magento\MagentoCloud\Process\Build\BackupData\WritableDirectories;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
-use Monolog\Logger;
 
 /**
- * Writable directories will be erased when the writable filesystem is mounted to them. This
- * step backs them up to ./init/
+ * Copies the data to the ./init/ directory
  *
  * {@inheritdoc}
  */
 class BackupData implements ProcessInterface
 {
     /**
-     * @var StaticContent
-     */
-    private $backupStaticContentProcess;
-
-    /**
-     * @var WritableDirectories
-     */
-    private $backupWritableDirectoriesProcess;
-    /**
-     * @var LoggerInterface|Logger
+     * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var LoggerPool
+     * @var ProcessInterface
      */
-    private $loggerPool;
+    private $processes;
 
     /**
-     * BackupData constructor.
-     *
-     * @param StaticContent $backupStaticContentProcess
-     * @param WritableDirectories $backupWritableDirectories
      * @param LoggerInterface $logger
-     * @param LoggerPool $loggerPool
+     * @param ProcessInterface $processes
      */
-    public function __construct(
-        StaticContent $backupStaticContentProcess,
-        WritableDirectories $backupWritableDirectories,
-        LoggerInterface $logger,
-        LoggerPool $loggerPool
-    ) {
-        $this->backupStaticContentProcess = $backupStaticContentProcess;
-        $this->backupWritableDirectoriesProcess = $backupWritableDirectories;
+    public function __construct(LoggerInterface $logger, ProcessInterface $processes)
+    {
         $this->logger = $logger;
-        $this->loggerPool = $loggerPool;
+        $this->processes = $processes;
     }
 
     /**
@@ -64,28 +40,7 @@ class BackupData implements ProcessInterface
      */
     public function execute()
     {
-        $this->backupStaticContentProcess->execute();
-        $this->stopLogging();
-        $this->backupWritableDirectoriesProcess->execute();
-        $this->restoreLogging();
-    }
-
-    /**
-     * Removes all log handlers for closing all connections to files that are opened for logging.
-     *
-     * It's done for avoiding file system exceptions while file opened for writing is not physically exists
-     * and some process trying to write into that file.
-     */
-    private function stopLogging()
-    {
-        $this->logger->setHandlers([]);
-    }
-
-    /**
-     * Restore all log handlers.
-     */
-    private function restoreLogging()
-    {
-        $this->logger->setHandlers($this->loggerPool->getHandlers());
+        $this->logger->info('Copying data to the ./init directory');
+        $this->processes->execute();
     }
 }

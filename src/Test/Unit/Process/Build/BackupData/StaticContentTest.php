@@ -79,7 +79,7 @@ class StaticContentTest extends TestCase
         );
     }
 
-    public function testExecuteWhenFlagSCDInBuildExistsAndInitPubStaticExists()
+    public function testExecuteFlagSCDInBuildExistsAndInitPubStaticExists()
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -120,7 +120,7 @@ class StaticContentTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteWhenFlagSCDInBuildExistsAndInitPubStaticDoesNotExist()
+    public function testExecuteFlagSCDInBuildExistsAndInitPubStaticDoesNotExist()
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -161,7 +161,7 @@ class StaticContentTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteWhenFlagSCDInBuildDoesNotExist()
+    public function testExecuteFlagSCDInBuildDoesNotExist()
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
