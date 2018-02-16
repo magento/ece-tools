@@ -94,7 +94,7 @@ class DeployStaticContentTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -124,7 +124,7 @@ class DeployStaticContentTest extends TestCase
             ->willReturn($resultMock);
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -160,13 +160,13 @@ class DeployStaticContentTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(true);
         $this->stageConfigMock->expects($this->never())
             ->method('get');
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('Skipping static content deploy. Enabled static content deploy on demand.');
+            ->with('Skipping static content deploy. SCD on demand is enabled.');
         $this->configFileStructureMock->expects($this->never())
             ->method('validate');
         $this->processMock->expects($this->never())

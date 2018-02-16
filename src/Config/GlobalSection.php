@@ -82,7 +82,7 @@ class GlobalSection implements StageConfigInterface
     private function getDefault(): array
     {
         return [
-            self::VAR_SCD_ON_DEMAND_IN_PRODUCTION => false,
+            self::VAR_SCD_ON_DEMAND => false,
         ];
     }
 }

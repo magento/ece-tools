@@ -107,7 +107,7 @@ class DeployStaticContentTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
         $this->remoteDiskIdentifierMock->expects($this->once())
             ->method('isOnLocalDisk')
@@ -137,7 +137,7 @@ class DeployStaticContentTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
         $this->remoteDiskIdentifierMock->expects($this->once())
             ->method('isOnLocalDisk')
@@ -173,7 +173,7 @@ class DeployStaticContentTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
         $this->remoteDiskIdentifierMock->expects($this->once())
             ->method('isOnLocalDisk')
@@ -196,7 +196,7 @@ class DeployStaticContentTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
         $this->remoteDiskIdentifierMock->expects($this->once())
             ->method('isOnLocalDisk')
@@ -225,11 +225,11 @@ class DeployStaticContentTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('Skipping static content deploy. Enabled static content deploy on demand.');
+            ->with('Skipping static content deploy. SCD on demand is enabled.');
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->remoteDiskIdentifierMock->expects($this->never())

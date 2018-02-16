@@ -83,8 +83,8 @@ class DeployStaticContent implements ProcessInterface
     {
         $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
 
-        if ($this->globalConfig->get(BuildInterface::VAR_SCD_ON_DEMAND_IN_PRODUCTION)) {
-            $this->logger->notice('Skipping static content deploy. Enabled static content deploy on demand.');
+        if ($this->globalConfig->get(BuildInterface::VAR_SCD_ON_DEMAND)) {
+            $this->logger->notice('Skipping static content deploy. SCD on demand is enabled.');
 
             return;
         }

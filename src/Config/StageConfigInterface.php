@@ -31,7 +31,7 @@ interface StageConfigInterface
     const VAR_SCD_EXCLUDE_THEMES = 'SCD_EXCLUDE_THEMES';
     const VAR_SKIP_SCD = 'SKIP_SCD';
     const VAR_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
-    const VAR_SCD_ON_DEMAND_IN_PRODUCTION = 'SCD_ON_DEMAND_IN_PRODUCTION';
+    const VAR_SCD_ON_DEMAND = 'SCD_ON_DEMAND';
 
     /**
      * Retrieves environment configuration per stage.

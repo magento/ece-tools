@@ -58,43 +58,43 @@ class GlobalSectionTest extends TestCase
     {
         return [
             [
-                'name' => GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION,
+                'name' => GlobalSection::VAR_SCD_ON_DEMAND,
                 'config' => [
                     StageConfigInterface::STAGE_GLOBAL => [
-                        GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION => true,
+                        GlobalSection::VAR_SCD_ON_DEMAND => true,
                     ],
                     StageConfigInterface::STAGE_BUILD => [
-                        GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION => false
+                        GlobalSection::VAR_SCD_ON_DEMAND => false
                     ],
                     StageConfigInterface::STAGE_DEPLOY => [
-                        GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION => false
+                        GlobalSection::VAR_SCD_ON_DEMAND => false
                     ],
                 ],
                 'expectedValue' => true,
             ],
             [
-                'name' => GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION,
+                'name' => GlobalSection::VAR_SCD_ON_DEMAND,
                 'config' => [
                     StageConfigInterface::STAGE_GLOBAL => [
-                        GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION => false,
+                        GlobalSection::VAR_SCD_ON_DEMAND => false,
                     ],
                     StageConfigInterface::STAGE_BUILD => [
-                        GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION => true
+                        GlobalSection::VAR_SCD_ON_DEMAND => true
                     ],
                     StageConfigInterface::STAGE_DEPLOY => [
-                        GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION => true
+                        GlobalSection::VAR_SCD_ON_DEMAND => true
                     ],
                 ],
                 'expectedValue' => false,
             ],
             [
-                'name' => GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION,
+                'name' => GlobalSection::VAR_SCD_ON_DEMAND,
                 'config' => [
                     StageConfigInterface::STAGE_BUILD => [
-                        GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION => true
+                        GlobalSection::VAR_SCD_ON_DEMAND => true
                     ],
                     StageConfigInterface::STAGE_DEPLOY => [
-                        GlobalSection::VAR_SCD_ON_DEMAND_IN_PRODUCTION => true
+                        GlobalSection::VAR_SCD_ON_DEMAND => true
                     ],
                 ],
                 'expectedValue' => false,

@@ -73,7 +73,7 @@ class ScdOnDemandTest extends TestCase
             ->with('Updating env.php SCD on demand in production.');
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND_IN_PRODUCTION)
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn($scdOnDemand);
         $this->configWriterMock->expects($this->once())
             ->method('update')
