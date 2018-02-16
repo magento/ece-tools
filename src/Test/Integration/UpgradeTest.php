@@ -39,8 +39,8 @@ class UpgradeTest extends AbstractTest
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
         $executeAndAssert(Prestart::NAME);
-        $this->assertContentPresence();
 
+        $this->assertContentPresence();
         $this->updateToVersion($toVersion);
 
         $executeAndAssert(Build::NAME);
@@ -55,8 +55,8 @@ class UpgradeTest extends AbstractTest
     public function defaultDataProvider(): array
     {
         return [
-            ['^2.1', '2.2.0'],
-            ['2.2.0', '^2.2'],
+            ['^2.1.0', '2.2.0'],
+            ['2.2.0', '^2.2.0'],
         ];
     }
 
