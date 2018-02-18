@@ -350,9 +350,9 @@ class RecoverableDirectoryListTest extends TestCase
     /**
      * @param bool $skipCopyingViewPreprocessed
      * @param array $expected
-     * @dataProvider GetListDataSkipCopyingVarViewPreprocessedDataProvider
+     * @dataProvider getListSkipCopyingVarViewPreprocessedDataProvider
      */
-    public function testGetListDataSkipCopyingVarViewPreprocessed($skipCopyingViewPreprocessed, $expected)
+    public function testGetListSkipCopyingVarViewPreprocessed($skipCopyingViewPreprocessed, $expected)
     {
         $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
@@ -384,7 +384,7 @@ class RecoverableDirectoryListTest extends TestCase
     /**
      * @return array
      */
-    public function getListDataSkipCopyingVarViewPreprocessedDataProvider() : array
+    public function getListSkipCopyingVarViewPreprocessedDataProvider() : array
     {
         return [
             'copying view preprocessed dir' => [

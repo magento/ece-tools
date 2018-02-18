@@ -14,8 +14,8 @@ use Monolog\Logger;
 use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 
 /**
- * Writable directories will be erased when the writable filesystem is mounted to them. This
- * step backs them up to ./init/
+ * Writable directories will be erased when the writable filesystem is mounted to them.
+ * This step backs them up to ./init/
  *
  * {@inheritdoc}
  */

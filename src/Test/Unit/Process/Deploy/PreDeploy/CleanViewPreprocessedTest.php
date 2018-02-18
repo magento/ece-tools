@@ -48,9 +48,7 @@ class CleanViewPreprocessedTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->setMethods(['info'])
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);

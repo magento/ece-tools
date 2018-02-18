@@ -12,7 +12,8 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
- * Cleans the directory var/view_preprocessed
+ * Cleans the var/view_preprocessed directory
+ * when the deployment variable SKIP_COPYING_VIEW_PREPROCESSED_DIR is true
  */
 class CleanViewPreprocessed implements ProcessInterface
 {
