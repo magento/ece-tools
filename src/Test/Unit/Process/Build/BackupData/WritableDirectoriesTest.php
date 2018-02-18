@@ -157,15 +157,12 @@ class WritableDirectoriesTest extends TestCase
             ->willReturnOnConsecutiveCalls(true, true, false, true);
 
         $this->loggerMock->expects($this->once())
-            ->method('warning')
+            ->method('notice')
             ->with('Directory magento_root/some/path/2 does not exist.');
 
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(false);
-
-        $this->loggerMock->expects($this->never())
-            ->method('notice');
 
         $this->fileMock->expects($this->exactly(3))
             ->method('createDirectory')
@@ -230,21 +227,22 @@ class WritableDirectoriesTest extends TestCase
             )
             ->willReturnOnConsecutiveCalls(true, true, false, true);
 
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('Directory magento_root/some/path/2 does not exist.');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                [
+                    sprintf(
+                        'Skip copying %s->%s',
+                        $this->magentoRootDir . '/' . $this->viewPreprocessedDir,
+                        $this->rootInitDir . '/' . $this->viewPreprocessedDir
+                    )
+                ],
+                ['Directory magento_root/some/path/2 does not exist.']
+            );
 
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(true);
-
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with(sprintf(
-                'Skip copying %s->%s',
-                $this->magentoRootDir . '/' . $this->viewPreprocessedDir,
-                $this->rootInitDir . '/' . $this->viewPreprocessedDir
-            ));
 
         $this->fileMock->expects($this->exactly(2))
             ->method('createDirectory')
@@ -305,15 +303,12 @@ class WritableDirectoriesTest extends TestCase
             ->willReturnOnConsecutiveCalls(true, true, false, false);
 
         $this->loggerMock->expects($this->once())
-            ->method('warning')
+            ->method('notice')
             ->with('Directory magento_root/some/path/2 does not exist.');
 
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(false);
-
-        $this->loggerMock->expects($this->never())
-            ->method('notice');
 
         $this->fileMock->expects($this->exactly(2))
             ->method('createDirectory')

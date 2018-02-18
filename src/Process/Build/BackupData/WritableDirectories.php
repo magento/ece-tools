@@ -85,7 +85,7 @@ class WritableDirectories implements ProcessInterface
             $originalDir = $magentoRoot . $dir;
 
             if (!$this->file->isExists($originalDir)) {
-                $this->logger->warning(sprintf('Directory %s does not exist.', $originalDir));
+                $this->logger->notice(sprintf('Directory %s does not exist.', $originalDir));
                 continue;
             }
 
