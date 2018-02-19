@@ -5,7 +5,7 @@ diff --git a/pub/front-static.php b/pub/front-static.php
   * See COPYING.txt for license details.
   */
 
-+$_GET['resource'] = preg_replace('/^(\/static\/)(version(\d+)?\/)?/', '', $_SERVER['REQUEST_URI'] ?: '');
++$_GET['resource'] = preg_replace('/^(\/static\/)(version(\d+)?\/)?|(\?.*)/', '', $_SERVER['REQUEST_URI'] ?: '');
  require realpath(__DIR__) . '/../app/bootstrap.php';
  $bootstrap = \Magento\Framework\App\Bootstrap::create(BP, $_SERVER);
  /** @var \Magento\Framework\App\StaticResource $app */
