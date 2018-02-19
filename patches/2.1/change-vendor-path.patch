@@ -1,0 +1,37 @@
+Ticket MAGETWO-57413
+diff --git a/app/autoload.php b/app/autoload.php
+index b817baf..1d1873d 100644
+--- a/app/autoload.php
++++ b/app/autoload.php
+@@ -13,16 +13,7 @@ use Magento\Framework\Autoload\ClassLoaderWrapper;
+  */
+ define('BP', dirname(__DIR__));
+
+-define('VENDOR_PATH', BP . '/app/etc/vendor_path.php');
+-
+-if (!file_exists(VENDOR_PATH)) {
+-    throw new \Exception(
+-        'We can\'t read some files that are required to run the Magento application. '
+-         . 'This usually means file permissions are set incorrectly.'
+-    );
+-}
+-
+-$vendorDir = require VENDOR_PATH;
++$vendorDir = './vendor';
+ $vendorAutoload = BP . "/{$vendorDir}/autoload.php";
+
+ /* 'composer install' validation */
+
+diff --git a/vendor/magento/framework/App/Arguments/FileResolver/Primary.php b/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
+index 40b74e9..0f732c9 100644
+--- a/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
++++ b/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
+@@ -29,7 +29,7 @@ class Primary implements \Magento\Framework\Config\FileResolverInterface
+         \Magento\Framework\Filesystem $filesystem,
+         \Magento\Framework\Config\FileIteratorFactory $iteratorFactory
+     ) {
+-        $this->configDirectory = $filesystem->getDirectoryRead(DirectoryList::CONFIG);
++        $this->configDirectory = $filesystem->getDirectoryRead(DirectoryList::APP);
+         $this->iteratorFactory = $iteratorFactory;
+     }
+

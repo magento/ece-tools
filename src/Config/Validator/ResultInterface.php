@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Config\Validator;
 
+/**
+ * Validation result.
+ */
 interface ResultInterface
 {
     /**

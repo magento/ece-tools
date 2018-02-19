@@ -87,7 +87,7 @@ class AmqpTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with($config);
         $this->loggerMock->expects($this->never())
             ->method('info');
@@ -127,7 +127,7 @@ class AmqpTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with($resultConfig);
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -164,7 +164,6 @@ class AmqpTest extends TestCase
                             'user' => 'login',
                             'password' => 'pswd',
                             'virtualhost' => 'virtualhost',
-                            'ssl' => '',
                         ],
                     ],
                 ],
@@ -189,7 +188,6 @@ class AmqpTest extends TestCase
                             'user' => 'login',
                             'password' => 'pswd',
                             'virtualhost' => '/',
-                            'ssl' => '',
                         ],
                     ],
                 ],
@@ -204,7 +202,8 @@ class AmqpTest extends TestCase
                             'user' => 'mylogin',
                             'password' => 'mysqwwd',
                             'virtualhost' => 'virtualhost',
-                            'ssl' => '1',
+                            'someoption1' => 'some_value',
+                            'someoption2' => 'some_value',
                         ],
                     ],
                 ],
@@ -227,7 +226,6 @@ class AmqpTest extends TestCase
                             'user' => 'login',
                             'password' => 'pswd',
                             'virtualhost' => 'virtualhost',
-                            'ssl' => '',
                         ],
                     ],
                 ],
@@ -242,7 +240,6 @@ class AmqpTest extends TestCase
                             'user' => 'mylogin',
                             'password' => 'mysqwwd',
                             'virtualhost' => 'virtualhost',
-                            'ssl' => '1',
                         ],
                     ],
                 ],
@@ -298,11 +295,11 @@ class AmqpTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->configWriterMock->expects($this->once())
-            ->method('write')
+            ->method('create')
             ->with($expectedConfig);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Removing AMQP configuration from env.php.');
+            ->with('Removing queue configuration from env.php.');
 
         $this->amqp->execute();
     }
@@ -323,7 +320,6 @@ class AmqpTest extends TestCase
                             'user' => 'login',
                             'password' => 'pswd',
                             'virtualhost' => '/',
-                            'ssl' => '',
                         ],
                     ],
                 ],
@@ -339,16 +335,12 @@ class AmqpTest extends TestCase
                             'user' => 'login',
                             'password' => 'pswd',
                             'virtualhost' => '/',
-                            'ssl' => '',
                         ],
                         'someQueue' => ['some queue config'],
                     ],
                 ],
                 'expectedConfig' => [
                     'some config',
-                    'queue' => [
-                        'someQueue' => ['some queue config'],
-                    ],
                 ],
             ],
         ];

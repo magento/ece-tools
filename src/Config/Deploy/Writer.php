@@ -7,8 +7,12 @@ namespace Magento\MagentoCloud\Config\Deploy;
 
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\Writer\WriterInterface;
 
-class Writer
+/**
+ * @inheritdoc
+ */
+class Writer implements WriterInterface
 {
     /**
      * @var Reader
@@ -41,11 +45,9 @@ class Writer
     }
 
     /**
-     * Writes given configuration to file.
-     *
-     * @param array $config
+     * @inheritdoc
      */
-    public function write(array $config)
+    public function create(array $config)
     {
         $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($config, true) . ';';
 
@@ -53,14 +55,12 @@ class Writer
     }
 
     /**
-     * Updates existence configuration.
-     *
-     * @param array $config
+     * @inheritdoc
      */
     public function update(array $config)
     {
         $updatedConfig = array_replace_recursive($this->reader->read(), $config);
 
-        $this->write($updatedConfig);
+        $this->create($updatedConfig);
     }
 }

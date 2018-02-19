@@ -141,7 +141,7 @@ class DeployTest extends TestCase
                 [],
                 '{"SOME_CONFIG": "some value',
             ],
-            'disabled flow 2' => [
+            'disabled flow 1' => [
                 Deploy::VAR_UPDATE_URLS,
                 [],
                 [
@@ -190,6 +190,102 @@ class DeployTest extends TestCase
                     'STATIC_CONTENT_THREADS' => 4,
                 ],
                 4,
+            ],
+            'scd strategy default' => [
+                Deploy::VAR_SCD_STRATEGY,
+                [],
+                [],
+                ''
+            ],
+            'exclude themes deprecated' => [
+                Deploy::VAR_SCD_EXCLUDE_THEMES,
+                [],
+                [
+                    'STATIC_CONTENT_EXCLUDE_THEMES' => 'some theme',
+                    Deploy::VAR_SCD_EXCLUDE_THEMES => 'some theme 2',
+                ],
+                'some theme',
+            ],
+            'exclude themes' => [
+                Deploy::VAR_SCD_EXCLUDE_THEMES,
+                [],
+                [
+                    Deploy::VAR_SCD_EXCLUDE_THEMES => 'some theme 2',
+                ],
+                'some theme 2',
+            ],
+        ];
+    }
+
+    /**
+     * @param string $name
+     * @param array $envConfig
+     * @param array $envVarConfig
+     * @param array $rawEnv
+     * @param int $expectedValue
+     * @dataProvider getDeprecatedScdThreadsDataProvider
+     */
+    public function testGetDeprecatedScdThreads(
+        string $name,
+        array $envConfig,
+        array $envVarConfig,
+        array $rawEnv,
+        int $expectedValue
+    ) {
+        $this->environmentReaderMock->expects($this->any())
+            ->method('read')
+            ->willReturn([Deploy::SECTION_STAGE => $envConfig]);
+        $this->environmentConfigMock->expects($this->any())
+            ->method('getVariables')
+            ->willReturn($envVarConfig);
+        $_ENV = $rawEnv;
+
+        $this->assertSame($expectedValue, $this->config->get($name));
+    }
+
+    /**
+     * @return array
+     */
+    public function getDeprecatedScdThreadsDataProvider(): array
+    {
+        return [
+            'threads' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 4,
+                ],
+                [],
+                4,
+            ],
+            'threads raw' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 4,
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 3,
+                ],
+                4,
+            ],
+            'threads mode none' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [],
+                [
+                    'MAGENTO_CLOUD_MODE' => '',
+                ],
+                1,
+            ],
+            'threads mode enterprise' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                3,
             ],
         ];
     }

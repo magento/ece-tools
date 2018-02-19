@@ -7,11 +7,20 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class CommandFactoryTest extends TestCase
 {
+    /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
     /**
      * @var CommandFactory
      */
@@ -19,26 +28,35 @@ class CommandFactoryTest extends TestCase
 
     public function setUp()
     {
-        $this->commandFactory = new CommandFactory();
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->commandFactory = new CommandFactory(
+            $this->magentoVersionMock
+        );
     }
 
     /**
      * @param array $optionConfig
-     * @param $expected
+     * @param bool $useScdStrategy
+     * @param string $expected
      * @dataProvider createDataProvider
      */
-    public function testCreate(array $optionConfig, $expected)
+    public function testCreate(array $optionConfig, bool $useScdStrategy, string $expected)
     {
+        $this->magentoVersionMock
+            ->expects($this->exactly(1))
+            ->method('satisfies')
+            ->willReturn(!$useScdStrategy);
+
         $this->assertEquals(
             $expected,
-            $this->commandFactory->create($this->createOption($optionConfig))
+            $this->commandFactory->create($this->createOption($optionConfig, (int)$useScdStrategy))
         );
     }
 
     /**
      * @return array
      */
-    public function createDataProvider()
+    public function createDataProvider(): array
     {
         return [
             [
@@ -50,8 +68,9 @@ class CommandFactoryTest extends TestCase
                     'is_force' => true,
                     'verbosity_level' => '-v',
                 ],
+                true,
                 'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 -s ' .
-                'quick -v en_US --jobs=3'
+                'quick -v en_US --jobs=3',
             ],
             [
                 [
@@ -62,16 +81,44 @@ class CommandFactoryTest extends TestCase
                     'is_force' => false,
                     'verbosity_level' => '-v',
                 ],
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1'
+                true,
+                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1',
+            ],
+            [
+                [
+                    'thread_count' => 3,
+                    'excluded_themes' => ['theme1', 'theme2'],
+                    'strategy' => 'quick',
+                    'locales' => ['en_US'],
+                    'is_force' => true,
+                    'verbosity_level' => '-v',
+                ],
+                false,
+                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 ' .
+                '-v en_US --jobs=3',
+            ],
+            [
+                [
+                    'thread_count' => 1,
+                    'excluded_themes' => ['theme1'],
+                    'strategy' => 'quick',
+                    'locales' => ['en_US', 'de_DE'],
+                    'is_force' => false,
+                    'verbosity_level' => '-v',
+                ],
+                false,
+                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -v en_US de_DE --jobs=1',
             ],
         ];
     }
 
     /**
      * @param array $optionConfig
+     * @param int $getStrategyTimes
+     *
      * @return Mock|OptionInterface
      */
-    private function createOption(array $optionConfig)
+    private function createOption(array $optionConfig, int $getStrategyTimes)
     {
         $optionMock = $this->getMockBuilder(OptionInterface::class)
             ->getMockForAbstractClass();
@@ -84,7 +131,7 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->once())
             ->method('getExcludedThemes')
             ->willReturn($optionConfig['excluded_themes']);
-        $optionMock->expects($this->once())
+        $optionMock->expects($this->exactly($getStrategyTimes))
             ->method('getStrategy')
             ->willReturn($optionConfig['strategy']);
         $optionMock->expects($this->once())

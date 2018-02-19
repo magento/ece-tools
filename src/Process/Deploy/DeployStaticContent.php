@@ -108,13 +108,6 @@ class DeployStaticContent implements ProcessInterface
             return;
         }
 
-        $applicationMode = $this->environment->getApplicationMode();
-        $this->logger->info('Application mode is ' . $applicationMode);
-
-        if ($applicationMode !== Environment::MAGENTO_PRODUCTION_MODE) {
-            return;
-        }
-
         if ($this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
             || !$this->environment->isDeployStaticContent()
         ) {

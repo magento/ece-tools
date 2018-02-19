@@ -43,6 +43,14 @@ class FileList
     /**
      * @return string
      */
+    public function getConfigLocal(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/app/etc/config.local.php';
+    }
+
+    /**
+     * @return string
+     */
     public function getEnv(): string
     {
         return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
@@ -54,24 +62,6 @@ class FileList
     public function getBuildConfig(): string
     {
         return $this->directoryList->getMagentoRoot() . '/build_options.ini';
-    }
-
-    /**
-     * @return string
-     * @throws FileSystemException
-     */
-    public function getComposer(): string
-    {
-        $magentoComposer = $this->directoryList->getMagentoRoot() . '/composer.json';
-
-        if ($this->file->isExists($magentoComposer)) {
-            return $magentoComposer;
-        }
-
-        /**
-         * Workaround for local development.
-         */
-        return $this->directoryList->getRoot() . '/composer.json';
     }
 
     /**

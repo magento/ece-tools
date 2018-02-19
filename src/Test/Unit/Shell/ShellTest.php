@@ -46,21 +46,6 @@ class ShellTest extends TestCase
         $this->shell = new Shell($this->loggerMock, $this->directoryListMock);
     }
 
-    public function testBackgroundExecute()
-    {
-        $commandInput = 'la -al /';
-        $commandOutput = 'nohup ' . $commandInput . ' 1>/dev/null 2>&1 &';
-
-        $shellExecMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'shell_exec');
-        $shellExecMock->expects($this->once())
-            ->with($commandOutput);
-
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Execute command in background: ' . $commandOutput);
-        $this->shell->backgroundExecute($commandInput);
-    }
-
     /**
      * @param string $execOutput
      * @param int $loggerInfoExpects

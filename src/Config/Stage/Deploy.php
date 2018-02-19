@@ -34,8 +34,10 @@ class Deploy implements DeployInterface
      * @param EnvironmentReader $environmentReader
      * @param EnvironmentConfig $environmentConfig
      */
-    public function __construct(EnvironmentReader $environmentReader, EnvironmentConfig $environmentConfig)
-    {
+    public function __construct(
+        EnvironmentReader $environmentReader,
+        EnvironmentConfig $environmentConfig
+    ) {
         $this->environmentReader = $environmentReader;
         $this->environmentConfig = $environmentConfig;
     }
@@ -99,6 +101,7 @@ class Deploy implements DeployInterface
      * Resolves environment values with and adds custom mappings.
      *
      * @return array
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function getEnvironmentConfig(): array
     {
@@ -114,6 +117,7 @@ class Deploy implements DeployInterface
             self::VAR_CLEAN_STATIC_FILES,
             self::VAR_STATIC_CONTENT_SYMLINK,
             self::VAR_UPDATE_URLS,
+            self::VAR_GENERATED_CODE_SYMLINK,
         ];
 
         foreach ($disabledFlow as $disabledVar) {
@@ -132,10 +136,17 @@ class Deploy implements DeployInterface
             $variables[self::VAR_SCD_THREADS] = $scdThreads;
         }
 
+        if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
+            $variables[self::VAR_SCD_EXCLUDE_THEMES] = $variables['STATIC_CONTENT_EXCLUDE_THEMES'];
+        }
+
         return $variables;
     }
 
     /**
+     * Retrieves deploy threads.
+     * By default it's 1, unless it is re-declared via environment variable.
+     *
      * @return int
      */
     private function getScdThreads(): int
@@ -145,7 +156,24 @@ class Deploy implements DeployInterface
 
         if (isset($variables['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
+        } elseif ($envScThreads = $this->getEnvScdThreads()) {
+            $staticDeployThreads = $envScThreads;
+        }
+
+        return $staticDeployThreads;
+    }
+
+    /**
+     * Retrieves SCD threads configuration from raw environment data.
+     *
+     * @return int
+     * @deprecated Environment variable STATIC_CONTENT_THREADS must be used instead
+     */
+    private function getEnvScdThreads(): int
+    {
+        $staticDeployThreads = 0;
+
+        if (isset($_ENV['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
         } elseif (isset($_ENV['MAGENTO_CLOUD_MODE'])
             && $_ENV['MAGENTO_CLOUD_MODE'] === EnvironmentConfig::CLOUD_MODE_ENTERPRISE
@@ -168,14 +196,17 @@ class Deploy implements DeployInterface
             self::VAR_SCD_COMPRESSION_LEVEL => 4,
             self::VAR_SEARCH_CONFIGURATION => [],
             self::VAR_QUEUE_CONFIGURATION => [],
+            self::VAR_CACHE_CONFIGURATION => [],
+            self::VAR_SESSION_CONFIGURATION => [],
             self::VAR_VERBOSE_COMMANDS => '',
             self::VAR_CRON_CONSUMERS_RUNNER => [],
             self::VAR_CLEAN_STATIC_FILES => true,
             self::VAR_STATIC_CONTENT_SYMLINK => true,
             self::VAR_UPDATE_URLS => true,
-            self::VAR_STATIC_CONTENT_EXCLUDE_THEMES => '',
             self::VAR_SKIP_SCD => false,
             self::VAR_SCD_THREADS => 1,
+            self::VAR_GENERATED_CODE_SYMLINK => true,
+            self::VAR_SCD_EXCLUDE_THEMES => '',
         ];
     }
 }

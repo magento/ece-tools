@@ -49,6 +49,9 @@ class OptionTest extends TestCase
      */
     private $stageConfigMock;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -91,7 +94,7 @@ class OptionTest extends TestCase
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_STATIC_CONTENT_EXCLUDE_THEMES)
+            ->with(DeployInterface::VAR_SCD_EXCLUDE_THEMES)
             ->willReturn($themes);
 
         $this->assertEquals(
@@ -121,12 +124,20 @@ class OptionTest extends TestCase
         ];
     }
 
+    /**
+     * Test getting the SCD strategy from the strategy checker.
+     */
     public function testGetStrategy()
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_SCD_STRATEGY)
-            ->willReturn('strategy');
+            ->withConsecutive(
+                [DeployInterface::VAR_SCD_STRATEGY]
+            )
+            ->willReturn(
+                'strategy',
+                ['strategy']
+            );
 
         $this->assertEquals('strategy', $this->option->getStrategy());
     }
