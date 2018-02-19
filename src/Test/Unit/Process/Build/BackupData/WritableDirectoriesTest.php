@@ -146,15 +146,14 @@ class WritableDirectoriesTest extends TestCase
                 ]
             );
 
-        $this->fileMock->expects($this->exactly(4))
+        $this->fileMock->expects($this->exactly(3))
             ->method('isExists')
             ->withConsecutive(
                 [$this->magentoRootDir . '/some/path/1'],
                 [$this->magentoRootDir . '/' . $this->viewPreprocessedDir],
-                [$this->magentoRootDir . '/some/path/2'],
-                [$this->magentoRootDir . '/' . $this->logDir]
+                [$this->magentoRootDir . '/some/path/2']
             )
-            ->willReturnOnConsecutiveCalls(true, true, false, true);
+            ->willReturnOnConsecutiveCalls(true, true, false);
 
         $this->loggerMock->expects($this->once())
             ->method('notice')
@@ -217,15 +216,14 @@ class WritableDirectoriesTest extends TestCase
                 ]
             );
 
-        $this->fileMock->expects($this->exactly(4))
+        $this->fileMock->expects($this->exactly(3))
             ->method('isExists')
             ->withConsecutive(
                 [$this->magentoRootDir . '/some/path/1'],
                 [$this->magentoRootDir . '/' . $this->viewPreprocessedDir],
-                [$this->magentoRootDir . '/some/path/2'],
-                [$this->magentoRootDir . '/' . $this->logDir]
+                [$this->magentoRootDir . '/some/path/2']
             )
-            ->willReturnOnConsecutiveCalls(true, true, false, true);
+            ->willReturnOnConsecutiveCalls(true, true, false);
 
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
@@ -266,73 +264,6 @@ class WritableDirectoriesTest extends TestCase
                 [[]],
                 [['handler1', 'handler2']]
             );
-
-        $this->process->execute();
-    }
-
-    public function testExecuteVarLogDoesNotExist()
-    {
-        $this->loggerMock->expects($this->exactly(3))
-            ->method('info')
-            ->withConsecutive(
-                [sprintf('Copying writable directories to %s/ directory.', $this->rootInitDir)],
-                [
-                    sprintf(
-                        'Copying %s/some/path/1->%s/some/path/1',
-                        $this->magentoRootDir,
-                        $this->rootInitDir
-                    )
-                ],
-                [
-                    sprintf(
-                        'Copying %s->%s',
-                        $this->magentoRootDir . '/' . $this->viewPreprocessedDir,
-                        $this->rootInitDir . '/' . $this->viewPreprocessedDir
-                    )
-                ]
-            );
-
-        $this->fileMock->expects($this->exactly(4))
-            ->method('isExists')
-            ->withConsecutive(
-                [$this->magentoRootDir . '/some/path/1'],
-                [$this->magentoRootDir . '/' . $this->viewPreprocessedDir],
-                [$this->magentoRootDir . '/some/path/2'],
-                [$this->magentoRootDir . '/' . $this->logDir]
-            )
-            ->willReturnOnConsecutiveCalls(true, true, false, false);
-
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Directory magento_root/some/path/2 does not exist.');
-
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn(false);
-
-        $this->fileMock->expects($this->exactly(2))
-            ->method('createDirectory')
-            ->withConsecutive(
-                [$this->rootInitDir . '/some/path/1'],
-                [$this->rootInitDir . '/' . $this->viewPreprocessedDir]
-            );
-        $this->fileMock->expects($this->exactly(2))
-            ->method('copyDirectory')
-            ->withConsecutive(
-                [$this->magentoRootDir . '/some/path/1', $this->rootInitDir . '/some/path/1'],
-                [
-                    $this->magentoRootDir . '/' . $this->viewPreprocessedDir,
-                    $this->rootInitDir . '/' . $this->viewPreprocessedDir
-                ]
-            );
-
-        $this->loggerPoolMock->expects($this->never())
-            ->method('getHandlers');
-
-        $this->loggerMock->expects($this->never())
-            ->method('setHandlers');
-
-        $this->expectException(\RuntimeException::class);
 
         $this->process->execute();
     }

@@ -107,10 +107,6 @@ class WritableDirectories implements ProcessInterface
 
     protected function backupLogDir($originalLogDir, $initLogDir)
     {
-        if (!$this->file->isExists($originalLogDir)) {
-            throw new \RuntimeException(sprintf('Directory %s does not exist.', $originalLogDir));
-        }
-
         $this->logger->info(sprintf('Copying %s->%s', $originalLogDir, $initLogDir));
         $this->stopLogging();
         $this->backupDir($originalLogDir, $initLogDir);
