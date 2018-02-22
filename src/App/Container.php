@@ -220,6 +220,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\ScdOnDemand::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\CronConsumersRunner::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
