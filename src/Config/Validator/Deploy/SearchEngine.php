@@ -52,15 +52,20 @@ class SearchEngine implements ValidatorInterface
     {
         $relationships = $this->environment->getRelationships();
 
-        if (isset($relationships['solr']) && $this->magentoVersion->satisfies('>=2.2')) {
-            return $this->resultFactory->create(
-                ResultInterface::ERROR,
-                [
-                    'error' => 'Configuration for Solr was found in .magento.app.yaml.',
-                    'suggestion' => 'Solr is no longer supported by Magento 2.2 or later. ' .
-                        'You should remove this relationship and use either MySQL or Elasticsearch.',
-                ]
-            );
+        if (isset($relationships['solr'])) {
+            $args['error'] = 'Configuration for Solr was found in .magento.app.yaml.';
+
+            if ($this->magentoVersion->satisfies('2.1.*')) {
+                $args['suggestion'] = 'Solr support has been deprecated in Magento 2.1. ' .
+                    'You should update your search engine to Elasticsearch and remove this relationship.';
+            }
+
+            if ($this->magentoVersion->satisfies('>=2.2')) {
+                $args['suggestion'] = 'Solr is no longer supported by Magento 2.2 or later. ' .
+                    'You should remove this relationship and use Elasticsearch.';
+            }
+
+            return $this->resultFactory->create(ResultInterface::ERROR, $args);
         }
 
         return $this->resultFactory->create(ResultInterface::SUCCESS);

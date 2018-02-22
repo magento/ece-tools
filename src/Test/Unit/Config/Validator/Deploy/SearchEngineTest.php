@@ -85,16 +85,25 @@ class SearchEngineTest extends TestCase
                 ]]]);
 
         $this->magentoVersionMock->method('satisfies')
-            ->willReturn(false);
+            ->willReturnMap([
+                ['2.1.*', true],
+                ['>=2.2', false],
+            ]);
 
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
-            ->with(ResultInterface::SUCCESS)
-            ->willReturn($this->createMock(Success::class));
+            ->with(
+                ResultInterface::ERROR,
+                [
+                    'error' => 'Configuration for Solr was found in .magento.app.yaml.',
+                    'suggestion' => 'Solr support has been deprecated in Magento 2.1. ' .
+                        'You should update your search engine to Elasticsearch and remove this relationship.',
+                ]
+            )->willReturn($this->createMock(Error::class));
 
         $result = $this->searchEngineValidator->validate();
 
-        $this->assertInstanceOf(Success::class, $result);
+        $this->assertInstanceOf(Error::class, $result);
     }
 
     public function testConfigSolr22()
@@ -109,7 +118,10 @@ class SearchEngineTest extends TestCase
                 ]]]);
 
         $this->magentoVersionMock->method('satisfies')
-            ->willReturn(true);
+            ->willReturnMap([
+                ['2.1.*', false],
+                ['>=2.2', true],
+            ]);
 
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
@@ -118,7 +130,7 @@ class SearchEngineTest extends TestCase
                 [
                     'error' => 'Configuration for Solr was found in .magento.app.yaml.',
                     'suggestion' => 'Solr is no longer supported by Magento 2.2 or later. ' .
-                        'You should remove this relationship and use either MySQL or Elasticsearch.',
+                        'You should remove this relationship and use Elasticsearch.',
                 ]
             )->willReturn($this->createMock(Error::class));
 
