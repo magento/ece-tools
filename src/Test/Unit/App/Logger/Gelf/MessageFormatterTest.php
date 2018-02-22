@@ -9,6 +9,9 @@ use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\App\Logger\Gelf\MessageFormatter;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class MessageFormatterTest extends TestCase
 {
     /**

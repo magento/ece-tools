@@ -11,6 +11,9 @@ use Gelf\Transport\UdpTransport;
 use Magento\MagentoCloud\App\Logger\Gelf\TransportFactory;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class TransportFactoryTest extends TestCase
 {
     /**

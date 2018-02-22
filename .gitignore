@@ -3,4 +3,4 @@ vendor
 composer.phar
 composer.lock
 .DS_Store
-app
+/app

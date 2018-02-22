@@ -10,6 +10,9 @@ use Gelf\Transport\HttpTransport;
 use Gelf\Transport\TcpTransport;
 use Gelf\Transport\UdpTransport;
 
+/**
+ * Factory for creating gelf transport instances.
+ */
 class TransportFactory
 {
     const TRANSPORT_HTTP = 'http';

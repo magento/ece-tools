@@ -15,6 +15,9 @@ use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class HandlerFactoryTest extends TestCase
 {
     /**
