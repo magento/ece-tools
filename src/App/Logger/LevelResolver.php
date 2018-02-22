@@ -13,7 +13,7 @@ use \Monolog\Logger;
 class LevelResolver
 {
     /**
-     * @var int
+     * @var integer
      */
     private $defaultLevel = Logger::NOTICE;
 

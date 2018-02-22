@@ -8,7 +8,7 @@
   ],
   "require": {
     "php": "^7.0",
-    "monolog/monolog": "^1.17",
+    "monolog/monolog": "^1.16",
     "symfony/console": "^2.6",
     "illuminate/contracts": "^5.5",
     "illuminate/container": "^5.5",
@@ -17,7 +17,7 @@
     "psr/container": "^1.0",
     "composer/composer": "@stable",
     "composer/semver": "^1.4",
-    "symfony/yaml": "^3.3",
+    "symfony/yaml": "^2.3||^3.3",
     "graylog2/gelf-php": "^1.4.2"
   },
   "require-dev": {
@@ -28,7 +28,8 @@
     "phpunit/php-code-coverage": "^5.2"
   },
   "replace": {
-    "magento/ece-patches": "*"
+    "magento/ece-patches": "*",
+    "magento/magento-cloud-configuration": "*"
   },
   "bin": [
     "bin/ece-tools",

@@ -5,14 +5,18 @@
  */
 namespace Magento\MagentoCloud\Util;
 
+/**
+ * Generates password with given length.
+ */
 class PasswordGenerator
 {
     /**
      * Generates a random string at the desired length
+     *
      * @param int $length the length of the random string
      * @return string
      */
-    public function generateRandomString(int $length) : string
+    public function generateRandomString(int $length): string
     {
         $charsLowers = "abcdefghijklmnopqrstuvwxyz";
         $charsUppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -24,22 +28,24 @@ class PasswordGenerator
             $rand = random_int(0, $lc);
             $output .= $chars[$rand]; // random character in $chars
         }
+
         return $output;
     }
 
     /**
      * Generates an admin password using default Magento settings
+     *
      * @param int $length the length of the random string
      * @return string
      */
-    public function generateRandomPassword(int $length = 20) : string
+    public function generateRandomPassword(int $length = 20): string
     {
         while (true) {
             $password = $this->generateRandomString($length);
             /* http://docs.magento.com/m2/ee/user_guide/stores/admin-signin.html
              * An Admin password must be seven or more characters long, and include both letters and numbers.
              */
-            if (( preg_match('/.*[A-Za-z].*/', $password) ) && ( preg_match('/.*[\d].*/', $password) )) {
+            if ((preg_match('/.*[A-Za-z].*/', $password)) && (preg_match('/.*[\d].*/', $password))) {
                 return $password;
             }
         }
@@ -47,21 +53,23 @@ class PasswordGenerator
 
     /**
      * Generates salt and hash for the admin password using default Magento settings
+     *
      * @param string $password The password we will generate a hash of
      * @return string The hash + salt + version
      */
-    public function generateSaltAndHash(string $password) : string
+    public function generateSaltAndHash(string $password): string
     {
         $saltLength = 32;
         $salt = $this->generateRandomString($saltLength);
         $version = 1;
         $hash = hash('sha256', $salt . $password);
+
         return implode(
             ':',
             [
                 $hash,
                 $salt,
-                $version
+                $version,
             ]
         );
     }

@@ -8,6 +8,9 @@ namespace Magento\MagentoCloud\Util;
 use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Provides an access wrapper to retrieve application URLs.
+ */
 class UrlManager
 {
     const MAGIC_ROUTE = '{default}';

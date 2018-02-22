@@ -9,6 +9,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
+/**
+ * Provides remote disk tools.
+ */
 class RemoteDiskIdentifier
 {
     const REMOTE_DISK_RE = '/^([1-9]|\/dev\/rbd[0-9]+)/';
@@ -71,6 +74,7 @@ class RemoteDiskIdentifier
     {
         if (count($output) === 2) {
             $cols = preg_split('/\s+/', $output[1]);
+
             return array_shift($cols);
         }
     }

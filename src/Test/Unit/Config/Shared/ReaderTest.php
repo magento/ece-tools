@@ -11,6 +11,9 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class ReaderTest extends TestCase
 {
     /**
@@ -53,8 +56,8 @@ class ReaderTest extends TestCase
             [
                 'modules' => [
                     'Some_ModuleName' => 1,
-                    'Another_Module' => 0
-                ]
+                    'Another_Module' => 0,
+                ],
             ],
             $this->reader->read()
         );

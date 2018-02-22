@@ -14,6 +14,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class RestoreWritableDirectoriesTest extends TestCase
 {
     /**
@@ -72,7 +75,7 @@ class RestoreWritableDirectoriesTest extends TestCase
             ->method('getList')
             ->willReturn([
                 ['directory' => 'app/etc', 'strategy' => 'copy'],
-                ['directory' => 'pub/media', 'strategy' => 'copy']
+                ['directory' => 'pub/media', 'strategy' => 'copy'],
             ]);
         $this->buildDirCopierMock->expects($this->exactly(2))
             ->method('copy')

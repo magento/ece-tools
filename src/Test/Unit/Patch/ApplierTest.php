@@ -83,18 +83,21 @@ class ApplierTest extends TestCase
         );
     }
 
-    public function testApply()
+    /**
+     * @param string $path
+     * @param string|null $name
+     * @param string|null $packageName
+     * @param string|null $constraint
+     * @param string $expectedLog
+     * @dataProvider applyDataProvider
+     */
+    public function testApply(string $path, $name, $packageName, $constraint, string $expectedLog)
     {
-        $path = 'path/to/patch';
-        $name = 'patchName';
-        $packageName = 'packageName';
-        $constraint = '1.0';
-
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($path)
             ->willReturn(true);
-        $this->localRepositoryMock->expects($this->once())
+        $this->localRepositoryMock->expects($this->any())
             ->method('findPackage')
             ->with($packageName, $constraint)
             ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
@@ -104,13 +107,24 @@ class ApplierTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Applying patch patchName 1.0.'],
+                [$expectedLog],
                 ['Done.']
             );
         $this->loggerMock->expects($this->never())
             ->method('notice');
 
         $this->applier->apply($path, $name, $packageName, $constraint);
+    }
+
+    /**
+     * @return array
+     */
+    public function applyDataProvider(): array
+    {
+        return [
+            ['path/to/patch', 'patchName', 'packageName', '1.0', 'Applying patch patchName (path/to/patch) 1.0.'],
+            ['path/to/patch2', null, null, null, 'Applying patch path/to/patch2.'],
+        ];
     }
 
     public function testApplyPathNotExists()
@@ -136,7 +150,7 @@ class ApplierTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Applying patch patchName 1.0.'],
+                ['Applying patch patchName (root/path/to/patch) 1.0.'],
                 ['Done.']
             );
         $this->directoryListMock->expects($this->once())
@@ -161,12 +175,6 @@ class ApplierTest extends TestCase
             ->method('findPackage')
             ->with($packageName, $constraint)
             ->willReturn(null);
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Constraint packageName 1.0 was not found.');
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Applying patch patchName 1.0.');
         $this->shellMock->expects($this->never())
             ->method('execute');
 

@@ -117,14 +117,6 @@ class EnvironmentTest extends TestCase
         ];
     }
 
-    public function testGetWritableDirectories()
-    {
-        $this->assertSame(
-            ['var', 'app/etc', 'pub/media'],
-            $this->environment->getWritableDirectories()
-        );
-    }
-
     /**
      * @param bool $isExists
      * @dataProvider isDeployStaticContentToBeEnabledDataProvider

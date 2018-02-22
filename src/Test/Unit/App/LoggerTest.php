@@ -13,6 +13,9 @@ use Magento\MagentoCloud\App\Logger\Pool;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class LoggerTest extends TestCase
 {
     /**
@@ -91,7 +94,7 @@ class LoggerTest extends TestCase
             ->method('isExists')
             ->willReturnMap([
                 [$buildPhaseLogPath, $buildLogFileExists],
-                [$deployLogPath, $deployLogFileExists]
+                [$deployLogPath, $deployLogFileExists],
             ]);
         $this->fileMock->expects($this->exactly($fileMockFilePutContentsExpects))
             ->method('filePutContents')
@@ -148,7 +151,7 @@ class LoggerTest extends TestCase
                 'deployLogFileExists' => true,
                 'fileMockFilePutContentsExpects' => 0,
                 'fileMockCopyExpects' => 0,
-            ]
+            ],
         ];
     }
 }
