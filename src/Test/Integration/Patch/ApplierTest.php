@@ -16,6 +16,9 @@ use PHPUnit\Framework\TestCase;
  */
 class ApplierTest extends TestCase
 {
+    /**
+     * @var Bootstrap
+     */
     private $bootstrap;
 
     /**
