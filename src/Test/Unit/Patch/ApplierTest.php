@@ -208,12 +208,12 @@ class ApplierTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Applying patch patchName 1.0.'],
+                ['Applying patch patchName (path/to/patch) 1.0.'],
                 ['Done.']
             );
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with("Patch {$name} was already applied.");
+            ->with("Patch patchName (path/to/patch) was already applied.");
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
@@ -263,7 +263,7 @@ class ApplierTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Applying patch patchName 1.0.');
+            ->with('Applying patch patchName (path/to/patch) 1.0.');
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
