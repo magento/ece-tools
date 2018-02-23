@@ -10,6 +10,9 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
+use Monolog\Handler\SyslogHandler;
+use Monolog\Handler\SyslogUdpHandler;
+use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
 
 /**
  * The handler factory.
@@ -20,6 +23,9 @@ class HandlerFactory
     const HANDLER_FILE = 'file';
     const HANDLER_EMAIL = 'email';
     const HANDLER_SLACK = 'slack';
+    const HANDLER_GELF = 'gelf';
+    const HANDLER_SYSLOG = 'syslog';
+    const HANDLER_SYSLOG_UDP = 'syslog_udp';
 
     /**
      * @var LevelResolver
@@ -32,13 +38,23 @@ class HandlerFactory
     private $logConfig;
 
     /**
+     * @var GelfHandlerFactory
+     */
+    private $gelfHandlerFactory;
+
+    /**
      * @param LevelResolver $levelResolver
      * @param LogConfig $logConfig
+     * @param GelfHandlerFactory $gelfHandlerFactory
      */
-    public function __construct(LevelResolver $levelResolver, LogConfig $logConfig)
-    {
+    public function __construct(
+        LevelResolver $levelResolver,
+        LogConfig $logConfig,
+        GelfHandlerFactory $gelfHandlerFactory
+    ) {
         $this->levelResolver = $levelResolver;
         $this->logConfig = $logConfig;
+        $this->gelfHandlerFactory = $gelfHandlerFactory;
     }
 
     /**
@@ -73,6 +89,28 @@ class HandlerFactory
                     null,
                     $minLevel
                 );
+                break;
+            case static::HANDLER_SYSLOG:
+                $handlerInstance = new SyslogHandler(
+                    $configuration->get('ident'),
+                    $configuration->get('facility', LOG_USER),
+                    $minLevel,
+                    true,
+                    $configuration->get('logopts', LOG_PID)
+                );
+                break;
+            case static::HANDLER_SYSLOG_UDP:
+                $handlerInstance = new SyslogUdpHandler(
+                    $configuration->get('host'),
+                    $configuration->get('port'),
+                    $configuration->get('facility', LOG_USER),
+                    $minLevel,
+                    true,
+                    $configuration->get('ident', 'php')
+                );
+                break;
+            case static::HANDLER_GELF:
+                $handlerInstance = $this->gelfHandlerFactory->create($configuration, $minLevel);
                 break;
             default:
                 throw new \Exception('Unknown type of log handler: ' . $handler);

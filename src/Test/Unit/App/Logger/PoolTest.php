@@ -55,30 +55,35 @@ class PoolTest extends TestCase
     {
         $this->logConfigMock->expects($this->once())
             ->method('getHandlers')
-            ->willReturn(['slack', 'email']);
+            ->willReturn([
+                'slack' => [],
+                'email' => ['use_default_formatter' => false],
+                'syslog' => ['use_default_formatter' => true]
+            ]);
 
         $formatterMock = $this->createMock(LineFormatter::class);
         $this->lineFormatterFactoryMock->expects($this->exactly(2))
             ->method('create')
             ->willReturn($formatterMock);
 
-        $slackHandlerMock = $this->getMockBuilder(HandlerInterface::class)
-            ->getMockForAbstractClass();
+        $slackHandlerMock = $this->getMockForAbstractClass(HandlerInterface::class);
         $slackHandlerMock->expects($this->once())
             ->method('setFormatter')
             ->with($formatterMock)
             ->willReturnSelf();
-        $emailHandlerMock = $this->getMockBuilder(HandlerInterface::class)
-            ->getMockForAbstractClass();
+        $emailHandlerMock = $this->getMockForAbstractClass(HandlerInterface::class);
         $emailHandlerMock->expects($this->once())
             ->method('setFormatter')
             ->with($formatterMock)
             ->willReturnSelf();
+        $syslogHandler = $this->getMockForAbstractClass(HandlerInterface::class);
+        $syslogHandler->expects($this->never())
+            ->method('setFormatter');
 
-        $this->handlerFactoryMock->expects($this->exactly(2))
+        $this->handlerFactoryMock->expects($this->exactly(3))
             ->method('create')
-            ->withConsecutive(['slack'], ['email'])
-            ->willReturnOnConsecutiveCalls($slackHandlerMock, $emailHandlerMock);
+            ->withConsecutive(['slack'], ['email'], ['syslog'])
+            ->willReturnOnConsecutiveCalls($slackHandlerMock, $emailHandlerMock, $syslogHandler);
 
         $this->pool->getHandlers();
     }

@@ -105,6 +105,7 @@ class Container implements ContainerInterface
         );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
+        $this->container->singleton(\Magento\MagentoCloud\App\Logger\Pool::class);
         $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);

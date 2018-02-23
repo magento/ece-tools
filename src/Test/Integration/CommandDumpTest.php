@@ -80,6 +80,10 @@ class CommandDumpTest extends AbstractTest
      */
     private function executeAndAssert(string $commandName, Application $application)
     {
+        $application->getContainer()->set(
+            \Psr\Log\LoggerInterface::class,
+            \Magento\MagentoCloud\App\Logger::class
+        );
         $commandTester = new CommandTester($application->get($commandName));
         $commandTester->execute([]);
         $this->assertSame(0, $commandTester->getStatusCode());
