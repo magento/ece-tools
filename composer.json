@@ -1,7 +1,7 @@
 {
   "name": "magento/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
-  "version": "2002.0.8",
+  "version": "2002.0.9",
   "license": [
     "OSL-3.0",
     "AFL-3.0"
@@ -17,7 +17,8 @@
     "psr/container": "^1.0",
     "composer/composer": "@stable",
     "composer/semver": "^1.4",
-    "symfony/yaml": "^2.3||^3.3"
+    "symfony/yaml": "^2.3||^3.3",
+    "graylog2/gelf-php": "^1.4.2"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.2.0",
