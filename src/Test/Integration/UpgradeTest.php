@@ -98,6 +98,6 @@ class UpgradeTest extends AbstractTest
             $version,
             $sandboxDir
         ));
-        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s', $sandboxDir));
+        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s -vvv', $sandboxDir));
     }
 }
