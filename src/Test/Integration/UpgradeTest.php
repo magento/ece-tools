@@ -16,6 +16,18 @@ use Symfony\Component\Console\Tester\CommandTester;
 class UpgradeTest extends AbstractTest
 {
     /**
+     * @inheritdoc
+     */
+    protected function setUp()
+    {
+        $this->bootstrap = Bootstrap::create();
+        $this->bootstrap->execute(sprintf(
+            'cd %s && rm -rf ./vendor/*',
+            $this->bootstrap->getSandboxDir()
+        ));
+    }
+
+    /**
      * @param string $fromVersion
      * @param string $toVersion
      * @dataProvider defaultDataProvider
