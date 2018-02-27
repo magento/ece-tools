@@ -18,10 +18,17 @@ class UpgradeTest extends AbstractTest
     /**
      * @inheritdoc
      */
+    public static function setUpBeforeClass()
+    {
+        // Skip installation.
+    }
+
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
-        $this->bootstrap = Bootstrap::create();
-        $this->bootstrap->destroy();
+        // Skip installation.
     }
 
     /**
@@ -91,10 +98,10 @@ class UpgradeTest extends AbstractTest
     {
         $sandboxDir = $this->bootstrap->getSandboxDir();
         $this->bootstrap->execute(sprintf(
-            'composer require magento/product-enterprise-edition %s --no-update -n -d %s --ignore-platform-reqs',
+            'composer require magento/product-enterprise-edition %s --no-update -n -d %s',
             $version,
             $sandboxDir
         ));
-        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s  --ignore-platform-reqs', $sandboxDir));
+        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s', $sandboxDir));
     }
 }

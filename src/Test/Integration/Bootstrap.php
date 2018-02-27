@@ -51,7 +51,7 @@ class Bootstrap
         }
 
         $this->execute(sprintf(
-            'composer create-project --repository-url=%s %s %s %s --ignore-platform-reqs',
+            'composer create-project --repository-url=%s %s %s %s',
             $envConfig->get('deploy.repo'),
             $envConfig->get('deploy.name'),
             $sandboxDir,
@@ -105,6 +105,9 @@ class Bootstrap
         ));
     }
 
+    /**
+     * Removes application directory.
+     */
     public function destroy()
     {
         $this->execute(sprintf(

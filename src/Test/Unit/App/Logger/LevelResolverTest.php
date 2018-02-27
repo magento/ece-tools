@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Magento\MagentoCloud\App\Logger\LevelResolver;
-use Magento\MagentoCloud\Config\Environment;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
@@ -19,11 +18,6 @@ class LevelResolverTest extends TestCase
      * @var LevelResolver
      */
     private $levelResolver;
-
-    /**
-     * @var Environment
-     */
-    private $environmentMock;
 
     /**
      * @inheritdoc
