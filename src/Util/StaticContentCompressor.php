@@ -76,12 +76,6 @@ class StaticContentCompressor
             return;
         }
 
-        if (!$this->utilityManager->has(UtilityManager::UTILITY_TIMEOUT)) {
-            $this->logger->warning('Timeout utility not found in the system.');
-
-            return;
-        }
-
         $compressionCommand = $this->getCompressionCommand($compressionLevel);
 
         $startTime = microtime(true);

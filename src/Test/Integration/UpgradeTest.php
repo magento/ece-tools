@@ -21,10 +21,7 @@ class UpgradeTest extends AbstractTest
     protected function setUp()
     {
         $this->bootstrap = Bootstrap::create();
-        $this->bootstrap->execute(sprintf(
-            'cd %s && rm -rf ./vendor/*',
-            $this->bootstrap->getSandboxDir()
-        ));
+        $this->bootstrap->destroy();
     }
 
     /**
@@ -34,6 +31,8 @@ class UpgradeTest extends AbstractTest
      */
     public function testDefault(string $fromVersion, string $toVersion)
     {
+        $this->bootstrap->run($fromVersion);
+
         $application = $this->bootstrap->createApplication([]);
 
         $executeAndAssert = function ($commandName) use ($application) {
@@ -45,8 +44,6 @@ class UpgradeTest extends AbstractTest
             $commandTester->execute([]);
             $this->assertSame(0, $commandTester->getStatusCode());
         };
-
-        $this->updateToVersion($fromVersion);
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
@@ -94,10 +91,10 @@ class UpgradeTest extends AbstractTest
     {
         $sandboxDir = $this->bootstrap->getSandboxDir();
         $this->bootstrap->execute(sprintf(
-            'composer require magento/product-enterprise-edition %s --no-update -n -d %s',
+            'composer require magento/product-enterprise-edition %s --no-update -n -d %s --ignore-platform-reqs',
             $version,
             $sandboxDir
         ));
-        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s -vvv', $sandboxDir));
+        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s  --ignore-platform-reqs', $sandboxDir));
     }
 }

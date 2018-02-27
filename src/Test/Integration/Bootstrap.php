@@ -32,9 +32,10 @@ class Bootstrap
     }
 
     /**
+     * @param string $version
      * @throws \Exception
      */
-    public function run()
+    public function run($version = '@stable')
     {
         $sandboxDir = $this->getSandboxDir();
 
@@ -50,11 +51,11 @@ class Bootstrap
         }
 
         $this->execute(sprintf(
-            'composer create-project --repository-url=%s %s %s %s',
+            'composer create-project --repository-url=%s %s %s %s --ignore-platform-reqs',
             $envConfig->get('deploy.repo'),
             $envConfig->get('deploy.name'),
             $sandboxDir,
-            $envConfig->get('deploy.version')
+            $version
         ));
 
         /**
@@ -104,12 +105,20 @@ class Bootstrap
         ));
     }
 
+    public function destroy()
+    {
+        $this->execute(sprintf(
+            'rm -rf %s',
+            $this->getSandboxDir()
+        ));
+    }
+
     /**
      * @return string
      */
     public function getSandboxDir(): string
     {
-        return ECE_BP . '/app';
+        return ECE_BP . '/sandbox';
     }
 
     /**

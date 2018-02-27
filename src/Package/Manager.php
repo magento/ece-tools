@@ -68,7 +68,11 @@ class Manager
         $package = $this->repository->findPackage($packageName, $version);
 
         if (!$package instanceof PackageInterface) {
-            throw new \Exception('Package was not found');
+            throw new \Exception(sprintf(
+                'Package %s:%s was not found',
+                $packageName,
+                $version
+            ));
         }
 
         return $package;

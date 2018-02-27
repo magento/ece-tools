@@ -32,17 +32,6 @@ class UtilityManager
     }
 
     /**
-     * Asserts presence of utility in the system.
-     *
-     * @param string $utility
-     * @return bool
-     */
-    public function has(string $utility): bool
-    {
-        return array_key_exists($utility, $this->getUtilities());
-    }
-
-    /**
      * Retrieves system path to given utility.
      *
      * @param string $utility
@@ -79,7 +68,10 @@ class UtilityManager
                     $output = $this->shell->execute('which ' . $name);
                     $this->utilities[$name] = implode(PHP_EOL, $output);
                 } catch (\Exception $exception) {
-                    // No utility. Skip.
+                    throw new \RuntimeException(sprintf(
+                        'Utility %s was not found',
+                        $name
+                    ));
                 }
             }
         }
