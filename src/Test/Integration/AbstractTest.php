@@ -42,10 +42,6 @@ abstract class AbstractTest extends TestCase
     {
         $this->bootstrap = Bootstrap::create();
         $this->bootstrap->execute(sprintf(
-            'cd %s && rm -rf ./vendor/*',
-            $this->bootstrap->getSandboxDir()
-        ));
-        $this->bootstrap->execute(sprintf(
             'cd %s && composer install -n --no-dev --no-progress',
             $this->bootstrap->getSandboxDir()
         ));
@@ -56,9 +52,12 @@ abstract class AbstractTest extends TestCase
      */
     protected function tearDown()
     {
-        $this->bootstrap = Bootstrap::create();
         $this->bootstrap->execute(sprintf(
-            'cd %s && php ./bin/magento setup:uninstall -n',
+            'cd %s && php bin/magento setup:uninstall -n',
+            $this->bootstrap->getSandboxDir()
+        ));
+        $this->bootstrap->execute(sprintf(
+            'cd %s && rm -rf vendor/*',
             $this->bootstrap->getSandboxDir()
         ));
     }
