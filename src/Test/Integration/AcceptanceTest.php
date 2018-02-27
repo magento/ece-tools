@@ -35,16 +35,13 @@ class AcceptanceTest extends AbstractTest
     }
 
     /**
-     * @param string $version
      * @param array $environment
      * @param array $expectedConsumersRunnerConfig
      * @dataProvider defaultDataProvider
      */
-    public function testDefault(string $version, array $environment, array $expectedConsumersRunnerConfig)
+    public function testDefault(array $environment, array $expectedConsumersRunnerConfig)
     {
         $application = $this->bootstrap->createApplication($environment);
-
-        $this->updateToVersion($version);
 
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
@@ -60,27 +57,12 @@ class AcceptanceTest extends AbstractTest
     }
 
     /**
-     * @param string $version
-     */
-    private function updateToVersion($version)
-    {
-        $sandboxDir = $this->bootstrap->getSandboxDir();
-        $this->bootstrap->execute(sprintf(
-            'composer require magento/product-enterprise-edition %s --no-update -n -d %s',
-            $version,
-            $sandboxDir
-        ));
-        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s', $sandboxDir));
-    }
-
-    /**
      * @return array
      */
     public function defaultDataProvider(): array
     {
         return [
             'default configuration' => [
-                'version' => '^2.2',
                 'environment' => [
                     'variables' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
@@ -94,17 +76,7 @@ class AcceptanceTest extends AbstractTest
                     ],
                 ],
             ],
-            'default configuration 2.1' => [
-                'version' => '^2.1',
-                'environment' => [
-                    'variables' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                    ],
-                ],
-                'expectedConsumersRunnerConfig' => [],
-            ],
             'test cron_consumers_runner with array' => [
-                'version' => '^2.2',
                 'environment' => [
                     'variables' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
@@ -124,7 +96,6 @@ class AcceptanceTest extends AbstractTest
                 ],
             ],
             'test cron_consumers_runner with string' => [
-                'version' => '^2.2',
                 'environment' => [
                     'variables' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
@@ -140,7 +111,6 @@ class AcceptanceTest extends AbstractTest
                 ],
             ],
             'disabled static content symlinks 3 jobs' => [
-                'version' => '^2.2',
                 'environment' => [
                     'variables' => [
                         'ADMIN_EMAIL' => 'admin@example.com',

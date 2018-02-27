@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\App\Logger;
 
+use Magento\MagentoCloud\Config\Environment;
 use \Monolog\Logger;
 
 /**
@@ -27,12 +28,25 @@ class LevelResolver
     ];
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
+     * @param Environment $environment
+     */
+    public function __construct(Environment $environment)
+    {
+        $this->environment = $environment;
+    }
+
+    /**
      * @param string $level
      * @return int
      */
     public function resolve(string $level): int
     {
-        $defaultLevel = getenv('LOG_LEVEL') ? (int)getenv('LOG_LEVEL') : Logger::NOTICE;
+        $defaultLevel = $this->environment->getLogLevel() ? $this->environment->getLogLevel() : Logger::NOTICE;
 
         return $this->mapLevels[strtolower($level)] ?? $defaultLevel;
     }
