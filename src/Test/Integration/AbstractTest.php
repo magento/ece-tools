@@ -61,9 +61,5 @@ abstract class AbstractTest extends TestCase
             'cd %s && php ./bin/magento setup:uninstall -n',
             $this->bootstrap->getSandboxDir()
         ));
-        $this->bootstrap->execute(sprintf(
-            'cd %s && rm -rf ./vendor/*',
-            $this->bootstrap->getSandboxDir()
-        ));
     }
 }
