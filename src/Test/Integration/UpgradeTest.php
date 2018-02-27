@@ -20,7 +20,7 @@ class UpgradeTest extends AbstractTest
      */
     public static function setUpBeforeClass()
     {
-        // Skip installation.
+        Bootstrap::create()->destroy();
     }
 
     /**
@@ -28,7 +28,7 @@ class UpgradeTest extends AbstractTest
      */
     protected function setUp()
     {
-        // Skip installation.
+        $this->bootstrap = Bootstrap::create();
     }
 
     /**
@@ -72,7 +72,7 @@ class UpgradeTest extends AbstractTest
     {
         return [
             ['^2.1.0', '2.2.0'],
-            ['2.2.0', '2.2.2'],
+            ['2.2.0', '^2.2.0'],
         ];
     }
 

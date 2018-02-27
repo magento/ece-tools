@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\App\Logger;
 
-use Magento\MagentoCloud\Config\Environment;
 use \Monolog\Logger;
 
 /**
@@ -33,8 +32,6 @@ class LevelResolver
      */
     public function resolve(string $level): int
     {
-        $defaultLevel = Logger::NOTICE;
-
-        return $this->mapLevels[strtolower($level)] ?? $defaultLevel;
+        return $this->mapLevels[strtolower($level)] ?? Logger::NOTICE;
     }
 }
