@@ -271,12 +271,4 @@ class Environment
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
     }
-
-    /**
-     * @return int
-     */
-    public function getLogLevel(): int
-    {
-        return $_ENV('LOG_LEVEL') ? (int)$_ENV('LOG_LEVEL') : 0;
-    }
 }

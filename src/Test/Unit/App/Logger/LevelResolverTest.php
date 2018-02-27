@@ -9,7 +9,6 @@ use Magento\MagentoCloud\App\Logger\LevelResolver;
 use Magento\MagentoCloud\Config\Environment;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -22,7 +21,7 @@ class LevelResolverTest extends TestCase
     private $levelResolver;
 
     /**
-     * @var Environment|Mock
+     * @var Environment
      */
     private $environmentMock;
 
@@ -31,11 +30,7 @@ class LevelResolverTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
-
-        $this->levelResolver = new LevelResolver(
-            $this->environmentMock
-        );
+        $this->levelResolver = new LevelResolver();
     }
 
     /**
@@ -45,10 +40,6 @@ class LevelResolverTest extends TestCase
      */
     public function testResolve(string $level, int $expectedResult)
     {
-        $this->environmentMock->expects($this->any())
-            ->method('getLogLevel')
-            ->willReturn(0);
-
         $this->assertSame($expectedResult, $this->levelResolver->resolve($level));
     }
 

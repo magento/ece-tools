@@ -28,25 +28,12 @@ class LevelResolver
     ];
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
-     * @param Environment $environment
-     */
-    public function __construct(Environment $environment)
-    {
-        $this->environment = $environment;
-    }
-
-    /**
      * @param string $level
      * @return int
      */
     public function resolve(string $level): int
     {
-        $defaultLevel = $this->environment->getLogLevel() ? $this->environment->getLogLevel() : Logger::NOTICE;
+        $defaultLevel = Logger::NOTICE;
 
         return $this->mapLevels[strtolower($level)] ?? $defaultLevel;
     }
