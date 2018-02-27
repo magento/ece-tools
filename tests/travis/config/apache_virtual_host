@@ -1,8 +1,8 @@
 <VirtualHost *:80>
-    DocumentRoot %TRAVIS_BUILD_DIR%/app
+    DocumentRoot %TRAVIS_BUILD_DIR%/sandbox
     ServerName %MAGENTO_HOST_NAME%
 
-    <Directory "%TRAVIS_BUILD_DIR%/app">
+    <Directory "%TRAVIS_BUILD_DIR%/sandbox">
         Options FollowSymLinks MultiViews ExecCGI
         AllowOverride All
         Require all granted
