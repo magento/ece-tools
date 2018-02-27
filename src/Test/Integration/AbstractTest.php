@@ -56,6 +56,7 @@ abstract class AbstractTest extends TestCase
      */
     protected function tearDown()
     {
+        $this->bootstrap = Bootstrap::create();
         $this->bootstrap->execute(sprintf(
             'cd %s && php ./bin/magento setup:uninstall -n',
             $this->bootstrap->getSandboxDir()

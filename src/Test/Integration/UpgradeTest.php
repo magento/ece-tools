@@ -39,6 +39,10 @@ class UpgradeTest extends AbstractTest
     public function testDefault(string $fromVersion, string $toVersion)
     {
         $this->bootstrap->run($fromVersion);
+        $this->bootstrap->execute(sprintf(
+            'cd %s && composer install -n --no-dev --no-progress',
+            $this->bootstrap->getSandboxDir()
+        ));
 
         $application = $this->bootstrap->createApplication([]);
 

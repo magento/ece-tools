@@ -6,6 +6,7 @@
          columns="max"
          bootstrap="../../bootstrap.php"
          beStrictAboutTestsThatDoNotTestAnything="false"
+         stopOnFailure="true"
 >
     <testsuites>
         <testsuite name="Unit">
