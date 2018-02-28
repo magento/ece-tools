@@ -16,29 +16,14 @@ use Symfony\Component\Console\Tester\CommandTester;
 class UpgradeTest extends AbstractTest
 {
     /**
-     * @inheritdoc
-     */
-    public static function setUpBeforeClass()
-    {
-        Bootstrap::create()->destroy();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function setUp()
-    {
-        $this->bootstrap = Bootstrap::create();
-    }
-
-    /**
      * @param string $fromVersion
      * @param string $toVersion
      * @dataProvider defaultDataProvider
      */
     public function testDefault(string $fromVersion, string $toVersion)
     {
-        $this->bootstrap->run($fromVersion);
+        $this->updateToVersion($fromVersion);
+
         $this->bootstrap->execute(sprintf(
             'cd %s && composer install -n --no-dev --no-progress',
             $this->bootstrap->getSandboxDir()
