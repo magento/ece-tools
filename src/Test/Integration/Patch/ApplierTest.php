@@ -8,19 +8,15 @@ namespace Magento\MagentoCloud\Test\Integration\Patch;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Patch\Applier;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Test\Integration\AbstractTest;
 use Magento\MagentoCloud\Test\Integration\Bootstrap;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
-class ApplierTest extends TestCase
+class ApplierTest extends AbstractTest
 {
-    /**
-     * @var Bootstrap
-     */
-    private $bootstrap;
-
     /**
      * @var Applier
      */
