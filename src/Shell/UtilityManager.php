@@ -69,7 +69,7 @@ class UtilityManager
                     $this->utilities[$name] = implode(PHP_EOL, $output);
                 } catch (\Exception $exception) {
                     throw new \RuntimeException(sprintf(
-                        'Utility %s was not found',
+                        'Required utility %s was not found',
                         $name
                     ));
                 }

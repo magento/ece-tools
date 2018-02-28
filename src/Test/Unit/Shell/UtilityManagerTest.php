@@ -51,4 +51,39 @@ class UtilityManagerTest extends TestCase
             $this->utilityManager->get(UtilityManager::UTILITY_BASH)
         );
     }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Utility some_util not found
+     */
+    public function testGetWithException()
+    {
+        $this->shellMock->expects($this->any())
+            ->method('execute')
+            ->willReturnMap([
+                ['which ' . UtilityManager::UTILITY_BASH, ['/usr/bash']],
+                ['which ' . UtilityManager::UTILITY_TIMEOUT, ['/usr/timeout']],
+            ]);
+
+        $this->assertSame(
+            '/usr/bash',
+            $this->utilityManager->get('some_util')
+        );
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Required utility timeout was not found
+     */
+    public function testGetRequiredWithException()
+    {
+        $this->shellMock->expects($this->any())
+            ->method('execute')
+            ->willThrowException(new \Exception('Shell error'));
+
+        $this->assertSame(
+            '/usr/bash',
+            $this->utilityManager->get('some_util')
+        );
+    }
 }
