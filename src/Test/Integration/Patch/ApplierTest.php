@@ -7,10 +7,8 @@ namespace Magento\MagentoCloud\Test\Integration\Patch;
 
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Patch\Applier;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Test\Integration\AbstractTest;
 use Magento\MagentoCloud\Test\Integration\Bootstrap;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
@@ -21,6 +19,11 @@ class ApplierTest extends AbstractTest
      * @var Applier
      */
     private $applier;
+
+    /**
+     * @var FileList
+     */
+    private $fileList;
 
     /**
      * Path to patch file
@@ -42,7 +45,7 @@ class ApplierTest extends AbstractTest
         $this->fileList = $application->getContainer()
             ->get(FileList::class);
 
-        $this->patchFile  = realpath(__DIR__ . '/../_files/patches/patch.diff');
+        $this->patchFile = realpath(__DIR__ . '/../_files/patches/patch.diff');
 
         // Make sure our target file is in its original state
         $this->bootstrap->execute(sprintf(
@@ -50,6 +53,11 @@ class ApplierTest extends AbstractTest
             __DIR__ . '/../_files/patches/target_file.md',
             $this->bootstrap->getSandboxDir() . '/target_file.md'
         ));
+    }
+
+    protected function tearDown()
+    {
+        // Skip cleaning.
     }
 
     public function testApplyingPatch()
