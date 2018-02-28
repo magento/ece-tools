@@ -16,16 +16,22 @@ use Symfony\Component\Console\Tester\CommandTester;
 class UpgradeTest extends AbstractTest
 {
     /**
+     * @inheritdoc
+     */
+    public static function setUpBeforeClass()
+    {
+        Bootstrap::create()->run('~2.1.12');
+    }
+
+    /**
      * @param string $fromVersion
      * @param string $toVersion
      * @dataProvider defaultDataProvider
      */
     public function testDefault(string $fromVersion, string $toVersion)
     {
-        $this->updateToVersion($fromVersion);
-
         $this->bootstrap->execute(sprintf(
-            'cd %s && composer install -n --no-dev --no-progress',
+            'rm -rf %s/vendor/*',
             $this->bootstrap->getSandboxDir()
         ));
 
@@ -41,16 +47,13 @@ class UpgradeTest extends AbstractTest
             $this->assertSame(0, $commandTester->getStatusCode());
         };
 
+        $this->updateToVersion($fromVersion);
+
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
         $executeAndAssert(Prestart::NAME);
 
         $this->assertContentPresence();
-
-        $this->bootstrap->execute(sprintf(
-            'rm -rf %s/vendor/*',
-            $this->bootstrap->getSandboxDir()
-        ));
 
         $this->updateToVersion($toVersion);
 
@@ -66,7 +69,7 @@ class UpgradeTest extends AbstractTest
     public function defaultDataProvider(): array
     {
         return [
-            ['2.1.*', '2.2.0'],
+            ['~2.1.12', '2.2.0'],
             ['2.2.0', '2.2.*'],
         ];
     }
@@ -93,10 +96,14 @@ class UpgradeTest extends AbstractTest
     {
         $sandboxDir = $this->bootstrap->getSandboxDir();
         $this->bootstrap->execute(sprintf(
+            'rm -rf %s/vendor/*',
+            $sandboxDir
+        ));
+        $this->bootstrap->execute(sprintf(
             'composer require magento/product-enterprise-edition %s --no-update -n -d %s',
             $version,
             $sandboxDir
         ));
-        $this->bootstrap->execute(sprintf('composer update -n --no-dev -d %s', $sandboxDir));
+        $this->bootstrap->execute(sprintf('composer update -n -d %s', $sandboxDir));
     }
 }
