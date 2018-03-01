@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build\BackupData;
 
-use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\BackupData\WritableDirectories;
@@ -35,9 +35,9 @@ class WritableDirectoriesTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var BuildInterface|Mock
+     * @var GlobalConfig|Mock
      */
-    private $stageConfigMock;
+    private $globalConfigMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -76,7 +76,7 @@ class WritableDirectoriesTest extends TestCase
     {
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
+        $this->globalConfigMock = $this->createMock(GlobalConfig::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->setMethods(['setHandlers'])
             ->getMockForAbstractClass();
@@ -85,7 +85,7 @@ class WritableDirectoriesTest extends TestCase
         $this->process = new WritableDirectories(
             $this->fileMock,
             $this->directoryListMock,
-            $this->stageConfigMock,
+            $this->globalConfigMock,
             $this->loggerMock,
             $this->loggerPoolMock
         );
@@ -159,7 +159,7 @@ class WritableDirectoriesTest extends TestCase
             ->method('notice')
             ->with('Directory magento_root/some/path/2 does not exist.');
 
-        $this->stageConfigMock->expects($this->once())
+        $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(false);
 
@@ -238,7 +238,7 @@ class WritableDirectoriesTest extends TestCase
                 ['Directory magento_root/some/path/2 does not exist.']
             );
 
-        $this->stageConfigMock->expects($this->once())
+        $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(true);
 

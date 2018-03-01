@@ -207,7 +207,6 @@ class Deploy implements DeployInterface
             self::VAR_SCD_THREADS => 1,
             self::VAR_GENERATED_CODE_SYMLINK => true,
             self::VAR_SCD_EXCLUDE_THEMES => '',
-            self::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false,
         ];
     }
 }

@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
  * @inheritdoc
@@ -51,6 +52,11 @@ class RecoverableDirectoryListTest extends TestCase
     private $directoryListMock;
 
     /**
+     * @var GlobalConfig|Mock
+     */
+    private $globalConfigMock;
+
+    /**
      * @var array
      */
     private $directoryListGetPathReturnMap;
@@ -65,6 +71,7 @@ class RecoverableDirectoryListTest extends TestCase
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
         $this->directoryListGetPathReturnMap = [
             [DirectoryList::DIR_ETC, true, 'app/etc'],
@@ -80,7 +87,8 @@ class RecoverableDirectoryListTest extends TestCase
             $this->flagManagerMock,
             $this->stageConfigMock,
             $this->magentoVersionMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->globalConfigMock
         );
     }
 
@@ -354,10 +362,16 @@ class RecoverableDirectoryListTest extends TestCase
      */
     public function testGetListSkipCopyingVarViewPreprocessed($skipCopyingViewPreprocessed, $expected)
     {
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, false],
+                [DeployInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR, $skipCopyingViewPreprocessed]
+            ]);
+
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturnMap([
                 [DeployInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR, $skipCopyingViewPreprocessed]
             ]);
 

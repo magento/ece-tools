@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
  * Cleans the var/view_preprocessed directory
@@ -33,26 +33,26 @@ class CleanViewPreprocessed implements ProcessInterface
     private $directoryList;
 
     /**
-     * @var DeployInterface
+     * @var GlobalConfig
      */
-    private $stageConfig;
+    private $globalConfig;
 
     /**
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
-     * @param DeployInterface $stageConfig
+     * @param GlobalConfig $globalConfig
      */
     public function __construct(
         LoggerInterface $logger,
         File $file,
         DirectoryList $directoryList,
-        DeployInterface $stageConfig
+        GlobalConfig $globalConfig
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->stageConfig = $stageConfig;
+        $this->globalConfig = $globalConfig;
     }
 
     /**
@@ -62,7 +62,7 @@ class CleanViewPreprocessed implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->stageConfig->get(DeployInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR)) {
+        if (!$this->globalConfig->get(GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR)) {
             return;
         }
 

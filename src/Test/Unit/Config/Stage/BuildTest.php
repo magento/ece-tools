@@ -377,35 +377,7 @@ class BuildTest extends TestCase
                 [],
                 [],
                 ''
-            ],
-            'default skip copying view_preprocessed dir' => [
-                StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
-                [],
-                [],
-                false,
-            ],
-            'build skip copying view_preprocessed dir' => [
-                StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_BUILD => [
-                        StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true,
-                    ],
-                ],
-                [],
-                true,
-            ],
-            'global skip copying view_preprocessed dir' => [
-                StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [
-                        StageConfigInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true,
-                    ],
-                    StageConfigInterface::STAGE_BUILD => [],
-                ],
-                [],
-                true,
-            ],
+            ]
         ];
     }
 

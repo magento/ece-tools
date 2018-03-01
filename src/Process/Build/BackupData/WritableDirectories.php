@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build\BackupData;
 
-use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -32,9 +32,9 @@ class WritableDirectories implements ProcessInterface
     private $directoryList;
 
     /**
-     * @var BuildInterface
+     * @var GlobalConfig
      */
-    private $stageConfig;
+    private $globalConfig;
 
     /**
      * @var LoggerInterface|Logger
@@ -49,20 +49,20 @@ class WritableDirectories implements ProcessInterface
     /**
      * @param File $file
      * @param DirectoryList $directoryList
-     * @param BuildInterface $stageConfig ,
+     * @param GlobalConfig $globalConfig
      * @param LoggerInterface $logger
      * @param LoggerPool $loggerPool
      */
     public function __construct(
         File $file,
         DirectoryList $directoryList,
-        BuildInterface $stageConfig,
+        GlobalConfig $globalConfig,
         LoggerInterface $logger,
         LoggerPool $loggerPool
     ) {
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->stageConfig = $stageConfig;
+        $this->globalConfig = $globalConfig;
         $this->logger = $logger;
         $this->loggerPool = $loggerPool;
     }
@@ -92,7 +92,7 @@ class WritableDirectories implements ProcessInterface
             $initDir = $rootInitDir . $dir;
 
             if (($dir == $viewPreprocessedDir)
-                && $this->stageConfig->get(BuildInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR)
+                && $this->globalConfig->get(GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR)
             ) {
                 $this->logger->notice(sprintf('Skip copying %s->%s', $originalDir, $initDir));
                 continue;

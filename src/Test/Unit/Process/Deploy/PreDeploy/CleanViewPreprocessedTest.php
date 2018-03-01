@@ -5,13 +5,13 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanViewPreprocessed;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
  * @inheritdoc
@@ -39,9 +39,9 @@ class CleanViewPreprocessedTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var GlobalConfig|Mock
      */
-    private $stageConfigMock;
+    private $globalConfigMock;
 
     /**
      * @inheritdoc
@@ -51,19 +51,19 @@ class CleanViewPreprocessedTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
         $this->process = new CleanViewPreprocessed(
             $this->loggerMock,
             $this->fileMock,
             $this->directoryListMock,
-            $this->stageConfigMock
+            $this->globalConfigMock
         );
     }
 
     public function testExecuteCopyingViewPreprocessedDir()
     {
-        $this->stageConfigMock->expects($this->once())
+        $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(false);
         $this->loggerMock->expects($this->never())
@@ -78,7 +78,7 @@ class CleanViewPreprocessedTest extends TestCase
 
     public function testExecuteSkipCopyingViewPreprocessedDir()
     {
-        $this->stageConfigMock->expects($this->once())
+        $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(true);
         $this->loggerMock->expects($this->exactly(2))
