@@ -161,6 +161,25 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(BuildProcess\DeployStaticContent::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
+                    ],
+                ]);
+            });
+        $this->container->when(BuildProcess\BackupData::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->get(BuildProcess\BackupData\StaticContent::class),
+                        $this->get(BuildProcess\BackupData\WritableDirectories::class),
+                    ],
+                ]);
+            });
         $this->container->when(Deploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -279,6 +298,7 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
+                        $this->container->make(DeployProcess\PreDeploy\CleanViewPreprocessed::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
@@ -300,15 +320,6 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->get(PrestartProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
-        $this->container->when(BuildProcess\DeployStaticContent::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
                     ],
                 ]);
             });

@@ -99,6 +99,48 @@ class GlobalSectionTest extends TestCase
                 ],
                 'expectedValue' => false,
             ],
+            [
+                'name' => GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                'config' => [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true,
+                    ],
+                    StageConfigInterface::STAGE_BUILD => [
+                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false
+                    ],
+                ],
+                'expectedValue' => true,
+            ],
+            [
+                'name' => GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                'config' => [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false,
+                    ],
+                    StageConfigInterface::STAGE_BUILD => [
+                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true
+                    ],
+                ],
+                'expectedValue' => false,
+            ],
+            [
+                'name' => GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                'config' => [
+                    StageConfigInterface::STAGE_BUILD => [
+                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true
+                    ],
+                ],
+                'expectedValue' => false,
+            ],
         ];
     }
 
