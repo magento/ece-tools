@@ -18,6 +18,24 @@ abstract class AbstractTest extends TestCase
     protected $bootstrap;
 
     /**
+     * {@inheritdoc}
+     *
+     * @throws \Exception
+     */
+    public static function setUpBeforeClass()
+    {
+        Bootstrap::create()->run();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function tearDownAfterClass()
+    {
+        Bootstrap::create()->destroy();
+    }
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
