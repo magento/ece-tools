@@ -50,11 +50,13 @@ class Log
     }
 
     /**
+     * Returns array of handlers configs with keys as handler name.
+     *
      * @return array
      */
     public function getHandlers(): array
     {
-        return array_keys($this->getConfig());
+        return $this->getConfig();
     }
 
     /**
