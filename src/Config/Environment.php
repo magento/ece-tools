@@ -81,12 +81,17 @@ class Environment
 
     /**
      * @param string $key
-     * @param string|int|null $default
      * @return array|string|int|null
      */
-    public function get(string $key, $default = null)
+    private function get(string $key): array
     {
-        return isset($_ENV[$key]) ? json_decode(base64_decode($_ENV[$key]), true) : $default;
+        $envConfig = $this->directoryList->getMagentoRoot() . '/docker/env.php';
+
+        if ($this->file->isExists($envConfig)) {
+            return (require $envConfig)[$key];
+        }
+
+        return isset($_ENV[$key]) ? json_decode(base64_decode($_ENV[$key]), true) : [];
     }
 
     /**
@@ -100,7 +105,12 @@ class Environment
             return $this->data['routes'];
         }
 
-        return $this->data['routes'] = $this->get('MAGENTO_CLOUD_ROUTES', []);
+        return $this->data['routes'] = $this->get('MAGENTO_CLOUD_ROUTES');
+    }
+
+    public function setRoutes(array $routes)
+    {
+        $this->data['routes'] = $routes;
     }
 
     /**
@@ -114,7 +124,12 @@ class Environment
             return $this->data['relationships'];
         }
 
-        return $this->data['relationships'] = $this->get('MAGENTO_CLOUD_RELATIONSHIPS', []);
+        return $this->data['relationships'] = $this->get('MAGENTO_CLOUD_RELATIONSHIPS');
+    }
+
+    public function setRelationships(array $rel)
+    {
+        $this->data['relationships'] = $rel;
     }
 
     /**
@@ -141,7 +156,12 @@ class Environment
             return $this->data['variables'];
         }
 
-        return $this->data['variables'] = $this->get('MAGENTO_CLOUD_VARIABLES', []);
+        return $this->data['variables'] = $this->get('MAGENTO_CLOUD_VARIABLES');
+    }
+
+    public function setVariables(array $var)
+    {
+        $this->data['variables'] = $var;
     }
 
     /**

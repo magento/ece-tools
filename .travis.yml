@@ -3,10 +3,8 @@ dist: trusty
 addons:
   hosts:
       - magento2.travis
-      - magento2.docker
 services:
   - mysql
-  - docker
 language: php
 php:
   - 7.0
@@ -20,18 +18,14 @@ env:
     - TEST_SUITE=static
     - TEST_SUITE=unit
     - TEST_SUITE=integration
-    - TEST_SUITE=integration-docker
 matrix:
   exclude:
     - php: 7.1
       env: TEST_SUITE=integration
-    - php: 7.1
-      env: TEST_SUITE=integration-docker
 cache:
   apt: true
   directories:
     - $HOME/.composer/cache
 before_install: ./tests/travis/before_install.sh
 install: composer install --no-interaction
-before_script: ./tests/travis/before_script.sh
 script: ./tests/travis/script.sh
