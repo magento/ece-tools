@@ -36,17 +36,12 @@ class File
      *
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
     public function isExists($path): bool
     {
         clearstatcache();
-        $result = @file_exists($path);
-        if ($result === null) {
-            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
-        }
 
-        return $result;
+        return file_exists($path);
     }
 
     /**
@@ -266,6 +261,7 @@ class File
                 return false;
             }
         }
+
         return true;
     }
 

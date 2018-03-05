@@ -77,20 +77,6 @@ class EnvironmentTest extends TestCase
     }
 
     /**
-     * @param array $env
-     * @param string $key
-     * @param mixed $default
-     * @param mixed $expected
-     * @dataProvider getDataProvider
-     */
-    public function testGet(array $env, string $key, $default, $expected)
-    {
-        $_ENV = $env;
-
-        $this->assertSame($expected, $this->environment->get($key, $default));
-    }
-
-    /**
      * @return array
      */
     public function getDataProvider(): array
