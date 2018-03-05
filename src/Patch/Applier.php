@@ -73,6 +73,8 @@ class Applier
     /**
      * Applies patch, using 'git apply' command.
      *
+     * If the patch fails to apply, checks if it has already been applied which is considered ok.
+     *
      * @param string $path Path to patch
      * @param string|null $name Name of patch
      * @param string|null $packageName Name of package to be patched
@@ -80,7 +82,7 @@ class Applier
      * @return void
      * @throws \RuntimeException
      */
-    public function apply(string $path, $name, $packageName, $constraint)
+    public function apply(string $path, string $name = null, string $packageName = null, $constraint = null)
     {
         /**
          * Support for relative paths.
@@ -102,7 +104,18 @@ class Applier
             $constraint
         ));
 
-        $this->shell->execute('git apply ' . $path);
+        try {
+            $this->shell->execute('git apply ' . $path);
+        } catch (\RuntimeException $applyException) {
+            try {
+                $this->shell->execute('git apply --check --reverse ' . $path);
+            } catch (\RuntimeException $reverseException) {
+                throw $applyException;
+            }
+
+            $this->logger->notice("Patch {$name} was already applied.");
+        }
+
         $this->logger->info('Done.');
     }
 

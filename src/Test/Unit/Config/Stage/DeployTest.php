@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 

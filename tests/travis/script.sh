@@ -16,6 +16,6 @@ case $TEST_SUITE in
         phpunit --configuration tests/unit/phpunit.xml.dist
         ;;
     integration)
-        phpunit --verbose --configuration tests/integration/phpunit.xml.dist;
+        phpunit --verbose --configuration tests/integration/phpunit.xml.dist
         ;;
 esac
