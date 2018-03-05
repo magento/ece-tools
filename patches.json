@@ -56,6 +56,11 @@
       "100.1.*": "2.1/scd-on-demand-in-production.patch"
     }
   },
+  "magento/module-cron": {
+    "Fixed issues with CRON": {
+      "100.2.*": "2.2/fix-cron.patch"
+    }
+  },
   "magento/module-customer-import-export": {
     "Fix out of memory during import of customers and addresses": {
       ">=100.2.0": "2.2/fix-oom-during-import-customers-and-addresses.patch"
