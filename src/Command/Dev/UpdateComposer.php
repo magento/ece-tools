@@ -75,28 +75,6 @@ class UpdateComposer extends Command
         $this->setName(static::NAME)
             ->setDescription('Updates composer for deployment from git.');
 
-        foreach (ComposerGenerator::POSSIBLE_REPOS as $repoName) {
-            $this->addOption(
-                $repoName . '-branch',
-                null,
-                $repoName === 'ce' ? InputOption::VALUE_REQUIRED : InputOption::VALUE_OPTIONAL,
-                sprintf('Name of %s branch, 2.2.3 for example', $repoName)
-            );
-            $this->addOption(
-                $repoName . '-repo',
-                null,
-                InputOption::VALUE_OPTIONAL,
-                sprintf('Url of %s git repository', $repoName)
-            );
-        }
-
-        $this->addOption(
-            'github-token',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'Github token for cloning git branches.'
-        );
-
         parent::configure();
     }
 
@@ -113,7 +91,10 @@ class UpdateComposer extends Command
             json_encode($this->composerGenerator->generate($gitOptions), JSON_PRETTY_PRINT)
         );
 
-        echo "Run composer update\n";
+        $output->writeln('Run composer update');
         $this->shell->execute('composer update');
+
+        $output->writeln('Composer update finished.');
+        $output->writeln('Please commit and push changed files.');
     }
 }
