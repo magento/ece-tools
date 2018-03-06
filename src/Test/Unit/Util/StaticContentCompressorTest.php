@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
+use Magento\MagentoCloud\Shell\UtilityManager;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -16,6 +17,11 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
  */
 class StaticContentCompressorTest extends TestCase
 {
+    /**
+     * @var StaticContentCompressor
+     */
+    private $staticContentCompressor;
+
     /**
      * @var LoggerInterface|Mock
      */
@@ -27,59 +33,58 @@ class StaticContentCompressorTest extends TestCase
     private $shellMock;
 
     /**
-     * @var StaticContentCompressor
+     * @var UtilityManager|Mock
      */
-    private $staticContentCompressor;
+    private $utilityManagerMock;
 
     /**
      * Setup the test environment.
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->utilityManagerMock = $this->createMock(UtilityManager::class);
 
         $this->staticContentCompressor = new StaticContentCompressor(
             $this->loggerMock,
-            $this->shellMock
+            $this->shellMock,
+            $this->utilityManagerMock
         );
     }
 
     /**
-     * Test the method that compresses the files.
+     * @param int $compressionLevel
+     * @dataProvider compressionDataProvider
      */
-    public function testCompression()
+    public function testCompression(int $compressionLevel)
     {
-        $minLevel = 1;
-        $maxLevel = 9;
-
-        // Create the list of parameters to be expected on each invocation.
-        $parameters = function () use ($minLevel, $maxLevel) {
-            $runningArray = [];
-            for ($i = $minLevel; $i <= $maxLevel; $i++) {
-                $runningArray[] = [
-                    $this->logicalAnd(
-                        $this->stringContains('gzip -q --keep'),
-                        $this->stringContains('-print0 | xargs -0'),
-                        $this->stringContains($this->staticContentCompressor::TARGET_DIR),
-                        $this->stringContains("-$i")
-                    ),
-                ];
-            }
-
-            return $runningArray;
-        };
+        $expectedCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c "find ';
 
         $this->shellMock
-            ->expects($this->exactly(1 + $maxLevel - $minLevel))
+            ->expects($this->once())
             ->method('execute')
-            ->withConsecutive(...$parameters());
+            ->with($this->logicalAnd(
+                $this->stringContains($expectedCommand),
+                $this->stringContains(" -{$compressionLevel}")
+            ));
+        $this->utilityManagerMock->method('get')
+            ->willReturnMap([
+                [UtilityManager::UTILITY_TIMEOUT, '/usr/bin/timeout'],
+                [UtilityManager::UTILITY_BASH, '/bin/bash'],
+            ]);
 
-        for ($i = $minLevel; $i <= $maxLevel; $i++) {
-            $this->staticContentCompressor->process($i);
-        }
+        $this->staticContentCompressor->process($compressionLevel);
+    }
+
+    /**
+     * @return array
+     */
+    public function compressionDataProvider(): array
+    {
+        return [
+            [4],
+        ];
     }
 
     public function testCompressionDisabled()
@@ -89,5 +94,19 @@ class StaticContentCompressorTest extends TestCase
             ->with('Static content compression was disabled.');
 
         $this->staticContentCompressor->process(0);
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Utility was not found
+     */
+    public function testUtilityNotFound()
+    {
+        $this->utilityManagerMock->expects($this->once())
+            ->method('get')
+            ->with(UtilityManager::UTILITY_TIMEOUT)
+            ->willThrowException(new \RuntimeException('Utility was not found.'));
+
+        $this->staticContentCompressor->process(1);
     }
 }

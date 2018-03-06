@@ -83,6 +83,7 @@ class GlobalSection implements StageConfigInterface
     {
         return [
             self::VAR_SCD_ON_DEMAND => false,
+            self::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false,
         ];
     }
 }
