@@ -58,7 +58,9 @@
   },
   "magento/module-cron": {
     "Fixed issues with CRON": {
-      "100.2.*": "2.2/fix-cron.patch"
+      "100.2.*": "2.2/fix-cron.patch",
+      "100.1.2": "2.1/fix-cron-2.1.4.patch",
+      ">100.1.2": "2.1/fix-cron-2.1.5-plus.patch"
     }
   },
   "magento/module-customer-import-export": {
