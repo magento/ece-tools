@@ -195,6 +195,7 @@ class Container implements ContainerInterface
                         ]),
                         $this->container->make(DeployProcess\CreateConfigFile::class),
                         $this->container->make(DeployProcess\SetMode::class),
+                        $this->container->make(DeployProcess\SetCryptKey::class),
                         $this->container->make(DeployProcess\InstallUpdate::class),
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
