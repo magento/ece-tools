@@ -42,8 +42,8 @@ class ReadConnection implements ConnectionInterface
      */
     private function getConnectionData(): array
     {
-        if (is_array($this->environment->getRelationship('database-slave')[0])) {
-            return $this->connectionData = $this->environment->getRelationship('database-slave')[0];
+        if ($this->environment->getRelationship('database-slave')) {
+            return $this->connectionData = $this->environment->getRelationship('database-slave')[0] ?? [];
         }
         return $this->connectionData = $this->environment->getRelationship('database')[0] ?? [];
     }
