@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
+use Magento\MagentoCloud\Command\Dev\UpdateComposer;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
@@ -67,6 +68,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(BackupRestore::class),
                 $this->container->get(BackupList::class),
                 $this->container->get(ApplyPatches::class),
+                $this->container->get(UpdateComposer::class),
             ]
         );
     }

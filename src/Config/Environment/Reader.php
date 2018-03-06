@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Config\Environment;
 
+use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
@@ -18,9 +18,9 @@ use Symfony\Component\Yaml\Exception\ParseException;
 class Reader implements ReaderInterface
 {
     /**
-     * @var FileList
+     * @var ConfigFileList
      */
-    private $fileList;
+    private $configFileList;
 
     /**
      * @var File
@@ -28,12 +28,12 @@ class Reader implements ReaderInterface
     private $file;
 
     /**
-     * @param FileList $fileList
+     * @param ConfigFileList $configFileList
      * @param File $file
      */
-    public function __construct(FileList $fileList, File $file)
+    public function __construct(ConfigFileList $configFileList, File $file)
     {
-        $this->fileList = $fileList;
+        $this->configFileList = $configFileList;
         $this->file = $file;
     }
 
@@ -44,7 +44,7 @@ class Reader implements ReaderInterface
      */
     public function read(): array
     {
-        $path = $this->fileList->getEnvConfig();
+        $path = $this->configFileList->getEnvConfig();
 
         return !$this->file->isExists($path) ? [] : (array)Yaml::parse($this->file->fileGetContents($path));
     }

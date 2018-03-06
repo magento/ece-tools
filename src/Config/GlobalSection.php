@@ -84,6 +84,9 @@ class GlobalSection implements StageConfigInterface
         return [
             self::VAR_SCD_ON_DEMAND => false,
             self::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false,
+            self::VAR_DEPLOY_FROM_GIT => false,
+            self::VAR_DEPLOY_FROM_GIT_OPTIONS => [],
+            self::VAR_MAGENTO_VERSION => '2.2',
         ];
     }
 }

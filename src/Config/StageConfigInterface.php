@@ -35,6 +35,13 @@ interface StageConfigInterface
     const VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR = 'SKIP_COPYING_VIEW_PREPROCESSED_DIR';
 
     /**
+     * Settings for deployment from git.
+     */
+    const VAR_DEPLOY_FROM_GIT = 'DEPLOY_FROM_GIT';
+    const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
+    const VAR_MAGENTO_VERSION = 'MAGENTO_VERSION';
+
+    /**
      * Retrieves environment configuration per stage.
      *
      * @param string $name The config name
