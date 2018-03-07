@@ -153,7 +153,7 @@ class Environment
             return $this->data['application'];
         }
 
-        return $this->data['application'] = $this->get('MAGENTO_CLOUD_APPLICATION');
+        return $this->data['application'] = $this->get('MAGENTO_CLOUD_APPLICATION', []);
     }
 
     /**
