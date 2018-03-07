@@ -112,7 +112,7 @@ class ConnectionTest extends TestCase
             ],
             [
                 [['host' => 's.host']],
-                [$fullMasterData, ],
+                [$fullMasterData],
                 's.host',
                 '',
                 '',
@@ -121,7 +121,7 @@ class ConnectionTest extends TestCase
             ],
             [
                 [['other slave data']],
-                [$fullMasterData, ],
+                [$fullMasterData],
                 '',
                 '',
                 '',

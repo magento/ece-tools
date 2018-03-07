@@ -24,7 +24,6 @@ interface DeployInterface extends StageConfigInterface
 
     /**
      * The variable responsible to set mysql slave connection when it has true value
-     *
      */
     const VAR_MYSQL_READ_DISTRIBUTION = 'MYSQL_READ_DISTRIBUTION';
 

@@ -99,7 +99,7 @@ class DbConnection implements ProcessInterface
     }
 
     /**
-     * Returns mysql read connection if MYSQL_READ_DISTRIBUTION is enabled otherwise return empty array.
+     * Returns mysql read connection if MYSQL_READ_DISTRIBUTION is enabled otherwise returns empty array.
      * Connection data is nested to the array with the path which this data should have in env.php
      *
      * @return array

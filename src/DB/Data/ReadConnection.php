@@ -35,8 +35,8 @@ class ReadConnection implements ConnectionInterface
     }
 
     /**
-     * Retrieve read only connection data from 'database-slave' relationships if exists,
-     * otherwise retrieve write connection (take place for integration environment)
+     * Retrieves read only connection data from 'database-slave' relationships if exists,
+     * otherwise retrieves write connection (in case of integration environment)
      *
      * @return array
      */
