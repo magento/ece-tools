@@ -95,7 +95,6 @@ class ComposerGenerator
                 ]
             ],
             "require" => [
-                "magento/ece-tools" => "2002.0.*",
             ],
             "config" => [
                 "use-include-path" => true
@@ -126,13 +125,20 @@ class ComposerGenerator
             ]
         ];
 
+        $rootComposer = json_decode(
+            $this->file->fileGetContents($this->directoryList->getMagentoRoot() . '/composer.json'),
+            true
+        );
+        $composer['require'] += $rootComposer['require'];
+        $composer['repositories'] += $rootComposer['repositories'];
+
         foreach ($repoOptions as $repoName => $gitOption) {
             $repoComposer = $this->file->fileGetContents(
                 $this->directoryList->getMagentoRoot() . '/' . $repoName . '/composer.json'
             );
-            $composer["require"] = array_merge(
-                $composer["require"],
-                json_decode($repoComposer, true)["require"]
+            $composer['require'] = array_merge(
+                $composer['require'],
+                json_decode($repoComposer, true)['require']
             );
         }
 
@@ -146,7 +152,7 @@ class ComposerGenerator
                 "url" => '.' . str_replace($this->directoryList->getMagentoRoot(), '', $dir)
             ];
             $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
-            $composer["require"][$dirComposer['name']] = $dirComposer['version'];
+            $composer['equire'][$dirComposer['name']] = $dirComposer['version'];
         };
 
         foreach ($repoOptions as $repoName => $gitOption) {
