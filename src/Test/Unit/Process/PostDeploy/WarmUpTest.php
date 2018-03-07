@@ -6,12 +6,14 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Promise\PromiseInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
+use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\RequestInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -35,9 +37,14 @@ class WarmUpTest extends TestCase
     private $clientMock;
 
     /**
-     * @var ResponseInterface|Mock
+     * @var RequestFactory|Mock
      */
-    private $responseMock;
+    private $requestFactoryMock;
+
+    /**
+     * @var RequestInterface|Mock
+     */
+    private $requestMock;
 
     /**
      * @var UrlManager|Mock
@@ -50,6 +57,11 @@ class WarmUpTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var PromiseInterface|Mock
+     */
+    private $promiseMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -58,14 +70,20 @@ class WarmUpTest extends TestCase
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->clientMock = $this->getMockForAbstractClass(ClientInterface::class);
-        $this->responseMock = $this->getMockForAbstractClass(ResponseInterface::class);
+        $this->requestFactoryMock = $this->createMock(RequestFactory::class);
+        $this->requestMock = $this->getMockForAbstractClass(RequestInterface::class);
+        $this->promiseMock = $this->getMockForAbstractClass(PromiseInterface::class);
 
         $this->clientFactoryMock->expects($this->any())
             ->method('create')
             ->willReturn($this->clientMock);
+        $this->requestFactoryMock->expects($this->any())
+            ->method('create')
+            ->willReturn($this->requestMock);
 
         $this->process = new WarmUp(
             $this->clientFactoryMock,
+            $this->requestFactoryMock,
             $this->urlManagerMock,
             $this->loggerMock
         );
@@ -76,23 +94,10 @@ class WarmUpTest extends TestCase
         $this->urlManagerMock->expects($this->any())
             ->method('getDefaultSecureUrl')
             ->willReturn('site_url/');
-        $this->responseMock->expects($this->any())
-            ->method('getStatusCode')
-            ->willReturn(200);
         $this->clientMock->expects($this->exactly(2))
-            ->method('request')
-            ->withConsecutive(
-                ['GET', 'site_url/index.php'],
-                ['GET', 'site_url/index.php/customer/account/create']
-            )
-            ->willReturn($this->responseMock);
-
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Warming up page: site_url/index.php', ['code' => 200]],
-                ['Warming up page: site_url/index.php/customer/account/create', ['code' => 200]]
-            );
+            ->method('sendAsync')
+            ->with($this->requestMock)
+            ->willReturn($this->promiseMock);
 
         $this->process->execute();
     }

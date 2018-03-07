@@ -6,8 +6,10 @@
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use Magento\MagentoCloud\Http\ClientFactory;
+use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\UrlManager;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -21,6 +23,11 @@ class WarmUp implements ProcessInterface
     private $clientFactory;
 
     /**
+     * @var RequestFactory
+     */
+    private $requestFactory;
+
+    /**
      * @var UrlManager
      */
     private $urlManager;
@@ -32,12 +39,18 @@ class WarmUp implements ProcessInterface
 
     /**
      * @param ClientFactory $clientFactory
+     * @param RequestFactory $requestFactory
      * @param UrlManager $urlManager
      * @param LoggerInterface $logger
      */
-    public function __construct(ClientFactory $clientFactory, UrlManager $urlManager, LoggerInterface $logger)
-    {
+    public function __construct(
+        ClientFactory $clientFactory,
+        RequestFactory $requestFactory,
+        UrlManager $urlManager,
+        LoggerInterface $logger
+    ) {
         $this->clientFactory = $clientFactory;
+        $this->requestFactory = $requestFactory;
         $this->urlManager = $urlManager;
         $this->logger = $logger;
     }
@@ -57,15 +70,13 @@ class WarmUp implements ProcessInterface
         array_walk($pages, function ($page) {
             $url = $this->urlManager->getDefaultSecureUrl() . $page;
             $client = $this->clientFactory->create();
+            $request = $this->requestFactory->create('GET', $url);
 
-            $response = $client->request(
-                'GET',
-                $url
-            );
-
-            $this->logger->info('Warming up page: ' . $url, [
-                'code' => $response->getStatusCode(),
-            ]);
+            $client->sendAsync($request)->then(function (ResponseInterface $response) use ($url) {
+                $this->logger->info('Warming up page: ' . $url, [
+                    'code' => $response->getStatusCode(),
+                ]);
+            });
         });
     }
 }
