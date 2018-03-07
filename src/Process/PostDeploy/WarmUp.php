@@ -51,10 +51,11 @@ class WarmUp implements ProcessInterface
     {
         $pages = [
             'index.php',
+            'index.php/customer/account/create',
         ];
 
         array_walk($pages, function ($page) {
-            $url = $this->urlManager->getDefaultSecureUrl() . '/' . $page;
+            $url = $this->urlManager->getDefaultSecureUrl() . $page;
             $client = $this->clientFactory->create();
 
             $response = $client->request(
@@ -64,7 +65,6 @@ class WarmUp implements ProcessInterface
 
             $this->logger->info('Warming up page: ' . $url, [
                 'code' => $response->getStatusCode(),
-                'headers' => $response->getHeaders(),
             ]);
         });
     }
