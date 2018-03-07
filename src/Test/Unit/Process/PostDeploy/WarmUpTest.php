@@ -98,6 +98,9 @@ class WarmUpTest extends TestCase
             ->method('sendAsync')
             ->with($this->requestMock)
             ->willReturn($this->promiseMock);
+        $this->promiseMock->expects($this->exactly(2))
+            ->method('then')
+            ->willReturn($this->promiseMock);
 
         $this->process->execute();
     }

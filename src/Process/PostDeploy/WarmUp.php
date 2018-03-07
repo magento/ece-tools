@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
+use GuzzleHttp\Exception\RequestException;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -67,16 +68,19 @@ class WarmUp implements ProcessInterface
             'index.php/customer/account/create',
         ];
 
-        array_walk($pages, function ($page) {
+        array_walk($pages, function ($page) use (&$promises) {
             $url = $this->urlManager->getDefaultSecureUrl() . $page;
             $client = $this->clientFactory->create();
             $request = $this->requestFactory->create('GET', $url);
 
-            $client->sendAsync($request)->then(function (ResponseInterface $response) use ($url) {
-                $this->logger->info('Warming up page: ' . $url, [
-                    'code' => $response->getStatusCode(),
+            $client->sendAsync($request)->then(function () use ($url) {
+                $this->logger->info('Warmed up page: ' . $url);
+            }, function (RequestException $exception) use ($url) {
+                $this->logger->error('Warming up failed' . $url, [
+                    'error' => $exception->getResponse()->getReasonPhrase(),
+                    'code' => $exception->getResponse()->getStatusCode(),
                 ]);
-            });
+            })->wait(true);
         });
     }
 }
