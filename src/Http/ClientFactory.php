@@ -37,6 +37,6 @@ class ClientFactory
      */
     public function create(array $config = []): ClientInterface
     {
-        return $this->container->make(Client::class, ['config' => $config]);
+        return $this->container->create(Client::class, ['config' => $config]);
     }
 }
