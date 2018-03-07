@@ -80,7 +80,7 @@ class WarmUp implements ProcessInterface
                     'error' => $exception->getResponse()->getReasonPhrase(),
                     'code' => $exception->getResponse()->getStatusCode(),
                 ]);
-            })->wait(true);
+            })->wait();
         });
     }
 }
