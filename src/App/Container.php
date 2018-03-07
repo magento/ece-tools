@@ -341,8 +341,8 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->make(ProcessComposite::class, [
                     'processes' => [
-//                        $this->container->make(PostDeployProcess\Backup::class),
-//                        $this->container->make(PostDeployProcess\CleanCache::class),
+                        $this->container->make(PostDeployProcess\Backup::class),
+                        $this->container->make(PostDeployProcess\CleanCache::class),
                         $this->container->make(PostDeployProcess\WarmUp::class),
                     ],
                 ]);
