@@ -343,6 +343,7 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
+                        $this->container->make(PostDeployProcess\WarmUp::class),
                     ],
                 ]);
             });
