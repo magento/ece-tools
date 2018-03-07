@@ -9,6 +9,9 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
+/**
+ * Generates composer.json data for installation from git.
+ */
 class ComposerGenerator
 {
     const POSSIBLE_REPOS = ['ce', 'ee', 'b2b'];
@@ -27,6 +30,11 @@ class ComposerGenerator
      */
     private $file;
 
+    /**
+     * @param DirectoryList $directoryList
+     * @param MagentoVersion $magentoVersion
+     * @param File $file
+     */
     public function __construct(
         DirectoryList $directoryList,
         MagentoVersion $magentoVersion,
@@ -38,6 +46,8 @@ class ComposerGenerator
     }
 
     /**
+     * Generates composer.json data for installation from git.
+     *
      * @param array $repoOptions
      * @return array
      */
