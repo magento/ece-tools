@@ -42,10 +42,9 @@ class ReadConnection implements ConnectionInterface
      */
     private function getConnectionData(): array
     {
-        if ($this->environment->getRelationship('database-slave')) {
-            return $this->connectionData = $this->environment->getRelationship('database-slave')[0] ?? [];
-        }
-        return $this->connectionData = $this->environment->getRelationship('database')[0] ?? [];
+        return $this->environment->getRelationship('database-slave')[0]
+            ?? $this->environment->getRelationship('database')[0]
+            ?? [];
     }
 
     /**
@@ -53,7 +52,7 @@ class ReadConnection implements ConnectionInterface
      */
     public function getHost()
     {
-        return $this->connectionData['host'] ?? '127.0.0.1';
+        return $this->connectionData['host'] ?? '';
     }
 
     /**

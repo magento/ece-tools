@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
-use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -214,6 +213,20 @@ class DeployTest extends TestCase
                     Deploy::VAR_SCD_EXCLUDE_THEMES => 'some theme 2',
                 ],
                 'some theme 2',
+            ],
+            'default slave connection' => [
+                Deploy::VAR_MYSQL_READ_DISTRIBUTION,
+                [],
+                [],
+                false,
+            ],
+            'use slave connection' => [
+                Deploy::VAR_MYSQL_READ_DISTRIBUTION,
+                [],
+                [
+                    Deploy::VAR_MYSQL_READ_DISTRIBUTION => true
+                ],
+                true,
             ],
         ];
     }

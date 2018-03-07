@@ -72,17 +72,26 @@ class DbConnection implements ProcessInterface
     {
         $this->logger->info('Updating env.php DB connection configuration.');
 
-        $config['db']['connection']['default']['username'] = $this->environment->getDbUser();
-        $config['db']['connection']['default']['host'] = $this->environment->getDbHost();
-        $config['db']['connection']['default']['dbname'] = $this->environment->getDbName();
-        $config['db']['connection']['default']['password'] = $this->environment->getDbPassword();
+        $mainConnectionData = [
+            'username' => $this->environment->getDbUser(),
+            'host' => $this->environment->getDbHost(),
+            'dbname' => $this->environment->getDbName(),
+            'password' => $this->environment->getDbPassword(),
+        ];
 
-        $config['db']['connection']['indexer']['username'] = $this->environment->getDbUser();
-        $config['db']['connection']['indexer']['host'] = $this->environment->getDbHost();
-        $config['db']['connection']['indexer']['dbname'] = $this->environment->getDbName();
-        $config['db']['connection']['indexer']['password'] = $this->environment->getDbPassword();
-
-        $config['resource']['default_setup']['connection'] = 'default';
+        $config = [
+            'db' => [
+                'connection' => [
+                    'default' => $mainConnectionData,
+                    'indexer' => $mainConnectionData,
+                ],
+            ],
+            'resource' => [
+                'default_setup' => [
+                    'connection' => 'default',
+                ],
+            ],
+        ];
 
         $config = array_replace_recursive($this->getSlaveConnection(), $config);
 
@@ -95,11 +104,12 @@ class DbConnection implements ProcessInterface
      *
      * @return array
      */
-    private function getSlaveConnection()
+    private function getSlaveConnection(): array
     {
         $config = [];
-        if ($this->deployConfig->get(DeployInterface::VAR_MYSQL_READ_DISTRIBUTION)) {
-
+        if ($this->deployConfig->get(DeployInterface::VAR_MYSQL_READ_DISTRIBUTION)
+            && $this->readConnection->getHost()
+        ) {
             $this->logger->info('Set DB slave connection.');
 
             $slaveConnection = [

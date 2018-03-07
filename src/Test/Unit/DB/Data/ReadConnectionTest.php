@@ -21,11 +21,6 @@ class ConnectionTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var ReadConnection
-     */
-    private $model;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -33,93 +28,133 @@ class ConnectionTest extends TestCase
         $this->environmentMock = $this->getMockBuilder(Environment::class)
             ->disableOriginalConstructor()
             ->getMock();
-
-        $this->model = new ReadConnection($this->environmentMock);
     }
 
     /**
-     * @param string $environmentHost
-     * @param string $expectedResult
+     * @param $slave array
+     * @param $master array
+     * @param $host string
+     * @param $port string
+     * @param $dbName string
+     * @param $user string
+     * @param $password string
      *
-     * @dataProvider getHostDataProvider
+     * @dataProvider connectionDataProvider
      */
-    public function testGetHost($environmentHost, $expectedResult)
+    public function testConnectionData($slave, $master, $host, $port, $dbName, $user, $password)
     {
         $this->environmentMock->expects($this->any())
-            ->method('getDbHost')
-            ->willReturn($environmentHost);
+            ->method('getRelationship')
+            ->willReturnMap(
+                [
+                    ['database-slave', $slave],
+                    ['database', $master],
+                ]
+            );
 
-        $this->assertEquals($expectedResult, $this->model->getHost());
+        $model = new ReadConnection($this->environmentMock);
+
+        $this->assertEquals($host, $model->getHost());
+        $this->assertEquals($port, $model->getPort());
+        $this->assertEquals($dbName, $model->getDbName());
+        $this->assertEquals($user, $model->getUser());
+        $this->assertEquals($password, $model->getPassword());
     }
 
     /**
-     * @param string $environmentHost
-     * @param string $expectedResult
-     *
-     * @dataProvider getPortDataProvider
-     */
-    public function testGetPort($environmentHost, $expectedResult)
-    {
-        $this->environmentMock->expects($this->once())
-            ->method('getDbHost')
-            ->willReturn($environmentHost);
-
-        $this->assertEquals($expectedResult, $this->model->getPort());
-    }
-
-    public function testGetDbName()
-    {
-        $dbName = 'main';
-        $this->environmentMock->expects($this->once())
-            ->method('getDbName')
-            ->willReturn($dbName);
-
-        $this->assertEquals($dbName, $this->model->getDbName());
-    }
-
-    public function testGetUser()
-    {
-        $user = 'user_name';
-        $this->environmentMock->expects($this->once())
-            ->method('getDbUser')
-            ->willReturn($user);
-
-        $this->assertEquals($user, $this->model->getUser());
-    }
-
-    public function testGetPassword()
-    {
-        $pswd = '123123q#';
-        $this->environmentMock->expects($this->once())
-            ->method('getDbPassword')
-            ->willReturn($pswd);
-
-        $this->assertEquals($pswd, $this->model->getPassword());
-    }
-
-    /**
-     * Data provider for testGetHost
+     * Return next data:
+     * 1 - data for 'database-slave' connection
+     * 2 - data for 'database' connection
+     * 3 - result for host
+     * 4 - result for port
+     * 5 - result for DB name
+     * 6 - result for user
+     * 7 - result for password
      *
      * @return array
      */
-    public function getHostDataProvider()
+    public function connectionDataProvider()
     {
-        return [
-            ['database.internal', 'database.internal'],
-            ['production_db_name', '127.0.0.1']
+        $fullMasterData = [
+            'host' => 'm.host',
+            'port' => 'm.port',
+            'path' => 'm.path',
+            'username' => 'm.user',
+            'password' => 'm.pswd',
         ];
-    }
+        $fullSlaveData = [
+            'host' => 's.host',
+            'port' => 's.port',
+            'path' => 's.path',
+            'username' => 's.user',
+            'password' => 's.pswd',
+        ];
 
-    /**
-     * Data provider for testGetPort
-     *
-     * @return array
-     */
-    public function getPortDataProvider()
-    {
         return [
-            ['database.internal', '3306'],
-            ['production_db_name', '3304']
+            [[], [], '', '', '', '', '',],
+            [
+                [['other slave data']],
+                [],
+                '',
+                '',
+                '',
+                '',
+                '',
+            ],
+            [
+                [],
+                [['other master data']],
+                '',
+                '',
+                '',
+                '',
+                '',
+            ],
+            [
+                [['host' => 's.host']],
+                [$fullMasterData, ],
+                's.host',
+                '',
+                '',
+                '',
+                '',
+            ],
+            [
+                [['other slave data']],
+                [$fullMasterData, ],
+                '',
+                '',
+                '',
+                '',
+                '',
+            ],
+            [
+                [$fullSlaveData],
+                [$fullMasterData],
+                's.host',
+                's.port',
+                's.path',
+                's.user',
+                's.pswd',
+            ],
+            [
+                [[]],
+                [$fullMasterData],
+                '',
+                '',
+                '',
+                '',
+                '',
+            ],
+            [
+                [],
+                [$fullMasterData],
+                'm.host',
+                'm.port',
+                'm.path',
+                'm.user',
+                'm.pswd',
+            ],
         ];
     }
 }
