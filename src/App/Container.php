@@ -209,7 +209,7 @@ class Container implements ContainerInterface
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_WARNING => [
-                                    $this->container->make(ConfigValidator\Deploy\CleanCache::class),
+                                    $this->container->make(ConfigValidator\Deploy\PostDeploy::class),
                                 ],
                             ],
                         ]),

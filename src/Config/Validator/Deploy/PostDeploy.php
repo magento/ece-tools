@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 /**
  * @inheritdoc
  */
-class CleanCache implements ValidatorInterface
+class PostDeploy implements ValidatorInterface
 {
     /**
      * @var Validator\ResultFactory
