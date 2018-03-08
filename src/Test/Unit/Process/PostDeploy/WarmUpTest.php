@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Promise\PromiseInterface;
+use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp;
@@ -25,6 +26,11 @@ class WarmUpTest extends TestCase
      * @var WarmUp
      */
     private $process;
+
+    /**
+     * @var PostDeployInterface|Mock
+     */
+    private $postDeployMock;
 
     /**
      * @var ClientFactory|Mock
@@ -66,6 +72,7 @@ class WarmUpTest extends TestCase
      */
     protected function setUp()
     {
+        $this->postDeployMock = $this->getMockForAbstractClass(PostDeployInterface::class);
         $this->clientFactoryMock = $this->createMock(ClientFactory::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
@@ -82,6 +89,7 @@ class WarmUpTest extends TestCase
             ->willReturn($this->requestMock);
 
         $this->process = new WarmUp(
+            $this->postDeployMock,
             $this->clientFactoryMock,
             $this->requestFactoryMock,
             $this->urlManagerMock,
@@ -91,6 +99,13 @@ class WarmUpTest extends TestCase
 
     public function testExecute()
     {
+        $this->postDeployMock->expects($this->once())
+            ->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_PAGES)
+            ->willReturn([
+                'index.php',
+                'index.php/customer/account/create',
+            ]);
         $this->urlManagerMock->expects($this->any())
             ->method('getDefaultSecureUrl')
             ->willReturn('site_url/');

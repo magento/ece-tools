@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
+use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -17,6 +18,11 @@ use Psr\Log\LoggerInterface;
  */
 class WarmUp implements ProcessInterface
 {
+    /**
+     * @var PostDeployInterface
+     */
+    private $postDeploy;
+
     /**
      * @var ClientFactory
      */
@@ -38,17 +44,20 @@ class WarmUp implements ProcessInterface
     private $logger;
 
     /**
+     * @param PostDeployInterface $postDeploy
      * @param ClientFactory $clientFactory
      * @param RequestFactory $requestFactory
      * @param UrlManager $urlManager
      * @param LoggerInterface $logger
      */
     public function __construct(
+        PostDeployInterface $postDeploy,
         ClientFactory $clientFactory,
         RequestFactory $requestFactory,
         UrlManager $urlManager,
         LoggerInterface $logger
     ) {
+        $this->postDeploy = $postDeploy;
         $this->clientFactory = $clientFactory;
         $this->requestFactory = $requestFactory;
         $this->urlManager = $urlManager;
@@ -62,11 +71,7 @@ class WarmUp implements ProcessInterface
      */
     public function execute()
     {
-        $pages = [
-            'index.php',
-            'index.php/customer/account/create',
-        ];
-
+        $pages = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES);
         $client = $this->clientFactory->create();
 
         array_walk($pages, function ($page) use ($client) {
@@ -76,7 +81,7 @@ class WarmUp implements ProcessInterface
             $client->sendAsync($request)->then(function () use ($url) {
                 $this->logger->info('Warmed up page: ' . $url);
             }, function (RequestException $exception) use ($url) {
-                $this->logger->error('Warming up failed' . $url, [
+                $this->logger->error('Warming up failed: ' . $url, [
                     'error' => $exception->getResponse()->getReasonPhrase(),
                     'code' => $exception->getResponse()->getStatusCode(),
                 ]);
