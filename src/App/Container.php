@@ -143,6 +143,7 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
+                                    $this->container->make(ConfigValidator\Build\EnvFileStructure::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
