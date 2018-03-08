@@ -104,8 +104,8 @@ class StageConfigStructure implements ValidatorInterface
     private function validateValue(string $key, $value)
     {
         $type = gettype($value);
-        $allowedTypes = $this->schema[$key][self::SCHEMA_TYPE] ?? null;
-        $allowedValues = $this->schema[$key][self::SCHEMA_VALUE] ?? null;
+        $allowedTypes = $this->schema[$key][self::SCHEMA_TYPE] ?? [];
+        $allowedValues = $this->schema[$key][self::SCHEMA_VALUE] ?? [];
 
         if ($allowedTypes && !in_array($type, $allowedTypes)) {
             return sprintf(
