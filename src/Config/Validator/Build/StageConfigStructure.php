@@ -11,21 +11,31 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 
 /**
- * Class EnvFileStructure.
+ * Validates 'stage' section of environment configuration.
  */
-class EnvFileStructure implements ValidatorInterface
+class StageConfigStructure implements ValidatorInterface
 {
+    const SCHEMA_TYPE = 'type';
+    const SCHEMA_VALUE = 'value';
+
     /**
      * @var EnvironmentReader
      */
     private $environmentReader;
 
     /**
-     * @param EnvironmentReader $environmentReader
+     * @var Validator\ResultFactory
      */
-    public function __construct(EnvironmentReader $environmentReader)
+    private $resultFactory;
+
+    /**
+     * @param EnvironmentReader $environmentReader
+     * @param Validator\ResultFactory $resultFactory
+     */
+    public function __construct(EnvironmentReader $environmentReader, Validator\ResultFactory $resultFactory)
     {
         $this->environmentReader = $environmentReader;
+        $this->resultFactory = $resultFactory;
     }
 
     /**
@@ -33,8 +43,11 @@ class EnvFileStructure implements ValidatorInterface
      */
     private $schema = [
         StageConfigInterface::VAR_VERBOSE_COMMANDS => [
-            'type' => ['string'],
-            'values' => ['-v', '-vv', '-vvv'],
+            self::SCHEMA_TYPE => ['string'],
+            self::SCHEMA_VALUE => ['', '-v', '-vv', '-vvv'],
+        ],
+        StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL => [
+            self::SCHEMA_TYPE => ['integer'],
         ],
     ];
 
@@ -43,13 +56,26 @@ class EnvFileStructure implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $config = $this->environmentReader->read();
-
+        $config = $this->environmentReader->read()[StageConfigInterface::SECTION_STAGE] ?? [];
         $errors = $this->validateChain($config, []);
 
-        die(var_dump($errors));
+        if ($errors) {
+            return $this->resultFactory->create(Validator\Result\Error::ERROR, [
+                'error' => 'Environment configuration is not valid',
+                'suggestion' => implode(PHP_EOL, $errors),
+            ]);
+        }
+
+        return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
     }
 
+    /**
+     * Recursive chain validation.
+     *
+     * @param array $config
+     * @param array $errors
+     * @return array
+     */
     private function validateChain(array $config, array $errors): array
     {
         foreach ($config as $key => $value) {
@@ -68,15 +94,22 @@ class EnvFileStructure implements ValidatorInterface
         return $errors;
     }
 
+    /**
+     * Validates the value by schema.
+     *
+     * @param string $key
+     * @param mixed $value
+     * @return string
+     */
     private function validateValue(string $key, $value)
     {
         $type = gettype($value);
-        $allowedTypes = $this->schema[$key]['type'];
-        $allowedValues = $this->schema[$key]['values'];
+        $allowedTypes = $this->schema[$key][self::SCHEMA_TYPE] ?? null;
+        $allowedValues = $this->schema[$key][self::SCHEMA_VALUE] ?? null;
 
         if ($allowedTypes && !in_array($type, $allowedTypes)) {
             return sprintf(
-                'Item %s has wrong type %s',
+                'Item %s has unexpected type %s',
                 $key,
                 $type
             );
@@ -84,7 +117,7 @@ class EnvFileStructure implements ValidatorInterface
 
         if ($allowedValues && !in_array($value, $allowedValues)) {
             return sprintf(
-                'Item %s has wrong value %s',
+                'Item %s has unexpected value %s',
                 $key,
                 $value
             );
