@@ -10,7 +10,6 @@ use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\UrlManager;
-use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -68,9 +67,10 @@ class WarmUp implements ProcessInterface
             'index.php/customer/account/create',
         ];
 
-        array_walk($pages, function ($page) use (&$promises) {
+        $client = $this->clientFactory->create();
+
+        array_walk($pages, function ($page) use ($client) {
             $url = $this->urlManager->getDefaultSecureUrl() . $page;
-            $client = $this->clientFactory->create();
             $request = $this->requestFactory->create('GET', $url);
 
             $client->sendAsync($request)->then(function () use ($url) {
