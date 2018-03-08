@@ -33,7 +33,7 @@ class EnvFileStructure implements ValidatorInterface
      */
     private $schema = [
         StageConfigInterface::VAR_VERBOSE_COMMANDS => [
-            'type' => ['array'],
+            'type' => ['string'],
             'values' => ['-v', '-vv', '-vvv'],
         ],
     ];
@@ -45,18 +45,27 @@ class EnvFileStructure implements ValidatorInterface
     {
         $config = $this->environmentReader->read();
 
-        $this->validateChain($config);
+        $errors = $this->validateChain($config, []);
+
+        die(var_dump($errors));
     }
 
-    private function validateChain(array $config)
+    private function validateChain(array $config, array $errors): array
     {
         foreach ($config as $key => $value) {
             if (array_key_exists($key, $this->schema)) {
-                $this->validateValue($key, $value);
+                if ($error = $this->validateValue($key, $value)) {
+                    $errors[] = $error;
+                }
             } elseif (is_array($value)) {
-                $this->validateChain($value);
+                $errors = array_merge(
+                    $errors,
+                    $this->validateChain($value, $errors)
+                );
             }
         }
+
+        return $errors;
     }
 
     private function validateValue(string $key, $value)
@@ -66,11 +75,19 @@ class EnvFileStructure implements ValidatorInterface
         $allowedValues = $this->schema[$key]['values'];
 
         if ($allowedTypes && !in_array($type, $allowedTypes)) {
-            die('d');
+            return sprintf(
+                'Item %s has wrong type %s',
+                $key,
+                $type
+            );
         }
 
         if ($allowedValues && !in_array($value, $allowedValues)) {
-            die('s');
+            return sprintf(
+                'Item %s has wrong value %s',
+                $key,
+                $value
+            );
         }
     }
 }
