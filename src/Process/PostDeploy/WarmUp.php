@@ -73,19 +73,22 @@ class WarmUp implements ProcessInterface
     {
         $pages = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES);
         $client = $this->clientFactory->create();
+        $promises = [];
 
-        array_walk($pages, function ($page) use ($client) {
+        foreach ($pages as $page) {
             $url = $this->urlManager->getDefaultSecureUrl() . $page;
             $request = $this->requestFactory->create('GET', $url);
 
-            $client->sendAsync($request)->then(function () use ($url) {
+            $promises[] = $client->sendAsync($request)->then(function () use ($url) {
                 $this->logger->info('Warmed up page: ' . $url);
             }, function (RequestException $exception) use ($url) {
                 $this->logger->error('Warming up failed: ' . $url, [
                     'error' => $exception->getResponse()->getReasonPhrase(),
                     'code' => $exception->getResponse()->getStatusCode(),
                 ]);
-            })->wait();
-        });
+            });
+        }
+
+        \GuzzleHttp\Promise\unwrap($promises);
     }
 }
