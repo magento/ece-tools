@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
+use Magento\MagentoCloud\Config\Validator\SchemaValidator;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -13,10 +14,8 @@ use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 /**
  * Validates 'stage' section of environment configuration.
  */
-class StageConfigStructure implements ValidatorInterface
+class StageConfig implements ValidatorInterface
 {
-    const SCHEMA_TYPE = 'type';
-    const SCHEMA_VALUE = 'value';
 
     /**
      * @var EnvironmentReader
@@ -29,26 +28,23 @@ class StageConfigStructure implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var array
+     * @var SchemaValidator
      */
-    private $schema = [
-        StageConfigInterface::VAR_VERBOSE_COMMANDS => [
-            self::SCHEMA_TYPE => ['string'],
-            self::SCHEMA_VALUE => ['', '-v', '-vv', '-vvv'],
-        ],
-        StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL => [
-            self::SCHEMA_TYPE => ['integer'],
-        ],
-    ];
+    private $schemaValidator;
 
     /**
      * @param EnvironmentReader $environmentReader
      * @param Validator\ResultFactory $resultFactory
+     * @param SchemaValidator $schema
      */
-    public function __construct(EnvironmentReader $environmentReader, Validator\ResultFactory $resultFactory)
-    {
+    public function __construct(
+        EnvironmentReader $environmentReader,
+        Validator\ResultFactory $resultFactory,
+        SchemaValidator $schema
+    ) {
         $this->environmentReader = $environmentReader;
         $this->resultFactory = $resultFactory;
+        $this->schemaValidator = $schema;
     }
 
     /**
@@ -61,7 +57,7 @@ class StageConfigStructure implements ValidatorInterface
 
         foreach ($config as $stageConfig) {
             foreach ($stageConfig as $key => $value) {
-                if ($error = $this->validateValue($key, $value)) {
+                if ($error = $this->schemaValidator->validate($key, $value)) {
                     $errors[] = $error;
                 }
             }
@@ -75,35 +71,5 @@ class StageConfigStructure implements ValidatorInterface
         }
 
         return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
-    }
-
-    /**
-     * Validates the value by schema.
-     *
-     * @param string $key
-     * @param mixed $value
-     * @return string
-     */
-    private function validateValue(string $key, $value)
-    {
-        $type = gettype($value);
-        $allowedTypes = $this->schema[$key][self::SCHEMA_TYPE] ?? [];
-        $allowedValues = $this->schema[$key][self::SCHEMA_VALUE] ?? [];
-
-        if ($allowedTypes && !in_array($type, $allowedTypes)) {
-            return sprintf(
-                'Item %s has unexpected type %s',
-                $key,
-                $type
-            );
-        }
-
-        if ($allowedValues && !in_array($value, $allowedValues)) {
-            return sprintf(
-                'Item %s has unexpected value %s',
-                $key,
-                $value
-            );
-        }
     }
 }
