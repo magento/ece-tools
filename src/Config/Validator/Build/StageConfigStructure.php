@@ -29,16 +29,6 @@ class StageConfigStructure implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @param EnvironmentReader $environmentReader
-     * @param Validator\ResultFactory $resultFactory
-     */
-    public function __construct(EnvironmentReader $environmentReader, Validator\ResultFactory $resultFactory)
-    {
-        $this->environmentReader = $environmentReader;
-        $this->resultFactory = $resultFactory;
-    }
-
-    /**
      * @var array
      */
     private $schema = [
@@ -52,12 +42,30 @@ class StageConfigStructure implements ValidatorInterface
     ];
 
     /**
+     * @param EnvironmentReader $environmentReader
+     * @param Validator\ResultFactory $resultFactory
+     */
+    public function __construct(EnvironmentReader $environmentReader, Validator\ResultFactory $resultFactory)
+    {
+        $this->environmentReader = $environmentReader;
+        $this->resultFactory = $resultFactory;
+    }
+
+    /**
      * @inheritdoc
      */
     public function validate(): Validator\ResultInterface
     {
         $config = $this->environmentReader->read()[StageConfigInterface::SECTION_STAGE] ?? [];
-        $errors = $this->validateChain($config, []);
+        $errors = [];
+
+        foreach ($config as $stageConfig) {
+            foreach ($stageConfig as $key => $value) {
+                if ($error = $this->validateValue($key, $value)) {
+                    $errors[] = $error;
+                }
+            }
+        }
 
         if ($errors) {
             return $this->resultFactory->create(Validator\Result\Error::ERROR, [
@@ -67,31 +75,6 @@ class StageConfigStructure implements ValidatorInterface
         }
 
         return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
-    }
-
-    /**
-     * Recursive chain validation.
-     *
-     * @param array $config
-     * @param array $errors
-     * @return array
-     */
-    private function validateChain(array $config, array $errors): array
-    {
-        foreach ($config as $key => $value) {
-            if (array_key_exists($key, $this->schema)) {
-                if ($error = $this->validateValue($key, $value)) {
-                    $errors[] = $error;
-                }
-            } elseif (is_array($value)) {
-                $errors = array_merge(
-                    $errors,
-                    $this->validateChain($value, $errors)
-                );
-            }
-        }
-
-        return $errors;
     }
 
     /**
