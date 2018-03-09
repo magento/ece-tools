@@ -57,8 +57,8 @@
     }
   },
   "magento/module-customer-import-export": {
-    "Fix out of memory during import of customers and addresses": {
-      ">=100.2.0": "2.2/fix-oom-during-import-customers-and-addresses.patch"
+    "Fix out of memory during import of customers and addresses (Magento 2.2.0 - 2.2.3)": {
+      ">=100.2.0 <100.2.2": "2.2/fix-oom-during-import-customers-and-addresses.patch"
     },
     "Fix out of memory during import of customers and addresses (Magento 2.1)": {
       "100.1.1": "2.1/fix-oom-during-import-customers-and-addresses.magento-2.1.4.patch"
