@@ -74,7 +74,7 @@ class PostDeployTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(ResultInterface::ERROR, [
-                'error' => 'Your application seems not using \'post_deploy\' hook.',
+                'error' => 'Your application does not have the \'post_deploy\' hook enabled.',
             ])
             ->willReturn($this->createMock(Error::class));
 

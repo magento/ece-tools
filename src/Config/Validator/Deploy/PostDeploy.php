@@ -47,7 +47,7 @@ class PostDeploy implements ValidatorInterface
             return $this->resultFactory->create(
                 Validator\ResultInterface::ERROR,
                 [
-                    'error' => 'Your application seems not using \'post_deploy\' hook.',
+                    'error' => 'Your application does not have the \'post_deploy\' hook enabled.',
                 ]
             );
         }

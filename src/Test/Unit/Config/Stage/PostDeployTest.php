@@ -81,4 +81,17 @@ class PostDeployTest extends TestCase
             ],
         ];
     }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
+     */
+    public function testNotExists()
+    {
+        $this->environmentReaderMock->expects($this->any())
+            ->method('read')
+            ->willReturn([]);
+
+        $this->config->get('NOT_EXISTS_VALUE');
+    }
 }
