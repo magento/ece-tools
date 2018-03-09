@@ -125,11 +125,9 @@ class ComposerGenerator
             ]
         ];
 
-        if ($this->file->isExists($this->directoryList->getMagentoRoot() . '/composer.json')) {
-            $rootComposer = json_decode(
-                $this->file->fileGetContents($this->directoryList->getMagentoRoot() . '/composer.json'),
-                true
-            );
+        $rootComposerJsonPath = $this->directoryList->getMagentoRoot() . '/composer.json';
+        if ($this->file->isExists($rootComposerJsonPath)) {
+            $rootComposer = json_decode($this->file->fileGetContents($rootComposerJsonPath), true);
             $composer['require'] += $rootComposer['require'];
             $composer['repositories'] += $rootComposer['repositories'];
         } else {
@@ -137,9 +135,12 @@ class ComposerGenerator
         }
 
         foreach ($repoOptions as $repoName => $gitOption) {
-            $repoComposer = $this->file->fileGetContents(
-                $this->directoryList->getMagentoRoot() . '/' . $repoName . '/composer.json'
-            );
+            $repoComposerJsonPath = $this->directoryList->getMagentoRoot() . '/' . $repoName . '/composer.json';
+            if (!$this->file->isExists($repoComposerJsonPath)) {
+                continue;
+            }
+
+            $repoComposer = $this->file->fileGetContents($repoComposerJsonPath);
             $composer['require'] = array_merge(
                 $composer['require'],
                 json_decode($repoComposer, true)['require']
