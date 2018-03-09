@@ -42,6 +42,7 @@ class Variables implements ValidatorInterface
     ) {
         $this->environment = $environment;
         $this->schemaValidator = $schema;
+        $this->resultFactory = $resultFactory;
     }
 
     /**
