@@ -119,6 +119,7 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\PostDeploy::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\RepositoryFactory::class);
         $this->container->singleton(
             \Magento\MagentoCloud\Config\Stage\BuildInterface::class,
@@ -127,6 +128,10 @@ class Container implements ContainerInterface
         $this->container->singleton(
             \Magento\MagentoCloud\Config\Stage\DeployInterface::class,
             \Magento\MagentoCloud\Config\Stage\Deploy::class
+        );
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\PostDeployInterface::class,
+            \Magento\MagentoCloud\Config\Stage\PostDeploy::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Shell\UtilityManager::class);
         /**
@@ -195,11 +200,19 @@ class Container implements ContainerInterface
                         ]),
                         $this->container->make(DeployProcess\CreateConfigFile::class),
                         $this->container->make(DeployProcess\SetMode::class),
+                        $this->container->make(DeployProcess\SetCryptKey::class),
                         $this->container->make(DeployProcess\InstallUpdate::class),
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
+                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+                            'validators' => [
+                                ValidatorInterface::LEVEL_WARNING => [
+                                    $this->container->make(ConfigValidator\Deploy\PostDeploy::class),
+                                ],
+                            ],
+                        ]),
                         /**
                          * Remove this line after implementation post-deploy hook
                          */
@@ -208,7 +221,7 @@ class Container implements ContainerInterface
                          * Cache clean process must remain the last one in deploy chain.
                          * Do not add any processes after it.
                          */
-                        $this->container->make(Process\CleanCache::class),
+                        $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);
             });
@@ -342,6 +355,7 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
+                        $this->container->make(PostDeployProcess\WarmUp::class),
                     ],
                 ]);
             });
