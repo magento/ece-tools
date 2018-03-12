@@ -58,6 +58,19 @@ class CleanCacheTest extends TestCase
         $this->process->execute();
     }
 
+    public function testExecuteWithPostDeployHook()
+    {
+        $this->stageConfig->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-vvv');
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php ./bin/magento cache:flush -vvv');
+
+        $this->process->execute();
+    }
+
     public function testExecuteNoVerbosity()
     {
         $this->stageConfig->expects($this->once())
