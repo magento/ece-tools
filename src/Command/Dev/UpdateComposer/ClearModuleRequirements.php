@@ -44,7 +44,12 @@ class ClearModuleRequirements
         $this->file = $file;
     }
 
-
+    /**
+     * Generates script for clearing module requirements.
+     *
+     * @param array $repos
+     * @return void
+     */
     public function generate(array $repos)
     {
         $rootDirectory = $this->directoryList->getMagentoRoot();
