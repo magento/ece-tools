@@ -1,0 +1,85 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+namespace Magento\MagentoCloud\Command\Dev\UpdateComposer;
+
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
+
+/**
+ */
+class ClearModuleRequirements
+{
+    const SCRIPT_PATH = 'clear_module_requirements.php';
+
+    /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
+     * @var File
+     */
+    private $file;
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @param DirectoryList $directoryList
+     * @param FileList $fileList
+     * @param File $file
+     */
+    public function __construct(
+        DirectoryList $directoryList,
+        FileList $fileList,
+        File $file
+    ) {
+        $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
+        $this->file = $file;
+    }
+
+
+    public function generate(array $repos)
+    {
+        $rootDirectory = $this->directoryList->getMagentoRoot();
+        $clearModulesFilePath = $rootDirectory . '/' . self::SCRIPT_PATH;
+        $reposArrayToString = '[\'' . implode('\', \'', $repos) . '\']';
+
+        $clearModulesCode = <<<CODE
+<?php
+foreach ($reposArrayToString as \$repoName) {
+    foreach (glob(__DIR__ .'/' . \$repoName . '/app/code/Magento/*') as \$moduleDir) {
+        if (!file_exists(\$moduleDir . '/composer.json')) {
+            continue;
+        }
+
+        \$composerJson = json_decode(file_get_contents(\$moduleDir . '/composer.json'), true);
+
+        foreach (\$composerJson['require'] as \$requireName => \$requireVersion) {
+            if (strpos(\$requireName, 'magento/') !== false) {
+                unset(\$composerJson['require'][\$requireName]);
+            }
+        }
+
+        file_put_contents(
+            \$moduleDir . '/composer.json',
+            json_encode(\$composerJson, JSON_PRETTY_PRINT)
+        );
+    }
+}
+CODE;
+        $this->file->filePutContents($clearModulesFilePath, $clearModulesCode);
+
+        $this->file->filePutContents(
+            $rootDirectory . '/.gitignore',
+            '!/' . self::SCRIPT_PATH . PHP_EOL,
+            FILE_APPEND
+        );
+    }
+}

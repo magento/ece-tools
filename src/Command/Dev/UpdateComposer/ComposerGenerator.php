@@ -126,8 +126,6 @@ class ComposerGenerator
             );
         }
 
-        $installFromGitScripts[] = 'php vendor/bin/ece-tools dev:git:clear-module-requirements';
-
         return $installFromGitScripts;
     }
 

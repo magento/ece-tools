@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command\Dev;
 
+use Magento\MagentoCloud\Command\Dev\UpdateComposer\ClearModuleRequirements;
 use Magento\MagentoCloud\Command\Dev\UpdateComposer\ComposerGenerator;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -45,9 +46,14 @@ class UpdateComposer extends Command
      * @var File
      */
     private $file;
+    /**
+     * @var ClearModuleRequirements
+     */
+    private $clearModuleRequirements;
 
     /**
      * @param ComposerGenerator $composerGenerator
+     * @param ClearModuleRequirements $clearModuleRequirements
      * @param ShellInterface $shell
      * @param GlobalSection $globalSection
      * @param FileList $fileList
@@ -55,12 +61,14 @@ class UpdateComposer extends Command
      */
     public function __construct(
         ComposerGenerator $composerGenerator,
+        ClearModuleRequirements $clearModuleRequirements,
         ShellInterface $shell,
         GlobalSection $globalSection,
         FileList $fileList,
         File $file
     ) {
         $this->composerGenerator = $composerGenerator;
+        $this->clearModuleRequirements = $clearModuleRequirements;
         $this->shell = $shell;
         $this->globalSection = $globalSection;
         $this->fileList = $fileList;
@@ -91,13 +99,22 @@ class UpdateComposer extends Command
     {
         $gitOptions = $this->globalSection->get(GlobalSection::VAR_DEPLOY_FROM_GIT_OPTIONS);
 
-        foreach ($this->composerGenerator->getInstallFromGitScripts($gitOptions) as $script) {
+        foreach ($this->composerGenerator->getInstallFromGitScripts($gitOptions['repositories']) as $script) {
             $this->shell->execute($script);
+        }
+
+        $composer = $this->composerGenerator->generate($gitOptions['repositories']);
+
+        if (isset($gitOptions['clear_magento_module_requirements'])
+            && $gitOptions['clear_magento_module_requirements']
+        ) {
+            $this->clearModuleRequirements->generate(array_keys($gitOptions['repositories']));
+            $composer['scripts']['install-from-git'][] = 'php ' . ClearModuleRequirements::SCRIPT_PATH;
         }
 
         $this->file->filePutContents(
             $this->fileList->getMagentoComposer(),
-            json_encode($this->composerGenerator->generate($gitOptions), JSON_PRETTY_PRINT)
+            json_encode($composer, JSON_PRETTY_PRINT)
         );
 
         $output->writeln('Run composer update');
