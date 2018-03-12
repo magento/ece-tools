@@ -21,6 +21,7 @@ interface StageConfigInterface
     const STAGE_GLOBAL = 'global';
     const STAGE_BUILD = 'build';
     const STAGE_DEPLOY = 'deploy';
+    const STAGE_POST_DEPLOY = 'post-deploy';
 
     /**
      * Deployment variables.
