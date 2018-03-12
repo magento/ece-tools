@@ -12,7 +12,6 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -31,14 +30,17 @@ class UpdateComposer extends Command
      * @var ShellInterface
      */
     private $shell;
+
     /**
      * @var GlobalSection
      */
     private $globalSection;
+
     /**
      * @var FileList
      */
     private $fileList;
+
     /**
      * @var File
      */
@@ -78,6 +80,13 @@ class UpdateComposer extends Command
         parent::configure();
     }
 
+    /**
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return void
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $gitOptions = $this->globalSection->get(GlobalSection::VAR_DEPLOY_FROM_GIT_OPTIONS);

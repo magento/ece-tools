@@ -53,77 +53,7 @@ class ComposerGenerator
      */
     public function generate(array $repoOptions): array
     {
-        $installPromGitScripts = $this->getInstallFromGitScripts($repoOptions);
-
-        $preparePackagesScripts = [];
-
-        foreach ($repoOptions as $repoName => $gitOption) {
-            $preparePackagesScripts[] = sprintf(
-                sprintf(
-                    "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
-                    . "--exclude='dev/tests' --exclude='lib/internal/Magento' ./%s/ ./",
-                    $repoName
-                )
-            );
-        }
-
-        $composer = [
-            "name" => "magento/cloud-dev",
-            "description" => "eCommerce Platform for Growth",
-            "type" => "project",
-            "version" => "{$this->magentoVersion->getVersion()}",
-            "license" => [
-                "OSL-3.0"
-            ],
-            "bin" => [
-                'ce/bin/magento'
-            ],
-            "repositories" => [
-                [
-                    "type" => "path",
-                    "url" => "./ce/lib/internal/Magento/Framework/",
-                    "transport-options" => [
-                        "symlink" => false
-                    ],
-                    "options" => [
-                        "symlink" => false
-                    ]
-                ],
-                [
-                    "type" => "composer",
-                    "url" => "https://repo.magento.com"
-                ]
-            ],
-            "require" => [
-            ],
-            "config" => [
-                "use-include-path" => true
-            ],
-            "autoload" => [
-                "psr-4" => [
-                    "Magento\\Setup\\" => "setup/src/Magento/Setup/",
-                ],
-            ],
-            "minimum-stability" => "dev",
-            "prefer-stable" => true,
-            "extra" => [
-                "magento-force" => "override",
-                "magento-deploystrategy" => "copy"
-            ],
-            "scripts" => [
-                "install-from-git" => $installPromGitScripts,
-                "prepare-packages" => $preparePackagesScripts,
-                "pre-install-cmd" => [
-                    "@install-from-git"
-                ],
-                "pre-update-cmd" => [
-                    "@install-from-git"
-                ],
-                "post-install-cmd" => [
-                    "@prepare-packages"
-                ]
-            ]
-        ];
+        $composer = $this->getBaseComposer($repoOptions);
 
         $rootComposerJsonPath = $this->directoryList->getMagentoRoot() . '/composer.json';
         if ($this->file->isExists($rootComposerJsonPath)) {
@@ -197,5 +127,88 @@ class ComposerGenerator
         }
 
         return $installPromGitScripts;
+    }
+
+    /**
+     * Returns base skeleton for composer.json.
+     *
+     * @param array $repoOptions
+     * @return array
+     */
+    protected function getBaseComposer(array $repoOptions): array
+    {
+        $installPromGitScripts = $this->getInstallFromGitScripts($repoOptions);
+
+        $preparePackagesScripts = [];
+
+        foreach (array_keys($repoOptions) as $repoName) {
+            $preparePackagesScripts[] = sprintf(
+                sprintf(
+                    "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
+                    . "--exclude='dev/tests' --exclude='lib/internal/Magento' ./%s/ ./",
+                    $repoName
+                )
+            );
+        }
+
+        $composer = [
+            "name" => "magento/cloud-dev",
+            "description" => "eCommerce Platform for Growth",
+            "type" => "project",
+            "version" => "{$this->magentoVersion->getVersion()}",
+            "license" => [
+                "OSL-3.0"
+            ],
+            "bin" => [
+                'ce/bin/magento'
+            ],
+            "repositories" => [
+                [
+                    "type" => "path",
+                    "url" => "./ce/lib/internal/Magento/Framework/",
+                    "transport-options" => [
+                        "symlink" => false
+                    ],
+                    "options" => [
+                        "symlink" => false
+                    ]
+                ],
+                [
+                    "type" => "composer",
+                    "url" => "https://repo.magento.com"
+                ]
+            ],
+            "require" => [
+            ],
+            "config" => [
+                "use-include-path" => true
+            ],
+            "autoload" => [
+                "psr-4" => [
+                    "Magento\\Setup\\" => "setup/src/Magento/Setup/",
+                ],
+            ],
+            "minimum-stability" => "dev",
+            "prefer-stable" => true,
+            "extra" => [
+                "magento-force" => "override",
+                "magento-deploystrategy" => "copy"
+            ],
+            "scripts" => [
+                "install-from-git" => $installPromGitScripts,
+                "prepare-packages" => $preparePackagesScripts,
+                "pre-install-cmd" => [
+                    "@install-from-git"
+                ],
+                "pre-update-cmd" => [
+                    "@install-from-git"
+                ],
+                "post-install-cmd" => [
+                    "@prepare-packages"
+                ]
+            ]
+        ];
+
+        return $composer;
     }
 }
