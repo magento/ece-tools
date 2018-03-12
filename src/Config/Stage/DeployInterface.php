@@ -23,7 +23,7 @@ interface DeployInterface extends StageConfigInterface
     const VAR_STATIC_CONTENT_EXCLUDE_THEMES = 'STATIC_CONTENT_EXCLUDE_THEMES';
 
     /**
-     * The variable responsible to set mysql slave connection when it has true value
+     * The variable responsible to set mysql slave connection when it has true value.
      */
     const VAR_MYSQL_READ_DISTRIBUTION = 'MYSQL_READ_DISTRIBUTION';
 

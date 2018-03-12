@@ -291,5 +291,4 @@ class DbConnectionTest extends TestCase
         ];
     }
 
-
 }
