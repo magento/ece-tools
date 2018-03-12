@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
@@ -33,6 +34,11 @@ class DbConnection implements ProcessInterface
     private $configWriter;
 
     /**
+     * @var ConfigReader
+     */
+    private $configReader;
+
+    /**
      * Data of read connection
      * @var ConnectionInterface
      */
@@ -49,6 +55,7 @@ class DbConnection implements ProcessInterface
      * @param ConnectionInterface $readConnection
      * @param DeployInterface $deployConfig
      * @param ConfigWriter $configWriter
+     * @param ConfigReader $configReader
      * @param LoggerInterface $logger
      */
     public function __construct(
@@ -56,12 +63,14 @@ class DbConnection implements ProcessInterface
         ConnectionInterface $readConnection,
         DeployInterface $deployConfig,
         ConfigWriter $configWriter,
+        ConfigReader $configReader,
         LoggerInterface $logger
     ) {
         $this->environment = $environment;
         $this->readConnection = $readConnection;
         $this->deployConfig = $deployConfig;
         $this->configWriter = $configWriter;
+        $this->configReader = $configReader;
         $this->logger = $logger;
     }
 
@@ -79,7 +88,7 @@ class DbConnection implements ProcessInterface
             'password' => $this->environment->getDbPassword(),
         ];
 
-        $config = [
+        $DbConfig = [
             'db' => [
                 'connection' => [
                     'default' => $mainConnectionData,
@@ -93,20 +102,28 @@ class DbConnection implements ProcessInterface
             ],
         ];
 
-        $config = array_replace_recursive($this->getSlaveConnection(), $config);
+        $config = $this->configReader->read();
+        $config = array_replace_recursive($config, $DbConfig);
 
-        $this->configWriter->update($config);
+        $slaveConnectionData = $this->getSlaveConnection();
+
+        if (!$slaveConnectionData) {
+            unset($config['db']['slave_connection']);
+        } else {
+            $config['db']['slave_connection']['default'] = $slaveConnectionData;
+        }
+
+        $this->configWriter->create($config);
     }
 
     /**
      * Returns mysql read connection if MYSQL_READ_DISTRIBUTION is enabled otherwise returns empty array.
-     * Connection data is nested to the array with the path which this data should have in env.php
      *
      * @return array
      */
     private function getSlaveConnection(): array
     {
-        $config = [];
+        $slaveConnection = [];
         if ($this->deployConfig->get(DeployInterface::VAR_MYSQL_READ_DISTRIBUTION)
             && $this->readConnection->getHost()
         ) {
@@ -122,9 +139,8 @@ class DbConnection implements ProcessInterface
                 'initStatements' => 'SET NAMES utf8;',
                 'active' => '1',
             ];
-            $config['db']['slave_connection']['default'] = $slaveConnection;
         }
         
-        return $config;
+        return $slaveConnection;
     }
 }
