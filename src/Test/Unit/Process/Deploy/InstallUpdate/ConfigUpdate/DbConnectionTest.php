@@ -122,6 +122,8 @@ class DbConnectionTest extends TestCase
      * 4 - result of updated config data for configuration file
      *
      * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function executeDataProvider()
     {
