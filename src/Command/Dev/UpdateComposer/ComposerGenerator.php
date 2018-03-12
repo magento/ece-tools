@@ -112,13 +112,13 @@ class ComposerGenerator
      */
     public function getInstallFromGitScripts(array $repoOptions): array
     {
-        $installPromGitScripts = ['mkdir -p app/etc'];
-        $installPromGitScripts[] = 'rm -rf ' . implode(' ', self::POSSIBLE_REPOS);
+        $installFromGitScripts = ['mkdir -p app/etc'];
+        $installFromGitScripts[] = 'rm -rf ' . implode(' ', self::POSSIBLE_REPOS);
 
         foreach ($repoOptions as $repoName => $gitOption) {
             $gitCloneCommand = "git clone -b %s --single-branch --depth 1 %s %s";
 
-            $installPromGitScripts[] = sprintf(
+            $installFromGitScripts[] = sprintf(
                 $gitCloneCommand,
                 $gitOption['branch'],
                 $gitOption['repo'],
@@ -126,7 +126,9 @@ class ComposerGenerator
             );
         }
 
-        return $installPromGitScripts;
+        $installFromGitScripts['php vendor/bin/ece-tools dev:git:clear-module-requirements'];
+
+        return $installFromGitScripts;
     }
 
     /**
@@ -137,7 +139,7 @@ class ComposerGenerator
      */
     protected function getBaseComposer(array $repoOptions): array
     {
-        $installPromGitScripts = $this->getInstallFromGitScripts($repoOptions);
+        $installFromGitScripts = $this->getInstallFromGitScripts($repoOptions);
 
         $preparePackagesScripts = [];
 
@@ -195,7 +197,7 @@ class ComposerGenerator
                 "magento-deploystrategy" => "copy"
             ],
             "scripts" => [
-                "install-from-git" => $installPromGitScripts,
+                "install-from-git" => $installFromGitScripts,
                 "prepare-packages" => $preparePackagesScripts,
                 "pre-install-cmd" => [
                     "@install-from-git"
