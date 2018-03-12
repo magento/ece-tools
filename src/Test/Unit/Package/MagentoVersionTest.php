@@ -11,6 +11,8 @@ use Composer\Semver\Semver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
  * @inheritdoc
@@ -23,14 +25,19 @@ class MagentoVersionTest extends TestCase
     private $magentoVersion;
 
     /**
-     * @var Manager|\PHPUnit_Framework_MockObject_MockObject
+     * @var Manager|Mock
      */
     private $managerMock;
 
     /**
-     * @var PackageInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var PackageInterface|Mock
      */
     private $packageMock;
+
+    /**
+     * @var GlobalConfig|Mock
+     */
+    private $globalConfigMock;
 
     /**
      * @inheritdoc
@@ -42,11 +49,13 @@ class MagentoVersionTest extends TestCase
             ->getMock();
         $this->packageMock = $this->getMockBuilder(PackageInterface::class)
             ->getMockForAbstractClass();
+        $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
         $this->magentoVersion = new MagentoVersion(
             $this->managerMock,
             new Comparator(),
-            new Semver()
+            new Semver(),
+            $this->globalConfigMock
         );
     }
 
@@ -89,14 +98,38 @@ class MagentoVersionTest extends TestCase
     /**
      * Test getting the version number from the installed version of Magento.
      */
-    public function testGetVersion()
+    public function testGetVersionFromBasePackage()
     {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_DEPLOY_FROM_GIT)
+            ->willReturn(false);
         $this->managerMock->method('get')
             ->with('magento/magento2-base')
             ->willReturn($this->packageMock);
         $this->packageMock->expects($this->once())
             ->method('getVersion')
             ->willReturn('2.2.1');
+
+        $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
+    }
+
+    /**
+     * Test getting the version number from the installed version of Magento.
+     */
+    public function testGetVersionFromGit()
+    {
+        $this->globalConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->withConsecutive(
+                [GlobalConfig::VAR_DEPLOY_FROM_GIT],
+                [GlobalConfig::VAR_MAGENTO_VERSION]
+            )
+            ->willReturn(true, '2.2.1');
+        $this->managerMock->expects($this->never())
+            ->method('get');
+        $this->packageMock->expects($this->never())
+            ->method('getVersion');
 
         $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
     }
@@ -110,6 +143,10 @@ class MagentoVersionTest extends TestCase
      */
     public function testSatisfies(string $constraint, string $packageVersion, bool $expected)
     {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_DEPLOY_FROM_GIT)
+            ->willReturn(false);
         $this->managerMock->expects($this->exactly(1))
             ->method('get')
             ->willReturn($this->packageMock);
