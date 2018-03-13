@@ -194,9 +194,9 @@ diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/Templa
 +     */
 +    private function getMinifiedTemplateInProduction($template)
 +    {
-+        if ($this->deploymentConfig->getConfigData(
-+            ConfigOptionsListConstants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION
-+        )) {
++        if (
++            true
++        ) {
 +            return $this->templateMinifier->getMinified($template);
 +        }
 +        return $this->templateMinifier->getPathToMinified($template);
