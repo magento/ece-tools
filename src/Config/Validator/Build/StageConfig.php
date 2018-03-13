@@ -35,16 +35,16 @@ class StageConfig implements ValidatorInterface
     /**
      * @param EnvironmentReader $environmentReader
      * @param Validator\ResultFactory $resultFactory
-     * @param SchemaValidator $schema
+     * @param SchemaValidator $schemaValidator
      */
     public function __construct(
         EnvironmentReader $environmentReader,
         Validator\ResultFactory $resultFactory,
-        SchemaValidator $schema
+        SchemaValidator $schemaValidator
     ) {
         $this->environmentReader = $environmentReader;
         $this->resultFactory = $resultFactory;
-        $this->schemaValidator = $schema;
+        $this->schemaValidator = $schemaValidator;
     }
 
     /**

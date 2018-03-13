@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
- * Validates configuration types and values by schema.s
+ * Validates configuration types and values by schema.
  */
 class SchemaValidator
 {
