@@ -124,7 +124,7 @@ class DbConnection implements ProcessInterface
     private function getSlaveConnection(): array
     {
         $slaveConnection = [];
-        if ($this->deployConfig->get(DeployInterface::VAR_MYSQL_READ_DISTRIBUTION)
+        if ($this->deployConfig->get(DeployInterface::VAR_MYSQL_USE_READ_CONNECTION)
             && $this->readConnection->getHost()
         ) {
             $this->logger->info('Set DB slave connection.');

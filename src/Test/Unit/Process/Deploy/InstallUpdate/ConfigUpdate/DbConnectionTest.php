@@ -100,7 +100,7 @@ class DbConnectionTest extends TestCase
 
         $this->deployConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_MYSQL_READ_DISTRIBUTION)
+            ->with(DeployInterface::VAR_MYSQL_USE_READ_CONNECTION)
             ->willReturn($setSlave);
 
         $this->configWriterMock->expects($this->once())
