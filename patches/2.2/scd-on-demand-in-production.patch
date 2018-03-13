@@ -5,7 +5,7 @@ diff --git a/vendor/magento/framework/App/StaticResource.php b/vendor/magento/fr
  use Magento\Framework\App\Filesystem\DirectoryList;
  use Magento\Framework\ObjectManager\ConfigLoaderInterface;
  use Magento\Framework\Filesystem;
-+use Magento\Framework\Config\ConfigOptionsListConstants;
++use Magento\Framework\Config\ConfigOptionsListConstants as Constants;
  use Psr\Log\LoggerInterface;
 
  /**
@@ -194,11 +194,11 @@ diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/Templa
 +     */
 +    private function getMinifiedTemplateInProduction($template)
 +    {
-+        if ($this->deploymentConfig->getConfigData(
-+            ConfigOptionsListConstants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION
-+        )) {
-+            return $this->templateMinifier->getMinified($template);
-+        }
-+        return $this->templateMinifier->getPathToMinified($template);
++        $forceMinification = $this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION)
++            || $this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_FORCE_HTML_MINIFICATION);
++
++        return $forceMinification ?
++            $this->templateMinifier->getMinified($template)
++            : $this->templateMinifier->getPathToMinified($template);
 +    }
  }

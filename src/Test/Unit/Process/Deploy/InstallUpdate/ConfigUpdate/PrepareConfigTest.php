@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\ScdOnDemand;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
@@ -16,10 +16,10 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class ScdOnDemandTest extends TestCase
+class PrepareConfigTest extends TestCase
 {
     /**
-     * @var ScdOnDemand
+     * @var PrepareConfig
      */
     private $process;
 
@@ -53,7 +53,7 @@ class ScdOnDemandTest extends TestCase
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
-        $this->process = new ScdOnDemand(
+        $this->process = new PrepareConfig(
             $this->loggerMock,
             $this->configReaderMock,
             $this->configWriterMock,
@@ -63,18 +63,21 @@ class ScdOnDemandTest extends TestCase
 
     /**
      * @param bool $scdOnDemand
+     * @param bool $skipViewPreprocesed
      * @param array $expectedResult
      * @dataProvider executeDataProvider
      */
-    public function testExecute(bool $scdOnDemand, array $expectedResult)
+    public function testExecute(bool $scdOnDemand, bool $skipViewPreprocesed, array $expectedResult)
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Updating env.php SCD on demand in production.');
-        $this->globalConfigMock->expects($this->once())
+            ->with('Updating env.php.');
+        $this->globalConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
-            ->willReturn($scdOnDemand);
+            ->willReturnMap([
+                [GlobalConfig::VAR_SCD_ON_DEMAND, $scdOnDemand],
+                [GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR, $skipViewPreprocesed],
+            ]);
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with($expectedResult);
@@ -90,11 +93,19 @@ class ScdOnDemandTest extends TestCase
         return [
             [
                 'scdOnDemand' => false,
-                'expectedResult' => ['static_content_on_demand_in_production' => 0]
+                'skipViewPreprocesed' => true,
+                'expectedResult' => [
+                    'static_content_on_demand_in_production' => 0,
+                    'force_html_minification' => 1,
+                ],
             ],
             [
                 'scdOnDemand' => true,
-                'expectedResult' => ['static_content_on_demand_in_production' => 1]
+                'skipViewPreprocesed' => false,
+                'expectedResult' => [
+                    'static_content_on_demand_in_production' => 1,
+                    'force_html_minification' => 0,
+                ],
             ],
         ];
     }

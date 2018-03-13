@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class ScdOnDemand implements ProcessInterface
+class PrepareConfig implements ProcessInterface
 {
     /**
      * @var LoggerInterface
@@ -59,13 +59,13 @@ class ScdOnDemand implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Updating env.php SCD on demand in production.');
-
-        $onDemandMode = $this->globalConfig->get(GlobalConfig::VAR_SCD_ON_DEMAND)
-            || $this->globalConfig->get(GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR);
+        $this->logger->info('Updating env.php.');
 
         $config = [
-            'static_content_on_demand_in_production' => (int)$onDemandMode,
+            'static_content_on_demand_in_production' => (int)$this->globalConfig->get(GlobalConfig::VAR_SCD_ON_DEMAND),
+            'force_html_minification' => (int)$this->globalConfig->get(
+                GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR
+            ),
         ];
 
         $this->configWriter->update($config);
