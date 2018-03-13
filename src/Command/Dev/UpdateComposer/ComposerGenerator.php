@@ -84,7 +84,10 @@ class ComposerGenerator
 
             $composer['repositories'][] = [
                 "type" => "path",
-                "url" => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/')
+                "url" => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
+                "options" => [
+                    "symlink" => false
+                ]
             ];
             $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
             $composer['require'][$dirComposer['name']] = $dirComposer['version'];
