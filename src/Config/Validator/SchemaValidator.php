@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Validator;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
@@ -21,7 +22,7 @@ class SchemaValidator
     private $schema = [
         StageConfigInterface::VAR_VERBOSE_COMMANDS => [
             self::SCHEMA_TYPE => ['string'],
-            self::SCHEMA_VALUE => ['', '-v', '-vv', '-vvv'],
+            self::SCHEMA_VALUE => ['', '-v', '-vv', '-vvv', Environment::VAL_ENABLED],
         ],
         StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL => [
             self::SCHEMA_TYPE => ['integer'],
