@@ -20,13 +20,10 @@ env:
     - TEST_SUITE=static
     - TEST_SUITE=unit
     - TEST_SUITE=integration
-    - TEST_SUITE=integration-docker
 matrix:
   exclude:
     - php: 7.1
       env: TEST_SUITE=integration
-    - php: 7.1
-      env: TEST_SUITE=integration-docker
 cache:
   apt: true
   directories:

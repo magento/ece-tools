@@ -145,6 +145,18 @@ class Environment
     }
 
     /**
+     * @return array
+     */
+    public function getApplication(): array
+    {
+        if (isset($this->data['application'])) {
+            return $this->data['application'];
+        }
+
+        return $this->data['application'] = $this->get('MAGENTO_CLOUD_APPLICATION', []);
+    }
+
+    /**
      * Returns variable value if such variable exists otherwise return $default
      *
      * @param string $name
@@ -258,6 +270,14 @@ class Environment
     public function getDefaultCurrency(): string
     {
         return 'USD';
+    }
+
+    /**
+     * @return string
+     */
+    public function getCryptKey(): string
+    {
+        return $this->getVariable('CRYPT_KEY', '');
     }
 
     /**

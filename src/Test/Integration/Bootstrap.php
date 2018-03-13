@@ -86,6 +86,9 @@ class Bootstrap
             'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
                 $environment->get('routes', [])
             )),
+            'MAGENTO_CLOUD_APPLICATION' => base64_encode(json_encode(
+                []
+            )),
         ]);
 
         $container = new Container(ECE_BP, $this->getSandboxDir());

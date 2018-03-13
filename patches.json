@@ -92,6 +92,12 @@
     },
     "Images not sized properly after upgrade to 2.1.6": {
       "2.1.6": "2.1/MAGETWO-67805.hotfix.git-composer-compatible.patch"
+    },
+    "Fixing bundling javascript files with gzip compression (Magento <2.1.13)": {
+      "<2.1.13": "2.1/MAGETWO-88336.patch"
+    },
+    "Fixing bundling javascript files with gzip compression (Magento 2.2.0 - 2.2.3)": {
+      "2.2.0 - 2.2.3": "2.2/MAGETWO-84507.patch"
     }
   },
   "magento/module-config": {
@@ -102,14 +108,6 @@
   "magento/module-cms": {
     "Fix cannot upgrade 2.0 => 2.1 with auto_increment > 1": {
       "101.0.3 - 101.0.5": "2.1/MAGETWO-57799.patch"
-    }
-  },
-  "magento/module-require-js": {
-    "Fixing bundling javascript files with gzip compression (Magento 2.1.*)": {
-      "100.1.*": "2.1/MAGETWO-88336.patch"
-    },
-    "Fixing bundling javascript files with gzip compression (Magento 2.2.*)": {
-      "100.2.*": "2.2/MAGETWO-84507.patch"
     }
   }
 }

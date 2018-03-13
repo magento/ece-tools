@@ -18,7 +18,8 @@
     "composer/composer": "@stable",
     "composer/semver": "^1.4",
     "symfony/yaml": "^2.3||^3.3",
-    "graylog2/gelf-php": "^1.4.2"
+    "graylog2/gelf-php": "^1.4.2",
+    "guzzlehttp/guzzle": "^6.3"
   },
   "require-dev": {
     "phpunit/phpunit": "~6.2.0",
