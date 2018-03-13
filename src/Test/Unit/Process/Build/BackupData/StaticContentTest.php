@@ -86,34 +86,28 @@ class StaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
-
         $this->directoryListMock->expects($this->exactly(2))
             ->method('getPath')
             ->willReturnMap([
                 [DirectoryList::DIR_STATIC, false, $this->originalPubStaticPath],
                 [DirectoryList::DIR_INIT, false, $this->rootInitDir]
             ]);
-
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($this->initPubStaticPath)
             ->willReturn(true);
-
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Clear ./init/pub/static'],
                 ['Moving static content to init directory']
             );
-
         $this->fileMock->expects($this->once())
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath);
-
         $this->fileMock->expects($this->never())
             ->method('createDirectory')
             ->with($this->initPubStaticPath);
-
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
@@ -130,38 +124,31 @@ class StaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
-
         $this->directoryListMock->expects($this->exactly(2))
             ->method('getPath')
             ->willReturnMap([
                 [DirectoryList::DIR_STATIC, false, $this->originalPubStaticPath],
                 [DirectoryList::DIR_INIT, false, $this->rootInitDir]
             ]);
-
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($this->initPubStaticPath)
             ->willReturn(false);
-
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Create ./init/pub/static'],
                 ['Moving static content to init directory']
             );
-
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath);
-
         $this->fileMock->expects($this->once())
             ->method('createDirectory')
             ->with($this->initPubStaticPath);
-
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
-
         $this->fileMock->expects($this->never())
             ->method('copyDirectory');
 
@@ -203,39 +190,32 @@ class StaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
-
         $this->directoryListMock->expects($this->exactly(2))
             ->method('getPath')
             ->willReturnMap([
                 [DirectoryList::DIR_STATIC, false, $this->originalPubStaticPath],
                 [DirectoryList::DIR_INIT, false, $this->rootInitDir]
             ]);
-
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($this->initPubStaticPath)
             ->willReturn(false);
-
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Create ./init/pub/static'],
                 ['Moving static content to init directory']
             );
-
         $this->fileMock->expects($this->never())
             ->method('backgroundClearDirectory')
             ->with($this->initPubStaticPath);
-
         $this->fileMock->expects($this->once())
             ->method('createDirectory')
             ->with($this->initPubStaticPath);
-
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath)
             ->will($this->throwException(new FileSystemException()));
-
         $this->fileMock->expects($this->once())
             ->method('copyDirectory')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);
