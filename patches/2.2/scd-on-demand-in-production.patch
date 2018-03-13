@@ -121,7 +121,6 @@ diff --git a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/ve
      const CONFIG_PATH_DB_LOGGER_QUERY_TIME_THRESHOLD = 'db_logger/query_time_threshold';
      const CONFIG_PATH_DB_LOGGER_INCLUDE_STACKTRACE = 'db_logger/include_stacktrace';
 +    const CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION = 'static_content_on_demand_in_production';
-+    const CONFIG_PATH_FORCE_HTML_MINIFICATION = 'force_html_minification';
      /**#@-*/
 
      /**#@+
@@ -135,7 +134,7 @@ diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/Templa
  use Magento\Framework\View\Template\Html\MinifierInterface;
 +use Magento\Framework\App\DeploymentConfig;
 +use Magento\Framework\App\ObjectManager;
-+use Magento\Framework\Config\ConfigOptionsListConstants as Constants;
++use Magento\Framework\Config\ConfigOptionsListConstants;
 
  /**
   * Provider of template view files
@@ -195,11 +194,11 @@ diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/Templa
 +     */
 +    private function getMinifiedTemplateInProduction($template)
 +    {
-+        $forceMinification = $this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION)
-+            || $this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_FORCE_HTML_MINIFICATION);
-+
-+        return $forceMinification ?
-+            $this->templateMinifier->getMinified($template)
-+            : $this->templateMinifier->getPathToMinified($template);
++        if ($this->deploymentConfig->getConfigData(
++            ConfigOptionsListConstants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION
++        )) {
++            return $this->templateMinifier->getMinified($template);
++        }
++        return $this->templateMinifier->getPathToMinified($template);
 +    }
  }

@@ -1,0 +1,93 @@
+diff --git a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
+index 792c5a0d1038..52e7137fa3dd 100644
+--- a/vendor/magento/framework/Config/ConfigOptionsListConstants.php
++++ b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
+@@ -44,6 +44,11 @@ class ConfigOptionsListConstants
+      */
+     const CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION = 'static_content_on_demand_in_production';
+
++    /**
++     * Paramater for forcing HTML minification even if file is already minified.
++     */
++    const CONFIG_PATH_FORCE_HTML_MINIFICATION = 'force_html_minification';
++
+     /**#@+
+      * Input keys for the options
+      */
+diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php b/vendor/magento/framework/Framework/View/Design/FileResolution/Fallback/TemplateFile.php
+index 09f87d878ad1..47c0e905fc25 100644
+--- a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
++++ b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
+@@ -12,7 +12,7 @@
+ use Magento\Framework\View\Template\Html\MinifierInterface;
+ use Magento\Framework\App\DeploymentConfig;
+ use Magento\Framework\App\ObjectManager;
+-use Magento\Framework\Config\ConfigOptionsListConstants;
++use Magento\Framework\Config\ConfigOptionsListConstants as Constants;
+
+ /**
+  * Provider of template view files
+@@ -107,11 +107,11 @@ public function getFile($area, ThemeInterface $themeModel, $file, $module = null
+      */
+     private function getMinifiedTemplateInProduction($template)
+     {
+-        if ($this->deploymentConfig->getConfigData(
+-            ConfigOptionsListConstants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION
+-        )) {
+-            return $this->templateMinifier->getMinified($template);
+-        }
+-        return $this->templateMinifier->getPathToMinified($template);
++        $forceMinification = $this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION)
++            || $this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_FORCE_HTML_MINIFICATION);
++
++        return $forceMinification ?
++            $this->templateMinifier->getMinified($template)
++            : $this->templateMinifier->getPathToMinified($template);
+     }
+ }
+diff --git a/vendor/magento/framework/View/Test/Unit/Design/FileResolution/Fallback/TemplateFileTest.php b/vendor/magento/framework/View/Test/Unit/Design/FileResolution/Fallback/TemplateFileTest.php
+index 7e94d7e80a97..1b87b2108f04 100644
+--- a/vendor/magento/framework/View/Test/Unit/Design/FileResolution/Fallback/TemplateFileTest.php
++++ b/vendor/magento/framework/View/Test/Unit/Design/FileResolution/Fallback/TemplateFileTest.php
+@@ -92,10 +92,11 @@ public function testGetFileWhenStateDeveloper()
+      * Cover getFile when mode is default
+      * @param string $mode
+      * @param integer $onDemandInProduction
++     * @param integer $forceMinification
+      * @param string $method
+      * @dataProvider getMinifiedDataProvider
+      */
+-    public function testGetFileWhenModifiedNeeded($mode, $onDemandInProduction, $method)
++    public function testGetFileWhenModifiedNeeded($mode, $onDemandInProduction, $forceMinification, $method)
+     {
+         $this->assetConfig
+             ->expects($this->once())
+@@ -108,8 +109,10 @@ public function testGetFileWhenModifiedNeeded($mode, $onDemandInProduction, $met
+
+         $this->deploymentConfigMock->expects($this->any())
+             ->method('getConfigData')
+-            ->with(ConfigOptionsListConstants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION)
+-            ->willReturn($onDemandInProduction);
++            ->willReturnMap([
++                [ConfigOptionsListConstants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION, $onDemandInProduction],
++                [ConfigOptionsListConstants::CONFIG_PATH_FORCE_HTML_MINIFICATION, $forceMinification],
++            ]);
+         $this->state->expects($this->once())
+             ->method('getMode')
+             ->willReturn($mode);
+@@ -156,10 +159,11 @@ public function testGetFileIfMinificationIsDisabled()
+     public function getMinifiedDataProvider()
+     {
+         return [
+-            'default with on demand' => [State::MODE_DEFAULT, 1, 'getMinified'],
+-            'default without on demand' => [State::MODE_DEFAULT, 0, 'getMinified'],
+-            'production with on demand' => [State::MODE_PRODUCTION, 1, 'getMinified'],
+-            'production without on demand' => [State::MODE_PRODUCTION, 0, 'getPathToMinified'],
++            'default with on demand' => [State::MODE_DEFAULT, 1, 1, 'getMinified'],
++            'default without on demand' => [State::MODE_DEFAULT, 0, 0, 'getMinified'],
++            'production with on demand' => [State::MODE_PRODUCTION, 1, 0, 'getMinified'],
++            'production without on demand' => [State::MODE_PRODUCTION, 0, 0, 'getPathToMinified'],
++            'production without on demand with minified' => [State::MODE_PRODUCTION, 0, 1, 'getMinified'],
+         ];
+     }
+ }
