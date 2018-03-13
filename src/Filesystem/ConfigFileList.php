@@ -5,18 +5,11 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
-
 /**
  * Resolver of file configurations.
  */
 class ConfigFileList
 {
-    /**
-     * @var File
-     */
-    private $file;
-
     /**
      * @var SystemList
      */
@@ -24,11 +17,9 @@ class ConfigFileList
 
     /**
      * @param SystemList $systemList
-     * @param File $file
      */
-    public function __construct(SystemList $systemList, File $file)
+    public function __construct(SystemList $systemList)
     {
-        $this->file = $file;
         $this->systemList = $systemList;
     }
 

@@ -5,8 +5,6 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
-
 /**
  * Resolver of file configurations.
  */
@@ -18,21 +16,14 @@ class FileList extends ConfigFileList
     private $directoryList;
 
     /**
-     * @var File
-     */
-    private $file;
-
-    /**
      * @param DirectoryList $directoryList
      * @param SystemList $systemList
-     * @param File $file
      */
-    public function __construct(DirectoryList $directoryList, SystemList $systemList, File $file)
+    public function __construct(DirectoryList $directoryList, SystemList $systemList)
     {
         $this->directoryList = $directoryList;
-        $this->file = $file;
 
-        parent::__construct($systemList, $file);
+        parent::__construct($systemList);
     }
 
     /**
