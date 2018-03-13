@@ -61,10 +61,13 @@ class ScdOnDemand implements ProcessInterface
     {
         $this->logger->info('Updating env.php SCD on demand in production.');
 
+        $onDemandMode = $this->globalConfig->get(GlobalConfig::VAR_SCD_ON_DEMAND)
+            || $this->globalConfig->get(GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR);
+
         $config = [
-            'static_content_on_demand_in_production' =>
-                $this->globalConfig->get(GlobalConfig::VAR_SCD_ON_DEMAND) ? 1 : 0
+            'static_content_on_demand_in_production' => (int)$onDemandMode,
         ];
+
         $this->configWriter->update($config);
     }
 }
