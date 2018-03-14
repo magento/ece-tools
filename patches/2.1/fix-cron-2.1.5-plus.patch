@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
+diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 --- a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 +++ b/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 @@ -1,6 +1,6 @@
@@ -729,7 +729,7 @@ diff --git a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +    }
  }
 
-diff --git a/vendor/magento/module-cron/Model/Schedule.php b/vendor/magento/module-cron/Model/Schedule.php
+diff -Naur a/vendor/magento/module-cron/Model/Schedule.php b/vendor/magento/module-cron/Model/Schedule.php
 --- a/vendor/magento/module-cron/Model/Schedule.php
 +++ b/vendor/magento/module-cron/Model/Schedule.php
 @@ -1,18 +1,18 @@
@@ -836,7 +836,8 @@ diff --git a/vendor/magento/module-cron/Model/Schedule.php b/vendor/magento/modu
              self::STATUS_RUNNING,
              self::STATUS_PENDING
 
-diff --git a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php b/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
+diff -Naur a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php b/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
+index dca4e22..25dd02c 100644
 --- a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
 +++ b/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
 @@ -1,6 +1,6 @@
@@ -871,7 +872,7 @@ diff --git a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php b/vendo
       *
       * @param string $scheduleId
       * @param string $newStatus
-@@ -45,4 +47,42 @@ class Schedule extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
+@@ -45,4 +47,49 @@ class Schedule extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
          }
          return false;
      }
@@ -894,7 +895,14 @@ diff --git a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php b/vendo
 +    {
 +        $connection = $this->getConnection();
 +
-+        $match = $connection->quoteInto('existing.job_code = current.job_code AND existing.status = ?', $newStatus);
++        // this condition added to avoid cron jobs locking after incorrect termination of running job
++        $match = $connection->quoteInto(
++            'existing.job_code = current.job_code ' .
++            'AND (existing.executed_at > UTC_TIMESTAMP() - INTERVAL 1 DAY OR existing.executed_at IS NULL) ' .
++            'AND existing.status = ?',
++            $newStatus
++        );
++
 +        $selectIfUnlocked = $connection->select()
 +            ->joinLeft(
 +                ['existing' => $this->getTable('cron_schedule')],
