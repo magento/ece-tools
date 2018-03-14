@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/framework/App/Cache/Frontend/Factory.php b/vendor/magento/framework/App/Cache/Frontend/Factory.php
+diff -Nuar a/vendor/magento/framework/App/Cache/Frontend/Factory.php b/vendor/magento/framework/App/Cache/Frontend/Factory.php
 index 4c539da096..8477d94f28 100644
 --- a/vendor/magento/framework/App/Cache/Frontend/Factory.php
 +++ b/vendor/magento/framework/App/Cache/Frontend/Factory.php
@@ -29,7 +29,7 @@ index 4c539da096..8477d94f28 100644
              ]
          );
          $result = $this->_applyDecorators($result);
-diff --git a/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php b/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php
+diff -Nuar a/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php b/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php
 index c8917a0996..fe9dc2f453 100644
 --- a/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php
 +++ b/vendor/magento/framework/Cache/Frontend/Adapter/Zend.php

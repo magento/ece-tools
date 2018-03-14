@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/module-catalog/Block/Product/ImageBlockBuilder.php b/vendor/magento/module-catalog/Block/Product/ImageBlockBuilder.php
+diff -Nuar a/vendor/magento/module-catalog/Block/Product/ImageBlockBuilder.php b/vendor/magento/module-catalog/Block/Product/ImageBlockBuilder.php
 index 9fa50c1..1e54cfc 100644
 --- a/vendor/magento/module-catalog/Block/Product/ImageBlockBuilder.php
 +++ b/vendor/magento/module-catalog/Block/Product/ImageBlockBuilder.php
@@ -16,7 +16,7 @@ index 9fa50c1..1e54cfc 100644
              ? 'Magento_Catalog::product/image.phtml'
              : 'Magento_Catalog::product/image_with_borders.phtml';
  
-diff --git a/vendor/magento/module-catalog/Helper/Image.php b/vendor/magento/module-catalog/Helper/Image.php
+diff -Nuar a/vendor/magento/module-catalog/Helper/Image.php b/vendor/magento/module-catalog/Helper/Image.php
 index 039c260..9a7c13e 100644
 --- a/vendor/magento/module-catalog/Helper/Image.php
 +++ b/vendor/magento/module-catalog/Helper/Image.php
@@ -29,7 +29,7 @@ index 039c260..9a7c13e 100644
      }
  
      /**
-diff --git a/vendor/magento/module-catalog/Model/Product/Image.php b/vendor/magento/module-catalog/Model/Product/Image.php
+diff -Nuar a/vendor/magento/module-catalog/Model/Product/Image.php b/vendor/magento/module-catalog/Model/Product/Image.php
 index c1c10da..b543571 100644
 --- a/vendor/magento/module-catalog/Model/Product/Image.php
 +++ b/vendor/magento/module-catalog/Model/Product/Image.php
@@ -69,7 +69,7 @@ index c1c10da..b543571 100644
          return $this;
      }
  
-diff --git a/vendor/magento/module-catalog/Model/Product/Image/ParamsBuilder.php b/vendor/magento/module-catalog/Model/Product/Image/ParamsBuilder.php
+diff -Nuar a/vendor/magento/module-catalog/Model/Product/Image/ParamsBuilder.php b/vendor/magento/module-catalog/Model/Product/Image/ParamsBuilder.php
 index 603f3e8..7aa0c32 100644
 --- a/vendor/magento/module-catalog/Model/Product/Image/ParamsBuilder.php
 +++ b/vendor/magento/module-catalog/Model/Product/Image/ParamsBuilder.php
@@ -110,7 +110,7 @@ index 603f3e8..7aa0c32 100644
  
          $constrain = !empty($imageArguments['constrain'])
              ? $imageArguments['constrain']
-diff --git a/vendor/magento/module-catalog/etc/view.xml b/vendor/magento/module-catalog/etc/view.xml
+diff -Nuar a/vendor/magento/module-catalog/etc/view.xml b/vendor/magento/module-catalog/etc/view.xml
 index 8c7500d..f2f004c 100644
 --- a/vendor/magento/module-catalog/etc/view.xml
 +++ b/vendor/magento/module-catalog/etc/view.xml
@@ -122,7 +122,7 @@ index 8c7500d..f2f004c 100644
 +        <var name="product_image_white_borders">0</var>
      </vars>
  </view>
-diff --git a/vendor/magento/module-catalog/view/frontend/templates/product/image_with_borders.phtml b/vendor/magento/module-catalog/view/frontend/templates/product/image_with_borders.phtml
+diff -Nuar a/vendor/magento/module-catalog/view/frontend/templates/product/image_with_borders.phtml b/vendor/magento/module-catalog/view/frontend/templates/product/image_with_borders.phtml
 index c3280c5..4d7a825 100644
 --- a/vendor/magento/module-catalog/view/frontend/templates/product/image_with_borders.phtml
 +++ b/vendor/magento/module-catalog/view/frontend/templates/product/image_with_borders.phtml
@@ -134,7 +134,7 @@ index c3280c5..4d7a825 100644
 -             height="<?php /* @escapeNotVerified */ echo $block->getResizedImageHeight(); ?>"
               alt="<?php /* @escapeNotVerified */ echo $block->stripTags($block->getLabel(), null, true); ?>"/></span>
  </span>
-diff --git a/vendor/magento/theme-adminhtml-backend/etc/view.xml b/vendor/magento/theme-adminhtml-backend/etc/view.xml
+diff -Nuar a/vendor/magento/theme-adminhtml-backend/etc/view.xml b/vendor/magento/theme-adminhtml-backend/etc/view.xml
 index de6b0cf..f352974 100644
 --- a/vendor/magento/theme-adminhtml-backend/etc/view.xml
 +++ b/vendor/magento/theme-adminhtml-backend/etc/view.xml
@@ -148,7 +148,7 @@ index de6b0cf..f352974 100644
      <media>
          <images module="Magento_Catalog">
              <image id="product_listing_thumbnail" type="thumbnail">
-diff --git a/lib/web/mage/gallery/gallery.less b/lib/web/mage/gallery/gallery.less
+diff -Nuar a/lib/web/mage/gallery/gallery.less b/lib/web/mage/gallery/gallery.less
 index fc9d09e..2fd877d 100644
 --- a/lib/web/mage/gallery/gallery.less
 +++ b/lib/web/mage/gallery/gallery.less

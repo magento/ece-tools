@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/framework/Session/SessionManager.php b/vendor/magento/framework/Session/SessionManager.php
+diff -Nuar a/vendor/magento/framework/Session/SessionManager.php b/vendor/magento/framework/Session/SessionManager.php
 index 2cea02f..272d3d9 100644
 --- a/vendor/magento/framework/Session/SessionManager.php
 +++ b/vendor/magento/framework/Session/SessionManager.php

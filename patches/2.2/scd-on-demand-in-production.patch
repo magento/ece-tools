@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/framework/App/StaticResource.php b/vendor/magento/framework/App/StaticResource.php
+diff -Nuar a/vendor/magento/framework/App/StaticResource.php b/vendor/magento/framework/App/StaticResource.php
 --- a/vendor/magento/framework/App/StaticResource.php
 +++ b/vendor/magento/framework/App/StaticResource.php
 @@ -8,6 +8,7 @@ namespace Magento\Framework\App;
@@ -61,7 +61,7 @@ diff --git a/vendor/magento/framework/App/StaticResource.php b/vendor/magento/fr
          } else {
              $path = $this->request->get('resource');
 
-diff --git a/vendor/magento/framework/App/View/Deployment/Version.php b/vendor/magento/framework/App/View/Deployment/Version.php
+diff -Nuar a/vendor/magento/framework/App/View/Deployment/Version.php b/vendor/magento/framework/App/View/Deployment/Version.php
 --- a/vendor/magento/framework/App/View/Deployment/Version.php
 +++ b/vendor/magento/framework/App/View/Deployment/Version.php
 @@ -6,6 +6,9 @@
@@ -113,7 +113,7 @@ diff --git a/vendor/magento/framework/App/View/Deployment/Version.php b/vendor/m
                  throw new \UnexpectedValueException(
                      "Unable to retrieve deployment version of static files from the file system."
 
-diff --git a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
+diff -Nuar a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 --- a/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 +++ b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 @@ -36,6 +36,7 @@ class ConfigOptionsListConstants
@@ -125,7 +125,7 @@ diff --git a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/ve
 
      /**#@+
 
-diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
+diff -Nuar a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
 --- a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
 +++ b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
 @@ -10,6 +10,9 @@ use Magento\Framework\App\State;
