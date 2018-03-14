@@ -7,18 +7,15 @@ namespace Magento\MagentoCloud\Command\Dev\UpdateComposer;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
 
 /**
+ * Generates script for clearing module requirements that run after composer install.
+ *
+ * This requires for avoiding requirement conflicts for not released magento version.
  */
 class ClearModuleRequirements
 {
     const SCRIPT_PATH = 'clear_module_requirements.php';
-
-    /**
-     * @var FileList
-     */
-    private $fileList;
 
     /**
      * @var File
@@ -31,21 +28,18 @@ class ClearModuleRequirements
 
     /**
      * @param DirectoryList $directoryList
-     * @param FileList $fileList
      * @param File $file
      */
     public function __construct(
         DirectoryList $directoryList,
-        FileList $fileList,
         File $file
     ) {
         $this->directoryList = $directoryList;
-        $this->fileList = $fileList;
         $this->file = $file;
     }
 
     /**
-     * Generates script for clearing module requirements.
+     * Generates script for clearing module requirements that run after composer install.
      *
      * @param array $repos
      * @return void

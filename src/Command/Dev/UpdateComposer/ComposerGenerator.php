@@ -78,7 +78,7 @@ class ComposerGenerator
         }
 
         $add = function ($dir) use (&$composer) {
-            if (!file_exists($dir . '/composer.json')) {
+            if (!$this->file->isExists($dir . '/composer.json')) {
                 return;
             }
 

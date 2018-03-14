@@ -46,6 +46,7 @@ class UpdateComposer extends Command
      * @var File
      */
     private $file;
+
     /**
      * @var ClearModuleRequirements
      */
