@@ -207,6 +207,7 @@ class Deploy implements DeployInterface
             self::VAR_SCD_THREADS => 1,
             self::VAR_GENERATED_CODE_SYMLINK => true,
             self::VAR_SCD_EXCLUDE_THEMES => '',
+            self::VAR_REDIS_USE_READ_CONNECTION => false,
         ];
     }
 }
