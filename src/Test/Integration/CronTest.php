@@ -86,15 +86,15 @@ class CronTest extends AbstractTest
             $this->bootstrap->getSandboxDir()
         ));
 
-        $selectSuccessJobs = 'SELECT * FROM cron_schedule WHERE job_code = "cron_test_job" AND status = "success";';
+        $selectSuccessJobs = 'SELECT * FROM cron_schedule WHERE job_code = "cron_test_job" AND status = "success"';
         $updatePendingJobs = 'UPDATE cron_schedule SET scheduled_at = NOW() '
-            . 'WHERE job_code = "cron_test_job" AND status = "pending";';
+            . 'WHERE job_code = "cron_test_job" AND status = "pending"';
         $addRunningJob = 'INSERT INTO cron_schedule '
             . 'SET job_code = "cron_test_job", status = "running", created_at = NOW() - INTERVAL 3 minute, '
             . 'scheduled_at = NOW() - INTERVAL 2 minute, executed_at = NOW() - INTERVAL 2 minute';
         $updateRunningJob = 'UPDATE cron_schedule '
             . 'SET created_at = NOW() - INTERVAL 3 day, scheduled_at = NOW() - INTERVAL 2 day, '
-            . 'executed_at = NOW() - INTERVAL 2 day WHERE job_code = "cron_test_job" AND status = "running";';
+            . 'executed_at = NOW() - INTERVAL 2 day WHERE job_code = "cron_test_job" AND status = "running"';
 
         $countSuccess = count($db->select($selectSuccessJobs));
         $this->assertTrue($db->query($addRunningJob));
