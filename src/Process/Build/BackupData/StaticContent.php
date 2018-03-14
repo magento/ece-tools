@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Process\Build\BackupData;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -78,6 +79,10 @@ class StaticContent implements ProcessInterface
         }
 
         $this->logger->info('Moving static content to init directory');
-        $this->file->copyDirectory($originalPubStatic, $initPubStatic);
+        try {
+            $this->file->rename($originalPubStatic, $initPubStatic);
+        } catch (FileSystemException $e) {
+            $this->file->copyDirectory($originalPubStatic, $initPubStatic);
+        }
     }
 }
