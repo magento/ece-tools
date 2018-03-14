@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
@@ -22,11 +21,6 @@ class PrepareConfig implements ProcessInterface
     private $logger;
 
     /**
-     * @var ConfigReader
-     */
-    private $configReader;
-
-    /**
      * @var ConfigWriter
      */
     private $configWriter;
@@ -38,18 +32,15 @@ class PrepareConfig implements ProcessInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param GlobalConfig $globalConfig
      */
     public function __construct(
         LoggerInterface $logger,
-        ConfigReader $configReader,
         ConfigWriter $configWriter,
         GlobalConfig $globalConfig
     ) {
         $this->logger = $logger;
-        $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->globalConfig = $globalConfig;
     }
@@ -63,9 +54,7 @@ class PrepareConfig implements ProcessInterface
 
         $config = [
             'static_content_on_demand_in_production' => (int)$this->globalConfig->get(GlobalConfig::VAR_SCD_ON_DEMAND),
-            'force_html_minification' => (int)$this->globalConfig->get(
-                GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR
-            ),
+            'force_html_minification' => (int)$this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION),
         ];
 
         $this->configWriter->update($config);

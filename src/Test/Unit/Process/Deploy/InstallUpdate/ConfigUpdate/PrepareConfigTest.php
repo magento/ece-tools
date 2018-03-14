@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
@@ -29,11 +28,6 @@ class PrepareConfigTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ConfigReader|Mock
-     */
-    private $configReaderMock;
-
-    /**
      * @var ConfigWriter|Mock
      */
     private $configWriterMock;
@@ -49,13 +43,11 @@ class PrepareConfigTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
         $this->process = new PrepareConfig(
             $this->loggerMock,
-            $this->configReaderMock,
             $this->configWriterMock,
             $this->globalConfigMock
         );
@@ -76,7 +68,7 @@ class PrepareConfigTest extends TestCase
             ->method('get')
             ->willReturnMap([
                 [GlobalConfig::VAR_SCD_ON_DEMAND, $scdOnDemand],
-                [GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR, $skipViewPreprocesed],
+                [GlobalConfig::VAR_SKIP_HTML_MINIFICATION, $skipViewPreprocesed],
             ]);
         $this->configWriterMock->expects($this->once())
             ->method('update')
