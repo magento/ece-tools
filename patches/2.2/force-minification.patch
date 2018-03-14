@@ -1,7 +1,7 @@
-diff --git vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
+diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
 index 09f87d878..5ef71afcc 100644
---- vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
-+++ vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
+--- a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
++++ b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
 @@ -107,9 +107,12 @@ class TemplateFile extends File
       */
      private function getMinifiedTemplateInProduction($template)
