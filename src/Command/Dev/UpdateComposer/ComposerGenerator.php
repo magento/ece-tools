@@ -176,10 +176,6 @@ class ComposerGenerator
                         "symlink" => false
                     ]
                 ],
-                [
-                    "type" => "composer",
-                    "url" => "https://repo.magento.com"
-                ]
             ],
             "require" => [
             ],
