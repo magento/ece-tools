@@ -13,7 +13,16 @@ use Psr\Log\LoggerInterface;
  */
 class ThreadCountOptimizer
 {
-    const FORCE_CHANGE_THREAD_COUNT_COMPACT_STRATEGY_VERSION_CONSTRAINT = '<2.2.4';
+    /**
+     * Version of construction of Magento for which
+     * the number of threads will be forced to change
+     * in the case of using a compact strategy
+     * of static content deployment
+     *
+     * @var string
+     */
+    const VERSION_CONSTRAINT = '<2.2.4';
+
     /**
      * @var string
      */
@@ -56,7 +65,7 @@ class ThreadCountOptimizer
     public function optimize(int $threads, string $strategy): int
     {
         if ($strategy === self::STRATEGY_COMPACT
-            && $this->magentoVersion->satisfies(self::FORCE_CHANGE_THREAD_COUNT_COMPACT_STRATEGY_VERSION_CONSTRAINT)
+            && $this->magentoVersion->satisfies(self::VERSION_CONSTRAINT)
         ) {
             if ($threads !== self::THREAD_COUNT_COMPACT_STRATEGY) {
                 $this->logger->notice(
