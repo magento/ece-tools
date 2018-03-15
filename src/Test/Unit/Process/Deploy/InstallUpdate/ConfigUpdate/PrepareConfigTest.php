@@ -55,11 +55,11 @@ class PrepareConfigTest extends TestCase
 
     /**
      * @param bool $scdOnDemand
-     * @param bool $skipViewPreprocesed
+     * @param bool $skipHtmlMinification
      * @param array $expectedResult
      * @dataProvider executeDataProvider
      */
-    public function testExecute(bool $scdOnDemand, bool $skipViewPreprocesed, array $expectedResult)
+    public function testExecute(bool $scdOnDemand, bool $skipHtmlMinification, array $expectedResult)
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -68,7 +68,7 @@ class PrepareConfigTest extends TestCase
             ->method('get')
             ->willReturnMap([
                 [GlobalConfig::VAR_SCD_ON_DEMAND, $scdOnDemand],
-                [GlobalConfig::VAR_SKIP_HTML_MINIFICATION, $skipViewPreprocesed],
+                [GlobalConfig::VAR_SKIP_HTML_MINIFICATION, $skipHtmlMinification],
             ]);
         $this->configWriterMock->expects($this->once())
             ->method('update')
@@ -85,7 +85,7 @@ class PrepareConfigTest extends TestCase
         return [
             [
                 'scdOnDemand' => false,
-                'skipViewPreprocesed' => true,
+                'skipHtmlMinification' => true,
                 'expectedResult' => [
                     'static_content_on_demand_in_production' => 0,
                     'force_html_minification' => 1,
@@ -93,7 +93,7 @@ class PrepareConfigTest extends TestCase
             ],
             [
                 'scdOnDemand' => true,
-                'skipViewPreprocesed' => false,
+                'skipHtmlMinification' => false,
                 'expectedResult' => [
                     'static_content_on_demand_in_production' => 1,
                     'force_html_minification' => 0,
