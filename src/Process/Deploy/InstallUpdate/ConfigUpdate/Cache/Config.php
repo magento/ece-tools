@@ -118,11 +118,11 @@ class Config
     private function getSlaveConnection(): array
     {
         $connectionData = [];
+        $redisSlaveConfig = $this->environment->getRelationship('redis-slave');
         $slaveHost = $redisSlaveConfig[0]['host'] ?? null;
 
         if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_READ_CONNECTION) && $slaveHost) {
             $this->logger->info('Set Redis slave connection');
-            $redisSlaveConfig = $this->environment->getRelationship('redis-slave');
             $connectionData = [
                 'server' => $slaveHost,
                 'port' => $redisSlaveConfig[0]['port'] ?? '',
