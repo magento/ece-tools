@@ -61,7 +61,7 @@ class ConfigTest extends TestCase
                     ['frontend' => ['cache_option' => 'value']]
                 ],
                 [
-                    DeployInterface::VAR_REDIS_USE_READ_CONNECTION,
+                    DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
                     false
                 ]
             ]);
@@ -88,7 +88,7 @@ class ConfigTest extends TestCase
                     ['frontend' => ['cache_option' => 'value']]
                 ],
                 [
-                    DeployInterface::VAR_REDIS_USE_READ_CONNECTION,
+                    DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
                     true
                 ]
             ]);
@@ -98,7 +98,7 @@ class ConfigTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('The variable \'' . DeployInterface::VAR_REDIS_USE_READ_CONNECTION . '\' is ignored'
+            ->with('The variable \'' . DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION . '\' is ignored'
                     . ' as you set your own cache connection in \'' . DeployInterface::VAR_CACHE_CONFIGURATION . '\'');
 
         $this->assertEquals(
@@ -139,7 +139,7 @@ class ConfigTest extends TestCase
                     []
                 ],
                 [
-                    DeployInterface::VAR_REDIS_USE_READ_CONNECTION,
+                    DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
                     $useSlave
                 ]
             ]);
@@ -163,7 +163,7 @@ class ConfigTest extends TestCase
      * Results value for next data:
      * 1 - data for 'redis' relationships
      * 2 - data for 'redis-slave' relationships
-     * 3 - value for REDIS_USE_READ_CONNECTION variable
+     * 3 - value for REDIS_USE_SLAVE_CONNECTION variable
      * 4 - expected result
      *
      * @return array

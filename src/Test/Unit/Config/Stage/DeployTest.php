@@ -215,16 +215,16 @@ class DeployTest extends TestCase
                 'some theme 2',
             ],
             'redis_use_slave_default' => [
-                Deploy::VAR_REDIS_USE_READ_CONNECTION,
+                Deploy::VAR_REDIS_USE_SLAVE_CONNECTION,
                 [],
                 [],
                 false,
             ],
             'redis_use_slave_true' => [
-                Deploy::VAR_REDIS_USE_READ_CONNECTION,
+                Deploy::VAR_REDIS_USE_SLAVE_CONNECTION,
                 [],
                 [
-                    Deploy::VAR_REDIS_USE_READ_CONNECTION => true
+                    Deploy::VAR_REDIS_USE_SLAVE_CONNECTION => true
                 ],
                 true,
             ],

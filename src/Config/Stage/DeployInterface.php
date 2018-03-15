@@ -25,7 +25,7 @@ interface DeployInterface extends StageConfigInterface
     /**
      * The variable responsible to set Redis slave connection when it has true value.
      */
-    const VAR_REDIS_USE_READ_CONNECTION = 'REDIS_USE_READ_CONNECTION';
+    const VAR_REDIS_USE_SLAVE_CONNECTION = 'REDIS_USE_SLAVE_CONNECTION';
 
     /**
      * @deprecated 2.1 specific variable.

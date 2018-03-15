@@ -58,11 +58,11 @@ class Config
         $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
 
         if ($this->isCacheConfigurationValid($envCacheConfiguration)) {
-            if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_READ_CONNECTION)) {
+            if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION)) {
                 $this->logger->notice(
                     sprintf(
                         'The variable \'%s\' is ignored as you set your own cache connection in \'%s\'',
-                        DeployInterface::VAR_REDIS_USE_READ_CONNECTION,
+                        DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
                         DeployInterface::VAR_CACHE_CONFIGURATION
                     )
                 );
@@ -110,7 +110,7 @@ class Config
     }
 
     /**
-     * Retrieves Redis read connection data if it exists and variable REDIS_USE_READ_CONNECTION was set as true.
+     * Retrieves Redis read connection data if it exists and variable REDIS_USE_SLAVE_CONNECTION was set as true.
      * Otherwise retrieves an empty array.
      *
      * @return array
@@ -121,7 +121,7 @@ class Config
         $redisSlaveConfig = $this->environment->getRelationship('redis-slave');
         $slaveHost = $redisSlaveConfig[0]['host'] ?? null;
 
-        if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_READ_CONNECTION) && $slaveHost) {
+        if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION) && $slaveHost) {
             $this->logger->info('Set Redis slave connection');
             $connectionData = [
                 'server' => $slaveHost,
