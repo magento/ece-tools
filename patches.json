@@ -14,6 +14,9 @@
     "Fix redis session locking for 2.2.0 and 2.2.1": {
       "101.0.0||101.0.1": "2.2/fix-redis-session-manager-locking.patch"
     },
+    "Fix redis session locking for 2.1.11 and 2.1.13": {
+      "100.1.11 - 100.1.13": "2.1/fix-redis-session-manager-locking.patch"
+    },
     "Fix locker process (Magento 2.1)": {
       "100.1.*": "2.1/locker-process.magento-2.1.patch"
     },
