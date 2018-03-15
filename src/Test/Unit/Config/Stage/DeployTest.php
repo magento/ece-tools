@@ -215,16 +215,16 @@ class DeployTest extends TestCase
                 'some theme 2',
             ],
             'default slave connection' => [
-                Deploy::VAR_MYSQL_USE_READ_CONNECTION,
+                Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 [],
                 [],
                 false,
             ],
             'use slave connection' => [
-                Deploy::VAR_MYSQL_USE_READ_CONNECTION,
+                Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 [],
                 [
-                    Deploy::VAR_MYSQL_USE_READ_CONNECTION => true
+                    Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION => true
                 ],
                 true,
             ],

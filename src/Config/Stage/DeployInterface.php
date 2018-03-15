@@ -25,7 +25,7 @@ interface DeployInterface extends StageConfigInterface
     /**
      * The variable responsible to set mysql slave connection when it has true value.
      */
-    const VAR_MYSQL_USE_READ_CONNECTION = 'MYSQL_USE_READ_CONNECTION';
+    const VAR_MYSQL_USE_SLAVE_CONNECTION = 'MYSQL_USE_SLAVE_CONNECTION';
 
     /**
      * @deprecated 2.1 specific variable.
