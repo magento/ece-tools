@@ -92,7 +92,7 @@ class WritableDirectories implements ProcessInterface
             $initDir = $rootInitDir . $dir;
 
             if (($dir == $viewPreprocessedDir)
-                && $this->globalConfig->get(GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR)
+                && $this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)
             ) {
                 $this->logger->notice(sprintf('Skip copying %s->%s', $originalDir, $initDir));
                 continue;

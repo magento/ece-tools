@@ -57,6 +57,10 @@
       "*": "front-static.patch",
       "101.0.0 - 101.0.3": "2.2/scd-on-demand-in-production.patch",
       "100.1.*": "2.1/scd-on-demand-in-production.patch"
+    },
+    "Force minification": {
+      "101.0.*": "2.2/force-minification.patch",
+      "100.1.*": "2.1/force-minification.patch"
     }
   },
   "magento/module-customer-import-export": {
