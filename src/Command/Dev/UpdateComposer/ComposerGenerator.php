@@ -108,7 +108,7 @@ class ComposerGenerator
             foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
                 $add($dir);
             }
-            if ($repoName == self::EE_REPO) {
+            if ($this->file->isDirectory($baseRepoFolder . '/lib/internal/Magento/Framework/')) {
                 foreach (glob($baseRepoFolder . '/lib/internal/Magento/Framework/*') as $dir) {
                     $add($dir);
                 }
