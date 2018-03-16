@@ -108,6 +108,11 @@ class ComposerGenerator
             foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
                 $add($dir);
             }
+            if ($repoName == self::EE_REPO) {
+                foreach (glob($baseRepoFolder . '/lib/internal/Magento/Framework/*') as $dir) {
+                    $add($dir);
+                }
+            }
         }
 
         return $composer;
@@ -131,11 +136,6 @@ class ComposerGenerator
                 $gitOption['repo'],
                 $repoName
             );
-        }
-
-        if (isset($repoOptions[self::EE_REPO])) {
-            $installFromGitScripts[] = 'cp -R ./ee/lib/internal/Magento/Framework/*'
-                . ' ./ce/lib/internal/Magento/Framework/';
         }
 
         return $installFromGitScripts;
