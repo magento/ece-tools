@@ -14,7 +14,11 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class ComposerGenerator
 {
-    const POSSIBLE_REPOS = ['ce', 'ee', 'b2b'];
+    const CE_REPO = 'ce';
+    const EE_REPO = 'ee';
+    const B2B_REPO = 'ee';
+
+    const POSSIBLE_REPOS = [self::CE_REPO, self::EE_REPO, self::B2B_REPO];
     /**
      * @var DirectoryList
      */
@@ -127,6 +131,11 @@ class ComposerGenerator
                 $gitOption['repo'],
                 $repoName
             );
+        }
+
+        if (isset($repoOptions[self::EE_REPO])) {
+            $installFromGitScripts[] = 'cp -R ./ee/lib/internal/Magento/Framework/*'
+                . ' ./ce/lib/internal/Magento/Framework/';
         }
 
         return $installFromGitScripts;
