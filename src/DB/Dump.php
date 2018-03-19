@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface as DatabaseConnectionInterface;
 
 /**
  * Class Dump generate mysqldump command with read only connection
@@ -15,15 +15,15 @@ class Dump implements DumpInterface
     /**
      * Database connection data for read operations
      *
-     * @var ConnectionInterface
+     * @var DatabaseConnectionInterface
      */
     private $connectionData;
 
     /**
-     * @param ConnectionInterface $connectionData
+     * @param DatabaseConnectionInterface $connectionData
      */
     public function __construct(
-        ConnectionInterface $connectionData
+        DatabaseConnectionInterface $connectionData
     ) {
         $this->connectionData = $connectionData;
     }
