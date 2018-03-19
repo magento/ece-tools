@@ -68,7 +68,7 @@ class ComposerGenerator
             $composer['require'] += ["magento/ece-tools" => "2002.0.*"];
         }
 
-        foreach ($repoOptions as $repoName => $gitOption) {
+        foreach (array_keys($repoOptions) as $repoName) {
             $repoComposerJsonPath = $this->directoryList->getMagentoRoot() . '/' . $repoName . '/composer.json';
             if (!$this->file->isExists($repoComposerJsonPath)) {
                 continue;
@@ -81,39 +81,7 @@ class ComposerGenerator
             );
         }
 
-        $add = function ($dir) use (&$composer) {
-            if (!$this->file->isExists($dir . '/composer.json')) {
-                return;
-            }
-
-            $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
-            $composer['repositories'][$dirComposer['name']] = [
-                "type" => "path",
-                "url" => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
-                "options" => [
-                    "symlink" => false
-                ]
-            ];
-            $composer['require'][$dirComposer['name']] = $dirComposer['version'];
-        };
-
-        foreach ($repoOptions as $repoName => $gitOption) {
-            $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
-            foreach (glob($baseRepoFolder . '/app/code/Magento/*') as $dir) {
-                $add($dir);
-            }
-            foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
-                $add($dir);
-            }
-            foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
-                $add($dir);
-            }
-            if ($this->file->isDirectory($baseRepoFolder . '/lib/internal/Magento/Framework/')) {
-                foreach (glob($baseRepoFolder . '/lib/internal/Magento/Framework/*') as $dir) {
-                    $add($dir);
-                }
-            }
-        }
+        $composer = $this->addModules($repoOptions, $composer);
 
         return $composer;
     }
@@ -216,6 +184,52 @@ class ComposerGenerator
                 ]
             ]
         ];
+
+        return $composer;
+    }
+
+    /**
+     * Adds modules and repositories to composer.json.
+     *
+     * @param array $repoOptions
+     * @param array $composer
+     * @return array
+     */
+    private function addModules(array $repoOptions, array $composer): array
+    {
+        $add = function ($dir) use (&$composer) {
+            if (!$this->file->isExists($dir . '/composer.json')) {
+                return;
+            }
+
+            $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
+            $composer['repositories'][$dirComposer['name']] = [
+                "type" => "path",
+                "url" => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
+                "options" => [
+                    "symlink" => false
+                ]
+            ];
+            $composer['require'][$dirComposer['name']] = $dirComposer['version'];
+        };
+
+        foreach (array_keys($repoOptions) as $repoName) {
+            $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
+            foreach (glob($baseRepoFolder . '/app/code/Magento/*') as $dir) {
+                $add($dir);
+            }
+            foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
+                $add($dir);
+            }
+            foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
+                $add($dir);
+            }
+            if ($this->file->isDirectory($baseRepoFolder . '/lib/internal/Magento/Framework/')) {
+                foreach (glob($baseRepoFolder . '/lib/internal/Magento/Framework/*') as $dir) {
+                    $add($dir);
+                }
+            }
+        }
 
         return $composer;
     }
