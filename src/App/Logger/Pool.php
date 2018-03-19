@@ -64,6 +64,15 @@ class Pool
             }
         }
 
+        /**
+         * Monolog does not handle associative array of handlers prior to version 1.18.0.
+         *
+         * @see https://github.com/Seldaek/monolog/issues/691
+         */
+        $this->handlers = array_values(
+            $this->handlers
+        );
+
         return $this->handlers;
     }
 }
