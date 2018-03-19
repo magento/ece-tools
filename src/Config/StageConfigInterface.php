@@ -33,7 +33,7 @@ interface StageConfigInterface
     const VAR_SKIP_SCD = 'SKIP_SCD';
     const VAR_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
     const VAR_SCD_ON_DEMAND = 'SCD_ON_DEMAND';
-    const VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR = 'SKIP_COPYING_VIEW_PREPROCESSED_DIR';
+    const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
 
     /**
      * Retrieves environment configuration per stage.

@@ -366,13 +366,13 @@ class RecoverableDirectoryListTest extends TestCase
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, false],
-                [DeployInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR, $skipCopyingViewPreprocessed]
+                [DeployInterface::VAR_SKIP_HTML_MINIFICATION, $skipCopyingViewPreprocessed]
             ]);
 
         $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->willReturnMap([
-                [DeployInterface::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR, $skipCopyingViewPreprocessed]
+                [DeployInterface::VAR_SKIP_HTML_MINIFICATION, $skipCopyingViewPreprocessed]
             ]);
 
         $this->directoryListMock->expects($this->exactly(count($expected)))
