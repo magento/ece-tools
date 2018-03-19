@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
  * Compress static content at deploy time.
@@ -43,24 +44,32 @@ class CompressStaticContent implements ProcessInterface
     private $stageConfig;
 
     /**
+     * @var GlobalConfig
+     */
+    private $globalConfig;
+
+    /**
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param StaticContentCompressor $staticContentCompressor
      * @param FlagManager $flagManager
      * @param DeployInterface $stageConfig
+     * @param GlobalConfig $globalConfig
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         StaticContentCompressor $staticContentCompressor,
         FlagManager $flagManager,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        GlobalConfig $globalConfig
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->staticContentCompressor = $staticContentCompressor;
         $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
+        $this->globalConfig = $globalConfig;
     }
 
     /**
@@ -70,6 +79,12 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
+        if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND)) {
+            $this->logger->notice('Skipping static content compression. SCD on demand is enabled.');
+
+            return;
+        }
+
         if (!$this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
             && $this->environment->isDeployStaticContent()
         ) {

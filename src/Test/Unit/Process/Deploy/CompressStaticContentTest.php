@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -50,6 +51,11 @@ class CompressStaticContentTest extends TestCase
     private $stageConfigMock;
 
     /**
+     * @var GlobalConfig|Mock
+     */
+    private $globalConfigMock;
+
+    /**
      * Setup the test environment.
      */
     protected function setUp()
@@ -59,13 +65,15 @@ class CompressStaticContentTest extends TestCase
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
             $this->environmentMock,
             $this->compressorMock,
             $this->flagManagerMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->globalConfigMock
         );
     }
 
@@ -74,6 +82,10 @@ class CompressStaticContentTest extends TestCase
      */
     public function testExecute()
     {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(false);
         $this->stageConfigMock->expects($this->exactly(3))
             ->method('get')
             ->willReturnMap([
@@ -98,10 +110,40 @@ class CompressStaticContentTest extends TestCase
     }
 
     /**
+     * Test deploy-time compression is skipped.
+     */
+    public function testExecuteSkipped()
+    {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->never())
+            ->method('get');
+        $this->environmentMock
+            ->expects($this->never())
+            ->method('isDeployStaticContent');
+        $this->flagManagerMock->expects($this->never())
+            ->method('exists');
+        $this->compressorMock
+            ->expects($this->never())
+            ->method('process');
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Skipping static content compression. SCD on demand is enabled.');
+
+        $this->process->execute();
+    }
+
+    /**
      * Test that deploy-time compression will fail appropriately.
      */
     public function testExecuteNoCompressByEnv()
     {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(false);
         $this->environmentMock
             ->expects($this->once())
             ->method('isDeployStaticContent')
@@ -123,6 +165,10 @@ class CompressStaticContentTest extends TestCase
 
     public function testExecuteNoCompressBySCDInBuild()
     {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(false);
         $this->environmentMock
             ->expects($this->once())
             ->method('isDeployStaticContent')
