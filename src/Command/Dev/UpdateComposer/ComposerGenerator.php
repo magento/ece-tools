@@ -16,7 +16,7 @@ class ComposerGenerator
 {
     const CE_REPO = 'ce';
     const EE_REPO = 'ee';
-    const B2B_REPO = 'ee';
+    const B2B_REPO = 'b2b';
 
     const POSSIBLE_REPOS = [self::CE_REPO, self::EE_REPO, self::B2B_REPO];
     /**
@@ -63,7 +63,7 @@ class ComposerGenerator
         if ($this->file->isExists($rootComposerJsonPath)) {
             $rootComposer = json_decode($this->file->fileGetContents($rootComposerJsonPath), true);
             $composer['require'] += $rootComposer['require'];
-            $composer['repositories'] += $rootComposer['repositories'];
+            $composer['repositories'] = array_merge($composer['repositories'], $rootComposer['repositories']);
         } else {
             $composer['require'] += ["magento/ece-tools" => "2002.0.*"];
         }
@@ -86,14 +86,14 @@ class ComposerGenerator
                 return;
             }
 
-            $composer['repositories'][] = [
+            $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
+            $composer['repositories'][$dirComposer['name']] = [
                 "type" => "path",
                 "url" => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
                 "options" => [
                     "symlink" => false
                 ]
             ];
-            $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
             $composer['require'][$dirComposer['name']] = $dirComposer['version'];
         };
 
@@ -175,7 +175,7 @@ class ComposerGenerator
                 'ce/bin/magento'
             ],
             "repositories" => [
-                [
+                "magento/framework" => [
                     "type" => "path",
                     "url" => "./ce/lib/internal/Magento/Framework/",
                     "transport-options" => [

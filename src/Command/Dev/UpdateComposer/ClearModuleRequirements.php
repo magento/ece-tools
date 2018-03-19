@@ -75,10 +75,13 @@ foreach ($reposArrayToString as \$repoName) {
 CODE;
         $this->file->filePutContents($clearModulesFilePath, $clearModulesCode);
 
-        $this->file->filePutContents(
-            $rootDirectory . '/.gitignore',
-            '!/' . self::SCRIPT_PATH . PHP_EOL,
-            FILE_APPEND
-        );
+        $gitIgnore = $this->file->fileGetContents($rootDirectory . '/.gitignore');
+        if (strpos($gitIgnore, self::SCRIPT_PATH) === false) {
+            $this->file->filePutContents(
+                $rootDirectory . '/.gitignore',
+                '!/' . self::SCRIPT_PATH . PHP_EOL,
+                FILE_APPEND
+            );
+        }
     }
 }
