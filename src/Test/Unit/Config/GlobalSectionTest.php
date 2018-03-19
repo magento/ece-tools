@@ -100,43 +100,43 @@ class GlobalSectionTest extends TestCase
                 'expectedValue' => false,
             ],
             [
-                'name' => GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                'name' => GlobalSection::VAR_SKIP_HTML_MINIFICATION,
                 'config' => [
                     StageConfigInterface::STAGE_GLOBAL => [
-                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true,
+                        GlobalSection::VAR_SKIP_HTML_MINIFICATION => true,
                     ],
                     StageConfigInterface::STAGE_BUILD => [
-                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false
+                        GlobalSection::VAR_SKIP_HTML_MINIFICATION => false
                     ],
                     StageConfigInterface::STAGE_DEPLOY => [
-                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false
+                        GlobalSection::VAR_SKIP_HTML_MINIFICATION => false
                     ],
                 ],
                 'expectedValue' => true,
             ],
             [
-                'name' => GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                'name' => GlobalSection::VAR_SKIP_HTML_MINIFICATION,
                 'config' => [
                     StageConfigInterface::STAGE_GLOBAL => [
-                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => false,
+                        GlobalSection::VAR_SKIP_HTML_MINIFICATION => false,
                     ],
                     StageConfigInterface::STAGE_BUILD => [
-                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true
+                        GlobalSection::VAR_SKIP_HTML_MINIFICATION => true
                     ],
                     StageConfigInterface::STAGE_DEPLOY => [
-                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true
+                        GlobalSection::VAR_SKIP_HTML_MINIFICATION => true
                     ],
                 ],
                 'expectedValue' => false,
             ],
             [
-                'name' => GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR,
+                'name' => GlobalSection::VAR_SKIP_HTML_MINIFICATION,
                 'config' => [
                     StageConfigInterface::STAGE_BUILD => [
-                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true
+                        GlobalSection::VAR_SKIP_HTML_MINIFICATION => true
                     ],
                     StageConfigInterface::STAGE_DEPLOY => [
-                        GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR => true
+                        GlobalSection::VAR_SKIP_HTML_MINIFICATION => true
                     ],
                 ],
                 'expectedValue' => false,

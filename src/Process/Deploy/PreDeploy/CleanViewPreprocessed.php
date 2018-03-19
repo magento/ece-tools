@@ -62,7 +62,7 @@ class CleanViewPreprocessed implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->globalConfig->get(GlobalConfig::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR)) {
+        if (!$this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)) {
             return;
         }
 
