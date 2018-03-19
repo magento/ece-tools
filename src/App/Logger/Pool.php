@@ -54,24 +54,21 @@ class Pool
      */
     public function getHandlers(): array
     {
-        if (null === $this->handlers) {
-            foreach ($this->logConfig->getHandlers() as $handlerName => $handlerConfig) {
-                $this->handlers[$handlerName] = $this->handlerFactory->create($handlerName);
-
-                if (empty($handlerConfig['use_default_formatter'])) {
-                    $this->handlers[$handlerName]->setFormatter($this->lineFormatterFactory->create());
-                }
-            }
+        if (null !== $this->handlers) {
+            return $this->handlers;
         }
 
-        /**
-         * Monolog does not handle associative array of handlers prior to version 1.18.0.
-         *
-         * @see https://github.com/Seldaek/monolog/issues/691
-         */
-        $this->handlers = array_values(
-            $this->handlers
-        );
+        $this->handlers = [];
+
+        foreach ($this->logConfig->getHandlers() as $handlerName => $handlerConfig) {
+            $handler = $this->handlerFactory->create($handlerName);
+
+            if (empty($handlerConfig['use_default_formatter'])) {
+                $handler->setFormatter($this->lineFormatterFactory->create());
+            }
+
+            $this->handlers[] = $handler;
+        }
 
         return $this->handlers;
     }
