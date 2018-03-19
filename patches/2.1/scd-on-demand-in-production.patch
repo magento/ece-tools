@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
+diff -Nuar a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 --- a/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 +++ b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 @@ -11,6 +11,8 @@ namespace Magento\Framework\Config;
@@ -11,7 +11,7 @@ diff --git a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/ve
       * Path to the values in the deployment config
       */
 
-diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
+diff -Nuar a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
 --- a/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
 +++ b/vendor/magento/framework/View/Design/FileResolution/Fallback/TemplateFile.php
 @@ -10,6 +10,9 @@ use Magento\Framework\App\State;
@@ -89,7 +89,7 @@ diff --git a/vendor/magento/framework/View/Design/FileResolution/Fallback/Templa
 +    }
  }
 
-diff --git a/vendor/magento/framework/App/View/Deployment/Version.php b/vendor/magento/framework/App/View/Deployment/Version.php
+diff -Nuar a/vendor/magento/framework/App/View/Deployment/Version.php b/vendor/magento/framework/App/View/Deployment/Version.php
 --- a/vendor/magento/framework/App/View/Deployment/Version.php
 +++ b/vendor/magento/framework/App/View/Deployment/Version.php
 @@ -6,6 +6,10 @@

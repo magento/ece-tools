@@ -1,4 +1,4 @@
-diff --git a/pub/front-static.php b/pub/front-static.php
+diff -Naur a/pub/front-static.php b/pub/front-static.php
 --- a/pub/front-static.php
 +++ b/pub/front-static.php
 @@ -6,6 +6,7 @@
