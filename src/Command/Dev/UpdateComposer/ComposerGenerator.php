@@ -92,7 +92,7 @@ class ComposerGenerator
      */
     public function getInstallFromGitScripts(array $repoOptions): array
     {
-        $installFromGitScripts = ['mkdir -p app/etc'];
+        $installFromGitScripts = ['mkdir -p app' . DIRECTORY_SEPARATOR . 'etc'];
         $installFromGitScripts[] = 'rm -rf ' . implode(' ', self::POSSIBLE_REPOS);
 
         foreach ($repoOptions as $repoName => $gitOption) {
@@ -122,13 +122,11 @@ class ComposerGenerator
         $preparePackagesScripts = [];
 
         foreach (array_keys($repoOptions) as $repoName) {
-            $preparePackagesScripts[] = sprintf(
-                sprintf(
-                    "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
-                    . "--exclude='dev/tests' --exclude='lib/internal/Magento' ./%s/ ./",
-                    $repoName
-                )
-            );
+            $preparePackagesScripts[] = str_replace('/', DIRECTORY_SEPARATOR, sprintf(
+                "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
+                . "--exclude='dev/tests' --exclude='lib/internal/Magento' ./%s/ ./",
+                $repoName
+            ));
         }
 
         $composer = [
