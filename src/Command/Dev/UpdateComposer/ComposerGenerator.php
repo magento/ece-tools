@@ -65,7 +65,7 @@ class ComposerGenerator
             $composer['require'] += $rootComposer['require'];
             $composer['repositories'] = array_merge($composer['repositories'], $rootComposer['repositories']);
         } else {
-            $composer['require'] += ["magento/ece-tools" => "2002.0.*"];
+            $composer['require'] += ['magento/ece-tools' => '2002.0.*'];
         }
 
         foreach (array_keys($repoOptions) as $repoName) {
@@ -96,7 +96,7 @@ class ComposerGenerator
         $installFromGitScripts[] = 'rm -rf ' . implode(' ', self::POSSIBLE_REPOS);
 
         foreach ($repoOptions as $repoName => $gitOption) {
-            $gitCloneCommand = "git clone -b %s --single-branch --depth 1 %s %s";
+            $gitCloneCommand = 'git clone -b %s --single-branch --depth 1 %s %s';
 
             $installFromGitScripts[] = sprintf(
                 $gitCloneCommand,
@@ -132,55 +132,55 @@ class ComposerGenerator
         }
 
         $composer = [
-            "name" => "magento/cloud-dev",
-            "description" => "eCommerce Platform for Growth",
-            "type" => "project",
-            "version" => "{$this->magentoVersion->getVersion()}",
-            "license" => [
-                "OSL-3.0"
+            'name' => 'magento/cloud-dev',
+            'description' => 'eCommerce Platform for Growth',
+            'type' => 'project',
+            'version' => $this->magentoVersion->getVersion(),
+            'license' => [
+                'OSL-3.0'
             ],
-            "bin" => [
+            'bin' => [
                 'ce/bin/magento'
             ],
-            "repositories" => [
-                "magento/framework" => [
-                    "type" => "path",
-                    "url" => "./ce/lib/internal/Magento/Framework/",
-                    "transport-options" => [
-                        "symlink" => false
+            'repositories' => [
+                'magento/framework' => [
+                    'type' => 'path',
+                    'url' => './ce/lib/internal/Magento/Framework/',
+                    'transport-options' => [
+                        'symlink' => false
                     ],
-                    "options" => [
-                        "symlink" => false
+                    'options' => [
+                        'symlink' => false
                     ]
                 ],
             ],
-            "require" => [
+            'require' => [
             ],
-            "config" => [
-                "use-include-path" => true
+            'config' => [
+                'use-include-path' => true
             ],
-            "autoload" => [
-                "psr-4" => [
-                    "Magento\\Setup\\" => "setup/src/Magento/Setup/",
+            'autoload' => [
+                'psr-4' => [
+                    'Magento\\Setup\\' => 'setup/src/Magento/Setup/',
                 ],
             ],
-            "minimum-stability" => "dev",
-            "prefer-stable" => true,
-            "extra" => [
-                "magento-force" => "override",
-                "magento-deploystrategy" => "copy"
+            'minimum-stability' => 'dev',
+            'prefer-stable' => true,
+            'extra' => [
+                'magento-force' => 'override',
+                'magento-deploystrategy' => 'copy'
             ],
-            "scripts" => [
-                "install-from-git" => $installFromGitScripts,
-                "prepare-packages" => $preparePackagesScripts,
-                "pre-install-cmd" => [
-                    "@install-from-git"
+            'scripts' => [
+                'install-from-git' => $installFromGitScripts,
+                'prepare-packages' => $preparePackagesScripts,
+                'pre-install-cmd' => [
+                    '@install-from-git'
                 ],
-                "pre-update-cmd" => [
-                    "@install-from-git"
+                'pre-update-cmd' => [
+                    '@install-from-git'
                 ],
-                "post-install-cmd" => [
-                    "@prepare-packages"
+                'post-install-cmd' => [
+                    '@prepare-packages'
                 ]
             ]
         ];
@@ -204,10 +204,10 @@ class ComposerGenerator
 
             $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
             $composer['repositories'][$dirComposer['name']] = [
-                "type" => "path",
-                "url" => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
-                "options" => [
-                    "symlink" => false
+                'type' => 'path',
+                'url' => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
+                'options' => [
+                    'symlink' => false
                 ]
             ];
             $composer['require'][$dirComposer['name']] = $dirComposer['version'];

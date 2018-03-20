@@ -52,7 +52,7 @@ class ClearModuleRequirements
 
         $clearModulesCode = <<<CODE
 <?php
-foreach ($reposArrayToString as \$repoName) {
+foreach ({$reposArrayToString} as \$repoName) {
     foreach (glob(__DIR__ .'/' . \$repoName . '/app/code/Magento/*') as \$moduleDir) {
         if (!file_exists(\$moduleDir . '/composer.json')) {
             continue;
