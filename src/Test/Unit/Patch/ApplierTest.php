@@ -297,7 +297,7 @@ class ApplierTest extends TestCase
             ->will($this->returnCallback([$this, 'shellMockErrorCallback']));
         $this->globalSection->expects($this->once())
             ->method('get')
-            ->with(GlobalSection::VAR_DEPLOY_FROM_GIT)
+            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')

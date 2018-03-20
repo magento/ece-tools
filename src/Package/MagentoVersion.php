@@ -53,8 +53,8 @@ class MagentoVersion
      */
     public function getVersion(): string
     {
-        if ($this->globalSection->get(GlobalSection::VAR_DEPLOY_FROM_GIT)) {
-            return $this->globalSection->get(GlobalSection::VAR_MAGENTO_VERSION);
+        if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+            return $this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT);
         }
 
         return $this->manager->get('magento/magento2-base')->getVersion();

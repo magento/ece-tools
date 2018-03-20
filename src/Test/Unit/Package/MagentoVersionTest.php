@@ -102,7 +102,7 @@ class MagentoVersionTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_DEPLOY_FROM_GIT)
+            ->with(GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
             ->willReturn(false);
         $this->managerMock->method('get')
             ->with('magento/magento2-base')
@@ -122,10 +122,10 @@ class MagentoVersionTest extends TestCase
         $this->globalConfigMock->expects($this->exactly(2))
             ->method('get')
             ->withConsecutive(
-                [GlobalConfig::VAR_DEPLOY_FROM_GIT],
-                [GlobalConfig::VAR_MAGENTO_VERSION]
+                [GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT],
+                [GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT]
             )
-            ->willReturn(true, '2.2.1');
+            ->willReturn('2.2.1', '2.2.1');
         $this->managerMock->expects($this->never())
             ->method('get');
         $this->packageMock->expects($this->never())
@@ -145,7 +145,7 @@ class MagentoVersionTest extends TestCase
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
-            ->with(GlobalConfig::VAR_DEPLOY_FROM_GIT)
+            ->with(GlobalConfig::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
             ->willReturn(false);
         $this->managerMock->expects($this->exactly(1))
             ->method('get')

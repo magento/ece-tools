@@ -116,7 +116,7 @@ class Applier
         try {
             $this->shell->execute('git apply ' . $path);
         } catch (\RuntimeException $applyException) {
-            if ($this->globalSection->get(GlobalSection::VAR_DEPLOY_FROM_GIT)) {
+            if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
                 $this->logger->notice("Patch {$name} wasn't applied.");
 
                 return;

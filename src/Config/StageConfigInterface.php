@@ -38,9 +38,8 @@ interface StageConfigInterface
     /**
      * Settings for deployment from git.
      */
-    const VAR_DEPLOY_FROM_GIT = 'DEPLOY_FROM_GIT';
+    const VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT = 'DEPLOYED_MAGENTO_VERSION_FROM_GIT';
     const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
-    const VAR_MAGENTO_VERSION = 'MAGENTO_VERSION';
 
     /**
      * Retrieves environment configuration per stage.
