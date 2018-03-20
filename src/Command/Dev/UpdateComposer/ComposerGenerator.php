@@ -88,11 +88,12 @@ class ComposerGenerator
 
     /**
      * @param array $repoOptions
+     * @param string $dirSeparator
      * @return array
      */
-    public function getInstallFromGitScripts(array $repoOptions): array
+    public function getInstallFromGitScripts(array $repoOptions, string $dirSeparator = '/'): array
     {
-        $installFromGitScripts = ['mkdir -p app' . DIRECTORY_SEPARATOR . 'etc'];
+        $installFromGitScripts = ['mkdir -p app' . $dirSeparator . 'etc'];
         $installFromGitScripts[] = 'rm -rf ' . implode(' ', self::POSSIBLE_REPOS);
 
         foreach ($repoOptions as $repoName => $gitOption) {
