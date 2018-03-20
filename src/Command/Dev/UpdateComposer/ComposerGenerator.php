@@ -122,11 +122,11 @@ class ComposerGenerator
         $preparePackagesScripts = [];
 
         foreach (array_keys($repoOptions) as $repoName) {
-            $preparePackagesScripts[] = str_replace('/', DIRECTORY_SEPARATOR, sprintf(
+            $preparePackagesScripts[] = sprintf(
                 "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
                 . "--exclude='dev/tests' --exclude='lib/internal/Magento' ./%s/ ./",
                 $repoName
-            ));
+            );
         }
 
         $composer = [
