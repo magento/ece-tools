@@ -8,11 +8,13 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
  * @inheritdoc
@@ -45,6 +47,21 @@ class RecoverableDirectoryListTest extends TestCase
     private $magentoVersionMock;
 
     /**
+     * @var DirectoryList|Mock
+     */
+    private $directoryListMock;
+
+    /**
+     * @var GlobalConfig|Mock
+     */
+    private $globalConfigMock;
+
+    /**
+     * @var array
+     */
+    private $directoryListGetPathReturnMap;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -53,12 +70,25 @@ class RecoverableDirectoryListTest extends TestCase
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->globalConfigMock = $this->createMock(GlobalConfig::class);
+
+        $this->directoryListGetPathReturnMap = [
+            [DirectoryList::DIR_ETC, true, 'app/etc'],
+            [DirectoryList::DIR_MEDIA, true, 'pub/media'],
+            [DirectoryList::DIR_VIEW_PREPROCESSED, true, 'var/view_preprocessed'],
+            [DirectoryList::DIR_STATIC, true, 'pub/static'],
+            [DirectoryList::DIR_GENERATED_METADATA, true, 'var/di'],
+            [DirectoryList::DIR_GENERATED_CODE, true, 'var/generation']
+        ];
 
         $this->recoverableDirectoryList = new RecoverableDirectoryList(
             $this->environmentMock,
             $this->flagManagerMock,
             $this->stageConfigMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->directoryListMock,
+            $this->globalConfigMock
         );
     }
 
@@ -68,22 +98,31 @@ class RecoverableDirectoryListTest extends TestCase
      * @param array $expected
      * @dataProvider getListDataProvider22
      */
-    public function testGetList22(bool $isSymlinkOn, bool $isStaticInBuild, array $expected)
-    {
+    public function testGetList22(
+        bool $isSymlinkOn,
+        bool $isStaticInBuild,
+        array $expected
+    ) {
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
             ]);
+
+        $this->directoryListMock->expects($this->exactly(count($expected)))
+            ->method('getPath')
+            ->willReturnMap($this->directoryListGetPathReturnMap);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn($isStaticInBuild);
+
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
             ->willReturnMap([
                 ['2.1.*', false],
             ]);
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-            ->willReturn($isStaticInBuild);
 
         $this->assertEquals(
             $expected,
@@ -165,23 +204,32 @@ class RecoverableDirectoryListTest extends TestCase
      * @param array $expected
      * @dataProvider getListDataProvider21
      */
-    public function testGetList21(bool $isSymlinkOn, bool $isGeneratedSymlinkOn, bool $isStaticInBuild, array $expected)
-    {
+    public function testGetList21(
+        bool $isSymlinkOn,
+        bool $isGeneratedSymlinkOn,
+        bool $isStaticInBuild,
+        array $expected
+    ) {
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK, $isGeneratedSymlinkOn],
             ]);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn($isStaticInBuild);
+
+        $this->directoryListMock->expects($this->exactly(count($expected)))
+            ->method('getPath')
+            ->willReturnMap($this->directoryListGetPathReturnMap);
         $this->magentoVersionMock->expects($this->once())
             ->method('satisfies')
             ->willReturnMap([
                 ['2.1.*', true],
             ]);
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-            ->willReturn($isStaticInBuild);
 
         $this->assertEquals(
             $expected,
@@ -302,6 +350,93 @@ class RecoverableDirectoryListTest extends TestCase
                         'directory' => 'var/generation',
                         'strategy' => StrategyInterface::STRATEGY_SYMLINK,
                     ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param bool $skipCopyingViewPreprocessed
+     * @param array $expected
+     * @dataProvider getListSkipCopyingVarViewPreprocessedDataProvider
+     */
+    public function testGetListSkipCopyingVarViewPreprocessed($skipCopyingViewPreprocessed, $expected)
+    {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, false],
+                [DeployInterface::VAR_SKIP_HTML_MINIFICATION, $skipCopyingViewPreprocessed]
+            ]);
+
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_SKIP_HTML_MINIFICATION, $skipCopyingViewPreprocessed]
+            ]);
+
+        $this->directoryListMock->expects($this->exactly(count($expected)))
+            ->method('getPath')
+            ->willReturnMap($this->directoryListGetPathReturnMap);
+
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->willReturnMap([
+                ['2.1.*', false],
+            ]);
+        $this->assertEquals(
+            $expected,
+            $this->recoverableDirectoryList->getList()
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getListSkipCopyingVarViewPreprocessedDataProvider() : array
+    {
+        return [
+            'copying view preprocessed dir' => [
+                'skipCopyingViewPreprocessed' => false,
+                'expected' => [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'var/view_preprocessed',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/static',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ]
+                ],
+            ],
+            'skip copying view preprocessed dir' => [
+                'skipCopyingViewPreprocessed' => true,
+                'expected' => [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/static',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ]
                 ],
             ],
         ];

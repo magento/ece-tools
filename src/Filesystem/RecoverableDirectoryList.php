@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Filesystem;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -41,21 +42,37 @@ class RecoverableDirectoryList
     private $magentoVersion;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @var GlobalSection
+     */
+    private $globalSection;
+
+    /**
      * @param Environment $environment
      * @param FlagManager $flagManager
      * @param DeployInterface $stageConfig
      * @param MagentoVersion $magentoVersion
+     * @param DirectoryList $directoryList
+     * @param GlobalSection $globalSection
      */
     public function __construct(
         Environment $environment,
         FlagManager $flagManager,
         DeployInterface $stageConfig,
-        MagentoVersion $magentoVersion
+        MagentoVersion $magentoVersion,
+        DirectoryList $directoryList,
+        GlobalSection $globalSection
     ) {
         $this->environment = $environment;
         $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
         $this->magentoVersion = $magentoVersion;
+        $this->directoryList = $directoryList;
+        $this->globalSection = $globalSection;
     }
 
     /**
@@ -69,22 +86,27 @@ class RecoverableDirectoryList
 
         $recoverableDirs = [
             [
-                self::OPTION_DIRECTORY => 'app/etc',
+                self::OPTION_DIRECTORY => $this->directoryList->getPath(DirectoryList::DIR_ETC, true),
                 self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY,
             ],
             [
-                self::OPTION_DIRECTORY => 'pub/media',
+                self::OPTION_DIRECTORY => $this->directoryList->getPath(DirectoryList::DIR_MEDIA, true),
                 self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY,
             ],
         ];
 
         if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
+            if (!$this->globalSection->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
+                $recoverableDirs[] = [
+                    self::OPTION_DIRECTORY => $this->directoryList->getPath(
+                        DirectoryList::DIR_VIEW_PREPROCESSED,
+                        true
+                    ),
+                    self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY,
+                ];
+            }
             $recoverableDirs[] = [
-                self::OPTION_DIRECTORY => 'var/view_preprocessed',
-                self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY,
-            ];
-            $recoverableDirs[] = [
-                self::OPTION_DIRECTORY => 'pub/static',
+                self::OPTION_DIRECTORY => $this->directoryList->getPath(DirectoryList::DIR_STATIC, true),
                 self::OPTION_STRATEGY => $isSymlinkEnabled ?
                     StrategyInterface::STRATEGY_SUB_SYMLINK : StrategyInterface::STRATEGY_COPY,
             ];
@@ -99,11 +121,11 @@ class RecoverableDirectoryList
                 : StrategyInterface::STRATEGY_COPY;
 
             $recoverableDirs[] = [
-                self::OPTION_DIRECTORY => 'var/di',
+                self::OPTION_DIRECTORY => $this->directoryList->getPath(DirectoryList::DIR_GENERATED_METADATA, true),
                 self::OPTION_STRATEGY => $diStrategy,
             ];
             $recoverableDirs[] = [
-                self::OPTION_DIRECTORY => 'var/generation',
+                self::OPTION_DIRECTORY => $this->directoryList->getPath(DirectoryList::DIR_GENERATED_CODE, true),
                 self::OPTION_STRATEGY => $diStrategy,
             ];
         }

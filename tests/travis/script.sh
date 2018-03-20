@@ -16,7 +16,7 @@ case $TEST_SUITE in
         phpunit --configuration tests/unit/phpunit.xml.dist
         ;;
     integration)
-        phpunit --verbose --configuration tests/integration/phpunit.xml.dist;
+        phpunit --verbose --configuration tests/integration/phpunit.xml.dist
         ;;
     integration-docker)
         docker-compose run cli bash -c "/var/www/magento/vendor/bin/phpunit --verbose --configuration /var/www/magento/tests/integration/phpunit.xml.docker"

@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -57,6 +58,11 @@ class DeployStaticContentTest extends TestCase
     private $flagManagerMock;
 
     /**
+     * @var GlobalConfig|Mock
+     */
+    private $globalConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -71,6 +77,7 @@ class DeployStaticContentTest extends TestCase
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
+        $this->globalConfigMock = $this->createMock(GlobalConfig::class);
 
         $this->process = new DeployStaticContent(
             $this->loggerMock,
@@ -78,12 +85,17 @@ class DeployStaticContentTest extends TestCase
             $this->environmentMock,
             $this->processMock,
             $this->configFileStructureMock,
-            $this->flagManagerMock
+            $this->flagManagerMock,
+            $this->globalConfigMock
         );
     }
 
     public function testExecute()
     {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(false);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(BuildInterface::VAR_SKIP_SCD)
@@ -110,6 +122,10 @@ class DeployStaticContentTest extends TestCase
         $this->configFileStructureMock->expects($this->once())
             ->method('validate')
             ->willReturn($resultMock);
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(false);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(BuildInterface::VAR_SKIP_SCD)
@@ -129,6 +145,28 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(BuildInterface::VAR_SKIP_SCD)
             ->willReturn(true);
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Skipping static content deploy');
+        $this->configFileStructureMock->expects($this->never())
+            ->method('validate');
+        $this->processMock->expects($this->never())
+            ->method('execute');
+
+        $this->process->execute();
+    }
+
+    public function testExecuteScdOnDemandInProduction()
+    {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->never())
+            ->method('get');
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Skipping static content deploy. SCD on demand is enabled.');
         $this->configFileStructureMock->expects($this->never())
             ->method('validate');
         $this->processMock->expects($this->never())

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\StaticContent;
 
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
@@ -23,11 +24,18 @@ class CommandFactory
     private $magentoVersion;
 
     /**
-     * @param MagentoVersion $magentoVersion
+     * @var GlobalSection
      */
-    public function __construct(MagentoVersion $magentoVersion)
+    private $globalConfig;
+
+    /**
+     * @param MagentoVersion $magentoVersion
+     * @param GlobalSection $globalConfig
+     */
+    public function __construct(MagentoVersion $magentoVersion, GlobalSection $globalConfig)
     {
         $this->magentoVersion = $magentoVersion;
+        $this->globalConfig = $globalConfig;
     }
 
     /**
@@ -35,6 +43,8 @@ class CommandFactory
      *
      * @param OptionInterface $option
      * @return string
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function create(OptionInterface $option): string
     {
@@ -72,6 +82,12 @@ class CommandFactory
         $treadCount = $option->getThreadCount();
         if ($treadCount) {
             $command .= ' --jobs=' . $treadCount;
+        }
+
+        if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)
+            && $this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
+        ) {
+            $command .= ' --no-html-minify';
         }
 
         return $command;

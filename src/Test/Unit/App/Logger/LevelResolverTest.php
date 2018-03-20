@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Magento\MagentoCloud\App\Logger\LevelResolver;
-use \Monolog\Logger;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
 /**

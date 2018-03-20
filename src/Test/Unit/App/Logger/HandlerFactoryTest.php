@@ -6,19 +6,25 @@
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Illuminate\Config\Repository;
+use Magento\MagentoCloud\App\Logger\Gelf\Handler as GelfHandler;
+use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
+use Magento\MagentoCloud\Config\Log as LogConfig;
+use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
-use Monolog\Handler\NativeMailerHandler;
-use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\SyslogHandler;
+use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Logger;
-use Magento\MagentoCloud\Config\Log as LogConfig;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class HandlerFactoryTest extends TestCase
 {
@@ -38,6 +44,11 @@ class HandlerFactoryTest extends TestCase
     private $repositoryMock;
 
     /**
+     * @var GelfHandlerFactory|Mock
+     */
+    private $gelfHandlerFactoryMock;
+
+    /**
      * @var HandlerFactory
      */
     private $handlerFactory;
@@ -50,8 +61,13 @@ class HandlerFactoryTest extends TestCase
         $this->levelResolverMock = $this->createMock(LevelResolver::class);
         $this->logConfigMock = $this->createMock(LogConfig::class);
         $this->repositoryMock = $this->createMock(Repository::class);
+        $this->gelfHandlerFactoryMock = $this->createMock(GelfHandlerFactory::class);
 
-        $this->handlerFactory = new HandlerFactory($this->levelResolverMock, $this->logConfigMock);
+        $this->handlerFactory = new HandlerFactory(
+            $this->levelResolverMock,
+            $this->logConfigMock,
+            $this->gelfHandlerFactoryMock
+        );
     }
 
     /**
@@ -75,6 +91,25 @@ class HandlerFactoryTest extends TestCase
             ->willReturn(Logger::NOTICE);
 
         $this->handlerFactory->create($handler);
+    }
+
+    public function testCreateGelfHandler()
+    {
+        $handler = 'gelf';
+        $handlerMock = $this->createMock(GelfHandler::class);
+        $this->logConfigMock->expects($this->once())
+            ->method('get')
+            ->with($handler)
+            ->willReturn($this->repositoryMock);
+        $this->repositoryMock->expects($this->once())
+            ->method('get')
+            ->with('min_level', '')
+            ->willReturn('');
+        $this->gelfHandlerFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($handlerMock);
+
+        $this->assertInstanceOf(GelfHandler::class, $this->handlerFactory->create($handler));
     }
 
     /**
@@ -150,6 +185,31 @@ class HandlerFactoryTest extends TestCase
                 ],
                 'expectedClass' => NativeMailerHandler::class,
             ],
+            [
+                'handler' => HandlerFactory::HANDLER_SYSLOG,
+                'repositoryMockGetExpects' => 4,
+                'repositoryMockReturnMap' => [
+                    ['ident', null, 'user@example.com'],
+                    ['facility', LOG_USER, LOG_USER],
+                    ['bubble', true, false],
+                    ['logopts', LOG_PID, LOG_PERROR],
+                    ['min_level', '', ''],
+                ],
+                'expectedClass' => SyslogHandler::class,
+            ],
+            [
+                'handler' => HandlerFactory::HANDLER_SYSLOG_UDP,
+                'repositoryMockGetExpects' => 5,
+                'repositoryMockReturnMap' => [
+                    ['host', null, '127.0.0.1'],
+                    ['port', null, 12201],
+                    ['facility', LOG_USER, LOG_USER],
+                    ['bubble', true, false],
+                    ['ident', 'php', 'php'],
+                    ['min_level', '', ''],
+                ],
+                'expectedClass' => SyslogUdpHandler::class,
+            ]
         ];
     }
 }

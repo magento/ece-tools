@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\UtilityManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -41,20 +42,23 @@ class StaticContentCompressor
     private $shell;
 
     /**
-     * @var string The outer wrapper command that limits execution time and prevents hanging during deployment.
+     * @var UtilityManager
      */
-    private static $timeoutCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c ';
+    private $utilityManager;
 
     /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
+     * @param UtilityManager $utilityManager
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellInterface $shell
+        ShellInterface $shell,
+        UtilityManager $utilityManager
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
+        $this->utilityManager = $utilityManager;
     }
 
     /**
@@ -116,10 +120,12 @@ class StaticContentCompressor
             ? $compressionLevel
             : static::DEFAULT_COMPRESSION_LEVEL;
 
-        $compressionCommand = $this->innerCompressionCommand();
-        $compressionCommand .= " -$compressionLevel";
-        $compressionCommand = static::$timeoutCommand . '"' . $compressionCommand . '"';
-
-        return $compressionCommand;
+        return sprintf(
+            '%s -k 30 600 %s -c "%s" -%s',
+            $this->utilityManager->get(UtilityManager::UTILITY_TIMEOUT),
+            $this->utilityManager->get(UtilityManager::UTILITY_BASH),
+            $this->innerCompressionCommand(),
+            $compressionLevel
+        );
     }
 }

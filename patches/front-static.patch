@@ -1,0 +1,11 @@
+diff -Naur a/pub/front-static.php b/pub/front-static.php
+--- a/pub/front-static.php
++++ b/pub/front-static.php
+@@ -6,6 +6,7 @@
+  * See COPYING.txt for license details.
+  */
+
++$_GET['resource'] = preg_replace('/^(\/static\/)(version(\d+)?\/)?|(\?.*)/', '', $_SERVER['REQUEST_URI'] ?: '');
+ require realpath(__DIR__) . '/../app/bootstrap.php';
+ $bootstrap = \Magento\Framework\App\Bootstrap::create(BP, $_SERVER);
+ /** @var \Magento\Framework\App\StaticResource $app */

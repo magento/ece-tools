@@ -109,13 +109,35 @@ class UrlManager
         return $this->urls = $urls;
     }
 
+    /**
+     * @return array
+     */
     public function getSecureUrls()
     {
         return $this->getUrls()['secure'] ?? [];
     }
 
+    /**
+     * @return string
+     */
+    public function getDefaultSecureUrl(): string
+    {
+        return $this->getUnSecureUrls()[''];
+    }
+
+    /**
+     * @return array
+     */
     public function getUnSecureUrls()
     {
         return $this->getUrls()['unsecure'] ?? [];
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultUnsecureUrl(): string
+    {
+        return $this->getUnSecureUrls()[''];
     }
 }

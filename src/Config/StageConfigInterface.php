@@ -21,6 +21,7 @@ interface StageConfigInterface
     const STAGE_GLOBAL = 'global';
     const STAGE_BUILD = 'build';
     const STAGE_DEPLOY = 'deploy';
+    const STAGE_POST_DEPLOY = 'post-deploy';
 
     /**
      * Deployment variables.
@@ -31,6 +32,14 @@ interface StageConfigInterface
     const VAR_SCD_EXCLUDE_THEMES = 'SCD_EXCLUDE_THEMES';
     const VAR_SKIP_SCD = 'SKIP_SCD';
     const VAR_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
+    const VAR_SCD_ON_DEMAND = 'SCD_ON_DEMAND';
+    const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
+
+    /**
+     * Settings for deployment from git.
+     */
+    const VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT = 'DEPLOYED_MAGENTO_VERSION_FROM_GIT';
+    const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
 
     /**
      * Retrieves environment configuration per stage.

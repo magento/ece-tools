@@ -32,9 +32,10 @@ class Bootstrap
     }
 
     /**
+     * @param string $version
      * @throws \Exception
      */
-    public function run()
+    public function run($version = '@stable')
     {
         $sandboxDir = $this->getSandboxDir();
 
@@ -54,7 +55,7 @@ class Bootstrap
             $envConfig->get('deploy.repo'),
             $envConfig->get('deploy.name'),
             $sandboxDir,
-            $envConfig->get('deploy.version')
+            $version
         ));
 
         /**
@@ -85,6 +86,9 @@ class Bootstrap
             'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
                 $environment->get('routes', [])
             )),
+            'MAGENTO_CLOUD_APPLICATION' => base64_encode(json_encode(
+                []
+            )),
         ]);
 
         $container = new Container(ECE_BP, $this->getSandboxDir());
@@ -105,11 +109,22 @@ class Bootstrap
     }
 
     /**
+     * Removes application directory.
+     */
+    public function destroy()
+    {
+        $this->execute(sprintf(
+            'rm -rf %s',
+            $this->getSandboxDir()
+        ));
+    }
+
+    /**
      * @return string
      */
     public function getSandboxDir(): string
     {
-        return ECE_BP . '/app';
+        return ECE_BP . '/sandbox';
     }
 
     /**
