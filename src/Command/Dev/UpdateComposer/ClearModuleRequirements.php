@@ -21,6 +21,7 @@ class ClearModuleRequirements
      * @var File
      */
     private $file;
+
     /**
      * @var DirectoryList
      */
