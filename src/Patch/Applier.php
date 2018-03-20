@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Patch;
 use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Composer\Repository\WritableRepositoryInterface;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -49,18 +50,25 @@ class Applier
     private $file;
 
     /**
+     * @var GlobalSection
+     */
+    private $globalSection;
+
+    /**
      * @param Composer $composer
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param DirectoryList $directoryList
      * @param File $file
+     * @param GlobalSection $globalSection
      */
     public function __construct(
         Composer $composer,
         ShellInterface $shell,
         LoggerInterface $logger,
         DirectoryList $directoryList,
-        File $file
+        File $file,
+        GlobalSection $globalSection
     ) {
         $this->composer = $composer;
         $this->repository = $composer->getRepositoryManager()->getLocalRepository();
@@ -68,6 +76,7 @@ class Applier
         $this->logger = $logger;
         $this->directoryList = $directoryList;
         $this->file = $file;
+        $this->globalSection = $globalSection;
     }
 
     /**
@@ -107,6 +116,12 @@ class Applier
         try {
             $this->shell->execute('git apply ' . $path);
         } catch (\RuntimeException $applyException) {
+            if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+                $this->logger->notice("Patch {$name} wasn't applied.");
+
+                return;
+            }
+
             try {
                 $this->shell->execute('git apply --check --reverse ' . $path);
             } catch (\RuntimeException $reverseException) {

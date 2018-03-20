@@ -36,6 +36,12 @@ interface StageConfigInterface
     const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
 
     /**
+     * Settings for deployment from git.
+     */
+    const VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT = 'DEPLOYED_MAGENTO_VERSION_FROM_GIT';
+    const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
+
+    /**
      * Retrieves environment configuration per stage.
      *
      * @param string $name The config name
