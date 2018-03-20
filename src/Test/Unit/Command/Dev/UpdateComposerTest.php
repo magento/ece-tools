@@ -98,6 +98,7 @@ class UpdateComposerTest extends TestCase
             ->willReturn([
                 'script1',
                 'script2',
+                'script3',
             ]);
         $this->composerGeneratorMock->expects($this->once())
             ->method('generate')
@@ -108,8 +109,8 @@ class UpdateComposerTest extends TestCase
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
-                ['script1'],
                 ['script2'],
+                ['script3'],
                 ['composer update']
             );
         $this->fileListMock->expects($this->once())

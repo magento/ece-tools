@@ -121,7 +121,7 @@ class ComposerGeneratorTest extends TestCase
     {
         $this->assertEquals(
             [
-                'mkdir -p app/etc',
+                'php -r"mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
                 'rm -rf ce ee b2b',
                 'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo1 repo1',
                 'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo2 repo2'
