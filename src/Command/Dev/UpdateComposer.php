@@ -100,7 +100,8 @@ class UpdateComposer extends Command
     {
         $gitOptions = $this->globalSection->get(GlobalSection::VAR_DEPLOY_FROM_GIT_OPTIONS);
 
-        foreach ($this->composerGenerator->getInstallFromGitScripts($gitOptions['repositories']) as $script) {
+        $scripts = $this->composerGenerator->getInstallFromGitScripts($gitOptions['repositories']);
+        foreach (array_slice($scripts, 1) as $script) {
             $this->shell->execute($script);
         }
 
