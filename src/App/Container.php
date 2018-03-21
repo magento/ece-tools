@@ -266,6 +266,9 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class)
+            ->needs(ConnectionInterface::class)
+            ->give(ReadConnection::class);
         $this->container->when(Prestart::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
