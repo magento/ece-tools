@@ -42,17 +42,19 @@ class SchemaValidator
 
         if ($allowedTypes && !in_array($type, $allowedTypes)) {
             return sprintf(
-                'Item %s has unexpected type %s',
+                'Item %s has unexpected type %s. Please use one of next types: %s',
                 $key,
-                $type
+                $type,
+                implode(', ', $allowedTypes)
             );
         }
 
         if ($allowedValues && !in_array($value, $allowedValues)) {
             return sprintf(
-                'Item %s has unexpected value %s',
+                'Item %s has unexpected value %s. Please use one of next values: %s',
                 $key,
-                $value
+                $value,
+                implode(', ', array_filter($allowedValues))
             );
         }
     }

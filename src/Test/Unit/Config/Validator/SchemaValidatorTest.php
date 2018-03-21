@@ -51,14 +51,22 @@ class SchemaValidatorTest extends TestCase
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-vv', null],
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-vvv', null],
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '', null],
-            [StageConfigInterface::VAR_VERBOSE_COMMANDS, 1, 'Item VERBOSE_COMMANDS has unexpected type integer'],
-            [StageConfigInterface::VAR_VERBOSE_COMMANDS, '1', 'Item VERBOSE_COMMANDS has unexpected value 1'],
+            [
+                StageConfigInterface::VAR_VERBOSE_COMMANDS,
+                1,
+                'Item VERBOSE_COMMANDS has unexpected type integer. Please use one of next types: string',
+            ],
+            [
+                StageConfigInterface::VAR_VERBOSE_COMMANDS,
+                '1',
+                'Item VERBOSE_COMMANDS has unexpected value 1. Please use one of next values: -v, -vv, -vvv, enabled',
+            ],
             [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, 0, null],
             [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, 10, null],
             [
                 StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
                 '1',
-                'Item SCD_COMPRESSION_LEVEL has unexpected type string',
+                'Item SCD_COMPRESSION_LEVEL has unexpected type string. Please use one of next types: integer',
             ],
         ];
     }

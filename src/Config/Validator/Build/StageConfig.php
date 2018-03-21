@@ -16,7 +16,6 @@ use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
  */
 class StageConfig implements ValidatorInterface
 {
-
     /**
      * @var EnvironmentReader
      */
