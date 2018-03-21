@@ -89,6 +89,7 @@ class Container implements ContainerInterface
                     Flag\Manager::FLAG_REGENERATE => 'var/.regenerate',
                     Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
                     Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_PENDING => 'var/.static_content_deploy_pending',
+                    Flag\Manager::FLAG_DEPLOY_HOOK_IS_FAILED => 'var/.deploy_is_failed',
                 ]);
             }
         );
@@ -256,7 +257,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\ScdOnDemand::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\PrepareConfig::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\CronConsumersRunner::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
@@ -267,6 +268,9 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class)
+            ->needs(ConnectionInterface::class)
+            ->give(ReadConnection::class);
         $this->container->when(Prestart::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
