@@ -149,6 +149,7 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
+                                    $this->container->make(ConfigValidator\Build\StageConfig::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
@@ -196,6 +197,7 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
+                                    $this->container->make(ConfigValidator\Deploy\Variables::class),
                                 ],
                             ],
                         ]),
