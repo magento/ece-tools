@@ -15,13 +15,18 @@ if (!defined('BP')) {
     define('BP', realpath($magentoRoot));
 }
 
-if (!file_exists($magentoRoot . '/app/etc/NonComposerComponentRegistration.php') &&
-    file_exists($magentoRoot . '/init/app/etc/NonComposerComponentRegistration.php')
-) {
-    copy(
-        $magentoRoot . '/init/app/etc/NonComposerComponentRegistration.php',
-        $magentoRoot . '/app/etc/NonComposerComponentRegistration.php'
-    );
+$files = [
+    '/app/etc/registration_globlist.php',
+    '/app/etc/NonComposerComponentRegistration.php',
+];
+
+foreach ($files as $file) {
+    if (!file_exists($magentoRoot . $file) && file_exists($magentoRoot . '/init' . $file)) {
+        copy(
+            $magentoRoot . '/init' . $file,
+            $magentoRoot . $file
+        );
+    }
 }
 
 foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/vendor/autoload.php'] as $file) {
