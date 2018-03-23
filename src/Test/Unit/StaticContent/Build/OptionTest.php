@@ -162,8 +162,56 @@ class OptionTest extends TestCase
 
     public function testGetLocales()
     {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(false);
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
+            ->willReturn(__DIR__ . '/_files/app/etc/config.php');
+        $flattenConfig = [
+            'scopes' => [
+                'websites' => [],
+                'stores' => [],
+            ],
+        ];
+        $this->arrayManagerMock->expects($this->once())
+            ->method('flatten')
+            ->willReturn([
+                'scopes' => [
+                    'websites' => [],
+                    'stores' => [],
+                ],
+            ]);
+        $this->arrayManagerMock->expects($this->exactly(2))
+            ->method('filter')
+            ->willReturnMap([
+                [$flattenConfig, 'general/locale/code', true, ['fr_FR']],
+                [$flattenConfig, 'admin_user/locale/code', false, ['es_ES']],
+            ]);
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminLocale')
+            ->willReturn('ua_UA');
+
+        $this->assertEquals(
+            [
+                'ua_UA',
+                'fr_FR',
+                'es_ES',
+                'en_US',
+            ],
+            $this->option->getLocales()
+        );
+    }
+
+    public function testGetLocales21()
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(true);
+        $this->fileListMock->expects($this->once())
+            ->method('getConfigLocal')
             ->willReturn(__DIR__ . '/_files/app/etc/config.php');
         $flattenConfig = [
             'scopes' => [
