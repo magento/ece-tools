@@ -82,7 +82,6 @@ class PostDeploy implements PostDeployInterface
         return [
             self::VAR_WARM_UP_PAGES => [
                 'index.php',
-                'index.php/customer/account/create',
             ],
         ];
     }

@@ -122,7 +122,7 @@ class UrlManager
      */
     public function getDefaultSecureUrl(): string
     {
-        return $this->getUnSecureUrls()[''];
+        return $this->getSecureUrls()[''];
     }
 
     /**
@@ -131,13 +131,5 @@ class UrlManager
     public function getUnSecureUrls()
     {
         return $this->getUrls()['unsecure'] ?? [];
-    }
-
-    /**
-     * @return string
-     */
-    public function getDefaultUnsecureUrl(): string
-    {
-        return $this->getUnSecureUrls()[''];
     }
 }
