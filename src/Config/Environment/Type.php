@@ -17,6 +17,10 @@ class Type
     /**
      * Gets environment type depending on system user.
      *
+     * - if user is 'web' environment is integration,
+     * - if user name ends with '_stg' environment is staging,
+     * - in other cases environment is production.
+     *
      * @return string
      */
     public function get(): string
