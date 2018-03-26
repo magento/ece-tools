@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Environment\Type as EnvironmentType;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -49,11 +50,18 @@ class SearchEngine implements ProcessInterface
     private $magentoVersion;
 
     /**
+     * @var EnvironmentType
+     */
+    private $environmentType;
+
+    /**
      * @param Environment $environment
      * @param LoggerInterface $logger
      * @param EnvWriter $envWriter
      * @param SharedWriter $sharedWriter
      * @param DeployInterface $stageConfig
+     * @param MagentoVersion $version
+     * @param EnvironmentType $environmentType
      */
     public function __construct(
         Environment $environment,
@@ -61,7 +69,8 @@ class SearchEngine implements ProcessInterface
         EnvWriter $envWriter,
         SharedWriter $sharedWriter,
         DeployInterface $stageConfig,
-        MagentoVersion $version
+        MagentoVersion $version,
+        EnvironmentType $environmentType
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
@@ -69,6 +78,7 @@ class SearchEngine implements ProcessInterface
         $this->sharedWriter = $sharedWriter;
         $this->stageConfig = $stageConfig;
         $this->magentoVersion = $version;
+        $this->environmentType = $environmentType;
     }
 
     /**
@@ -134,18 +144,27 @@ class SearchEngine implements ProcessInterface
     }
 
     /**
-     * Returns ElasticSearch configuration
+     * Returns ElasticSearch configuration.
+     *
+     * Adds index prefix on no production environments.
      *
      * @param array $config Elasticsearch connection configuration
      * @return array
      */
     private function getElasticSearchConfiguration(array $config)
     {
-        return [
+        $elasticConfiguration = [
             'engine' => 'elasticsearch',
             'elasticsearch_server_hostname' => $config['host'],
             'elasticsearch_server_port' => $config['port'],
         ];
+
+        $environmentType = $this->environmentType->get();
+        if ($environmentType != EnvironmentType::PRODUCTION) {
+            $elasticConfiguration['elasticsearch_index_prefix'] = 'magento2_' . $environmentType;
+        }
+
+        return $elasticConfiguration;
     }
 
     /**
