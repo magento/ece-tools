@@ -108,26 +108,23 @@ class SearchEngineTest extends TestCase
     public function magentoVersionTestDataProvider(): array
     {
         return [
-            [ 'newVersion' => true ],
-            [ 'newVersion' => false ],
+            ['newVersion' => true],
+            ['newVersion' => false],
         ];
     }
 
     /**
      * @param bool newVersion
-     * @dataProvider magentoVersionTestDataProvider
+     * @param array $relationships
+     * @param array $expected
+     * @dataProvider executeWithElasticSearchDataProvider
      */
-    public function testExecuteWithElasticSearch(bool $newVersion)
+    public function testExecuteWithElasticSearch(bool $newVersion, array $relationships, array $expected)
     {
-        $config['system']['default']['catalog']['search'] = [
-            'engine' => 'elasticsearch',
-            'elasticsearch_server_hostname' => 'localhost',
-            'elasticsearch_server_port' => 1234,
-        ];
+        $config['system']['default']['catalog']['search'] = $expected;
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn($newVersion);
-        
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -137,10 +134,7 @@ class SearchEngineTest extends TestCase
             ->willReturn(
                 [
                     'elasticsearch' => [
-                        [
-                            'host' => 'localhost',
-                            'port' => 1234,
-                        ],
+                        $relationships,
                     ],
                 ]
             );
@@ -157,10 +151,58 @@ class SearchEngineTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Updating search engine configuration.'],
-                ['Set search engine to: elasticsearch']
+                ['Set search engine to: ' . $expected['engine']]
             );
 
         $this->process->execute();
+    }
+
+    /**
+     * @return array
+     */
+    public function executeWithElasticSearchDataProvider(): array
+    {
+        return [
+            [
+                'newVersion' => true,
+                'relationships' => [
+                    'service' => 'elasticsearch',
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
+                ],
+            ],
+            [
+                'newVersion' => false,
+                'relationships' => [
+                    'service' => 'elasticsearch5',
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch5',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
+                ],
+            ],
+            [
+                'newVersion' => false,
+                'relationships' => [
+                    'service' => 'elasticsearchNA',
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
+                ],
+            ],
+        ];
     }
 
     /**
@@ -179,7 +221,7 @@ class SearchEngineTest extends TestCase
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn($newVersion);
-        
+
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -231,7 +273,7 @@ class SearchEngineTest extends TestCase
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn($newVersion);
-        
+
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)

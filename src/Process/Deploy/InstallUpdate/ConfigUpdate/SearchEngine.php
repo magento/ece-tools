@@ -141,8 +141,12 @@ class SearchEngine implements ProcessInterface
      */
     private function getElasticSearchConfiguration(array $config)
     {
+        $engine = isset($config['service']) && $config['service'] === 'elasticsearch5'
+            ? 'elasticsearch5'
+            : 'elasticsearch';
+
         return [
-            'engine' => 'elasticsearch',
+            'engine' => $engine,
             'elasticsearch_server_hostname' => $config['host'],
             'elasticsearch_server_port' => $config['port'],
         ];
