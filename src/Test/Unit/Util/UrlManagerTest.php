@@ -322,9 +322,9 @@ class UrlManagerTest extends TestCase
 
     /**
      * @param array $secureRoute
-     * @dataProvider getDefaultSecureUrlDataProvider
+     * @dataProvider getBaseUrlDataProvider
      */
-    public function testGetDefaultSecureUrl(array $secureRoute)
+    public function testGetBaseUrl(array $secureRoute)
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -332,14 +332,14 @@ class UrlManagerTest extends TestCase
 
         $this->assertEquals(
             'https://example.com/',
-            $this->manager->getDefaultSecureUrl()
+            $this->manager->getBaseUrl()
         );
     }
 
     /**
      * @return array
      */
-    public function getDefaultSecureUrlDataProvider(): array
+    public function getBaseUrlDataProvider(): array
     {
         return [
             [

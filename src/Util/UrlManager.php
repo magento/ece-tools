@@ -120,9 +120,9 @@ class UrlManager
     /**
      * @return string
      */
-    public function getDefaultSecureUrl(): string
+    public function getBaseUrl(): string
     {
-        return $this->getSecureUrls()[''];
+        return $this->getUnSecureUrls()[''];
     }
 
     /**

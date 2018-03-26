@@ -76,7 +76,7 @@ class WarmUp implements ProcessInterface
         $promises = [];
 
         foreach ($pages as $page) {
-            $url = $this->urlManager->getDefaultSecureUrl() . $page;
+            $url = rtrim($this->urlManager->getBaseUrl(), '/') . '/' . $page;
             $request = $this->requestFactory->create('GET', $url);
 
             $promises[] = $client->sendAsync($request)->then(function () use ($url) {
