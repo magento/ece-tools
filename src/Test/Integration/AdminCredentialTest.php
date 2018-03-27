@@ -149,8 +149,6 @@ class AdminCredentialTest extends AbstractTest
         $this->executeAndAssert(Deploy::NAME, $application);
 
         $this->assertContains('Updating admin credentials: nothing to update.', $this->getCloudLog());
-        $this->assertContains('Some administrator already uses this email admin@example.com', $this->getCloudLog());
-        $this->assertContains('Some administrator already uses this username admin', $this->getCloudLog());
     }
 
     private function getCloudLog()

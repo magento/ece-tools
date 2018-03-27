@@ -46,27 +46,33 @@ class ValidateConfiguration implements ProcessInterface
     {
         $this->logger->info('Validating configuration');
 
+        $maxLevel = 0;
+        $messages = [];
+
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
+            $maxLevel = max($maxLevel, $level);
+
             foreach ($validators as $validator) {
                 $result = $validator->validate();
 
                 if ($result instanceof Error) {
-                    $message = $result->getError();
-
-                    if (!empty($result->getSuggestion())) {
-                        $message .= PHP_EOL . 'SUGGESTION:' . PHP_EOL . $result->getSuggestion();
-                    }
-
-                    $this->logger->log($level, $message);
-
-                    if ($level === ValidatorInterface::LEVEL_CRITICAL) {
-                        throw new \RuntimeException('Please fix configuration with given suggestions:');
-                    }
+                    $pattern = $result->getSuggestion() ? '- %s (%s)' : '- %s';
+                    $messages[] = sprintf($pattern, $result->getError(), $result->getSuggestion());
                 }
             }
         }
 
         $this->logger->info('End of validation');
+
+        if ($maxLevel >= ValidatorInterface::LEVEL_CRITICAL && $messages) {
+            throw new \RuntimeException(
+                'Fix configuration with given suggestions: ' . PHP_EOL . implode(PHP_EOL, $messages)
+            );
+        }
+
+        if ($maxLevel && $messages) {
+            $this->logger->log($maxLevel, implode(PHP_EOL, $messages));
+        }
     }
 }
