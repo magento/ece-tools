@@ -165,7 +165,7 @@ class Connection implements ConnectionInterface
             $environment->getDbUser(),
             $environment->getDbPassword(),
             [
-                \PDO::ATTR_PERSISTENT => true
+                \PDO::ATTR_PERSISTENT => true,
             ]
         );
     }
@@ -185,5 +185,13 @@ class Connection implements ConnectionInterface
         }
 
         return $closure($query, $bindings);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function close()
+    {
+        $this->pdo = null;
     }
 }

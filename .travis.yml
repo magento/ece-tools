@@ -1,34 +1,27 @@
 sudo: required
 dist: trusty
-addons:
-  hosts:
-      - magento2.travis
-      - magento2.docker
+git:
+  depth: 1
 services:
-  - mysql
   - docker
-language: php
-php:
-  - 7.0
-  - 7.1
+language: generic
 env:
-  global:
-    - COMPOSER_BIN_DIR=~/bin
-    - MAGENTO_HOST_NAME="magento2.travis"
-    - SANDBOX_KEY="travis"
   matrix:
-    - TEST_SUITE=static
-    - TEST_SUITE=unit
-    - TEST_SUITE=integration
-matrix:
-  exclude:
-    - php: 7.1
-      env: TEST_SUITE=integration
+#    - TEST_SUITE=static-unit PHP=7.0
+#    - TEST_SUITE=static-unit PHP=7.1
+    - TEST_SUITE=integration PHP=7.0
+#    - TEST_SUITE=integration PHP=7.1
 cache:
   apt: true
-  directories:
-    - $HOME/.composer/cache
-before_install: ./tests/travis/before_install.sh
-install: composer install --no-interaction
-before_script: ./tests/travis/before_script.sh
+#  directories:
+#    - $HOME/.composer/cache
+before_install:
+  - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
+  - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
+install:
+  - docker-compose -f docker-compose-${PHP}.yml run cli bash -c "composer install -n -d /var/www/magento"
+before_script:
+  - docker-compose -f docker-compose-${PHP}.yml up -d --build
+  - docker-compose -f docker-compose-${PHP}.yml run cli bash -c "sudo -u www-data -- /var/www/magento/vendor/bin/phpunit"
 script: ./tests/travis/script.sh
+after_failure: docker ps -s

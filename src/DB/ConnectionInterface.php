@@ -53,4 +53,11 @@ interface ConnectionInterface
      * @return \PDO
      */
     public function getPdo(): \PDO;
+
+    /**
+     * Close connection.
+     *
+     * @return void
+     */
+    public function close();
 }

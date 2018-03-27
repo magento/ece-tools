@@ -43,7 +43,11 @@ class Bootstrap
             return;
         }
 
-        $buildFile = $this->getConfigFile('build_options.ini');
+        /**
+         * Clean sandbox.
+         */
+        $this->destroy();
+
         $envConfig = $this->mergeConfig([]);
 
         if (!is_dir($sandboxDir)) {
@@ -63,8 +67,17 @@ class Bootstrap
          */
         $this->execute(sprintf(
             'cp -f %s %s',
-            $buildFile,
+            $this->getConfigFile('build_options.ini'),
             $sandboxDir . '/build_options.ini'
+        ));
+
+        /**
+         * Copying env file.
+         */
+        $this->execute(sprintf(
+            'cp -f %s %s',
+            $this->getConfigFile('.magento.env.yaml'),
+            $sandboxDir . '/.magento.env.yaml'
         ));
     }
 
@@ -140,10 +153,8 @@ class Bootstrap
             return $configFile;
         }
 
-        $environment = getenv('environment') ?? '';
-
         if (@file_exists($configFile . '.dist')) {
-            return $configFile . $environment . '.dist';
+            return $configFile . '.dist';
         }
 
         throw new \Exception(sprintf(
