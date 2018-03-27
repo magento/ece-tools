@@ -146,7 +146,7 @@ class SearchEngine implements ProcessInterface
     /**
      * Returns ElasticSearch configuration.
      *
-     * Adds index prefix on no production environments.
+     * Adds index prefix on not production environments.
      *
      * @param array $config Elasticsearch connection configuration
      * @return array
