@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Environment\Type as EnvironmentType;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
@@ -56,6 +57,11 @@ class SearchEngineTest extends TestCase
     private $magentoVersionMock;
 
     /**
+     * @var EnvironmentType|Mock
+     */
+    private $environmentTypeMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -66,6 +72,7 @@ class SearchEngineTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->environmentTypeMock = $this->createMock(EnvironmentType::class);
 
         $this->process = new SearchEngine(
             $this->environmentMock,
@@ -73,7 +80,8 @@ class SearchEngineTest extends TestCase
             $this->envWriterMock,
             $this->sharedWriterMock,
             $this->stageConfigMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->environmentTypeMock
         );
     }
 
@@ -108,26 +116,37 @@ class SearchEngineTest extends TestCase
     public function magentoVersionTestDataProvider(): array
     {
         return [
-            [ 'newVersion' => true ],
-            [ 'newVersion' => false ],
+            ['newVersion' => true, EnvironmentType::PRODUCTION, []],
+            ['newVersion' => false, EnvironmentType::PRODUCTION, []],
+            ['newVersion' => true, 'test', ['elasticsearch_index_prefix' => 'magento2_test']],
+            ['newVersion' => true, EnvironmentType::STAGING, ['elasticsearch_index_prefix' => 'magento2_staging']],
+            [
+                'newVersion' => true,
+                EnvironmentType::INTEGRATION,
+                ['elasticsearch_index_prefix' => 'magento2_integration']
+            ],
         ];
     }
 
     /**
-     * @param bool newVersion
+     * @param bool $newVersion
+     * @param string $environmentType
+     * @param array $additionalOptions
      * @dataProvider magentoVersionTestDataProvider
      */
-    public function testExecuteWithElasticSearch(bool $newVersion)
+    public function testExecuteWithElasticSearch(bool $newVersion, string $environmentType, array $additionalOptions)
     {
-        $config['system']['default']['catalog']['search'] = [
+        $config['system']['default']['catalog']['search'] = array_merge([
             'engine' => 'elasticsearch',
             'elasticsearch_server_hostname' => 'localhost',
             'elasticsearch_server_port' => 1234,
-        ];
+        ], $additionalOptions);
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn($newVersion);
-        
+        $this->environmentTypeMock->expects($this->once())
+            ->method('get')
+            ->willReturn($environmentType);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -164,7 +183,7 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param bool newVersion
+     * @param bool $newVersion
      * @dataProvider magentoVersionTestDataProvider
      */
     public function testExecuteWithElasticSolr(bool $newVersion)
@@ -218,7 +237,7 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param bool newVersion
+     * @param bool $newVersion
      * @dataProvider magentoVersionTestDataProvider
      */
     public function testExecuteEnvironmentConfiguration(bool $newVersion)
