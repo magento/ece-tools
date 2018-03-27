@@ -23,6 +23,6 @@ install:
 before_script:
   - sudo chown -R www-data:www-data .
   - docker-compose -f docker-compose-${PHP}.yml up -d --build
-  - docker-compose -f docker-compose-${PHP}.yml run cli bash -c "sudo -u www-data -- /var/www/magento/vendor/bin/phpunit"
+  - docker-compose -f docker-compose-${PHP}.yml run cli bash -c "/var/www/magento/vendor/bin/phpunit"
 script: ./tests/travis/script.sh
 after_failure: docker ps -s
