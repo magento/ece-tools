@@ -61,7 +61,6 @@ services:
     image: tianon/true
     volumes:
       - .:/var/www/magento
-      - /var/www/sandbox
 
   dbdata:
     image: tianon/true

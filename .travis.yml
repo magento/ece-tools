@@ -13,8 +13,8 @@ env:
 #    - TEST_SUITE=integration PHP=7.1
 cache:
   apt: true
-#  directories:
-#    - $HOME/.composer/cache
+  directories:
+    - $HOME/.composer/cache
 before_install:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
