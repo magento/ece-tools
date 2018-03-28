@@ -119,6 +119,9 @@ class AdminCredentials implements ValidatorInterface
     }
 
     /**
+     * Retrieves admin data of the first user as the only, which must be created by
+     * this scripts.
+     *
      * @return array
      */
     private function getStoredData(): array

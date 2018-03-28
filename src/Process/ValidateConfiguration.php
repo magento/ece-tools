@@ -51,13 +51,13 @@ class ValidateConfiguration implements ProcessInterface
 
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
-            $maxLevel = max($maxLevel, $level);
-
             foreach ($validators as $validator) {
                 $result = $validator->validate();
 
                 if ($result instanceof Error) {
+                    $maxLevel = max($maxLevel, $level);
                     $pattern = $result->getSuggestion() ? '- %s (%s)' : '- %s';
+
                     $messages[] = sprintf($pattern, $result->getError(), $result->getSuggestion());
                 }
             }

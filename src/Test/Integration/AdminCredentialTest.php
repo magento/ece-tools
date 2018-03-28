@@ -58,7 +58,7 @@ class AdminCredentialTest extends AbstractTest
 
     /**
      * @expectedException \Exception
-     * @expectedExceptionMessage Please fix configuration with given suggestions
+     * @expectedExceptionMessage Fix configuration with given suggestions
      */
     public function testInstallWithoutAdminEmail()
     {
