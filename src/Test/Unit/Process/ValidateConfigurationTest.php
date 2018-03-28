@@ -115,7 +115,11 @@ class ValidateConfigurationTest extends TestCase
             );
         $this->loggerMock->expects($this->once())
             ->method('log')
-            ->with(ValidatorInterface::LEVEL_WARNING, '- some warning (some warning suggestion)');
+            ->with(
+                ValidatorInterface::LEVEL_WARNING,
+                'Fix configuration with given suggestions:'
+                . PHP_EOL . '- some warning (some warning suggestion)'
+            );
 
         $process = new ValidateConfiguration(
             $this->loggerMock,
@@ -168,7 +172,8 @@ class ValidateConfigurationTest extends TestCase
             ->method('log')
             ->with(
                 Logger::WARNING,
-                '- some warning (some warning suggestion)'
+                'Fix configuration with given suggestions:'
+                . PHP_EOL . '- some warning (some warning suggestion)'
                 . PHP_EOL . '- some warning 2 (some warning suggestion 2)'
             );
 
