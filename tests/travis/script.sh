@@ -18,7 +18,7 @@ case $TEST_SUITE in
     integration)
         case $PHP in
             7.0)
-                $BASH -c "/var/www/magento/vendor/bin/phpunit --verbose --configuration /var/www/magento/tests/integration"
+                $BASH -c "/var/www/magento/vendor/bin/phpunit --group php70 --verbose --configuration /var/www/magento/tests/integration"
                 ;;
             7.1)
                 $BASH -c "/var/www/magento/vendor/bin/phpunit --exclude-group php70 --verbose --configuration /var/www/magento/tests/integration"
