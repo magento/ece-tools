@@ -141,11 +141,17 @@ class SearchEngine implements ProcessInterface
      */
     private function getElasticSearchConfiguration(array $config)
     {
-        return [
+        $elasticSearchConfig = [
             'engine' => 'elasticsearch',
             'elasticsearch_server_hostname' => $config['host'],
             'elasticsearch_server_port' => $config['port'],
         ];
+
+        if (isset($config['query']['index'])) {
+            $elasticSearchConfig['elasticsearch_index_prefix'] = $config['query']['index'];
+        }
+
+        return $elasticSearchConfig;
     }
 
     /**

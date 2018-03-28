@@ -114,16 +114,59 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param bool newVersion
-     * @dataProvider magentoVersionTestDataProvider
+     * @return array
      */
-    public function testExecuteWithElasticSearch(bool $newVersion)
+    public function elasticSearchTestDataProvider(): array
     {
-        $config['system']['default']['catalog']['search'] = [
-            'engine' => 'elasticsearch',
-            'elasticsearch_server_hostname' => 'localhost',
-            'elasticsearch_server_port' => 1234,
+        return [
+            [
+                'newVersion' => true,
+                [
+                    'elasticsearch' => [
+                        [
+                            'host' => 'localhost',
+                            'port' => 1234,
+                            'query' => [
+                                'index' => 'stg'
+                            ]
+                        ],
+                    ],
+                ],
+                [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
+                    'elasticsearch_index_prefix' => 'stg'
+                ]
+            ],
+            [
+                'newVersion' => false,
+                [
+                    'elasticsearch' => [
+                        [
+                            'host' => 'localhost',
+                            'port' => 1234
+                        ],
+                    ],
+                ],
+                [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234
+                ]
+            ],
         ];
+    }
+
+    /**
+     * @param bool $newVersion newVersion
+     * @param array $configFromRelationships
+     * @param array $configToSave
+     * @dataProvider elasticSearchTestDataProvider
+     */
+    public function testExecuteWithElasticSearch(bool $newVersion, array $configFromRelationships, array $configToSave)
+    {
+        $config['system']['default']['catalog']['search'] = $configToSave;
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn($newVersion);
@@ -134,16 +177,7 @@ class SearchEngineTest extends TestCase
             ->willReturn([]);
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
-            ->willReturn(
-                [
-                    'elasticsearch' => [
-                        [
-                            'host' => 'localhost',
-                            'port' => 1234,
-                        ],
-                    ],
-                ]
-            );
+            ->willReturn($configFromRelationships);
         if ($newVersion) {
             $this->envWriterMock->expects($this->once())
                 ->method('update')
@@ -164,7 +198,7 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param bool newVersion
+     * @param bool $newVersion
      * @dataProvider magentoVersionTestDataProvider
      */
     public function testExecuteWithElasticSolr(bool $newVersion)
@@ -218,7 +252,7 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param bool newVersion
+     * @param bool $newVersion
      * @dataProvider magentoVersionTestDataProvider
      */
     public function testExecuteEnvironmentConfiguration(bool $newVersion)
