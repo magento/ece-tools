@@ -135,7 +135,7 @@ class Bootstrap
      */
     public function getSandboxDir(): string
     {
-        return ECE_BP . '/sandbox';
+        return getenv('MAGENTO_ROOT') ?: ECE_BP . '/sandbox';
     }
 
     /**
