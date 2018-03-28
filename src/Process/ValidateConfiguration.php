@@ -65,7 +65,7 @@ class ValidateConfiguration implements ProcessInterface
 
         $this->logger->info('End of validation');
 
-        if (!$messages && $maxLevel) {
+        if (!$messages || !$maxLevel) {
             return;
         }
 
