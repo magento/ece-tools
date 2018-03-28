@@ -30,9 +30,4 @@ return [
     'variables' => [
         'ADMIN_EMAIL' => 'admin@example.com',
     ],
-    'deploy' => [
-        'repo' => 'https://repo.magento.com/',
-        'name' => 'magento/project-enterprise-edition',
-    ],
-    'skip_front_check' => false,
 ];

@@ -74,11 +74,6 @@ class UpgradeTest extends AbstractTest
     {
         $config = $this->bootstrap->mergeConfig([]);
         $routes = $config->get('routes');
-
-        if ($config->get('skip_front_check') === true || !$routes) {
-            return;
-        }
-
         $defaultRoute = array_keys($routes)[0];
         $pageContent = file_get_contents($defaultRoute);
 

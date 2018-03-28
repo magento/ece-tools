@@ -48,16 +48,14 @@ class Bootstrap
          */
         $this->destroy();
 
-        $envConfig = $this->mergeConfig([]);
-
         if (!is_dir($sandboxDir)) {
             mkdir($sandboxDir, 0777, true);
         }
 
         $this->execute(sprintf(
             'composer create-project --repository-url=%s %s %s %s',
-            $envConfig->get('deploy.repo'),
-            $envConfig->get('deploy.name'),
+            'https://repo.magento.com/',
+            'magento/project-enterprise-edition',
             $sandboxDir,
             $version
         ));

@@ -178,11 +178,6 @@ class AcceptanceTest extends AbstractTest
     {
         $config = $this->bootstrap->mergeConfig($environment);
         $routes = $config->get('routes');
-
-        if ($config->get('skip_front_check') === true || !$routes) {
-            return;
-        }
-
         $routes = array_keys($routes);
         $defaultRoute = reset($routes);
         $pageContent = file_get_contents($defaultRoute);
