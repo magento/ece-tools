@@ -21,7 +21,6 @@ before_install:
 install:
   - docker-compose -f docker-compose-${PHP}.yml run cli bash -c "composer install -n -d /var/www/magento"
 before_script:
-  - sudo chown -R www-data:www-data .
   - docker-compose -f docker-compose-${PHP}.yml up -d --build
 script: ./tests/travis/script.sh
 after_failure: docker ps -s
