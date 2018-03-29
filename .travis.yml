@@ -10,7 +10,7 @@ env:
 #    - TEST_SUITE=static-unit PHP=7.0
 #    - TEST_SUITE=static-unit PHP=7.1
     - TEST_SUITE=integration PHP=7.0
-#    - TEST_SUITE=integration PHP=7.1
+    - TEST_SUITE=integration PHP=7.1
 cache:
   apt: true
   directories:
