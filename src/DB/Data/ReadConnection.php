@@ -20,54 +20,47 @@ class ReadConnection implements ConnectionInterface
     private $environment;
 
     /**
+     * Array with necessary connection data
+     * @var array
+     */
+    private $connectionData;
+
+    /**
      * @param Environment $environment
      */
     public function __construct(Environment $environment)
     {
         $this->environment = $environment;
+        $this->connectionData = $this->getConnectionData();
     }
 
     /**
-     * Checks whether project is integration or not.
+     * Retrieves read only connection data from 'database-slave' relationships if exists,
+     * otherwise retrieves write connection (in case of integration environment)
      *
-     * @return bool Return true if project is integration, otherwise return false (for staging or production)
+     * @return array
      */
-    private function isIntegration()
+    private function getConnectionData(): array
     {
-        //return empty($_ENV['REGISTRY']);
-        //while $_ENV['REGISTRY'] is not approved by platform we check the DB host name
-        //TODO: use method from Environment class which will be implemented in MAGECLOUD-1122
-        return $this->environment->getDbHost() === 'database.internal';
+        return $this->environment->getRelationship('database-slave')[0]
+            ?? $this->environment->getRelationship('database')[0]
+            ?? [];
     }
 
     /**
-     * Returns the host name for backup.
-     * Integration project has only one node and host should be used the same as retrieved from environment variables.
-     * Production or staging projects have 3 nodes but for read operations we need to connect to localhost
-     * with 3304 port and this connection will proxy to appropriate server.
-     *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getHost()
     {
-        return $this->isIntegration() ? $this->environment->getDbHost() : '127.0.0.1';
+        return $this->connectionData['host'] ?? '';
     }
 
     /**
-     * Returns ports for DB connection for backup.
-     * There are several available ports:
-     *  - 3306 - talks to master DB
-     *  - 3307 - talks to local node
-     *  - 3304 - is used for read only operations
-     * For production or staging server we cannot make such operations as backup from active master,
-     * so we should always use 3304 for them for localhost, this connection will proxy to appropriate server.
-     * For integration we have only one node and 3306 is always used.
-     *
-     * {@inheritdoc}
+     * @inheritdoc
      */
     public function getPort()
     {
-        return $this->isIntegration() ? '3306' : '3304';
+        return $this->connectionData['port'] ?? '';
     }
 
     /**
@@ -75,7 +68,7 @@ class ReadConnection implements ConnectionInterface
      */
     public function getDbName()
     {
-        return $this->environment->getDbName();
+        return $this->connectionData['path'] ?? '';
     }
 
     /**
@@ -83,7 +76,7 @@ class ReadConnection implements ConnectionInterface
      */
     public function getUser()
     {
-        return $this->environment->getDbUser();
+        return $this->connectionData['username'] ?? '';
     }
 
     /**
@@ -91,6 +84,6 @@ class ReadConnection implements ConnectionInterface
      */
     public function getPassword()
     {
-        return $this->environment->getDbPassword();
+        return $this->connectionData['password'] ?? '';
     }
 }

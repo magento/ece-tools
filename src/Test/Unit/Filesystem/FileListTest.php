@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Filesystem;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\SystemList;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
 
@@ -27,9 +27,9 @@ class FileListTest extends TestCase
     private $directoryListMock;
 
     /**
-     * @var File|Mock
+     * @var SystemList|Mock
      */
-    private $fileMock;
+    private $systemListMock;
 
     /**
      * @inheritdoc
@@ -37,7 +37,7 @@ class FileListTest extends TestCase
     protected function setUp()
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->fileMock = $this->createMock(File::class);
+        $this->systemListMock = $this->createMock(SystemList::class);
 
         $this->directoryListMock->expects($this->any())
             ->method('getMagentoRoot')
@@ -54,28 +54,8 @@ class FileListTest extends TestCase
 
         $this->fileList = new FileList(
             $this->directoryListMock,
-            $this->fileMock
+            $this->systemListMock
         );
-    }
-
-    public function testGetConfig()
-    {
-        $this->assertSame('magento_root/app/etc/config.php', $this->fileList->getConfig());
-    }
-
-    public function testGetEnv()
-    {
-        $this->assertSame('magento_root/app/etc/env.php', $this->fileList->getEnv());
-    }
-
-    public function testGetBuildConfig()
-    {
-        $this->assertSame('magento_root/build_options.ini', $this->fileList->getBuildConfig());
-    }
-
-    public function testGetToolsConfig()
-    {
-        $this->assertSame('magento_root/.magento.env.yaml', $this->fileList->getEnvConfig());
     }
 
     public function testGetCloudLog()
@@ -88,8 +68,18 @@ class FileListTest extends TestCase
         $this->assertSame('magento_root/init/var/log/cloud.log', $this->fileList->getInitCloudLog());
     }
 
+    public function testGetPatches()
+    {
+        $this->assertSame('root/patches.json', $this->fileList->getPatches());
+    }
+
     public function testGetInstallUpgradeLog()
     {
         $this->assertSame('magento_root/var/log/install_upgrade.log', $this->fileList->getInstallUpgradeLog());
+    }
+
+    public function testGetMagentoComposer()
+    {
+        $this->assertSame('magento_root/composer.json', $this->fileList->getMagentoComposer());
     }
 }

@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Package;
 
 use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
+use Magento\MagentoCloud\Config\GlobalSection;
 
 /**
  * Defines methods for comparing version constraints with base Magento package.
@@ -29,15 +30,22 @@ class MagentoVersion
     private $semver;
 
     /**
+     * @var GlobalSection
+     */
+    private $globalSection;
+
+    /**
      * @param Manager $manager
      * @param Comparator $comparator
      * @param Semver $semver
+     * @param GlobalSection $globalSection
      */
-    public function __construct(Manager $manager, Comparator $comparator, Semver $semver)
+    public function __construct(Manager $manager, Comparator $comparator, Semver $semver, GlobalSection $globalSection)
     {
         $this->manager = $manager;
         $this->comparator = $comparator;
         $this->semver = $semver;
+        $this->globalSection = $globalSection;
     }
 
     /**
@@ -45,6 +53,10 @@ class MagentoVersion
      */
     public function getVersion(): string
     {
+        if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+            return $this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT);
+        }
+
         return $this->manager->get('magento/magento2-base')->getVersion();
     }
 
