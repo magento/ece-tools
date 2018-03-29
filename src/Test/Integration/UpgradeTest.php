@@ -14,7 +14,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * {@inheritdoc}
  *
- * @group php71
+ * @group php70
  */
 class UpgradeTest extends AbstractTest
 {
