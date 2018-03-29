@@ -28,6 +28,7 @@ class DirectoryList
     const DIR_ETC = 'etc';
     const DIR_MEDIA = 'media';
     const DIR_VIEW_PREPROCESSED = 'view-preprocessed';
+    const DIR_STATIC = 'static';
 
     /**
      * @var string
@@ -161,14 +162,16 @@ class DirectoryList
      */
     public function getWritableDirectories(): array
     {
-        $writableDirs = [static::DIR_ETC, static::DIR_MEDIA];
+        $writableDirs = [
+            static::DIR_ETC,
+            static::DIR_MEDIA,
+            static::DIR_LOG,
+            static::DIR_VIEW_PREPROCESSED,
+        ];
 
         if ($this->magentoVersion->satisfies('2.1.*')) {
             $writableDirs[] = static::DIR_GENERATED_METADATA;
             $writableDirs[] = static::DIR_GENERATED_CODE;
-            $writableDirs[] = static::DIR_VIEW_PREPROCESSED;
-        } else {
-            $writableDirs[] = static::DIR_VAR;
         }
 
         return array_map(function ($path) {
@@ -187,6 +190,7 @@ class DirectoryList
             static::DIR_LOG => [static::PATH => 'var/log'],
             static::DIR_ETC => [static::PATH => 'app/etc'],
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
+            static::DIR_STATIC => [static::PATH => 'pub/static'],
             static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
         ];
 

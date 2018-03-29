@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 
 /**
  * Performs post-deploy operations, such us:
@@ -30,13 +31,23 @@ class PostDeploy extends Command
     private $logger;
 
     /**
+     * @var FlagManager
+     */
+    private $flagManager;
+
+    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
+     * @param FlagManager $flagManager
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
-    {
+    public function __construct(
+        ProcessInterface $process,
+        LoggerInterface $logger,
+        FlagManager $flagManager
+    ) {
         $this->process = $process;
         $this->logger = $logger;
+        $this->flagManager = $flagManager;
 
         parent::__construct();
     }
@@ -58,6 +69,11 @@ class PostDeploy extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
+            if ($this->flagManager->exists(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED)) {
+                $this->logger->info('Post-deploy is skipped because deploy was failed.');
+                return;
+            }
+
             $this->logger->info('Starting post-deploy.');
             $this->process->execute();
             $this->logger->info('Post-deploy is complete.');

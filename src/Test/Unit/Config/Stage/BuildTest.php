@@ -377,7 +377,7 @@ class BuildTest extends TestCase
                 [],
                 [],
                 ''
-            ],
+            ]
         ];
     }
 

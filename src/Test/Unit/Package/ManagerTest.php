@@ -140,7 +140,7 @@ class ManagerTest extends TestCase
     }
 
     /**
-     * @expectedExceptionMessage Package was not found
+     * @expectedExceptionMessage Package some_package:* was not found
      * @expectedException \Exception
      */
     public function testGetWithException()

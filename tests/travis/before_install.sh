@@ -18,7 +18,7 @@ case $TEST_SUITE in
 
         # Install apache
         sudo apt-get update
-        mkdir -p ${TRAVIS_BUILD_DIR}/app
+        mkdir -p ${TRAVIS_BUILD_DIR}/sandbox
         sudo apt-get install apache2 libapache2-mod-fastcgi
         sudo cp ${TRAVIS_BUILD_DIR}/tests/travis/config/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/
 

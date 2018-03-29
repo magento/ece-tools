@@ -6,10 +6,16 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Updates DB connection configuration.
+ */
 class DbConnection implements ProcessInterface
 {
     /**
@@ -28,17 +34,43 @@ class DbConnection implements ProcessInterface
     private $configWriter;
 
     /**
+     * @var ConfigReader
+     */
+    private $configReader;
+
+    /**
+     * Data of read connection
+     * @var ConnectionInterface
+     */
+    private $readConnection;
+
+    /**
+     * Configurations for deploy phase
+     * @var DeployInterface
+     */
+    private $deployConfig;
+
+    /**
      * @param Environment $environment
+     * @param ConnectionInterface $readConnection
+     * @param DeployInterface $deployConfig
      * @param ConfigWriter $configWriter
+     * @param ConfigReader $configReader
      * @param LoggerInterface $logger
      */
     public function __construct(
         Environment $environment,
+        ConnectionInterface $readConnection,
+        DeployInterface $deployConfig,
         ConfigWriter $configWriter,
+        ConfigReader $configReader,
         LoggerInterface $logger
     ) {
         $this->environment = $environment;
+        $this->readConnection = $readConnection;
+        $this->deployConfig = $deployConfig;
         $this->configWriter = $configWriter;
+        $this->configReader = $configReader;
         $this->logger = $logger;
     }
 
@@ -49,18 +81,66 @@ class DbConnection implements ProcessInterface
     {
         $this->logger->info('Updating env.php DB connection configuration.');
 
-        $config['db']['connection']['default']['username'] = $this->environment->getDbUser();
-        $config['db']['connection']['default']['host'] = $this->environment->getDbHost();
-        $config['db']['connection']['default']['dbname'] = $this->environment->getDbName();
-        $config['db']['connection']['default']['password'] = $this->environment->getDbPassword();
+        $mainConnectionData = [
+            'username' => $this->environment->getDbUser(),
+            'host' => $this->environment->getDbHost(),
+            'dbname' => $this->environment->getDbName(),
+            'password' => $this->environment->getDbPassword(),
+        ];
 
-        $config['db']['connection']['indexer']['username'] = $this->environment->getDbUser();
-        $config['db']['connection']['indexer']['host'] = $this->environment->getDbHost();
-        $config['db']['connection']['indexer']['dbname'] = $this->environment->getDbName();
-        $config['db']['connection']['indexer']['password'] = $this->environment->getDbPassword();
+        $DbConfig = [
+            'db' => [
+                'connection' => [
+                    'default' => $mainConnectionData,
+                    'indexer' => $mainConnectionData,
+                ],
+            ],
+            'resource' => [
+                'default_setup' => [
+                    'connection' => 'default',
+                ],
+            ],
+        ];
 
-        $config['resource']['default_setup']['connection'] = 'default';
+        $config = $this->configReader->read();
+        $config = array_replace_recursive($config, $DbConfig);
 
-        $this->configWriter->update($config);
+        $slaveConnectionData = $this->getSlaveConnection();
+
+        if (!$slaveConnectionData) {
+            unset($config['db']['slave_connection']);
+        } else {
+            $config['db']['slave_connection']['default'] = $slaveConnectionData;
+        }
+
+        $this->configWriter->create($config);
+    }
+
+    /**
+     * Returns mysql read connection if MYSQL_USE_SLAVE_CONNECTION is enabled otherwise returns empty array.
+     *
+     * @return array
+     */
+    private function getSlaveConnection(): array
+    {
+        $slaveConnection = [];
+        if ($this->deployConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
+            && $this->readConnection->getHost()
+        ) {
+            $this->logger->info('Set DB slave connection.');
+
+            $slaveConnection = [
+                'host' => $this->readConnection->getHost() . ':' . $this->readConnection->getPort(),
+                'username' => $this->readConnection->getUser(),
+                'dbname' => $this->readConnection->getDBName(),
+                'password' => $this->readConnection->getPassword(),
+                'model' => 'mysql4',
+                'engine' => 'innodb',
+                'initStatements' => 'SET NAMES utf8;',
+                'active' => '1',
+            ];
+        }
+        
+        return $slaveConnection;
     }
 }

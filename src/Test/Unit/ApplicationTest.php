@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\CronUnlock;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\Dev\UpdateComposer;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
@@ -79,6 +80,7 @@ class ApplicationTest extends TestCase
         $backupRestoreCommandMock = $this->createMock(BackupRestore::class);
         $backupListCommandMock = $this->createMock(BackupList::class);
         $applyPatchesCommandMock = $this->createMock(ApplyPatches::class);
+        $updateComposerCommandMock = $this->createMock(UpdateComposer::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
         $this->mockCommand($configDumpCommandMock, ConfigDump::NAME);
@@ -90,6 +92,7 @@ class ApplicationTest extends TestCase
         $this->mockCommand($backupRestoreCommandMock, BackupRestore::class);
         $this->mockCommand($backupListCommandMock, BackupList::class);
         $this->mockCommand($applyPatchesCommandMock, ApplyPatches::class);
+        $this->mockCommand($updateComposerCommandMock, UpdateComposer::class);
 
         $this->containerMock->method('get')
             ->willReturnMap([
@@ -104,6 +107,7 @@ class ApplicationTest extends TestCase
                 [BackupRestore::class, $backupRestoreCommandMock],
                 [BackupList::class, $backupListCommandMock],
                 [ApplyPatches::class, $applyPatchesCommandMock],
+                [UpdateComposer::class, $updateComposerCommandMock],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);
@@ -159,6 +163,13 @@ class ApplicationTest extends TestCase
             $this->applicationVersion,
             $this->application->getVersion()
         );
-        $this->assertTrue($this->application->has(CronUnlock::NAME));
+    }
+
+    public function testGetContainer()
+    {
+        $this->assertInstanceOf(
+            ContainerInterface::class,
+            $this->application->getContainer()
+        );
     }
 }

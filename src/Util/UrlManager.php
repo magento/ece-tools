@@ -8,6 +8,9 @@ namespace Magento\MagentoCloud\Util;
 use Magento\MagentoCloud\Config\Environment;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Provides an access wrapper to retrieve application URLs.
+ */
 class UrlManager
 {
     const MAGIC_ROUTE = '{default}';
@@ -106,13 +109,35 @@ class UrlManager
         return $this->urls = $urls;
     }
 
+    /**
+     * @return array
+     */
     public function getSecureUrls()
     {
         return $this->getUrls()['secure'] ?? [];
     }
 
+    /**
+     * @return string
+     */
+    public function getDefaultSecureUrl(): string
+    {
+        return $this->getUnSecureUrls()[''];
+    }
+
+    /**
+     * @return array
+     */
     public function getUnSecureUrls()
     {
         return $this->getUrls()['unsecure'] ?? [];
+    }
+
+    /**
+     * @return string
+     */
+    public function getDefaultUnsecureUrl(): string
+    {
+        return $this->getUnSecureUrls()[''];
     }
 }

@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class ResultFactoryTest extends TestCase
 {
     /**
@@ -34,7 +37,7 @@ class ResultFactoryTest extends TestCase
     {
         /** @var Result\Error $result */
         $result = $this->resultFactory->create(ResultInterface::ERROR, [
-            'error' => 'some error'
+            'error' => 'some error',
         ]);
 
         $this->assertInstanceOf(

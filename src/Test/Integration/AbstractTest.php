@@ -7,12 +7,33 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * Adds sandbox project installation and cleanup abstract features.
+ */
 abstract class AbstractTest extends TestCase
 {
     /**
      * @var Bootstrap
      */
     protected $bootstrap;
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws \Exception
+     */
+    public static function setUpBeforeClass()
+    {
+        Bootstrap::create()->run();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function tearDownAfterClass()
+    {
+        Bootstrap::create()->destroy();
+    }
 
     /**
      * @inheritdoc

@@ -12,6 +12,9 @@ use Magento\MagentoCloud\Command\Backup\FileList as BackupFilesList;
 use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class BackupListTest extends TestCase
 {
     /**

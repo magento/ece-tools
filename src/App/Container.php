@@ -89,6 +89,7 @@ class Container implements ContainerInterface
                     Flag\Manager::FLAG_REGENERATE => 'var/.regenerate',
                     Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
                     Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_PENDING => 'var/.static_content_deploy_pending',
+                    Flag\Manager::FLAG_DEPLOY_HOOK_IS_FAILED => 'var/.deploy_is_failed',
                 ]);
             }
         );
@@ -105,6 +106,7 @@ class Container implements ContainerInterface
         );
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
+        $this->container->singleton(\Magento\MagentoCloud\App\Logger\Pool::class);
         $this->container->singleton(\Psr\Log\LoggerInterface::class, \Magento\MagentoCloud\App\Logger::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
         $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
@@ -118,6 +120,7 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\PostDeploy::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\RepositoryFactory::class);
         $this->container->singleton(
             \Magento\MagentoCloud\Config\Stage\BuildInterface::class,
@@ -127,6 +130,11 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Stage\DeployInterface::class,
             \Magento\MagentoCloud\Config\Stage\Deploy::class
         );
+        $this->container->singleton(
+            \Magento\MagentoCloud\Config\Stage\PostDeployInterface::class,
+            \Magento\MagentoCloud\Config\Stage\PostDeploy::class
+        );
+        $this->container->singleton(\Magento\MagentoCloud\Shell\UtilityManager::class);
         /**
          * Contextual binding.
          */
@@ -141,6 +149,7 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
+                                    $this->container->make(ConfigValidator\Build\StageConfig::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
@@ -159,6 +168,25 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(BuildProcess\DeployStaticContent::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
+                    ],
+                ]);
+            });
+        $this->container->when(BuildProcess\BackupData::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->get(BuildProcess\BackupData\StaticContent::class),
+                        $this->get(BuildProcess\BackupData\WritableDirectories::class),
+                    ],
+                ]);
+            });
         $this->container->when(Deploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -169,6 +197,7 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
+                                    $this->container->make(ConfigValidator\Deploy\Variables::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
@@ -177,11 +206,19 @@ class Container implements ContainerInterface
                         ]),
                         $this->container->make(DeployProcess\CreateConfigFile::class),
                         $this->container->make(DeployProcess\SetMode::class),
+                        $this->container->make(DeployProcess\SetCryptKey::class),
                         $this->container->make(DeployProcess\InstallUpdate::class),
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
+                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+                            'validators' => [
+                                ValidatorInterface::LEVEL_WARNING => [
+                                    $this->container->make(ConfigValidator\Deploy\PostDeploy::class),
+                                ],
+                            ],
+                        ]),
                         /**
                          * Remove this line after implementation post-deploy hook
                          */
@@ -190,7 +227,7 @@ class Container implements ContainerInterface
                          * Cache clean process must remain the last one in deploy chain.
                          * Do not add any processes after it.
                          */
-                        $this->container->make(Process\CleanCache::class),
+                        $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);
             });
@@ -223,6 +260,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\PrepareConfig::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\CronConsumersRunner::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
@@ -233,6 +271,9 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class)
+            ->needs(ConnectionInterface::class)
+            ->give(ReadConnection::class);
         $this->container->when(Prestart::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -279,6 +320,7 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
+                        $this->container->make(DeployProcess\PreDeploy\CleanViewPreprocessed::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
@@ -303,15 +345,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(BuildProcess\DeployStaticContent::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
         $this->container->when(DbDump::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -331,6 +364,7 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
+                        $this->container->make(PostDeployProcess\WarmUp::class),
                     ],
                 ]);
             });

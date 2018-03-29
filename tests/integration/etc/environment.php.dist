@@ -33,7 +33,6 @@ return [
     'deploy' => [
         'repo' => 'https://repo.magento.com/',
         'name' => 'magento/project-enterprise-edition',
-        'version' => '^2.2',
     ],
     'skip_front_check' => false,
 ];

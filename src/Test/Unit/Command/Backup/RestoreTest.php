@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
+/**
+ * @inheritdoc
+ */
 class RestoreTest extends TestCase
 {
     /**
@@ -114,7 +117,7 @@ class RestoreTest extends TestCase
                 'fileExists' => true,
                 'copyExpects' => 0,
                 'writeLnMsg' => '<info>config.php file exists!</info>'
-                    . ' <comment>If you want to rewrite existed files use --force</comment>'
+                    . ' <comment>If you want to rewrite existed files use --force</comment>',
             ],
             [
                 'getOptionExpects' => 2,
@@ -124,7 +127,7 @@ class RestoreTest extends TestCase
                 'backupExists' => true,
                 'fileExists' => true,
                 'copyExpects' => 1,
-                'writeLnMsg' => '<info>Backup file config.php was restored.</info>'
+                'writeLnMsg' => '<info>Backup file config.php was restored.</info>',
             ],
             [
                 'getOptionExpects' => 1,
@@ -134,7 +137,7 @@ class RestoreTest extends TestCase
                 'backupExists' => true,
                 'fileExists' => false,
                 'copyExpects' => 1,
-                'writeLnMsg' => '<info>Backup file config.php was restored.</info>'
+                'writeLnMsg' => '<info>Backup file config.php was restored.</info>',
             ],
             [
                 'getOptionExpects' => 1,
@@ -144,7 +147,7 @@ class RestoreTest extends TestCase
                 'backupExists' => true,
                 'fileExists' => false,
                 'copyExpects' => 1,
-                'writeLnMsg' => '<info>Backup file config.php was restored.</info>'
+                'writeLnMsg' => '<info>Backup file config.php was restored.</info>',
             ],
             [
                 'getOptionExpects' => 1,
@@ -154,7 +157,7 @@ class RestoreTest extends TestCase
                 'backupExists' => false,
                 'fileExists' => false,
                 'copyExpects' => 0,
-                'writeLnMsg' => '<info>Backup for config.php does not exist.</info> <comment>Skipped.</comment>'
+                'writeLnMsg' => '<info>Backup for config.php does not exist.</info> <comment>Skipped.</comment>',
             ],
             [
                 'getOptionExpects' => 2,
@@ -165,7 +168,7 @@ class RestoreTest extends TestCase
                 'fileExists' => true,
                 'copyExpects' => 0,
                 'writeLnMsg' => '<info>config.php file exists!</info>'
-                    . ' <comment>If you want to rewrite existed files use --force</comment>'
+                    . ' <comment>If you want to rewrite existed files use --force</comment>',
             ],
             [
                 'getOptionExpects' => 2,
@@ -175,7 +178,7 @@ class RestoreTest extends TestCase
                 'backupExists' => true,
                 'fileExists' => true,
                 'copyExpects' => 1,
-                'writeLnMsg' => '<info>Backup file config.php was restored.</info>'
+                'writeLnMsg' => '<info>Backup file config.php was restored.</info>',
             ],
             [
                 'getOptionExpects' => 1,
@@ -185,7 +188,7 @@ class RestoreTest extends TestCase
                 'backupExists' => true,
                 'fileExists' => false,
                 'copyExpects' => 1,
-                'writeLnMsg' => '<info>Backup file config.php was restored.</info>'
+                'writeLnMsg' => '<info>Backup file config.php was restored.</info>',
             ],
             [
                 'getOptionExpects' => 1,
@@ -195,7 +198,7 @@ class RestoreTest extends TestCase
                 'backupExists' => true,
                 'fileExists' => false,
                 'copyExpects' => 1,
-                'writeLnMsg' => '<info>Backup file config.php was restored.</info>'
+                'writeLnMsg' => '<info>Backup file config.php was restored.</info>',
             ],
             [
                 'getOptionExpects' => 1,
@@ -205,7 +208,7 @@ class RestoreTest extends TestCase
                 'backupExists' => false,
                 'fileExists' => false,
                 'copyExpects' => 0,
-                'writeLnMsg' => '<info>Backup for config.php does not exist.</info> <comment>Skipped.</comment>'
+                'writeLnMsg' => '<info>Backup for config.php does not exist.</info> <comment>Skipped.</comment>',
             ],
             [
                 'getOptionExpects' => 1,
@@ -216,7 +219,7 @@ class RestoreTest extends TestCase
                 'fileExists' => false,
                 'copyExpects' => 0,
                 'writeLnMsg' => '<error>There is no some.php file in the backup list.</error>'
-                    . ' <comment>Run backup:list to show files from backup list.</comment>'
+                    . ' <comment>Run backup:list to show files from backup list.</comment>',
             ],
         ];
     }

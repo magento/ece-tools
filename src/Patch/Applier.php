@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Patch;
 use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Composer\Repository\WritableRepositoryInterface;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -49,18 +50,25 @@ class Applier
     private $file;
 
     /**
+     * @var GlobalSection
+     */
+    private $globalSection;
+
+    /**
      * @param Composer $composer
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param DirectoryList $directoryList
      * @param File $file
+     * @param GlobalSection $globalSection
      */
     public function __construct(
         Composer $composer,
         ShellInterface $shell,
         LoggerInterface $logger,
         DirectoryList $directoryList,
-        File $file
+        File $file,
+        GlobalSection $globalSection
     ) {
         $this->composer = $composer;
         $this->repository = $composer->getRepositoryManager()->getLocalRepository();
@@ -68,10 +76,13 @@ class Applier
         $this->logger = $logger;
         $this->directoryList = $directoryList;
         $this->file = $file;
+        $this->globalSection = $globalSection;
     }
 
     /**
      * Applies patch, using 'git apply' command.
+     *
+     * If the patch fails to apply, checks if it has already been applied which is considered ok.
      *
      * @param string $path Path to patch
      * @param string|null $name Name of patch
@@ -80,10 +91,8 @@ class Applier
      * @return void
      * @throws \RuntimeException
      */
-    public function apply(string $path, $name, $packageName, $constraint)
+    public function apply(string $path, string $name = null, string $packageName = null, $constraint = null)
     {
-        $name = $name ?: $path;
-
         /**
          * Support for relative paths.
          */
@@ -91,23 +100,37 @@ class Applier
             $path = $this->directoryList->getPatches() . '/' . $path;
         }
 
+        if ($packageName && !$this->matchConstraint($packageName, $constraint)) {
+            return;
+        }
+
+        $name = $name ? sprintf('%s (%s)', $name, $path) : $path;
+        $format = 'Applying patch ' . ($constraint ? '%s %s.' : '%s.');
+
         $this->logger->info(sprintf(
-            'Applying patch %s %s.',
+            $format,
             $name,
             $constraint
         ));
 
-        if ($packageName && !$this->matchConstraint($packageName, $constraint)) {
-            $this->logger->notice(sprintf(
-                'Constraint %s %s was not found.',
-                $packageName,
-                $constraint
-            ));
+        try {
+            $this->shell->execute('git apply ' . $path);
+        } catch (\RuntimeException $applyException) {
+            if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+                $this->logger->notice("Patch {$name} wasn't applied.");
 
-            return;
+                return;
+            }
+
+            try {
+                $this->shell->execute('git apply --check --reverse ' . $path);
+            } catch (\RuntimeException $reverseException) {
+                throw $applyException;
+            }
+
+            $this->logger->notice("Patch {$name} was already applied.");
         }
 
-        $this->shell->execute('git apply ' . $path);
         $this->logger->info('Done.');
     }
 

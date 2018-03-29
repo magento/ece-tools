@@ -32,6 +32,11 @@ class Manager
     const FLAG_STATIC_CONTENT_DEPLOY_PENDING = 'scd_pending';
 
     /**
+     * Used to mark that deploy hook is failed.
+     */
+    const FLAG_DEPLOY_HOOK_IS_FAILED = 'deploy_is_failed';
+
+    /**
      * @var LoggerInterface
      */
     private $logger;

@@ -13,11 +13,6 @@ use \Monolog\Logger;
 class LevelResolver
 {
     /**
-     * @var int
-     */
-    private $defaultLevel = Logger::NOTICE;
-
-    /**
      * @var array
      */
     private $mapLevels = [
@@ -37,6 +32,6 @@ class LevelResolver
      */
     public function resolve(string $level): int
     {
-        return $this->mapLevels[strtolower($level)] ?? $this->defaultLevel;
+        return $this->mapLevels[strtolower($level)] ?? Logger::NOTICE;
     }
 }

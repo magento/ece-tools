@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -44,12 +45,18 @@ class DeployStaticContent implements ProcessInterface
     private $flagManager;
 
     /**
+     * @var GlobalConfig
+     */
+    private $globalConfig;
+
+    /**
      * @param LoggerInterface $logger
      * @param BuildInterface $stageConfig
      * @param Environment $environment
      * @param ProcessInterface $process
      * @param ConfigFileStructure $configFileStructureValidator
      * @param FlagManager $flagManager
+     * @param GlobalConfig $globalConfig
      */
     public function __construct(
         LoggerInterface $logger,
@@ -57,7 +64,8 @@ class DeployStaticContent implements ProcessInterface
         Environment $environment,
         ProcessInterface $process,
         ConfigFileStructure $configFileStructureValidator,
-        FlagManager $flagManager
+        FlagManager $flagManager,
+        GlobalConfig $globalConfig
     ) {
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
@@ -65,6 +73,7 @@ class DeployStaticContent implements ProcessInterface
         $this->process = $process;
         $this->configFileStructureValidator = $configFileStructureValidator;
         $this->flagManager = $flagManager;
+        $this->globalConfig = $globalConfig;
     }
 
     /**
@@ -73,6 +82,12 @@ class DeployStaticContent implements ProcessInterface
     public function execute()
     {
         $this->flagManager->delete(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
+
+        if ($this->globalConfig->get(BuildInterface::VAR_SCD_ON_DEMAND)) {
+            $this->logger->notice('Skipping static content deploy. SCD on demand is enabled.');
+
+            return;
+        }
 
         if ($this->stageConfig->get(BuildInterface::VAR_SKIP_SCD)) {
             $this->logger->notice('Skipping static content deploy');
