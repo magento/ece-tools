@@ -125,7 +125,7 @@ class Bootstrap
     public function destroy()
     {
         $this->execute(sprintf(
-            'rm -rf %s',
+            'rm -rf %s/*',
             $this->getSandboxDir()
         ));
     }
