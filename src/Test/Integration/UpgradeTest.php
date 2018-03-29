@@ -14,7 +14,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * {@inheritdoc}
  *
- * @group php70
+ * @group php71
  */
 class UpgradeTest extends AbstractTest
 {
@@ -46,7 +46,7 @@ class UpgradeTest extends AbstractTest
             $this->assertSame(0, $commandTester->getStatusCode());
         };
 
-        $this->updateToVersion($fromVersion);
+//        $this->updateToVersion($fromVersion);
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
