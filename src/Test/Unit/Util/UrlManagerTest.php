@@ -268,11 +268,11 @@ class UrlManagerTest extends TestCase
                     'https://*.example.com/' => ['original_url' => 'https://*.example.com/', 'type' => 'upstream'],
                     'http://french.example.com/' => [
                         'original_url' => 'http://french.example.com/',
-                        'type' => 'upstream'
+                        'type' => 'upstream',
                     ],
                     'https://french.example.com/' => [
                         'original_url' => 'https://french.example.com/',
-                        'type' => 'upstream'
+                        'type' => 'upstream',
                     ],
                 ],
                 'expectedResult' => [
@@ -297,11 +297,11 @@ class UrlManagerTest extends TestCase
                     'https://*.example.com/' => ['original_url' => 'https://*.{default}/', 'type' => 'upstream'],
                     'http://french.example.com/' => [
                         'original_url' => 'http://french.{default}/',
-                        'type' => 'upstream'
+                        'type' => 'upstream',
                     ],
                     'https://french.example.com/' => [
                         'original_url' => 'https://french.{default}/',
-                        'type' => 'upstream'
+                        'type' => 'upstream',
                     ],
                 ],
                 [
@@ -314,6 +314,39 @@ class UrlManagerTest extends TestCase
                         '' => 'http://example.com/',
                         '*' => 'http://*.example.com/',
                         'french' => 'http://french.example.com/',
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array $secureRoute
+     * @dataProvider getBaseUrlDataProvider
+     */
+    public function testGetBaseUrl(array $secureRoute)
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRoutes')
+            ->willReturn($secureRoute);
+
+        $this->assertEquals(
+            'https://example.com/',
+            $this->manager->getBaseUrl()
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getBaseUrlDataProvider(): array
+    {
+        return [
+            [
+                [
+                    'https://example.com/' => [
+                        'original_url' => 'https://{default}',
+                        'type' => 'upstream',
                     ],
                 ],
             ],
