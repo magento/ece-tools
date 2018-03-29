@@ -128,6 +128,10 @@ class Bootstrap
             'rm -rf %s/*',
             $this->getSandboxDir()
         ));
+        $this->execute(sprintf(
+            'find %s -mindepth 1 -name \'.*\' -delete',
+            $this->getSandboxDir()
+        ));
     }
 
     /**
