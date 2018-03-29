@@ -16,8 +16,8 @@ class SanitizeProcessor
      * @var array
      */
     private $replacements = [
-        '/--admin-password=".*?"/i' => '--admin-password="******"',
-        '/--db-password=".*?"/i' => '--db-password="******"'
+        '/--admin-password=\'.*?\'/i' => '--admin-password=\'******\'',
+        '/--db-password=\'.*?\'/i' => '--db-password=\'******\''
     ];
 
     /**

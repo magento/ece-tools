@@ -34,12 +34,12 @@ class SanitizeProcessorTest extends TestCase
                 ['message' => 'some message']
             ],
             [
-                ['message' => 'some message with admin password --admin-password="Ks81bUSl13Osd"'],
-                ['message' => 'some message with admin password --admin-password="******"'],
+                ['message' => 'some message with admin password --admin-password=\'Ks81bUSl13Osd\''],
+                ['message' => 'some message with admin password --admin-password=\'******\''],
             ],
             [
-                ['message' => 'some message with db password --db-password="Ks81bUSl13Osd"'],
-                ['message' => 'some message with db password --db-password="******"'],
+                ['message' => 'some message with db password --db-password=\'Ks81bUSl13Osd\''],
+                ['message' => 'some message with db password --db-password=\'******\''],
             ]
         ];
     }
