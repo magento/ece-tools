@@ -40,7 +40,27 @@ class SanitizeProcessorTest extends TestCase
             [
                 ['message' => 'some message with db password --db-password=\'Ks81bUSl13Osd\''],
                 ['message' => 'some message with db password --db-password=\'******\''],
-            ]
+            ],
+            [
+                ['message' => 'some message with db password --db-password=\'--db-password\''],
+                ['message' => 'some message with db password --db-password=\'******\''],
+            ],
+            [
+                ['message' => 'some text --admin-password=\'Ks81bUSl13Osd\' some text'],
+                ['message' => 'some text --admin-password=\'******\' some text'],
+            ],
+            [
+                ['message' => 'some text --admin-password=\'Ks81bUSl13Osd\' --db-password=\'Ks81bUSl13Osd\' some text'],
+                ['message' => 'some text --admin-password=\'******\' --db-password=\'******\' some text'],
+            ],
+            [
+                ['message' => 'some text --admin-password=\'Ks81\'bUSl\'13Osd\''],
+                ['message' => 'some text --admin-password=\'******\''],
+            ],
+            [
+                ['message' => 'some text --admin-password=\'' . escapeshellarg("Ks81b'USl'13Osd") . '\''],
+                ['message' => 'some text --admin-password=\'******\''],
+            ],
         ];
     }
 }
