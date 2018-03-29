@@ -4,4 +4,3 @@ composer.phar
 composer.lock
 .DS_Store
 /sandbox
-docker/composer.env

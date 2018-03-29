@@ -18,9 +18,7 @@ cache:
 before_install:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
-install:
-  - docker-compose -f docker-compose-${PHP}.yml run cli bash -c "composer install -n -d /var/www/magento"
-before_script:
-  - docker-compose -f docker-compose-${PHP}.yml up -d --build
+install: docker-compose -f docker-compose-${PHP}.yml run cli bash -c "composer install -n -d /var/www/magento"
+before_script: docker-compose -f docker-compose-${PHP}.yml up -d --build
 script: ./tests/travis/script.sh
 after_failure: docker ps -s

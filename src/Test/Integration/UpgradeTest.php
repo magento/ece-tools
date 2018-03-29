@@ -59,12 +59,6 @@ class UpgradeTest extends AbstractTest
         $executeAndAssert(PostDeploy::NAME);
 
         $this->assertContentPresence();
-
-        $this->bootstrap->execute(sprintf(
-            'rm -rf %s/vendor/*',
-            $this->bootstrap->getSandboxDir()
-        ));
-
         $this->updateToVersion($toVersion);
 
         $executeAndAssert(Build::NAME);
