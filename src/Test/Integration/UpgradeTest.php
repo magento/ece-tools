@@ -33,6 +33,11 @@ class UpgradeTest extends AbstractTest
      */
     public function testDefault(string $fromVersion, string $toVersion)
     {
+        $this->bootstrap->execute(sprintf(
+            'rm -rf %s/vendor/*',
+            $this->bootstrap->getSandboxDir()
+        ));
+
         $application = $this->bootstrap->createApplication([]);
 
         $executeAndAssert = function ($commandName) use ($application) {
@@ -46,12 +51,18 @@ class UpgradeTest extends AbstractTest
             $this->assertSame(0, $commandTester->getStatusCode());
         };
 
-//        $this->updateToVersion($fromVersion);
+        $this->updateToVersion($fromVersion);
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
 
         $this->assertContentPresence();
+
+        $this->bootstrap->execute(sprintf(
+            'rm -rf %s/vendor/*',
+            $this->bootstrap->getSandboxDir()
+        ));
+
         $this->updateToVersion($toVersion);
 
         $executeAndAssert(Build::NAME);
