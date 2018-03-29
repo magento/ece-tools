@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
- * Validates Solr has not been configured for project
+ * Validates Solr has not been configured for project.
  */
 class SearchEngine implements ValidatorInterface
 {
@@ -57,12 +57,12 @@ class SearchEngine implements ValidatorInterface
 
             if ($this->magentoVersion->satisfies('2.1.*')) {
                 $args['suggestion'] = 'Solr support has been deprecated in Magento 2.1. ' .
-                    'You should update your search engine to Elasticsearch and remove this relationship.';
+                    'Update your search engine to Elasticsearch and remove this relationship.';
             }
 
             if ($this->magentoVersion->satisfies('>=2.2')) {
                 $args['suggestion'] = 'Solr is no longer supported by Magento 2.2 or later. ' .
-                    'You should remove this relationship and use Elasticsearch.';
+                    'Remove this relationship and use Elasticsearch.';
             }
 
             return $this->resultFactory->create(ResultInterface::ERROR, $args);

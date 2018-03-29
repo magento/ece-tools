@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -39,6 +40,9 @@ class SearchEngineTest extends TestCase
      */
     private $resultFactoryMock;
 
+    /**
+     * @inheritdoc
+     */
     public function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
@@ -58,19 +62,19 @@ class SearchEngineTest extends TestCase
             ->method('getRelationships')
             ->willReturn([
                 'elasticsearch' => [['host' => '127.0.0.1']],
-                'database' => [[
-                    'host' => 'database.internal',
-                    'scheme' => 'mysql',
-                ]]]);
-
+                'database' => [
+                    [
+                        'host' => 'database.internal',
+                        'scheme' => 'mysql',
+                    ],
+                ],
+            ]);
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(ResultInterface::SUCCESS)
             ->willReturn($this->createMock(Success::class));
 
-        $result = $this->searchEngineValidator->validate();
-
-        $this->assertInstanceOf(Success::class, $result);
+        $this->searchEngineValidator->validate();
     }
 
     public function testConfigSolr21()
@@ -79,17 +83,18 @@ class SearchEngineTest extends TestCase
             ->method('getRelationships')
             ->willReturn([
                 'solr' => [['host' => '127.0.0.1']],
-                'database' => [[
-                    'host' => 'database.internal',
-                    'scheme' => 'mysql',
-                ]]]);
-
+                'database' => [
+                    [
+                        'host' => 'database.internal',
+                        'scheme' => 'mysql',
+                    ],
+                ],
+            ]);
         $this->magentoVersionMock->method('satisfies')
             ->willReturnMap([
                 ['2.1.*', true],
                 ['>=2.2', false],
             ]);
-
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(
@@ -97,13 +102,11 @@ class SearchEngineTest extends TestCase
                 [
                     'error' => 'Configuration for Solr was found in .magento.app.yaml.',
                     'suggestion' => 'Solr support has been deprecated in Magento 2.1. ' .
-                        'You should update your search engine to Elasticsearch and remove this relationship.',
+                        'Update your search engine to Elasticsearch and remove this relationship.',
                 ]
             )->willReturn($this->createMock(Error::class));
 
-        $result = $this->searchEngineValidator->validate();
-
-        $this->assertInstanceOf(Error::class, $result);
+        $this->searchEngineValidator->validate();
     }
 
     public function testConfigSolr22()
@@ -112,10 +115,13 @@ class SearchEngineTest extends TestCase
             ->method('getRelationships')
             ->willReturn([
                 'solr' => [['host' => '127.0.0.1']],
-                'database' => [[
-                    'host' => 'database.internal',
-                    'scheme' => 'mysql',
-                ]]]);
+                'database' => [
+                    [
+                        'host' => 'database.internal',
+                        'scheme' => 'mysql',
+                    ],
+                ],
+            ]);
 
         $this->magentoVersionMock->method('satisfies')
             ->willReturnMap([
@@ -130,12 +136,10 @@ class SearchEngineTest extends TestCase
                 [
                     'error' => 'Configuration for Solr was found in .magento.app.yaml.',
                     'suggestion' => 'Solr is no longer supported by Magento 2.2 or later. ' .
-                        'You should remove this relationship and use Elasticsearch.',
+                        'Remove this relationship and use Elasticsearch.',
                 ]
             )->willReturn($this->createMock(Error::class));
 
-        $result = $this->searchEngineValidator->validate();
-
-        $this->assertInstanceOf(Error::class, $result);
+        $this->searchEngineValidator->validate();
     }
 }
