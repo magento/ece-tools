@@ -7,10 +7,10 @@ services:
 language: generic
 env:
   matrix:
-    - TEST_SUITE=static-unit PHP=7.0
-    - TEST_SUITE=static-unit PHP=7.1
-    - TEST_SUITE=integration PHP=7.0
-    - TEST_SUITE=integration PHP=7.1
+    - TEST_SUITE=static-unit PHP=7.0 XDEBUG=true
+    - TEST_SUITE=static-unit PHP=7.1 XDEBUG=true
+    - TEST_SUITE=integration PHP=7.0 XDEBUG=false
+    - TEST_SUITE=integration PHP=7.1 XDEBUG=false
 cache:
   apt: true
   directories:
@@ -18,6 +18,7 @@ cache:
 before_install:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
+  - echo "PHP_ENABLE_XDEBUG=${XDEBUG}" >> ./docker/global.env
 install: docker-compose -f docker-compose-${PHP}.yml run cli bash -c "composer install -n -d /var/www/magento"
 before_script: docker-compose -f docker-compose-${PHP}.yml up -d --build
 script: ./tests/travis/script.sh
