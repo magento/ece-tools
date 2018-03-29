@@ -55,6 +55,8 @@ class UpgradeTest extends AbstractTest
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
+        $executeAndAssert(Prestart::NAME);
+        $executeAndAssert(PostDeploy::NAME);
 
         $this->assertContentPresence();
 
@@ -67,6 +69,8 @@ class UpgradeTest extends AbstractTest
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
+        $executeAndAssert(Prestart::NAME);
+        $executeAndAssert(PostDeploy::NAME);
 
         $this->assertContentPresence();
     }
