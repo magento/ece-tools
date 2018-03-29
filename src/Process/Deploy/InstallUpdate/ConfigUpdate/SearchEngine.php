@@ -61,6 +61,7 @@ class SearchEngine implements ProcessInterface
      * @param SharedWriter $sharedWriter
      * @param DeployInterface $stageConfig
      * @param MagentoVersion $version
+     * @param ClientFactory $client
      */
     public function __construct(
         Environment $environment,
