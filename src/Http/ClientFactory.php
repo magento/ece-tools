@@ -33,7 +33,7 @@ class ClientFactory
      * Creates a Client instance.
      *
      * @param array $config
-     * @return ClientInterface
+     * @return Client|ClientInterface
      */
     public function create(array $config = []): ClientInterface
     {
