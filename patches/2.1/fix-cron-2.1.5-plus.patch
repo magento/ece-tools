@@ -204,14 +204,14 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
  
          if (!isset($jobConfig['instance'], $jobConfig['method'])) {
              $schedule->setStatus(Schedule::STATUS_ERROR);
-+            $this->logger->info(sprintf('Cron Job %s has an error', $jobCode));
++            $this->logger->error(sprintf('Cron Job %s has an error', $jobCode));
              throw new \Exception('No callbacks found');
          }
          $model = $this->_objectManager->create($jobConfig['instance']);
          $callback = [$model, $jobConfig['method']];
          if (!is_callable($callback)) {
              $schedule->setStatus(Schedule::STATUS_ERROR);
-+            $this->logger->info(sprintf('Cron Job %s has an error', $jobCode));
++            $this->logger->error(sprintf('Cron Job %s has an error', $jobCode));
              throw new \Exception(
                  sprintf('Invalid callback: %s::%s can\'t be called', $jobConfig['instance'], $jobConfig['method'])
              );
@@ -226,10 +226,10 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
              call_user_func_array($callback, [$schedule]);
          } catch (\Exception $e) {
              $schedule->setStatus(Schedule::STATUS_ERROR);
-+            $this->logger->info(sprintf(
-+                'Cron Job %s has an error. Statistics: %s',
++            $this->logger->error(sprintf(
++                'Cron Job %s has an error. Statistics: %s %s',
 +                $jobCode,
-+                $this->getProfilingStat()
++                $this->getProfilingStat(), $e->getMessage()
 +            ));
              throw $e;
 +        } finally {
@@ -711,7 +711,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +                if ($schedule->getStatus() === Schedule::STATUS_MISSED
 +                    && $this->state->getMode() === State::MODE_DEVELOPER
 +                ) {
-+                    $this->logger->info(
++                    $this->logger->error(
 +                        sprintf(
 +                            "%s Schedule Id: %s Job Code: %s",
 +                            $schedule->getMessages(),

@@ -154,14 +154,14 @@ index f772a6c..d760e92 100644
 
          if (!isset($jobConfig['instance'], $jobConfig['method'])) {
              $schedule->setStatus(Schedule::STATUS_ERROR);
-+            $this->logger->info(sprintf('Cron Job %s has an error', $jobCode));
++            $this->logger->error(sprintf('Cron Job %s has an error', $jobCode));
              throw new \Exception('No callbacks found');
          }
          $model = $this->_objectManager->create($jobConfig['instance']);
          $callback = [$model, $jobConfig['method']];
          if (!is_callable($callback)) {
              $schedule->setStatus(Schedule::STATUS_ERROR);
-+            $this->logger->info(sprintf('Cron Job %s has an error', $jobCode));
++            $this->logger->error(sprintf('Cron Job %s has an error', $jobCode));
              throw new \Exception(
                  sprintf('Invalid callback: %s::%s can\'t be called', $jobConfig['instance'], $jobConfig['method'])
              );
@@ -175,10 +175,10 @@ index f772a6c..d760e92 100644
              call_user_func_array($callback, [$schedule]);
          } catch (\Exception $e) {
              $schedule->setStatus(Schedule::STATUS_ERROR);
-+            $this->logger->info(sprintf(
-+                'Cron Job %s has an error. Statistics: %s',
++            $this->logger->error(sprintf(
++                'Cron Job %s has an error. Statistics: %s %s',
 +                $jobCode,
-+                $this->getProfilingStat()
++                $this->getProfilingStat(), $e->getMessage()
 +            ));
              throw $e;
 +        } finally {
