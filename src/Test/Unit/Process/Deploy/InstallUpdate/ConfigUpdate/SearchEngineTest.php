@@ -236,8 +236,8 @@ class SearchEngineTest extends TestCase
                 ],
                 'expected' => [
                     'engine' => 'elasticsearch5',
-                    'elasticsearch_server_hostname' => 'localhost',
-                    'elasticsearch_server_port' => 1234,
+                    'elasticsearch5_server_hostname' => 'localhost',
+                    'elasticsearch5_server_port' => 1234,
                 ],
             ],
             [
@@ -249,8 +249,8 @@ class SearchEngineTest extends TestCase
                 ],
                 'expected' => [
                     'engine' => 'elasticsearch5',
-                    'elasticsearch_server_hostname' => 'localhost',
-                    'elasticsearch_server_port' => 1234,
+                    'elasticsearch5_server_hostname' => 'localhost',
+                    'elasticsearch5_server_port' => 1234,
                 ],
             ],
             [
@@ -262,8 +262,8 @@ class SearchEngineTest extends TestCase
                 ],
                 'expected' => [
                     'engine' => 'elasticsearch5',
-                    'elasticsearch_server_hostname' => 'localhost',
-                    'elasticsearch_server_port' => 1234,
+                    'elasticsearch5_server_hostname' => 'localhost',
+                    'elasticsearch5_server_port' => 1234,
                 ],
             ],
         ];

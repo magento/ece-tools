@@ -164,12 +164,16 @@ class SearchEngine implements ProcessInterface
             $this->logger->warning($exception->getMessage());
         }
 
-        $engine = isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5
-            ? 'elasticsearch5'
-            : 'elasticsearch';
+        if (isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5) {
+            return [
+                'engine' => 'elasticsearch5',
+                'elasticsearch5_server_hostname' => $config['host'],
+                'elasticsearch5_server_port' => $config['port'],
+            ];
+        }
 
         return [
-            'engine' => $engine,
+            'engine' => 'elasticsearch',
             'elasticsearch_server_hostname' => $config['host'],
             'elasticsearch_server_port' => $config['port'],
         ];
