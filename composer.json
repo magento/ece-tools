@@ -52,10 +52,10 @@
     "test": [
       "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
       "phpmd src xml tests/static/phpmd-ruleset.xml",
-      "phpunit --configuration tests/unit/phpunit.xml.dist"
+      "phpunit --configuration tests/unit"
     ],
-    "test-coverage": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml 85",
-    "test-coverage-generate": "phpunit --configuration tests/unit/phpunit.xml.dist --coverage-html tests/unit/tmp/coverage"
+    "test-coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
+    "test-coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage"
   },
   "prefer-stable": true
 }

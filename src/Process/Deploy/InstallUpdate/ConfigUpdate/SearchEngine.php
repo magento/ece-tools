@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -49,11 +50,18 @@ class SearchEngine implements ProcessInterface
     private $magentoVersion;
 
     /**
+     * @var ClientFactory
+     */
+    private $clientFactory;
+
+    /**
      * @param Environment $environment
      * @param LoggerInterface $logger
      * @param EnvWriter $envWriter
      * @param SharedWriter $sharedWriter
      * @param DeployInterface $stageConfig
+     * @param MagentoVersion $version
+     * @param ClientFactory $client
      */
     public function __construct(
         Environment $environment,
@@ -61,7 +69,8 @@ class SearchEngine implements ProcessInterface
         EnvWriter $envWriter,
         SharedWriter $sharedWriter,
         DeployInterface $stageConfig,
-        MagentoVersion $version
+        MagentoVersion $version,
+        ClientFactory $client
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
@@ -69,6 +78,7 @@ class SearchEngine implements ProcessInterface
         $this->sharedWriter = $sharedWriter;
         $this->stageConfig = $stageConfig;
         $this->magentoVersion = $version;
+        $this->clientFactory = $client;
     }
 
     /**
@@ -88,6 +98,7 @@ class SearchEngine implements ProcessInterface
         // 2.1.x requires search config to be written to the shared config file: MAGECLOUD-1317
         if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
             $this->sharedWriter->update($config);
+
             return;
         }
         $this->envWriter->update($config);
@@ -141,6 +152,26 @@ class SearchEngine implements ProcessInterface
      */
     private function getElasticSearchConfiguration(array $config)
     {
+        try {
+            $response = $this->clientFactory->create()->get(sprintf(
+                '%s:%s',
+                $config['host'],
+                $config['port']
+            ));
+            $esConfiguration = $response->getBody()->getContents();
+            $esConfiguration = json_decode($esConfiguration, true);
+
+            if (isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5) {
+                return [
+                    'engine' => 'elasticsearch5',
+                    'elasticsearch5_server_hostname' => $config['host'],
+                    'elasticsearch5_server_port' => $config['port'],
+                ];
+            }
+        } catch (\Exception $exception) {
+            $this->logger->warning($exception->getMessage());
+        }
+
         return [
             'engine' => 'elasticsearch',
             'elasticsearch_server_hostname' => $config['host'],
