@@ -160,16 +160,16 @@ class SearchEngine implements ProcessInterface
             ));
             $esConfiguration = $response->getBody()->getContents();
             $esConfiguration = json_decode($esConfiguration, true);
+
+            if (isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5) {
+                return [
+                    'engine' => 'elasticsearch5',
+                    'elasticsearch5_server_hostname' => $config['host'],
+                    'elasticsearch5_server_port' => $config['port'],
+                ];
+            }
         } catch (\Exception $exception) {
             $this->logger->warning($exception->getMessage());
-        }
-
-        if (isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5) {
-            return [
-                'engine' => 'elasticsearch5',
-                'elasticsearch5_server_hostname' => $config['host'],
-                'elasticsearch5_server_port' => $config['port'],
-            ];
         }
 
         return [
