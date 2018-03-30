@@ -156,7 +156,7 @@ class SearchEngineTest extends TestCase
             ->method('getContents')
             ->willReturn('{
                 "name" : "ZaIj9mo",
-                "cluster_name" : "elasticsearch_oposyniak",
+                "cluster_name" : "elasticsearch",
                 "cluster_uuid" : "CIXBGIVdS6mwM_0lmVhF4g",
                 "version" : {
                     "number" : "' . $version . '",
@@ -267,6 +267,64 @@ class SearchEngineTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    public function testExecuteWithElasticSearchException()
+    {
+        $relationships = [
+            'host' => 'localhost',
+            'port' => 1234,
+        ];
+        $expected = [
+            'engine' => 'elasticsearch',
+            'elasticsearch_server_hostname' => 'localhost',
+            'elasticsearch_server_port' => 1234,
+        ];
+
+        $config['system']['default']['catalog']['search'] = $expected;
+
+        $clientMock = $this->getMockBuilder(Client::class)
+            ->setMethods(['get'])
+            ->getMock();
+
+        $clientMock->expects($this->once())
+            ->method('get')
+            ->with($relationships['host'] . ':' . $relationships['port'])
+            ->willThrowException(new \RuntimeException('ES is not available'));
+
+        $this->clientFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($clientMock);
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn([]);
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationships')
+            ->willReturn(
+                [
+                    'elasticsearch' => [
+                        $relationships,
+                    ],
+                ]
+            );
+        $this->envWriterMock->expects($this->once())
+            ->method('update')
+            ->with($config);
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Updating search engine configuration.'],
+                ['Set search engine to: ' . $expected['engine']]
+            );
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('ES is not available');
+
+        $this->process->execute();
     }
 
     /**

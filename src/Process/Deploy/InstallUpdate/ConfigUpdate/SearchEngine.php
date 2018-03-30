@@ -152,14 +152,21 @@ class SearchEngine implements ProcessInterface
      */
     private function getElasticSearchConfiguration(array $config)
     {
-        $response = $this->clientFactory->create()->get(sprintf(
-            '%s:%s',
-            $config['host'],
-            $config['port']
-        ));
-        $esConfiguration = $response->getBody()->getContents();
-        $esConfiguration = json_decode($esConfiguration, true);
-        $engine = $esConfiguration['version']['number'] >= 5 ? 'elasticsearch5' : 'elasticsearch';
+        try {
+            $response = $this->clientFactory->create()->get(sprintf(
+                '%s:%s',
+                $config['host'],
+                $config['port']
+            ));
+            $esConfiguration = $response->getBody()->getContents();
+            $esConfiguration = json_decode($esConfiguration, true);
+        } catch (\Exception $exception) {
+            $this->logger->warning($exception->getMessage());
+        }
+
+        $engine = isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5
+            ? 'elasticsearch5'
+            : 'elasticsearch';
 
         return [
             'engine' => $engine,
