@@ -119,6 +119,19 @@ class Bootstrap
     }
 
     /**
+     * @param string $value
+     * @param array $environment
+     * @return array
+     * @throws \Exception
+     */
+    public function getEnv(string $value, array $environment): array
+    {
+        $env = $this->mergeConfig($environment)->get($value);
+
+        return json_decode(base64_decode($env), true);
+    }
+
+    /**
      * Destroy app.
      */
     public function destroy()

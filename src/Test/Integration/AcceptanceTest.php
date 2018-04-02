@@ -47,6 +47,7 @@ class AcceptanceTest extends AbstractTest
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
         $this->executeAndAssert(Prestart::NAME, $application);
+        $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
 
@@ -151,6 +152,7 @@ class AcceptanceTest extends AbstractTest
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
         $this->executeAndAssert(Prestart::NAME, $application);
+        $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
     }
@@ -176,8 +178,7 @@ class AcceptanceTest extends AbstractTest
      */
     private function assertContentPresence(array $environment)
     {
-        $routes = $this->bootstrap->mergeConfig($environment)
-            ->get('MAGENTO_CLOUD_ROUTES');
+        $routes = $this->bootstrap->getEnv('MAGENTO_CLOUD_ROUTES', $environment);
         $routes = array_keys($routes);
         $defaultRoute = reset($routes);
         $pageContent = file_get_contents($defaultRoute);
