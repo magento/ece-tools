@@ -161,9 +161,9 @@ class Bootstrap
 
     /**
      * @param string $command
-     * @return string
+     * @return array
      */
-    public function execute(string $command): string
+    public function execute(string $command): array
     {
         exec($command, $output, $status);
 
