@@ -97,7 +97,7 @@ class Bootstrap
      */
     public function createApplication(array $environment): Application
     {
-        $environment = $this->mergeConfig($environment);
+        $environment = $this->getAllEnv($environment);
 
         $_ENV = array_replace($_ENV, [
             'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(
