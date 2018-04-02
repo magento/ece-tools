@@ -47,7 +47,6 @@ class AcceptanceTest extends AbstractTest
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
         $this->executeAndAssert(Prestart::NAME, $application);
-        $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
 
