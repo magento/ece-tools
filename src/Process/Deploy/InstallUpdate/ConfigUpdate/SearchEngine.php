@@ -152,6 +152,8 @@ class SearchEngine implements ProcessInterface
      */
     private function getElasticSearchConfiguration(array $config)
     {
+        $engine = 'elasticsearch';
+
         try {
             $response = $this->clientFactory->create()->get(sprintf(
                 '%s:%s',
@@ -162,24 +164,20 @@ class SearchEngine implements ProcessInterface
             $esConfiguration = json_decode($esConfiguration, true);
 
             if (isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5) {
-                return [
-                    'engine' => 'elasticsearch5',
-                    'elasticsearch5_server_hostname' => $config['host'],
-                    'elasticsearch5_server_port' => $config['port'],
-                ];
+                $engine = 'elasticsearch5';
             }
         } catch (\Exception $exception) {
             $this->logger->warning($exception->getMessage());
         }
 
-        return [
-            'engine' => 'elasticsearch',
-            'elasticsearch_server_hostname' => $config['host'],
-            'elasticsearch_server_port' => $config['port'],
+        $elasticSearchConfig = [
+            'engine' => $engine,
+            "{$engine}_server_hostname" => $config['host'],
+            "{$engine}_server_port" => $config['port'],
         ];
 
         if (isset($config['query']['index'])) {
-            $elasticSearchConfig['elasticsearch_index_prefix'] = $config['query']['index'];
+            $elasticSearchConfig["{$engine}_index_prefix"] = $config['query']['index'];
         }
 
         return $elasticSearchConfig;
