@@ -97,12 +97,26 @@ class Bootstrap
      */
     public function createApplication(array $environment): Application
     {
-        $environment = $this->mergeConfig($environment)->all();
-        $_ENV = array_replace($_ENV, $environment);
+        $environment = $this->mergeConfig($environment);
 
-        return new Application(
-            new Container(ECE_BP, $this->getSandboxDir())
-        );
+        $_ENV = array_replace($_ENV, [
+            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(
+                $environment->get('variables', [])
+            )),
+            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode(
+                $environment->get('relationships', [])
+            )),
+            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
+                $environment->get('routes', [])
+            )),
+            'MAGENTO_CLOUD_APPLICATION' => base64_encode(json_encode(
+                []
+            )),
+        ]);
+
+        $container = new Container(ECE_BP, $this->getSandboxDir());
+
+        return new Application($container);
     }
 
     /**
@@ -110,7 +124,7 @@ class Bootstrap
      * @return Repository
      * @throws \Exception
      */
-    private function mergeConfig(array $environment): Repository
+    private function getAllEnv(array $environment): Repository
     {
         return new Repository(array_replace(
             require $this->getConfigFile('environment.php'),
@@ -126,9 +140,7 @@ class Bootstrap
      */
     public function getEnv(string $value, array $environment): array
     {
-        $env = $this->mergeConfig($environment)->get($value);
-
-        return json_decode(base64_decode($env), true);
+        return $this->getAllEnv($environment)->get($value);
     }
 
     /**
