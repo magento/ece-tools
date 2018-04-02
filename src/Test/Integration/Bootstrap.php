@@ -110,7 +110,7 @@ class Bootstrap
      * @return Repository
      * @throws \Exception
      */
-    public function mergeConfig(array $environment): Repository
+    private function mergeConfig(array $environment): Repository
     {
         return new Repository(array_replace(
             require $this->getConfigFile('environment.php'),
