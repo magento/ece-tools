@@ -81,8 +81,8 @@ class UpgradeTest extends AbstractTest
 
     private function assertContentPresence()
     {
-        $config = $this->bootstrap->mergeConfig([]);
-        $routes = $config->get('routes');
+        $routes = $this->bootstrap->mergeConfig([])
+            ->get('MAGENTO_CLOUD_ROUTES');
         $defaultRoute = array_keys($routes)[0];
         $pageContent = file_get_contents($defaultRoute);
 

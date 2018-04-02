@@ -176,8 +176,8 @@ class AcceptanceTest extends AbstractTest
      */
     private function assertContentPresence(array $environment)
     {
-        $config = $this->bootstrap->mergeConfig($environment);
-        $routes = $config->get('routes');
+        $routes = $this->bootstrap->mergeConfig($environment)
+            ->get('MAGENTO_CLOUD_ROUTES');
         $routes = array_keys($routes);
         $defaultRoute = reset($routes);
         $pageContent = file_get_contents($defaultRoute);
