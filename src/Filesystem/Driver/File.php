@@ -37,7 +37,7 @@ class File
      * @param string $path
      * @return bool
      */
-    public function isExists($path): bool
+    public function isExists(string $path): bool
     {
         return @file_exists($path);
     }
@@ -242,16 +242,10 @@ class File
      *
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
-    public function deleteFile($path)
+    public function deleteFile(string $path): bool
     {
-        $result = @unlink($path);
-        if (!$result) {
-            $this->fileSystemException('The file "%1" cannot be deleted %2', [$path, $this->getWarningMessage()]);
-        }
-
-        return $result;
+        return @unlink($path);
     }
 
     /**
@@ -259,9 +253,8 @@ class File
      *
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
-    public function deleteDirectory($path)
+    public function deleteDirectory(string $path): bool
     {
         $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
         $iterator = new \FilesystemIterator($path, $flags);
@@ -273,25 +266,17 @@ class File
                 $this->deleteFile($entity->getPathname());
             }
         }
-        $result = @rmdir($path);
-        if (!$result) {
-            $this->fileSystemException(
-                'The directory "%1" cannot be deleted %2',
-                [$path, $this->getWarningMessage()]
-            );
-        }
 
-        return $result;
+        return @rmdir($path);
     }
 
     /**
-     * Recursive clear directory
+     * Recursive clear directory.
      *
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
-    public function clearDirectory($path)
+    public function clearDirectory(string $path): bool
     {
         if (!$this->isExists($path)) {
             return true;
