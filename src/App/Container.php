@@ -265,6 +265,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Session::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DocumentRoot::class),
                     ],
                 ]);
             });

@@ -99,6 +99,12 @@
     "Fixing bundling javascript files with gzip compression (Magento <2.1.13)": {
       "<2.1.13": "2.1/MAGETWO-88336.patch"
     },
+    "Fixed paths for robots.txt and sitemap.xml <= 2.1.10":{
+      "<=2.1.10": "2.1/MAGECLOUD-1998-2.1.4-2.1.10.patch"
+    },
+    "Fixed a path for sitemap.xml >= 2.1.11":{
+        ">=2.1.11 <2.2.0": "2.1/MAGECLOUD-1998-2.1.11-2.1.12.patch"
+    },
     "Fixing bundling javascript files with gzip compression (Magento 2.2.0 - 2.2.3)": {
       "2.2.0 - 2.2.3": "2.2/MAGETWO-84507.patch"
     }
