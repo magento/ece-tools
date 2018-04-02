@@ -97,8 +97,8 @@ class Bootstrap
      */
     public function createApplication(array $environment): Application
     {
-        $environment = $this->mergeConfig($environment);
-        $_ENV = array_replace($_ENV, (array)$environment);
+        $environment = $this->mergeConfig($environment)->all();
+        $_ENV = array_replace($_ENV, $environment);
 
         return new Application(
             new Container(ECE_BP, $this->getSandboxDir())
@@ -119,7 +119,7 @@ class Bootstrap
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * Destroy app.
      */
     public function destroy()
     {

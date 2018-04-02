@@ -159,7 +159,7 @@ class Connection implements ConnectionInterface
         }
 
         $environment = $this->environment;
-
+die(var_dump(sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost())));
         $this->pdo = new \PDO(
             sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
             $environment->getDbUser(),
