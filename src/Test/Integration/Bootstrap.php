@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Application;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
  * Integration testing bootstrap.
@@ -15,14 +16,35 @@ use Magento\MagentoCloud\Application;
 class Bootstrap
 {
     /**
+     * Distributive files.
+     */
+    const DIST_FILES = [
+        'build_options.ini',
+        '.magento.env.yaml',
+    ];
+
+    /**
      * @var Bootstrap
      */
     private static $instance;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * Bootstrap constructor.
+     */
+    public function __construct()
+    {
+        $this->file = new File();
+    }
+
+    /**
      * @return Bootstrap
      */
-    public static function create()
+    public static function create(): Bootstrap
     {
         if (null === static::$instance) {
             static::$instance = new self();
@@ -39,7 +61,7 @@ class Bootstrap
     {
         $sandboxDir = $this->getSandboxDir();
 
-        if (file_exists($sandboxDir . '/composer.lock')) {
+        if ($this->file->isExists($sandboxDir . '/composer.lock')) {
             return;
         }
 
@@ -48,68 +70,45 @@ class Bootstrap
          */
         $this->destroy();
 
-        if (!is_dir($sandboxDir)) {
-            mkdir($sandboxDir, 0777, true);
+        if (!$this->file->isDirectory($sandboxDir)) {
+            $this->file->createDirectory($sandboxDir);
         }
 
         $this->execute(sprintf(
             'composer create-project --repository-url=%s %s %s %s',
-            'https://repo.magento.com/',
-            'magento/project-enterprise-edition',
+            getenv('MAGENTO_REPO') ?: 'https://repo.magento.com/',
+            getenv('MAGENTO_PROJECT') ?: 'magento/project-enterprise-edition',
             $sandboxDir,
             $version
         ));
 
-        /**
-         * Copying build options.
-         */
-        $this->execute(sprintf(
-            'cp -f %s %s',
-            $this->getConfigFile('build_options.ini'),
-            $sandboxDir . '/build_options.ini'
-        ));
-
-        /**
-         * Copying env file.
-         */
-        $this->execute(sprintf(
-            'cp -f %s %s',
-            $this->getConfigFile('.magento.env.yaml'),
-            $sandboxDir . '/.magento.env.yaml'
-        ));
+        foreach (self::DIST_FILES as $distFile) {
+            $this->file->copy(
+                $this->getConfigFile($distFile),
+                $sandboxDir . '/' . $distFile
+            );
+        }
     }
 
     /**
      * @param array $environment
      * @return Application
+     * @throws \Exception
      */
     public function createApplication(array $environment): Application
     {
         $environment = $this->mergeConfig($environment);
+        $_ENV = array_replace($_ENV, (array)$environment);
 
-        $_ENV = array_replace($_ENV, [
-            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(
-                $environment->get('variables', [])
-            )),
-            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode(
-                $environment->get('relationships', [])
-            )),
-            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
-                $environment->get('routes', [])
-            )),
-            'MAGENTO_CLOUD_APPLICATION' => base64_encode(json_encode(
-                []
-            )),
-        ]);
-
-        $container = new Container(ECE_BP, $this->getSandboxDir());
-
-        return new Application($container);
+        return new Application(
+            new Container(ECE_BP, $this->getSandboxDir())
+        );
     }
 
     /**
      * @param array $environment
      * @return Repository
+     * @throws \Exception
      */
     public function mergeConfig(array $environment): Repository
     {
@@ -120,18 +119,13 @@ class Bootstrap
     }
 
     /**
-     * Removes application directory.
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     public function destroy()
     {
-        $this->execute(sprintf(
-            'rm -rf %s/*',
+        $this->file->clearDirectory(
             $this->getSandboxDir()
-        ));
-        $this->execute(sprintf(
-            'find %s -mindepth 1 -name \'.*\' -delete',
-            $this->getSandboxDir()
-        ));
+        );
     }
 
     /**
@@ -151,11 +145,11 @@ class Bootstrap
     {
         $configFile = ECE_BP . '/tests/integration/etc/' . $file;
 
-        if (@file_exists($configFile)) {
+        if ($this->file->isExists($configFile)) {
             return $configFile;
         }
 
-        if (@file_exists($configFile . '.dist')) {
+        if ($this->file->isExists($configFile . '.dist')) {
             return $configFile . '.dist';
         }
 
@@ -169,7 +163,7 @@ class Bootstrap
      * @param string $command
      * @return string
      */
-    public function execute(string $command)
+    public function execute(string $command): string
     {
         exec($command, $output, $status);
 

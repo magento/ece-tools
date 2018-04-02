@@ -6,7 +6,10 @@
 $baseUrl = 'web';
 
 return [
-    'relationships' => [
+    'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode([
+        'ADMIN_EMAIL' => 'admin@example.com',
+    ])),
+    'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode([
         'database' => [
             0 => [
                 'host' => 'db',
@@ -16,8 +19,8 @@ return [
                 'port' => '3306',
             ],
         ],
-    ],
-    'routes' => [
+    ])),
+    'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode([
         "http://{$baseUrl}/" => [
             'type' => 'upstream',
             'original_url' => 'http://{default}',
@@ -26,8 +29,6 @@ return [
             'type' => 'upstream',
             'original_url' => 'https://{default}',
         ],
-    ],
-    'variables' => [
-        'ADMIN_EMAIL' => 'admin@example.com',
-    ],
+    ])),
+    'MAGENTO_CLOUD_APPLICATION' => base64_encode(json_encode([])),
 ];
