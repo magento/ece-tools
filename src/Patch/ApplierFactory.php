@@ -35,7 +35,7 @@ class ApplierFactory
      */
     public function create(): ApplierInterface
     {
-        if (isQuiltInstalled) {
+        if ($this->isQuiltInstalled()) {
             return $this->container->create(QuiltApplier::class);
         }
         return $this->container->create(GitApplier::class);
