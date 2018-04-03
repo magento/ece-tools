@@ -157,13 +157,13 @@ class Manager
                 if (is_string($packageInfo)) {
                     $appliedPath = $this->constraintTester->testConstraint($packageInfo, $packageName, '*');
                     if (!empty($appliedPath)) {
-                        $patchListToApply[] = $packageInfo;
+                        $patchListToApply[] = $appliedPath;
                     }
                 } elseif (is_array($packageInfo)) {
                     foreach ($packageInfo as $constraint => $path) {
                         $appliedPath = $this->constraintTester->testConstraint($path, $packageName, $constraint);
                         if (!empty($appliedPath)) {
-                            $patchListToApply[] = $packageInfo;
+                            $patchListToApply[] = $appliedPath;
                         }
                     }
                 }
