@@ -84,6 +84,19 @@ class Connection implements ConnectionInterface
      */
     public function select(string $query, array $bindings = []): array
     {
+        return $this->getFetchStatement($query, $bindings)->fetchAll();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function selectOne(string $query, array $bindings = []): array
+    {
+        return $this->getFetchStatement($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    private function getFetchStatement(string $query, array $bindings = []): \PDOStatement
+    {
         return $this->run($query, $bindings, function ($query, $bindings) {
             $statement = $this->getPdo()->prepare($query);
 
@@ -94,7 +107,7 @@ class Connection implements ConnectionInterface
             );
             $statement->execute();
 
-            return $statement->fetchAll();
+            return $statement;
         });
     }
 
@@ -185,6 +198,20 @@ class Connection implements ConnectionInterface
         }
 
         return $closure($query, $bindings);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function count(string $query, array $bindings = []): int
+    {
+        return $this->run($query, $bindings, function ($query, $bindings) {
+            $statement = $this->getPdo()->prepare($query);
+            $this->bindValues($statement, $bindings);
+            $statement->execute();
+
+            return $statement->rowCount();
+        });
     }
 
     /**
