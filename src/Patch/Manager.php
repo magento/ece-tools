@@ -175,7 +175,7 @@ class Manager
     /**
      * Applies patches from root directory m2-hotfixes.
      *
-     * @return void
+     * @return string[]
      * @throws \RuntimeException
      * @throws FileSystemException
      */
@@ -185,15 +185,12 @@ class Manager
         $hotFixesDir = $this->directoryList->getMagentoRoot() . '/' . static::HOTFIXES_DIR;
         if (!$this->file->isDirectory($hotFixesDir)) {
             $this->logger->notice('Hot-fixes directory was not found. Skipping.');
-
-            return;
+            return $patchListToApply;
         }
 
         $this->logger->info('Applying hot-fixes.');
-
         $files = glob($hotFixesDir . '/*.patch');
         sort($files);
-
         foreach ($files as $file) {
             $path = $this->constraintTester->testConstraint($file, null, null);
             if (!empty($path)) {
