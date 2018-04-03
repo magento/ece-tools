@@ -92,7 +92,7 @@ class ConstraintTester
         if ($packageName && !$this->matchConstraint($packageName, $constraint)) {
             return null;
         }
-        return path;
+        return $path;
     }
 
     /**
