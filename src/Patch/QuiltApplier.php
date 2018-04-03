@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Patch;
 
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Shell\ShellInterface as Shell;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 
 /**
  * Provides apply methods for patches.
@@ -22,20 +23,26 @@ class QuiltApplier implements ApplierInterface
      */
     private $shell;
 
-
     /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param Shell $shell
      * @param LoggerInterface $logger
+     * @param DirectoryList $directoryList
      */
-    public function __construct(Shell $shell, LoggerInterface $logger)
+    public function __construct(Shell $shell, LoggerInterface $logger, DirectoryList $directoryList)
     {
         $this->shell = $shell;
         $this->logger = $logger;
+        $this->directoryList = $directoryList;
     }
 
     /**
@@ -47,15 +54,26 @@ class QuiltApplier implements ApplierInterface
      */
     public function applyPatches(array $paths)
     {
-        $seriesData = implode("\n", $paths);
-        $seriesData .= "\n";
-        $seriesPath = 'vendor/magento/ece-patches/patches/series';
+        $patchesDirectory = $this->directoryList->getPatches() ;
+        $patchesDirectoryWithSlash = $patchesDirectory . '/' ;
+        $seriesPath = $patchesDirectoryWithSlash . 'series';
+        if (file_exists($seriesPath)) {
+            $this->unapplyAllPatches();
+        }
+        $patchesDirectoryWithSlashLength = strlen($patchesDirectoryWithSlash);
+        $seriesData = '';
+        foreach ($paths as $path) {
+            if (0 === strncmp($path, $patchesDirectoryWithSlash, $patchesDirectoryWithSlashLength)) {
+                $path = substr($path, $patchesDirectoryWithSlashLength);
+            }
+            $seriesData .= $path . "\n";
+        }
         $success = file_put_contents($seriesPath, $seriesData);
         if ($success === false) {
             throw new \Exception("Failed to write to $seriesPath!");
         }
         $this->logger->info("* Running quilt started.");
-        $output = $this->shell->execute('QUILT_PATCHES=vendor/magento/ece-patches/patches quilt push -a ;'
+        $output = $this->shell->execute('QUILT_PATCHES=' . $patchesDirectory . ' quilt push -a ;'
             . ' EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi');
         /** @var string $line */
         foreach ($output as $line) {
@@ -72,7 +90,7 @@ class QuiltApplier implements ApplierInterface
     public function unapplyAllPatches()
     {
         $this->logger->info('Unapplying patches started.');
-        $this->shell->execute('QUILT_PATCHES=vendor/magento/ece-patches/patches quilt pop -a ;'
+        $this->shell->execute('QUILT_PATCHES=' . $this->directoryList->getPatches() . ' quilt pop -a ;'
             . ' EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi');
         $this->logger->info('Unapplying patches finished.');
     }
