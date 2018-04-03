@@ -38,6 +38,20 @@ interface ConnectionInterface
     public function select(string $query, array $bindings = []): array;
 
     /**
+     * @param string $query
+     * @param array $bindings
+     * @return array
+     */
+    public function selectOne(string $query, array $bindings = []): array;
+
+    /**
+     * @param string $query
+     * @param array $bindings
+     * @return int
+     */
+    public function count(string $query, array $bindings = []): int;
+
+    /**
      * @return array
      */
     public function listTables(): array;
