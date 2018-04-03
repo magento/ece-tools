@@ -52,7 +52,7 @@ class Manager
     private $directoryList;
 
     /**
-     * @param ApplierInterface $applier
+     * @param ApplierFactory $applierFactory
      * @param ConstraintTester $constraintTester
      * @param LoggerInterface $logger
      * @param File $file
@@ -60,14 +60,14 @@ class Manager
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        ApplierInterface $applier,
+        ApplierFactory $applierFactory,
         ConstraintTester $constraintTester,
         LoggerInterface $logger,
         File $file,
         FileList $fileList,
         DirectoryList $directoryList
     ) {
-        $this->applier = $applier;
+        $this->applier = $applierFactory->create();
         $this->constraintTester = $constraintTester;
         $this->logger = $logger;
         $this->file = $file;
