@@ -76,16 +76,18 @@ class WarmUp implements ProcessInterface
         $promises = [];
 
         foreach ($pages as $page) {
-            $url = $this->urlManager->getDefaultSecureUrl() . $page;
+            $url = rtrim($this->urlManager->getBaseUrl(), '/') . '/' . $page;
             $request = $this->requestFactory->create('GET', $url);
 
             $promises[] = $client->sendAsync($request)->then(function () use ($url) {
                 $this->logger->info('Warmed up page: ' . $url);
             }, function (RequestException $exception) use ($url) {
-                $context = $exception->getResponse() ? [
-                    'error' => $exception->getResponse()->getReasonPhrase(),
-                    'code' => $exception->getResponse()->getStatusCode(),
-                ] : [];
+                $context = $exception->getResponse()
+                    ? [
+                        'error' => $exception->getResponse()->getReasonPhrase(),
+                        'code' => $exception->getResponse()->getStatusCode(),
+                    ]
+                    : [];
 
                 $this->logger->error('Warming up failed: ' . $url, $context);
             });

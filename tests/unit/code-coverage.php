@@ -3,9 +3,10 @@
  * @author Marco Pivetta
  * @link https://ocramius.github.io/blog/automated-code-coverage-check-for-github-pull-requests-with-travis/
  */
+const MIN_COVERAGE = 87;
+
 $inputFile = $argv[1];
-$desiredCoverage = $argv[2] ?? 87;
-$percentage = min(100, max(0, (int)$desiredCoverage));
+$percentage = min(100, max(0, MIN_COVERAGE));
 
 if (!file_exists($inputFile)) {
     throw new InvalidArgumentException('Invalid input file provided');
