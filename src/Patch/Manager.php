@@ -86,17 +86,17 @@ class Manager
         $this->copyStaticFile();
         //$this->applyComposerPatches();
         //$this->applyHotFixes();
-        $this->logger->log('Patching started.');
+        $this->logger->notice('Patching started.');
         $patchList = array_merge(
             $this->getApplicableComposerPatches(),
             $this->getApplicableHotFixes()
         );
         if (empty($patchList)) {
-            $this->logger->log('Patching finished - no patches applied.');
+            $this->logger->notice('Patching finished - no patches applied.');
             return;
         }
         $this->applier->applyPatches($patchList);
-        $this->logger->log('Patching finished.');
+        $this->logger->notice('Patching finished.');
     }
 
     /**
