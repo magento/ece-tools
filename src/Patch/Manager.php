@@ -84,8 +84,6 @@ class Manager
     public function applyAll()
     {
         $this->copyStaticFile();
-        //$this->applyComposerPatches();
-        //$this->applyHotFixes();
         $this->logger->notice('Patching started.');
         $patchList = array_merge(
             $this->getApplicableComposerPatches(),
@@ -97,6 +95,16 @@ class Manager
         }
         $this->applier->applyPatches($patchList);
         $this->logger->notice('Patching finished.');
+    }
+
+    /**
+     * Unapplies all patches
+     */
+    public function unapplyAll()
+    {
+        $this->logger->notice('Unapplying patches started.');
+        $this->applier->unapplyAllPatches();
+        $this->logger->notice('Unapplying patches finished.');
     }
 
     /**

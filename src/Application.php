@@ -70,6 +70,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(BackupRestore::class),
                 $this->container->get(BackupList::class),
                 $this->container->get(ApplyPatches::class),
+                $this->container->get(UnapplyPatches::class),
                 $this->container->get(UpdateComposer::class),
             ]
         );
