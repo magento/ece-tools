@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 /**
  * @inheritdoc
@@ -49,7 +50,12 @@ class UnapplyPatches extends Command
     {
         $this->setName(static::NAME)
             ->setDescription('Unapplies all patches.');
-
+        $this->addOption(
+            'force',
+            'f',
+            InputOption::VALUE_NONE,
+            "Force unapplying patches even if some don't seem to be applied."
+        );
         parent::configure();
     }
 
@@ -60,7 +66,7 @@ class UnapplyPatches extends Command
     {
         try {
             $this->logger->info('Unpatching started.');
-            $this->manager->unapplyAll();
+            $this->manager->unapplyAll($input->getOption('force'));
             $this->logger->info('Unpatching finished.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());

@@ -93,7 +93,7 @@ class GitApplier implements ApplierInterface
         }
     }
 
-    public function unapplyAllPatches()
+    public function unapplyAllPatches(bool $force = false)
     {
         /* Note: We don't have a way to do this in this Applier since we don't keep track of what is applied and in what
          order. */

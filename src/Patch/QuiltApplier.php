@@ -85,12 +85,17 @@ class QuiltApplier implements ApplierInterface
     /**
      * Unapplies all patches, using 'quilt' command.
      *
+     * @param bool $force Forces the patches to be unapplied even if they don't seem to be applied
      * @return void
      */
-    public function unapplyAllPatches()
+    public function unapplyAllPatches(bool $force = false)
     {
+        $forceArgument = '';
+        if ($force) {
+            $forceArgument = ' -f';
+        }
         $this->logger->info('Unapplying patches started.');
-        $this->shell->execute('QUILT_PATCHES=' . $this->directoryList->getPatches() . ' quilt pop -a ;'
+        $this->shell->execute('QUILT_PATCHES=' . $this->directoryList->getPatches() . ' quilt pop' . $forceArgument . ' -a ;'
             . ' EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi');
         $this->logger->info('Unapplying patches finished.');
     }

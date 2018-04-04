@@ -22,8 +22,9 @@ interface ApplierInterface
     /**
      * Unapply patches
      *
+     * @param bool $force Forces the patches to be unapplied even if they don't seem to be applied
      * @return void
      */
-    public function unapplyAllPatches();
+    public function unapplyAllPatches(bool $force = false);
 
 }

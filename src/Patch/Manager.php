@@ -99,11 +99,12 @@ class Manager
 
     /**
      * Unapplies all patches
+     * @param bool $force Forces the patches to be unapplied even if they don't seem to be applied
      */
-    public function unapplyAll()
+    public function unapplyAll(bool $force=false)
     {
         $this->logger->notice('Unapplying patches started.');
-        $this->applier->unapplyAllPatches();
+        $this->applier->unapplyAllPatches($force);
         $this->logger->notice('Unapplying patches finished.');
     }
 
