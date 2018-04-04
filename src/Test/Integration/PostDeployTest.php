@@ -73,7 +73,7 @@ class PostDeployTest extends AbstractTest
         try {
             $this->assertSame(1, $this->execute(Deploy::NAME, $application));
         } catch (\Exception $e) {
-            $this->assertContains('Please fix configuration with given suggestions', $e->getMessage());
+            $this->assertContains('Fix configuration with given suggestions', $e->getMessage());
         }
         $this->assertSame(0, $this->execute(PostDeploy::NAME, $application));
 

@@ -63,7 +63,6 @@ class PostDeployTest extends TestCase
                 [],
                 [
                     'index.php',
-                    'index.php/customer/account/create',
                 ],
             ],
             'custom pages' => [
