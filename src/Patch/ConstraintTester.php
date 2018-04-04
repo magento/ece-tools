@@ -81,7 +81,7 @@ class ConstraintTester
      * @return void
      * @throws \RuntimeException
      */
-    public function testConstraint(string $path, string $packageName, string $constraint)
+    public function testConstraint(string $path, string $packageName = null, string $constraint = null)
     {
         /**
          * Support for relative paths.
