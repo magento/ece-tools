@@ -190,7 +190,7 @@ class Manager
     private function getApplicableHotFixes()
     {
         $patchListToApply = [];
-        $hotFixesDir = $this->directoryList->getMagentoRoot() . '/' . static::HOTFIXES_DIR;
+        $hotFixesDir = $this->directoryList->getPatches() . '/' . static::HOTFIXES_DIR;
         if (!$this->file->isDirectory($hotFixesDir)) {
             $this->logger->notice('Hot-fixes directory was not found. Skipping.');
             return $patchListToApply;
