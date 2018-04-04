@@ -351,7 +351,8 @@ class SearchEngineTest extends TestCase
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn($newVersion);
-
+        $this->magentoVersionMock->method('satisfies')
+            ->willReturn(true);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -403,6 +404,7 @@ class SearchEngineTest extends TestCase
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn($newVersion);
+
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
