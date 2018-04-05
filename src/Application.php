@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud;
 
 use Composer\Composer;
 use Magento\MagentoCloud\Command\ApplyPatches;
+use Magento\MagentoCloud\Command\ShowAppliedPatches;
 use Magento\MagentoCloud\Command\UnapplyPatches;
 use Magento\MagentoCloud\Command\BackupList;
 use Magento\MagentoCloud\Command\BackupRestore;
@@ -72,6 +73,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(BackupList::class),
                 $this->container->get(ApplyPatches::class),
                 $this->container->get(UnapplyPatches::class),
+                $this->container->get(ShowAppliedPatches::class),
                 $this->container->get(UpdateComposer::class),
             ]
         );
