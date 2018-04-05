@@ -50,17 +50,19 @@ class Bootstrap
             mkdir($sandboxDir, 0777, true);
         }
 
-        $this->execute(sprintf(
-            'composer create-project --repository=%s %s %s %s',
-            escapeshellarg(json_encode(
-                [
-                    "repositories" => $envConfig->get('repositories')
-                ]
-            ))),
+        $this->execute(
+            sprintf(
+                'composer create-project --repository=%s %s %s %s',
+                escapeshellarg(json_encode(
+                    [
+                        "repositories" => $envConfig->get('repositories')
+                    ]
+                ))
+            ),
             $envConfig->get('deploy.name'),
             $sandboxDir,
             $version
-        ));
+        );
 
         /**
          * Copying build options.
