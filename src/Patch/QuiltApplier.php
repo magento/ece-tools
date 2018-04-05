@@ -95,7 +95,8 @@ class QuiltApplier implements ApplierInterface
             $forceArgument = ' -f';
         }
         $this->logger->info('Unapplying patches started.');
-        $this->shell->execute('QUILT_PATCHES=' . $this->directoryList->getPatches() . ' quilt pop' . $forceArgument . ' -a ;'
+        $this->shell->execute('QUILT_PATCHES=' . $this->directoryList->getPatches()
+            . ' quilt pop' . $forceArgument . ' -a ;'
             . ' EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi');
         $this->logger->info('Unapplying patches finished.');
     }

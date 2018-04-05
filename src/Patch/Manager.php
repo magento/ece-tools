@@ -101,7 +101,7 @@ class Manager
      * Unapplies all patches
      * @param bool $force Forces the patches to be unapplied even if they don't seem to be applied
      */
-    public function unapplyAll(bool $force=false)
+    public function unapplyAll(bool $force = false)
     {
         $this->logger->notice('Unapplying patches started.');
         $this->applier->unapplyAllPatches($force);
@@ -172,7 +172,7 @@ class Manager
             return $patchListToApply;
         }
         foreach ($patches as $packageName => $patchesInfo) {
-            foreach ($patchesInfo as $patchName => $packageInfo) {
+            foreach ($patchesInfo as $packageInfo) {
                 if (is_string($packageInfo)) {
                     $appliedPath = $this->constraintTester->testConstraint($packageInfo, $packageName, '*');
                     if (!empty($appliedPath)) {

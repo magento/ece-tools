@@ -22,7 +22,6 @@ class GitApplier implements ApplierInterface
      */
     private $shell;
 
-
     /**
      * @var LoggerInterface
      */
@@ -97,7 +96,9 @@ class GitApplier implements ApplierInterface
     {
         /* Note: We don't have a way to do this in this Applier since we don't keep track of what is applied and in what
          order. */
-        $this->logger->info('Git applier does not support unapplying patches.  If you need this feature, install quilt.');
+        $this->logger->info(
+            'Git applier does not support unapplying patches.  If you need this feature, install quilt.'
+        );
     }
 
     /**
@@ -105,6 +106,8 @@ class GitApplier implements ApplierInterface
      */
     public function showAppliedPatches()
     {
-        $this->logger->info('Git applier does not support showing applied patches.  If you need this feature, install quilt.');
+        $this->logger->info(
+            'Git applier does not support showing applied patches.  If you need this feature, install quilt.'
+        );
     }
 }
