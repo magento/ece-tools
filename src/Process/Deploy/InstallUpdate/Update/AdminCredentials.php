@@ -88,6 +88,7 @@ class AdminCredentials implements ProcessInterface
 
         if (!$data) {
             $this->logger->info('Updating admin credentials: nothing to update.');
+
             return;
         }
 
@@ -99,7 +100,7 @@ class AdminCredentials implements ProcessInterface
             },
             array_keys($data)
         );
-            $query = 'UPDATE `admin_user` SET ' . implode(', ', $fields) . ' ORDER BY `user_id` ASC LIMIT 1';
+        $query = 'UPDATE `admin_user` SET ' . implode(', ', $fields) . ' ORDER BY `user_id` ASC LIMIT 1';
 
         $this->connection->affectingQuery(
             $query,
@@ -113,13 +114,7 @@ class AdminCredentials implements ProcessInterface
      */
     private function isEmailUsed(string $email): bool
     {
-        $isUsed = count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `email` = ?', [$email])) > 0;
-
-        if ($isUsed) {
-            $this->logger->warning('Some administrator already uses this email ' . $email);
-        }
-
-        return $isUsed;
+        return count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `email` = ?', [$email])) > 0;
     }
 
     /**
@@ -128,12 +123,6 @@ class AdminCredentials implements ProcessInterface
      */
     private function isUsernameUsed(string $username): bool
     {
-        $isUsed = count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `username` = ?', [$username])) > 0;
-
-        if ($isUsed) {
-            $this->logger->warning('Some administrator already uses this username ' . $username);
-        }
-
-        return $isUsed;
+        return count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `username` = ?', [$username])) > 0;
     }
 }

@@ -114,7 +114,9 @@ class Option implements OptionInterface
      */
     public function getLocales(): array
     {
-        $configPath = $this->fileList->getConfig();
+        $configPath = $this->magentoVersion->satisfies('2.1.*')
+            ? $this->fileList->getConfigLocal()
+            : $this->fileList->getConfig();
         $configuration = require $configPath;
         $flattenedConfig = $this->arrayManager->flatten($configuration);
 
