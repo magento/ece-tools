@@ -9,7 +9,7 @@
   "require": {
     "php": "^7.0",
     "monolog/monolog": "^1.16",
-    "symfony/console": "~4.0.0",
+    "symfony/console": "^2.6||~4.0.0",
     "illuminate/contracts": "^5.5",
     "illuminate/container": "^5.5",
     "illuminate/config": "^5.5",
