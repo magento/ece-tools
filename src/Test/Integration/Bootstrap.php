@@ -52,7 +52,11 @@ class Bootstrap
 
         $this->execute(sprintf(
             'composer create-project --repository=%s %s %s %s',
-            escapeshellarg(json_encode($envConfig->get('repositories'))),
+            escapeshellarg(json_encode(
+                [
+                    "repositories" => $envConfig->get('repositories')
+                ]
+            ))),
             $envConfig->get('deploy.name'),
             $sandboxDir,
             $version
