@@ -99,4 +99,14 @@ class QuiltApplier implements ApplierInterface
             . ' EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi');
         $this->logger->info('Unapplying patches finished.');
     }
+
+    /**
+     * Shows applied patches, using 'quilt' command.
+     *
+     * @return void
+     */
+    public function showAppliedPatches()
+    {
+        $this->shell->execute('QUILT_PATCHES=' . $this->directoryList->getPatches() . ' quilt applied ;');
+    }
 }

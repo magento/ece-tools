@@ -99,4 +99,12 @@ class GitApplier implements ApplierInterface
          order. */
         $this->logger->info('Git applier does not support unapplying patches.  If you need this feature, install quilt.');
     }
+
+    /**
+     * @return void
+     */
+    public function showAppliedPatches()
+    {
+        $this->logger->info('Git applier does not support showing applied patches.  If you need this feature, install quilt.');
+    }
 }

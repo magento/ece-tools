@@ -27,4 +27,10 @@ interface ApplierInterface
      */
     public function unapplyAllPatches(bool $force = false);
 
+    /**
+     * Shows applied patches.  Prints to stdout.
+     *
+     * @return void
+     */
+    public function showAppliedPatches();
 }

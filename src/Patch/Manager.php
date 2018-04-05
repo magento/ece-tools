@@ -109,6 +109,13 @@ class Manager
     }
 
     /**
+     * Shows applied patches.  Prints to stdout.
+     */
+    public function showApplied()
+    {
+        $this->applier->showAppliedPatches();
+    }
+    /**
      * Copying static file endpoint.
      * This resolves issue MAGECLOUD-314
      *
