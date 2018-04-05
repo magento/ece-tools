@@ -125,7 +125,10 @@ class Manager
     private function copyStaticFile()
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
-
+        if ($this->file->isExists($magentoRoot . '/pub/front-static.php')) {
+            // Already copied.  Don't copy again, otherwise unpatching will fail.
+            return;
+        }
         if (!$this->file->isExists($magentoRoot . '/pub/static.php')) {
             $this->logger->notice('File static.php was not found.');
 
