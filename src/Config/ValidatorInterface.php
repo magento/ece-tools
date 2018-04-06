@@ -5,13 +5,15 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\App\Logger;
+
 /**
  * Interface for validators which runs at the very beginning of build or deploy phase
  */
 interface ValidatorInterface
 {
-    const LEVEL_WARNING = 'warning';
-    const LEVEL_CRITICAL = 'critical';
+    const LEVEL_WARNING = Logger::WARNING;
+    const LEVEL_CRITICAL = Logger::CRITICAL;
 
     /**
      * @return Validator\ResultInterface
