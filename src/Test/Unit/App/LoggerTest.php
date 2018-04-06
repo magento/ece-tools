@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\App\Logger\Pool;
 use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -39,6 +40,11 @@ class LoggerTest extends TestCase
     private $poolMock;
 
     /**
+     * @var SanitizeProcessor|Mock
+     */
+    private $sanitizeProcessorMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -47,6 +53,7 @@ class LoggerTest extends TestCase
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileListMock = $this->createMock(FileList::class);
         $this->poolMock = $this->createMock(Pool::class);
+        $this->sanitizeProcessorMock = $this->createMock(SanitizeProcessor::class);
     }
 
     /**
@@ -107,7 +114,13 @@ class LoggerTest extends TestCase
             ->method('getHandlers')
             ->willReturn([]);
 
-        new Logger($this->fileMock, $this->directoryListMock, $this->fileListMock, $this->poolMock);
+        new Logger(
+            $this->fileMock,
+            $this->directoryListMock,
+            $this->fileListMock,
+            $this->poolMock,
+            $this->sanitizeProcessorMock
+        );
     }
 
     /**

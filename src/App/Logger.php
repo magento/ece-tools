@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\App\Logger\Pool;
+use Magento\MagentoCloud\App\Logger\Processor\SanitizeProcessor;
 
 /**
  * @inheritdoc
@@ -35,12 +36,14 @@ class Logger extends \Monolog\Logger
      * @param DirectoryList $directoryList
      * @param FileList $fileList
      * @param Pool $pool
+     * @param SanitizeProcessor $sanitizeProcessor
      */
     public function __construct(
         File $file,
         DirectoryList $directoryList,
         FileList $fileList,
-        Pool $pool
+        Pool $pool,
+        SanitizeProcessor $sanitizeProcessor
     ) {
         $this->file = $file;
         $this->directoryList = $directoryList;
@@ -48,7 +51,7 @@ class Logger extends \Monolog\Logger
 
         $this->prepare();
 
-        parent::__construct('default', $pool->getHandlers());
+        parent::__construct('default', $pool->getHandlers(), [$sanitizeProcessor]);
     }
 
     /**
