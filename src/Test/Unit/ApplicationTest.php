@@ -19,6 +19,8 @@ use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Command\BackupRestore;
+use Magento\MagentoCloud\Command\Wizard\ScdOnBuild;
+use Magento\MagentoCloud\Command\Wizard\ScdOnDemand;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Container\ContainerInterface;
@@ -81,6 +83,8 @@ class ApplicationTest extends TestCase
         $backupListCommandMock = $this->createMock(BackupList::class);
         $applyPatchesCommandMock = $this->createMock(ApplyPatches::class);
         $updateComposerCommandMock = $this->createMock(UpdateComposer::class);
+        $scdOnBuildWizardCommandMock = $this->createMock(ScdOnBuild::class);
+        $scdOnDemandWizardCommandMock = $this->createMock(ScdOnDemand::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
         $this->mockCommand($configDumpCommandMock, ConfigDump::NAME);
@@ -93,6 +97,8 @@ class ApplicationTest extends TestCase
         $this->mockCommand($backupListCommandMock, BackupList::class);
         $this->mockCommand($applyPatchesCommandMock, ApplyPatches::class);
         $this->mockCommand($updateComposerCommandMock, UpdateComposer::class);
+        $this->mockCommand($scdOnBuildWizardCommandMock, ScdOnBuild::class);
+        $this->mockCommand($scdOnDemandWizardCommandMock, ScdOnDemand::class);
 
         $this->containerMock->method('get')
             ->willReturnMap([
@@ -108,6 +114,8 @@ class ApplicationTest extends TestCase
                 [BackupList::class, $backupListCommandMock],
                 [ApplyPatches::class, $applyPatchesCommandMock],
                 [UpdateComposer::class, $updateComposerCommandMock],
+                [ScdOnBuild::class, $scdOnBuildWizardCommandMock],
+                [ScdOnDemand::class, $scdOnDemandWizardCommandMock],
             ]);
         $this->composerMock->method('getPackage')
             ->willReturn($this->packageMock);

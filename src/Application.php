@@ -17,6 +17,8 @@ use Magento\MagentoCloud\Command\Dev\UpdateComposer;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
+use Magento\MagentoCloud\Command\Wizard\ScdOnBuild;
+use Magento\MagentoCloud\Command\Wizard\ScdOnDemand;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -71,6 +73,8 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(BackupList::class),
                 $this->container->get(ApplyPatches::class),
                 $this->container->get(UpdateComposer::class),
+                $this->container->get(ScdOnDemand::class),
+                $this->container->get(ScdOnBuild::class),
             ]
         );
     }

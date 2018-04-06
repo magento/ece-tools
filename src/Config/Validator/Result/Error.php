@@ -15,20 +15,20 @@ class Error implements ResultInterface
     /**
      * @var string
      */
-    private $error;
+    private $message;
 
     /**
      * @var string
      */
-    private $suggestion = '';
+    private $suggestion;
 
     /**
-     * @param string $error
+     * @param string $message
      * @param string $suggestion
      */
-    public function __construct(string $error, string $suggestion = '')
+    public function __construct(string $message, string $suggestion = '')
     {
-        $this->error = $error;
+        $this->message = $message;
         $this->suggestion = $suggestion;
     }
 
@@ -39,7 +39,7 @@ class Error implements ResultInterface
      */
     public function getError(): string
     {
-        return $this->error;
+        return $this->message;
     }
 
     /**

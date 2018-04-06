@@ -9,6 +9,8 @@ use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,24 +22,48 @@ class ResultFactoryTest extends TestCase
      */
     private $resultFactory;
 
+    /**
+     * @var ContainerInterface|Mock
+     */
+    private $containerMock;
+
+    /**
+     * @inheritdoc
+     */
     public function setUp()
     {
-        $this->resultFactory = new ResultFactory();
+        $this->containerMock = $this->getMockBuilder(ContainerInterface::class)
+            ->setMethods(['create'])
+            ->getMockForAbstractClass();
+
+        $this->resultFactory = new ResultFactory(
+            $this->containerMock
+        );
     }
 
     public function testCreateSuccessResult()
     {
-        $this->assertInstanceOf(
-            Result\Success::class,
-            $this->resultFactory->create(ResultInterface::SUCCESS)
-        );
+        $this->containerMock->expects($this->once())
+            ->method('create')
+            ->with(Result\Success::class)
+            ->willReturn(new Result\Success());
+
+        $this->resultFactory->create(ResultInterface::SUCCESS);
     }
 
     public function testCreateErrorResult()
     {
+        $this->containerMock->expects($this->once())
+            ->method('create')
+            ->with(Result\Error::class, [
+                'message' => 'some error',
+                'suggestion' => 'some suggestion',
+            ])->willReturn(new Result\Error('some error', 'some suggestion'));
+
         /** @var Result\Error $result */
         $result = $this->resultFactory->create(ResultInterface::ERROR, [
             'error' => 'some error',
+            'suggestion' => 'some suggestion',
         ]);
 
         $this->assertInstanceOf(
@@ -45,5 +71,6 @@ class ResultFactoryTest extends TestCase
             $result
         );
         $this->assertEquals('some error', $result->getError());
+        $this->assertEquals('some suggestion', $result->getSuggestion());
     }
 }
