@@ -228,6 +228,20 @@ class DeployTest extends TestCase
                 ],
                 true,
             ],
+            'default slave connection' => [
+                Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION,
+                [],
+                [],
+                false,
+            ],
+            'use slave connection' => [
+                Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION,
+                [],
+                [
+                    Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION => true
+                ],
+                true,
+            ],
         ];
     }
 

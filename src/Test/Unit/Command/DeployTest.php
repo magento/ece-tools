@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -32,18 +33,23 @@ class DeployTest extends TestCase
     private $loggerMock;
 
     /**
+     * @var FlagManager|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $flagManagerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->command = new Deploy(
             $this->processMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->flagManagerMock
         );
     }
 
@@ -54,6 +60,8 @@ class DeployTest extends TestCase
             ->withConsecutive(['Starting deploy.'], ['Deployment completed.']);
         $this->processMock->expects($this->once())
             ->method('execute');
+        $this->flagManagerMock->expects($this->never())
+            ->method('set');
 
         $tester = new CommandTester(
             $this->command
@@ -75,6 +83,9 @@ class DeployTest extends TestCase
         $this->processMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new \Exception('Some error'));
+        $this->flagManagerMock->expects($this->once())
+            ->method('set')
+            ->with(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
 
         $tester = new CommandTester(
             $this->command

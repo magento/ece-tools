@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -25,21 +26,38 @@ class ThreadCountOptimizerTest extends TestCase
      */
     private $loggerMock;
 
+    /**
+     * @var MagentoVersion|Mock
+     */
+    private $magentoVersionMock;
+
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
-        $this->optimizer = new ThreadCountOptimizer($this->loggerMock);
+        $this->optimizer = new ThreadCountOptimizer(
+            $this->loggerMock,
+            $this->magentoVersionMock
+        );
     }
 
     /**
+     * @param bool $magentoVersionSatisfies
      * @param int $threadCount
      * @param string $strategy
      * @param int $expectedThreadCount
      * @dataProvider optimizeDataProvider
      */
-    public function testOptimize(int $threadCount, string $strategy, int $expectedThreadCount)
-    {
+    public function testOptimize(
+        bool $magentoVersionSatisfies,
+        int $threadCount,
+        string $strategy,
+        int $expectedThreadCount
+    ) {
+        $this->magentoVersionMock->expects($this->any())
+            ->method('satisfies')
+            ->willReturn($magentoVersionSatisfies);
         $this->assertEquals(
             $expectedThreadCount,
             $this->optimizer->optimize($threadCount, $strategy)
@@ -53,16 +71,25 @@ class ThreadCountOptimizerTest extends TestCase
     {
         return [
             [
+                true,
                 3,
                 ThreadCountOptimizer::STRATEGY_COMPACT,
                 1,
             ],
             [
+                false,
+                3,
+                ThreadCountOptimizer::STRATEGY_COMPACT,
+                3,
+            ],
+            [
+                false,
                 5,
                 'SomeStrategy',
                 5,
             ],
             [
+                false,
                 1,
                 'SomeStrategy',
                 1,
@@ -72,6 +99,9 @@ class ThreadCountOptimizerTest extends TestCase
 
     public function testOptimizeWithNotice()
     {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Threads count was forced to 1 as compact strategy can\'t be run with more than one job');

@@ -123,12 +123,6 @@ class AdminCredentialsTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating admin credentials.');
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('warning')
-            ->withConsecutive(
-                ['Some administrator already uses this email ' . $email],
-                ['Some administrator already uses this username ' . $userName]
-            );
         $this->environmentMock->expects($this->once())
             ->method('getAdminPassword')
             ->willReturn('');

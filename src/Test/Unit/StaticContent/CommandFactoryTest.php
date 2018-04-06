@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -26,11 +27,22 @@ class CommandFactoryTest extends TestCase
      */
     private $commandFactory;
 
+    /**
+     * @var GlobalSection
+     */
+    private $globalConfig;
+
+    /**
+     * @inheritdoc
+     */
     public function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->globalConfig = $this->createMock(GlobalSection::class);
+
         $this->commandFactory = new CommandFactory(
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->globalConfig
         );
     }
 
@@ -43,7 +55,7 @@ class CommandFactoryTest extends TestCase
     public function testCreate(array $optionConfig, bool $useScdStrategy, string $expected)
     {
         $this->magentoVersionMock
-            ->expects($this->exactly(1))
+            ->expects($this->exactly(2))
             ->method('satisfies')
             ->willReturn(!$useScdStrategy);
 
@@ -120,8 +132,7 @@ class CommandFactoryTest extends TestCase
      */
     private function createOption(array $optionConfig, int $getStrategyTimes)
     {
-        $optionMock = $this->getMockBuilder(OptionInterface::class)
-            ->getMockForAbstractClass();
+        $optionMock = $this->getMockForAbstractClass(OptionInterface::class);
 
         if (isset($optionConfig['thread_count'])) {
             $optionMock->expects($this->once())

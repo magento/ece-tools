@@ -13,9 +13,8 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 /**
  * @inheritdoc
  */
-class DbDumpTest extends TestCase
+class DumpTest extends TestCase
 {
-
     /**
      * @var Dump
      */

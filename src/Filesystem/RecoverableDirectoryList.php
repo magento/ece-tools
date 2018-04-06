@@ -96,7 +96,7 @@ class RecoverableDirectoryList
         ];
 
         if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            if (!$this->globalSection->get(GlobalSection::VAR_SKIP_COPYING_VIEW_PREPROCESSED_DIR)) {
+            if (!$this->globalSection->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
                 $recoverableDirs[] = [
                     self::OPTION_DIRECTORY => $this->directoryList->getPath(
                         DirectoryList::DIR_VIEW_PREPROCESSED,

@@ -5,12 +5,10 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
-
 /**
  * Resolver of file configurations.
  */
-class FileList
+class FileList extends ConfigFileList
 {
     /**
      * @var DirectoryList
@@ -18,58 +16,14 @@ class FileList
     private $directoryList;
 
     /**
-     * @var File
-     */
-    private $file;
-
-    /**
      * @param DirectoryList $directoryList
-     * @param File $file
+     * @param SystemList $systemList
      */
-    public function __construct(DirectoryList $directoryList, File $file)
+    public function __construct(DirectoryList $directoryList, SystemList $systemList)
     {
         $this->directoryList = $directoryList;
-        $this->file = $file;
-    }
 
-    /**
-     * @return string
-     */
-    public function getConfig(): string
-    {
-        return $this->directoryList->getMagentoRoot() . '/app/etc/config.php';
-    }
-
-    /**
-     * @return string
-     */
-    public function getConfigLocal(): string
-    {
-        return $this->directoryList->getMagentoRoot() . '/app/etc/config.local.php';
-    }
-
-    /**
-     * @return string
-     */
-    public function getEnv(): string
-    {
-        return $this->directoryList->getMagentoRoot() . '/app/etc/env.php';
-    }
-
-    /**
-     * @return string
-     */
-    public function getBuildConfig(): string
-    {
-        return $this->directoryList->getMagentoRoot() . '/build_options.ini';
-    }
-
-    /**
-     * @return string
-     */
-    public function getEnvConfig(): string
-    {
-        return $this->directoryList->getMagentoRoot() . '/.magento.env.yaml';
+        parent::__construct($systemList);
     }
 
     /**
@@ -102,5 +56,13 @@ class FileList
     public function getPatches(): string
     {
         return $this->directoryList->getRoot() . '/patches.json';
+    }
+
+    /**
+     * @return string
+     */
+    public function getMagentoComposer(): string
+    {
+        return $this->directoryList->getMagentoRoot() . '/composer.json';
     }
 }
