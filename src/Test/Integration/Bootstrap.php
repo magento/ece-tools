@@ -51,7 +51,7 @@ class Bootstrap
         }
 
         $this->execute(sprintf(
-            'composer create-project --repository-url=%s %s %s %s',
+            'composer create-project --no-dev --repository-url=%s %s %s %s',
             $envConfig->get('deploy.repo'),
             $envConfig->get('deploy.name'),
             $sandboxDir,

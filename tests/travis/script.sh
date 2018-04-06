@@ -12,7 +12,7 @@ case $TEST_SUITE in
         phpmd src xml tests/static/phpmd-ruleset.xml
         ;;
     unit)
-        phpunit --configuration tests/unit/phpunit.xml.dist --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml ${MIN_CODE_COVERAGE}
+        phpunit --configuration tests/unit/phpunit.xml.dist --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml
         phpunit --configuration tests/unit/phpunit.xml.dist
         ;;
     integration)

@@ -16,6 +16,8 @@ use Magento\MagentoCloud\Util\OutputFormatter;
  */
 class ScdOnDemand extends Command
 {
+    const NAME = 'wizard:scd-on-demand';
+
     /**
      * @var OutputFormatter
      */
@@ -43,7 +45,7 @@ class ScdOnDemand extends Command
      */
     protected function configure()
     {
-        $this->setName('wizard:scd-on-demand')
+        $this->setName(self::NAME)
             ->setDescription('Verifies SCD on demand configuration');
 
         parent::configure();
@@ -58,5 +60,7 @@ class ScdOnDemand extends Command
         $scdOnDemandStatus = $scdOnDemandEnabled ? 'enabled' : 'disabled';
 
         $this->outputFormatter->writeResult($output, $scdOnDemandEnabled, 'SCD on demand is ' . $scdOnDemandStatus);
+
+        return (int)!$scdOnDemandEnabled;
     }
 }

@@ -17,6 +17,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ScdOnBuild extends Command
 {
+    const NAME = 'wizard:scd-on-build';
+
     /**
      * @var OutputFormatter
      */
@@ -46,7 +48,7 @@ class ScdOnBuild extends Command
      */
     protected function configure()
     {
-        $this->setName('wizard:scd-on-build')
+        $this->setName(self::NAME)
             ->setDescription('Verifies SCD on build phase configuration');
 
         parent::configure();
@@ -67,5 +69,7 @@ class ScdOnBuild extends Command
         }
 
         $this->outputFormatter->writeResult($output, $status, 'SCD on build is ' . ($status ? 'enabled' : 'disabled'));
+
+        return (int)!$status;
     }
 }
