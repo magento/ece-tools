@@ -31,8 +31,17 @@ return [
         'ADMIN_EMAIL' => 'admin@example.com',
     ],
     'deploy' => [
-        'repo' => 'https://repo.magento.com/',
         'name' => 'magento/project-enterprise-edition',
+    ],
+    'repositories' => [
+        [
+            "type" => "composer",
+            "url" => "https://repo.magento.com",
+        ],
+        [
+            "type" => "composer",
+            "url" => "https://connect20-qa01.magedevteam.com/",
+        ],
     ],
     'skip_front_check' => false,
 ];
