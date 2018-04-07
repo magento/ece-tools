@@ -1,5 +1,5 @@
 Ticket MAGETWO-57413
-diff --git a/app/autoload.php b/app/autoload.php
+diff -Naur a/app/autoload.php b/app/autoload.php
 index b817baf..1d1873d 100644
 --- a/app/autoload.php
 +++ b/app/autoload.php
@@ -22,7 +22,7 @@ index b817baf..1d1873d 100644
 
  /* 'composer install' validation */
 
-diff --git a/vendor/magento/framework/App/Arguments/FileResolver/Primary.php b/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
+diff -Naur a/vendor/magento/framework/App/Arguments/FileResolver/Primary.php b/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
 index 40b74e9..0f732c9 100644
 --- a/vendor/magento/framework/App/Arguments/FileResolver/Primary.php
 +++ b/vendor/magento/framework/App/Arguments/FileResolver/Primary.php

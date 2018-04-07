@@ -63,6 +63,14 @@
       "100.1.*": "2.1/force-minification.patch"
     }
   },
+  "magento/module-cron": {
+    "Fixed issues with CRON": {
+      "100.2.0": "2.2/fix-cron-2.2.0-2.2.2.patch",
+      "~100.2.1": "2.2/fix-cron-2.2.3-plus.patch",
+      "100.1.2": "2.1/fix-cron-2.1.4.patch",
+      "~100.1.3": "2.1/fix-cron-2.1.5-plus.patch"
+    }
+  },
   "magento/module-customer-import-export": {
     "Fix out of memory during import of customers and addresses (Magento 2.2.0 - 2.2.3)": {
       ">=100.2.0 <100.2.2": "2.2/fix-oom-during-import-customers-and-addresses-2.2.0.patch"

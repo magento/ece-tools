@@ -1,4 +1,5 @@
 MDVA-2470
+diff -Nuar a/vendor/magento/framework/View/Asset/LockerProcess.php b/vendor/magento/framework/View/Asset/LockerProcess.php
 --- a/vendor/magento/framework/View/Asset/LockerProcess.php	2017-02-13 17:38:15.000000000 +0000
 +++ b/vendor/magento/framework/View/Asset/LockerProcess.php	2017-02-13 18:53:22.000000000 +0000
 @@ -68,12 +68,26 @@
@@ -31,6 +32,7 @@ MDVA-2470
      }
 
      /**
+diff -Nuar a/vendor/magento/framework/View/Asset/PreProcessor/AlternativeSource.php b/vendor/magento/framework/View/Asset/PreProcessor/AlternativeSource.php
 --- a/vendor/magento/framework/View/Asset/PreProcessor/AlternativeSource.php	2017-02-14 20:49:33.000000000 +0000
 +++ b/vendor/magento/framework/View/Asset/PreProcessor/AlternativeSource.php	2017-02-15 15:00:41.000000000 +0000
 @@ -106,7 +106,7 @@
@@ -42,6 +44,7 @@ MDVA-2470
 
              $module = $chain->getAsset()->getModule();
 
+diff -Nuar a/vendor/magento/framework/View/Asset/LockerProcess.php b/vendor/magento/framework/View/Asset/LockerProcess.php
 --- a/vendor/magento/framework/View/Asset/LockerProcess.php	2017-02-14 21:50:57.000000000 +0000
 +++ b/vendor/magento/framework/View/Asset/LockerProcess.php	2017-02-15 15:00:41.000000000 +0000
 @@ -67,7 +67,7 @@
@@ -63,6 +66,7 @@ MDVA-2470
              }
          }
 
+diff -Nuar a/vendor/magento/module-developer/Model/View/Asset/PreProcessor/FrontendCompilation.php b/vendor/magento/module-developer/Model/View/Asset/PreProcessor/FrontendCompilation.php
 --- a/vendor/magento/module-developer/Model/View/Asset/PreProcessor/FrontendCompilation.php	2017-02-15 16:24:07.000000000 +0000
 +++ b/vendor/magento/module-developer/Model/View/Asset/PreProcessor/FrontendCompilation.php	2017-02-15 16:24:07.000000000 +0000
 @@ -76,7 +76,7 @@
