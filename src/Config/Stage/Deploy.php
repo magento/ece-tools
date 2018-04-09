@@ -173,10 +173,11 @@ class Deploy implements DeployInterface
     {
         $staticDeployThreads = 0;
 
-        if (isset($_ENV['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['MAGENTO_CLOUD_MODE'])
-            && $_ENV['MAGENTO_CLOUD_MODE'] === EnvironmentConfig::CLOUD_MODE_ENTERPRISE
+        $staticContentThreads = $this->environmentConfig->get(
+        if (null !== $this->environmentConfig->get('STATIC_CONTENT_THREADS')) {
+            $staticDeployThreads = (int)$this->environmentConfig->get('STATIC_CONTENT_THREADS');
+        } elseif (null !== $this->environmentConfig->get('MAGENTO_CLOUD_MODE')
+            && $this->environmentConfig->get('MAGENTO_CLOUD_MODE') === EnvironmentConfig::CLOUD_MODE_ENTERPRISE
         ) {
             $staticDeployThreads = 3;
         }

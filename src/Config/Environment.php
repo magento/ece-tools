@@ -86,7 +86,14 @@ class Environment
      */
     public function get(string $key, $default = null)
     {
-        return isset($_ENV[$key]) ? json_decode(base64_decode($_ENV[$key]), true) : $default;
+        if (isset($_ENV[$key])) {
+            return json_decode(base64_decode($_ENV[$key]), true);
+        }
+        $value = getenv($key);
+        if (false === $value) {
+            return $default;
+        }
+        return json_decode(base64_decode($value), true);
     }
 
     /**
