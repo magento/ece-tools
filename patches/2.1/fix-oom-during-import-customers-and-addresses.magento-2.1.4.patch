@@ -4,7 +4,7 @@ Date:   Thu Nov 16 18:55:15 2017 +0200
 
     SET-36: Memory limit exhausted during import of customers and addresses
 
-diff --git a/vendor/magento/module-customer-import-export/Model/Import/Address.php b/vendor/magento/module-customer-import-export/Model/Import/Address.php
+diff -Naur a/vendor/magento/module-customer-import-export/Model/Import/Address.php b/vendor/magento/module-customer-import-export/Model/Import/Address.php
 index eb5742d24c7..70b8c34ef41 100644
 --- a/vendor/magento/module-customer-import-export/Model/Import/Address.php
 +++ b/vendor/magento/module-customer-import-export/Model/Import/Address.php
@@ -79,7 +79,7 @@ index eb5742d24c7..70b8c34ef41 100644
       * Initialize country regions hash for clever recognition
       *
       * @return $this
-diff --git a/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php b/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php
+diff -Naur a/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php b/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php
 index 4e6687bff28..359822df6d9 100644
 --- a/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php
 +++ b/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php

@@ -4,7 +4,7 @@ Date:   Tue Nov 28 15:29:54 2017 +0200
 
     MAGETWO-84444: Mview does not work with Staging
 
-diff --git a/vendor/magento/module-catalog-inventory/etc/mview.xml b/vendor/magento/module-catalog-inventory/etc/mview.xml
+diff -Nuar a/vendor/magento/module-catalog-inventory/etc/mview.xml b/vendor/magento/module-catalog-inventory/etc/mview.xml
 index 58a051a3d0e..3dd8419d7e3 100644
 --- a/vendor/magento/module-catalog-inventory/etc/mview.xml
 +++ b/vendor/magento/module-catalog-inventory/etc/mview.xml
@@ -23,7 +23,7 @@ index 58a051a3d0e..3dd8419d7e3 100644
          </subscriptions>
      </view>
  </config>
-diff --git a/vendor/magento/module-indexer/Setup/RecurringData.php b/vendor/magento/module-indexer/Setup/RecurringData.php
+diff -Nuar a/vendor/magento/module-indexer/Setup/RecurringData.php b/vendor/magento/module-indexer/Setup/RecurringData.php
 new file mode 100644
 index 00000000000..38ea0e5b79e
 --- /dev/null
@@ -85,7 +85,7 @@ index 00000000000..38ea0e5b79e
 +        }
 +    }
 +}
-diff --git a/vendor/magento/framework/Mview/Test/Unit/View/SubscriptionTest.php b/vendor/magento/framework/Mview/Test/Unit/View/SubscriptionTest.php
+diff -Nuar a/vendor/magento/framework/Mview/Test/Unit/View/SubscriptionTest.php b/vendor/magento/framework/Mview/Test/Unit/View/SubscriptionTest.php
 index aae82938c83..545689a4391 100644
 --- a/vendor/magento/framework/Mview/Test/Unit/View/SubscriptionTest.php
 +++ b/vendor/magento/framework/Mview/Test/Unit/View/SubscriptionTest.php
@@ -151,7 +151,7 @@ index aae82938c83..545689a4391 100644
              ->will($this->returnSelf());
  
          $changelogMock = $this->getMockForAbstractClass(
-diff --git a/vendor/magento/framework/Mview/View/Subscription.php b/vendor/magento/framework/Mview/View/Subscription.php
+diff -Nuar a/vendor/magento/framework/Mview/View/Subscription.php b/vendor/magento/framework/Mview/View/Subscription.php
 index c3da91c8331..3c4bd1dce2d 100644
 --- a/vendor/magento/framework/Mview/View/Subscription.php
 +++ b/vendor/magento/framework/Mview/View/Subscription.php
@@ -358,7 +358,7 @@ index c3da91c8331..3c4bd1dce2d 100644
       * @codeCoverageIgnore
       */
      public function getView()
-diff --git a/vendor/magento/framework/Mview/etc/mview.xsd b/vendor/magento/framework/Mview/etc/mview.xsd
+diff -Nuar a/vendor/magento/framework/Mview/etc/mview.xsd b/vendor/magento/framework/Mview/etc/mview.xsd
 index 1dad5b3f415..b7d6bbdde68 100644
 --- a/vendor/magento/framework/Mview/etc/mview.xsd
 +++ b/vendor/magento/framework/Mview/etc/mview.xsd
@@ -377,7 +377,7 @@ Date:   Tue Nov 28 15:30:48 2017 +0200
 
     MAGETWO-84444: Mview does not work with Staging
 
-diff --git a/vendor/magento/module-catalog-staging/Model/Mview/View/Category/Attribute/Subscription.php b/vendor/magento/module-catalog-staging/Model/Mview/View/Category/Attribute/Subscription.php
+diff -Nuar a/vendor/magento/module-catalog-staging/Model/Mview/View/Category/Attribute/Subscription.php b/vendor/magento/module-catalog-staging/Model/Mview/View/Category/Attribute/Subscription.php
 index b3e920fb87..f9b1d1a32a 100644
 --- a/vendor/magento/module-catalog-staging/Model/Mview/View/Category/Attribute/Subscription.php
 +++ b/vendor/magento/module-catalog-staging/Model/Mview/View/Category/Attribute/Subscription.php
@@ -481,7 +481,7 @@ index b3e920fb87..f9b1d1a32a 100644
 +        );
      }
  }
-diff --git a/vendor/magento/module-catalog-staging/Model/Mview/View/SubscriptionFactory.php b/vendor/magento/module-catalog-staging/Model/Mview/View/SubscriptionFactory.php
+diff -Nuar a/vendor/magento/module-catalog-staging/Model/Mview/View/SubscriptionFactory.php b/vendor/magento/module-catalog-staging/Model/Mview/View/SubscriptionFactory.php
 index 96c0f71164..7c841853f9 100644
 --- a/vendor/magento/module-catalog-staging/Model/Mview/View/SubscriptionFactory.php
 +++ b/vendor/magento/module-catalog-staging/Model/Mview/View/SubscriptionFactory.php
@@ -542,7 +542,7 @@ index 96c0f71164..7c841853f9 100644
       */
      protected function isStagingTable(array $data = [])
      {
-diff --git a/vendor/magento/module-catalog-staging/Model/VersionTables.php b/vendor/magento/module-catalog-staging/Model/VersionTables.php
+diff -Nuar a/vendor/magento/module-catalog-staging/Model/VersionTables.php b/vendor/magento/module-catalog-staging/Model/VersionTables.php
 index c845f98b31..242aaf2f25 100644
 --- a/vendor/magento/module-catalog-staging/Model/VersionTables.php
 +++ b/vendor/magento/module-catalog-staging/Model/VersionTables.php
@@ -558,7 +558,7 @@ index c845f98b31..242aaf2f25 100644
  class VersionTables extends \Magento\Framework\DataObject
  {
      /**
-diff --git a/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/SubscriptionFactoryTest.php b/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/SubscriptionFactoryTest.php
+diff -Nuar a/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/SubscriptionFactoryTest.php b/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/SubscriptionFactoryTest.php
 index d595784134..d5e78767bd 100644
 --- a/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/SubscriptionFactoryTest.php
 +++ b/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/SubscriptionFactoryTest.php
@@ -693,7 +693,7 @@ index d595784134..d5e78767bd 100644
          $result = $this->model->create($data);
          $this->assertEquals($subscriptionMock, $result);
      }
-diff --git a/vendor/magento/module-catalog-staging/etc/di.xml b/vendor/magento/module-catalog-staging/etc/di.xml
+diff -Nuar a/vendor/magento/module-catalog-staging/etc/di.xml b/vendor/magento/module-catalog-staging/etc/di.xml
 index aea000b42f..178b0bcf63 100644
 --- a/vendor/magento/module-catalog-staging/etc/di.xml
 +++ b/vendor/magento/module-catalog-staging/etc/di.xml
@@ -733,7 +733,7 @@ index aea000b42f..178b0bcf63 100644
      <type name="Magento\CatalogStaging\Helper\ReindexPool">
          <arguments>
              <argument name="reindexPool" xsi:type="array">
-diff --git a/vendor/magento/module-catalog-staging/etc/mview.xml b/vendor/magento/module-catalog-staging/etc/mview.xml
+diff -Nuar a/vendor/magento/module-catalog-staging/etc/mview.xml b/vendor/magento/module-catalog-staging/etc/mview.xml
 deleted file mode 100644
 index 45bb6589b6..0000000000
 --- a/vendor/magento/module-catalog-staging/etc/mview.xml
@@ -768,7 +768,7 @@ Date:   Tue Nov 28 15:45:17 2017 +0200
 
     MAGETWO-84444: Mview does not work with Staging
 
-diff --git a/vendor/magento/module-catalog-staging/Model/Mview/View/Attribute/Subscription.php b/vendor/magento/module-catalog-staging/Model/Mview/View/Attribute/Subscription.php
+diff -Nuar a/vendor/magento/module-catalog-staging/Model/Mview/View/Attribute/Subscription.php b/vendor/magento/module-catalog-staging/Model/Mview/View/Attribute/Subscription.php
 new file mode 100644
 index 0000000000..7c549538c7
 --- /dev/null
@@ -880,7 +880,7 @@ Date:   Tue Nov 28 15:54:17 2017 +0200
 
     MAGETWO-84444: Mview does not work with Staging
 
-diff --git a/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/Attribute/SubscriptionTest.php b/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/Attribute/SubscriptionTest.php
+diff -Nuar a/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/Attribute/SubscriptionTest.php b/vendor/magento/module-catalog-staging/Test/Unit/Model/Mview/View/Attribute/SubscriptionTest.php
 new file mode 100644
 index 0000000000..d396829ef8
 --- /dev/null

@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/framework/Mail/Message.php b/vendor/magento/framework/Mail/Message.php
+diff -Nuar a/vendor/magento/framework/Mail/Message.php b/vendor/magento/framework/Mail/Message.php
 index 36a0e6a..fad0910 100644
 --- a/vendor/magento/framework/Mail/Message.php
 +++ b/vendor/magento/framework/Mail/Message.php
