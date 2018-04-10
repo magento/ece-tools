@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Validator;
 
+use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
 /**
@@ -13,7 +14,7 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 interface CompositeValidator extends ValidatorInterface
 {
     /**
-     * @return ResultInterface[]
+     * @return Error[]
      */
-    public function validateAll(): array;
+    public function getErrors(): array;
 }

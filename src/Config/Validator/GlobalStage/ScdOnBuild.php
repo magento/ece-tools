@@ -59,10 +59,8 @@ class ScdOnBuild implements CompositeValidator
      */
     public function validate(): Validator\ResultInterface
     {
-        foreach ($this->validateAll() as $result) {
-            if ($result instanceof Validator\Result\Error) {
-                return $result;
-            }
+        if ($errors = $this->getErrors()) {
+            return reset($errors);
         }
 
         return $this->resultFactory->success();
@@ -71,24 +69,24 @@ class ScdOnBuild implements CompositeValidator
     /**
      * @inheritdoc
      */
-    public function validateAll(): array
+    public function getErrors(): array
     {
-        $results = [];
+        $errors = [];
 
         if ($this->globalConfig->get(BuildInterface::VAR_SCD_ON_DEMAND)) {
-            $results[] = $this->resultFactory->error('SCD_ON_DEMAND variable is enabled', '');
+            $errors[] = $this->resultFactory->error('SCD_ON_DEMAND variable is enabled', '');
         }
 
         if ($this->buildConfig->get(BuildInterface::VAR_SKIP_SCD)) {
-            $results[] = $this->resultFactory->error('SKIP_SCD variable is enabled', '');
+            $errors[] = $this->resultFactory->error('SKIP_SCD variable is enabled', '');
         }
 
         $validationResult = $this->configFileStructure->validate();
 
         if ($validationResult instanceof Validator\Result\Error) {
-            $results[] = $validationResult;
+            $errors[] = $validationResult;
         }
 
-        return $results;
+        return $errors;
     }
 }

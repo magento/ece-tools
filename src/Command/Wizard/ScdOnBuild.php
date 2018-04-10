@@ -59,13 +59,12 @@ class ScdOnBuild extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $results = $this->scdOnBuildValidator->validateAll();
-        $status = !$this->scdOnBuildValidator->validate() instanceof Error;
+        $errors = $this->scdOnBuildValidator->getErrors();
+        $status = !$errors;
 
-        foreach ($results as $error) {
-            if ($error instanceof Error) {
-                $this->outputFormatter->writeItem($output, $error->getError());
-            }
+        /** @var Error $error */
+        foreach ($errors as $error) {
+            $this->outputFormatter->writeItem($output, $error->getError());
         }
 
         $this->outputFormatter->writeResult($output, $status, 'SCD on build is ' . ($status ? 'enabled' : 'disabled'));
