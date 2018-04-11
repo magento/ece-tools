@@ -125,4 +125,13 @@ class SharedTest extends TestCase
         $this->shared->reset();
         $this->shared->all();
     }
+
+    public function testUpdate()
+    {
+        $this->writerMock->expects($this->once())
+            ->method('update')
+            ->with(['some' => 'config']);
+
+        $this->shared->update(['some' => 'config']);
+    }
 }
