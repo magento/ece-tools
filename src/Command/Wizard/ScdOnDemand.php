@@ -9,10 +9,10 @@ use Magento\MagentoCloud\Config\GlobalSection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\MagentoCloud\Util\OutputFormatter;
+use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 
 /**
- * @inheritdoc
+ * Verifies configuration to be properly set and ready to use SCD on demand.
  */
 class ScdOnDemand extends Command
 {

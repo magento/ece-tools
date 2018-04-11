@@ -5,19 +5,19 @@
  */
 namespace Magento\MagentoCloud\Command\Wizard;
 
-use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild as ScdOnBuildValidator;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use Symfony\Component\Console\Command\Command;
+use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnDeploy as ScdOnDeployValidator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Verifies configuration to be properly set and ready to use SCD on build phase.
+ * Verifies configuration to be properly set and ready to use SCD on deploy phase.
  */
-class ScdOnBuild extends Command
+class ScdOnDeploy extends Command
 {
-    const NAME = 'wizard:scd-on-build';
+    const NAME = 'wizard:scd-on-deploy';
 
     /**
      * @var OutputFormatter
@@ -25,20 +25,18 @@ class ScdOnBuild extends Command
     private $outputFormatter;
 
     /**
-     * @var ScdOnBuild
+     * @var ScdOnDeployValidator
      */
-    private $scdOnBuildValidator;
+    private $scdOnDeployValidator;
 
     /**
      * @param OutputFormatter $outputFormatter
-     * @param ScdOnBuildValidator $scdOnBuildValidator
+     * @param ScdOnDeployValidator $scdOnDeployValidator
      */
-    public function __construct(
-        OutputFormatter $outputFormatter,
-        ScdOnBuildValidator $scdOnBuildValidator
-    ) {
+    public function __construct(OutputFormatter $outputFormatter, ScdOnDeployValidator $scdOnDeployValidator)
+    {
         $this->outputFormatter = $outputFormatter;
-        $this->scdOnBuildValidator = $scdOnBuildValidator;
+        $this->scdOnDeployValidator = $scdOnDeployValidator;
 
         parent::__construct();
     }
@@ -49,9 +47,7 @@ class ScdOnBuild extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Verifies SCD on build configuration');
-
-        parent::configure();
+            ->setDescription('Verifies SCD on deploy configuration');
     }
 
     /**
@@ -59,7 +55,7 @@ class ScdOnBuild extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $errors = $this->scdOnBuildValidator->getErrors();
+        $errors = $this->scdOnDeployValidator->getErrors();
         $status = !$errors;
 
         /** @var Error $error */
@@ -67,7 +63,7 @@ class ScdOnBuild extends Command
             $this->outputFormatter->writeItem($output, $error->getError());
         }
 
-        $this->outputFormatter->writeResult($output, $status, 'SCD on build is ' . ($status ? 'enabled' : 'disabled'));
+        $this->outputFormatter->writeResult($output, $status, 'SCD on deploy is ' . ($status ? 'enabled' : 'disabled'));
 
         return (int)!$status;
     }

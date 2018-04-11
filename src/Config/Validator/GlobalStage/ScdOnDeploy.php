@@ -6,15 +6,15 @@
 namespace Magento\MagentoCloud\Config\Validator\GlobalStage;
 
 use Magento\MagentoCloud\Config\GlobalSection;
-use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\CompositeValidator;
-use Magento\MagentoCloud\Config\Stage\Build as BuildConfig;
 
 /**
  * @inheritdoc
  */
-class ScdOnBuild implements CompositeValidator
+class ScdOnDeploy implements CompositeValidator
 {
     /**
      * @var Validator\ResultFactory
@@ -27,31 +27,31 @@ class ScdOnBuild implements CompositeValidator
     private $globalConfig;
 
     /**
-     * @var BuildConfig
+     * @var DeployInterface
      */
-    private $buildConfig;
+    private $deployConfig;
 
     /**
-     * @var Validator\Build\ConfigFileStructure
+     * @var ScdOnBuild
      */
-    private $configFileStructure;
+    private $scdOnBuild;
 
     /**
      * @param Validator\ResultFactory $resultFactory
-     * @param GlobalSection $globalStage
-     * @param BuildConfig $buildConfig
-     * @param Validator\Build\ConfigFileStructure $configFileStructure
+     * @param GlobalSection $globalSection
+     * @param DeployInterface $deployConfig
+     * @param ScdOnBuild $scdOnBuild
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
-        GlobalSection $globalStage,
-        BuildConfig $buildConfig,
-        Validator\Build\ConfigFileStructure $configFileStructure
+        GlobalSection $globalSection,
+        DeployInterface $deployConfig,
+        ScdOnBuild $scdOnBuild
     ) {
         $this->resultFactory = $resultFactory;
-        $this->globalConfig = $globalStage;
-        $this->buildConfig = $buildConfig;
-        $this->configFileStructure = $configFileStructure;
+        $this->globalConfig = $globalSection;
+        $this->deployConfig = $deployConfig;
+        $this->scdOnBuild = $scdOnBuild;
     }
 
     /**
@@ -73,18 +73,16 @@ class ScdOnBuild implements CompositeValidator
     {
         $errors = [];
 
-        if ($this->globalConfig->get(BuildInterface::VAR_SCD_ON_DEMAND)) {
+        if ($this->globalConfig->get(StageConfigInterface::VAR_SCD_ON_DEMAND)) {
             $errors[] = $this->resultFactory->error('SCD_ON_DEMAND variable is enabled');
         }
 
-        if ($this->buildConfig->get(BuildInterface::VAR_SKIP_SCD)) {
+        if ($this->deployConfig->get(DeployInterface::VAR_SKIP_SCD)) {
             $errors[] = $this->resultFactory->error('SKIP_SCD variable is enabled');
         }
 
-        $validationResult = $this->configFileStructure->validate();
-
-        if ($validationResult instanceof Validator\Result\Error) {
-            $errors[] = $validationResult;
+        if ($this->scdOnBuild->validate() instanceof Validator\Result\Success) {
+            $errors[] = $this->resultFactory->error('SCD on build is enabled');
         }
 
         return $errors;

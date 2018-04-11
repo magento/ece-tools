@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Wizard;
 
 use Magento\MagentoCloud\Command\Wizard\ScdOnDemand;
 use Magento\MagentoCloud\Config\GlobalSection;
-use Magento\MagentoCloud\Util\OutputFormatter;
+use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Console\Input\Input;

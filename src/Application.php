@@ -6,19 +6,7 @@
 namespace Magento\MagentoCloud;
 
 use Composer\Composer;
-use Magento\MagentoCloud\Command\ApplyPatches;
-use Magento\MagentoCloud\Command\BackupList;
-use Magento\MagentoCloud\Command\BackupRestore;
-use Magento\MagentoCloud\Command\Build;
-use Magento\MagentoCloud\Command\CronUnlock;
-use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Command\ConfigDump;
-use Magento\MagentoCloud\Command\Dev\UpdateComposer;
-use Magento\MagentoCloud\Command\Prestart;
-use Magento\MagentoCloud\Command\DbDump;
-use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Command\Wizard\ScdOnBuild;
-use Magento\MagentoCloud\Command\Wizard\ScdOnDemand;
+use Magento\MagentoCloud\Command;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -62,19 +50,20 @@ class Application extends \Symfony\Component\Console\Application
         return array_merge(
             parent::getDefaultCommands(),
             [
-                $this->container->get(Build::class),
-                $this->container->get(Deploy::class),
-                $this->container->get(ConfigDump::class),
-                $this->container->get(Prestart::class),
-                $this->container->get(DbDump::class),
-                $this->container->get(PostDeploy::class),
-                $this->container->get(CronUnlock::class),
-                $this->container->get(BackupRestore::class),
-                $this->container->get(BackupList::class),
-                $this->container->get(ApplyPatches::class),
-                $this->container->get(UpdateComposer::class),
-                $this->container->get(ScdOnDemand::class),
-                $this->container->get(ScdOnBuild::class),
+                $this->container->get(Command\Build::class),
+                $this->container->get(Command\Deploy::class),
+                $this->container->get(Command\ConfigDump::class),
+                $this->container->get(Command\Prestart::class),
+                $this->container->get(Command\DbDump::class),
+                $this->container->get(Command\PostDeploy::class),
+                $this->container->get(Command\CronUnlock::class),
+                $this->container->get(Command\BackupRestore::class),
+                $this->container->get(Command\BackupList::class),
+                $this->container->get(Command\ApplyPatches::class),
+                $this->container->get(Command\Dev\UpdateComposer::class),
+                $this->container->get(Command\Wizard\ScdOnDemand::class),
+                $this->container->get(Command\Wizard\ScdOnBuild::class),
+                $this->container->get(Command\Wizard\ScdOnDeploy::class),
             ]
         );
     }

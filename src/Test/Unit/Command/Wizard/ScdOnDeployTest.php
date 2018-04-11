@@ -5,22 +5,22 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command\Wizard;
 
-use Magento\MagentoCloud\Command\Wizard\ScdOnBuild;
+use Magento\MagentoCloud\Command\Wizard\ScdOnDeploy;
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild as ScdOnBuildValidator;
+use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnDeploy as ScdOnDeployValidator;
 use Symfony\Component\Console\Input\Input;
 use Symfony\Component\Console\Output\Output;
 
 /**
  * @inheritdoc
  */
-class ScdOnBuildTest extends TestCase
+class ScdOnDeployTest extends TestCase
 {
     /**
-     * @var ScdOnBuild
+     * @var ScdOnDeploy
      */
     private $command;
 
@@ -30,9 +30,9 @@ class ScdOnBuildTest extends TestCase
     private $outputFormatterMock;
 
     /**
-     * @var ScdOnBuildValidator|MockObject
+     * @var ScdOnDeployValidator|MockObject
      */
-    private $scdOnBuildValidatorMock;
+    private $scdOnDeployValidatorMock;
 
     /**
      * @inheritdoc
@@ -40,11 +40,11 @@ class ScdOnBuildTest extends TestCase
     protected function setUp()
     {
         $this->outputFormatterMock = $this->createMock(OutputFormatter::class);
-        $this->scdOnBuildValidatorMock = $this->createMock(ScdOnBuildValidator::class);
+        $this->scdOnDeployValidatorMock = $this->createMock(ScdOnDeployValidator::class);
 
-        $this->command = new ScdOnBuild(
+        $this->command = new ScdOnDeploy(
             $this->outputFormatterMock,
-            $this->scdOnBuildValidatorMock
+            $this->scdOnDeployValidatorMock
         );
     }
 
@@ -53,12 +53,12 @@ class ScdOnBuildTest extends TestCase
         $inputMock = $this->getMockForAbstractClass(Input::class);
         $outputMock = $this->getMockForAbstractClass(Output::class);
 
-        $this->scdOnBuildValidatorMock->expects($this->once())
+        $this->scdOnDeployValidatorMock->expects($this->once())
             ->method('getErrors')
             ->willReturn([]);
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')
-            ->with($outputMock, true, 'SCD on build is enabled');
+            ->with($outputMock, true, 'SCD on deploy is enabled');
 
         $this->command->run($inputMock, $outputMock);
     }
@@ -73,7 +73,7 @@ class ScdOnBuildTest extends TestCase
             ->method('getError')
             ->willReturn('Some error');
 
-        $this->scdOnBuildValidatorMock->expects($this->once())
+        $this->scdOnDeployValidatorMock->expects($this->once())
             ->method('getErrors')
             ->willReturn([
                 $errorMock,
@@ -83,7 +83,7 @@ class ScdOnBuildTest extends TestCase
             ->with($outputMock, 'Some error');
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')
-            ->with($outputMock, false, 'SCD on build is disabled');
+            ->with($outputMock, false, 'SCD on deploy is disabled');
 
         $this->command->run($inputMock, $outputMock);
     }

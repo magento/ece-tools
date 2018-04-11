@@ -59,7 +59,7 @@ class ResultFactory
      * @param string $suggestion
      * @return Error
      */
-    public function error(string $message, string $suggestion): Error
+    public function error(string $message, string $suggestion = ''): Error
     {
         return $this->container->create(Error::class, [
             'message' => $message,

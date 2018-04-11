@@ -3,9 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Util;
+namespace Magento\MagentoCloud\Test\Unit\Command\Wizard\Util;
 
-use Magento\MagentoCloud\Util\OutputFormatter;
+use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Symfony\Component\Console\Output\OutputInterface;

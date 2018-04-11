@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Util;
+namespace Magento\MagentoCloud\Command\Wizard\Util;
 
 use Symfony\Component\Console\Output\OutputInterface;
 
