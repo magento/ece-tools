@@ -1,5 +1,6 @@
 <+>UTF-8
 ===================================================================
+diff -Nuar a/vendor/magento/module-braintree/Gateway/Request/ChannelDataBuilder.php b/vendor/magento/module-braintree/Gateway/Request/ChannelDataBuilder.php
 --- a/vendor/magento/module-braintree/Gateway/Request/ChannelDataBuilder.php
 +++ b/vendor/magento/module-braintree/Gateway/Request/ChannelDataBuilder.php
 @@ -26,7 +26,7 @@
@@ -22,6 +23,7 @@
  }
 <+>UTF-8
 ===================================================================
+diff -Nuar a/vendor/magento/module-braintree/Test/Unit/Gateway/Request/ChannelDataBuilderTest.php b/vendor/magento/module-braintree/Test/Unit/Gateway/Request/ChannelDataBuilderTest.php
 --- a/vendor/magento/module-braintree/Test/Unit/Gateway/Request/ChannelDataBuilderTest.php
 +++ b/vendor/magento/module-braintree/Test/Unit/Gateway/Request/ChannelDataBuilderTest.php
 @@ -40,7 +40,7 @@
@@ -46,6 +48,7 @@
  }
 <+>UTF-8
 ===================================================================
+diff -Nuar a/vendor/magento/module-paypal/Model/AbstractConfig.php b/vendor/magento/module-paypal/Model/AbstractConfig.php
 --- a/vendor/magento/module-paypal/Model/AbstractConfig.php
 +++ b/vendor/magento/module-paypal/Model/AbstractConfig.php
 @@ -59,7 +59,7 @@
@@ -68,6 +71,7 @@
      /**
 <+>UTF-8
 ===================================================================
+diff -Nuar a/vendor/magento/module-paypal/Test/Unit/Model/AbstractConfigTest.php b/vendor/magento/module-paypal/Test/Unit/Model/AbstractConfigTest.php
 --- a/vendor/magento/module-paypal/Test/Unit/Model/AbstractConfigTest.php
 +++ b/vendor/magento/module-paypal/Test/Unit/Model/AbstractConfigTest.php
 @@ -293,7 +293,7 @@

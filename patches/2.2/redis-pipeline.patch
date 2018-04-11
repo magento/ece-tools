@@ -1,4 +1,4 @@
-diff --git a/vendor/colinmollenhour/credis/Client.php b/vendor/colinmollenhour/credis/Client.php
+diff -Nuar a/vendor/colinmollenhour/credis/Client.php b/vendor/colinmollenhour/credis/Client.php
 index afbc85d..8368b32 100755
 --- a/vendor/colinmollenhour/credis/Client.php
 +++ b/vendor/colinmollenhour/credis/Client.php

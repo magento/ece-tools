@@ -107,7 +107,7 @@ class WarmUpTest extends TestCase
                 'index.php/customer/account/create',
             ]);
         $this->urlManagerMock->expects($this->any())
-            ->method('getDefaultSecureUrl')
+            ->method('getBaseUrl')
             ->willReturn('site_url/');
         $this->clientMock->expects($this->exactly(2))
             ->method('sendAsync')
