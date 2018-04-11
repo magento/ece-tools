@@ -84,13 +84,27 @@ class Environment
      * @param string|int|null $default
      * @return array|string|int|null
      */
-    public function get(string $key, $default = null)
+    public function getEnv(string $key, $default = null)
     {
         if (isset($_ENV[$key])) {
-            return json_decode(base64_decode($_ENV[$key]), true);
+            return $_ENV[$key];
         }
         $value = getenv($key);
         if (false === $value) {
+            return $default;
+        }
+        return $value;
+    }
+
+    /**
+     * @param string $key
+     * @param string|int|null $default
+     * @return array|string|int|null
+     */
+    public function get(string $key, $default = null)
+    {
+        $value = $this->getEnv($key);
+        if ($value === null) {
             return $default;
         }
         return json_decode(base64_decode($value), true);
