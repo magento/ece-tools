@@ -95,6 +95,13 @@ class Connection implements ConnectionInterface
         return $this->getFetchStatement($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Retrieves prepared fetch statement.
+     *
+     * @param string $query
+     * @param array $bindings
+     * @return \PDOStatement
+     */
     private function getFetchStatement(string $query, array $bindings = []): \PDOStatement
     {
         return $this->run($query, $bindings, function ($query, $bindings) {
@@ -212,5 +219,13 @@ class Connection implements ConnectionInterface
 
             return $statement->rowCount();
         });
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function close()
+    {
+        $this->pdo = null;
     }
 }
