@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -50,6 +51,7 @@ class AcceptanceTest extends AbstractTest
         $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
+        $this->assertLogIsSanitized($application);
 
         /** @var ConfigReader $configReader */
         $configReader = $application->getContainer()->get(ConfigReader::class);
@@ -193,5 +195,22 @@ class AcceptanceTest extends AbstractTest
             $pageContent,
             'Check "CMS homepage content goes here." phrase presence'
         );
+    }
+
+    /**
+     * Checks that sensitive data are sanitizing in cloud.log file.
+     *
+     * @param Application $application
+     */
+    private function assertLogIsSanitized(Application $application)
+    {
+        /** @var FileList $fileList */
+        $fileList = $application->getContainer()->get(FileList::class);
+        $logContent = file_get_contents($fileList->getCloudLog());
+
+        $this->assertContains('--admin-password=\'******\'', $logContent);
+        if (strpos($logContent, '--db-password') !== false) {
+            $this->assertContains('--db-password=\'******\'', $logContent);
+        }
     }
 }

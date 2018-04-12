@@ -208,7 +208,7 @@ class ComposerGenerator
                     'symlink' => false
                 ]
             ];
-            $composer['require'][$dirComposer['name']] = $dirComposer['version'];
+            $composer['require'][$dirComposer['name']] = $dirComposer['version'] ?? '*';
         };
 
         foreach (array_keys($repoOptions) as $repoName) {

@@ -1,3 +1,4 @@
+diff -Nuar a/vendor/magento/module-config/Model/Config/Importer.php b/vendor/magento/module-config/Model/Config/Importer.php
 --- a/vendor/magento/module-config/Model/Config/Importer.php
 +++ b/vendor/magento/module-config/Model/Config/Importer.php
 @@ -129,8 +129,10 @@ class Importer implements ImporterInterface

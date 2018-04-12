@@ -201,6 +201,9 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\Variables::class),
                                     $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),
                                 ],
+                                ValidatorInterface::LEVEL_WARNING => [
+                                    $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
+                                ],
                             ],
                         ]),
                         $this->container->make(DeployProcess\CreateConfigFile::class),

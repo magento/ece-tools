@@ -11,6 +11,7 @@ diff -Naur a/vendor/magento/framework/View/Asset/File/FallbackContext.php b/vend
      }
  }
 
+diff -Nuar a/vendor/magento/framework/View/Asset/Repository.php b/vendor/magento/framework/View/Asset/Repository.php
 --- a/vendor/magento/framework/View/Asset/Repository.php	2017-02-16 16:50:18.000000000 +0000
 +++ b/vendor/magento/framework/View/Asset/Repository.php	2017-02-22 14:29:40.000000000 +0000
 @@ -269,8 +269,7 @@
