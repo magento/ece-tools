@@ -13,7 +13,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * @inheritdoc
+ * {@inheritdoc}
+ *
+ * @group php71
  */
 class CronTest extends AbstractTest
 {
@@ -124,8 +126,6 @@ class CronTest extends AbstractTest
     public function cronDataProvider()
     {
         return [
-            ['version' => '2.1.4'],
-            ['version' => '2.1.*'],
             ['version' => '2.2.0'],
             ['version' => '2.2.2'],
             ['version' => '2.2.*'],
