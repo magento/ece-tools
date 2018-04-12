@@ -1,4 +1,3 @@
 environment.php
-auth.json
-composer.json
 build_options.ini
+.magento.env.yaml

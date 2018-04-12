@@ -3,16 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-$baseUrl = getenv('MAGENTO_HOST_NAME') ?: 'localhost';
+$baseUrl = 'web';
 
 return [
     'relationships' => [
         'database' => [
             0 => [
-                'host' => '127.0.0.1',
-                'path' => 'integration_tests',
-                'password' => '',
-                'username' => 'root',
+                'host' => 'db',
+                'path' => 'magento2',
+                'password' => 'magento2',
+                'username' => 'magento2',
                 'port' => '3306',
             ],
         ],
@@ -30,9 +30,4 @@ return [
     'variables' => [
         'ADMIN_EMAIL' => 'admin@example.com',
     ],
-    'deploy' => [
-        'repo' => 'https://repo.magento.com/',
-        'name' => 'magento/project-enterprise-edition',
-    ],
-    'skip_front_check' => false,
 ];
