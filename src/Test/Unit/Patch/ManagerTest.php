@@ -158,15 +158,15 @@ class ManagerTest extends TestCase
             ->method('isExists')
             ->willReturn(false);
         $this->directoryListMock->expects($this->any())
-            ->method('getMagentoRoot')
+            ->method('getPatches')
             ->willReturn(__DIR__ . '/_files');
         $this->fileMock->expects($this->once())
             ->method('isDirectory')
             ->willReturn(true);
         $this->applierMock->expects($this->once())->method('applyPatches')
             ->with([
-                __DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch1.patch',
-                __DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch2.patch'
+                ['path' => __DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch1.patch'],
+                ['path' => __DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch2.patch'],
             ]);
         $this->loggerMock->expects($this->once())
             ->method('info')

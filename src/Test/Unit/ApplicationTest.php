@@ -19,6 +19,8 @@ use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Command\BackupRestore;
+use Magento\MagentoCloud\Command\UnapplyPatches;
+use Magento\MagentoCloud\Command\ShowAppliedPatches;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Container\ContainerInterface;
@@ -80,6 +82,8 @@ class ApplicationTest extends TestCase
         $backupRestoreCommandMock = $this->createMock(BackupRestore::class);
         $backupListCommandMock = $this->createMock(BackupList::class);
         $applyPatchesCommandMock = $this->createMock(ApplyPatches::class);
+        $unapplyPatchesCommandMock = $this->createMock(UnapplyPatches::class);
+        $showAppliedPatchesCommandMock = $this->createMock(ShowAppliedPatches::class);
         $updateComposerCommandMock = $this->createMock(UpdateComposer::class);
 
         $this->mockCommand($buildCommandMock, Build::NAME);
@@ -92,6 +96,8 @@ class ApplicationTest extends TestCase
         $this->mockCommand($backupRestoreCommandMock, BackupRestore::class);
         $this->mockCommand($backupListCommandMock, BackupList::class);
         $this->mockCommand($applyPatchesCommandMock, ApplyPatches::class);
+        $this->mockCommand($unapplyPatchesCommandMock, ApplyPatches::class);
+        $this->mockCommand($showAppliedPatchesCommandMock, ApplyPatches::class);
         $this->mockCommand($updateComposerCommandMock, UpdateComposer::class);
 
         $this->containerMock->method('get')
@@ -107,6 +113,8 @@ class ApplicationTest extends TestCase
                 [BackupRestore::class, $backupRestoreCommandMock],
                 [BackupList::class, $backupListCommandMock],
                 [ApplyPatches::class, $applyPatchesCommandMock],
+                [UnapplyPatches::class, $unapplyPatchesCommandMock],
+                [ShowAppliedPatches::class, $showAppliedPatchesCommandMock],
                 [UpdateComposer::class, $updateComposerCommandMock],
             ]);
         $this->composerMock->method('getPackage')
