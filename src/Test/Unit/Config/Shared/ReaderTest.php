@@ -7,9 +7,9 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Shared;
 
 use Magento\MagentoCloud\Config\Shared\Reader;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -17,35 +17,38 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class ReaderTest extends TestCase
 {
     /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
-     * @var FileList|Mock
-     */
-    private $fileListMock;
-
-    /**
      * @var Reader
      */
     private $reader;
 
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
+     * @var SharedConfig|MockObject
+     */
+    private $resolverMock;
+
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->fileListMock = $this->createMock(FileList::class);
+        $this->resolverMock = $this->createMock(SharedConfig::class);
 
         $this->reader = new Reader(
             $this->fileMock,
-            $this->fileListMock
+            $this->resolverMock
         );
     }
 
     public function testRead()
     {
-        $this->fileListMock->expects($this->once())
-            ->method('getConfig')
+        $this->resolverMock->expects($this->once())
+            ->method('resolve')
             ->willReturn(__DIR__ . '/_file/app/etc/config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -65,8 +68,8 @@ class ReaderTest extends TestCase
 
     public function testReadFileNotExists()
     {
-        $this->fileListMock->expects($this->once())
-            ->method('getConfig')
+        $this->resolverMock->expects($this->once())
+            ->method('resolve')
             ->willReturn('/path/to/file');
         $this->fileMock->expects($this->once())
             ->method('isExists')

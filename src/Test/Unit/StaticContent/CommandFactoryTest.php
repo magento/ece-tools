@@ -81,8 +81,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 -s ' .
-                'quick -v en_US --jobs=3',
+                'php ./bin/magento setup:static-content:deploy -f -s quick -v --jobs 3 --exclude-theme theme1 '
+                . '--exclude-theme theme2 en_US',
             ],
             [
                 [
@@ -94,7 +94,7 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1',
+                'php ./bin/magento setup:static-content:deploy -s quick -v --jobs 1 --exclude-theme theme1 en_US de_DE',
             ],
             [
                 [
@@ -106,8 +106,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 ' .
-                '-v en_US --jobs=3',
+                'php ./bin/magento setup:static-content:deploy -f -v --jobs 3 --exclude-theme theme1 --exclude-theme'
+                . ' theme2 en_US',
             ],
             [
                 [
@@ -119,7 +119,7 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -v en_US de_DE --jobs=1',
+                'php ./bin/magento setup:static-content:deploy -v --jobs 1 --exclude-theme theme1 en_US de_DE',
             ],
         ];
     }

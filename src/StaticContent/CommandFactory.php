@@ -54,7 +54,7 @@ class CommandFactory
         ));
 
         if ($excludedThemes) {
-            $command .= ' --exclude-theme=' . implode(' --exclude-theme=', $excludedThemes);
+            $command .= ' --exclude-theme ' . implode(' --exclude-theme ', $excludedThemes);
         }
 
         if ($locales = $option->getLocales()) {
@@ -82,7 +82,7 @@ class CommandFactory
             $command .= ' --theme ' . $theme;
 
             if (isset($config['language'])) {
-                $command .= ' --language ' . implode(' --language ', $config['language']);
+                $command .= ' ' . implode(' ', $config['language']);
             }
 
             $commands[] = $command;
@@ -120,7 +120,7 @@ class CommandFactory
 
         $treadCount = $option->getThreadCount();
         if ($treadCount) {
-            $command .= ' --jobs=' . $treadCount;
+            $command .= ' --jobs ' . $treadCount;
         }
 
         if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)
