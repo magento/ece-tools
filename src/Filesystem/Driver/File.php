@@ -343,25 +343,12 @@ class File
      * Sets access and modification time of file.
      *
      * @param string $path
-     * @param int|null $modificationTime
+     * @param int|null $time
      * @return bool
-     * @throws FileSystemException
      */
-    public function touch($path, $modificationTime = null)
+    public function touch($path, $time = null): bool
     {
-        if (!$modificationTime) {
-            $result = @touch($path);
-        } else {
-            $result = @touch($path, $modificationTime);
-        }
-        if (!$result) {
-            $this->fileSystemException(
-                'The file or directory "%1" cannot be touched %2',
-                [$path, $this->getWarningMessage()]
-            );
-        }
-
-        return $result;
+        return @touch($path, $time);
     }
 
     /**

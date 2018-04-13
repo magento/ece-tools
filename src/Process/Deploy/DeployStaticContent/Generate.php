@@ -99,7 +99,10 @@ class Generate implements ProcessInterface
 
         $this->logger->info($logMessage);
 
-        $command = $this->commandFactory->create($this->deployOption);
+        $command = $this->commandFactory->create(
+            $this->deployOption,
+            $this->stageConfig->get(DeployInterface::VAR_SCD_MATRIX)
+        );
 
         $this->shell->execute($command);
         $this->shell->execute(

@@ -42,23 +42,67 @@ class CommandFactory
      * Creates static deploy command based on given options
      *
      * @param OptionInterface $option
+     * @param array $matrix
+     * @return string
+     */
+    public function create(OptionInterface $option, array $matrix = []): string
+    {
+        return $matrix ? $this->createByMatrix($option, $matrix) : $this->createRegular($option);
+    }
+
+    /**
+     * @param OptionInterface $option
+     * @return string
+     */
+    private function createRegular(OptionInterface $option): string
+    {
+        $command = $this->build($option);
+        $excludedThemes = $option->getExcludedThemes();
+
+        if (count($excludedThemes) === 1) {
+            $command .= ' --exclude-theme=' . $excludedThemes[0];
+        } elseif (count($excludedThemes) > 1) {
+            $command .= ' --exclude-theme=' . implode(' --exclude-theme=', $excludedThemes);
+        }
+
+        return $command;
+    }
+
+    /**
+     * @param OptionInterface $option
+     * @param array $matrix
+     * @return string
+     */
+    private function createByMatrix(OptionInterface $option, array $matrix): string
+    {
+        $commands = [];
+
+        foreach ($matrix as $theme => $config) {
+            $command = $this->build($option);
+            $command .= ' --theme ' . $theme;
+
+            if ($config['language']) {
+                foreach ((array)$config['language'] as $language) {
+                    $command .= ' --language ' . $language;
+                }
+            }
+        }
+
+        return implode(' && ', $commands);
+    }
+
+    /**
+     * @param OptionInterface $option
      * @return string
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    public function create(OptionInterface $option): string
+    private function build(OptionInterface $option): string
     {
         $command = 'php ./bin/magento setup:static-content:deploy';
 
         if ($option->isForce()) {
             $command .= ' -f';
-        }
-
-        $excludedThemes = $option->getExcludedThemes();
-        if (count($excludedThemes) == 1) {
-            $command .= ' --exclude-theme=' . $excludedThemes[0];
-        } elseif (count($excludedThemes) > 1) {
-            $command .= ' --exclude-theme=' . implode(' --exclude-theme=', $excludedThemes);
         }
 
         if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)) {
