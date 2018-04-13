@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
 
 /**
- * Provides apply methods for patches.
+ *  Tests Constraints for patches.
  */
 class ConstraintTester
 {
