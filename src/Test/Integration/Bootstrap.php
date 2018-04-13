@@ -75,7 +75,7 @@ class Bootstrap
         }
 
         $this->execute(sprintf(
-            'composer create-project --repository-url=%s %s %s %s',
+            'composer create-project --no-dev --repository-url=%s %s %s %s',
             getenv('MAGENTO_REPO') ?: 'https://repo.magento.com/',
             getenv('MAGENTO_PROJECT') ?: 'magento/project-enterprise-edition',
             $sandboxDir,
