@@ -52,7 +52,7 @@ class QuiltApplier implements ApplierInterface
      *
      * @return void
      */
-    public function applyPatches(array $paths)
+    public function applyPatches(array $patches)
     {
         $patchesDirectory = $this->directoryList->getPatches() ;
         $patchesDirectoryWithSlash = $patchesDirectory . '/' ;
@@ -62,7 +62,8 @@ class QuiltApplier implements ApplierInterface
         }
         $patchesDirectoryWithSlashLength = strlen($patchesDirectoryWithSlash);
         $seriesData = '';
-        foreach ($paths as $path) {
+        foreach ($patches as $patch) {
+            $path = $patch['path'];
             if (0 === strncmp($path, $patchesDirectoryWithSlash, $patchesDirectoryWithSlashLength)) {
                 $path = substr($path, $patchesDirectoryWithSlashLength);
             }

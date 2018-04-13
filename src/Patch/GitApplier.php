@@ -72,22 +72,38 @@ class GitApplier implements ApplierInterface
      * @return void
      * @throws \RuntimeException
      */
-    public function applyPatches(array $paths)
+    public function applyPatches(array $patches)
     {
         /** @var string $path */
-        foreach ($paths as $path) {
+        foreach ($patches as $patch) {
+            $path = $patch['path'];
+            $name = $patch['name'] ?? null;
             /**
              * Support for relative paths.
              */
             if (!$this->file->isExists($path)) {
                 $path = $this->directoryList->getPatches() . '/' . $path;
             }
+            $name = $name ? sprintf('%s (%s)', $name, $path) : $path;
             $format = 'Applying patch %s.';
             $this->logger->info(sprintf(
                 $format,
-                $path
+                $name
             ));
-            $this->shell->execute('git apply ' . $path);
+            try {
+                $this->shell->execute('git apply ' . $path);
+            } catch (\RuntimeException $applyException) {
+                if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+                    $this->logger->notice("Patch {$name} wasn't applied.");
+                    return;
+                }
+                try {
+                    $this->shell->execute('git apply --check --reverse ' . $path);
+                } catch (\RuntimeException $reverseException) {
+                    throw $applyException;
+                }
+                $this->logger->notice("Patch {$name} was already applied.");
+            }
             $this->logger->info('Done.');
         }
     }

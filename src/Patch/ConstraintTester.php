@@ -71,14 +71,12 @@ class ConstraintTester
     }
 
     /**
-     * Applies patch, using 'git apply' command.
-     *
-     * If the patch fails to apply, checks if it has already been applied which is considered ok.
+     * Tests to see whether or not constraint should apply.
      *
      * @param string $path Path to patch
      * @param string|null $packageName Name of package to be patched
      * @param string|null $constraint Specific constraint of package to be fixed
-     * @return void
+     * @return string|null
      * @throws \RuntimeException
      */
     public function testConstraint(string $path, string $packageName = null, string $constraint = null)

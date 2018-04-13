@@ -172,17 +172,17 @@ class Manager
             return $patchListToApply;
         }
         foreach ($patches as $packageName => $patchesInfo) {
-            foreach ($patchesInfo as $packageInfo) {
+            foreach ($patchesInfo as $patchName => $packageInfo) {
                 if (is_string($packageInfo)) {
                     $appliedPath = $this->constraintTester->testConstraint($packageInfo, $packageName, '*');
                     if (!empty($appliedPath)) {
-                        $patchListToApply[] = $appliedPath;
+                        $patchListToApply[] = ['path' => $appliedPath, 'name' => $patchName];
                     }
                 } elseif (is_array($packageInfo)) {
                     foreach ($packageInfo as $constraint => $path) {
                         $appliedPath = $this->constraintTester->testConstraint($path, $packageName, $constraint);
                         if (!empty($appliedPath)) {
-                            $patchListToApply[] = $appliedPath;
+                            $patchListToApply[] = ['path' => $appliedPath, 'name' => $patchName];
                         }
                     }
                 }
@@ -206,14 +206,13 @@ class Manager
             $this->logger->notice('Hot-fixes directory was not found. Skipping.');
             return $patchListToApply;
         }
-
         $this->logger->info('Applying hot-fixes.');
         $files = glob($hotFixesDir . '/*.patch');
         sort($files);
         foreach ($files as $file) {
             $path = $this->constraintTester->testConstraint($file, null, null);
             if (!empty($path)) {
-                $patchListToApply[] = $path;
+                $patchListToApply[] = ['path' => $path];
             }
         }
         return $patchListToApply;
