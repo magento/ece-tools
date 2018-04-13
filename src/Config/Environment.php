@@ -80,23 +80,24 @@ class Environment
     }
 
     /**
+     * 'getEnv' method is an abstraction for _ENV and getenv.
+     * If _ENV is enabled in php.ini, use that.  If not, fall back to use getenv.
+     * returns false if not found
+     *
      * @param string $key
      * @param string|int|null $default
      * @return array|string|int|null
      */
-    public function getEnv(string $key, $default = null)
+    public function getEnv(string $key)
     {
-        if (isset($_ENV[$key])) {
-            return $_ENV[$key];
-        }
-        $value = getenv($key);
-        if (false === $value) {
-            return $default;
-        }
-        return $value;
+        return $_ENV[$key] ?? getenv($key);
     }
 
     /**
+     * 'get' method is used for getting environment variables, and then base64 decodes them,
+     * and then converts them from json objects to PHP arrays.
+     * returns $default argument if not found.
+     *
      * @param string $key
      * @param string|int|null $default
      * @return array|string|int|null
@@ -104,7 +105,7 @@ class Environment
     public function get(string $key, $default = null)
     {
         $value = $this->getEnv($key);
-        if (null === $value) {
+        if (false === $value) {
             return $default;
         }
         return json_decode(base64_decode($value), true);
