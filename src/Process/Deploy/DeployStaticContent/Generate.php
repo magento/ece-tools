@@ -99,12 +99,15 @@ class Generate implements ProcessInterface
 
         $this->logger->info($logMessage);
 
-        $command = $this->commandFactory->create(
+        $commands = $this->commandFactory->matrix(
             $this->deployOption,
             $this->stageConfig->get(DeployInterface::VAR_SCD_MATRIX)
         );
 
-        $this->shell->execute($command);
+        foreach ($commands as $command) {
+            $this->shell->execute($command);
+        }
+
         $this->shell->execute(
             "php ./bin/magento maintenance:disable {$this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)}"
         );

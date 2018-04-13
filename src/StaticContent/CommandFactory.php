@@ -16,7 +16,7 @@ class CommandFactory
     /**
      * A composer version constraint of versions that cannot use a static content deployment strategy.
      */
-    const NO_SCD_VERSION_CONSTRAINT = "<2.2";
+    const NO_SCD_VERSION_CONSTRAINT = '<2.2';
 
     /**
      * @var MagentoVersion
@@ -42,26 +42,18 @@ class CommandFactory
      * Creates static deploy command based on given options
      *
      * @param OptionInterface $option
-     * @param array $matrix
+     * @param array $excludedThemes
      * @return string
      */
-    public function create(OptionInterface $option, array $matrix = []): string
-    {
-        return $matrix ? $this->createByMatrix($option, $matrix) : $this->createRegular($option);
-    }
-
-    /**
-     * @param OptionInterface $option
-     * @return string
-     */
-    private function createRegular(OptionInterface $option): string
+    public function create(OptionInterface $option, array $excludedThemes = []): string
     {
         $command = $this->build($option);
-        $excludedThemes = $option->getExcludedThemes();
+        $excludedThemes = array_unique(array_merge(
+            $option->getExcludedThemes(),
+            $excludedThemes
+        ));
 
-        if (count($excludedThemes) === 1) {
-            $command .= ' --exclude-theme=' . $excludedThemes[0];
-        } elseif (count($excludedThemes) > 1) {
+        if ($excludedThemes) {
             $command .= ' --exclude-theme=' . implode(' --exclude-theme=', $excludedThemes);
         }
 
@@ -69,26 +61,30 @@ class CommandFactory
     }
 
     /**
+     * Creates set of SCD deployment commands within given matrix.
+     *
      * @param OptionInterface $option
      * @param array $matrix
-     * @return string
+     * @return array
      */
-    private function createByMatrix(OptionInterface $option, array $matrix): string
+    public function matrix(OptionInterface $option, array $matrix): array
     {
-        $commands = [];
+        $commands = [
+            $this->create($option, array_keys($matrix)),
+        ];
 
         foreach ($matrix as $theme => $config) {
             $command = $this->build($option);
             $command .= ' --theme ' . $theme;
 
-            if ($config['language']) {
-                foreach ((array)$config['language'] as $language) {
-                    $command .= ' --language ' . $language;
-                }
+            if (isset($config['language'])) {
+                $command .= ' --language ' . implode(' --language ', $config['language']);
             }
+
+            $commands[] = $command;
         }
 
-        return implode(' && ', $commands);
+        return $commands;
     }
 
     /**
@@ -118,8 +114,7 @@ class CommandFactory
             $command .= ' ' . $verbosityLevel;
         }
 
-        $locales = $option->getLocales();
-        if (count($locales)) {
+        if ($locales = $option->getLocales()) {
             $command .= ' ' . implode(' ', $locales);
         }
 
