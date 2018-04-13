@@ -104,7 +104,7 @@ class Environment
     public function get(string $key, $default = null)
     {
         $value = $this->getEnv($key);
-        if ($value === null) {
+        if (null === $value) {
             return $default;
         }
         return json_decode(base64_decode($value), true);
