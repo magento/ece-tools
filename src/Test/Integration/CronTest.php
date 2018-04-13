@@ -81,6 +81,7 @@ class CronTest extends AbstractTest
 
         /** @var ConnectionInterface $db */
         $db = $application->getContainer()->get(ConnectionInterface::class);
+        $db->close();
 
         $this->assertTrue($db->query('DELETE FROM cron_schedule;'));
         $this->bootstrap->execute(sprintf(
@@ -118,6 +119,8 @@ class CronTest extends AbstractTest
         ));
 
         $this->assertTrue($countSuccess < count($db->select($selectSuccessJobs)));
+
+        $db->close();
     }
 
     /**
