@@ -81,7 +81,7 @@ class CommandFactory
             $command = $this->build($option);
             $command .= ' --theme ' . $theme;
 
-            if (isset($config['language'])) {
+            if (!empty($config['language'])) {
                 $command .= ' ' . implode(' ', $config['language']);
             }
 
