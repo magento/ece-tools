@@ -57,6 +57,10 @@ class CommandFactory
             $command .= ' --exclude-theme=' . implode(' --exclude-theme=', $excludedThemes);
         }
 
+        if ($locales = $option->getLocales()) {
+            $command .= ' ' . implode(' ', $locales);
+        }
+
         return $command;
     }
 
@@ -112,10 +116,6 @@ class CommandFactory
         $verbosityLevel = $option->getVerbosityLevel();
         if ($verbosityLevel) {
             $command .= ' ' . $verbosityLevel;
-        }
-
-        if ($locales = $option->getLocales()) {
-            $command .= ' ' . implode(' ', $locales);
         }
 
         $treadCount = $option->getThreadCount();
