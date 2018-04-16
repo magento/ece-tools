@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/module-config/Model/Config/Backend/Admin/Robots.php b/vendor/magento/module-config/Model/Config/Backend/Admin/Robots.php
+diff -Naur a/vendor/magento/module-config/Model/Config/Backend/Admin/Robots.php b/vendor/magento/module-config/Model/Config/Backend/Admin/Robots.php
 --- a/vendor/magento/module-config/Model/Config/Backend/Admin/Robots.php
 +++ b/vendor/magento/module-config/Model/Config/Backend/Admin/Robots.php
 @@ -44,7 +44,7 @@
@@ -10,7 +10,7 @@ diff --git a/vendor/magento/module-config/Model/Config/Backend/Admin/Robots.php 
          $this->_file = 'robots.txt';
      }
  
-diff --git a/vendor/magento/module-config/Model/Config/Reader/Source/Deployed/DocumentRoot.php b/vendor/magento/module-config/Model/Config/Reader/Source/Deployed/DocumentRoot.php
+diff -Naur a/vendor/magento/module-config/Model/Config/Reader/Source/Deployed/DocumentRoot.php b/vendor/magento/module-config/Model/Config/Reader/Source/Deployed/DocumentRoot.php
 new file mode 100644
 --- /dev/null
 +++ b/vendor/magento/module-config/Model/Config/Reader/Source/Deployed/DocumentRoot.php
@@ -70,7 +70,7 @@ new file mode 100644
 +        return (bool)$this->config->get(ConfigOptionsListConstants::CONFIG_PATH_DOCUMENT_ROOT_IS_PUB);
 +    }
 +}
-diff --git a/vendor/magento/module-sitemap/Block/Adminhtml/Grid/Renderer/Link.php b/vendor/magento/module-sitemap/Block/Adminhtml/Grid/Renderer/Link.php
+diff -Naur a/vendor/magento/module-sitemap/Block/Adminhtml/Grid/Renderer/Link.php b/vendor/magento/module-sitemap/Block/Adminhtml/Grid/Renderer/Link.php
 --- a/vendor/magento/module-sitemap/Block/Adminhtml/Grid/Renderer/Link.php
 +++ b/vendor/magento/module-sitemap/Block/Adminhtml/Grid/Renderer/Link.php
 @@ -11,6 +11,8 @@
@@ -122,7 +122,7 @@ diff --git a/vendor/magento/module-sitemap/Block/Adminhtml/Grid/Renderer/Link.ph
          if ($directory->isFile($fileName)) {
              return sprintf('<a href="%1$s">%1$s</a>', $url);
          }
-diff --git a/vendor/magento/module-sitemap/Model/Sitemap.php b/vendor/magento/module-sitemap/Model/Sitemap.php
+diff -Naur a/vendor/magento/module-sitemap/Model/Sitemap.php b/vendor/magento/module-sitemap/Model/Sitemap.php
 --- a/vendor/magento/module-sitemap/Model/Sitemap.php
 +++ b/vendor/magento/module-sitemap/Model/Sitemap.php
 @@ -8,7 +8,8 @@
@@ -150,7 +150,7 @@ diff --git a/vendor/magento/module-sitemap/Model/Sitemap.php b/vendor/magento/mo
          $this->_categoryFactory = $categoryFactory;
          $this->_productFactory = $productFactory;
          $this->_cmsFactory = $cmsFactory;
-diff --git a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
+diff -Naur a/vendor/magento/framework/Config/ConfigOptionsListConstants.php b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 --- a/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 +++ b/vendor/magento/framework/Config/ConfigOptionsListConstants.php
 @@ -30,6 +30,8 @@ class ConfigOptionsListConstants
