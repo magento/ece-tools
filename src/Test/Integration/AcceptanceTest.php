@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Application;
@@ -47,6 +48,7 @@ class AcceptanceTest extends AbstractTest
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
         $this->executeAndAssert(Prestart::NAME, $application);
+        $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
         $this->assertLogIsSanitized($application);
@@ -152,6 +154,7 @@ class AcceptanceTest extends AbstractTest
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
         $this->executeAndAssert(Prestart::NAME, $application);
+        $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
     }
@@ -177,13 +180,7 @@ class AcceptanceTest extends AbstractTest
      */
     private function assertContentPresence(array $environment)
     {
-        $config = $this->bootstrap->mergeConfig($environment);
-        $routes = $config->get('routes');
-
-        if ($config->get('skip_front_check') === true || !$routes) {
-            return;
-        }
-
+        $routes = $this->bootstrap->getEnv('routes', $environment);
         $routes = array_keys($routes);
         $defaultRoute = reset($routes);
         $pageContent = file_get_contents($defaultRoute);

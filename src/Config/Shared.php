@@ -5,13 +5,14 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\Shared\Reader;
 use Magento\MagentoCloud\Config\Shared\Writer;
 
 /**
  * Class Shared.
  */
-class Shared
+class Shared implements ConfigInterface
 {
     /**
      * @var Reader
@@ -24,46 +25,56 @@ class Shared
     private $writer;
 
     /**
-     * @var array
+     * @var Repository
      */
     private $config;
 
     /**
+     * @var RepositoryFactory
+     */
+    private $repositoryFactory;
+
+    /**
      * @param Reader $reader
      * @param Writer $writer
+     * @param RepositoryFactory $repositoryFactory
      */
     public function __construct(
         Reader $reader,
-        Writer $writer
+        Writer $writer,
+        RepositoryFactory $repositoryFactory
     ) {
         $this->reader = $reader;
         $this->writer = $writer;
+        $this->repositoryFactory = $repositoryFactory;
     }
 
     /**
-     * @param string $key
-     * @param string|null $default
-     * @return mixed|null
+     * @inheritdoc
      */
-    public function get(string $key, $default = null)
+    public function has(string $key): bool
     {
-        return $this->read()[$key] ?? $default;
+        return $this->read()->has($key);
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
-    public function read(): array
+    public function get(string $key)
     {
-        if ($this->config === null) {
-            $this->config = $this->reader->read();
-        }
-
-        return $this->config;
+        return $this->read()->get($key) ?? null;
     }
 
     /**
-     * @param array $config
+     * @inheritdoc
+     */
+    public function all(): array
+    {
+        return $this->read()->all();
+    }
+
+    /**
+     * @inheritdoc
      */
     public function update(array $config)
     {
@@ -72,10 +83,24 @@ class Shared
     }
 
     /**
-     * Resets cached data.
+     * @inheritdoc
      */
     public function reset()
     {
         $this->config = null;
+    }
+
+    /**
+     * @return Repository
+     */
+    private function read(): Repository
+    {
+        if ($this->config === null) {
+            $this->config = $this->repositoryFactory->create(
+                $this->reader->read()
+            );
+        }
+
+        return $this->config;
     }
 }

@@ -13,7 +13,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * @inheritdoc
+ * {@inheritdoc}
+ *
+ * @group php71
  */
 class CronTest extends AbstractTest
 {
@@ -79,6 +81,7 @@ class CronTest extends AbstractTest
 
         /** @var ConnectionInterface $db */
         $db = $application->getContainer()->get(ConnectionInterface::class);
+        $db->close();
 
         $this->assertTrue($db->query('DELETE FROM cron_schedule;'));
         $this->bootstrap->execute(sprintf(
@@ -116,6 +119,8 @@ class CronTest extends AbstractTest
         ));
 
         $this->assertTrue($countSuccess < count($db->select($selectSuccessJobs)));
+
+        $db->close();
     }
 
     /**
@@ -124,8 +129,6 @@ class CronTest extends AbstractTest
     public function cronDataProvider()
     {
         return [
-            ['version' => '2.1.4'],
-            ['version' => '2.1.*'],
             ['version' => '2.2.0'],
             ['version' => '2.2.2'],
             ['version' => '2.2.*'],

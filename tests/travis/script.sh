@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Copyright © Magento, Inc. All rights reserved.
 # See COPYING.txt for license details.
@@ -6,19 +6,23 @@
 set -e
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
+BASH="docker-compose -f ./docker-compose-${PHP}.yml run cli bash"
+
 case $TEST_SUITE in
-    static)
-        phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n
-        phpmd src xml tests/static/phpmd-ruleset.xml
-        ;;
-    unit)
-        phpunit --configuration tests/unit/phpunit.xml.dist --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml ${MIN_CODE_COVERAGE}
-        phpunit --configuration tests/unit/phpunit.xml.dist
+    static-unit)
+        $BASH -c "${DIR_TOOLS}/vendor/bin/phpcs ${DIR_TOOLS}/src --standard=${DIR_TOOLS}/tests/static/phpcs-ruleset.xml -p -n"
+        $BASH -c "${DIR_TOOLS}/vendor/bin/phpmd ${DIR_TOOLS}/src xml ${DIR_TOOLS}/tests/static/phpmd-ruleset.xml"
+        $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --configuration ${DIR_TOOLS}/tests/unit --coverage-clover ${DIR_TOOLS}/tests/unit/tmp/clover.xml && php ${DIR_TOOLS}/tests/unit/code-coverage.php ${DIR_TOOLS}/tests/unit/tmp/clover.xml"
+        $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --configuration ${DIR_TOOLS}/tests/unit"
         ;;
     integration)
-        phpunit --verbose --configuration tests/integration/phpunit.xml.dist
-        ;;
-    integration-docker)
-        docker-compose run cli bash -c "/var/www/magento/vendor/bin/phpunit --verbose --configuration /var/www/magento/tests/integration/phpunit.xml.docker"
+        case $PHP in
+            7.0)
+                $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
+                ;;
+            7.1)
+                $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --exclude-group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
+                ;;
+        esac
         ;;
 esac

@@ -6,9 +6,7 @@
 namespace Magento\MagentoCloud\DB;
 
 /**
- * Interface ConnectionInterface
- *
- * @package Magento\MagentoCloud\DB
+ * General Connection interface.
  */
 interface ConnectionInterface
 {
@@ -31,6 +29,8 @@ interface ConnectionInterface
     public function affectingQuery(string $query, array $bindings = []): int;
 
     /**
+     * Select results with a query.
+     *
      * @param string $query
      * @param array $bindings
      * @return array
@@ -38,6 +38,8 @@ interface ConnectionInterface
     public function select(string $query, array $bindings = []): array;
 
     /**
+     * Select one result with a query.
+     *
      * @param string $query
      * @param array $bindings
      * @return array
@@ -45,6 +47,8 @@ interface ConnectionInterface
     public function selectOne(string $query, array $bindings = []): array;
 
     /**
+     * Count results according to query.
+     *
      * @param string $query
      * @param array $bindings
      * @return int
@@ -52,11 +56,15 @@ interface ConnectionInterface
     public function count(string $query, array $bindings = []): int;
 
     /**
+     * List existing tables.
+     *
      * @return array
      */
     public function listTables(): array;
 
     /**
+     * Bind values to statement.
+     *
      * @param \PDOStatement $statement
      * @param array $bindings
      * @return mixed
@@ -64,7 +72,16 @@ interface ConnectionInterface
     public function bindValues(\PDOStatement $statement, array $bindings);
 
     /**
+     * Retrieve a \PDO object.
+     *
      * @return \PDO
      */
     public function getPdo(): \PDO;
+
+    /**
+     * Close connection.
+     *
+     * @return void
+     */
+    public function close();
 }

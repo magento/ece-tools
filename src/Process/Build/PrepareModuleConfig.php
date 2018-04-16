@@ -61,7 +61,7 @@ class PrepareModuleConfig implements ProcessInterface
             return;
         }
 
-        $actualConfig = $this->sharedConfig->read();
+        $actualConfig = $this->sharedConfig->all();
         $this->shell->execute('php bin/magento module:enable --all');
         $this->sharedConfig->update($actualConfig);
     }

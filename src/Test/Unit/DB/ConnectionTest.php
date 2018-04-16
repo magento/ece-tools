@@ -87,6 +87,22 @@ class ConnectionTest extends TestCase
         );
     }
 
+    public function testSelectOne()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Query: some query');
+        $this->statementMock->expects($this->once())
+            ->method('fetch')
+            ->with(\PDO::FETCH_ASSOC)
+            ->willReturn(['result']);
+
+        $this->assertSame(
+            ['result'],
+            $this->connection->selectOne('some query', [])
+        );
+    }
+
     public function testListTables()
     {
         $this->loggerMock->expects($this->once())
@@ -123,9 +139,14 @@ class ConnectionTest extends TestCase
             ->willReturn([
                 'HY000',
                 2000,
-                'Some message'
+                'Some message',
             ]);
 
         $this->connection->getPdo();
+    }
+
+    public function testClose()
+    {
+        $this->connection->close();
     }
 }
