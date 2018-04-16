@@ -36,8 +36,7 @@ class DocumentRootTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
 
         $this->process = new DocumentRoot(
