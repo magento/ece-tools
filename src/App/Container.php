@@ -11,6 +11,8 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -150,6 +152,9 @@ class Container implements ContainerInterface
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
                                     $this->container->make(ConfigValidator\Build\StageConfig::class),
+                                    $this->container->make(ConfigValidator\ScdStrategy::class, [
+                                        'stageConfig' => $this->get(BuildInterface::class)
+                                    ]),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
@@ -199,7 +204,9 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Build\StageConfig::class),
                                     $this->container->make(ConfigValidator\Deploy\Variables::class),
-                                    $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),
+                                    $this->container->make(ConfigValidator\ScdStrategy::class, [
+                                        'stageConfig' => $this->get(DeployInterface::class)
+                                    ]),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
