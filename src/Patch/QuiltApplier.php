@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Patch;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Shell\ShellInterface as Shell;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
  * Provides apply methods for patches.
@@ -34,15 +35,27 @@ class QuiltApplier implements ApplierInterface
     private $directoryList;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @param Shell $shell
      * @param LoggerInterface $logger
      * @param DirectoryList $directoryList
+     * @param File $file
      */
-    public function __construct(Shell $shell, LoggerInterface $logger, DirectoryList $directoryList)
+    public function __construct(
+        Shell $shell,
+        LoggerInterface $logger,
+        DirectoryList $directoryList,
+        File $file
+    )
     {
         $this->shell = $shell;
         $this->logger = $logger;
         $this->directoryList = $directoryList;
+        $this->file = $file;
     }
 
     /**
@@ -57,7 +70,7 @@ class QuiltApplier implements ApplierInterface
         $patchesDirectory = $this->directoryList->getPatches() ;
         $patchesDirectoryWithSlash = $patchesDirectory . '/' ;
         $seriesPath = $patchesDirectoryWithSlash . 'series';
-        if (file_exists($seriesPath)) {
+        if ($this->file->isExists($seriesPath)) {
             $this->unapplyAllPatches();
         }
         $patchesDirectoryWithSlashLength = strlen($patchesDirectoryWithSlash);
@@ -69,12 +82,13 @@ class QuiltApplier implements ApplierInterface
             }
             $seriesData .= $path . "\n";
         }
-        $success = file_put_contents($seriesPath, $seriesData);
+        $success = $this->file->filePutContents($seriesPath, $seriesData);
         if ($success === false) {
             throw new \Exception("Failed to write to $seriesPath!");
         }
         $this->logger->info("* Running quilt started.");
-        $output = $this->shell->execute('QUILT_PATCHES=' . $patchesDirectory . ' quilt push -a ;'
+        $output = $this->shell->execute('QUILT_PATCHES=' . escapeshellarg($patchesDirectory)
+            . ' quilt push -a ;'
             . ' EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi');
         /** @var string $line */
         foreach ($output as $line) {
@@ -96,8 +110,8 @@ class QuiltApplier implements ApplierInterface
             $forceArgument = ' -f';
         }
         $this->logger->info('Unapplying patches started.');
-        $this->shell->execute('QUILT_PATCHES=' . $this->directoryList->getPatches()
-            . ' quilt pop' . $forceArgument . ' -a ;'
+        $this->shell->execute("QUILT_PATCHES=" . escapeshellarg($this->directoryList->getPatches())
+            . " quilt pop" . $forceArgument . ' -a ;'
             . ' EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi');
         $this->logger->info('Unapplying patches finished.');
     }

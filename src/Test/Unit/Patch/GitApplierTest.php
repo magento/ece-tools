@@ -69,8 +69,6 @@ class GitApplierTest extends TestCase
     /**
      * @param string $path
      * @param string|null $name
-     * @param string|null $packageName
-     * @param string|null $constraint
      * @param string $expectedLog
      * @dataProvider applyDataProvider
      */
