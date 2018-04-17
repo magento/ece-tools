@@ -74,7 +74,8 @@ class QuiltApplierTest extends TestCase
             ->willReturn(false);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi')
+            ->with('QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ;'
+                . ' if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi')
             ->willReturn([$quiltMocOutput]);
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
@@ -109,8 +110,10 @@ class QuiltApplierTest extends TestCase
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
-                ['QUILT_PATCHES=\'root\' quilt pop -a ; EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi'],
-                ['QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi']
+                ['QUILT_PATCHES=\'root\' quilt pop -a ; EXIT_CODE=$? ;'
+                    . ' if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi'],
+                ['QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ;'
+                    . ' if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi']
             )
             ->willReturn([$quiltMocOutput]);
         $this->fileMock->expects($this->once())
@@ -152,8 +155,10 @@ class QuiltApplierTest extends TestCase
         $this->shellMock->expects($this->exactly(1))
             ->method('execute')
             ->withConsecutive(
-                ['QUILT_PATCHES=\'root\' quilt pop -a ; EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi'],
-                ['QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi']
+                ['QUILT_PATCHES=\'root\' quilt pop -a ; EXIT_CODE=$? ;'
+                    .' if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi'],
+                ['QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ;'
+                    . ' if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi']
             )
             ->willReturnCallback(function () {
                 throw new \RuntimeException('Applying the patch has failed for some reason');
@@ -197,7 +202,8 @@ class QuiltApplierTest extends TestCase
         $this->shellMock->expects($this->exactly(1))
             ->method('execute')
             ->withConsecutive(
-                ['QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ; if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi']
+                ['QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ;'
+                    . ' if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi']
             )
             ->willReturnCallback(function () {
                 throw new \RuntimeException('Applying the patch has failed for some reason');

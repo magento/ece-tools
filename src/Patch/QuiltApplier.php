@@ -50,8 +50,7 @@ class QuiltApplier implements ApplierInterface
         LoggerInterface $logger,
         DirectoryList $directoryList,
         File $file
-    )
-    {
+    ) {
         $this->shell = $shell;
         $this->logger = $logger;
         $this->directoryList = $directoryList;
