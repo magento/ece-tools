@@ -57,5 +57,13 @@
     "test-coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
     "test-coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage"
   },
-  "prefer-stable": true
+  "prefer-stable": true,
+  "extra": {
+    "map": [
+      [
+        ".magento.env.yaml.sample",
+        ".magento.env.yaml.sample"
+      ]
+    ]
+  }
 }
