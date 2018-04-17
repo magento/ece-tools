@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Application;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
  * Integration testing bootstrap.
@@ -15,14 +16,35 @@ use Magento\MagentoCloud\Application;
 class Bootstrap
 {
     /**
+     * Distributive files.
+     */
+    const DIST_FILES = [
+        'build_options.ini',
+        '.magento.env.yaml',
+    ];
+
+    /**
      * @var Bootstrap
      */
     private static $instance;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * Bootstrap constructor.
+     */
+    public function __construct()
+    {
+        $this->file = new File();
+    }
+
+    /**
      * @return Bootstrap
      */
-    public static function create()
+    public static function create(): Bootstrap
     {
         if (null === static::$instance) {
             static::$instance = new self();
@@ -39,42 +61,43 @@ class Bootstrap
     {
         $sandboxDir = $this->getSandboxDir();
 
-        if (file_exists($sandboxDir . '/composer.lock')) {
+        if ($this->file->isExists($sandboxDir . '/composer.lock')) {
             return;
         }
 
-        $buildFile = $this->getConfigFile('build_options.ini');
-        $envConfig = $this->mergeConfig([]);
+        /**
+         * Clean sandbox.
+         */
+        $this->destroy();
 
-        if (!is_dir($sandboxDir)) {
-            mkdir($sandboxDir, 0777, true);
+        if (!$this->file->isDirectory($sandboxDir)) {
+            $this->file->createDirectory($sandboxDir);
         }
 
         $this->execute(sprintf(
-            'composer create-project --repository-url=%s %s %s %s',
-            $envConfig->get('deploy.repo'),
-            $envConfig->get('deploy.name'),
+            'composer create-project --no-dev --repository-url=%s %s %s %s',
+            getenv('MAGENTO_REPO') ?: 'https://repo.magento.com/',
+            getenv('MAGENTO_PROJECT') ?: 'magento/project-enterprise-edition',
             $sandboxDir,
             $version
         ));
 
-        /**
-         * Copying build options.
-         */
-        $this->execute(sprintf(
-            'cp -f %s %s',
-            $buildFile,
-            $sandboxDir . '/build_options.ini'
-        ));
+        foreach (self::DIST_FILES as $distFile) {
+            $this->file->copy(
+                $this->getConfigFile($distFile),
+                $sandboxDir . '/' . $distFile
+            );
+        }
     }
 
     /**
      * @param array $environment
      * @return Application
+     * @throws \Exception
      */
     public function createApplication(array $environment): Application
     {
-        $environment = $this->mergeConfig($environment);
+        $environment = $this->getAllEnv($environment);
 
         $_ENV = array_replace($_ENV, [
             'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(
@@ -99,8 +122,9 @@ class Bootstrap
     /**
      * @param array $environment
      * @return Repository
+     * @throws \Exception
      */
-    public function mergeConfig(array $environment): Repository
+    private function getAllEnv(array $environment): Repository
     {
         return new Repository(array_replace(
             require $this->getConfigFile('environment.php'),
@@ -109,14 +133,24 @@ class Bootstrap
     }
 
     /**
-     * Removes application directory.
+     * @param string $value
+     * @param array $environment
+     * @return array
+     * @throws \Exception
+     */
+    public function getEnv(string $value, array $environment): array
+    {
+        return $this->getAllEnv($environment)->get($value);
+    }
+
+    /**
+     * Destroy app.
      */
     public function destroy()
     {
-        $this->execute(sprintf(
-            'rm -rf %s',
+        $this->file->clearDirectory(
             $this->getSandboxDir()
-        ));
+        );
     }
 
     /**
@@ -124,7 +158,7 @@ class Bootstrap
      */
     public function getSandboxDir(): string
     {
-        return ECE_BP . '/sandbox';
+        return getenv('MAGENTO_ROOT') ?: ECE_BP . '/sandbox';
     }
 
     /**
@@ -136,14 +170,12 @@ class Bootstrap
     {
         $configFile = ECE_BP . '/tests/integration/etc/' . $file;
 
-        if (@file_exists($configFile)) {
+        if ($this->file->isExists($configFile)) {
             return $configFile;
         }
 
-        $environment = getenv('environment') ?? '';
-
-        if (@file_exists($configFile . '.dist')) {
-            return $configFile . $environment . '.dist';
+        if ($this->file->isExists($configFile . '.dist')) {
+            return $configFile . '.dist';
         }
 
         throw new \Exception(sprintf(
@@ -154,9 +186,9 @@ class Bootstrap
 
     /**
      * @param string $command
-     * @return string
+     * @return array
      */
-    public function execute(string $command)
+    public function execute(string $command): array
     {
         exec($command, $output, $status);
 

@@ -74,14 +74,6 @@ class CronUnlock extends Command
     /**
      * @inheritdoc
      */
-    public function isEnabled()
-    {
-        return $this->magentoVersion->isGreaterOrEqual('2.2');
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {

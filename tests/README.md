@@ -18,7 +18,7 @@ This is the best way to run tests locally.
 To run unit tests, specify the configuration file in the following command:
 
 ```
-./vendor/bin/phpunit --configuration tests/unit/phpunit.xml.dist
+./vendor/bin/phpunit --configuration tests/unit
 ```
 
 ## Static tests
@@ -41,14 +41,27 @@ Integration tests require database access and existed database. To run, you will
 ```
 cp environment.php.dist environemnt.php
 ```
-3. Edit this file with your custom configuration, including section `relationships` and `skip_front_check => true`
+3. Edit this file with your custom configuration, including section `relationships`
 4. Run integration tests with the following command:
 ```
-./vendor/bin/phpunit --configuration tests/integration/phpunit.xml.dist
+./vendor/bin/phpunit --configuration tests/integration
 ```
 
-It will create a snapshot folder under `tests/integration/tmp` and clone the project.
+It will create a snapshot folder under `sandbox` and clone the project.
 Then, all available tests will be executed.
+
+## Integration tests with Docker
+
+To run integration tests on Docker, instead of local, proceed with next steps:
+
+1. Download and install [Docker](https://www.docker.com/get-docker)
+2. Create file `./docker/composer.env` with your personal `repo.magento.com` access keys:
+```
+COMPOSER_MAGENTO_USERNAME={YOUR_MAGENTO_USERNAME}
+COMPOSER_MAGENTO_PASSWORD={YOUR_MAGENTO_PASSWORD}
+```
+3. Run `docker-compose -f ./docker-compose-7.1.yml run -d --build`
+4. Run `docker-compose -f ./docker-compose-7.1.yml run cli bash -c "/var/www/ece-tools/vendor/bin/phpunit --exclude-group php70 --verbose --configuration /var/www/ece-tools/tests/integration"`
 
 ## Code coverage check
 

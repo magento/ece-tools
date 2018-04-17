@@ -7,11 +7,14 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Command\Prestart;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * @inheritdoc
+ * {@inheritdoc}
+ *
+ * @group php71
  */
 class UpgradeTest extends AbstractTest
 {
@@ -20,7 +23,7 @@ class UpgradeTest extends AbstractTest
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::create()->run('~2.1.12');
+        Bootstrap::create()->run('2.2.0');
     }
 
     /**
@@ -42,6 +45,7 @@ class UpgradeTest extends AbstractTest
                 \Psr\Log\LoggerInterface::class,
                 \Magento\MagentoCloud\App\Logger::class
             );
+
             $commandTester = new CommandTester($application->get($commandName));
             $commandTester->execute([]);
             $this->assertSame(0, $commandTester->getStatusCode());
@@ -52,19 +56,16 @@ class UpgradeTest extends AbstractTest
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
         $executeAndAssert(Prestart::NAME);
+        $executeAndAssert(PostDeploy::NAME);
 
         $this->assertContentPresence();
-
-        $this->bootstrap->execute(sprintf(
-            'rm -rf %s/vendor/*',
-            $this->bootstrap->getSandboxDir()
-        ));
-
         $this->updateToVersion($toVersion);
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
         $executeAndAssert(Prestart::NAME);
+        $executeAndAssert(PostDeploy::NAME);
+
         $this->assertContentPresence();
     }
 
@@ -74,20 +75,13 @@ class UpgradeTest extends AbstractTest
     public function defaultDataProvider(): array
     {
         return [
-            ['~2.1.12', '2.2.0'],
             ['2.2.0', '2.2.*'],
         ];
     }
 
     private function assertContentPresence()
     {
-        $config = $this->bootstrap->mergeConfig([]);
-        $routes = $config->get('routes');
-
-        if ($config->get('skip_front_check') === true || !$routes) {
-            return;
-        }
-
+        $routes = $this->bootstrap->getEnv('routes', []);
         $defaultRoute = array_keys($routes)[0];
         $pageContent = file_get_contents($defaultRoute);
 

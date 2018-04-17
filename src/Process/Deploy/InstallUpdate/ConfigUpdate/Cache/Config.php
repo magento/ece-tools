@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Cache;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * Returns cache configuration.
@@ -24,15 +25,23 @@ class Config
     private $stageConfig;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param Environment $environment
      * @param DeployInterface $stageConfig
+     * @param LoggerInterface $logger
      */
     public function __construct(
         Environment $environment,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        LoggerInterface $logger
     ) {
         $this->environment = $environment;
         $this->stageConfig = $stageConfig;
+        $this->logger = $logger;
     }
 
     /**
@@ -49,6 +58,15 @@ class Config
         $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
 
         if ($this->isCacheConfigurationValid($envCacheConfiguration)) {
+            if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION)) {
+                $this->logger->notice(
+                    sprintf(
+                        'The variable \'%s\' is ignored as you set your own cache connection in \'%s\'',
+                        DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
+                        DeployInterface::VAR_CACHE_CONFIGURATION
+                    )
+                );
+            }
             return $envCacheConfiguration;
         }
 
@@ -67,6 +85,11 @@ class Config
             ],
         ];
 
+        $slaveConnectionData = $this->getSlaveConnection();
+        if ($slaveConnectionData) {
+            $redisCache['backend_options']['load_from_slave'] = $slaveConnectionData;
+        }
+
         return [
             'frontend' => [
                 'default' => $redisCache,
@@ -84,5 +107,28 @@ class Config
     private function isCacheConfigurationValid(array $cacheConfiguration): bool
     {
         return !empty($cacheConfiguration) && isset($cacheConfiguration['frontend']);
+    }
+
+    /**
+     * Retrieves Redis read connection data if it exists and variable REDIS_USE_SLAVE_CONNECTION was set as true.
+     * Otherwise retrieves an empty array.
+     *
+     * @return array
+     */
+    private function getSlaveConnection(): array
+    {
+        $connectionData = [];
+        $redisSlaveConfig = $this->environment->getRelationship('redis-slave');
+        $slaveHost = $redisSlaveConfig[0]['host'] ?? null;
+
+        if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION) && $slaveHost) {
+            $this->logger->info('Set Redis slave connection');
+            $connectionData = [
+                'server' => $slaveHost,
+                'port' => $redisSlaveConfig[0]['port'] ?? '',
+            ];
+        }
+
+        return $connectionData;
     }
 }

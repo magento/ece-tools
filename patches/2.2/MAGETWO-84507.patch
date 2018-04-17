@@ -1,3 +1,4 @@
+diff -Nuar a/vendor/magento/module-require-js/Model/FileManager.php b/vendor/magento/module-require-js/Model/FileManager.php
 --- a/vendor/magento/module-require-js/Model/FileManager.php
 +++ b/vendor/magento/module-require-js/Model/FileManager.php
 @@ -183,6 +183,9 @@

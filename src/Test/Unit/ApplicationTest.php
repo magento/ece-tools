@@ -8,21 +8,9 @@ namespace Magento\MagentoCloud\Test\Unit;
 use Composer\Composer;
 use Composer\Package\PackageInterface;
 use Magento\MagentoCloud\Application;
-use Magento\MagentoCloud\Command\ApplyPatches;
-use Magento\MagentoCloud\Command\BackupList;
-use Magento\MagentoCloud\Command\Build;
-use Magento\MagentoCloud\Command\ConfigDump;
-use Magento\MagentoCloud\Command\CronUnlock;
-use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Command\Dev\UpdateComposer;
-use Magento\MagentoCloud\Command\Prestart;
-use Magento\MagentoCloud\Command\DbDump;
-use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Command\BackupRestore;
-use Magento\MagentoCloud\Command\UnapplyPatches;
-use Magento\MagentoCloud\Command\ShowAppliedPatches;
+use Magento\MagentoCloud\Command;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -36,17 +24,17 @@ class ApplicationTest extends TestCase
     private $application;
 
     /**
-     * @var ContainerInterface|Mock
+     * @var ContainerInterface|MockObject
      */
     private $containerMock;
 
     /**
-     * @var Composer|Mock
+     * @var Composer|MockObject
      */
     private $composerMock;
 
     /**
-     * @var PackageInterface|Mock
+     * @var PackageInterface|MockObject
      */
     private $packageMock;
 
@@ -61,6 +49,30 @@ class ApplicationTest extends TestCase
     private $applicationName = 'Magento Cloud Tools';
 
     /**
+     * Classes passed to application.
+     *
+     * @var array
+     */
+    private $classMap = [
+        Command\Build::NAME => Command\Build::class,
+        Command\ConfigDump::NAME => Command\ConfigDump::class,
+        Command\CronUnlock::NAME => Command\CronUnlock::class,
+        Command\DbDump::NAME => Command\DbDump::class,
+        Command\Deploy::NAME => Command\Deploy::class,
+        Command\Prestart::NAME => Command\Prestart::class,
+        Command\PostDeploy::NAME => Command\PostDeploy::class,
+        Command\BackupRestore::NAME => Command\BackupRestore::class,
+        Command\BackupList::NAME => Command\BackupList::class,
+        Command\ApplyPatches::NAME => Command\ApplyPatches::class,
+        Command\UnapplyPatches::NAME => Command\UnapplyPatches::class,
+        Command\ShowAppliedPatches::NAME => Command\ShowAppliedPatches::class,
+        Command\Dev\UpdateComposer::NAME => Command\Dev\UpdateComposer::class,
+        Command\Wizard\ScdOnBuild::NAME => Command\Wizard\ScdOnBuild::class,
+        Command\Wizard\ScdOnDeploy::NAME => Command\Wizard\ScdOnDeploy::class,
+        Command\Wizard\ScdOnDemand::NAME => Command\Wizard\ScdOnDemand::class,
+    ];
+
+    /**
      * @inheritdoc
      */
     public function setUp()
@@ -69,55 +81,28 @@ class ApplicationTest extends TestCase
         $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
 
-        /**
-         * Command mocks.
-         */
-        $buildCommandMock = $this->createMock(Build::class);
-        $configDumpCommandMock = $this->createMock(ConfigDump::class);
-        $cronUnlockCommandMock = $this->createMock(CronUnlock::class);
-        $dbDumpCommandMock = $this->createMock(DbDump::class);
-        $deployCommandMock = $this->createMock(Deploy::class);
-        $prestartCommandMock = $this->createMock(Prestart::class);
-        $postDeployCommandMock = $this->createMock(PostDeploy::class);
-        $backupRestoreCommandMock = $this->createMock(BackupRestore::class);
-        $backupListCommandMock = $this->createMock(BackupList::class);
-        $applyPatchesCommandMock = $this->createMock(ApplyPatches::class);
-        $unapplyPatchesCommandMock = $this->createMock(UnapplyPatches::class);
-        $showAppliedPatchesCommandMock = $this->createMock(ShowAppliedPatches::class);
-        $updateComposerCommandMock = $this->createMock(UpdateComposer::class);
+        $map = [
+            [Composer::class, $this->composerMock],
+        ];
 
-        $this->mockCommand($buildCommandMock, Build::NAME);
-        $this->mockCommand($configDumpCommandMock, ConfigDump::NAME);
-        $this->mockCommand($cronUnlockCommandMock, CronUnlock::NAME);
-        $this->mockCommand($dbDumpCommandMock, DbDump::NAME);
-        $this->mockCommand($deployCommandMock, Deploy::NAME);
-        $this->mockCommand($postDeployCommandMock, PostDeploy::NAME);
-        $this->mockCommand($prestartCommandMock, Prestart::NAME);
-        $this->mockCommand($backupRestoreCommandMock, BackupRestore::class);
-        $this->mockCommand($backupListCommandMock, BackupList::class);
-        $this->mockCommand($applyPatchesCommandMock, ApplyPatches::class);
-        $this->mockCommand($unapplyPatchesCommandMock, ApplyPatches::class);
-        $this->mockCommand($showAppliedPatchesCommandMock, ApplyPatches::class);
-        $this->mockCommand($updateComposerCommandMock, UpdateComposer::class);
+        foreach ($this->classMap as $name => $className) {
+            $mock = $this->createMock($className);
+            $mock->method('getName')
+                ->willReturn($name);
+            $mock->method('isEnabled')
+                ->willReturn(true);
+            $mock->method('getDefinition')
+                ->willReturn([]);
+            $mock->method('getAliases')
+                ->willReturn([]);
+
+            $map[] = [$className, $mock];
+        }
 
         $this->containerMock->method('get')
-            ->willReturnMap([
-                [Composer::class, $this->composerMock],
-                [Build::class, $buildCommandMock],
-                [Deploy::class, $deployCommandMock],
-                [ConfigDump::class, $configDumpCommandMock],
-                [PostDeploy::class, $postDeployCommandMock],
-                [Prestart::class, $prestartCommandMock],
-                [DbDump::class, $dbDumpCommandMock],
-                [CronUnlock::class, $cronUnlockCommandMock],
-                [BackupRestore::class, $backupRestoreCommandMock],
-                [BackupList::class, $backupListCommandMock],
-                [ApplyPatches::class, $applyPatchesCommandMock],
-                [UnapplyPatches::class, $unapplyPatchesCommandMock],
-                [ShowAppliedPatches::class, $showAppliedPatchesCommandMock],
-                [UpdateComposer::class, $updateComposerCommandMock],
-            ]);
-        $this->composerMock->method('getPackage')
+            ->willReturnMap($map);
+        $this->composerMock->expects($this->any())
+            ->method('getPackage')
             ->willReturn($this->packageMock);
         $this->packageMock->expects($this->once())
             ->method('getPrettyName')
@@ -131,30 +116,13 @@ class ApplicationTest extends TestCase
         );
     }
 
-    /**
-     * @param \PHPUnit_Framework_MockObject_MockObject $command
-     * @param string $name
-     */
-    private function mockCommand(\PHPUnit_Framework_MockObject_MockObject $command, string $name)
-    {
-        $command->method('getName')
-            ->willReturn($name);
-        $command->method('isEnabled')
-            ->willReturn(true);
-        $command->method('getDefinition')
-            ->willReturn([]);
-        $command->method('getAliases')
-            ->willReturn([]);
-    }
-
     public function testHasCommand()
     {
-        $this->assertTrue($this->application->has(Build::NAME));
-        $this->assertTrue($this->application->has(Deploy::NAME));
-        $this->assertTrue($this->application->has(DbDump::NAME));
-        $this->assertTrue($this->application->has(ConfigDump::NAME));
-        $this->assertTrue($this->application->has(Prestart::NAME));
-        $this->assertTrue($this->application->has(PostDeploy::NAME));
+        foreach (array_keys($this->classMap) as $name) {
+            $this->assertTrue(
+                $this->application->has($name)
+            );
+        }
     }
 
     public function testGetName()
@@ -175,9 +143,6 @@ class ApplicationTest extends TestCase
 
     public function testGetContainer()
     {
-        $this->assertInstanceOf(
-            ContainerInterface::class,
-            $this->application->getContainer()
-        );
+        $this->application->getContainer();
     }
 }
