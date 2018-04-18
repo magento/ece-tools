@@ -32,19 +32,9 @@ class RepositoryFactory
      *
      * @param array $items The config array
      * @return Repository
-     * @throws \RuntimeException If object cannot be created via container
      */
     public function create(array $items = []): Repository
     {
-        if (!$this->container instanceof Container) {
-            /**
-             * Limitation of https://github.com/php-fig/container
-             * does not allow to create objects with params, so
-             * custom implementation is used.
-             */
-            throw new \RuntimeException('New object can not be created via container.');
-        }
-
         return $this->container->create(\Illuminate\Config\Repository::class, ['items' => $items]);
     }
 }

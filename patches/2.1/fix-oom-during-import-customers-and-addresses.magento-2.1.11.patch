@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/module-customer-import-export/Model/Import/Address.php b/vendor/magento/module-customer-import-export/Model/Import/Address.php
+diff -Naur a/vendor/magento/module-customer-import-export/Model/Import/Address.php b/vendor/magento/module-customer-import-export/Model/Import/Address.php
 index 3f745267fd2..13e659e4e62 100644
 --- a/vendor/magento/module-customer-import-export/Model/Import/Address.php
 +++ b/vendor/magento/module-customer-import-export/Model/Import/Address.php
@@ -73,7 +73,7 @@ index 3f745267fd2..13e659e4e62 100644
       * Initialize country regions hash for clever recognition
       *
       * @return $this
-diff --git a/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php b/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php
+diff -Naur a/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php b/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php
 index 4e6687bff28..359822df6d9 100644
 --- a/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php
 +++ b/vendor/magento/module-customer-import-export/Model/ResourceModel/Import/Customer/Storage.php

@@ -1,4 +1,5 @@
 Patch regarding MAGETWO-56675.
+diff -Nuar a/vendor/magento/framework/Interception/PluginList/PluginList.php b/vendor/magento/framework/Interception/PluginList/PluginList.php
 --- a/vendor/magento/framework/Interception/PluginList/PluginList.php
 +++ b/vendor/magento/framework/Interception/PluginList/PluginList.php
 @@ -277,6 +277,7 @@ class PluginList extends Scoped implements InterceptionPluginList

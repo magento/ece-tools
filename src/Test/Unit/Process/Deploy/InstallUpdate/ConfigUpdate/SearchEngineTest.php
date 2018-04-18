@@ -125,7 +125,7 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param bool newVersion
+     * @param bool $newVersion
      * @param string $version
      * @param array $relationships
      * @param array $expected
@@ -220,11 +220,15 @@ class SearchEngineTest extends TestCase
                 'relationships' => [
                     'host' => 'localhost',
                     'port' => 1234,
+                    'query' => [
+                        'index' => 'stg',
+                    ],
                 ],
                 'expected' => [
                     'engine' => 'elasticsearch',
                     'elasticsearch_server_hostname' => 'localhost',
                     'elasticsearch_server_port' => 1234,
+                    'elasticsearch_index_prefix' => 'stg',
                 ],
             ],
             [
@@ -233,11 +237,15 @@ class SearchEngineTest extends TestCase
                 'relationships' => [
                     'host' => 'localhost',
                     'port' => 1234,
+                    'query' => [
+                        'index' => 'stg',
+                    ],
                 ],
                 'expected' => [
                     'engine' => 'elasticsearch5',
                     'elasticsearch5_server_hostname' => 'localhost',
                     'elasticsearch5_server_port' => 1234,
+                    'elasticsearch5_index_prefix' => 'stg',
                 ],
             ],
             [
@@ -328,7 +336,7 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param bool newVersion
+     * @param bool $newVersion
      * @dataProvider magentoVersionTestDataProvider
      */
     public function testExecuteWithElasticSolr(bool $newVersion)
@@ -343,7 +351,8 @@ class SearchEngineTest extends TestCase
 
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn($newVersion);
-
+        $this->magentoVersionMock->method('satisfies')
+            ->willReturn(true);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -382,7 +391,7 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param bool newVersion
+     * @param bool $newVersion
      * @dataProvider magentoVersionTestDataProvider
      */
     public function testExecuteEnvironmentConfiguration(bool $newVersion)
@@ -406,6 +415,7 @@ class SearchEngineTest extends TestCase
             ]);
         $this->environmentMock->expects($this->never())
             ->method('getRelationships');
+
         if ($newVersion) {
             $this->envWriterMock->expects($this->once())
                 ->method('update')
