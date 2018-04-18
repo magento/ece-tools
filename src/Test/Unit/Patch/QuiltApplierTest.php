@@ -201,9 +201,9 @@ class QuiltApplierTest extends TestCase
             ->willReturn(false);
         $this->shellMock->expects($this->exactly(1))
             ->method('execute')
-            ->withConsecutive(
-                ['QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ;'
-                    . ' if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi']
+            ->with(
+                'QUILT_PATCHES=\'root\' quilt push -a ; EXIT_CODE=$? ;'
+                    . ' if { [ 0 -eq "$EXIT_CODE" ] || [ 2 -eq "$EXIT_CODE" ]; }; then true; else false ; fi'
             )
             ->willReturnCallback(function () {
                 throw new \RuntimeException('Applying the patch has failed for some reason');
@@ -222,5 +222,16 @@ class QuiltApplierTest extends TestCase
             );
 
         $this->applier->applyPatches([['path' => $path, 'name' => $name]]);
+    }
+
+    public function testshowAppliedPatches()
+    {
+        $this->directoryListMock->expects($this->any())
+            ->method('getPatches')
+            ->willReturn('root');
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('QUILT_PATCHES=\'root\' quilt applied');
+        $this->applier->showAppliedPatches();
     }
 }

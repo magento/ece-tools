@@ -138,7 +138,8 @@ class ManagerTest extends TestCase
                     ],
                 ]
             ));
-        $this->applierMock->expects($this->once())->method('applyPatches')
+        $this->applierMock->expects($this->once())
+            ->method('applyPatches')
             ->with([
                 ['path' => 'patchPath1', 'name' => 'patchName1'],
                 ['path' => 'patchPath2', 'name' => 'patchName2'],
@@ -163,7 +164,8 @@ class ManagerTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('isDirectory')
             ->willReturn(true);
-        $this->applierMock->expects($this->once())->method('applyPatches')
+        $this->applierMock->expects($this->once())
+            ->method('applyPatches')
             ->with([
                 ['path' => __DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch1.patch'],
                 ['path' => __DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch2.patch'],
@@ -178,5 +180,19 @@ class ManagerTest extends TestCase
             ->willReturnArgument(0);
 
         $this->manager->applyAll();
+    }
+
+    public function testUnapplyAll()
+    {
+        $this->applierMock->expects($this->once())
+            ->method('unapplyAllPatches');
+        $this->manager->unapplyAll();
+    }
+
+    public function testShowApplied()
+    {
+        $this->applierMock->expects($this->once())
+            ->method('showAppliedPatches');
+        $this->manager->showApplied();
     }
 }

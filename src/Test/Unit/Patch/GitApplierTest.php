@@ -245,4 +245,28 @@ class GitApplierTest extends TestCase
         // Not a reverse, better throw an exception.
         throw new \RuntimeException('Applying the patch has failed for some reason');
     }
+
+    public function testUnapplyAllPatchesDoesNothing()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Git applier does not support unapplying patches.  If you need this feature, install quilt.');
+        $this->loggerMock->expects($this->never())
+            ->method('notice');
+        $this->shellMock->expects($this->never())
+            ->method('execute');
+        $this->applier->unapplyAllPatches();
+    }
+
+    public function testShowAppliedPatchesDoesNothing()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Git applier does not support showing applied patches.  If you need this feature, install quilt.');
+        $this->loggerMock->expects($this->never())
+            ->method('notice');
+        $this->shellMock->expects($this->never())
+            ->method('execute');
+        $this->applier->showAppliedPatches();
+    }
 }

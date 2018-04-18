@@ -122,6 +122,6 @@ class QuiltApplier implements ApplierInterface
      */
     public function showAppliedPatches()
     {
-        $this->shell->execute('QUILT_PATCHES=' . $this->directoryList->getPatches() . ' quilt applied ;');
+        $this->shell->execute('QUILT_PATCHES=' . escapeshellarg($this->directoryList->getPatches()) . ' quilt applied');
     }
 }
