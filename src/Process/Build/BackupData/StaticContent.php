@@ -78,11 +78,18 @@ class StaticContent implements ProcessInterface
             $this->file->createDirectory($initPubStatic);
         }
 
-        $this->logger->info('Moving static content to init directory');
         try {
+            $this->logger->info('Moving static content to init directory');
             $this->file->rename($originalPubStatic, $initPubStatic);
         } catch (FileSystemException $e) {
+            $this->logger->notice('Can\'t move static content');
+            $this->logger->info('Copying static content to init directory');
             $this->file->copyDirectory($originalPubStatic, $initPubStatic);
+        } finally {
+            if (!$this->file->isExists($originalPubStatic)) {
+                $this->logger->info('Recreating pub/static directory');
+                $this->file->createDirectory($originalPubStatic);
+            }
         }
     }
 }
