@@ -54,9 +54,9 @@ class StageConfig implements ValidatorInterface
         $config = $this->environmentReader->read()[StageConfigInterface::SECTION_STAGE] ?? [];
         $errors = [];
 
-        foreach ($config as $stageConfig) {
+        foreach ($config as $stage => $stageConfig) {
             foreach ($stageConfig as $key => $value) {
-                if ($error = $this->schemaValidator->validate($key, $value)) {
+                if ($error = $this->schemaValidator->validate($key, $stage, $value)) {
                     $errors[] = $error;
                 }
             }
