@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Test\Integration\Scd;
 
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Test\Integration\AbstractTest;
 use Magento\MagentoCloud\Test\Integration\Bootstrap;
@@ -34,6 +36,16 @@ class MatrixTest extends AbstractTest
     private $urlManager;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @var SystemList
+     */
+    private $systemList;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -43,6 +55,8 @@ class MatrixTest extends AbstractTest
         $this->application = Bootstrap::getInstance()->createApplication();
         $this->urlManager = $this->application->getContainer()->get(UrlManager::class);
         $this->clientFactory = $this->application->getContainer()->get(ClientFactory::class);
+        $this->file = $this->application->getContainer()->get(File::class);
+        $this->systemList = $this->application->getContainer()->get(SystemList::class);
     }
 
     /**
@@ -59,11 +73,13 @@ class MatrixTest extends AbstractTest
         $this->assertSame(0, $commandTester->getStatusCode());
     }
 
-    /**
-     * @param array $environment
-     */
     public function testScdOnDeploy()
     {
+        $this->file->copy(
+            __DIR__ . '/_files/env_matrix_1.yaml',
+            $this->systemList->getMagentoRoot() . '/.magento.env.yaml'
+        );
+
         $this->executeAndAssert(Command\Build::NAME);
         $this->executeAndAssert(Command\Deploy::NAME);
         $this->executeAndAssert(Command\Prestart::NAME);
@@ -80,12 +96,12 @@ class MatrixTest extends AbstractTest
         $this->assertSame(200, $response->getStatusCode());
         $this->assertContains(
             'Home Page',
-            $response->getBody()->getContents(),
+            (string)$response->getBody(),
             'Check "Home Page" phrase presence'
         );
         $this->assertContains(
             'CMS homepage content goes here.',
-            $response->getBody()->getContents(),
+            (string)$response->getBody(),
             'Check "CMS homepage content goes here." phrase presence'
         );
     }
