@@ -84,7 +84,7 @@ class StaticContent implements ProcessInterface
             $this->file->rename($originalPubStatic, $initPubStatic);
 
             /**
-             * Workaround to force deploy phase mount the directory.
+             * Workaround to have source for mount the directory.
              */
             $this->logger->info('Recreating pub/static directory');
             $this->file->createDirectory($originalPubStatic);
