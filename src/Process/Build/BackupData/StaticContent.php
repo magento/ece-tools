@@ -64,6 +64,7 @@ class StaticContent implements ProcessInterface
 
         if (!$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             $this->logger->info('SCD not performed during build');
+
             return;
         }
 
@@ -78,10 +79,19 @@ class StaticContent implements ProcessInterface
             $this->file->createDirectory($initPubStatic);
         }
 
-        $this->logger->info('Moving static content to init directory');
         try {
+            $this->logger->info('Moving static content to init directory');
             $this->file->rename($originalPubStatic, $initPubStatic);
+
+            /**
+             * Workaround to force deploy phase mount the directory.
+             */
+            $this->logger->info('Recreating pub/static directory');
+            $this->file->createDirectory($originalPubStatic);
         } catch (FileSystemException $e) {
+            $this->logger->notice(
+                'Can\'t move static content. Copying static content to init directory'
+            );
             $this->file->copyDirectory($originalPubStatic, $initPubStatic);
         }
     }
