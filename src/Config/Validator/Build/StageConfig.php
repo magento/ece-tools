@@ -65,7 +65,7 @@ class StageConfig implements ValidatorInterface
         if ($errors) {
             return $this->resultFactory->create(Validator\Result\Error::ERROR, [
                 'error' => 'Environment configuration is not valid',
-                'suggestion' => implode(PHP_EOL, $errors),
+                'suggestion' => PHP_EOL . "\t" .implode(PHP_EOL . "\t", $errors) . PHP_EOL,
             ]);
         }
 
