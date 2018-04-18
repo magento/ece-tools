@@ -15,6 +15,7 @@ abstract class AbstractTest extends TestCase
 {
     /**
      * @var Bootstrap
+     * @deprecated
      */
     protected $bootstrap;
 
@@ -25,7 +26,7 @@ abstract class AbstractTest extends TestCase
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::create()->run();
+        Bootstrap::getInstance()->run();
     }
 
     /**
@@ -33,7 +34,7 @@ abstract class AbstractTest extends TestCase
      */
     public static function tearDownAfterClass()
     {
-        Bootstrap::create()->destroy();
+        Bootstrap::getInstance()->destroy();
     }
 
     /**
@@ -41,10 +42,11 @@ abstract class AbstractTest extends TestCase
      */
     protected function setUp()
     {
-        $this->bootstrap = Bootstrap::create();
-        $this->bootstrap->execute(sprintf(
+        $this->bootstrap = Bootstrap::getInstance();
+
+        Bootstrap::getInstance()->execute(sprintf(
             'cd %s && composer install -n --no-dev --no-progress',
-            $this->bootstrap->getSandboxDir()
+            Bootstrap::getInstance()->getSandboxDir()
         ));
     }
 
@@ -53,16 +55,16 @@ abstract class AbstractTest extends TestCase
      */
     protected function tearDown()
     {
-        $this->bootstrap->execute(sprintf(
+        Bootstrap::getInstance()->execute(sprintf(
             'cd %s && php bin/magento setup:uninstall -n',
-            $this->bootstrap->getSandboxDir()
+            Bootstrap::getInstance()->getSandboxDir()
         ));
-        $this->bootstrap->createApplication([])->getContainer()
+        Bootstrap::getInstance()->createApplication([])->getContainer()
             ->get(ConnectionInterface::class)
             ->close();
-        $this->bootstrap->execute(sprintf(
+        Bootstrap::getInstance()->execute(sprintf(
             'cd %s && rm -rf vendor/*',
-            $this->bootstrap->getSandboxDir()
+            Bootstrap::getInstance()->getSandboxDir()
         ));
     }
 }

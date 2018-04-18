@@ -48,7 +48,7 @@ class CronTest extends AbstractTest
      */
     protected function setUp()
     {
-        $this->bootstrap = Bootstrap::create();
+        $this->bootstrap = Bootstrap::getInstance();
     }
 
     /**

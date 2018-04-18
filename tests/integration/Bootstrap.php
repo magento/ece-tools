@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Container;
-use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
@@ -44,7 +43,7 @@ class Bootstrap
     /**
      * @return Bootstrap
      */
-    public static function create(): Bootstrap
+    public static function getInstance(): Bootstrap
     {
         if (null === static::$instance) {
             static::$instance = new self();
@@ -93,9 +92,8 @@ class Bootstrap
     /**
      * @param array $environment
      * @return Application
-     * @throws \Exception
      */
-    public function createApplication(array $environment): Application
+    public function createApplication(array $environment = []): Application
     {
         $environment = $this->getAllEnv($environment);
 
@@ -122,7 +120,6 @@ class Bootstrap
     /**
      * @param array $environment
      * @return Repository
-     * @throws \Exception
      */
     private function getAllEnv(array $environment): Repository
     {
@@ -137,6 +134,8 @@ class Bootstrap
      * @param array $environment
      * @return array
      * @throws \Exception
+     * @deprecated
+     * @see \Magento\MagentoCloud\Util\UrlManager
      */
     public function getEnv(string $value, array $environment): array
     {
@@ -164,7 +163,6 @@ class Bootstrap
     /**
      * @param string $file
      * @return string
-     * @throws \Exception
      */
     public function getConfigFile(string $file): string
     {
@@ -174,14 +172,7 @@ class Bootstrap
             return $configFile;
         }
 
-        if ($this->file->isExists($configFile . '.dist')) {
-            return $configFile . '.dist';
-        }
-
-        throw new \Exception(sprintf(
-            'Config file %s can not be found',
-            $file
-        ));
+        return $configFile . '.dist';
     }
 
     /**

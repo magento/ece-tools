@@ -45,7 +45,8 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Magento\\MagentoCloud\\Test\\": "tests/static/"
+      "Magento\\MagentoCloud\\Test\\": "tests/static/",
+      "Magento\\MagentoCloud\\Test\\Integration\\": "tests/integration/"
     }
   },
   "scripts": {
