@@ -62,7 +62,7 @@ class ApplierTest extends AbstractTest
 
     public function testApplyingPatch()
     {
-        $this->applier->applyPatches([['name' => $this->patchFile]]);
+        $this->applier->applyPatches([['path' => $this->patchFile]]);
         $content = $this->getTargetFileContents();
         $this->assertContains('# Hello Magento', $content);
         $this->assertContains('## Additional Info', $content);
@@ -76,7 +76,7 @@ class ApplierTest extends AbstractTest
             $this->patchFile
         ));
 
-        $this->applier->applyPatches([['name' => $this->patchFile]]);
+        $this->applier->applyPatches([['path' => $this->patchFile]]);
 
         $content = $this->getTargetFileContents();
         $this->assertContains('# Hello Magento', $content);
