@@ -195,7 +195,7 @@ class DeployTest extends TestCase
                 Deploy::VAR_SCD_STRATEGY,
                 [],
                 [],
-                '',
+                ''
             ],
             'exclude themes deprecated' => [
                 Deploy::VAR_SCD_EXCLUDE_THEMES,
@@ -224,7 +224,7 @@ class DeployTest extends TestCase
                 Deploy::VAR_REDIS_USE_SLAVE_CONNECTION,
                 [],
                 [
-                    Deploy::VAR_REDIS_USE_SLAVE_CONNECTION => true,
+                    Deploy::VAR_REDIS_USE_SLAVE_CONNECTION => true
                 ],
                 true,
             ],
@@ -238,33 +238,9 @@ class DeployTest extends TestCase
                 Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 [],
                 [
-                    Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION => true,
+                    Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION => true
                 ],
                 true,
-            ],
-            'SCD compression as string' => [
-                Deploy::VAR_SCD_COMPRESSION_LEVEL,
-                [],
-                [
-                    Deploy::VAR_SCD_COMPRESSION_LEVEL => '4',
-                ],
-                4,
-            ],
-            'SCD compression as invalid string' => [
-                Deploy::VAR_SCD_COMPRESSION_LEVEL,
-                [],
-                [
-                    Deploy::VAR_SCD_COMPRESSION_LEVEL => 'test',
-                ],
-                0,
-            ],
-            'SCD compression as integer' => [
-                Deploy::VAR_SCD_COMPRESSION_LEVEL,
-                [],
-                [
-                    Deploy::VAR_SCD_COMPRESSION_LEVEL => 3,
-                ],
-                3,
             ],
         ];
     }

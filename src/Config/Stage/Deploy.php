@@ -102,7 +102,6 @@ class Deploy implements DeployInterface
      *
      * @return array
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     private function getEnvironmentConfig(): array
     {
@@ -139,10 +138,6 @@ class Deploy implements DeployInterface
 
         if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
             $variables[self::VAR_SCD_EXCLUDE_THEMES] = $variables['STATIC_CONTENT_EXCLUDE_THEMES'];
-        }
-
-        if (isset($variables[self::VAR_SCD_COMPRESSION_LEVEL])) {
-            $variables[self::VAR_SCD_COMPRESSION_LEVEL] = (int)$variables[self::VAR_SCD_COMPRESSION_LEVEL];
         }
 
         return $variables;
