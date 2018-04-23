@@ -24,9 +24,6 @@ class SchemaValidator
             self::SCHEMA_TYPE => ['string'],
             self::SCHEMA_VALUE => ['', '-v', '-vv', '-vvv', Environment::VAL_ENABLED],
         ],
-        StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL => [
-            self::SCHEMA_TYPE => ['integer'],
-        ],
     ];
 
     /**
