@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Shared;
 
 use Magento\MagentoCloud\Config\Shared\Reader;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -17,38 +17,35 @@ use PHPUnit\Framework\TestCase;
 class ReaderTest extends TestCase
 {
     /**
-     * @var Reader
-     */
-    private $reader;
-
-    /**
      * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var SharedConfig|MockObject
+     * @var FileList|MockObject
      */
-    private $resolverMock;
+    private $fileListMock;
 
     /**
-     * @inheritdoc
+     * @var Reader
      */
+    private $reader;
+
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->resolverMock = $this->createMock(SharedConfig::class);
+        $this->fileListMock = $this->createMock(FileList::class);
 
         $this->reader = new Reader(
             $this->fileMock,
-            $this->resolverMock
+            $this->fileListMock
         );
     }
 
     public function testRead()
     {
-        $this->resolverMock->expects($this->once())
-            ->method('resolve')
+        $this->fileListMock->expects($this->once())
+            ->method('getConfig')
             ->willReturn(__DIR__ . '/_file/app/etc/config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
@@ -68,8 +65,8 @@ class ReaderTest extends TestCase
 
     public function testReadFileNotExists()
     {
-        $this->resolverMock->expects($this->once())
-            ->method('resolve')
+        $this->fileListMock->expects($this->once())
+            ->method('getConfig')
             ->willReturn('/path/to/file');
         $this->fileMock->expects($this->once())
             ->method('isExists')

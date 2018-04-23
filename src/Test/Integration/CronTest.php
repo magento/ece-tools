@@ -126,12 +126,11 @@ class CronTest extends AbstractTest
     /**
      * @return array
      */
-    public function cronDataProvider()
+    public function cronDataProvider(): array
     {
         return [
             ['version' => '2.2.0'],
             ['version' => '2.2.2'],
-            ['version' => '2.2.*'],
             ['version' => '@stable'],
         ];
     }

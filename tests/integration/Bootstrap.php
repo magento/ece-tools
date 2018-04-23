@@ -164,7 +164,7 @@ class Bootstrap
      * @param string $file
      * @return string
      */
-    public function getConfigFile(string $file): string
+    private function getConfigFile(string $file): string
     {
         $configFile = ECE_BP . '/tests/integration/etc/' . $file;
 

@@ -25,8 +25,6 @@ class ConfigFileList
 
     /**
      * @return string
-     * @deprecated
-     * @see \Magento\MagentoCloud\Filesystem\Resolver\SharedConfig
      */
     public function getConfig(): string
     {
@@ -35,8 +33,6 @@ class ConfigFileList
 
     /**
      * @return string
-     * @deprecated
-     * @see \Magento\MagentoCloud\Filesystem\Resolver\SharedConfig
      */
     public function getConfigLocal(): string
     {

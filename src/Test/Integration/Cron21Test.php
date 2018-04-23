@@ -22,7 +22,7 @@ class Cron21Test extends CronTest
     /**
      * @return array
      */
-    public function cronDataProvider()
+    public function cronDataProvider(): array
     {
         return [
             ['version' => '2.1.4'],

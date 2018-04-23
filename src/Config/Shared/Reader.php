@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Config\Shared;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 
 /**
  * @inheritdoc
@@ -21,18 +20,18 @@ class Reader implements ReaderInterface
     private $file;
 
     /**
-     * @var SharedConfig
+     * @var FileList
      */
-    private $resolver;
+    private $fileList;
 
     /**
      * @param File $file
-     * @param SharedConfig $resolver
+     * @param FileList $fileList
      */
-    public function __construct(File $file, SharedConfig $resolver)
+    public function __construct(File $file, FileList $fileList)
     {
         $this->file = $file;
-        $this->resolver = $resolver;
+        $this->fileList = $fileList;
     }
 
     /**
@@ -40,7 +39,7 @@ class Reader implements ReaderInterface
      */
     public function read(): array
     {
-        $configPath = $this->resolver->resolve();
+        $configPath = $this->fileList->getConfig();
 
         if (!$this->file->isExists($configPath)) {
             return [];
