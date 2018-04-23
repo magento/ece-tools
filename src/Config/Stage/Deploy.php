@@ -140,6 +140,10 @@ class Deploy implements DeployInterface
             $variables[self::VAR_SCD_EXCLUDE_THEMES] = $variables['STATIC_CONTENT_EXCLUDE_THEMES'];
         }
 
+        if (isset($variables[self::VAR_SCD_COMPRESSION_LEVEL])) {
+            $variables[self::VAR_SCD_COMPRESSION_LEVEL] = (int)$variables[self::VAR_SCD_COMPRESSION_LEVEL];
+        }
+
         return $variables;
     }
 
