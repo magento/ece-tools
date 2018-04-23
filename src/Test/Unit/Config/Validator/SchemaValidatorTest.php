@@ -63,11 +63,8 @@ class SchemaValidatorTest extends TestCase
             ],
             [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, 0, null],
             [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, 10, null],
-            [
-                StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
-                '1',
-                'Item SCD_COMPRESSION_LEVEL has unexpected type string. Please use one of next types: integer',
-            ],
+            [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, '3', null],
+            [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, '10', null],
         ];
     }
 }
