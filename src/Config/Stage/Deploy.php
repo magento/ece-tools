@@ -102,6 +102,7 @@ class Deploy implements DeployInterface
      *
      * @return array
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     private function getEnvironmentConfig(): array
     {
