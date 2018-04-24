@@ -132,8 +132,8 @@ class Deploy implements DeployInterface
             $variables[self::VAR_SKIP_SCD] = true;
         }
 
-        if (isset($variables['STATIC_CONTENT_THREADS'])) {
-            $variables[self::VAR_SCD_THREADS] = (int)$variables['STATIC_CONTENT_THREADS'];
+        if ($scdThreads = $this->getEnvScdThreads()) {
+            $variables[self::VAR_SCD_THREADS] = $scdThreads;
         }
 
         if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
@@ -141,6 +141,27 @@ class Deploy implements DeployInterface
         }
 
         return $variables;
+    }
+
+    /**
+     * Retrieves SCD threads configuration from MAGENTO_CLOUD_VARIABLES or from raw environment data.
+     *
+     * Raw $_ENV['STATIC_CONTENT_THREADS'] is deprecated.
+     *
+     * @return int
+     */
+    private function getEnvScdThreads(): int
+    {
+        $variables = $this->environmentConfig->getVariables();
+        $staticDeployThreads = 0;
+
+        if (isset($variables['STATIC_CONTENT_THREADS'])) {
+            $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
+        } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
+            $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
+        }
+
+        return $staticDeployThreads;
     }
 
     /**

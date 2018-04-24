@@ -274,6 +274,7 @@ class DeployTest extends TestCase
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDeprecatedScdThreadsDataProvider(): array
     {
@@ -287,7 +288,18 @@ class DeployTest extends TestCase
                 [],
                 4,
             ],
-            'threads raw' => [
+            'threads ENV raw' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 5,
+                ],
+                5,
+            ],
+            'threads ENV raw and magento cloud variable' => [
                 Deploy::VAR_SCD_THREADS,
                 [],
                 [
@@ -315,6 +327,39 @@ class DeployTest extends TestCase
                     'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
                 ],
                 3,
+            ],
+            'threads mode enterprise and ENV raw' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 5,
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                5,
+            ],
+            'threads mode enterprise and ENV raw and magento cloud variable' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 4
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 5,
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                4,
+            ],
+            'threads mode enterprise and magento cloud variable' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 5,
+                ],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                5,
             ],
             'mode enterprise with global and deploy scd_threads in .magento.env.yaml' => [
                 Deploy::VAR_SCD_THREADS,
@@ -345,7 +390,25 @@ class DeployTest extends TestCase
                 ],
                 5,
             ],
-            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml and env variable' => [
+            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml and ENV variable' => [
+                Deploy::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SCD_THREADS => 5
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        StageConfigInterface::VAR_SCD_THREADS => 4
+                    ],
+                ],
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 7,
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                7,
+            ],
+            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml ' .
+            'and magento cloud variable and ENV variable' => [
                 Deploy::VAR_SCD_THREADS,
                 [
                     StageConfigInterface::STAGE_GLOBAL => [
@@ -359,6 +422,7 @@ class DeployTest extends TestCase
                     'STATIC_CONTENT_THREADS' => 6,
                 ],
                 [
+                    'STATIC_CONTENT_THREADS' => 7,
                     'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
                 ],
                 6,
