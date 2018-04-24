@@ -145,6 +145,7 @@ class Deploy implements DeployInterface
 
     /**
      * Retrieves SCD threads configuration from MAGENTO_CLOUD_VARIABLES or from raw environment data.
+     * STATIC_CONTENT_THREADS from MAGENTO_CLOUD_VARIABLES has higher priority then $_ENV['STATIC_CONTENT_THREADS']
      *
      * Raw $_ENV['STATIC_CONTENT_THREADS'] is deprecated.
      *
