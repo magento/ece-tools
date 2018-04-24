@@ -132,8 +132,8 @@ class Deploy implements DeployInterface
             $variables[self::VAR_SKIP_SCD] = true;
         }
 
-        if ($scdThreads = $this->getScdThreads()) {
-            $variables[self::VAR_SCD_THREADS] = $scdThreads;
+        if (isset($variables['STATIC_CONTENT_THREADS'])) {
+            $variables[self::VAR_SCD_THREADS] = (int)$variables['STATIC_CONTENT_THREADS'];
         }
 
         if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
@@ -141,47 +141,6 @@ class Deploy implements DeployInterface
         }
 
         return $variables;
-    }
-
-    /**
-     * Retrieves deploy threads.
-     * By default it's 1, unless it is re-declared via environment variable.
-     *
-     * @return int
-     */
-    private function getScdThreads(): int
-    {
-        $variables = $this->environmentConfig->getVariables();
-        $staticDeployThreads = 0;
-
-        if (isset($variables['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
-        } elseif ($envScThreads = $this->getEnvScdThreads()) {
-            $staticDeployThreads = $envScThreads;
-        }
-
-        return $staticDeployThreads;
-    }
-
-    /**
-     * Retrieves SCD threads configuration from raw environment data.
-     *
-     * @return int
-     * @deprecated Environment variable STATIC_CONTENT_THREADS must be used instead
-     */
-    private function getEnvScdThreads(): int
-    {
-        $staticDeployThreads = 0;
-
-        if (isset($_ENV['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['MAGENTO_CLOUD_MODE'])
-            && $_ENV['MAGENTO_CLOUD_MODE'] === EnvironmentConfig::CLOUD_MODE_ENTERPRISE
-        ) {
-            $staticDeployThreads = 3;
-        }
-
-        return $staticDeployThreads;
     }
 
     /**
@@ -204,11 +163,28 @@ class Deploy implements DeployInterface
             self::VAR_STATIC_CONTENT_SYMLINK => true,
             self::VAR_UPDATE_URLS => true,
             self::VAR_SKIP_SCD => false,
-            self::VAR_SCD_THREADS => 1,
+            self::VAR_SCD_THREADS => $this->getDefaultScdThreads(),
             self::VAR_GENERATED_CODE_SYMLINK => true,
             self::VAR_SCD_EXCLUDE_THEMES => '',
             self::VAR_REDIS_USE_SLAVE_CONNECTION => false,
             self::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
         ];
+    }
+
+    /**
+     * Retrieves default scd threads value.
+     * 3 if production environment otherwise 1
+     *
+     * @return int
+     */
+    private function getDefaultScdThreads()
+    {
+        if (isset($_ENV['MAGENTO_CLOUD_MODE'])
+            && $_ENV['MAGENTO_CLOUD_MODE'] === EnvironmentConfig::CLOUD_MODE_ENTERPRISE
+        ) {
+            return 3;
+        }
+
+        return 1;
     }
 }

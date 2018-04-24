@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -314,6 +315,53 @@ class DeployTest extends TestCase
                     'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
                 ],
                 3,
+            ],
+            'mode enterprise with global and deploy scd_threads in .magento.env.yaml' => [
+                Deploy::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SCD_THREADS => 5
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        StageConfigInterface::VAR_SCD_THREADS => 4
+                    ],
+                ],
+                [],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                4,
+            ],
+            'threads mode enterprise with global scd_threads in .magento.env.yaml' => [
+                Deploy::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SCD_THREADS => 5
+                    ],
+                ],
+                [],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                5,
+            ],
+            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml and env variable' => [
+                Deploy::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SCD_THREADS => 5
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        StageConfigInterface::VAR_SCD_THREADS => 4
+                    ],
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 6,
+                ],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                6,
             ],
         ];
     }
