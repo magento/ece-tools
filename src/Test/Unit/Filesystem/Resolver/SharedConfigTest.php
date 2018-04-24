@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\Resolver;
 
+use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
-use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -22,9 +22,9 @@ class SharedConfigTest extends TestCase
     private $resolver;
 
     /**
-     * @var SystemList|MockObject
+     * @var ConfigFileList|MockObject
      */
-    private $systemListMock;
+    private $configFileListMock;
 
     /**
      * @var MagentoVersion|MockObject
@@ -36,20 +36,20 @@ class SharedConfigTest extends TestCase
      */
     protected function setUp()
     {
-        $this->systemListMock = $this->createMock(SystemList::class);
+        $this->configFileListMock = $this->createMock(ConfigFileList::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->resolver = new SharedConfig(
-            $this->systemListMock,
+            $this->configFileListMock,
             $this->magentoVersionMock
         );
     }
 
     public function testResolve()
     {
-        $this->systemListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+        $this->configFileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn('magento_root/app/etc/config.php');
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->with('2.2')
@@ -60,9 +60,9 @@ class SharedConfigTest extends TestCase
 
     public function testResolve21()
     {
-        $this->systemListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn('magento_root');
+        $this->configFileListMock->expects($this->once())
+            ->method('getConfigLocal')
+            ->willReturn('magento_root/app/etc/config.local.php');
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->with('2.2')

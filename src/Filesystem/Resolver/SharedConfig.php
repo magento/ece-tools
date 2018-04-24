@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Filesystem\Resolver;
 
-use Magento\MagentoCloud\Filesystem\SystemList;
+use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
@@ -14,9 +14,9 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 class SharedConfig implements ConfigResolverInterface
 {
     /**
-     * @var SystemList
+     * @var ConfigFileList
      */
-    private $systemList;
+    private $configFileList;
 
     /**
      * @var MagentoVersion
@@ -24,12 +24,12 @@ class SharedConfig implements ConfigResolverInterface
     private $magentoVersion;
 
     /**
-     * @param SystemList $systemList
+     * @param ConfigFileList $configFileList
      * @param MagentoVersion $magentoVersion
      */
-    public function __construct(SystemList $systemList, MagentoVersion $magentoVersion)
+    public function __construct(ConfigFileList $configFileList, MagentoVersion $magentoVersion)
     {
-        $this->systemList = $systemList;
+        $this->configFileList = $configFileList;
         $this->magentoVersion = $magentoVersion;
     }
 
@@ -39,7 +39,7 @@ class SharedConfig implements ConfigResolverInterface
     public function resolve(): string
     {
         return $this->magentoVersion->isGreaterOrEqual('2.2')
-            ? $this->systemList->getMagentoRoot() . '/app/etc/config.php'
-            : $this->systemList->getMagentoRoot() . '/app/etc/config.local.php';
+            ? $this->configFileList->getConfig()
+            : $this->configFileList->getConfigLocal();
     }
 }

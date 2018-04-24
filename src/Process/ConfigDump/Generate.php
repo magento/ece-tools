@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Process\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ArrayManager;
@@ -17,26 +17,6 @@ use Magento\MagentoCloud\Util\ArrayManager;
  */
 class Generate implements ProcessInterface
 {
-    /**
-     * @var ConnectionInterface
-     */
-    private $connection;
-
-    /**
-     * @var FileList
-     */
-    private $fileList;
-
-    /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @var ArrayManager
-     */
-    private $arrayManager;
-
     /**
      * @var array
      */
@@ -53,31 +33,45 @@ class Generate implements ProcessInterface
     ];
 
     /**
-     * @var MagentoVersion
+     * @var ConnectionInterface
      */
-    private $magentoVersion;
+    private $connection;
+
+    /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @var ArrayManager
+     */
+    private $arrayManager;
+
+    /**
+     * @var SharedConfig
+     */
+    private $sharedConfig;
 
     /**
      * @param ConnectionInterface $connection
-     * @param FileList $fileList
      * @param File $file
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
+     * @param SharedConfig $sharedConfig
      */
     public function __construct(
         ConnectionInterface $connection,
-        FileList $fileList,
         File $file,
         ArrayManager $arrayManager,
-        MagentoVersion $magentoVersion
+        MagentoVersion $magentoVersion,
+        SharedConfig $sharedConfig
     ) {
         $this->connection = $connection;
-        $this->fileList = $fileList;
         $this->file = $file;
         $this->arrayManager = $arrayManager;
-        $this->magentoVersion = $magentoVersion;
+        $this->sharedConfig = $sharedConfig;
 
-        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+        if ($magentoVersion->isGreaterOrEqual('2.2')) {
             $this->configKeys[] = 'modules';
             $this->configKeys[] = 'system/websites';
         }
@@ -88,11 +82,7 @@ class Generate implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $configFile = $this->fileList->getConfig();
-        } else { // In 2.0 and 2.1, we use config.local.php instead
-            $configFile = $this->fileList->getConfigLocal();
-        }
+        $configFile = $this->sharedConfig->resolve();
         $oldConfig = require $configFile;
         $newConfig = [];
 
@@ -104,15 +94,13 @@ class Generate implements ProcessInterface
              * Get value of the config recursively.
              */
             foreach ($configKeys as $configKey) {
-                $oldConfigCopy = isset($oldConfigCopy[$configKey])
-                    ? $oldConfigCopy[$configKey]
-                    : null;
+                $oldConfigCopy = $oldConfigCopy[$configKey] ?? null;
             }
 
             /**
              * Setting value in new array.
              */
-            if (isset($oldConfigCopy)) {
+            if ($oldConfigCopy) {
                 $newConfig = $this->arrayManager->nest($newConfig, $configKeys, $oldConfigCopy);
             }
         }
@@ -134,8 +122,10 @@ class Generate implements ProcessInterface
         /**
          * Un-setting base_url.
          */
-        unset($newConfig['system']['stores']['admin']['web']['secure']['base_url']);
-        unset($newConfig['system']['stores']['admin']['web']['unsecure']['base_url']);
+        unset(
+            $newConfig['system']['stores']['admin']['web']['secure']['base_url'],
+            $newConfig['system']['stores']['admin']['web']['unsecure']['base_url']
+        );
 
         /**
          * Adding locales for admin user.
