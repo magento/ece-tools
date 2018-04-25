@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
-use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
@@ -26,10 +25,8 @@ use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
-use Magento\MagentoCloud\Process\Prestart as PrestartProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Psr\Container\ContainerInterface;
-use Magento\MagentoCloud\Process;
 
 /**
  * @inheritdoc
@@ -88,7 +85,6 @@ class Container implements ContainerInterface
                 return new Flag\Pool([
                     Flag\Manager::FLAG_REGENERATE => 'var/.regenerate',
                     Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
-                    Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_PENDING => 'var/.static_content_deploy_pending',
                     Flag\Manager::FLAG_DEPLOY_HOOK_IS_FAILED => 'var/.deploy_is_failed',
                 ]);
             }
@@ -276,16 +272,6 @@ class Container implements ContainerInterface
         $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class)
             ->needs(ConnectionInterface::class)
             ->give(ReadConnection::class);
-        $this->container->when(Prestart::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(PrestartProcess\DeployStaticContent::class),
-                        $this->container->make(PrestartProcess\CompressStaticContent::class),
-                    ],
-                ]);
-            });
         $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -335,15 +321,6 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->get(DeployProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
-        $this->container->when(PrestartProcess\DeployStaticContent::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(PrestartProcess\DeployStaticContent\Generate::class),
                     ],
                 ]);
             });

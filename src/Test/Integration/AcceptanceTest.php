@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
@@ -47,7 +46,6 @@ class AcceptanceTest extends AbstractTest
 
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
-        $this->executeAndAssert(Prestart::NAME, $application);
         $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
@@ -153,7 +151,6 @@ class AcceptanceTest extends AbstractTest
 
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
-        $this->executeAndAssert(Prestart::NAME, $application);
         $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);

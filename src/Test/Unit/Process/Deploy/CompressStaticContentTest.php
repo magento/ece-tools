@@ -97,10 +97,6 @@ class CompressStaticContentTest extends TestCase
             ->expects($this->once())
             ->method('isDeployStaticContent')
             ->willReturn(true);
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
-            ->willReturn(false);
         $this->compressorMock
             ->expects($this->once())
             ->method('process')
@@ -156,30 +152,6 @@ class CompressStaticContentTest extends TestCase
             );
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
-        $this->compressorMock
-            ->expects($this->never())
-            ->method('process');
-
-        $this->process->execute();
-    }
-
-    public function testExecuteNoCompressBySCDInBuild()
-    {
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
-            ->willReturn(false);
-        $this->environmentMock
-            ->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(true);
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
-            ->willReturn(true);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Postpone static content compression until prestart');
         $this->compressorMock
             ->expects($this->never())
             ->method('process');
