@@ -6,7 +6,9 @@
 namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 
 /**
  * Adds sandbox project installation and cleanup abstract features.
@@ -18,6 +20,21 @@ abstract class AbstractTest extends TestCase
      * @deprecated
      */
     protected $bootstrap;
+
+    /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    /**
+     * @var ContainerInterface
+     */
+    private $connection;
+
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
 
     /**
      * {@inheritdoc}
@@ -43,11 +60,11 @@ abstract class AbstractTest extends TestCase
     protected function setUp()
     {
         $this->bootstrap = Bootstrap::getInstance();
+        $this->container = Bootstrap::getInstance()->createApplication()->getContainer();
+        $this->shell = $this->container->get(ShellInterface::class);
+        $this->connection = $this->container->get(ContainerInterface::class);
 
-        Bootstrap::getInstance()->execute(sprintf(
-            'cd %s && composer install -n --no-dev --no-progress',
-            Bootstrap::getInstance()->getSandboxDir()
-        ));
+        $this->shell->execute('composer install -n --no-dev --no-progress');
     }
 
     /**
@@ -55,16 +72,8 @@ abstract class AbstractTest extends TestCase
      */
     protected function tearDown()
     {
-        Bootstrap::getInstance()->execute(sprintf(
-            'cd %s && php bin/magento setup:uninstall -n',
-            Bootstrap::getInstance()->getSandboxDir()
-        ));
-        Bootstrap::getInstance()->createApplication([])->getContainer()
-            ->get(ConnectionInterface::class)
-            ->close();
-        Bootstrap::getInstance()->execute(sprintf(
-            'cd %s && rm -rf vendor/*',
-            Bootstrap::getInstance()->getSandboxDir()
-        ));
+        $this->shell->execute('./bin/magento setup:uninstall -n');
+        $this->shell->execute('rm -rf vendor/*');
+        $this->container->get(ConnectionInterface::class)->close();
     }
 }

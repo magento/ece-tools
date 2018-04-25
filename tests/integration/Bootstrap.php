@@ -153,6 +153,8 @@ class Bootstrap
     }
 
     /**
+     * {@deprecated}
+     *
      * @return string
      */
     public function getSandboxDir(): string
@@ -176,6 +178,8 @@ class Bootstrap
     }
 
     /**
+     * {@deprecated}
+     *
      * @param string $command
      * @return array
      */
