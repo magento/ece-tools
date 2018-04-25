@@ -27,6 +27,98 @@ class ArrayManagerTest extends TestCase
     }
 
     /**
+     * @param array $value
+     * @param string $prefix
+     * @param array $expected
+     * @dataProvider flattenDataProvider
+     */
+    public function testFlatten(array $value, string $prefix, array $expected)
+    {
+        $this->assertSame($expected, $this->manager->flatten($value, $prefix));
+    }
+
+    /**
+     * @return array
+     */
+    public function flattenDataProvider(): array
+    {
+        return [
+            [
+                ['test'],
+                '',
+                ['test'],
+            ],
+            [
+                [
+                    'test' => [
+                        'test2' => 'value2',
+                    ],
+                ],
+                '#',
+                [
+                    '#test/test2' => 'value2',
+                ],
+            ],
+            [
+                [
+                    'test' => [
+                        'test2' => 'value2',
+                    ],
+                ],
+                '',
+                [
+                    'test/test2' => 'value2',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array $value
+     * @param string $pattern
+     * @param bool $ending
+     * @param array $expected
+     * @dataProvider filterDataProvider
+     */
+    public function testFilter(array $value, string $pattern, bool $ending, array $expected)
+    {
+        $this->assertSame($expected, $this->manager->filter($value, $pattern, $ending));
+    }
+
+    /**
+     * @return array
+     */
+    public function filterDataProvider(): array
+    {
+        return [
+            [
+                [
+                    'some/admin_user/locale/code' => 'en_US',
+                ],
+                'admin_user/locale/code',
+                false,
+                [],
+            ],
+            [
+                [
+                    'admin_user/locale/code' => 'en_US',
+                ],
+                'admin_user/locale/code',
+                false,
+                ['en_US'],
+            ],
+            [
+                [
+                    'admin_user/locale/code' => 'en_US',
+                ],
+                'admin_user/locale/code',
+                true,
+                ['en_US'],
+            ],
+        ];
+    }
+
+    /**
      * @param array $expected
      * @param array $original
      * @param array $keys

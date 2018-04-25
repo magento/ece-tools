@@ -36,17 +36,10 @@ class File
      *
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
-    public function isExists($path): bool
+    public function isExists(string $path): bool
     {
-        clearstatcache();
-        $result = @file_exists($path);
-        if ($result === null) {
-            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
-        }
-
-        return $result;
+        return @file_exists($path);
     }
 
     /**
@@ -70,17 +63,10 @@ class File
     /**
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
     public function isDirectory(string $path): bool
     {
-        clearstatcache();
-        $result = @is_dir($path);
-        if ($result === null) {
-            $this->fileSystemException('Error occurred during execution %1', [$this->getWarningMessage()]);
-        }
-
-        return $result;
+        return @is_dir($path);
     }
 
     /**
@@ -123,45 +109,14 @@ class File
     }
 
     /**
-     * Create directory
-     *
-     * @param string $path
-     * @param int $permissions
+     * @param $path
+     * @param int $mode
+     * @param bool $recursive
      * @return bool
-     * @throws FileSystemException
      */
-    public function createDirectory($path, $permissions = 0777)
+    public function createDirectory($path, $mode = 0755, $recursive = true): bool
     {
-        return $this->mkdirRecursive($path, $permissions);
-    }
-
-    /**
-     * Create a directory recursively taking into account race conditions
-     *
-     * @param string $path
-     * @param int $permissions
-     * @return bool
-     * @throws FileSystemException
-     */
-    private function mkdirRecursive($path, $permissions = 0777)
-    {
-        if (is_dir($path)) {
-            return true;
-        }
-        $parentDir = dirname($path);
-        while (!is_dir($parentDir)) {
-            $this->mkdirRecursive($parentDir, $permissions);
-        }
-        $result = @mkdir($path, $permissions);
-        if (!$result) {
-            if (is_dir($path)) {
-                $result = true;
-            } else {
-                $this->fileSystemException('Directory "%1" cannot be created %2', [$path, $this->getWarningMessage()]);
-            }
-        }
-
-        return $result;
+        return @mkdir($path, $mode, $recursive);
     }
 
     /**
@@ -211,28 +166,15 @@ class File
     }
 
     /**
-     * Copy source into destination
+     * Copy source into destination.
      *
      * @param string $source
      * @param string $destination
      * @return bool
-     * @throws FileSystemException
      */
-    public function copy($source, $destination)
+    public function copy(string $source, string $destination): bool
     {
-        $result = @copy($source, $destination);
-        if (!$result) {
-            $this->fileSystemException(
-                'The file or directory "%1" cannot be copied to "%2" %3',
-                [
-                    $source,
-                    $destination,
-                    $this->getWarningMessage(),
-                ]
-            );
-        }
-
-        return $result;
+        return copy($source, $destination);
     }
 
     /**
@@ -266,6 +208,7 @@ class File
                 return false;
             }
         }
+
         return true;
     }
 
@@ -299,16 +242,10 @@ class File
      *
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
-    public function deleteFile($path)
+    public function deleteFile(string $path): bool
     {
-        $result = @unlink($path);
-        if (!$result) {
-            $this->fileSystemException('The file "%1" cannot be deleted %2', [$path, $this->getWarningMessage()]);
-        }
-
-        return $result;
+        return @unlink($path);
     }
 
     /**
@@ -316,9 +253,8 @@ class File
      *
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
-    public function deleteDirectory($path)
+    public function deleteDirectory(string $path): bool
     {
         $flags = \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::UNIX_PATHS;
         $iterator = new \FilesystemIterator($path, $flags);
@@ -330,25 +266,17 @@ class File
                 $this->deleteFile($entity->getPathname());
             }
         }
-        $result = @rmdir($path);
-        if (!$result) {
-            $this->fileSystemException(
-                'The directory "%1" cannot be deleted %2',
-                [$path, $this->getWarningMessage()]
-            );
-        }
 
-        return $result;
+        return @rmdir($path);
     }
 
     /**
-     * Recursive clear directory
+     * Recursive clear directory.
      *
      * @param string $path
      * @return bool
-     * @throws FileSystemException
      */
-    public function clearDirectory($path)
+    public function clearDirectory(string $path): bool
     {
         if (!$this->isExists($path)) {
             return true;

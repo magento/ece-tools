@@ -5,11 +5,28 @@
  */
 namespace Magento\MagentoCloud\Config\Validator;
 
+use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Psr\Container\ContainerInterface;
+
 /**
  * Creates instance of ResultInterface object
  */
 class ResultFactory
 {
+    /**
+     * @var ContainerInterface
+     */
+    private $container;
+
+    /**
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
     /**
      * Creates instance of ResultInterface object
      *
@@ -20,12 +37,33 @@ class ResultFactory
     public function create(string $type, array $arguments = []): ResultInterface
     {
         if ($type === ResultInterface::ERROR) {
-            $suggestion = $arguments['suggestion'] ?? '';
-            $result = new Result\Error($arguments['error'], $suggestion);
-        } else {
-            $result = new Result\Success();
+            return $this->error(
+                $arguments['error'],
+                $arguments['suggestion'] ?? ''
+            );
         }
 
-        return $result;
+        return $this->success();
+    }
+
+    /**
+     * @return Success
+     */
+    public function success(): Success
+    {
+        return $this->container->create(Success::class);
+    }
+
+    /**
+     * @param string $message
+     * @param string $suggestion
+     * @return Error
+     */
+    public function error(string $message, string $suggestion = ''): Error
+    {
+        return $this->container->create(Error::class, [
+            'message' => $message,
+            'suggestion' => $suggestion,
+        ]);
     }
 }
