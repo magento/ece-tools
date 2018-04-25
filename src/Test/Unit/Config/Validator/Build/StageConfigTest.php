@@ -62,6 +62,7 @@ class StageConfigTest extends TestCase
                     StageConfigInterface::STAGE_BUILD => [
                         StageConfigInterface::VAR_VERBOSE_COMMANDS => '-v',
                     ],
+                    StageConfigInterface::STAGE_DEPLOY => null,
                 ],
             ]);
         $this->schemaValidatorMock->expects($this->once())
