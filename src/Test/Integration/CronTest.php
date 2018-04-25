@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -61,7 +60,7 @@ class CronTest extends AbstractTest
             ->getContainer();
 
         $this->shell = $container->get(ShellInterface::class);
-        $this->connection = $container->get(ContainerInterface::class);
+        $this->connection = $container->get(ConnectionInterface::class);
     }
 
     /**

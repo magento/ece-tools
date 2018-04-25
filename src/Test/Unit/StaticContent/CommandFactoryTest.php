@@ -228,7 +228,23 @@ class CommandFactoryTest extends TestCase
                 [
                     'php ./bin/magento setup:static-content:deploy -s quick -v --exclude-theme theme1'
                     . ' --exclude-theme Magento/backend en_US de_DE',
-                    'php ./bin/magento setup:static-content:deploy -s quick -v --theme Magento/backend',
+                ],
+            ],
+            [
+                [
+                    'thread_count' => 1,
+                    'excluded_themes' => ['theme1'],
+                    'strategy' => 'quick',
+                    'locales' => ['en_US', 'de_DE'],
+                    'is_force' => false,
+                    'verbosity_level' => '-v',
+                ],
+                [
+                    'Magento/backend' => null,
+                ],
+                [
+                    'php ./bin/magento setup:static-content:deploy -s quick -v --exclude-theme theme1'
+                    . ' --exclude-theme Magento/backend en_US de_DE',
                 ],
             ],
             [

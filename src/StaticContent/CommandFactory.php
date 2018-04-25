@@ -78,12 +78,13 @@ class CommandFactory
         ];
 
         foreach ($matrix as $theme => $config) {
+            if (empty($config['language'])) {
+                continue;
+            }
+
             $command = $this->build($option);
             $command .= ' --theme ' . $theme;
-
-            if (!empty($config['language'])) {
-                $command .= ' ' . implode(' ', $config['language']);
-            }
+            $command .= ' ' . implode(' ', $config['language']);
 
             $commands[] = $command;
         }
