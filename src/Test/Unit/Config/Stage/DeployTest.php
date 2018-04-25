@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -220,6 +221,20 @@ class DeployTest extends TestCase
                 ],
                 'some theme 2',
             ],
+            'redis_use_slave_default' => [
+                Deploy::VAR_REDIS_USE_SLAVE_CONNECTION,
+                [],
+                [],
+                false,
+            ],
+            'redis_use_slave_true' => [
+                Deploy::VAR_REDIS_USE_SLAVE_CONNECTION,
+                [],
+                [
+                    Deploy::VAR_REDIS_USE_SLAVE_CONNECTION => true
+                ],
+                true,
+            ],
             'default slave connection' => [
                 Deploy::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 [],
@@ -265,6 +280,7 @@ class DeployTest extends TestCase
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDeprecatedScdThreadsDataProvider(): array
     {
@@ -278,7 +294,18 @@ class DeployTest extends TestCase
                 [],
                 4,
             ],
-            'threads raw' => [
+            'threads ENV raw' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 5,
+                ],
+                5,
+            ],
+            'threads ENV raw and magento cloud variable' => [
                 Deploy::VAR_SCD_THREADS,
                 [],
                 [
@@ -306,6 +333,105 @@ class DeployTest extends TestCase
                     'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
                 ],
                 3,
+            ],
+            'threads mode enterprise and ENV raw' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 5,
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                5,
+            ],
+            'threads mode enterprise and ENV raw and magento cloud variable' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 4
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 5,
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                4,
+            ],
+            'threads mode enterprise and magento cloud variable' => [
+                Deploy::VAR_SCD_THREADS,
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 5,
+                ],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                5,
+            ],
+            'mode enterprise with global and deploy scd_threads in .magento.env.yaml' => [
+                Deploy::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SCD_THREADS => 5
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        StageConfigInterface::VAR_SCD_THREADS => 4
+                    ],
+                ],
+                [],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                4,
+            ],
+            'threads mode enterprise with global scd_threads in .magento.env.yaml' => [
+                Deploy::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SCD_THREADS => 5
+                    ],
+                ],
+                [],
+                [
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                5,
+            ],
+            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml and ENV variable' => [
+                Deploy::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SCD_THREADS => 5
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        StageConfigInterface::VAR_SCD_THREADS => 4
+                    ],
+                ],
+                [],
+                [
+                    'STATIC_CONTENT_THREADS' => 7,
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                7,
+            ],
+            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml ' .
+            'and magento cloud variable and ENV variable' => [
+                Deploy::VAR_SCD_THREADS,
+                [
+                    StageConfigInterface::STAGE_GLOBAL => [
+                        StageConfigInterface::VAR_SCD_THREADS => 5
+                    ],
+                    StageConfigInterface::STAGE_DEPLOY => [
+                        StageConfigInterface::VAR_SCD_THREADS => 4
+                    ],
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 6,
+                ],
+                [
+                    'STATIC_CONTENT_THREADS' => 7,
+                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                ],
+                6,
             ],
         ];
     }

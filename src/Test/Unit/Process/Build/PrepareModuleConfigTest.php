@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Config\Shared;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
-use Magento\MagentoCloud\Util\ModuleInformation;
 use Magento\MagentoCloud\Process\Build\PrepareModuleConfig;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -96,7 +95,7 @@ class PrepareModuleConfigTest extends TestCase
         $this->sharedConfigMock->expects($this->never())
             ->method('reset');
         $this->sharedConfigMock->expects($this->once())
-            ->method('read')
+            ->method('all')
             ->willReturn(['modules' => ['Some_ExistingModule' => 1]]);
         $this->sharedConfigMock->expects($this->once())
             ->method('update')
@@ -115,7 +114,7 @@ class PrepareModuleConfigTest extends TestCase
             ->with('modules')
             ->willReturn(['Some_ExistingModule' => 1]);
         $this->sharedConfigMock->expects($this->any())
-            ->method('read')
+            ->method('all')
             ->willReturn(['modules' => ['Some_ExistingModule' => 1]]);
         $this->sharedConfigMock->expects($this->any())
             ->method('update')

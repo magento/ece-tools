@@ -23,6 +23,11 @@ interface DeployInterface extends StageConfigInterface
     const VAR_STATIC_CONTENT_EXCLUDE_THEMES = 'STATIC_CONTENT_EXCLUDE_THEMES';
 
     /**
+     * The variable responsible to set Redis slave connection when it has true value.
+     */
+    const VAR_REDIS_USE_SLAVE_CONNECTION = 'REDIS_USE_SLAVE_CONNECTION';
+
+    /**
      * The variable responsible to set mysql slave connection when it has true value.
      */
     const VAR_MYSQL_USE_SLAVE_CONNECTION = 'MYSQL_USE_SLAVE_CONNECTION';

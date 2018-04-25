@@ -5,23 +5,11 @@
     }
   },
   "magento/framework": {
-    "Fix locker process": {
-      "101.0.*": "2.2/locker-process.patch"
-    },
-    "Remove permissions check": {
-      "101.0.*": "2.2/remove-permission-checks.patch"
-    },
     "Fix redis session locking for 2.2.0 and 2.2.1": {
       "101.0.0||101.0.1": "2.2/fix-redis-session-manager-locking.patch"
     },
     "Fix redis session locking for 2.1.11 and 2.1.13": {
       "100.1.11 - 100.1.13": "2.1/fix-redis-session-manager-locking.patch"
-    },
-    "Fix locker process (Magento 2.1)": {
-      "100.1.*": "2.1/locker-process.magento-2.1.patch"
-    },
-    "Remove permissions check (Magento 2.1)": {
-      "100.1.*": "2.1/remove-permission-checks.patch"
     },
     "Vendor path workaround because /app/etc/ not available before deploy": {
       "100.1.*": "2.1/change-vendor-path.patch"
@@ -31,9 +19,6 @@
     },
     "/var/di compiled path for area in cloud": {
       "100.1.*": "2.1/setup-area.patch"
-    },
-    "bin/magento checks for var/generation write permission": {
-      "100.1.*": "2.1/generation-not-writable.patch"
     },
     "Multiple plugins cannot be run in setup area": {
       "100.1.*": "2.1/setup-area-plugins.patch"
@@ -66,9 +51,11 @@
   "magento/module-cron": {
     "Fixed issues with CRON": {
       "100.2.0": "2.2/fix-cron-2.2.0-2.2.2.patch",
-      "~100.2.1": "2.2/fix-cron-2.2.3-plus.patch",
+      "100.2.1": "2.2/fix-cron-2.2.3.patch",
+      "100.2.2": "2.2/fix-cron-2.2.4.patch",
       "100.1.2": "2.1/fix-cron-2.1.4.patch",
-      "~100.1.3": "2.1/fix-cron-2.1.5-plus.patch"
+      "100.1.3 - 100.1.4": "2.1/fix-cron-2.1.5-2.1.12.patch",
+      "~100.1.5": "2.1/fix-cron-2.1.13-plus.patch"
     }
   },
   "magento/module-customer-import-export": {
@@ -89,6 +76,21 @@
     }
   },
   "magento/product-community-edition": {
+    "Fix locker process": {
+      "2.2.0 - 2.2.5": "2.2/locker-process.patch"
+    },
+    "Remove permissions check": {
+      "2.2.0 - 2.2.5": "2.2/remove-permission-checks.patch"
+    },
+    "Fix locker process (Magento 2.1)": {
+      "2.1.4 - 2.1.14": "2.1/locker-process.magento-2.1.patch"
+    },
+    "Remove permissions check (Magento 2.1)": {
+      "2.1.4 - 2.1.14": "2.1/remove-permission-checks.patch"
+    },
+    "bin/magento checks for var/generation write permission": {
+      "2.1.4 - 2.1.14": "2.1/generation-not-writable.patch"
+    },
     "PayPal TPV tracking for Magento Cloud": {
       "~2.1.8": "2.1/MAGETWO-53941.patch"
     },
