@@ -59,15 +59,14 @@ class StaticContentCompressorTest extends TestCase
      */
     public function testCompression(int $compressionLevel)
     {
-        $expectedCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c "find ';
+        $expectedCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c "find \'pub/static\' -type f -size +300c'
+            . ' \'(\' -name \'*.js\' -or -name \'*.css\' -or -name \'*.svg\' -or -name \'*.html\' -or -name'
+            . ' \'*.htm\' \')\' -print0 | xargs -0 -n100 -P16 gzip -q --keep -' . $compressionLevel . '"';
 
         $this->shellMock
             ->expects($this->once())
             ->method('execute')
-            ->with($this->logicalAnd(
-                $this->stringContains($expectedCommand),
-                $this->stringContains(" -{$compressionLevel}")
-            ));
+            ->with($expectedCommand);
         $this->utilityManagerMock->method('get')
             ->willReturnMap([
                 [UtilityManager::UTILITY_TIMEOUT, '/usr/bin/timeout'],
@@ -89,6 +88,9 @@ class StaticContentCompressorTest extends TestCase
 
     public function testCompressionDisabled()
     {
+        $this->shellMock
+            ->expects($this->never())
+            ->method('execute');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Static content compression was disabled.');
@@ -102,6 +104,9 @@ class StaticContentCompressorTest extends TestCase
      */
     public function testUtilityNotFound()
     {
+        $this->shellMock
+            ->expects($this->never())
+            ->method('execute');
         $this->utilityManagerMock->expects($this->once())
             ->method('get')
             ->with(UtilityManager::UTILITY_TIMEOUT)

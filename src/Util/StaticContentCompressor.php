@@ -121,7 +121,7 @@ class StaticContentCompressor
             : static::DEFAULT_COMPRESSION_LEVEL;
 
         return sprintf(
-            '%s -k 30 600 %s -c "%s" -%s',
+            '%s -k 30 600 %s -c "%s -%s"',
             $this->utilityManager->get(UtilityManager::UTILITY_TIMEOUT),
             $this->utilityManager->get(UtilityManager::UTILITY_BASH),
             $this->innerCompressionCommand(),
