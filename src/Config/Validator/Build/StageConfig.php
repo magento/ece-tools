@@ -55,6 +55,10 @@ class StageConfig implements ValidatorInterface
         $errors = [];
 
         foreach ($config as $stageConfig) {
+            if (!\is_array($stageConfig)) {
+                continue;
+            }
+
             foreach ($stageConfig as $key => $value) {
                 if ($error = $this->schemaValidator->validate($key, $value)) {
                     $errors[] = $error;
