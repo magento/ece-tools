@@ -10,6 +10,8 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Shell\ShellInterface;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -20,18 +22,25 @@ use Symfony\Component\Console\Tester\CommandTester;
 class CronTest extends AbstractTest
 {
     /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    /**
+     * @var ConnectionInterface
+     */
+    private $connection;
+
+    /**
      * @param string $commandName
      * @param Application $application
      * @return void
      */
     private function executeAndAssert($commandName, $application)
     {
-        $application->getContainer()->set(
-            \Psr\Log\LoggerInterface::class,
-            \Magento\MagentoCloud\App\Logger::class
-        );
         $commandTester = new CommandTester($application->get($commandName));
         $commandTester->execute([]);
+
         $this->assertSame(0, $commandTester->getStatusCode());
     }
 
@@ -40,7 +49,6 @@ class CronTest extends AbstractTest
      */
     public static function setUpBeforeClass()
     {
-        //Do nothing for this test...
     }
 
     /**
@@ -48,7 +56,12 @@ class CronTest extends AbstractTest
      */
     protected function setUp()
     {
-        $this->bootstrap = Bootstrap::getInstance();
+        $container = Bootstrap::getInstance()
+            ->createApplication()
+            ->getContainer();
+
+        $this->shell = $container->get(ShellInterface::class);
+        $this->connection = $container->get(ContainerInterface::class);
     }
 
     /**
@@ -57,23 +70,25 @@ class CronTest extends AbstractTest
      */
     public function testCron($version = null)
     {
-        $this->bootstrap->run($version);
-        $this->bootstrap->execute(sprintf(
+        $bootstrap = Bootstrap::getInstance();
+
+        $bootstrap->run($version);
+        $bootstrap->execute(sprintf(
             'cd %s && composer install -n --no-dev --no-progress',
             $this->bootstrap->getSandboxDir()
         ));
 
-        $application = $this->bootstrap->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
+        $application = $bootstrap->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
 
         /** @var File $file */
         $file = $application->getContainer()->get(File::class);
         $file->createDirectory(sprintf(
             '%s/app/code/Magento/CronTest',
-            $this->bootstrap->getSandboxDir()
+            $bootstrap->getSandboxDir()
         ));
         $file->copyDirectory(
             sprintf('%s/_files/modules/Magento/CronTest', __DIR__),
-            sprintf('%s/app/code/Magento/CronTest', $this->bootstrap->getSandboxDir())
+            sprintf('%s/app/code/Magento/CronTest', $bootstrap->getSandboxDir())
         );
 
         $this->executeAndAssert(Build::NAME, $application);
@@ -84,9 +99,9 @@ class CronTest extends AbstractTest
         $db->close();
 
         $this->assertTrue($db->query('DELETE FROM cron_schedule;'));
-        $this->bootstrap->execute(sprintf(
+        $bootstrap->execute(sprintf(
             'cd %s && php bin/magento cron:run && php bin/magento cron:run',
-            $this->bootstrap->getSandboxDir()
+            $bootstrap->getSandboxDir()
         ));
 
         $selectSuccessJobs = 'SELECT * FROM cron_schedule WHERE job_code = "cron_test_job" AND status = "success"';
@@ -103,19 +118,18 @@ class CronTest extends AbstractTest
         $this->assertTrue($db->query($addRunningJob));
         $this->assertTrue($db->query($updatePendingJobs));
 
-        $this->bootstrap->execute(sprintf(
+        $bootstrap->execute(sprintf(
             'cd %s && php bin/magento cron:run',
-            $this->bootstrap->getSandboxDir()
+            $bootstrap->getSandboxDir()
         ));
 
-        $this->assertTrue($countSuccess == count($db->select($selectSuccessJobs)));
-
+        $this->assertCount($countSuccess, $db->select($selectSuccessJobs));
         $this->assertTrue($db->query($updateRunningJob));
         $this->assertTrue($db->query($updatePendingJobs));
 
-        $this->bootstrap->execute(sprintf(
+        $bootstrap->execute(sprintf(
             'cd %s && php bin/magento cron:run',
-            $this->bootstrap->getSandboxDir()
+            $bootstrap->getSandboxDir()
         ));
 
         $this->assertTrue($countSuccess < count($db->select($selectSuccessJobs)));
@@ -141,6 +155,7 @@ class CronTest extends AbstractTest
     protected function tearDown()
     {
         parent::tearDown();
-        $this->bootstrap->destroy();
+
+        Bootstrap::getInstance()->destroy();
     }
 }

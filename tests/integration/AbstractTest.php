@@ -27,7 +27,7 @@ abstract class AbstractTest extends TestCase
     private $shell;
 
     /**
-     * @var ContainerInterface
+     * @var ConnectionInterface
      */
     private $connection;
 
@@ -74,6 +74,6 @@ abstract class AbstractTest extends TestCase
     {
         $this->shell->execute('./bin/magento setup:uninstall -n');
         $this->shell->execute('rm -rf vendor/*');
-        $this->container->get(ConnectionInterface::class)->close();
+        $this->connection->close();
     }
 }

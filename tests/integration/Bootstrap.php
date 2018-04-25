@@ -54,7 +54,6 @@ class Bootstrap
 
     /**
      * @param string $version
-     * @throws \Exception
      */
     public function run($version = '@stable')
     {
