@@ -7,11 +7,9 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\SystemList;
-use Magento\MagentoCloud\Shell\ShellInterface;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -22,42 +20,19 @@ use Symfony\Component\Console\Tester\CommandTester;
 class CronTest extends AbstractTest
 {
     /**
-     * @var ContainerInterface
+     * @param string $commandName
+     * @param Application $application
+     * @return void
      */
-    private $container;
-
-    /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
-     * @var SystemList
-     */
-    private $systemList;
-
-    /**
-     * @var ConnectionInterface
-     */
-    private $connection;
-
-    /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @inheritdoc
-     */
-    public function setUp()
+    private function executeAndAssert($commandName, $application)
     {
-        parent::setUp();
-
-        $this->container = Bootstrap::getInstance()->createApplication()->getContainer();
-        $this->shell = $this->container->get(ShellInterface::class);
-        $this->systemList = $this->container->get(SystemList::class);
-        $this->connection = $this->container->get(ConnectionInterface::class);
-        $this->file = $this->container->get(File::class);
+        $application->getContainer()->set(
+            \Psr\Log\LoggerInterface::class,
+            \Magento\MagentoCloud\App\Logger::class
+        );
+        $commandTester = new CommandTester($application->get($commandName));
+        $commandTester->execute([]);
+        $this->assertSame(0, $commandTester->getStatusCode());
     }
 
     /**
@@ -65,34 +40,54 @@ class CronTest extends AbstractTest
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::getInstance()->run('2.2.0');
+        //Do nothing for this test...
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function setUp()
+    {
+        $this->bootstrap = Bootstrap::getInstance();
     }
 
     /**
      * @param string $version
      * @dataProvider cronDataProvider
      */
-    public function testCron(string $version)
+    public function testCron($version = null)
     {
-        $this->updateToVersion($version);
-
-        $this->file->createDirectory(sprintf(
-            '%s/app/code/Magento/CronTest',
-            $this->systemList->getMagentoRoot()
+        $this->bootstrap->run($version);
+        $this->bootstrap->execute(sprintf(
+            'cd %s && composer install -n --no-dev --no-progress',
+            $this->bootstrap->getSandboxDir()
         ));
-        $this->file->copyDirectory(
+
+        $application = $this->bootstrap->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
+
+        /** @var File $file */
+        $file = $application->getContainer()->get(File::class);
+        $file->createDirectory(sprintf(
+            '%s/app/code/Magento/CronTest',
+            $this->bootstrap->getSandboxDir()
+        ));
+        $file->copyDirectory(
             sprintf('%s/_files/modules/Magento/CronTest', __DIR__),
-            sprintf('%s/app/code/Magento/CronTest', $this->systemList->getMagentoRoot())
+            sprintf('%s/app/code/Magento/CronTest', $this->bootstrap->getSandboxDir())
         );
 
-        $this->executeAndAssert(Build::NAME);
-        $this->executeAndAssert(Deploy::NAME);
+        $this->executeAndAssert(Build::NAME, $application);
+        $this->executeAndAssert(Deploy::NAME, $application);
 
-        $this->connection->close();
+        /** @var ConnectionInterface $db */
+        $db = $application->getContainer()->get(ConnectionInterface::class);
+        $db->close();
 
-        $this->assertTrue($this->connection->query('DELETE FROM `cron_schedule`;'));
-
-        $this->shell->execute('php ./bin/magento cron:run && php ./bin/magento cron:run');
+        $this->assertTrue($db->query('DELETE FROM cron_schedule;'));
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento cron:run && php bin/magento cron:run',
+            $this->bootstrap->getSandboxDir()
+        ));
 
         $selectSuccessJobs = 'SELECT * FROM cron_schedule WHERE job_code = "cron_test_job" AND status = "success"';
         $updatePendingJobs = 'UPDATE cron_schedule SET scheduled_at = NOW() '
@@ -103,48 +98,29 @@ class CronTest extends AbstractTest
         $updateRunningJob = 'UPDATE cron_schedule '
             . 'SET created_at = NOW() - INTERVAL 3 day, scheduled_at = NOW() - INTERVAL 2 day, '
             . 'executed_at = NOW() - INTERVAL 2 day WHERE job_code = "cron_test_job" AND status = "running"';
-        $countSuccess = $this->connection->count($selectSuccessJobs);
 
-        $this->assertTrue($this->connection->query($addRunningJob));
-        $this->assertTrue($this->connection->query($updatePendingJobs));
+        $countSuccess = count($db->select($selectSuccessJobs));
+        $this->assertTrue($db->query($addRunningJob));
+        $this->assertTrue($db->query($updatePendingJobs));
 
-        $this->shell->execute('php ./bin/magento cron:run');
-
-        $this->assertSame($countSuccess, $this->connection->count($selectSuccessJobs));
-        $this->assertTrue($this->connection->query($updateRunningJob));
-        $this->assertTrue($this->connection->query($updatePendingJobs));
-
-        $this->shell->execute('php ./bin/magento cron:run');
-
-        $this->assertTrue($countSuccess < $this->connection->count($selectSuccessJobs));
-
-        $this->connection->close();
-    }
-
-    /**
-     * @param string $commandName
-     * @return void
-     */
-    private function executeAndAssert($commandName)
-    {
-        $application = Bootstrap::getInstance()->createApplication();
-        $commandTester = new CommandTester($application->get($commandName));
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
-    }
-
-    /**
-     * @param string $version
-     */
-    private function updateToVersion(string $version)
-    {
-        $this->shell->execute('rm -rf ./vendor/*');
-        $this->shell->execute(sprintf(
-            'composer require magento/product-enterprise-edition %s --no-update -n',
-            $version
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento cron:run',
+            $this->bootstrap->getSandboxDir()
         ));
-        $this->shell->execute('composer update -n');
+
+        $this->assertTrue($countSuccess == count($db->select($selectSuccessJobs)));
+
+        $this->assertTrue($db->query($updateRunningJob));
+        $this->assertTrue($db->query($updatePendingJobs));
+
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento cron:run',
+            $this->bootstrap->getSandboxDir()
+        ));
+
+        $this->assertTrue($countSuccess < count($db->select($selectSuccessJobs)));
+
+        $db->close();
     }
 
     /**
@@ -157,5 +133,24 @@ class CronTest extends AbstractTest
             ['version' => '2.2.2'],
             ['version' => '@stable'],
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function tearDown()
+    {
+        Bootstrap::getInstance()->execute(sprintf(
+            'cd %s && php bin/magento setup:uninstall -n',
+            Bootstrap::getInstance()->getSandboxDir()
+        ));
+        Bootstrap::getInstance()->createApplication([])->getContainer()
+            ->get(ConnectionInterface::class)
+            ->close();
+        Bootstrap::getInstance()->execute(sprintf(
+            'cd %s && rm -rf vendor/*',
+            Bootstrap::getInstance()->getSandboxDir()
+        ));
+        Bootstrap::getInstance()->destroy();
     }
 }
