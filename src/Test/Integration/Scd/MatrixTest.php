@@ -63,7 +63,7 @@ class MatrixTest extends AbstractTest
      * @param string $commandName
      * @return void
      */
-    private function executeAndAssert(string $commandName)
+    private function executeAndAssertStatusCode(string $commandName)
     {
         $commandTester = new CommandTester(
             $this->application->get($commandName)
@@ -80,10 +80,10 @@ class MatrixTest extends AbstractTest
             $this->systemList->getMagentoRoot() . '/.magento.env.yaml'
         );
 
-        $this->executeAndAssert(Command\Build::NAME);
-        $this->executeAndAssert(Command\Deploy::NAME);
-        $this->executeAndAssert(Command\Prestart::NAME);
-        $this->executeAndAssert(Command\PostDeploy::NAME);
+        $this->executeAndAssertStatusCode(Command\Build::NAME);
+        $this->executeAndAssertStatusCode(Command\Deploy::NAME);
+        $this->executeAndAssertStatusCode(Command\Prestart::NAME);
+        $this->executeAndAssertStatusCode(Command\PostDeploy::NAME);
 
         $this->assertContentPresence();
     }
