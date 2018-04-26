@@ -119,9 +119,9 @@ class CommandFactory
             $command .= ' ' . $verbosityLevel;
         }
 
-        $treadCount = $option->getThreadCount();
-        if ($treadCount) {
-            $command .= ' --jobs ' . $treadCount;
+        $threadCount = $option->getThreadCount();
+        if ($threadCount) {
+            $command .= ' --jobs ' . $threadCount;
         }
 
         if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)

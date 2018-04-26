@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Integration testing bootstrap.
@@ -33,11 +34,19 @@ class Bootstrap
     private $file;
 
     /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    /**
      * Bootstrap constructor.
      */
     public function __construct()
     {
         $this->file = new File();
+        $this->shell = new Shell\Shell(
+            $this->getSandboxDir()
+        );
     }
 
     /**
@@ -72,7 +81,7 @@ class Bootstrap
             $this->file->createDirectory($sandboxDir);
         }
 
-        $this->execute(sprintf(
+        $this->shell->execute(sprintf(
             'composer create-project --no-dev --repository-url=%s %s %s %s',
             getenv('MAGENTO_REPO') ?: 'https://repo.magento.com/',
             getenv('MAGENTO_PROJECT') ?: 'magento/project-enterprise-edition',
@@ -152,9 +161,9 @@ class Bootstrap
     }
 
     /**
-     * {@deprecated}
-     *
      * @return string
+     * @deprecated
+     * @see \Magento\MagentoCloud\Filesystem\SystemList
      */
     public function getSandboxDir(): string
     {
@@ -177,10 +186,12 @@ class Bootstrap
     }
 
     /**
-     * {@deprecated}
+     * Execute command.
      *
      * @param string $command
      * @return array
+     * @deprecated
+     * @see \Magento\MagentoCloud\Shell\ShellInterface
      */
     public function execute(string $command): array
     {
