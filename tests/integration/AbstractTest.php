@@ -72,7 +72,7 @@ abstract class AbstractTest extends TestCase
      */
     protected function tearDown()
     {
-        $this->shell->execute('./bin/magento setup:uninstall -n');
+        $this->shell->execute('php ./bin/magento setup:uninstall -n');
         $this->shell->execute('rm -rf vendor/*');
         $this->connection->close();
     }
