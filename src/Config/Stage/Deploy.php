@@ -6,7 +6,8 @@
 namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -90,80 +91,13 @@ class Deploy implements DeployInterface
                 $this->getDefault(),
                 $envConfig[self::STAGE_GLOBAL] ?? [],
                 $envConfig[self::STAGE_DEPLOY] ?? [],
-                $this->getEnvironmentConfig()
+                $this->environmentConfig->getAll()
             );
         }
 
         return $this->mergedConfig;
     }
 
-    /**
-     * Resolves environment values with and adds custom mappings.
-     *
-     * @return array
-     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     */
-    private function getEnvironmentConfig(): array
-    {
-        $variables = $this->environmentConfig->getVariables();
-
-        if (isset($variables[self::VAR_VERBOSE_COMMANDS])
-            && $variables[self::VAR_VERBOSE_COMMANDS] === EnvironmentConfig::VAL_ENABLED
-        ) {
-            $variables[self::VAR_VERBOSE_COMMANDS] = '-vvv';
-        }
-
-        $disabledFlow = [
-            self::VAR_CLEAN_STATIC_FILES,
-            self::VAR_STATIC_CONTENT_SYMLINK,
-            self::VAR_UPDATE_URLS,
-            self::VAR_GENERATED_CODE_SYMLINK,
-        ];
-
-        foreach ($disabledFlow as $disabledVar) {
-            if (isset($variables[$disabledVar]) && $variables[$disabledVar] === EnvironmentConfig::VAL_DISABLED) {
-                $variables[$disabledVar] = false;
-            }
-        }
-
-        if (isset($variables['DO_DEPLOY_STATIC_CONTENT']) &&
-            $variables['DO_DEPLOY_STATIC_CONTENT'] === EnvironmentConfig::VAL_DISABLED
-        ) {
-            $variables[self::VAR_SKIP_SCD] = true;
-        }
-
-        if ($scdThreads = $this->getEnvScdThreads()) {
-            $variables[self::VAR_SCD_THREADS] = $scdThreads;
-        }
-
-        if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
-            $variables[self::VAR_SCD_EXCLUDE_THEMES] = $variables['STATIC_CONTENT_EXCLUDE_THEMES'];
-        }
-
-        return $variables;
-    }
-
-    /**
-     * Retrieves SCD threads configuration from MAGENTO_CLOUD_VARIABLES or from raw environment data.
-     * STATIC_CONTENT_THREADS from MAGENTO_CLOUD_VARIABLES has higher priority then $_ENV['STATIC_CONTENT_THREADS']
-     *
-     * Raw $_ENV['STATIC_CONTENT_THREADS'] is deprecated.
-     *
-     * @return int
-     */
-    private function getEnvScdThreads(): int
-    {
-        $variables = $this->environmentConfig->getVariables();
-        $staticDeployThreads = 0;
-
-        if (isset($variables['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
-        }
-
-        return $staticDeployThreads;
-    }
 
     /**
      * Resolves default configuration value if other was not provided.
@@ -202,7 +136,7 @@ class Deploy implements DeployInterface
     private function getDefaultScdThreads()
     {
         if (isset($_ENV['MAGENTO_CLOUD_MODE'])
-            && $_ENV['MAGENTO_CLOUD_MODE'] === EnvironmentConfig::CLOUD_MODE_ENTERPRISE
+            && $_ENV['MAGENTO_CLOUD_MODE'] === Environment::CLOUD_MODE_ENTERPRISE
         ) {
             return 3;
         }
