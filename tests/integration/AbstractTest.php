@@ -62,7 +62,7 @@ abstract class AbstractTest extends TestCase
         $this->bootstrap = Bootstrap::getInstance();
         $this->container = Bootstrap::getInstance()->createApplication()->getContainer();
         $this->shell = $this->container->get(ShellInterface::class);
-        $this->connection = $this->container->get(ContainerInterface::class);
+        $this->connection = $this->container->get(ConnectionInterface::class);
 
         $this->shell->execute('composer install -n --no-dev --no-progress');
     }
