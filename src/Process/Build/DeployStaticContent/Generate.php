@@ -66,7 +66,7 @@ class Generate implements ProcessInterface
     /**
      * {@inheritdoc}
      *
-     * @throws \Exception
+     * @throws \RuntimeException
      */
     public function execute()
     {
