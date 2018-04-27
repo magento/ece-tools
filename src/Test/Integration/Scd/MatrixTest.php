@@ -63,7 +63,7 @@ class MatrixTest extends AbstractTest
      * @param string $commandName
      * @return void
      */
-    private function executeAndAssertStatusCode(string $commandName)
+    private function executeAndAssertCodeOK(string $commandName)
     {
         $commandTester = new CommandTester(
             $this->application->get($commandName)
@@ -73,19 +73,38 @@ class MatrixTest extends AbstractTest
         $this->assertSame(0, $commandTester->getStatusCode());
     }
 
-    public function testScdOnDeploy()
+    /**
+     * @param string $file
+     * @dataProvider scdOnDeployDataProvider
+     */
+    public function testScdOnDeploy(string $file)
     {
         $this->file->copy(
-            __DIR__ . '/_files/env_matrix_1.yaml',
+            $file,
             $this->systemList->getMagentoRoot() . '/.magento.env.yaml'
         );
 
-        $this->executeAndAssertStatusCode(Command\Build::NAME);
-        $this->executeAndAssertStatusCode(Command\Deploy::NAME);
-        $this->executeAndAssertStatusCode(Command\Prestart::NAME);
-        $this->executeAndAssertStatusCode(Command\PostDeploy::NAME);
+        $this->executeAndAssertCodeOK(Command\Build::NAME);
+        $this->executeAndAssertCodeOK(Command\Deploy::NAME);
+        $this->executeAndAssertCodeOK(Command\Prestart::NAME);
+        $this->executeAndAssertCodeOK(Command\PostDeploy::NAME);
 
         $this->assertContentPresence();
+    }
+
+    /**
+     * @return array
+     */
+    public function scdOnDeployDataProvider(): array
+    {
+        return [
+            [
+                __DIR__ . '/_files/env_matrix_1.yaml',
+            ],
+            [
+                __DIR__ . '/_files/env_matrix_2.yaml',
+            ],
+        ];
     }
 
     private function assertContentPresence()
