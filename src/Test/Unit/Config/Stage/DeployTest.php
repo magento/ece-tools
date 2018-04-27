@@ -39,14 +39,8 @@ class DeployTest extends TestCase
     protected function setUp()
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
-        $this->environmentConfigMock = $this->getMockBuilder(EnvironmentConfig::class)
-            ->setMethods(array('getVariables'))
-            ->setConstructorArgs([
-                $this->createMock('\Psr\Log\LoggerInterface'),
-                $this->createMock('\Magento\MagentoCloud\Filesystem\Driver\File'),
-                $this->createMock('\Magento\MagentoCloud\Filesystem\DirectoryList'),
-                $this->createMock('\Magento\MagentoCloud\Filesystem\Flag\Manager'),
-            ])->getMock();
+        $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);
+
         $this->config = new Deploy(
             $this->environmentReaderMock,
             $this->environmentConfigMock

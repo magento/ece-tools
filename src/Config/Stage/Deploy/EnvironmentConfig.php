@@ -63,8 +63,8 @@ class EnvironmentConfig
 
         if (isset($variables['STATIC_CONTENT_THREADS'])) {
             $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
-        } elseif (isset($_ENV['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$_ENV['STATIC_CONTENT_THREADS'];
+        } elseif ($envScdThreads = $this->environment->getEnv('STATIC_CONTENT_THREADS')) {
+            $staticDeployThreads = $envScdThreads;
         }
 
         return $staticDeployThreads;

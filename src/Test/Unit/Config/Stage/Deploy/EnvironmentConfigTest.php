@@ -36,16 +36,13 @@ class EnvironmentConfigTest extends TestCase
     /**
      * @param array $expectedVariables
      * @param array $envVariables
-     * @param array $rawEnvVariables
      * @dataProvider getAllDataProvider
      */
-    public function testGetAll(array $expectedVariables, array $envVariables, array $rawEnvVariables = [])
+    public function testGetAll(array $expectedVariables, array $envVariables)
     {
         $this->environmentMock->expects($this->any())
             ->method('getVariables')
             ->willReturn($envVariables);
-
-        $_ENV = $rawEnvVariables;
 
         $this->assertSame(
             $expectedVariables,
@@ -93,19 +90,27 @@ class EnvironmentConfigTest extends TestCase
                 ['STATIC_CONTENT_THREADS' => '3']
             ],
             [
-                [DeployInterface::VAR_SCD_THREADS => 4],
-                [],
-                ['STATIC_CONTENT_THREADS' => '4']
-            ],
-            [
                 [DeployInterface::VAR_SKIP_SCD => true],
                 ['DO_DEPLOY_STATIC_CONTENT' => Environment::VAL_DISABLED]
             ],
         ];
     }
 
-    public function tearDown()
+    public function testGetEnvScd()
     {
-        $_ENV = [];
+        $this->environmentMock->expects($this->any())
+            ->method('getVariables')
+            ->willReturn([]);
+        $this->environmentMock->expects($this->once())
+            ->method('getEnv')
+            ->with('STATIC_CONTENT_THREADS')
+            ->willReturn('5');
+
+        $this->assertSame(
+            [
+                'SCD_THREADS' => 5
+            ],
+            $this->environmentConfig->getAll()
+        );
     }
 }
