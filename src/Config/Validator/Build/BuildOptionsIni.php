@@ -90,7 +90,7 @@ class BuildOptionsIni implements ValidatorInterface
         if ($errors) {
             return $this->resultFactory->create(Validator\Result\Error::ERROR, [
                 'error' => 'build_options.ini file is not valid',
-                'suggestion' => PHP_EOL . "\t" .implode(PHP_EOL . "\t", $errors) . PHP_EOL,
+                'suggestion' => implode(PHP_EOL, $errors),
             ]);
         }
 
@@ -106,7 +106,7 @@ class BuildOptionsIni implements ValidatorInterface
      */
     private function prepareValue(string $name, $value)
     {
-        if (in_array($name, ['SCD_COMPRESSION_LEVEL', 'scd_threads'])) {
+        if (in_array($name, ['SCD_COMPRESSION_LEVEL', 'scd_threads']) && ctype_digit($name)) {
             return (int)$value;
         }
 
