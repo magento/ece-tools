@@ -123,5 +123,10 @@
     "Fix cannot upgrade 2.0 => 2.1 with auto_increment > 1": {
       "101.0.3 - 101.0.5": "2.1/MAGETWO-57799.patch"
     }
+  },
+  "magento/module-translation": {
+    "Fix incorrect js-translation.json localization": {
+      "100.2.0 - 100.2.1": "2.2/fix-translation-json-preprocessor.patch"
+    }
   }
 }
