@@ -6,9 +6,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
+use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -34,14 +34,21 @@ class DeployTest extends TestCase
     private $environmentConfigMock;
 
     /**
+     * @var Environment|Mock
+     */
+    private $environmentMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
+        $this->environmentMock = $this->createMock(Environment::class);
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);
 
         $this->config = new Deploy(
+            $this->environmentMock,
             $this->environmentReaderMock,
             $this->environmentConfigMock
         );
@@ -244,7 +251,7 @@ class DeployTest extends TestCase
      * @param string $name
      * @param array $envConfig Deploy config from .magento.env.yaml
      * @param array $envVarConfig Cloud variables configuration
-     * @param array $rawEnv Raw $_ENV configuration
+     * @param string $cloudMode
      * @param int $expectedValue
      * @dataProvider getDeprecatedScdThreadsDataProvider
      */
@@ -252,7 +259,7 @@ class DeployTest extends TestCase
         string $name,
         array $envConfig,
         array $envVarConfig,
-        array $rawEnv,
+        string $cloudMode,
         int $expectedValue
     ) {
         $this->environmentReaderMock->expects($this->any())
@@ -261,7 +268,10 @@ class DeployTest extends TestCase
         $this->environmentConfigMock->expects($this->once())
             ->method('getAll')
             ->willReturn($envVarConfig);
-        $_ENV = $rawEnv;
+        $this->environmentMock->expects($this->any())
+            ->method('getEnv')
+            ->with('MAGENTO_CLOUD_MODE')
+            ->willReturn($cloudMode);
 
         $this->assertSame($expectedValue, $this->config->get($name));
     }
@@ -279,25 +289,21 @@ class DeployTest extends TestCase
                 [
                     Deploy::VAR_SCD_THREADS => 4,
                 ],
-                [],
+                'develop',
                 4,
             ],
             'threads mode none' => [
                 Deploy::VAR_SCD_THREADS,
                 [],
                 [],
-                [
-                    'MAGENTO_CLOUD_MODE' => '',
-                ],
+                '',
                 1,
             ],
             'threads mode enterprise' => [
                 Deploy::VAR_SCD_THREADS,
                 [],
                 [],
-                [
-                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
-                ],
+                Environment::CLOUD_MODE_ENTERPRISE,
                 3,
             ],
             'threads mode enterprise and magento cloud variable' => [
@@ -306,9 +312,7 @@ class DeployTest extends TestCase
                 [
                     Deploy::VAR_SCD_THREADS => 5,
                 ],
-                [
-                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
-                ],
+                Environment::CLOUD_MODE_ENTERPRISE,
                 5,
             ],
             'mode enterprise with global and deploy scd_threads in .magento.env.yaml' => [
@@ -322,9 +326,7 @@ class DeployTest extends TestCase
                     ],
                 ],
                 [],
-                [
-                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
-                ],
+                Environment::CLOUD_MODE_ENTERPRISE,
                 4,
             ],
             'threads mode enterprise with global scd_threads in .magento.env.yaml' => [
@@ -335,9 +337,7 @@ class DeployTest extends TestCase
                     ],
                 ],
                 [],
-                [
-                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
-                ],
+                Environment::CLOUD_MODE_ENTERPRISE,
                 5,
             ],
             'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml and cloud variable' => [
@@ -353,9 +353,7 @@ class DeployTest extends TestCase
                 [
                     Deploy::VAR_SCD_THREADS => 7,
                 ],
-                [
-                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
-                ],
+                Environment::CLOUD_MODE_ENTERPRISE,
                 7,
             ],
         ];

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Stage;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -31,13 +32,21 @@ class Deploy implements DeployInterface
     private $mergedConfig;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
+     * @param Environment $environment
      * @param EnvironmentReader $environmentReader
      * @param EnvironmentConfig $environmentConfig
      */
     public function __construct(
+        Environment $environment,
         EnvironmentReader $environmentReader,
         EnvironmentConfig $environmentConfig
     ) {
+        $this->environment = $environment;
         $this->environmentReader = $environmentReader;
         $this->environmentConfig = $environmentConfig;
     }
@@ -133,9 +142,7 @@ class Deploy implements DeployInterface
      */
     private function getDefaultScdThreads()
     {
-        if (isset($_ENV['MAGENTO_CLOUD_MODE'])
-            && $_ENV['MAGENTO_CLOUD_MODE'] === Environment::CLOUD_MODE_ENTERPRISE
-        ) {
+        if ($this->environment->getEnv('MAGENTO_CLOUD_MODE')  === Environment::CLOUD_MODE_ENTERPRISE) {
             return 3;
         }
 
