@@ -5,8 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Validator\Result\Error;
-use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
 use Magento\MagentoCloud\Config\Validator\Deploy\SessionCredentials;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -19,43 +18,47 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class SessionCredentialsTest extends TestCase
 {
     /**
+     * @var SessionCredentials
+     */
+    private $sessionCredentials;
+
+    /**
      * @var Config|Mock
      */
     private $sessionConfigMock;
 
     /**
-     * @var SessionCredentials
+     * @var ResultFactory|Mock
      */
-    private $sessionCredentials;
+    private $resultFactoryMock;
 
     protected function setUp()
     {
         $this->sessionConfigMock = $this->createMock(Config::class);
+        $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
         $this->sessionCredentials = new SessionCredentials(
-            new ResultFactory(),
+            $this->resultFactoryMock,
             $this->sessionConfigMock
         );
     }
 
     /**
      * @param array $sessionConfig
-     * @param string $expectedResultClass
+     * @param string $expectedResultType
      * @param string|null $expectedErrorMessage
      * @dataProvider validateDataProvider
      */
-    public function testValidate(array $sessionConfig, string $expectedResultClass, string $expectedErrorMessage = null)
+    public function testValidate(array $sessionConfig, string $expectedResultType, string $expectedErrorMessage = null)
     {
         $this->sessionConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($sessionConfig);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('create')
+            ->with($expectedResultType, $expectedErrorMessage ? ['error' => $expectedErrorMessage] : $this->anything());
 
-        $result = $this->sessionCredentials->validate();
-
-        $this->assertInstanceOf($expectedResultClass, $result);
-        if ($expectedErrorMessage) {
-            $this->assertContains($expectedErrorMessage, $result->getError());
-        }
+        $this->sessionCredentials->validate();
     }
 
     public function validateDataProvider()
@@ -63,21 +66,21 @@ class SessionCredentialsTest extends TestCase
         return [
             [
                 [],
-                Success::class
+                ResultInterface::SUCCESS
             ],
             [
                 ['some' => 'option'],
-                Error::class,
+                ResultInterface::ERROR,
                 'Missed required parameter \'save\' in session configuration'
             ],
             [
                 ['save' => 'redis'],
-                Error::class,
+                ResultInterface::ERROR,
                 'Missed redis options in session configuration'
             ],
             [
                 ['save' => 'redis', 'redis' => []],
-                Error::class,
+                ResultInterface::ERROR,
                 'Missed host option for redis in session configuration'
             ]
         ];

@@ -32,13 +32,14 @@ class SchemaValidatorTest extends TestCase
      * @param string $key
      * @param $value
      * @param $expected
+     * @param string $stage
      * @dataProvider validateDataProvider
      */
-    public function testValidate(string $key, $value, $expected)
+    public function testValidate(string $key, $value, $expected, string $stage = StageConfigInterface::STAGE_DEPLOY)
     {
         $this->assertSame(
             $expected,
-            $this->validator->validate($key, $value)
+            $this->validator->validate($key, $stage, $value)
         );
     }
 
@@ -64,11 +65,16 @@ class SchemaValidatorTest extends TestCase
             [StageConfigInterface::VAR_SCD_EXCLUDE_THEMES, 'someTheme', null],
             [StageConfigInterface::VAR_SKIP_SCD, true, null],
             [StageConfigInterface::VAR_SKIP_SCD, false, null],
-            [StageConfigInterface::VAR_SKIP_HTML_MINIFICATION, true, null],
-            [StageConfigInterface::VAR_SKIP_HTML_MINIFICATION, false, null],
-            [StageConfigInterface::VAR_SCD_ON_DEMAND, true, null],
-            [StageConfigInterface::VAR_SCD_ON_DEMAND, false, null],
-            [StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS, ['someOptions' => 'someValue'], null],
+            [StageConfigInterface::VAR_SKIP_HTML_MINIFICATION, true, null, StageConfigInterface::STAGE_GLOBAL],
+            [StageConfigInterface::VAR_SKIP_HTML_MINIFICATION, false, null, StageConfigInterface::STAGE_GLOBAL],
+            [StageConfigInterface::VAR_SCD_ON_DEMAND, true, null, StageConfigInterface::STAGE_GLOBAL],
+            [StageConfigInterface::VAR_SCD_ON_DEMAND, false, null, StageConfigInterface::STAGE_GLOBAL],
+            [
+                StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS,
+                ['someOptions' => 'someValue'],
+                null,
+                StageConfigInterface::STAGE_GLOBAL
+            ],
             [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, true, null],
             [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false, null],
             [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, true, null],
@@ -144,12 +150,21 @@ class SchemaValidatorTest extends TestCase
             [
                 StageConfigInterface::VAR_SKIP_HTML_MINIFICATION,
                 0,
-                'Item SKIP_HTML_MINIFICATION has unexpected type integer. Please use one of next types: boolean'
+                'Item SKIP_HTML_MINIFICATION has unexpected type integer. Please use one of next types: boolean',
+                StageConfigInterface::STAGE_GLOBAL,
+            ],
+            [
+                StageConfigInterface::VAR_SKIP_HTML_MINIFICATION,
+                true,
+                'Item SKIP_HTML_MINIFICATION is not supposed to be in stage deploy. ' .
+                'Please move it to one of possible stages: global',
+                StageConfigInterface::STAGE_DEPLOY,
             ],
             [
                 StageConfigInterface::VAR_SCD_ON_DEMAND,
                 0,
-                'Item SCD_ON_DEMAND has unexpected type integer. Please use one of next types: boolean'
+                'Item SCD_ON_DEMAND has unexpected type integer. Please use one of next types: boolean',
+                StageConfigInterface::STAGE_GLOBAL
             ],
             [
                 StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS,
@@ -165,6 +180,13 @@ class SchemaValidatorTest extends TestCase
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 0,
                 'Item MYSQL_USE_SLAVE_CONNECTION has unexpected type integer. Please use one of next types: boolean'
+            ],
+            [
+                DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
+                true,
+                'Item MYSQL_USE_SLAVE_CONNECTION is not supposed to be in stage build. ' .
+                'Please move it to one of possible stages: global, deploy',
+                StageConfigInterface::STAGE_BUILD
             ],
             [
                 DeployInterface::VAR_UPDATE_URLS,

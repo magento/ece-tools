@@ -35,23 +35,14 @@ class EnvironmentConfig
     {
         $variables = $this->convertEnabledDisabledVariables($this->environment->getVariables());
 
-        $intVariables = [
-            DeployInterface::VAR_SCD_THREADS,
-            DeployInterface::VAR_SCD_COMPRESSION_LEVEL,
-        ];
-
-        foreach ($intVariables as $intVar) {
-            if (isset($variables[$intVar])) {
-                $variables[$intVar] = (int)$variables[$intVar];
-            }
-        }
-
         if ($scdThreads = $this->getEnvScdThreads()) {
             $variables[DeployInterface::VAR_SCD_THREADS] = $scdThreads;
+            unset($variables['STATIC_CONTENT_THREADS']);
         }
 
         if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
             $variables[DeployInterface::VAR_SCD_EXCLUDE_THEMES] = $variables['STATIC_CONTENT_EXCLUDE_THEMES'];
+            unset($variables['STATIC_CONTENT_EXCLUDE_THEMES']);
         }
 
         return $variables;
@@ -110,6 +101,7 @@ class EnvironmentConfig
             $variables['DO_DEPLOY_STATIC_CONTENT'] === Environment::VAL_DISABLED
         ) {
             $variables[DeployInterface::VAR_SKIP_SCD] = true;
+            unset($variables['DO_DEPLOY_STATIC_CONTENT']);
         }
 
         return $variables;

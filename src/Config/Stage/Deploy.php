@@ -98,7 +98,6 @@ class Deploy implements DeployInterface
         return $this->mergedConfig;
     }
 
-
     /**
      * Resolves default configuration value if other was not provided.
      *

@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
-use Magento\MagentoCloud\Config\Environment as EnvironmentConfig;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -59,7 +60,7 @@ class DeployTest extends TestCase
             ->method('read')
             ->willReturn([Deploy::SECTION_STAGE => $envConfig]);
         $this->environmentConfigMock->expects($this->any())
-            ->method('getVariables')
+            ->method('getAll')
             ->willReturn($envVarConfig);
 
         $this->assertSame($expectedValue, $this->config->get($name));
@@ -146,7 +147,7 @@ class DeployTest extends TestCase
                 Deploy::VAR_UPDATE_URLS,
                 [],
                 [
-                    Deploy::VAR_UPDATE_URLS => EnvironmentConfig::VAL_DISABLED,
+                    Deploy::VAR_UPDATE_URLS => false,
                 ],
                 false,
             ],
@@ -154,9 +155,9 @@ class DeployTest extends TestCase
                 Deploy::VAR_SKIP_SCD,
                 [],
                 [
-                    'DO_DEPLOY_STATIC_CONTENT' => EnvironmentConfig::VAL_DISABLED,
+                    Deploy::VAR_SKIP_SCD => false,
                 ],
-                true,
+                false,
             ],
             'do deploy scd' => [
                 Deploy::VAR_SKIP_SCD,
@@ -168,7 +169,7 @@ class DeployTest extends TestCase
                 Deploy::VAR_VERBOSE_COMMANDS,
                 [],
                 [
-                    Deploy::VAR_VERBOSE_COMMANDS => EnvironmentConfig::VAL_ENABLED,
+                    Deploy::VAR_VERBOSE_COMMANDS => '-vvv',
                 ],
                 '-vvv',
             ],
@@ -184,14 +185,6 @@ class DeployTest extends TestCase
                 [],
                 1,
             ],
-            'threads deprecated' => [
-                Deploy::VAR_SCD_THREADS,
-                [],
-                [
-                    'STATIC_CONTENT_THREADS' => 4,
-                ],
-                4,
-            ],
             'scd strategy default' => [
                 Deploy::VAR_SCD_STRATEGY,
                 [],
@@ -200,12 +193,13 @@ class DeployTest extends TestCase
             ],
             'exclude themes deprecated' => [
                 Deploy::VAR_SCD_EXCLUDE_THEMES,
-                [],
                 [
-                    'STATIC_CONTENT_EXCLUDE_THEMES' => 'some theme',
+                    Deploy::VAR_SCD_EXCLUDE_THEMES => 'some theme'
+                ],
+                [
                     Deploy::VAR_SCD_EXCLUDE_THEMES => 'some theme 2',
                 ],
-                'some theme',
+                'some theme 2',
             ],
             'exclude themes' => [
                 Deploy::VAR_SCD_EXCLUDE_THEMES,
@@ -248,9 +242,9 @@ class DeployTest extends TestCase
 
     /**
      * @param string $name
-     * @param array $envConfig
-     * @param array $envVarConfig
-     * @param array $rawEnv
+     * @param array $envConfig Deploy config from .magento.env.yaml
+     * @param array $envVarConfig Cloud variables configuration
+     * @param array $rawEnv Raw $_ENV configuration
      * @param int $expectedValue
      * @dataProvider getDeprecatedScdThreadsDataProvider
      */
@@ -264,8 +258,8 @@ class DeployTest extends TestCase
         $this->environmentReaderMock->expects($this->any())
             ->method('read')
             ->willReturn([Deploy::SECTION_STAGE => $envConfig]);
-        $this->environmentConfigMock->expects($this->any())
-            ->method('getVariables')
+        $this->environmentConfigMock->expects($this->once())
+            ->method('getAll')
             ->willReturn($envVarConfig);
         $_ENV = $rawEnv;
 
@@ -283,31 +277,9 @@ class DeployTest extends TestCase
                 Deploy::VAR_SCD_THREADS,
                 [],
                 [
-                    'STATIC_CONTENT_THREADS' => 4,
+                    Deploy::VAR_SCD_THREADS => 4,
                 ],
                 [],
-                4,
-            ],
-            'threads ENV raw' => [
-                Deploy::VAR_SCD_THREADS,
-                [],
-                [
-
-                ],
-                [
-                    'STATIC_CONTENT_THREADS' => 5,
-                ],
-                5,
-            ],
-            'threads ENV raw and magento cloud variable' => [
-                Deploy::VAR_SCD_THREADS,
-                [],
-                [
-                    'STATIC_CONTENT_THREADS' => 4,
-                ],
-                [
-                    'STATIC_CONTENT_THREADS' => 3,
-                ],
                 4,
             ],
             'threads mode none' => [
@@ -324,40 +296,18 @@ class DeployTest extends TestCase
                 [],
                 [],
                 [
-                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
                 ],
                 3,
-            ],
-            'threads mode enterprise and ENV raw' => [
-                Deploy::VAR_SCD_THREADS,
-                [],
-                [],
-                [
-                    'STATIC_CONTENT_THREADS' => 5,
-                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
-                ],
-                5,
-            ],
-            'threads mode enterprise and ENV raw and magento cloud variable' => [
-                Deploy::VAR_SCD_THREADS,
-                [],
-                [
-                    'STATIC_CONTENT_THREADS' => 4
-                ],
-                [
-                    'STATIC_CONTENT_THREADS' => 5,
-                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
-                ],
-                4,
             ],
             'threads mode enterprise and magento cloud variable' => [
                 Deploy::VAR_SCD_THREADS,
                 [],
                 [
-                    'STATIC_CONTENT_THREADS' => 5,
+                    Deploy::VAR_SCD_THREADS => 5,
                 ],
                 [
-                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
                 ],
                 5,
             ],
@@ -373,7 +323,7 @@ class DeployTest extends TestCase
                 ],
                 [],
                 [
-                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
                 ],
                 4,
             ],
@@ -386,11 +336,11 @@ class DeployTest extends TestCase
                 ],
                 [],
                 [
-                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
                 ],
                 5,
             ],
-            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml and ENV variable' => [
+            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml and cloud variable' => [
                 Deploy::VAR_SCD_THREADS,
                 [
                     StageConfigInterface::STAGE_GLOBAL => [
@@ -400,32 +350,13 @@ class DeployTest extends TestCase
                         StageConfigInterface::VAR_SCD_THREADS => 4
                     ],
                 ],
-                [],
                 [
-                    'STATIC_CONTENT_THREADS' => 7,
-                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
+                    Deploy::VAR_SCD_THREADS => 7,
+                ],
+                [
+                    'MAGENTO_CLOUD_MODE' => Environment::CLOUD_MODE_ENTERPRISE,
                 ],
                 7,
-            ],
-            'threads mode enterprise with global and deploy scd_threads in .magento.env.yaml ' .
-            'and magento cloud variable and ENV variable' => [
-                Deploy::VAR_SCD_THREADS,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [
-                        StageConfigInterface::VAR_SCD_THREADS => 5
-                    ],
-                    StageConfigInterface::STAGE_DEPLOY => [
-                        StageConfigInterface::VAR_SCD_THREADS => 4
-                    ],
-                ],
-                [
-                    'STATIC_CONTENT_THREADS' => 6,
-                ],
-                [
-                    'STATIC_CONTENT_THREADS' => 7,
-                    'MAGENTO_CLOUD_MODE' => EnvironmentConfig::CLOUD_MODE_ENTERPRISE,
-                ],
-                6,
             ],
         ];
     }
@@ -440,7 +371,7 @@ class DeployTest extends TestCase
             ->method('read')
             ->willReturn([]);
         $this->environmentConfigMock->expects($this->any())
-            ->method('getVariables')
+            ->method('getAll')
             ->willReturn([]);
 
         $this->config->get('NOT_EXISTS_VALUE');
