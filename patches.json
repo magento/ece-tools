@@ -55,7 +55,8 @@
       "100.2.2": "2.2/fix-cron-2.2.4.patch",
       "100.1.2": "2.1/fix-cron-2.1.4.patch",
       "100.1.3 - 100.1.4": "2.1/fix-cron-2.1.5-2.1.12.patch",
-      "~100.1.5": "2.1/fix-cron-2.1.13-plus.patch"
+      "100.1.5": "2.1/fix-cron-2.1.13.patch",
+      "~100.1.6": "2.1/fix-cron-2.1.14-plus.patch"
     }
   },
   "magento/module-customer-import-export": {
