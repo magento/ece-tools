@@ -20,9 +20,17 @@ use Symfony\Component\Console\Tester\CommandTester;
 class Cron21Test extends CronTest
 {
     /**
+     * @inheritdoc
+     */
+    public static function setUpBeforeClass()
+    {
+        Bootstrap::getInstance()->run('2.1.4');
+    }
+
+    /**
      * @return array
      */
-    public function cronDataProvider()
+    public function cronDataProvider(): array
     {
         return [
             ['version' => '2.1.4'],

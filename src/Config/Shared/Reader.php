@@ -40,6 +40,7 @@ class Reader implements ReaderInterface
     public function read(): array
     {
         $configPath = $this->fileList->getConfig();
+
         if (!$this->file->isExists($configPath)) {
             return [];
         }

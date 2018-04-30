@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Build\DeployStaticContent;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Build\Option;
@@ -26,10 +26,6 @@ class Generate implements ProcessInterface
      * @var LoggerInterface
      */
     private $logger;
-    /**
-     * @var Environment
-     */
-    private $environment;
 
     /**
      * @var CommandFactory
@@ -42,28 +38,35 @@ class Generate implements ProcessInterface
     private $buildOption;
 
     /**
+     * @var BuildInterface
+     */
+    private $buildConfig;
+
+    /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
-     * @param Environment $environment
      * @param CommandFactory $commandFactory
      * @param Option $buildOption
+     * @param BuildInterface $buildConfig
      */
     public function __construct(
         ShellInterface $shell,
         LoggerInterface $logger,
-        Environment $environment,
         CommandFactory $commandFactory,
-        Option $buildOption
+        Option $buildOption,
+        BuildInterface $buildConfig
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
-        $this->environment = $environment;
         $this->commandFactory = $commandFactory;
         $this->buildOption = $buildOption;
+        $this->buildConfig = $buildConfig;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws \RuntimeException
      */
     public function execute()
     {
@@ -84,11 +87,16 @@ class Generate implements ProcessInterface
 
             $this->logger->info($logMessage);
 
-            $command = $this->commandFactory->create($this->buildOption);
+            $commands = $this->commandFactory->matrix(
+                $this->buildOption,
+                $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
+            );
 
-            $this->shell->execute($command);
+            foreach ($commands as $command) {
+                $this->shell->execute($command);
+            }
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage(), 5);
+            throw new \RuntimeException($e->getMessage(), 5);
         }
     }
 }

@@ -100,6 +100,7 @@ class Build implements BuildInterface
             self::VAR_SCD_THREADS => 1,
             self::VAR_SCD_EXCLUDE_THEMES => '',
             self::VAR_VERBOSE_COMMANDS => '',
+            self::VAR_SCD_MATRIX => [],
         ];
     }
 
