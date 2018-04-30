@@ -46,7 +46,7 @@ class ModuleRefresh extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Refresh modules with newly added');
+            ->setDescription('Refresh config to enable newly added modules');
     }
 
     /**
@@ -59,7 +59,7 @@ class ModuleRefresh extends Command
         try {
             $this->logger->info('Refreshing modules started.');
             $this->config->refresh();
-            $this->logger->info('Refreshing completed.');
+            $this->logger->info('Refreshing modules completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 

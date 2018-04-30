@@ -52,7 +52,7 @@ class ModuleRefreshTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Refreshing modules started.'],
-                ['Refreshing completed.']
+                ['Refreshing modules completed.']
             );
         $this->configMock->expects($this->once())
             ->method('refresh');
