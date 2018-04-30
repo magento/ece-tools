@@ -190,6 +190,7 @@ class Deploy implements DeployInterface
             self::VAR_SCD_EXCLUDE_THEMES => '',
             self::VAR_REDIS_USE_SLAVE_CONNECTION => false,
             self::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
+            self::VAR_SCD_MATRIX => [],
         ];
     }
 

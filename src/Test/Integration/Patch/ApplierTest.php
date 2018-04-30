@@ -37,7 +37,7 @@ class ApplierTest extends AbstractTest
      */
     protected function setUp()
     {
-        $this->bootstrap = Bootstrap::create();
+        $this->bootstrap = Bootstrap::getInstance();
         $application = $this->bootstrap->createApplication([]);
 
         $this->applier = $application->getContainer()
