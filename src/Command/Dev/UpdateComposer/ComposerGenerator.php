@@ -87,7 +87,7 @@ class ComposerGenerator
      */
     public function getInstallFromGitScripts(array $repoOptions): array
     {
-        $installFromGitScripts = ['php -r"mkdir(__DIR__ . \'/app/etc\', 0777, true);"'];
+        $installFromGitScripts = ['php -r"@mkdir(__DIR__ . \'/app/etc\', 0777, true);"'];
         $installFromGitScripts[] = 'rm -rf ' . implode(' ', array_keys($repoOptions));
 
         foreach ($repoOptions as $repoName => $gitOption) {
