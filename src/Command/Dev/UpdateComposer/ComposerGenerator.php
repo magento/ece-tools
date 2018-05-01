@@ -119,7 +119,7 @@ class ComposerGenerator
         foreach (array_keys($repoOptions) as $repoName) {
             $preparePackagesScripts[] = sprintf(
                 "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
-                . "--exclude='dev/tests' --exclude='lib/internal/Magento' ./%s/ ./",
+                . "--exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./%s/ ./",
                 $repoName
             );
         }

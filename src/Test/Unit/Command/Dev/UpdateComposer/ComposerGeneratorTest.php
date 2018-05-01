@@ -23,11 +23,11 @@ class ComposerGeneratorTest extends TestCase
     private $repoOptions = [
         'repo1' => [
             'repo' => 'path_to_repo1',
-            'branch' => '1.0.0'
+            'branch' => '1.0.0',
         ],
         'repo2' => [
             'repo' => 'path_to_repo2',
-            'branch' => '1.0.0'
+            'branch' => '1.0.0',
         ],
     ];
 
@@ -51,6 +51,9 @@ class ComposerGeneratorTest extends TestCase
      */
     private $composerGenerator;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -122,9 +125,9 @@ class ComposerGeneratorTest extends TestCase
         $this->assertEquals(
             [
                 'php -r"mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
-                'rm -rf ce ee b2b',
+                'rm -rf repo1 repo2',
                 'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo1 repo1',
-                'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo2 repo2'
+                'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo2 repo2',
             ],
             $actual
         );
