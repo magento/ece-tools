@@ -155,6 +155,7 @@ class ComposerGenerator
             'autoload' => [
                 'psr-4' => [
                     'Magento\\Setup\\' => 'setup/src/Magento/Setup/',
+                    'Zend\\Mvc\\Controller\\' => 'setup/src/Zend/Mvc/Controller/'
                 ],
             ],
             'minimum-stability' => 'dev',
