@@ -1,0 +1,521 @@
+diff --git a/vendor/magento/module-deploy/Model/Deploy/JsDictionaryDeploy.php b/vendor/magento/module-deploy/Model/Deploy/JsDictionaryDeploy.php
+new file mode 100644
+index 0000000..9c6a309a
+--- /dev/null
++++ b/vendor/magento/module-deploy/Model/Deploy/JsDictionaryDeploy.php
+@@ -0,0 +1,89 @@
++<?php
++/**
++ * Copyright © 2013-2017 Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++
++namespace Magento\Deploy\Model\Deploy;
++
++use Magento\Framework\App\View\Asset\Publisher;
++use Magento\Framework\View\Asset\Repository;
++use Magento\Framework\Translate\Js\Config as TranslationJsConfig;
++use Magento\Framework\TranslateInterface;
++use Magento\Framework\Console\Cli;
++use Symfony\Component\Console\Output\OutputInterface;
++
++/**
++ * Deploy class for js dictionary
++ */
++class JsDictionaryDeploy implements DeployInterface
++{
++    /**
++     * @var Repository
++     */
++    private $assetRepo;
++
++    /**
++     * @var Publisher
++     */
++    private $assetPublisher;
++
++    /**
++     * @var TranslationJsConfig
++     */
++    private $translationJsConfig;
++
++    /**
++     * @var TranslateInterface
++     */
++    private $translator;
++
++    /**
++     * @var OutputInterface
++     */
++    private $output;
++
++    /**
++     * @param Repository $assetRepo
++     * @param Publisher $assetPublisher
++     * @param TranslationJsConfig $translationJsConfig
++     * @param TranslateInterface $translator
++     * @param OutputInterface $output
++     */
++    public function __construct(
++        Repository $assetRepo,
++        Publisher $assetPublisher,
++        TranslationJsConfig $translationJsConfig,
++        TranslateInterface $translator,
++        OutputInterface $output
++    ) {
++        $this->assetRepo = $assetRepo;
++        $this->assetPublisher = $assetPublisher;
++        $this->translationJsConfig = $translationJsConfig;
++        $this->translator = $translator;
++        $this->output = $output;
++    }
++
++    /**
++     * {@inheritdoc}
++     */
++    public function deploy($area, $themePath, $locale)
++    {
++        $this->translator->setLocale($locale);
++        $this->translator->loadData($area, true);
++
++        $asset = $this->assetRepo->createAsset(
++            $this->translationJsConfig->getDictionaryFileName(),
++            ['area' => $area, 'theme' => $themePath, 'locale' => $locale]
++        );
++        if ($this->output->isVeryVerbose()) {
++            $this->output->writeln("\tDeploying the file to '{$asset->getPath()}'");
++        } else {
++            $this->output->write('.');
++        }
++
++        $this->assetPublisher->publish($asset);
++
++        return Cli::RETURN_SUCCESS;
++    }
++}
+diff --git a/vendor/magento/module-deploy/Model/Deploy/LocaleQuickDeploy.php b/vendor/magento/module-deploy/Model/Deploy/LocaleQuickDeploy.php
+index 0d990b5..aa23833 100644
+--- a/vendor/magento/module-deploy/Model/Deploy/LocaleQuickDeploy.php
++++ b/vendor/magento/module-deploy/Model/Deploy/LocaleQuickDeploy.php
+@@ -6,16 +6,21 @@
+ 
+ namespace Magento\Deploy\Model\Deploy;
+ 
+-use Magento\Deploy\Model\DeployManager;
+ use Magento\Framework\App\Filesystem\DirectoryList;
+-use Magento\Framework\App\Utility\Files;
+ use Magento\Framework\Filesystem;
+ use Magento\Framework\Filesystem\Directory\WriteInterface;
+ use Symfony\Component\Console\Output\OutputInterface;
+ use Magento\Framework\Console\Cli;
+ use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
+-use \Magento\Framework\RequireJs\Config as RequireJsConfig;
++use Magento\Framework\RequireJs\Config as RequireJsConfig;
++use Magento\Framework\Translate\Js\Config as TranslationJsConfig;
++use Magento\Framework\App\ObjectManager;
++use Magento\Deploy\Model\DeployStrategyFactory;
+ 
++/**
++ * To avoid duplication of deploying of all static content per each theme/local, this class uses copying/symlinking
++ * of default static files to other locales, separately calls deploy for js dictionary per each locale
++ */
+ class LocaleQuickDeploy implements DeployInterface
+ {
+     /**
+@@ -39,15 +44,41 @@ class LocaleQuickDeploy implements DeployInterface
+     private $options = [];
+ 
+     /**
++     * @var TranslationJsConfig
++     */
++    private $translationJsConfig;
++
++    /**
++     * @var DeployStrategyFactory
++     */
++    private $deployStrategyFactory;
++
++    /**
++     * @var DeployInterface[]
++     */
++    private $deploys;
++
++    /**
+      * @param Filesystem $filesystem
+      * @param OutputInterface $output
+      * @param array $options
++     * @param TranslationJsConfig $translationJsConfig
++     * @param DeployStrategyFactory $deployStrategyFactory
+      */
+-    public function __construct(\Magento\Framework\Filesystem $filesystem, OutputInterface $output, $options = [])
+-    {
++    public function __construct(
++        Filesystem $filesystem,
++        OutputInterface $output,
++        $options = [],
++        TranslationJsConfig $translationJsConfig = null,
++        DeployStrategyFactory $deployStrategyFactory = null
++    ) {
+         $this->filesystem = $filesystem;
+         $this->output = $output;
+         $this->options = $options;
++        $this->translationJsConfig = $translationJsConfig
++            ?: ObjectManager::getInstance()->get(TranslationJsConfig::class);
++        $this->deployStrategyFactory = $deployStrategyFactory
++            ?: ObjectManager::getInstance()->get(DeployStrategyFactory::class);
+     }
+ 
+     /**
+@@ -67,13 +98,13 @@ private function getStaticDirectory()
+      */
+     public function deploy($area, $themePath, $locale)
+     {
+-        if (isset($this->options[Options::DRY_RUN]) && $this->options[Options::DRY_RUN]) {
++        if (!empty($this->options[Options::DRY_RUN])) {
+             return Cli::RETURN_SUCCESS;
+         }
+ 
+         $this->output->writeln("=== {$area} -> {$themePath} -> {$locale} ===");
+ 
+-        if (!isset($this->options[self::DEPLOY_BASE_LOCALE])) {
++        if (empty($this->options[self::DEPLOY_BASE_LOCALE])) {
+             throw new \InvalidArgumentException('Deploy base locale must be set for Quick Deploy');
+         }
+         $processedFiles = 0;
+@@ -88,7 +119,7 @@ public function deploy($area, $themePath, $locale)
+         $this->deleteLocaleResource($newLocalePath);
+         $this->deleteLocaleResource($newRequireJsPath);
+ 
+-        if (isset($this->options[Options::SYMLINK_LOCALE]) && $this->options[Options::SYMLINK_LOCALE]) {
++        if (!empty($this->options[Options::SYMLINK_LOCALE])) {
+             $this->getStaticDirectory()->createSymlink($baseLocalePath, $newLocalePath);
+             $this->getStaticDirectory()->createSymlink($baseRequireJsPath, $newRequireJsPath);
+ 
+@@ -98,14 +129,29 @@ public function deploy($area, $themePath, $locale)
+                 $this->getStaticDirectory()->readRecursively($baseLocalePath),
+                 $this->getStaticDirectory()->readRecursively($baseRequireJsPath)
+             );
++            $jsDictionaryEnabled = $this->translationJsConfig->dictionaryEnabled();
+             foreach ($localeFiles as $path) {
+                 if ($this->getStaticDirectory()->isFile($path)) {
+-                    $destination = $this->replaceLocaleInPath($path, $baseLocale, $locale);
+-                    $this->getStaticDirectory()->copyFile($path, $destination);
+-                    $processedFiles++;
++                    if (!$jsDictionaryEnabled || !$this->isJsDictionary($path)) {
++                        $destination = $this->replaceLocaleInPath($path, $baseLocale, $locale);
++                        $this->getStaticDirectory()->copyFile($path, $destination);
++                        $processedFiles++;
++                    }
+                 }
+             }
+ 
++            if ($jsDictionaryEnabled) {
++                $this->getDeploy(
++                    DeployStrategyFactory::DEPLOY_STRATEGY_JS_DICTIONARY,
++                    [
++                        'output' => $this->output,
++                        'translationJsConfig' => $this->translationJsConfig
++                    ]
++                )
++                ->deploy($area, $themePath, $locale);
++                $processedFiles++;
++            }
++
+             $this->output->writeln("\nSuccessful copied: {$processedFiles} files; errors: {$errorAmount}\n---\n");
+         }
+ 
+@@ -113,6 +159,32 @@ public function deploy($area, $themePath, $locale)
+     }
+ 
+     /**
++     * Get deploy strategy according to required strategy
++     *
++     * @param string $strategy
++     * @param array $params
++     * @return DeployInterface
++     */
++    private function getDeploy($strategy, $params)
++    {
++        if (empty($this->deploys[$strategy])) {
++            $this->deploys[$strategy] = $this->deployStrategyFactory->create($strategy, $params);
++        }
++        return $this->deploys[$strategy];
++    }
++
++    /**
++     * Define if provided path is js dictionary
++     *
++     * @param string $path
++     * @return bool
++     */
++    private function isJsDictionary($path)
++    {
++        return strpos($path, $this->translationJsConfig->getDictionaryFileName()) !== false;
++    }
++
++    /**
+      * @param string $path
+      * @return void
+      */
+diff --git a/vendor/magento/module-deploy/Model/DeployStrategyFactory.php b/vendor/magento/module-deploy/Model/DeployStrategyFactory.php
+index 536f344..7ba159b 100644
+--- a/vendor/magento/module-deploy/Model/DeployStrategyFactory.php
++++ b/vendor/magento/module-deploy/Model/DeployStrategyFactory.php
+@@ -23,6 +23,11 @@ class DeployStrategyFactory
+     const DEPLOY_STRATEGY_QUICK = 'quick';
+ 
+     /**
++     * Strategy for deploying js dictionary
++     */
++    const DEPLOY_STRATEGY_JS_DICTIONARY = 'js-dictionary';
++
++    /**
+      * @param ObjectManagerInterface $objectManager
+      */
+     public function __construct(ObjectManagerInterface $objectManager)
+@@ -41,6 +46,7 @@ public function create($type, array $arguments = [])
+         $strategyMap = [
+             self::DEPLOY_STRATEGY_STANDARD => Deploy\LocaleDeploy::class,
+             self::DEPLOY_STRATEGY_QUICK => Deploy\LocaleQuickDeploy::class,
++            self::DEPLOY_STRATEGY_JS_DICTIONARY => Deploy\JsDictionaryDeploy::class
+         ];
+ 
+         if (!isset($strategyMap[$type])) {
+diff --git a/vendor/magento/module-deploy/Test/Unit/Model/Deploy/JsDictionaryDeployTest.php b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/JsDictionaryDeployTest.php
+new file mode 100644
+index 0000000..2533476
+--- /dev/null
++++ b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/JsDictionaryDeployTest.php
+@@ -0,0 +1,103 @@
++<?php
++/**
++ * Copyright © 2013-2017 Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++namespace Magento\Deploy\Test\Unit\Model\Deploy;
++
++use Symfony\Component\Console\Output\OutputInterface;
++use Magento\Framework\Translate\Js\Config as TranslationJsConfig;
++use Magento\Framework\TranslateInterface;
++use Magento\Framework\View\Asset\Repository;
++use Magento\Framework\View\Asset\LocalInterface as Asset;
++use Magento\Framework\App\View\Asset\Publisher;
++use Magento\Deploy\Model\Deploy\JsDictionaryDeploy;
++use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
++
++class JsDictionaryDeployTest extends \PHPUnit_Framework_TestCase
++{
++    /**
++     * @var TranslationJsConfig|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $translationJsConfig;
++
++    /**
++     * @var TranslateInterface|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $translator;
++
++    /**
++     * @var Repository|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $assetRepo;
++
++    /**
++     * @var Asset|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $asset;
++
++    /**
++     * @var Publisher|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $assetPublisher;
++
++    /**
++     * @var JsDictionaryDeploy
++     */
++    private $model;
++
++    /**
++     * @var OutputInterface|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $output;
++
++    protected function setUp()
++    {
++        $this->output = $this->getMockBuilder(OutputInterface::class)
++            ->setMethods(['writeln', 'isVeryVerbose'])
++            ->getMockForAbstractClass();
++
++        $this->translationJsConfig = $this->getMock(TranslationJsConfig::class, [], [], '', false);
++        $this->translator = $this->getMockForAbstractClass(TranslateInterface::class, [], '', false, false, true);
++        $this->assetRepo = $this->getMock(Repository::class, [], [], '', false);
++        $this->asset = $this->getMockForAbstractClass(Asset::class, [], '', false, false, true);
++        $this->assetPublisher = $this->getMock(Publisher::class, [], [], '', false);
++
++        $this->model = (new ObjectManager($this))->getObject(
++            JsDictionaryDeploy::class,
++            [
++                'translationJsConfig' => $this->translationJsConfig,
++                'translator' => $this->translator,
++                'assetRepo' => $this->assetRepo,
++                'assetPublisher' => $this->assetPublisher,
++                'output' => $this->output
++            ]
++        );
++    }
++
++    public function testDeploy()
++    {
++        $area = 'adminhtml';
++        $themePath = 'Magento/backend';
++        $locale = 'uk_UA';
++
++        $dictionary = 'js-translation.json';
++
++        $this->translationJsConfig->expects(self::once())->method('getDictionaryFileName')
++            ->willReturn($dictionary);
++
++        $this->translator->expects($this->once())->method('setLocale')->with($locale);
++        $this->translator->expects($this->once())->method('loadData')->with($area, true);
++
++        $this->assetRepo->expects($this->once())->method('createAsset')
++            ->with(
++                $dictionary,
++                ['area' => $area, 'theme' => $themePath, 'locale' => $locale]
++            )
++            ->willReturn($this->asset);
++
++        $this->assetPublisher->expects($this->once())->method('publish');
++
++        $this->model->deploy($area, $themePath, $locale);
++    }
++}
+diff --git a/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleQuickDeployTest.php b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleQuickDeployTest.php
+index 6c693fe..d50c8ce 100644
+--- a/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleQuickDeployTest.php
++++ b/vendor/magento/module-deploy/Test/Unit/Model/Deploy/LocaleQuickDeployTest.php
+@@ -11,7 +11,10 @@
+ use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+ use Symfony\Component\Console\Output\OutputInterface;
+ use Magento\Deploy\Console\Command\DeployStaticOptionsInterface as Options;
+-use \Magento\Framework\RequireJs\Config as RequireJsConfig;
++use Magento\Framework\RequireJs\Config as RequireJsConfig;
++use Magento\Framework\Translate\Js\Config as TranslationJsConfig;
++use Magento\Deploy\Model\Deploy\JsDictionaryDeploy;
++use Magento\Deploy\Model\DeployStrategyFactory;
+ 
+ class LocaleQuickDeployTest extends \PHPUnit_Framework_TestCase
+ {
+@@ -25,15 +28,32 @@ class LocaleQuickDeployTest extends \PHPUnit_Framework_TestCase
+      */
+     private $staticDirectoryMock;
+ 
++    /**
++     * @var TranslationJsConfig|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $translationJsConfig;
++
++    /**
++     * @var JsDictionaryDeploy|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $jsDictionaryDeploy;
++
++    /**
++     * @var DeployStrategyFactory|\PHPUnit_Framework_MockObject_MockObject
++     */
++    private $deployStrategyFactory;
++
+     protected function setUp()
+     {
+         $this->outputMock = $this->getMockBuilder(OutputInterface::class)
+-            ->setMethods(['writeln'])
++            ->setMethods(['writeln', 'isVeryVerbose'])
+             ->getMockForAbstractClass();
+-
+         $this->staticDirectoryMock = $this->getMockBuilder(WriteInterface::class)
+             ->setMethods(['createSymlink', 'getAbsolutePath', 'getRelativePath', 'copyFile', 'readRecursively'])
+             ->getMockForAbstractClass();
++        $this->translationJsConfig = $this->getMock(TranslationJsConfig::class, [], [], '', false);
++        $this->deployStrategyFactory = $this->getMock(DeployStrategyFactory::class, [], [], '', false);
++        $this->jsDictionaryDeploy = $this->getMock(JsDictionaryDeploy::class, [], [], '', false);
+     }
+ 
+     /**
+@@ -68,29 +88,53 @@ public function testDeployWithSymlinkStrategy()
+ 
+     public function testDeployWithCopyStrategy()
+     {
+-
+         $area = 'adminhtml';
+         $themePath = 'Magento/backend';
+         $locale = 'uk_UA';
+-        $baseLocal = 'en_US';
++        $baseLocale = 'en_US';
++        $baseDir = $baseLocale . 'dir';
++        $file1 = 'file1';
++        $file2 = 'file2';
++        $baseFile1 = $baseLocale . $file1;
++        $baseFile2 = $baseLocale . $file2;
++
++        $dictionary = 'js-translation.json';
++        $baseDictionary = $baseLocale . $dictionary;
+ 
+         $this->staticDirectoryMock->expects(self::never())->method('createSymlink');
+-        $this->staticDirectoryMock->expects(self::exactly(2))->method('readRecursively')->willReturnMap([
+-            ['adminhtml/Magento/backend/en_US', [$baseLocal . 'file1', $baseLocal . 'dir']],
+-            [RequireJsConfig::DIR_NAME  . '/adminhtml/Magento/backend/en_US', [$baseLocal . 'file2']]
+-        ]);
+-        $this->staticDirectoryMock->expects(self::exactly(3))->method('isFile')->willReturnMap([
+-            [$baseLocal . 'file1', true],
+-            [$baseLocal . 'dir', false],
+-            [$baseLocal . 'file2', true],
++        $this->staticDirectoryMock->expects(self::exactly(2))->method('readRecursively')->willReturnMap(
++            [
++                ['adminhtml/Magento/backend/en_US', [$baseFile1, $baseDir]],
++                [RequireJsConfig::DIR_NAME  . '/adminhtml/Magento/backend/en_US', [$baseFile2, $baseDictionary]]
++            ]
++        );
++        $this->staticDirectoryMock->expects(self::exactly(4))->method('isFile')->willReturnMap([
++            [$baseFile1, true],
++            [$baseDir, false],
++            [$baseFile2, true],
++            [$baseDictionary, true]
+         ]);
+         $this->staticDirectoryMock->expects(self::exactly(2))->method('copyFile')->withConsecutive(
+-            [$baseLocal . 'file1', $locale . 'file1', null],
+-            [$baseLocal . 'file2', $locale . 'file2', null]
++            [$baseFile1, $locale . $file1, null],
++            [$baseFile2, $locale . $file2, null]
+         );
+ 
++        $this->translationJsConfig->expects(self::exactly(3))->method('getDictionaryFileName')
++            ->willReturn($dictionary);
++
++        $this->translationJsConfig->expects($this->once())->method('dictionaryEnabled')->willReturn(true);
++
++        $this->deployStrategyFactory->expects($this->once())->method('create')
++            ->with(
++                DeployStrategyFactory::DEPLOY_STRATEGY_JS_DICTIONARY,
++                ['output' => $this->outputMock, 'translationJsConfig' => $this->translationJsConfig]
++            )
++            ->willReturn($this->jsDictionaryDeploy);
++
++        $this->jsDictionaryDeploy->expects($this->once())->method('deploy')->with($area, $themePath, $locale);
++
+         $model = $this->getModel([
+-            DeployInterface::DEPLOY_BASE_LOCALE => $baseLocal,
++            DeployInterface::DEPLOY_BASE_LOCALE => $baseLocale,
+             Options::SYMLINK_LOCALE => 0,
+         ]);
+         $model->deploy($area, $themePath, $locale);
+@@ -107,7 +151,9 @@ private function getModel($options = [])
+             [
+                 'output' => $this->outputMock,
+                 'staticDirectory' => $this->staticDirectoryMock,
+-                'options' => $options
++                'options' => $options,
++                'translationJsConfig' => $this->translationJsConfig,
++                'deployStrategyFactory' => $this->deployStrategyFactory
+             ]
+         );
+     }

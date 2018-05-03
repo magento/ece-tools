@@ -126,6 +126,7 @@
   },
   "magento/module-translation": {
     "Fix incorrect js-translation.json localization": {
+      "^100.1.2": "2.1/MAGETWO-62660.composer.patch",
       "100.2.0 - 100.2.1": "2.2/fix-translation-json-preprocessor.patch"
     }
   }
