@@ -112,7 +112,7 @@
     },
     "Fixing bundling javascript files with gzip compression (Magento 2.2.0 - 2.2.3)": {
       "2.2.0 - 2.2.3": "2.2/MAGETWO-84507.patch"
-    }
+    },
     "Fix incorrect js-translation.json localization": {
       "2.1.*": "2.1/MAGETWO-62660.composer.patch",
       "2.2.0 - 2.2.1": "2.2/fix-translation-json-preprocessor.patch"
