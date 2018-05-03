@@ -78,6 +78,9 @@ class AcceptanceTest extends AbstractTest
                         'max_messages' => 10000,
                         'consumers' => [],
                     ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
                 ],
             ],
             'test cron_consumers_runner with array' => [
@@ -97,6 +100,9 @@ class AcceptanceTest extends AbstractTest
                         'max_messages' => 5000,
                         'consumers' => ['test'],
                     ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
                 ],
             ],
             'test cron_consumers_runner with string' => [
@@ -111,6 +117,9 @@ class AcceptanceTest extends AbstractTest
                         'cron_run' => true,
                         'max_messages' => 100,
                         'consumers' => ['test2'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
                     ],
                 ],
             ],
@@ -127,6 +136,9 @@ class AcceptanceTest extends AbstractTest
                         'cron_run' => false,
                         'max_messages' => 10000,
                         'consumers' => [],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
                     ],
                 ],
             ],
