@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 
+use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\SchemaValidator;
@@ -25,7 +26,7 @@ class SchemaValidatorTest extends TestCase
      */
     protected function setUp()
     {
-        $this->validator = new SchemaValidator();
+        $this->validator = new SchemaValidator(new Schema());
     }
 
     /**
