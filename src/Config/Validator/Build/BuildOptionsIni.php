@@ -106,7 +106,7 @@ class BuildOptionsIni implements ValidatorInterface
      */
     private function prepareValue(string $name, $value)
     {
-        if (in_array($name, ['SCD_COMPRESSION_LEVEL', 'scd_threads']) && ctype_digit($name)) {
+        if (in_array($name, ['SCD_COMPRESSION_LEVEL', 'scd_threads']) && ctype_digit($value)) {
             return (int)$value;
         }
 
