@@ -71,7 +71,7 @@ class PostDeploy implements PostDeployInterface
             $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
 
             $this->mergedConfig = array_replace(
-                $this->getDefault(),
+                $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY),
                 $envConfig[self::STAGE_GLOBAL] ?? [],
                 $envConfig[self::STAGE_POST_DEPLOY] ?? []
             );
