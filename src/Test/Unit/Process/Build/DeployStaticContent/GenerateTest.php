@@ -5,13 +5,13 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build\DeployStaticContent;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent\Generate;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Build\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,29 +25,29 @@ class GenerateTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
-
-    /**
-     * @var CommandFactory|Mock
+     * @var CommandFactory|MockObject
      */
     private $commandFactoryMock;
 
     /**
-     * @var Option|Mock
+     * @var Option|MockObject
      */
     private $optionMock;
+
+    /**
+     * @var BuildInterface|MockObject
+     */
+    private $buildConfigMock;
 
     /**
      * @inheritdoc
@@ -56,22 +56,25 @@ class GenerateTest extends TestCase
     {
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->commandFactoryMock = $this->createMock(CommandFactory::class);
         $this->optionMock = $this->createMock(Option::class);
+        $this->buildConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
 
         $this->process = new Generate(
             $this->shellMock,
             $this->loggerMock,
-            $this->environmentMock,
             $this->commandFactoryMock,
-            $this->optionMock
+            $this->optionMock,
+            $this->buildConfigMock
         );
     }
 
     public function testExecute()
     {
-        $command = 'setup:static-content:deploy with locales';
+        $commands = [
+            'setup:static-content:deploy with locales',
+            'setup:static-content:deploy with locales en_US',
+        ];
         $this->optionMock->expects($this->once())
             ->method('getLocales')
             ->willReturn(['ua_UA', 'fr_FR', 'es_ES', 'en_US']);
@@ -83,12 +86,19 @@ class GenerateTest extends TestCase
                 ["Generating static content for locales: ua_UA fr_FR es_ES en_US\nUsing 3 Threads"]
             );
         $this->commandFactoryMock->expects($this->once())
-            ->method('create')
-            ->with($this->optionMock)
-            ->willReturn($command);
-        $this->shellMock->expects($this->once())
+            ->method('matrix')
+            ->with($this->optionMock, ['some_matrix'])
+            ->willReturn($commands);
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->with($command);
+            ->withConsecutive(
+                ['setup:static-content:deploy with locales'],
+                ['setup:static-content:deploy with locales en_US']
+            );
+        $this->buildConfigMock->expects($this->once())
+            ->method('get')
+            ->with(BuildInterface::VAR_SCD_MATRIX)
+            ->willReturn(['some_matrix']);
 
         $this->process->execute();
     }

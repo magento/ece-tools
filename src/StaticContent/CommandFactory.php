@@ -16,7 +16,7 @@ class CommandFactory
     /**
      * A composer version constraint of versions that cannot use a static content deployment strategy.
      */
-    const NO_SCD_VERSION_CONSTRAINT = "<2.2";
+    const NO_SCD_VERSION_CONSTRAINT = '<2.2';
 
     /**
      * @var MagentoVersion
@@ -42,23 +42,68 @@ class CommandFactory
      * Creates static deploy command based on given options
      *
      * @param OptionInterface $option
+     * @param array $excludedThemes
+     * @return string
+     */
+    public function create(OptionInterface $option, array $excludedThemes = []): string
+    {
+        $command = $this->build($option);
+        $excludedThemes = array_unique(array_merge(
+            $option->getExcludedThemes(),
+            $excludedThemes
+        ));
+
+        if ($excludedThemes) {
+            $command .= ' --exclude-theme ' . implode(' --exclude-theme ', $excludedThemes);
+        }
+
+        if ($locales = $option->getLocales()) {
+            $command .= ' ' . implode(' ', $locales);
+        }
+
+        return $command;
+    }
+
+    /**
+     * Creates set of SCD deployment commands within given matrix.
+     *
+     * @param OptionInterface $option
+     * @param array $matrix
+     * @return array
+     */
+    public function matrix(OptionInterface $option, array $matrix): array
+    {
+        $commands = [
+            $this->create($option, array_keys($matrix)),
+        ];
+
+        foreach ($matrix as $theme => $config) {
+            if (empty($config['language'])) {
+                continue;
+            }
+
+            $command = $this->build($option);
+            $command .= ' --theme ' . $theme;
+            $command .= ' ' . implode(' ', $config['language']);
+
+            $commands[] = $command;
+        }
+
+        return $commands;
+    }
+
+    /**
+     * @param OptionInterface $option
      * @return string
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    public function create(OptionInterface $option): string
+    private function build(OptionInterface $option): string
     {
         $command = 'php ./bin/magento setup:static-content:deploy';
 
         if ($option->isForce()) {
             $command .= ' -f';
-        }
-
-        $excludedThemes = $option->getExcludedThemes();
-        if (count($excludedThemes) == 1) {
-            $command .= ' --exclude-theme=' . $excludedThemes[0];
-        } elseif (count($excludedThemes) > 1) {
-            $command .= ' --exclude-theme=' . implode(' --exclude-theme=', $excludedThemes);
         }
 
         if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)) {
@@ -74,14 +119,9 @@ class CommandFactory
             $command .= ' ' . $verbosityLevel;
         }
 
-        $locales = $option->getLocales();
-        if (count($locales)) {
-            $command .= ' ' . implode(' ', $locales);
-        }
-
-        $treadCount = $option->getThreadCount();
-        if ($treadCount) {
-            $command .= ' --jobs=' . $treadCount;
+        $threadCount = $option->getThreadCount();
+        if ($threadCount) {
+            $command .= ' --jobs ' . $threadCount;
         }
 
         if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)

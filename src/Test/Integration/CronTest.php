@@ -48,7 +48,7 @@ class CronTest extends AbstractTest
      */
     protected function setUp()
     {
-        $this->bootstrap = Bootstrap::create();
+        $this->bootstrap = Bootstrap::getInstance();
     }
 
     /**
@@ -126,12 +126,11 @@ class CronTest extends AbstractTest
     /**
      * @return array
      */
-    public function cronDataProvider()
+    public function cronDataProvider(): array
     {
         return [
             ['version' => '2.2.0'],
             ['version' => '2.2.2'],
-            ['version' => '2.2.*'],
             ['version' => '@stable'],
         ];
     }
@@ -141,7 +140,17 @@ class CronTest extends AbstractTest
      */
     protected function tearDown()
     {
-        parent::tearDown();
-        $this->bootstrap->destroy();
+        Bootstrap::getInstance()->execute(sprintf(
+            'cd %s && php bin/magento setup:uninstall -n',
+            Bootstrap::getInstance()->getSandboxDir()
+        ));
+        Bootstrap::getInstance()->createApplication([])->getContainer()
+            ->get(ConnectionInterface::class)
+            ->close();
+        Bootstrap::getInstance()->execute(sprintf(
+            'cd %s && rm -rf vendor/*',
+            Bootstrap::getInstance()->getSandboxDir()
+        ));
+        Bootstrap::getInstance()->destroy();
     }
 }

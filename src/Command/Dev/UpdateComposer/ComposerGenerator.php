@@ -14,11 +14,6 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class ComposerGenerator
 {
-    const CE_REPO = 'ce';
-    const EE_REPO = 'ee';
-    const B2B_REPO = 'b2b';
-
-    const POSSIBLE_REPOS = [self::CE_REPO, self::EE_REPO, self::B2B_REPO];
     /**
      * @var DirectoryList
      */
@@ -92,8 +87,8 @@ class ComposerGenerator
      */
     public function getInstallFromGitScripts(array $repoOptions): array
     {
-        $installFromGitScripts = ['php -r"mkdir(__DIR__ . \'/app/etc\', 0777, true);"'];
-        $installFromGitScripts[] = 'rm -rf ' . implode(' ', self::POSSIBLE_REPOS);
+        $installFromGitScripts = ['php -r"@mkdir(__DIR__ . \'/app/etc\', 0777, true);"'];
+        $installFromGitScripts[] = 'rm -rf ' . implode(' ', array_keys($repoOptions));
 
         foreach ($repoOptions as $repoName => $gitOption) {
             $gitCloneCommand = 'git clone -b %s --single-branch --depth 1 %s %s';
@@ -124,7 +119,7 @@ class ComposerGenerator
         foreach (array_keys($repoOptions) as $repoName) {
             $preparePackagesScripts[] = sprintf(
                 "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
-                . "--exclude='dev/tests' --exclude='lib/internal/Magento' ./%s/ ./",
+                . "--exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./%s/ ./",
                 $repoName
             );
         }
@@ -135,52 +130,53 @@ class ComposerGenerator
             'type' => 'project',
             'version' => $this->magentoVersion->getVersion(),
             'license' => [
-                'OSL-3.0'
+                'OSL-3.0',
             ],
             'bin' => [
-                'ce/bin/magento'
+                'ce/bin/magento',
             ],
             'repositories' => [
                 'magento/framework' => [
                     'type' => 'path',
                     'url' => './ce/lib/internal/Magento/Framework/',
                     'transport-options' => [
-                        'symlink' => false
+                        'symlink' => false,
                     ],
                     'options' => [
-                        'symlink' => false
-                    ]
+                        'symlink' => false,
+                    ],
                 ],
             ],
             'require' => [
             ],
             'config' => [
-                'use-include-path' => true
+                'use-include-path' => true,
             ],
             'autoload' => [
                 'psr-4' => [
                     'Magento\\Setup\\' => 'setup/src/Magento/Setup/',
+                    'Zend\\Mvc\\Controller\\' => 'setup/src/Zend/Mvc/Controller/'
                 ],
             ],
             'minimum-stability' => 'dev',
             'prefer-stable' => true,
             'extra' => [
                 'magento-force' => 'override',
-                'magento-deploystrategy' => 'copy'
+                'magento-deploystrategy' => 'copy',
             ],
             'scripts' => [
                 'install-from-git' => $installFromGitScripts,
                 'prepare-packages' => $preparePackagesScripts,
                 'pre-install-cmd' => [
-                    '@install-from-git'
+                    '@install-from-git',
                 ],
                 'pre-update-cmd' => [
-                    '@install-from-git'
+                    '@install-from-git',
                 ],
                 'post-install-cmd' => [
-                    '@prepare-packages'
-                ]
-            ]
+                    '@prepare-packages',
+                ],
+            ],
         ];
 
         return $composer;
@@ -205,8 +201,8 @@ class ComposerGenerator
                 'type' => 'path',
                 'url' => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
                 'options' => [
-                    'symlink' => false
-                ]
+                    'symlink' => false,
+                ],
             ];
             $composer['require'][$dirComposer['name']] = $dirComposer['version'] ?? '*';
         };

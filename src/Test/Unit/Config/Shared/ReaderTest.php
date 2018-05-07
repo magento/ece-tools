@@ -8,8 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Shared;
 use Magento\MagentoCloud\Config\Shared\Reader;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -17,12 +17,12 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class ReaderTest extends TestCase
 {
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 

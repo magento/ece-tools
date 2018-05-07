@@ -23,11 +23,11 @@ class ComposerGeneratorTest extends TestCase
     private $repoOptions = [
         'repo1' => [
             'repo' => 'path_to_repo1',
-            'branch' => '1.0.0'
+            'branch' => '1.0.0',
         ],
         'repo2' => [
             'repo' => 'path_to_repo2',
-            'branch' => '1.0.0'
+            'branch' => '1.0.0',
         ],
     ];
 
@@ -51,6 +51,9 @@ class ComposerGeneratorTest extends TestCase
      */
     private $composerGenerator;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -99,9 +102,9 @@ class ComposerGeneratorTest extends TestCase
         $this->assertEquals(
             [
                 "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
-                . " --exclude='dev/tests' --exclude='lib/internal/Magento' ./repo1/ ./",
+                . " --exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./repo1/ ./",
                 "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
-                . " --exclude='dev/tests' --exclude='lib/internal/Magento' ./repo2/ ./",
+                . " --exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./repo2/ ./",
             ],
             $composer['scripts']['prepare-packages']
         );
@@ -121,10 +124,10 @@ class ComposerGeneratorTest extends TestCase
     {
         $this->assertEquals(
             [
-                'php -r"mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
-                'rm -rf ce ee b2b',
+                'php -r"@mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
+                'rm -rf repo1 repo2',
                 'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo1 repo1',
-                'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo2 repo2'
+                'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo2 repo2',
             ],
             $actual
         );

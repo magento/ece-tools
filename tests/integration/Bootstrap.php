@@ -7,8 +7,8 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Container;
-use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Integration testing bootstrap.
@@ -34,17 +34,25 @@ class Bootstrap
     private $file;
 
     /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    /**
      * Bootstrap constructor.
      */
     public function __construct()
     {
         $this->file = new File();
+        $this->shell = new Shell\Shell(
+            $this->getSandboxDir()
+        );
     }
 
     /**
      * @return Bootstrap
      */
-    public static function create(): Bootstrap
+    public static function getInstance(): Bootstrap
     {
         if (null === static::$instance) {
             static::$instance = new self();
@@ -55,7 +63,6 @@ class Bootstrap
 
     /**
      * @param string $version
-     * @throws \Exception
      */
     public function run($version = '@stable')
     {
@@ -74,7 +81,7 @@ class Bootstrap
             $this->file->createDirectory($sandboxDir);
         }
 
-        $this->execute(sprintf(
+        $this->shell->execute(sprintf(
             'composer create-project --no-dev --repository-url=%s %s %s %s',
             getenv('MAGENTO_REPO') ?: 'https://repo.magento.com/',
             getenv('MAGENTO_PROJECT') ?: 'magento/project-enterprise-edition',
@@ -93,9 +100,8 @@ class Bootstrap
     /**
      * @param array $environment
      * @return Application
-     * @throws \Exception
      */
-    public function createApplication(array $environment): Application
+    public function createApplication(array $environment = []): Application
     {
         $environment = $this->getAllEnv($environment);
 
@@ -122,7 +128,6 @@ class Bootstrap
     /**
      * @param array $environment
      * @return Repository
-     * @throws \Exception
      */
     private function getAllEnv(array $environment): Repository
     {
@@ -137,6 +142,8 @@ class Bootstrap
      * @param array $environment
      * @return array
      * @throws \Exception
+     * @deprecated
+     * @see \Magento\MagentoCloud\Util\UrlManager
      */
     public function getEnv(string $value, array $environment): array
     {
@@ -155,6 +162,8 @@ class Bootstrap
 
     /**
      * @return string
+     * @deprecated
+     * @see \Magento\MagentoCloud\Filesystem\SystemList
      */
     public function getSandboxDir(): string
     {
@@ -164,9 +173,8 @@ class Bootstrap
     /**
      * @param string $file
      * @return string
-     * @throws \Exception
      */
-    public function getConfigFile(string $file): string
+    private function getConfigFile(string $file): string
     {
         $configFile = ECE_BP . '/tests/integration/etc/' . $file;
 
@@ -174,19 +182,16 @@ class Bootstrap
             return $configFile;
         }
 
-        if ($this->file->isExists($configFile . '.dist')) {
-            return $configFile . '.dist';
-        }
-
-        throw new \Exception(sprintf(
-            'Config file %s can not be found',
-            $file
-        ));
+        return $configFile . '.dist';
     }
 
     /**
+     * Execute command.
+     *
      * @param string $command
      * @return array
+     * @deprecated
+     * @see \Magento\MagentoCloud\Shell\ShellInterface
      */
     public function execute(string $command): array
     {
