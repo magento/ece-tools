@@ -83,6 +83,10 @@ class MagentoCloudVariablesTest extends TestCase
                 ResultInterface::SUCCESS
             ],
             [
+                ['STATIC_CONTENT_THREADS' => 3],
+                ResultInterface::SUCCESS
+            ],
+            [
                 ['STATIC_CONTENT_THREADS' => '3a'],
                 ResultInterface::ERROR
             ],
@@ -97,6 +101,10 @@ class MagentoCloudVariablesTest extends TestCase
             ],
             [
                 [DeployInterface::VAR_SCD_THREADS => '3'],
+                ResultInterface::SUCCESS
+            ],
+            [
+                [DeployInterface::VAR_SCD_THREADS => 3],
                 ResultInterface::SUCCESS
             ],
             [

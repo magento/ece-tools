@@ -85,7 +85,10 @@ class MagentoCloudVariables implements ValidatorInterface
         ];
 
         foreach ($intVariables as $intVarName) {
-            if (isset($variables[$intVarName]) && !ctype_digit($variables[$intVarName])) {
+            if (isset($variables[$intVarName])
+                && !is_int($variables[$intVarName])
+                && !ctype_digit($variables[$intVarName])
+            ) {
                 $errors[] = sprintf(
                     'Variable "%s" has wrong value: "%s". Please use only integer values.',
                     $intVarName,
