@@ -7,7 +7,9 @@ namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -37,18 +39,26 @@ class Deploy implements DeployInterface
     private $environment;
 
     /**
+     * @var Schema
+     */
+    private $schema;
+
+    /**
      * @param Environment $environment
      * @param EnvironmentReader $environmentReader
      * @param EnvironmentConfig $environmentConfig
+     * @param Schema $schema
      */
     public function __construct(
         Environment $environment,
         EnvironmentReader $environmentReader,
-        EnvironmentConfig $environmentConfig
+        EnvironmentConfig $environmentConfig,
+        Schema $schema
     ) {
         $this->environment = $environment;
         $this->environmentReader = $environmentReader;
         $this->environmentConfig = $environmentConfig;
+        $this->schema = $schema;
     }
 
     /**
@@ -56,7 +66,7 @@ class Deploy implements DeployInterface
      */
     public function get(string $name)
     {
-        if (!array_key_exists($name, $this->getDefault())) {
+        if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY))) {
             throw new \RuntimeException(sprintf(
                 'Config %s was not defined.',
                 $name
@@ -96,7 +106,8 @@ class Deploy implements DeployInterface
             $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
 
             $this->mergedConfig = array_replace(
-                $this->getDefault(),
+                $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY),
+                $this->getDeployConfiguration(),
                 $envConfig[self::STAGE_GLOBAL] ?? [],
                 $envConfig[self::STAGE_DEPLOY] ?? [],
                 $this->environmentConfig->getAll()
@@ -107,46 +118,20 @@ class Deploy implements DeployInterface
     }
 
     /**
-     * Resolves default configuration value if other was not provided.
+     * Resolves default configuration value for deploy stage.
+     *
+     * SCD_THREADS = 3 for production environment.
      *
      * @return array
      */
-    private function getDefault(): array
+    private function getDeployConfiguration(): array
     {
-        return [
-            self::VAR_SCD_STRATEGY => '',
-            self::VAR_SCD_COMPRESSION_LEVEL => 4,
-            self::VAR_SEARCH_CONFIGURATION => [],
-            self::VAR_QUEUE_CONFIGURATION => [],
-            self::VAR_CACHE_CONFIGURATION => [],
-            self::VAR_SESSION_CONFIGURATION => [],
-            self::VAR_VERBOSE_COMMANDS => '',
-            self::VAR_CRON_CONSUMERS_RUNNER => [],
-            self::VAR_CLEAN_STATIC_FILES => true,
-            self::VAR_STATIC_CONTENT_SYMLINK => true,
-            self::VAR_UPDATE_URLS => true,
-            self::VAR_SKIP_SCD => false,
-            self::VAR_SCD_THREADS => $this->getDefaultScdThreads(),
-            self::VAR_GENERATED_CODE_SYMLINK => true,
-            self::VAR_SCD_EXCLUDE_THEMES => '',
-            self::VAR_REDIS_USE_SLAVE_CONNECTION => false,
-            self::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
-            self::VAR_SCD_MATRIX => [],
-        ];
-    }
+        $config = [];
 
-    /**
-     * Retrieves default scd threads value.
-     * 3 if production environment otherwise 1
-     *
-     * @return int
-     */
-    private function getDefaultScdThreads()
-    {
         if ($this->environment->getEnv('MAGENTO_CLOUD_MODE')  === Environment::CLOUD_MODE_ENTERPRISE) {
-            return 3;
+            $config[self::VAR_SCD_THREADS] = 3;
         }
 
-        return 1;
+        return $config;
     }
 }

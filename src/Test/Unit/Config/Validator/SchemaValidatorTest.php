@@ -51,7 +51,7 @@ class SchemaValidatorTest extends TestCase
     public function validateDataProvider(): array
     {
         return [
-            ['keyNotExist', 'someValue', null],
+            ['keyNotExist', 'someValue', 'Item keyNotExist is not allowed in configuration.'],
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-v', null],
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-vv', null],
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-vvv', null],

@@ -7,9 +7,12 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -39,6 +42,11 @@ class DeployTest extends TestCase
     private $environmentMock;
 
     /**
+     * @var Schema|Mock
+     */
+    private $schemaMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -46,11 +54,36 @@ class DeployTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);
+        $this->schemaMock = $this->createMock(Schema::class);
+        $this->schemaMock->expects($this->any())
+            ->method('getDefaults')
+            ->with(StageConfigInterface::STAGE_DEPLOY)
+            ->willReturn([
+                DeployInterface::VAR_SCD_STRATEGY => '',
+                DeployInterface::VAR_SCD_COMPRESSION_LEVEL => 4,
+                DeployInterface::VAR_SEARCH_CONFIGURATION => [],
+                DeployInterface::VAR_QUEUE_CONFIGURATION => [],
+                DeployInterface::VAR_CACHE_CONFIGURATION => [],
+                DeployInterface::VAR_SESSION_CONFIGURATION => [],
+                DeployInterface::VAR_VERBOSE_COMMANDS => '',
+                DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [],
+                DeployInterface::VAR_CLEAN_STATIC_FILES => true,
+                DeployInterface::VAR_STATIC_CONTENT_SYMLINK => true,
+                DeployInterface::VAR_UPDATE_URLS => true,
+                DeployInterface::VAR_SKIP_SCD => false,
+                DeployInterface::VAR_SCD_THREADS => 1,
+                DeployInterface::VAR_GENERATED_CODE_SYMLINK => true,
+                DeployInterface::VAR_SCD_EXCLUDE_THEMES => '',
+                DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => false,
+                DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
+                DeployInterface::VAR_SCD_MATRIX => [],
+            ]);
 
         $this->config = new Deploy(
             $this->environmentMock,
             $this->environmentReaderMock,
-            $this->environmentConfigMock
+            $this->environmentConfigMock,
+            $this->schemaMock
         );
     }
 
@@ -71,6 +104,19 @@ class DeployTest extends TestCase
             ->willReturn($envVarConfig);
 
         $this->assertSame($expectedValue, $this->config->get($name));
+    }
+
+    /**
+     * @expectedExceptionMessage File system error
+     * @expectedException \RuntimeException
+     */
+    public function testGetWithFileSystemException()
+    {
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new FileSystemException('File system error'));
+
+        $this->config->get(Deploy::VAR_SCD_STRATEGY);
     }
 
     /**
