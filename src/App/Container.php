@@ -148,16 +148,18 @@ class Container implements ContainerInterface
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
-                                    $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
                                     $this->container->make(ConfigValidator\Build\StageConfig::class),
                                     $this->container->make(ConfigValidator\Build\BuildOptionsIni::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
+                                    $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
                                     $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
                                     $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
+                                    $this->container->make(ConfigValidator\Build\ModulesExists::class),
                                 ],
                             ],
                         ]),
+                        $this->container->make(BuildProcess\RefreshModules::class),
                         $this->container->make(BuildProcess\ApplyPatches::class),
                         $this->container->make(BuildProcess\MarshallFiles::class),
                         $this->container->make(BuildProcess\CopySampleData::class),
@@ -271,6 +273,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Session::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DocumentRoot::class),
                     ],
                 ]);
             });

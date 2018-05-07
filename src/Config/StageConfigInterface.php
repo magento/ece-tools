@@ -34,6 +34,7 @@ interface StageConfigInterface
     const VAR_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
     const VAR_SCD_ON_DEMAND = 'SCD_ON_DEMAND';
     const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
+    const VAR_SCD_MATRIX = 'SCD_MATRIX';
 
     /**
      * Settings for deployment from git.

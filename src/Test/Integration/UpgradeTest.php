@@ -23,7 +23,7 @@ class UpgradeTest extends AbstractTest
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::create()->run('2.2.0');
+        Bootstrap::getInstance()->run('2.2.0');
     }
 
     /**

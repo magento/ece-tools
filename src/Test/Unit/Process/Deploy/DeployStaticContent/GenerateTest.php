@@ -100,8 +100,10 @@ class GenerateTest extends TestCase
                 ['Maintenance mode is disabled.']
             );
         $this->commandFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn('php ./bin/magento static:content:deploy:command');
+            ->method('matrix')
+            ->willReturn([
+                'php ./bin/magento static:content:deploy:command',
+            ]);
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
@@ -110,8 +112,10 @@ class GenerateTest extends TestCase
                 ['php ./bin/magento maintenance:disable -vvv']
             );
         $this->stageConfigMock->method('get')
-            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
-            ->willReturn('-vvv');
+            ->willReturnMap([
+                [DeployInterface::VAR_VERBOSE_COMMANDS, '-vvv'],
+                [DeployInterface::VAR_SCD_MATRIX, []],
+            ]);
 
         $this->process->execute();
     }
