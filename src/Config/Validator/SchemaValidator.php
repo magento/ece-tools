@@ -22,12 +22,21 @@ class SchemaValidator
      */
     private $schema;
 
+    /**
+     * @param Schema $schema
+     */
     public function __construct(Schema $schema)
     {
         $this->schema = $schema;
     }
 
     /**
+     * Validates configuration item:
+     * - item exists in configuration schema
+     * - item configured in correct stage
+     * - item has correct type (integer, string, etc)
+     * - item value is correct
+     *
      * @param string $key
      * @param string $stage
      * @param mixed $value
