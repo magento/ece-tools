@@ -8,11 +8,14 @@ language: generic
 env:
   global:
     - DIR_TOOLS="/var/www/ece-tools"
+    -
   matrix:
     - TEST_SUITE=static-unit PHP=7.0 XDEBUG=true
     - TEST_SUITE=static-unit PHP=7.1 XDEBUG=true
-    - TEST_SUITE=integration PHP=7.0
-    - TEST_SUITE=integration PHP=7.1
+    - TEST_SUITE=integration PHP=7.0 INTEGRATION_INDEX=1 INTEGRATION_SETS=1
+    - TEST_SUITE=integration PHP=7.1 INTEGRATION_INDEX=1 INTEGRATION_SETS=3
+    - TEST_SUITE=integration PHP=7.1 INTEGRATION_INDEX=2 INTEGRATION_SETS=3
+    - TEST_SUITE=integration PHP=7.1 INTEGRATION_INDEX=3 INTEGRATION_SETS=3
 cache:
   apt: true
   directories:
@@ -22,6 +25,8 @@ before_install:
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
 install: docker-compose -f docker-compose-${PHP}.yml run cli bash -c "composer install -n -d ${DIR_TOOLS}"
-before_script: docker-compose -f docker-compose-${PHP}.yml up -d --build
+before_script:
+  - ./tests/travis/before_script.sh
+  - docker-compose -f docker-compose-${PHP}.yml up -d --build
 script: ./tests/travis/script.sh
 after_failure: docker ps -s
