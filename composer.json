@@ -1,6 +1,7 @@
 {
   "name": "magento/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
+  "type": "magento2-component",
   "version": "2002.0.11",
   "license": [
     "OSL-3.0",
@@ -61,5 +62,13 @@
   "config": {
     "sort-packages": true
   },
-  "prefer-stable": true
+  "prefer-stable": true,
+  "extra": {
+    "map": [
+      [
+        ".magento.env.yaml.sample",
+        ".magento.env.yaml.sample"
+      ]
+    ]
+  }
 }
