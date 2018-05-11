@@ -18,6 +18,7 @@ use Psr\Log\LoggerInterface;
  */
 class EnvironmentTest extends TestCase
 {
+    use \phpmock\phpunit\PHPMock;
     /**
      * @var Environment
      */
@@ -78,14 +79,18 @@ class EnvironmentTest extends TestCase
 
     /**
      * @param array $env
+     * @param mixed $getEnv
      * @param string $key
      * @param mixed $default
      * @param mixed $expected
      * @dataProvider getDataProvider
      */
-    public function testGet(array $env, string $key, $default, $expected)
+    public function testGet(array $env, $getEnv, string $key, $default, $expected)
     {
         $_ENV = $env;
+        $getenvMock = $this->getFunctionMock('Magento\MagentoCloud\Config', 'getenv');
+        $getenvMock->expects($this->any())
+            ->willReturn($getEnv);
 
         $this->assertSame($expected, $this->environment->get($key, $default));
     }
@@ -98,21 +103,38 @@ class EnvironmentTest extends TestCase
         return [
             'string value' => [
                 ['some_key' => base64_encode(json_encode('some_value'))],
+                false,
                 'some_key',
                 null,
                 'some_value',
             ],
             'empty value' => [
                 [],
+                false,
                 'some_key',
                 null,
                 null,
             ],
             'empty value with default' => [
                 [],
+                false,
                 'some_key',
                 'some_new_value',
                 'some_new_value',
+            ],
+            'empty value with getenv with default' => [
+                [],
+                base64_encode(json_encode('getenv_value')),
+                'some_key',
+                'some_new_value',
+                'getenv_value',
+            ],
+            'string value with getenv with default' => [
+                ['some_key' => base64_encode(json_encode('some_value'))],
+                base64_encode(json_encode('getenv_value')),
+                'some_key',
+                'some_new_value',
+                'some_value',
             ],
         ];
     }

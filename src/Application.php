@@ -63,6 +63,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(Command\Wizard\ScdOnDemand::class),
                 $this->container->get(Command\Wizard\ScdOnBuild::class),
                 $this->container->get(Command\Wizard\ScdOnDeploy::class),
+                $this->container->get(Command\ModuleRefresh::class),
             ]
         );
     }

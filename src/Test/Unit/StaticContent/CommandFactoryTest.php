@@ -81,8 +81,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 -s ' .
-                'quick -v en_US --jobs=3',
+                'php ./bin/magento setup:static-content:deploy -f -s quick -v --jobs 3 --exclude-theme theme1 '
+                . '--exclude-theme theme2 en_US',
             ],
             [
                 [
@@ -94,7 +94,7 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -s quick -v en_US de_DE --jobs=1',
+                'php ./bin/magento setup:static-content:deploy -s quick -v --jobs 1 --exclude-theme theme1 en_US de_DE',
             ],
             [
                 [
@@ -106,8 +106,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                'php ./bin/magento setup:static-content:deploy -f --exclude-theme=theme1 --exclude-theme=theme2 ' .
-                '-v en_US --jobs=3',
+                'php ./bin/magento setup:static-content:deploy -f -v --jobs 3 --exclude-theme theme1 --exclude-theme'
+                . ' theme2 en_US',
             ],
             [
                 [
@@ -119,7 +119,7 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                'php ./bin/magento setup:static-content:deploy --exclude-theme=theme1 -v en_US de_DE --jobs=1',
+                'php ./bin/magento setup:static-content:deploy -v --jobs 1 --exclude-theme theme1 en_US de_DE',
             ],
         ];
     }
@@ -156,5 +156,118 @@ class CommandFactoryTest extends TestCase
             ->willReturn($optionConfig['verbosity_level']);
 
         return $optionMock;
+    }
+
+    /**
+     * @param array $optionConfig
+     * @param array $matrix
+     * @param array $expected
+     * @dataProvider matrixDataProvider
+     */
+    public function testMatrix(array $optionConfig, array $matrix, array $expected)
+    {
+        $optionMock = $this->getMockForAbstractClass(OptionInterface::class);
+
+        $optionMock->expects($this->once())
+            ->method('getExcludedThemes')
+            ->willReturn($optionConfig['excluded_themes']);
+        $optionMock->expects($this->any())
+            ->method('getStrategy')
+            ->willReturn($optionConfig['strategy']);
+        $optionMock->expects($this->once())
+            ->method('getLocales')
+            ->willReturn($optionConfig['locales']);
+        $optionMock->expects($this->any())
+            ->method('isForce')
+            ->willReturn($optionConfig['is_force']);
+        $optionMock->expects($this->any())
+            ->method('getVerbosityLevel')
+            ->willReturn($optionConfig['verbosity_level']);
+
+        $this->assertSame(
+            $expected,
+            $this->commandFactory->matrix($optionMock, $matrix)
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function matrixDataProvider(): array
+    {
+        return [
+            [
+                [
+                    'thread_count' => 3,
+                    'excluded_themes' => ['theme1', 'theme2'],
+                    'strategy' => 'quick',
+                    'locales' => ['en_US'],
+                    'is_force' => true,
+                    'verbosity_level' => '-v',
+                ],
+                [],
+                [
+                    'php ./bin/magento setup:static-content:deploy -f -s quick -v --exclude-theme theme1'
+                    . ' --exclude-theme theme2 en_US',
+                ],
+            ],
+            [
+                [
+                    'thread_count' => 1,
+                    'excluded_themes' => ['theme1'],
+                    'strategy' => 'quick',
+                    'locales' => ['en_US', 'de_DE'],
+                    'is_force' => false,
+                    'verbosity_level' => '-v',
+                ],
+                [
+                    'Magento/backend' => [
+                        'language' => [],
+                    ],
+                ],
+                [
+                    'php ./bin/magento setup:static-content:deploy -s quick -v --exclude-theme theme1'
+                    . ' --exclude-theme Magento/backend en_US de_DE',
+                ],
+            ],
+            [
+                [
+                    'thread_count' => 1,
+                    'excluded_themes' => ['theme1'],
+                    'strategy' => 'quick',
+                    'locales' => ['en_US', 'de_DE'],
+                    'is_force' => false,
+                    'verbosity_level' => '-v',
+                ],
+                [
+                    'Magento/backend' => null,
+                ],
+                [
+                    'php ./bin/magento setup:static-content:deploy -s quick -v --exclude-theme theme1'
+                    . ' --exclude-theme Magento/backend en_US de_DE',
+                ],
+            ],
+            [
+                [
+                    'thread_count' => 1,
+                    'excluded_themes' => ['theme1'],
+                    'strategy' => 'quick',
+                    'locales' => ['en_US', 'de_DE'],
+                    'is_force' => false,
+                    'verbosity_level' => '-v',
+                ],
+                [
+                    'Magento/backend' => [
+                        'language' => ['en_US', 'fr_FR', 'af_ZA'],
+                    ],
+                ],
+                [
+                    'php ./bin/magento setup:static-content:deploy -s quick -v --exclude-theme theme1'
+                    . ' --exclude-theme Magento/backend en_US de_DE',
+                    'php ./bin/magento setup:static-content:deploy -s quick -v --theme Magento/backend en_US'
+                    . ' fr_FR af_ZA',
+                ],
+            ],
+        ];
     }
 }

@@ -17,7 +17,7 @@ class Upgrade21Test extends UpgradeTest
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::create()->run('2.1.12');
+        Bootstrap::getInstance()->run('2.1.12');
     }
 
     /**

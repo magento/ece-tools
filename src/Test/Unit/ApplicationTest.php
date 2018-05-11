@@ -67,6 +67,7 @@ class ApplicationTest extends TestCase
         Command\Wizard\ScdOnBuild::NAME => Command\Wizard\ScdOnBuild::class,
         Command\Wizard\ScdOnDeploy::NAME => Command\Wizard\ScdOnDeploy::class,
         Command\Wizard\ScdOnDemand::NAME => Command\Wizard\ScdOnDemand::class,
+        Command\ModuleRefresh::NAME => Command\ModuleRefresh::class,
     ];
 
     /**
