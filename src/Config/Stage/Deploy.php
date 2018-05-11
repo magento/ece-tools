@@ -179,6 +179,7 @@ class Deploy implements DeployInterface
             self::VAR_QUEUE_CONFIGURATION => [],
             self::VAR_CACHE_CONFIGURATION => [],
             self::VAR_SESSION_CONFIGURATION => [],
+            self::VAR_DATABASE_CONFIGURATION => [],
             self::VAR_VERBOSE_COMMANDS => '',
             self::VAR_CRON_CONSUMERS_RUNNER => [],
             self::VAR_CLEAN_STATIC_FILES => true,
