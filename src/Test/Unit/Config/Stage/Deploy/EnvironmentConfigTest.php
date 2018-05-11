@@ -93,6 +93,10 @@ class EnvironmentConfigTest extends TestCase
                 [DeployInterface::VAR_SKIP_SCD => true],
                 ['DO_DEPLOY_STATIC_CONTENT' => Environment::VAL_DISABLED]
             ],
+            [
+                [DeployInterface::VAR_SKIP_SCD => false],
+                ['DO_DEPLOY_STATIC_CONTENT' => 0]
+            ],
         ];
     }
 

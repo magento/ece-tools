@@ -97,10 +97,9 @@ class EnvironmentConfig
             }
         }
 
-        if (isset($variables['DO_DEPLOY_STATIC_CONTENT']) &&
-            $variables['DO_DEPLOY_STATIC_CONTENT'] === Environment::VAL_DISABLED
-        ) {
-            $variables[DeployInterface::VAR_SKIP_SCD] = true;
+        if (isset($variables['DO_DEPLOY_STATIC_CONTENT'])) {
+            $variables[DeployInterface::VAR_SKIP_SCD] =
+                $variables['DO_DEPLOY_STATIC_CONTENT'] === Environment::VAL_DISABLED;
             unset($variables['DO_DEPLOY_STATIC_CONTENT']);
         }
 
