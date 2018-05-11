@@ -154,6 +154,4 @@ class EnvironmentConfigTest extends TestCase
             ]
         ];
     }
-
-
 }
