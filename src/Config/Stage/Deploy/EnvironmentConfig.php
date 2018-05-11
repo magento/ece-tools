@@ -29,15 +29,24 @@ class EnvironmentConfig
     /**
      * Resolves environment values with and adds custom mappings.
      *
+     * STATIC_CONTENT_THREADS from MAGENTO_CLOUD_VARIABLES has higher priority then $_ENV['STATIC_CONTENT_THREADS']
+     * Raw $_ENV['STATIC_CONTENT_THREADS'] is deprecated.
+     *
      * @return array
      */
     public function getAll(): array
     {
         $variables = $this->convertEnabledDisabledVariables($this->environment->getVariables());
 
-        if ($scdThreads = $this->getEnvScdThreads()) {
-            $variables[DeployInterface::VAR_SCD_THREADS] = $scdThreads;
+        if (isset($variables['STATIC_CONTENT_THREADS'])) {
+            $envScdThreads = $variables['STATIC_CONTENT_THREADS'];
             unset($variables['STATIC_CONTENT_THREADS']);
+        } else {
+            $envScdThreads = $this->environment->getEnv('STATIC_CONTENT_THREADS');
+        }
+
+        if (ctype_digit($envScdThreads)) {
+            $variables[DeployInterface::VAR_SCD_THREADS] = (int)$envScdThreads;
         }
 
         if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
@@ -46,28 +55,6 @@ class EnvironmentConfig
         }
 
         return $variables;
-    }
-
-    /**
-     * Retrieves SCD threads configuration from MAGENTO_CLOUD_VARIABLES or from raw environment data.
-     * STATIC_CONTENT_THREADS from MAGENTO_CLOUD_VARIABLES has higher priority then $_ENV['STATIC_CONTENT_THREADS']
-     *
-     * Raw $_ENV['STATIC_CONTENT_THREADS'] is deprecated.
-     *
-     * @return int
-     */
-    private function getEnvScdThreads(): int
-    {
-        $variables = $this->environment->getVariables();
-        $staticDeployThreads = 0;
-
-        if (isset($variables['STATIC_CONTENT_THREADS'])) {
-            $staticDeployThreads = (int)$variables['STATIC_CONTENT_THREADS'];
-        } elseif ($envScdThreads = $this->environment->getEnv('STATIC_CONTENT_THREADS')) {
-            $staticDeployThreads = $envScdThreads;
-        }
-
-        return $staticDeployThreads;
     }
 
     /**

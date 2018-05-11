@@ -90,6 +90,14 @@ class EnvironmentConfigTest extends TestCase
                 ['STATIC_CONTENT_THREADS' => '3']
             ],
             [
+                [DeployInterface::VAR_SCD_THREADS => 0],
+                ['STATIC_CONTENT_THREADS' => '0']
+            ],
+            [
+                [],
+                ['STATIC_CONTENT_THREADS' => 'test']
+            ],
+            [
                 [DeployInterface::VAR_SKIP_SCD => true],
                 ['DO_DEPLOY_STATIC_CONTENT' => Environment::VAL_DISABLED]
             ],
@@ -100,7 +108,12 @@ class EnvironmentConfigTest extends TestCase
         ];
     }
 
-    public function testGetEnvScd()
+    /**
+     * @param string $staticContentThreads
+     * @param array $expectedResult
+     * @dataProvider getEnvScdDataProvider
+     */
+    public function testGetEnvScd(string $staticContentThreads, array $expectedResult)
     {
         $this->environmentMock->expects($this->any())
             ->method('getVariables')
@@ -108,13 +121,39 @@ class EnvironmentConfigTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getEnv')
             ->with('STATIC_CONTENT_THREADS')
-            ->willReturn('5');
+            ->willReturn($staticContentThreads);
 
-        $this->assertSame(
-            [
-                'SCD_THREADS' => 5
-            ],
-            $this->environmentConfig->getAll()
-        );
+        $this->assertSame($expectedResult, $this->environmentConfig->getAll());
     }
+
+    /**
+     * @return array
+     */
+    public function getEnvScdDataProvider(): array
+    {
+        return [
+            [
+                '5',
+                ['SCD_THREADS' => 5]
+            ],
+            [
+                '0',
+                ['SCD_THREADS' => 0]
+            ],
+            [
+                'test',
+                []
+            ],
+            [
+                '',
+                []
+            ],
+            [
+                false,
+                []
+            ]
+        ];
+    }
+
+
 }
