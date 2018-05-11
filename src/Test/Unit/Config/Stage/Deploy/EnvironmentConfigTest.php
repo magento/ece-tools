@@ -87,15 +87,15 @@ class EnvironmentConfigTest extends TestCase
             ],
             [
                 [DeployInterface::VAR_SCD_THREADS => 3],
-                ['STATIC_CONTENT_THREADS' => '3']
+                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3']
             ],
             [
                 [DeployInterface::VAR_SCD_THREADS => 0],
-                ['STATIC_CONTENT_THREADS' => '0']
+                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '0']
             ],
             [
                 [],
-                ['STATIC_CONTENT_THREADS' => 'test']
+                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 'test']
             ],
             [
                 [DeployInterface::VAR_SKIP_SCD => true],
@@ -120,7 +120,7 @@ class EnvironmentConfigTest extends TestCase
             ->willReturn([]);
         $this->environmentMock->expects($this->once())
             ->method('getEnv')
-            ->with('STATIC_CONTENT_THREADS')
+            ->with(DeployInterface::VAR_STATIC_CONTENT_THREADS)
             ->willReturn($staticContentThreads);
 
         $this->assertSame($expectedResult, $this->environmentConfig->getAll());

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\RawEnvVariable;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
@@ -43,7 +44,7 @@ class RawEnvVariableTest extends TestCase
      */
     public function testExecute(string $scdThreadsValue, string $expectedResultType)
     {
-        $_ENV['STATIC_CONTENT_THREADS'] = $scdThreadsValue;
+        $_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS] = $scdThreadsValue;
 
         $this->resultFactoryMock->expects($this->once())
             ->method('create')

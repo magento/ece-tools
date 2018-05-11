@@ -35,4 +35,9 @@ interface DeployInterface extends StageConfigInterface
      * @deprecated 2.1 specific variable.
      */
     const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';
+
+    /**
+     * @deprecated use SCD_THREADS instead
+     */
+    const VAR_STATIC_CONTENT_THREADS = 'STATIC_CONTENT_THREADS';
 }

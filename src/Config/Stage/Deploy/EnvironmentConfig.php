@@ -38,11 +38,11 @@ class EnvironmentConfig
     {
         $variables = $this->convertEnabledDisabledVariables($this->environment->getVariables());
 
-        if (isset($variables['STATIC_CONTENT_THREADS'])) {
-            $envScdThreads = $variables['STATIC_CONTENT_THREADS'];
-            unset($variables['STATIC_CONTENT_THREADS']);
+        if (isset($variables[DeployInterface::VAR_STATIC_CONTENT_THREADS])) {
+            $envScdThreads = $variables[DeployInterface::VAR_STATIC_CONTENT_THREADS];
+            unset($variables[DeployInterface::VAR_STATIC_CONTENT_THREADS]);
         } else {
-            $envScdThreads = $this->environment->getEnv('STATIC_CONTENT_THREADS');
+            $envScdThreads = $this->environment->getEnv(DeployInterface::VAR_STATIC_CONTENT_THREADS);
         }
 
         if (ctype_digit($envScdThreads)) {

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -37,15 +38,15 @@ class RawEnvVariable implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        if (isset($_ENV['STATIC_CONTENT_THREADS'])
-            && !ctype_digit($_ENV['STATIC_CONTENT_THREADS'])
+        if (isset($_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS])
+            && !ctype_digit($_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS])
         ) {
             return $this->resultFactory->create(
                 Validator\ResultInterface::ERROR,
                 [
                     'error' => sprintf(
                         'Environment variable STATIC_CONTENT_THREADS has wrong value: "%s"',
-                        $_ENV['STATIC_CONTENT_THREADS']
+                        $_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS]
                     ),
                     'suggestion' => 'Please use only integer values for STATIC_CONTENT_THREADS'
                 ]

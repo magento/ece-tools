@@ -79,15 +79,15 @@ class MagentoCloudVariablesTest extends TestCase
     {
         return [
             [
-                ['STATIC_CONTENT_THREADS' => '3'],
+                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3'],
                 ResultInterface::SUCCESS
             ],
             [
-                ['STATIC_CONTENT_THREADS' => 3],
+                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 3],
                 ResultInterface::SUCCESS
             ],
             [
-                ['STATIC_CONTENT_THREADS' => '3a'],
+                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3a'],
                 ResultInterface::ERROR
             ],
             [
