@@ -37,19 +37,24 @@ class Config
     private $logger;
 
     /**
+     * @var SlaveConfig
+     */
+    private $slaveConfig;
+
+    /**
      * @param Environment $environment
-     * @param ConnectionInterface $readConnection
+     * @param SlaveConfig $slaveConfig
      * @param DeployInterface $stageConfig
      * @param LoggerInterface $logger
      */
     public function __construct(
         Environment $environment,
-        ConnectionInterface $readConnection,
+        SlaveConfig $slaveConfig,
         DeployInterface $stageConfig,
         LoggerInterface $logger
     ) {
         $this->environment = $environment;
-        $this->readConnection = $readConnection;
+        $this->slaveConfig = $slaveConfig;
         $this->stageConfig = $stageConfig;
         $this->logger = $logger;
     }
@@ -57,31 +62,14 @@ class Config
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function get()
     {
-        $dbConfig = [
-            'db' => [
-            ],
-            'resource' => [
-                'default_setup' => [
-                    'connection' => 'default',
-                ],
-            ],
-        ];
-
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
         if (!empty($envDbConfig) &&
-            !isset($envDbConfig[StageConfigInterface::OPTION_MERGE])
-            || !$envDbConfig[StageConfigInterface::OPTION_MERGE]
+            empty($envDbConfig[StageConfigInterface::OPTION_MERGE])
         ) {
-            $dbConfig['db'] = $envDbConfig;
-
-            return $dbConfig;
+            return $envDbConfig;
         }
-
-
-
-        $this->logger->info('Updating env.php DB connection configuration.');
 
         $mainConnectionData = [
             'username' => $this->environment->getDbUser(),
@@ -91,58 +79,23 @@ class Config
         ];
 
         $dbConfig = [
-            'db' => [
-                'connection' => [
-                    'default' => $mainConnectionData,
-                    'indexer' => $mainConnectionData,
-                ],
-            ],
-            'resource' => [
-                'default_setup' => [
-                    'connection' => 'default',
-                ],
+            'connection' => [
+                'default' => $mainConnectionData,
+                'indexer' => $mainConnectionData,
             ],
         ];
 
-        $config = $this->configReader->read();
-        $config = array_replace_recursive($config, $dbConfig);
+        if ($this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)) {
+            $slaveConfiguration = $this->slaveConfig->get();
 
-        $slaveConnectionData = $this->getSlaveConnection();
+            if (!empty($slaveConfiguration)) {
+                $dbConfig['slave_connection']['default'] = $slaveConfiguration;
 
-        if (!$slaveConnectionData) {
-            unset($config['db']['slave_connection']);
-        } else {
-            $config['db']['slave_connection']['default'] = $slaveConnectionData;
+                $this->logger->info('Set DB slave connection.');
+            }
         }
 
-        $this->configWriter->create($config);
-    }
 
-    /**
-     * Returns mysql read connection if MYSQL_USE_SLAVE_CONNECTION is enabled otherwise returns empty array.
-     *
-     * @return array
-     */
-    private function getSlaveConnection(): array
-    {
-        $slaveConnection = [];
-        if ($this->deployConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
-            && $this->readConnection->getHost()
-        ) {
-            $this->logger->info('Set DB slave connection.');
-
-            $slaveConnection = [
-                'host' => $this->readConnection->getHost() . ':' . $this->readConnection->getPort(),
-                'username' => $this->readConnection->getUser(),
-                'dbname' => $this->readConnection->getDBName(),
-                'password' => $this->readConnection->getPassword(),
-                'model' => 'mysql4',
-                'engine' => 'innodb',
-                'initStatements' => 'SET NAMES utf8;',
-                'active' => '1',
-            ];
-        }
-
-        return $slaveConnection;
+        return $dbConfig;
     }
 }
