@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,11 +24,6 @@ class Config
      * @var DeployInterface
      */
     private $stageConfig;
-
-    /**
-     * @var ConnectionInterface
-     */
-    private $readConnection;
 
     /**
      * @var LoggerInterface
@@ -60,15 +54,20 @@ class Config
     }
 
     /**
-     * @inheritdoc
+     * Returns database configuration.
      */
     public function get()
     {
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
-        if (!empty($envDbConfig) &&
-            empty($envDbConfig[StageConfigInterface::OPTION_MERGE])
-        ) {
-            return $envDbConfig;
+        $isMerging = false;
+
+        if (!empty($envDbConfig)) {
+            if (empty($envDbConfig[StageConfigInterface::OPTION_MERGE])) {
+                return $envDbConfig;
+            }
+
+            $isMerging = true;
+            unset($envDbConfig[StageConfigInterface::OPTION_MERGE]);
         }
 
         $mainConnectionData = [
@@ -86,16 +85,48 @@ class Config
         ];
 
         if ($this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)) {
-            $slaveConfiguration = $this->slaveConfig->get();
+            if ($isMerging && !$this->isDbConfigurationCompatible($envDbConfig)) {
+                $this->logger->warning(
+                    'You have changed db configuration that not compatible with default slave connection.'
+                );
+            } else {
+                $slaveConfiguration = $this->slaveConfig->get();
 
-            if (!empty($slaveConfiguration)) {
-                $dbConfig['slave_connection']['default'] = $slaveConfiguration;
-
-                $this->logger->info('Set DB slave connection.');
+                if (!empty($slaveConfiguration)) {
+                    $this->logger->info('Set DB slave connection.');
+                    $dbConfig['slave_connection']['default'] = $slaveConfiguration;
+                }
             }
         }
 
+        if ($isMerging) {
+            $dbConfig = array_replace_recursive($dbConfig, $envDbConfig);
+        }
 
         return $dbConfig;
+    }
+
+    /**
+     * Checks that database configuration was changed in DATABASE_CONFIGURATION variable
+     * in not compatible way with slave_connection.
+     *
+     * Returns true if $envDbConfig contains host or dbname for default connection
+     * that doesn't match connection from relationships,
+     * otherwise return false.
+     *
+     * @param array $envDbConfig
+     * @return boolean
+     */
+    private function isDbConfigurationCompatible(array $envDbConfig)
+    {
+        if ((isset($envDbConfig['connection']['default']['host'])
+                && $envDbConfig['connection']['default']['host'] !== $this->environment->getDbHost())
+            || (isset($envDbConfig['connection']['default']['dbname'])
+                && $envDbConfig['connection']['default']['dbname'] !== $this->environment->getDbName())
+        ) {
+            return false;
+        }
+
+        return true;
     }
 }

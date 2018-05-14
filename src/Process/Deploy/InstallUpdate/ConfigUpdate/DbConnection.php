@@ -50,10 +50,10 @@ class DbConnection implements ProcessInterface
         ConfigReader $configReader,
         LoggerInterface $logger
     ) {
+        $this->dbConfig = $dbConfig;
         $this->configWriter = $configWriter;
         $this->configReader = $configReader;
         $this->logger = $logger;
-        $this->dbConfig = $dbConfig;
     }
 
     /**

@@ -5,13 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Db;
 
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db\SlaveConfig;
-use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Data\ReadConnection;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db\SlaveConfig;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -19,37 +17,14 @@ use Psr\Log\LoggerInterface;
 class SlaveConfigTest extends TestCase
 {
     /**
-     * @var DeployInterface|Mock
-     */
-    private $stageConfigMock;
-
-    /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    protected function setUp()
-    {
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-    }
-
-    /**
      * @param array $relationships
-     * @param boolean $setSlave
      * @param array $expectedConfig
      * @dataProvider getDataProvider
      */
     public function testGet(
         array $relationships,
-        $setSlave,
         array $expectedConfig
     ) {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
-            ->willReturn($setSlave);
-
         /** @var Environment|Mock $readConnectionEnvironmentMock */
         $readConnectionEnvironmentMock = $this->createPartialMock(Environment::class, ['getRelationships']);
         $readConnectionEnvironmentMock->expects($this->any())
@@ -58,11 +33,7 @@ class SlaveConfigTest extends TestCase
 
         $readConnection = new ReadConnection($readConnectionEnvironmentMock);
 
-        $dbSlaveConfig = new SlaveConfig(
-            $this->stageConfigMock,
-            $readConnection,
-            $this->loggerMock
-        );
+        $dbSlaveConfig = new SlaveConfig($readConnection);
 
         $this->assertEquals($expectedConfig, $dbSlaveConfig->get());
     }
@@ -98,22 +69,10 @@ class SlaveConfigTest extends TestCase
         return [
             [
                 [],
-                false,
-                []
-            ],
-            [
-                [],
-                true,
                 []
             ],
             [
                 $relationships,
-                false,
-                []
-            ],
-            [
-                $relationships,
-                true,
                 [
                     'host' => 'slave.host:slave.port',
                     'username' => 'slave.user',
@@ -127,12 +86,6 @@ class SlaveConfigTest extends TestCase
             ],
             [
                 $relationshipsWithoutSlave,
-                false,
-                []
-            ],
-            [
-                $relationshipsWithoutSlave,
-                true,
                 [
                     'host' => 'localhost:3306',
                     'username' => 'user',
