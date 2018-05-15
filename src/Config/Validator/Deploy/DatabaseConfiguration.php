@@ -47,7 +47,7 @@ class DatabaseConfiguration implements ValidatorInterface
         if (empty($dbConfig) ||
             (isset($dbConfig[StageConfigInterface::OPTION_MERGE]) && $dbConfig[StageConfigInterface::OPTION_MERGE])
         ) {
-            return $this->resultFactory->create(Validator\ResultInterface::SUCCESS);
+            return $this->resultFactory->success();
         }
 
         if (!isset(
@@ -61,6 +61,6 @@ class DatabaseConfiguration implements ValidatorInterface
             );
         }
 
-        return $this->resultFactory->create(Validator\ResultInterface::SUCCESS);
+        return $this->resultFactory->success();
     }
 }
