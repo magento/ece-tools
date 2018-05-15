@@ -198,6 +198,7 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
+                                    $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
                                     $this->container->make(ConfigValidator\Build\StageConfig::class),
                                     $this->container->make(ConfigValidator\Deploy\Variables::class),
                                     $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),
@@ -275,7 +276,7 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class)
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Db\SlaveConfig::class)
             ->needs(ConnectionInterface::class)
             ->give(ReadConnection::class);
         $this->container->when(Prestart::class)

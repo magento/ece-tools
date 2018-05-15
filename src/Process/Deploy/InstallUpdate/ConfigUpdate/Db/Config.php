@@ -62,12 +62,14 @@ class Config
         $isMerging = false;
 
         if (!empty($envDbConfig)) {
-            if (empty($envDbConfig[StageConfigInterface::OPTION_MERGE])) {
-                return $envDbConfig;
+            if (isset($envDbConfig[StageConfigInterface::OPTION_MERGE])) {
+                $isMerging = (bool) $envDbConfig[StageConfigInterface::OPTION_MERGE];
+                unset($envDbConfig[StageConfigInterface::OPTION_MERGE]);
             }
 
-            $isMerging = true;
-            unset($envDbConfig[StageConfigInterface::OPTION_MERGE]);
+            if (!$isMerging && count($envDbConfig)) {
+                return $envDbConfig;
+            }
         }
 
         $mainConnectionData = [

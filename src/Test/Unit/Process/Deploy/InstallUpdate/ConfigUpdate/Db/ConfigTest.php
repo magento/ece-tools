@@ -143,7 +143,7 @@ class ConfigTest extends TestCase
                             'dbname' => 'magento',
                             'password' => 'password',
                         ],
-                    ]
+                    ],
                 ],
             ],
             'default connection with slave' => [
@@ -166,7 +166,32 @@ class ConfigTest extends TestCase
                             'password' => 'password',
                         ],
                     ],
-                    'slave_connection' => ['default' => $slaveConfig]
+                    'slave_connection' => ['default' => $slaveConfig],
+                ],
+            ],
+            'custom environment db configuration only merge option' => [
+                $relationships,
+                [
+                    '_merge' => true,
+                ],
+                $slaveConfig,
+                true,
+                [
+                    'connection' => [
+                        'default' => [
+                            'username' => 'user',
+                            'host' => 'localhost',
+                            'dbname' => 'magento',
+                            'password' => 'password',
+                        ],
+                        'indexer' => [
+                            'username' => 'user',
+                            'host' => 'localhost',
+                            'dbname' => 'magento',
+                            'password' => 'password',
+                        ],
+                    ],
+                    'slave_connection' => ['default' => $slaveConfig],
                 ],
             ],
             'custom environment db configuration without merge' => [
@@ -177,11 +202,11 @@ class ConfigTest extends TestCase
                             'host' => 'test',
                             'dbname' => 'test',
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
-                        ]
+                        ],
                     ],
                     'slave_connection' => [
-                        ['default' => $slaveConfig]
-                    ]
+                        ['default' => $slaveConfig],
+                    ],
                 ],
                 $slaveConfig,
                 true,
@@ -191,11 +216,11 @@ class ConfigTest extends TestCase
                             'host' => 'test',
                             'dbname' => 'test',
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
-                        ]
+                        ],
                     ],
                     'slave_connection' => [
-                        ['default' => $slaveConfig]
-                    ]
+                        ['default' => $slaveConfig],
+                    ],
                 ],
             ],
             'custom environment db configuration with merge and without slave' => [
@@ -203,15 +228,15 @@ class ConfigTest extends TestCase
                 [
                     'connection' => [
                         'default' => [
-                            'host' => 'test',
-                            'dbname' => 'test',
+                            'host' => 'test.host',
+                            'dbname' => 'test.dbname',
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
                         ],
                         'indexer' => [
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
-                        ]
+                        ],
                     ],
-                    '_merge' => true
+                    '_merge' => true,
                 ],
                 $slaveConfig,
                 false,
@@ -219,8 +244,8 @@ class ConfigTest extends TestCase
                     'connection' => [
                         'default' => [
                             'username' => 'user',
-                            'host' => 'test',
-                            'dbname' => 'test',
+                            'host' => 'test.host',
+                            'dbname' => 'test.dbname',
                             'password' => 'password',
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
                         ],
@@ -229,6 +254,36 @@ class ConfigTest extends TestCase
                             'host' => 'localhost',
                             'dbname' => 'magento',
                             'password' => 'password',
+                            'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
+                        ],
+                    ],
+                ],
+            ],
+            'custom environment db configuration with merge set to false and without slave' => [
+                $relationships,
+                [
+                    'connection' => [
+                        'default' => [
+                            'host' => 'test.host',
+                            'dbname' => 'test.dbname',
+                            'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
+                        ],
+                        'indexer' => [
+                            'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
+                        ],
+                    ],
+                    '_merge' => false,
+                ],
+                $slaveConfig,
+                false,
+                [
+                    'connection' => [
+                        'default' => [
+                            'host' => 'test.host',
+                            'dbname' => 'test.dbname',
+                            'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
+                        ],
+                        'indexer' => [
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
                         ],
                     ],
@@ -243,9 +298,9 @@ class ConfigTest extends TestCase
                         ],
                         'indexer' => [
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
-                        ]
+                        ],
                     ],
-                    '_merge' => true
+                    '_merge' => true,
                 ],
                 $slaveConfig,
                 true,
@@ -266,7 +321,7 @@ class ConfigTest extends TestCase
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
                         ],
                     ],
-                    'slave_connection' => ['default' => $slaveConfig]
+                    'slave_connection' => ['default' => $slaveConfig],
                 ],
             ],
             'custom environment db configuration with merge, with slave, and host changed' => [
@@ -279,9 +334,9 @@ class ConfigTest extends TestCase
                         ],
                         'indexer' => [
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
-                        ]
+                        ],
                     ],
-                    '_merge' => true
+                    '_merge' => true,
                 ],
                 $slaveConfig,
                 true,
