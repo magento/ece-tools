@@ -44,9 +44,7 @@ class DatabaseConfiguration implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         $dbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
-        if (empty($dbConfig) ||
-            (isset($dbConfig[StageConfigInterface::OPTION_MERGE]) && $dbConfig[StageConfigInterface::OPTION_MERGE])
-        ) {
+        if (empty($dbConfig) || !empty($dbConfig[StageConfigInterface::OPTION_MERGE])) {
             return $this->resultFactory->success();
         }
 
