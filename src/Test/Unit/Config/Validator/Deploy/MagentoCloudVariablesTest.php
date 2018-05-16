@@ -153,7 +153,7 @@ class MagentoCloudVariablesTest extends TestCase
                 'Variable "GENERATED_CODE_SYMLINK" has wrong value: "1". Please use only disabled or enabled.'
             ],
             [
-                ['DO_DEPLOY_STATIC_CONTENT' => '1'],
+                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => '1'],
                 ResultInterface::ERROR,
                 'Variable "DO_DEPLOY_STATIC_CONTENT" has wrong value: "1". Please use only disabled or enabled.'
             ],
@@ -174,7 +174,7 @@ class MagentoCloudVariablesTest extends TestCase
                 ResultInterface::SUCCESS,
             ],
             [
-                ['DO_DEPLOY_STATIC_CONTENT' => 'enabled'],
+                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 'enabled'],
                 ResultInterface::SUCCESS,
             ],
             [

@@ -40,4 +40,9 @@ interface DeployInterface extends StageConfigInterface
      * @deprecated use SCD_THREADS instead
      */
     const VAR_STATIC_CONTENT_THREADS = 'STATIC_CONTENT_THREADS';
+
+    /**
+     * @deprecated use SKIP_SCD instead
+     */
+    const VAR_DO_DEPLOY_STATIC_CONTENT = 'DO_DEPLOY_STATIC_CONTENT';
 }
