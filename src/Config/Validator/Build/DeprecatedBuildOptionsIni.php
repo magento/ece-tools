@@ -51,12 +51,15 @@ class DeprecatedBuildOptionsIni implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         if ($this->file->isExists($this->fileList->getBuildConfig())) {
-            return $this->resultFactory->create(Validator\Result\Error::ERROR, [
-                'error' => sprintf('File %s is deprecated', basename($this->fileList->getBuildConfig())),
-                'suggestion' => 'Please use new configuration file ' . basename($this->fileList->getEnvConfig()),
-            ]);
+            return $this->resultFactory->error(
+                sprintf('The %s file has been deprecated', basename($this->fileList->getBuildConfig())),
+                sprintf(
+                    'Modify your configuration to use the %s file',
+                    basename($this->fileList->getEnvConfig())
+                )
+            );
         }
 
-        return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
+        return $this->resultFactory->success();
     }
 }

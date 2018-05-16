@@ -52,7 +52,7 @@ class SchemaValidatorTest extends TestCase
     public function validateDataProvider(): array
     {
         return [
-            ['keyNotExist', 'someValue', 'Item keyNotExist is not allowed in configuration.'],
+            ['keyNotExist', 'someValue', 'The keyNotExist variable is not allowed in configuration.'],
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-v', null],
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-vv', null],
             [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-vvv', null],
@@ -93,136 +93,154 @@ class SchemaValidatorTest extends TestCase
             [
                 StageConfigInterface::VAR_VERBOSE_COMMANDS,
                 1,
-                'Item VERBOSE_COMMANDS has unexpected type integer. Please use one of next types: string',
+                'The VERBOSE_COMMANDS variable contains an invalid value of type integer. ' .
+                'Use one of the next types: string.',
             ],
             [
                 StageConfigInterface::VAR_VERBOSE_COMMANDS,
                 '1',
-                'Item VERBOSE_COMMANDS has unexpected value 1. Please use one of next values: -v, -vv, -vvv',
+                'The VERBOSE_COMMANDS variable contains an invalid value 1. ' .
+                'Use one of the available value options: -v, -vv, -vvv.',
             ],
             [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, 0, null],
             [
                 StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
                 10,
-                'Item SCD_COMPRESSION_LEVEL has unexpected value 10. Value must be in range 0 - 9.'
+                'The SCD_COMPRESSION_LEVEL variable contains an invalid value of type string. ' .
+                'Use an integer value from 0 to 9.'
             ],
             [
                 StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
                 '1',
-                'Item SCD_COMPRESSION_LEVEL has unexpected type string. Please use one of next types: integer',
+                'The SCD_COMPRESSION_LEVEL variable contains an invalid value of type string. '.
+                'Use one of the next types: integer.',
             ],
             [
                 StageConfigInterface::VAR_SCD_STRATEGY,
                 12,
-                'Item SCD_STRATEGY has unexpected type integer. Please use one of next types: string',
+                'The SCD_STRATEGY variable contains an invalid value of type integer. ' .
+                'Use one of the next types: string.',
             ],
             [
                 StageConfigInterface::VAR_SCD_STRATEGY,
                 'quickk',
-                'Item SCD_STRATEGY has unexpected value quickk. ' .
-                'Please use one of next values: compact, quick, standard',
+                'The SCD_STRATEGY variable contains an invalid value quickk. ' .
+                'Use one of the available value options: compact, quick, standard.',
             ],
             [
                 StageConfigInterface::VAR_SCD_STRATEGY,
                 'standart',
-                'Item SCD_STRATEGY has unexpected value standart. ' .
-                'Please use one of next values: compact, quick, standard'
+                'The SCD_STRATEGY variable contains an invalid value standart. ' .
+                'Use one of the available value options: compact, quick, standard.'
             ],
             [
                 StageConfigInterface::VAR_SCD_THREADS,
                 'test',
-                'Item SCD_THREADS has unexpected type string. Please use one of next types: integer'
+                'The SCD_THREADS variable contains an invalid value of type string. Use one of the next types: integer.'
             ],
             [
                 StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
                 123,
-                'Item SCD_EXCLUDE_THEMES has unexpected type integer. Please use one of next types: string'
+                'The SCD_EXCLUDE_THEMES variable contains an invalid value of type integer. ' .
+                'Use one of the next types: string.'
             ],
             [
                 StageConfigInterface::VAR_SKIP_SCD,
                 0,
-                'Item SKIP_SCD has unexpected type integer. Please use one of next types: boolean'
+                'The SKIP_SCD variable contains an invalid value of type integer. Use one of the next types: boolean.'
             ],
             [
                 StageConfigInterface::VAR_SKIP_SCD,
                 'enable',
-                'Item SKIP_SCD has unexpected type string. Please use one of next types: boolean'
+                'The SKIP_SCD variable contains an invalid value of type string. Use one of the next types: boolean.'
             ],
             [
                 StageConfigInterface::VAR_SKIP_HTML_MINIFICATION,
                 0,
-                'Item SKIP_HTML_MINIFICATION has unexpected type integer. Please use one of next types: boolean',
+                'The SKIP_HTML_MINIFICATION variable contains an invalid value of type integer. ' .
+                'Use one of the next types: boolean.',
                 StageConfigInterface::STAGE_GLOBAL,
             ],
             [
                 StageConfigInterface::VAR_SKIP_HTML_MINIFICATION,
                 true,
-                'Item SKIP_HTML_MINIFICATION is not supposed to be in stage deploy. ' .
-                'Please move it to one of possible stages: global',
+                'The SKIP_HTML_MINIFICATION variable is not supposed to be in stage deploy. ' .
+                'Move it to one of the possible stages: global.',
                 StageConfigInterface::STAGE_DEPLOY,
             ],
             [
                 StageConfigInterface::VAR_SCD_ON_DEMAND,
                 0,
-                'Item SCD_ON_DEMAND has unexpected type integer. Please use one of next types: boolean',
+                'The SCD_ON_DEMAND variable contains an invalid value of type integer. ' .
+                'Use one of the next types: boolean.',
                 StageConfigInterface::STAGE_GLOBAL
             ],
             [
                 StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS,
                 'someOption',
-                'Item DEPLOY_FROM_GIT_OPTIONS has unexpected type string. Please use one of next types: array'
+                'The DEPLOY_FROM_GIT_OPTIONS variable contains an invalid value of type string. ' .
+                'Use one of the next types: array.'
             ],
             [
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
                 0,
-                'Item REDIS_USE_SLAVE_CONNECTION has unexpected type integer. Please use one of next types: boolean'
+                'The REDIS_USE_SLAVE_CONNECTION variable contains an invalid value of type integer. ' .
+                'Use one of the next types: boolean.'
             ],
             [
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 0,
-                'Item MYSQL_USE_SLAVE_CONNECTION has unexpected type integer. Please use one of next types: boolean'
+                'The MYSQL_USE_SLAVE_CONNECTION variable contains an invalid value of type integer. ' .
+                'Use one of the next types: boolean.'
             ],
             [
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 true,
-                'Item MYSQL_USE_SLAVE_CONNECTION is not supposed to be in stage build. ' .
-                'Please move it to one of possible stages: global, deploy',
+                'The MYSQL_USE_SLAVE_CONNECTION variable is not supposed to be in stage build. ' .
+                'Move it to one of the possible stages: global, deploy.',
                 StageConfigInterface::STAGE_BUILD
             ],
             [
                 DeployInterface::VAR_UPDATE_URLS,
                 0,
-                'Item UPDATE_URLS has unexpected type integer. Please use one of next types: boolean'
+                'The UPDATE_URLS variable contains an invalid value of type integer. ' .
+                'Use one of the next types: boolean.'
             ],
             [
                 DeployInterface::VAR_STATIC_CONTENT_SYMLINK,
                 0,
-                'Item STATIC_CONTENT_SYMLINK has unexpected type integer. Please use one of next types: boolean'
+                'The STATIC_CONTENT_SYMLINK variable contains an invalid value of type integer. ' .
+                'Use one of the next types: boolean.'
             ],
             [
                 DeployInterface::VAR_CLEAN_STATIC_FILES,
                 0,
-                'Item CLEAN_STATIC_FILES has unexpected type integer. Please use one of next types: boolean'
+                'The CLEAN_STATIC_FILES variable contains an invalid value of type integer. ' .
+                'Use one of the next types: boolean.'
             ],
             [
                 DeployInterface::VAR_SEARCH_CONFIGURATION,
                 'someOption',
-                'Item SEARCH_CONFIGURATION has unexpected type string. Please use one of next types: array'
+                'The SEARCH_CONFIGURATION variable contains an invalid value of type string. ' .
+                'Use one of the next types: array.'
             ],
             [
                 DeployInterface::VAR_CACHE_CONFIGURATION,
                 'someOption',
-                'Item CACHE_CONFIGURATION has unexpected type string. Please use one of next types: array'
+                'The CACHE_CONFIGURATION variable contains an invalid value of type string. ' .
+                'Use one of the next types: array.'
             ],
             [
                 DeployInterface::VAR_SESSION_CONFIGURATION,
                 'someOption',
-                'Item SESSION_CONFIGURATION has unexpected type string. Please use one of next types: array'
+                'The SESSION_CONFIGURATION variable contains an invalid value of type string. ' .
+                'Use one of the next types: array.'
             ],
             [
                 DeployInterface::VAR_CRON_CONSUMERS_RUNNER,
                 'someOption',
-                'Item CRON_CONSUMERS_RUNNER has unexpected type string. Please use one of next types: array'
+                'The CRON_CONSUMERS_RUNNER variable contains an invalid value of type string. ' .
+                'Use one of the next types: array.'
             ],
         ];
     }

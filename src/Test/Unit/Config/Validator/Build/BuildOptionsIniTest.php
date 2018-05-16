@@ -68,7 +68,7 @@ class BuildOptionsIniTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(ResultInterface::ERROR, [
-                'error' => 'build_options.ini file is not valid',
+                'error' => 'The build_options.ini file contains an unexpected value',
                 'suggestion' => 'scd_strategy error1' . PHP_EOL .
                     'scd_threads error2' . PHP_EOL .
                     'exclude_themes error3' . PHP_EOL .

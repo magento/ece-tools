@@ -46,7 +46,7 @@ class SchemaValidator
     {
         $schema = $this->schema->getSchema();
         if (!isset($schema[$key])) {
-            return sprintf('Item %s is not allowed in configuration.', $key);
+            return sprintf('The %s variable is not allowed in configuration.', $key);
         }
 
         $type = gettype($value);
@@ -56,7 +56,7 @@ class SchemaValidator
 
         if ($allowedTypes && !in_array($type, $allowedTypes)) {
             return sprintf(
-                'Item %s has unexpected type %s. Please use one of next types: %s',
+                'The %s variable contains an invalid value of type %s. Use one of the next types: %s.',
                 $key,
                 $type,
                 implode(', ', $allowedTypes)
@@ -65,7 +65,7 @@ class SchemaValidator
 
         if (!in_array($stage, $allowedStages)) {
             return sprintf(
-                'Item %s is not supposed to be in stage %s. Please move it to one of possible stages: %s',
+                'The %s variable is not supposed to be in stage %s. Move it to one of the possible stages: %s.',
                 $key,
                 $stage,
                 implode(', ', $allowedStages)
@@ -78,7 +78,7 @@ class SchemaValidator
 
         if ($allowedValues && !in_array($value, $allowedValues)) {
             return sprintf(
-                'Item %s has unexpected value %s. Please use one of next values: %s',
+                'The %s variable contains an invalid value %s. Use one of the available value options: %s.',
                 $key,
                 $value,
                 implode(', ', array_filter($allowedValues))

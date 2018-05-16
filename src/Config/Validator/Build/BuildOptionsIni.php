@@ -89,7 +89,7 @@ class BuildOptionsIni implements ValidatorInterface
 
         if ($errors) {
             return $this->resultFactory->create(Validator\Result\Error::ERROR, [
-                'error' => 'build_options.ini file is not valid',
+                'error' => 'The build_options.ini file contains an unexpected value',
                 'suggestion' => implode(PHP_EOL, $errors),
             ]);
         }

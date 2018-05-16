@@ -77,7 +77,8 @@ class Schema
                 self::SCHEMA_VALUE_VALIDATION => function (string $key, $value) {
                     if (!in_array($value, range(0, 9))) {
                         return sprintf(
-                            'Item %s has unexpected value %s. Value must be in range 0 - 9.',
+                            'The SCD_COMPRESSION_LEVEL variable contains an invalid value of type string. ' .
+                            'Use an integer value from 0 to 9.',
                             $key,
                             $value
                         );

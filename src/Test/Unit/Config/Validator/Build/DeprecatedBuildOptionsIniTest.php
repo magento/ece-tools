@@ -66,8 +66,7 @@ class DeprecatedBuildOptionsIniTest extends TestCase
             ->with($path)
             ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with(ResultInterface::SUCCESS);
+            ->method('success');
 
         $this->validator->validate();
     }
@@ -87,11 +86,11 @@ class DeprecatedBuildOptionsIniTest extends TestCase
             ->with($path)
             ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with(ResultInterface::ERROR, [
-                'error' => 'File build_options.ini is deprecated',
-                'suggestion' => 'Please use new configuration file magento.env.yaml'
-            ]);
+            ->method('error')
+            ->with(
+                'The build_options.ini file has been deprecated',
+                'Modify your configuration to use the magento.env.yaml file'
+            );
 
         $this->validator->validate();
     }
