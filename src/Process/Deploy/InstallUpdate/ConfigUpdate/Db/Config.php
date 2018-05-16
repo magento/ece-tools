@@ -87,7 +87,7 @@ class Config
         ];
 
         if ($this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)) {
-            if ($isMerging && !$this->isDbConfigurationCompatible($envDbConfig)) {
+            if (!$this->isDbConfigurationCompatible($envDbConfig)) {
                 $this->logger->warning(
                     'You have changed db configuration that not compatible with default slave connection.'
                 );
