@@ -55,8 +55,10 @@ class Config
 
     /**
      * Returns database configuration.
+     *
+     * @return array
      */
-    public function get()
+    public function get(): array
     {
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
         $isMerging = false;
