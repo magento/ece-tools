@@ -116,6 +116,7 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\Connection::class
         );
         $this->container->singleton(DirectoryCopier\CopyStrategy::class);
+        $this->container->singleton(DirectoryCopier\CopySubFolderStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);

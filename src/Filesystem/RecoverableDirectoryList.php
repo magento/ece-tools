@@ -83,6 +83,9 @@ class RecoverableDirectoryList
     public function getList(): array
     {
         $isSymlinkEnabled = $this->stageConfig->get(DeployInterface::VAR_STATIC_CONTENT_SYMLINK);
+        $staticCopyStrategy = $this->stageConfig->get(DeployInterface::VAR_CLEAN_STATIC_FILES)
+            ? StrategyInterface::STRATEGY_COPY
+            : StrategyInterface::STRATEGY_COPY_SUB_FOLDERS;
 
         $recoverableDirs = [
             [
@@ -102,13 +105,13 @@ class RecoverableDirectoryList
                         DirectoryList::DIR_VIEW_PREPROCESSED,
                         true
                     ),
-                    self::OPTION_STRATEGY => StrategyInterface::STRATEGY_COPY,
+                    self::OPTION_STRATEGY => $staticCopyStrategy,
                 ];
             }
             $recoverableDirs[] = [
                 self::OPTION_DIRECTORY => $this->directoryList->getPath(DirectoryList::DIR_STATIC, true),
                 self::OPTION_STRATEGY => $isSymlinkEnabled ?
-                    StrategyInterface::STRATEGY_SUB_SYMLINK : StrategyInterface::STRATEGY_COPY,
+                    StrategyInterface::STRATEGY_SUB_SYMLINK : $staticCopyStrategy,
             ];
         }
 

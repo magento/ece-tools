@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
+use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopySubFolderStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SubSymlinkStrategy;
@@ -71,6 +72,10 @@ class StrategyFactoryTest extends TestCase
             [
                 StrategyInterface::STRATEGY_SUB_SYMLINK,
                 SubSymlinkStrategy::class
+            ],
+            [
+                StrategyInterface::STRATEGY_COPY_SUB_FOLDERS,
+                CopySubFolderStrategy::class
             ],
         ];
     }

@@ -36,6 +36,9 @@ class StrategyFactory
             case StrategyInterface::STRATEGY_COPY:
                 $strategyInstance = $this->container->get(CopyStrategy::class);
                 break;
+            case StrategyInterface::STRATEGY_COPY_SUB_FOLDERS:
+                $strategyInstance = $this->container->get(CopySubFolderStrategy::class);
+                break;
             case StrategyInterface::STRATEGY_SYMLINK:
                 $strategyInstance = $this->container->get(SymlinkStrategy::class);
                 break;
