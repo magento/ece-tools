@@ -41,18 +41,16 @@ class RawEnvVariable implements ValidatorInterface
         if (isset($_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS])
             && !ctype_digit($_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS])
         ) {
-            return $this->resultFactory->create(
-                Validator\ResultInterface::ERROR,
-                [
-                    'error' => sprintf(
-                        'Environment variable STATIC_CONTENT_THREADS has wrong value: "%s"',
-                        $_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS]
-                    ),
-                    'suggestion' => 'Please use only integer values for STATIC_CONTENT_THREADS'
-                ]
+            return $this->resultFactory->error(
+                sprintf(
+                    'The %s variable value "%s" is an invalid value type',
+                    DeployInterface::VAR_STATIC_CONTENT_THREADS,
+                    $_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS]
+                ),
+                'Use an integer value'
             );
         }
 
-        return $this->resultFactory->create(Validator\ResultInterface::SUCCESS);
+        return $this->resultFactory->success();
     }
 }

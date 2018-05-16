@@ -40,15 +40,14 @@ class RawEnvVariableTest extends TestCase
     /**
      * @dataProvider executeDataProvider
      * @param string $scdThreadsValue
-     * @param string $expectedResultType
+     * @param string $expectedResultMethodName
      */
-    public function testExecute(string $scdThreadsValue, string $expectedResultType)
+    public function testExecute(string $scdThreadsValue, string $expectedResultMethodName)
     {
         $_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS] = $scdThreadsValue;
 
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with($expectedResultType);
+            ->method($expectedResultMethodName);
 
         $this->validator->validate();
     }
