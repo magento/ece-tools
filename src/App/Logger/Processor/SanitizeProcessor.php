@@ -16,7 +16,8 @@ class SanitizeProcessor
      * @var array
      */
     private $replacements = [
-        '/-password=\'.*?\'(\s|$)/i' => '-password=\'******\'$1'
+        '/-password=\'.*?\'(\s|$)/i' => '-password=\'******\'$1',
+        '/mysqldump (.* )-p\'[^\']+\'/i'  => 'mysqldump $1-p\'******\'',
     ];
 
     /**
