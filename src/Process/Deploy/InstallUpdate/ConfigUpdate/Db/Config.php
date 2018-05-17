@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db;
 
+use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\StageConfigInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -36,21 +36,29 @@ class Config
     private $slaveConfig;
 
     /**
+     * @var ConfigMerger
+     */
+    private $configMerger;
+
+    /**
      * @param Environment $environment
      * @param SlaveConfig $slaveConfig
      * @param DeployInterface $stageConfig
      * @param LoggerInterface $logger
+     * @param ConfigMerger $configMerger
      */
     public function __construct(
         Environment $environment,
         SlaveConfig $slaveConfig,
         DeployInterface $stageConfig,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ConfigMerger $configMerger
     ) {
         $this->environment = $environment;
         $this->slaveConfig = $slaveConfig;
         $this->stageConfig = $stageConfig;
         $this->logger = $logger;
+        $this->configMerger = $configMerger;
     }
 
     /**
@@ -61,17 +69,9 @@ class Config
     public function get(): array
     {
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
-        $isMerging = false;
 
-        if (!empty($envDbConfig)) {
-            if (isset($envDbConfig[StageConfigInterface::OPTION_MERGE])) {
-                $isMerging = (bool) $envDbConfig[StageConfigInterface::OPTION_MERGE];
-                unset($envDbConfig[StageConfigInterface::OPTION_MERGE]);
-            }
-
-            if (!$isMerging && count($envDbConfig)) {
-                return $envDbConfig;
-            }
+        if (!$this->configMerger->isEmpty($envDbConfig) && !$this->configMerger->isMergeRequired($envDbConfig)) {
+            return $this->configMerger->clear($envDbConfig);
         }
 
         $mainConnectionData = [
@@ -103,11 +103,7 @@ class Config
             }
         }
 
-        if ($isMerging) {
-            $dbConfig = array_replace_recursive($dbConfig, $envDbConfig);
-        }
-
-        return $dbConfig;
+        return $this->configMerger->mergeConfigs($dbConfig, $envDbConfig);
     }
 
     /**

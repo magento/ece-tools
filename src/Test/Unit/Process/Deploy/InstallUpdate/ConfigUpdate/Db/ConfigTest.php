@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Db;
 
+use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db\Config;
@@ -78,7 +79,8 @@ class ConfigTest extends TestCase
             $dbConfigEnvironmentMock,
             $this->slaveConfigMock,
             $this->stageConfigMock,
-            $this->loggerMock
+            $this->loggerMock,
+            new ConfigMerger()
         );
 
         $this->assertEquals($expectedConfig, $dbConfig->get());
