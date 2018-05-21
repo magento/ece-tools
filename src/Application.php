@@ -54,7 +54,6 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\Build::class),
                 $this->container->create(Command\Deploy::class),
                 $this->container->create(Command\ConfigDump::class),
-                $this->container->create(Command\Prestart::class),
                 $this->container->create(Command\DbDump::class),
                 $this->container->create(Command\PostDeploy::class),
                 $this->container->create(Command\CronUnlock::class),

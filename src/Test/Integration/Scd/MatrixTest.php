@@ -86,7 +86,6 @@ class MatrixTest extends AbstractTest
 
         $this->executeAndAssertCodeOK(Command\Build::NAME);
         $this->executeAndAssertCodeOK(Command\Deploy::NAME);
-        $this->executeAndAssertCodeOK(Command\Prestart::NAME);
         $this->executeAndAssertCodeOK(Command\PostDeploy::NAME);
 
         $this->assertContentPresence();
