@@ -86,7 +86,7 @@ class Log
                 HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getCloudLog()],
             ];
 
-            $this->config += $this->reader->read()[static::CONFIG_SECTION] ?? [];
+            $this->config = array_merge_recursive($this->config, $this->reader->read()[static::CONFIG_SECTION] ?? []);
         }
 
         return $this->config;
