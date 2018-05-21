@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Config\ValidatorFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
+use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnDeploy;
 
 /**
  * @inheritdoc
@@ -72,8 +72,8 @@ class IdealState extends Command
     {
         $errors = [];
 
-        if (!$this->validatorFactory->create(ScdOnBuild::class)->validate() instanceof Success) {
-            $errors[] = 'SCD on build is not configured';
+        if ($this->validatorFactory->create(ScdOnDeploy::class)->validate() instanceof Success) {
+            $errors[] = 'SCD on build or on demand is not configured';
         }
 
         if (!$this->validatorFactory->create(PostDeploy::class)->validate() instanceof Success) {
