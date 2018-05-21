@@ -67,6 +67,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\Wizard\ScdOnDeploy::class),
                 $this->container->create(Command\ModuleRefresh::class),
                 $this->container->create(Command\Wizard\IdealState::class),
+                $this->container->create(Command\Wizard\MasterSlave::class),
             ]
         );
     }

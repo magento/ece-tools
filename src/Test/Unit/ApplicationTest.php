@@ -71,6 +71,7 @@ class ApplicationTest extends TestCase
         Command\Wizard\ScdOnDemand::NAME => Command\Wizard\ScdOnDemand::class,
         Command\ModuleRefresh::NAME => Command\ModuleRefresh::class,
         Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
+        Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
     ];
 
     /**
