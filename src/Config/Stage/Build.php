@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Build\Reader as BuildReader;
+use Magento\MagentoCloud\Config\Schema;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -31,15 +33,23 @@ class Build implements BuildInterface
     private $mergedConfig;
 
     /**
+     * @var Schema
+     */
+    private $schema;
+
+    /**
      * @param EnvironmentReader $environmentReader
      * @param BuildReader $buildReader
+     * @param Schema $schema
      */
     public function __construct(
         EnvironmentReader $environmentReader,
-        BuildReader $buildReader
+        BuildReader $buildReader,
+        Schema $schema
     ) {
         $this->environmentReader = $environmentReader;
         $this->buildReader = $buildReader;
+        $this->schema = $schema;
     }
 
     /**
@@ -47,7 +57,7 @@ class Build implements BuildInterface
      */
     public function get(string $name)
     {
-        if (!array_key_exists($name, $this->getDefault())) {
+        if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD))) {
             throw new \RuntimeException(sprintf(
                 'Config %s was not defined.',
                 $name
@@ -76,7 +86,7 @@ class Build implements BuildInterface
             $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
 
             $this->mergedConfig = array_replace(
-                $this->getDefault(),
+                $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD),
                 $envConfig[self::STAGE_GLOBAL] ?? [],
                 $envConfig[self::STAGE_BUILD] ?? [],
                 $this->getDeprecatedConfig()
@@ -84,24 +94,6 @@ class Build implements BuildInterface
         }
 
         return $this->mergedConfig;
-    }
-
-    /**
-     * Resolves default configuration value if other was not provided.
-     *
-     * @return array
-     */
-    private function getDefault(): array
-    {
-        return [
-            self::VAR_SCD_STRATEGY => '',
-            self::VAR_SKIP_SCD => false,
-            self::VAR_SCD_COMPRESSION_LEVEL => 6,
-            self::VAR_SCD_THREADS => 1,
-            self::VAR_SCD_EXCLUDE_THEMES => '',
-            self::VAR_VERBOSE_COMMANDS => '',
-            self::VAR_SCD_MATRIX => [],
-        ];
     }
 
     /**
