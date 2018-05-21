@@ -70,7 +70,7 @@ class HandlerFactory
         switch ($handler) {
             case static::HANDLER_STREAM:
             case static::HANDLER_FILE:
-                $handlerInstance =  new StreamHandler($configuration->get('stream'));
+                $handlerInstance =  new StreamHandler($configuration->get('stream'), $minLevel);
                 break;
             case static::HANDLER_EMAIL:
                 $handlerInstance = new NativeMailerHandler(
