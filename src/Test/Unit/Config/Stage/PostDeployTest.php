@@ -5,7 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\PostDeploy;
+use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -26,14 +29,27 @@ class PostDeployTest extends TestCase
     private $environmentReaderMock;
 
     /**
+     * @var Schema|Mock
+     */
+    private $schemaMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
+        $this->schemaMock = $this->createMock(Schema::class);
+        $this->schemaMock->expects($this->any())
+            ->method('getDefaults')
+            ->with(StageConfigInterface::STAGE_POST_DEPLOY)
+            ->willReturn([
+                PostDeployInterface::VAR_WARM_UP_PAGES => ['index.php']
+            ]);
 
         $this->config = new PostDeploy(
-            $this->environmentReaderMock
+            $this->environmentReaderMock,
+            $this->schemaMock
         );
     }
 

@@ -25,11 +25,18 @@ class GlobalSection implements StageConfigInterface
     private $mergedConfig;
 
     /**
-     * @param EnvironmentReader $environmentReader
+     * @var Schema
      */
-    public function __construct(EnvironmentReader $environmentReader)
+    private $schema;
+
+    /**
+     * @param EnvironmentReader $environmentReader
+     * @param Schema $schema
+     */
+    public function __construct(EnvironmentReader $environmentReader, Schema $schema)
     {
         $this->environmentReader = $environmentReader;
+        $this->schema = $schema;
     }
 
     /**
@@ -37,7 +44,7 @@ class GlobalSection implements StageConfigInterface
      */
     public function get(string $name)
     {
-        if (!array_key_exists($name, $this->getDefault())) {
+        if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_GLOBAL))) {
             throw new \RuntimeException(sprintf(
                 'Config %s was not defined.',
                 $name
@@ -66,26 +73,11 @@ class GlobalSection implements StageConfigInterface
             $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
 
             $this->mergedConfig = array_replace(
-                $this->getDefault(),
+                $this->schema->getDefaults(StageConfigInterface::STAGE_GLOBAL),
                 $envConfig[self::STAGE_GLOBAL] ?? []
             );
         }
 
         return $this->mergedConfig;
-    }
-
-    /**
-     * Resolves default configuration value if other was not provided.
-     *
-     * @return array
-     */
-    private function getDefault(): array
-    {
-        return [
-            self::VAR_SCD_ON_DEMAND => false,
-            self::VAR_SKIP_HTML_MINIFICATION => false,
-            self::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => false,
-            self::VAR_DEPLOY_FROM_GIT_OPTIONS => [],
-        ];
     }
 }

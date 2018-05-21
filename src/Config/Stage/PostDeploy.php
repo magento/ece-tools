@@ -6,6 +6,8 @@
 namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\Schema;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
  * @inheritdoc
@@ -23,11 +25,17 @@ class PostDeploy implements PostDeployInterface
     private $mergedConfig;
 
     /**
+     * @var Schema
+     */
+    private $schema;
+
+    /**
      * @param EnvironmentReader $environmentReader
      */
-    public function __construct(EnvironmentReader $environmentReader)
+    public function __construct(EnvironmentReader $environmentReader, Schema $schema)
     {
         $this->environmentReader = $environmentReader;
+        $this->schema = $schema;
     }
 
     /**
@@ -35,7 +43,7 @@ class PostDeploy implements PostDeployInterface
      */
     public function get(string $name)
     {
-        if (!array_key_exists($name, $this->getDefault())) {
+        if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY))) {
             throw new \RuntimeException(sprintf(
                 'Config %s was not defined.',
                 $name
@@ -63,26 +71,12 @@ class PostDeploy implements PostDeployInterface
             $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
 
             $this->mergedConfig = array_replace(
-                $this->getDefault(),
+                $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY),
                 $envConfig[self::STAGE_GLOBAL] ?? [],
                 $envConfig[self::STAGE_POST_DEPLOY] ?? []
             );
         }
 
         return $this->mergedConfig;
-    }
-
-    /**
-     * Resolves default configuration value if other was not provided.
-     *
-     * @return array
-     */
-    private function getDefault(): array
-    {
-        return [
-            self::VAR_WARM_UP_PAGES => [
-                'index.php',
-            ],
-        ];
     }
 }
