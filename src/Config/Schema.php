@@ -174,7 +174,7 @@ class Schema
                 ],
             ],
             StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => [
-                self::SCHEMA_TYPE => ['array', 'boolean'],
+                self::SCHEMA_TYPE => ['string'],
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL
                 ],
