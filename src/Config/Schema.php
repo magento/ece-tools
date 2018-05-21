@@ -179,7 +179,7 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => false,
+                    StageConfigInterface::STAGE_GLOBAL => '',
                 ],
             ],
             StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [
