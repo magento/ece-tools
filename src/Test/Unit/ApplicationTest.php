@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit;
 
 use Composer\Composer;
 use Composer\Package\PackageInterface;
+use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -24,7 +25,7 @@ class ApplicationTest extends TestCase
     private $application;
 
     /**
-     * @var ContainerInterface|MockObject
+     * @var ContainerInterface|Container|MockObject
      */
     private $containerMock;
 
@@ -69,6 +70,7 @@ class ApplicationTest extends TestCase
         Command\Wizard\ScdOnDeploy::NAME => Command\Wizard\ScdOnDeploy::class,
         Command\Wizard\ScdOnDemand::NAME => Command\Wizard\ScdOnDemand::class,
         Command\ModuleRefresh::NAME => Command\ModuleRefresh::class,
+        Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
     ];
 
     /**
@@ -76,12 +78,12 @@ class ApplicationTest extends TestCase
      */
     public function setUp()
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->containerMock = $this->createMock(Container::class);
         $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
 
         $map = [
-            [Composer::class, $this->composerMock],
+            [Composer::class, [], $this->composerMock],
         ];
 
         foreach ($this->classMap as $name => $className) {
@@ -95,10 +97,10 @@ class ApplicationTest extends TestCase
             $mock->method('getAliases')
                 ->willReturn([]);
 
-            $map[] = [$className, $mock];
+            $map[] = [$className, [], $mock];
         }
 
-        $this->containerMock->method('get')
+        $this->containerMock->method('create')
             ->willReturnMap($map);
         $this->composerMock->expects($this->any())
             ->method('getPackage')
