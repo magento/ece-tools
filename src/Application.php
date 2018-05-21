@@ -53,7 +53,6 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->get(Command\Build::class),
                 $this->container->get(Command\Deploy::class),
                 $this->container->get(Command\ConfigDump::class),
-                $this->container->get(Command\Prestart::class),
                 $this->container->get(Command\DbDump::class),
                 $this->container->get(Command\PostDeploy::class),
                 $this->container->get(Command\CronUnlock::class),
