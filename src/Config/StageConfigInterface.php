@@ -43,6 +43,11 @@ interface StageConfigInterface
     const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
 
     /**
+     * Option for enabling merging given configuration with default configuration
+     */
+    const OPTION_MERGE = '_merge';
+
+    /**
      * Retrieves environment configuration per stage.
      *
      * @param string $name The config name
