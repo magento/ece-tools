@@ -7,12 +7,11 @@ namespace Magento\MagentoCloud\Test\Unit;
 
 use Composer\Composer;
 use Composer\Package\PackageInterface;
-use Magento\MagentoCloud\App\Container;
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -25,7 +24,7 @@ class ApplicationTest extends TestCase
     private $application;
 
     /**
-     * @var ContainerInterface|Container|MockObject
+     * @var ContainerInterface|MockObject
      */
     private $containerMock;
 
@@ -78,7 +77,7 @@ class ApplicationTest extends TestCase
      */
     public function setUp()
     {
-        $this->containerMock = $this->createMock(Container::class);
+        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->packageMock = $this->getMockForAbstractClass(PackageInterface::class);
         $this->composerMock = $this->createMock(Composer::class);
 

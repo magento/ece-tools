@@ -6,9 +6,8 @@
 namespace Magento\MagentoCloud;
 
 use Composer\Composer;
-use Magento\MagentoCloud\App\Container;
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Command;
-use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
@@ -18,12 +17,12 @@ use Psr\Container\ContainerInterface;
 class Application extends \Symfony\Component\Console\Application
 {
     /**
-     * @var ContainerInterface|Container
+     * @var ContainerInterface
      */
     private $container;
 
     /**
-     * @param ContainerInterface|Container $container
+     * @param ContainerInterface $container
      */
     public function __construct(ContainerInterface $container)
     {

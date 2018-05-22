@@ -26,7 +26,6 @@ use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
-use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
@@ -365,7 +364,7 @@ class Container implements ContainerInterface
     /**
      * @inheritdoc
      */
-    public function has($id)
+    public function has($id): bool
     {
         return $this->container->has($id);
     }
@@ -385,11 +384,7 @@ class Container implements ContainerInterface
     }
 
     /**
-     * Creates instance with params.
-     *
-     * @param string $abstract The class name to create
-     * @param array $params Associative array of constructor params
-     * @return object The resolved object
+     * @inheritdoc
      */
     public function create(string $abstract, array $params = [])
     {
