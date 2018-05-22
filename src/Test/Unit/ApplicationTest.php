@@ -59,7 +59,6 @@ class ApplicationTest extends TestCase
         Command\CronUnlock::NAME => Command\CronUnlock::class,
         Command\DbDump::NAME => Command\DbDump::class,
         Command\Deploy::NAME => Command\Deploy::class,
-        Command\Prestart::NAME => Command\Prestart::class,
         Command\PostDeploy::NAME => Command\PostDeploy::class,
         Command\BackupRestore::NAME => Command\BackupRestore::class,
         Command\BackupList::NAME => Command\BackupList::class,

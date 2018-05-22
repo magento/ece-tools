@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Config\Schema;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
@@ -27,13 +28,28 @@ class GlobalSectionTest extends TestCase
     private $environmentReaderMock;
 
     /**
+     * @var Schema|Mock
+     */
+    private $schemaMock;
+
+    /**
      * @inheritdoc
      */
     public function setUp()
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
+        $this->schemaMock = $this->createMock(Schema::class);
+        $this->schemaMock->expects($this->any())
+            ->method('getDefaults')
+            ->with(StageConfigInterface::STAGE_GLOBAL)
+            ->willReturn([
+                StageConfigInterface::VAR_SCD_ON_DEMAND => false,
+                StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => false,
+                StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => false,
+                StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [],
+            ]);
 
-        $this->config = new GlobalSection($this->environmentReaderMock);
+        $this->config = new GlobalSection($this->environmentReaderMock, $this->schemaMock);
     }
 
     /**

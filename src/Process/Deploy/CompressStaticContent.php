@@ -88,10 +88,6 @@ class CompressStaticContent implements ProcessInterface
         if (!$this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
             && $this->environment->isDeployStaticContent()
         ) {
-            if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)) {
-                $this->logger->info('Postpone static content compression until prestart');
-                return;
-            }
             $this->staticContentCompressor->process(
                 $this->stageConfig->get(DeployInterface::VAR_SCD_COMPRESSION_LEVEL),
                 $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
