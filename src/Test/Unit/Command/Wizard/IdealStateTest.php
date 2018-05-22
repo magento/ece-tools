@@ -88,7 +88,7 @@ class IdealStateTest extends TestCase
             ->method('writeItem');
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')
-            ->with($outputMock, true, 'Ideal state is configured');
+            ->with($outputMock, true, 'The configured state is ideal');
 
         $this->command->run($inputMock, $outputMock);
     }
@@ -120,13 +120,13 @@ class IdealStateTest extends TestCase
         $this->outputFormatterMock->expects($this->exactly(3))
             ->method('writeItem')
             ->withConsecutive(
-                [$outputMock, 'SCD on build or on demand is not configured'],
+                [$outputMock, 'The SCD is not set for on-demand or the build stage'],
                 [$outputMock, 'Post-deploy hook is not configured'],
                 [$outputMock, 'Skip HTML minification is disabled']
             );
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')
-            ->with($outputMock, false, 'Ideal state is not configured');
+            ->with($outputMock, false, 'The configured state is not ideal');
 
         $this->command->run($inputMock, $outputMock);
     }

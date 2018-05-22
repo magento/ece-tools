@@ -73,7 +73,7 @@ class IdealState extends Command
         $errors = [];
 
         if ($this->validatorFactory->create(ScdOnDeploy::class)->validate() instanceof Success) {
-            $errors[] = 'SCD on build or on demand is not configured';
+            $errors[] = 'The SCD is not set for on-demand or the build stage';
         }
 
         if (!$this->validatorFactory->create(PostDeploy::class)->validate() instanceof Success) {
@@ -89,8 +89,8 @@ class IdealState extends Command
         }
 
         $message = $errors
-            ? 'Ideal state is not configured'
-            : 'Ideal state is configured';
+            ? 'The configured state is not ideal'
+            : 'The configured state is ideal';
 
         $this->outputFormatter->writeResult($output, !$errors, $message);
     }
