@@ -354,7 +354,9 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @see create() For factory-like usage
      */
     public function get($id)
     {
@@ -370,14 +372,9 @@ class Container implements ContainerInterface
     }
 
     /**
-     * Register a binding with the container.
-     *
-     * @param string|array $abstract
-     * @param \Closure|string|null $concrete
-     * @param bool $shared
-     * @return void
+     * @inheritdoc
      */
-    public function set($abstract, $concrete, bool $shared = true)
+    public function set(string $abstract, $concrete, bool $shared = true)
     {
         $this->container->forgetInstance($abstract);
         $this->container->bind($abstract, $concrete, $shared);

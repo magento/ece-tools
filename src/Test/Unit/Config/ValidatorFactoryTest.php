@@ -5,11 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
-use Magento\MagentoCloud\App\ContainerInterface;
+use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Config\ValidatorFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
@@ -22,7 +23,7 @@ class ValidatorFactoryTest extends TestCase
     private $validatorFactory;
 
     /**
-     * @var ContainerInterface|MockObject
+     * @var ContainerInterface|Container|MockObject
      */
     private $containerMock;
 
@@ -31,7 +32,7 @@ class ValidatorFactoryTest extends TestCase
      */
     protected function setUp()
     {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->containerMock = $this->createMock(Container::class);
 
         $this->validatorFactory = new ValidatorFactory(
             $this->containerMock

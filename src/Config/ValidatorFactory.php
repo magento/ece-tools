@@ -14,7 +14,7 @@ use Magento\MagentoCloud\App\ContainerInterface;
 class ValidatorFactory
 {
     /**
-     * @var ContainerInterface|Container
+     * @var ContainerInterface
      */
     private $container;
 
