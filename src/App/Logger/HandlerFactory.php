@@ -66,8 +66,8 @@ class HandlerFactory
     public function create(string $handler): HandlerInterface
     {
         $configuration = $this->logConfig->get($handler);
-        $minLevel = $this->levelResolver->resolve($configuration->get('min_level', Logger::NOTICE));
-        $minLevelStream = $this->levelResolver->resolve($configuration->get('min_level', Logger::INFO));
+        $minLevel = $this->levelResolver->resolve($configuration->get('min_level', 'notice'));
+        $minLevelStream = $this->levelResolver->resolve($configuration->get('min_level', 'info'));
 
         switch ($handler) {
             case static::HANDLER_STREAM:
