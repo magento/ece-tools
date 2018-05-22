@@ -281,6 +281,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
             ],
+            DeployInterface::VAR_DATABASE_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+            ],
             DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [
