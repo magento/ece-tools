@@ -42,8 +42,6 @@ interface StageConfigInterface
     const VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT = 'DEPLOYED_MAGENTO_VERSION_FROM_GIT';
     const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
 
-    const VAR_MIN_LOGGING_LEVEL = 'MIN_LOGGING_LEVEL';
-
     /**
      * Option for enabling merging given configuration with default configuration
      */

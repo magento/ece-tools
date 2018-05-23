@@ -94,7 +94,6 @@ class SchemaTest extends TestCase
                 StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => false,
                 StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => false,
                 StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [],
-                StageConfigInterface::VAR_MIN_LOGGING_LEVEL => '',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_GLOBAL)
         );

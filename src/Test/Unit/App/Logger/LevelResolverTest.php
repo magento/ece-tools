@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
-use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Config\Environment;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
@@ -22,17 +22,17 @@ class LevelResolverTest extends TestCase
     private $levelResolver;
 
     /**
-     * @var GlobalSection|Mock
+     * @var Environment|Mock
      */
-    private $stageConfig;
+    private $environment;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->stageConfig = $this->createMock(GlobalSection::class);
-        $this->levelResolver = new LevelResolver($this->stageConfig);
+        $this->environment = $this->createMock(Environment::class);
+        $this->levelResolver = new LevelResolver($this->environment);
     }
 
     /**
@@ -52,9 +52,8 @@ class LevelResolverTest extends TestCase
      */
     public function testResolveOverride(string $level, int $expectedResult)
     {
-        $this->stageConfig
-            ->method('get')
-            ->with(GlobalSection::VAR_MIN_LOGGING_LEVEL)
+        $this->environment
+            ->method('getMinLoggingLevel')
             ->willReturn($level);
 
         $this->assertSame($expectedResult, $this->levelResolver->resolve('some level'));
