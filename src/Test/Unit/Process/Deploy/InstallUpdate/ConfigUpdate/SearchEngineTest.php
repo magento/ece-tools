@@ -6,7 +6,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
+use Magento\MagentoCloud\Config\Deploy\Reader as EnvReader;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
+use Magento\MagentoCloud\Config\Shared\Reader as SharedReader;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
@@ -36,9 +38,19 @@ class SearchEngineTest extends TestCase
     private $envWriterMock;
 
     /**
+     * @var EnvReader|Mock
+     */
+    private $envReaderMock;
+
+    /**
      * @var SharedWriter|Mock
      */
     private $sharedWriterMock;
+
+    /**
+     * @var SharedReader|Mock
+     */
+    private $sharedReaderMock;
 
     /**
      * @var MagentoVersion|Mock
@@ -56,7 +68,9 @@ class SearchEngineTest extends TestCase
     protected function setUp()
     {
         $this->envWriterMock = $this->createMock(EnvWriter::class);
+        $this->envReaderMock = $this->createMock(EnvReader::class);
         $this->sharedWriterMock = $this->createMock(SharedWriter::class);
+        $this->sharedReaderMock = $this->createMock(SharedReader::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->configMock = $this->createMock(SearchEngineConfig::class);
@@ -64,7 +78,9 @@ class SearchEngineTest extends TestCase
         $this->process = new SearchEngine(
             $this->loggerMock,
             $this->envWriterMock,
+            $this->envReaderMock,
             $this->sharedWriterMock,
+            $this->sharedReaderMock,
             $this->magentoVersionMock,
             $this->configMock
         );
@@ -72,14 +88,18 @@ class SearchEngineTest extends TestCase
 
     /**
      * @param bool $newVersion
-     * @param InvokedCount $useShareWriter
+     * @param InvokedCount $useSharerReader
+     * @param InvokedCount $useSharerWriter
+     * @param InvokedCount $useEnvReader
      * @param InvokedCount $useEnvWriter
      * @dataProvider executeDataProvider()
      * @return void
      */
     public function testExecute(
         bool $newVersion,
-        InvokedCount $useShareWriter,
+        InvokedCount $useSharerReader,
+        InvokedCount $useSharerWriter,
+        InvokedCount $useEnvReader,
         InvokedCount $useEnvWriter
     ) {
         $searchConfig = ['engine' => 'mysql'];
@@ -97,11 +117,17 @@ class SearchEngineTest extends TestCase
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->willReturn($newVersion);
-        $this->sharedWriterMock->expects($useShareWriter)
-            ->method('update')
+        $this->sharedReaderMock->expects($useSharerReader)
+            ->method('read')
+            ->willReturn([]);
+        $this->sharedWriterMock->expects($useSharerWriter)
+            ->method('create')
             ->with($config);
+        $this->envReaderMock->expects($useEnvReader)
+            ->method('read')
+            ->willReturn([]);
         $this->envWriterMock->expects($useEnvWriter)
-            ->method('update')
+            ->method('create')
             ->with($config);
 
         $this->process->execute();
@@ -112,14 +138,18 @@ class SearchEngineTest extends TestCase
         return [
             [
                 'newVersion' => true,
-                'useShareWriter' => $this->never(),
+                'useSharerReader' => $this->never(),
+                'useSharerWriter' => $this->never(),
+                'useEnvReader' => $this->once(),
                 'useEnvWriter' => $this->once(),
             ],
             [
                 'newVersion' => false,
-                'useShareWriter' => $this->once(),
+                'useSharerReader' => $this->once(),
+                'useSharerWriter' => $this->once(),
+                'useEnvReader' => $this->never(),
                 'useEnvWriter' => $this->never(),
-            ]
+            ],
         ];
     }
 }
