@@ -58,7 +58,7 @@ class Config
     {
         $envSessionConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_SESSION_CONFIGURATION);
 
-        if ($this->isSessionConfigurationValid($envSessionConfiguration)
+        if (!$this->configMerger->isEmpty($envSessionConfiguration)
             && !$this->configMerger->isMergeRequired($envSessionConfiguration)
         ) {
             return $envSessionConfiguration;
@@ -78,16 +78,5 @@ class Config
                 'database' => 0
             ]
         ], $envSessionConfiguration);
-    }
-
-    /**
-     * Checks that given session configuration is valid.
-     *
-     * @param array $sessionConfiguration
-     * @return bool
-     */
-    private function isSessionConfigurationValid(array $sessionConfiguration): bool
-    {
-        return !$this->configMerger->isEmpty($sessionConfiguration) && isset($sessionConfiguration['save']);
     }
 }

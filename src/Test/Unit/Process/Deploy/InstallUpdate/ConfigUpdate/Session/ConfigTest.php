@@ -61,49 +61,6 @@ class ConfigTest extends TestCase
         );
     }
 
-    public function testGetWithoutRedisAndWithNotValidEnvConfig()
-    {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
-            ->willReturn(['some_key' => 'some_storage']);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('redis')
-            ->willReturn([]);
-
-        $this->assertEmpty($this->config->get());
-    }
-
-    public function testGetWithRedisAndNotValidEnvConfig()
-    {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
-            ->willReturn(['some_key' => 'some_storage']);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('redis')
-            ->willReturn([
-                [
-                    'host' => 'redis_host',
-                    'port' => '1234'
-                ]
-            ]);
-
-        $this->assertEquals(
-            [
-                'save' => 'redis',
-                'redis' => [
-                    'host' => 'redis_host',
-                    'port' => '1234',
-                    'database' => 0
-                ]
-            ],
-            $this->config->get()
-        );
-    }
-
     /**
      * @param array $envSessionConfiguration
      * @param array $relationships
@@ -188,17 +145,6 @@ class ConfigTest extends TestCase
                 ],
                 $relationships,
                 $resultWithMergedHostAndPort,
-            ],
-            [
-                [
-                    StageConfigInterface::OPTION_MERGE => false,
-                    'redis' => [
-                        'host' => 'new_host',
-                        'port' => 'new_port',
-                    ],
-                ],
-                $relationships,
-                $result,
             ],
         ];
     }
