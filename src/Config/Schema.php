@@ -206,12 +206,9 @@ class Schema
                 ],
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY,
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => '',
-                    StageConfigInterface::STAGE_DEPLOY => '',
+                    StageConfigInterface::STAGE_GLOBAL => '',
                 ],
             ],
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => [

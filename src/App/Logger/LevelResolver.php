@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\App\Logger;
 
-use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Monolog\Logger;
 
 /**
@@ -14,7 +14,7 @@ use Monolog\Logger;
 class LevelResolver
 {
     /**
-     * @var StageConfigInterface
+     * @var GlobalSection
      */
     private $stageConfig;
 
@@ -32,7 +32,7 @@ class LevelResolver
         'emergency' => Logger::EMERGENCY,
     ];
 
-    public function __construct(StageConfigInterface $stageConfig)
+    public function __construct(GlobalSection $stageConfig)
     {
         $this->stageConfig = $stageConfig;
     }
@@ -43,7 +43,7 @@ class LevelResolver
      */
     public function resolve(string $level): int
     {
-        $levelOverride = $this->stageConfig->get(StageConfigInterface::VAR_MIN_LOGGING_LEVEL);
+        $levelOverride = $this->stageConfig->get(GlobalSection::VAR_MIN_LOGGING_LEVEL);
 
         if ($levelOverride) {
             return $this->mapLevels[strtolower($levelOverride)] ?? Logger::NOTICE;
