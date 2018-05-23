@@ -1,0 +1,13 @@
+diff --git a/vendor/magento/module-support/Console/Command/AbstractBackupDumpCommand.php b/vendor/magento/module-support/Console/Command/AbstractBackupDumpCommand.php
+index 673d65ec1b2..aa198e265b0 100644
+--- a/vendor/magento/module-support/Console/Command/AbstractBackupDumpCommand.php
++++ b/vendor/magento/module-support/Console/Command/AbstractBackupDumpCommand.php
+@@ -181,7 +181,7 @@ class AbstractBackupDumpCommand extends AbstractBackupCommand
+                 : $this->getParam(ConfigOptionsListConstants::KEY_HOST);
+ 
+             $this->dbConnectionParams = sprintf(
+-                '-u%s -h%s %s %s %s',
++                '-u%s -h%s %s %s %s %s',
+                 $this->getParam(ConfigOptionsListConstants::KEY_USER),
+                 $host,
+                 $port,
