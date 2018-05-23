@@ -6,10 +6,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Illuminate\Config\Repository;
-use Magento\MagentoCloud\App\Container;
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -37,7 +36,7 @@ class RepositoryFactoryTest extends TestCase
      */
     protected function setUp()
     {
-        $this->containerMock = $this->createMock(Container::class);
+        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->repositoryMock = $this->createMock(Repository::class);
 
         $this->factory = new RepositoryFactory(

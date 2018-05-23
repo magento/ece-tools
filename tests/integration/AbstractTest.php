@@ -5,10 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Integration;
 
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 
 /**
  * Adds sandbox project installation and cleanup abstract features.

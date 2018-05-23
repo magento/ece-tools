@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Http;
 
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Http\RequestFactory;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -36,9 +36,7 @@ class RequestFactoryTest extends TestCase
      */
     protected function setUp()
     {
-        $this->containerMock = $this->getMockBuilder(ContainerInterface::class)
-            ->setMethods(['create'])
-            ->getMockForAbstractClass();
+        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->requestMock = $this->getMockForAbstractClass(RequestInterface::class);
 
         $this->requestFactory = new RequestFactory(
@@ -52,9 +50,6 @@ class RequestFactoryTest extends TestCase
             ->method('create')
             ->willReturn($this->requestMock);
 
-        $this->assertInstanceOf(
-            RequestInterface::class,
-            $this->requestFactory->create('GET', 'some_uri')
-        );
+        $this->requestFactory->create('GET', 'some_uri');
     }
 }

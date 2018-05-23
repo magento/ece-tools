@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\App\Container;
-use Psr\Container\ContainerInterface;
+use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
  * Created instances of specific validators.
@@ -14,7 +14,7 @@ use Psr\Container\ContainerInterface;
 class ValidatorFactory
 {
     /**
-     * @var ContainerInterface|Container
+     * @var ContainerInterface
      */
     private $container;
 

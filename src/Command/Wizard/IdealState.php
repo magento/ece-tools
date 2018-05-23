@@ -72,6 +72,10 @@ class IdealState extends Command
     {
         $errors = [];
 
+        /**
+         * We check whether SCD on deploy is configured, because it's a sign
+         * that other strategies, like SCD on build and SCD on demand are disabled.
+         */
         if ($this->validatorFactory->create(ScdOnDeploy::class)->validate() instanceof Success) {
             $errors[] = 'The SCD is not set for on-demand or the build stage';
         }

@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Http;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
-use Psr\Container\ContainerInterface;
+use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
  * Creates configured instances of Client.

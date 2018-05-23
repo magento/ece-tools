@@ -6,9 +6,9 @@
 namespace Magento\MagentoCloud;
 
 use Composer\Composer;
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Command;
-use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc
@@ -66,6 +66,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\Wizard\ScdOnDeploy::class),
                 $this->container->create(Command\ModuleRefresh::class),
                 $this->container->create(Command\Wizard\IdealState::class),
+                $this->container->create(Command\Wizard\MasterSlave::class),
             ]
         );
     }
