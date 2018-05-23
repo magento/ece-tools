@@ -33,79 +33,143 @@ class ConfigTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var ConfigMerger|Mock
-     */
-    private $configMergerMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->configMergerMock = $this->createMock(ConfigMerger::class);
 
         $this->config = new Config(
             $this->environmentMock,
             $this->stageConfigMock,
-            $this->configMergerMock
+            new ConfigMerger()
         );
     }
 
     /**
+     * @param array $customQueueConfig
      * @param array $magentoRelationShipsQueueConfig
      * @param array $expectedQueueConfig
-     * @dataProvider envQueueConfigNotExistDataProvider
+     * @dataProvider getDataProvider
      * @return void
      */
-    public function testGetWhenEnvQueueConfigNotExist(
+    public function testGet(
+        $customQueueConfig,
         $magentoRelationShipsQueueConfig,
         $expectedQueueConfig
     ) {
-        $envQueueConfig = [];
-
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_QUEUE_CONFIGURATION)
-            ->willReturn($envQueueConfig);
+            ->willReturn($customQueueConfig);
         $this->environmentMock->expects($this->exactly(3))
             ->method('getRelationship')
             ->withConsecutive(['rabbitmq'], ['mq'], ['amqp'])
             ->willReturnOnConsecutiveCalls([], [], $magentoRelationShipsQueueConfig);
-
-        $this->configMergerMock->expects($this->once())
-            ->method('isEmpty')
-            ->with($envQueueConfig)
-            ->willReturn(true);
-
-        $this->configMergerMock->expects($this->never())
-            ->method('isMergeRequired');
-        $this->configMergerMock->expects($this->never())
-            ->method('mergeConfigs');
-        $this->configMergerMock->expects($this->never())
-            ->method('clear');
 
         $this->assertEquals($expectedQueueConfig, $this->config->get());
     }
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function envQueueConfigNotExistDataProvider(): array
+    public function getDataProvider(): array
     {
         return [
-            [
+            'queue configuration does not exist' => [
+                'customQueueConfig' => [],
                 'magentoRelationShipsQueueConfig' => [],
                 'expectedQueueConfig' => [],
             ],
-            [
+            'only custom queue configuration exists' => [
+                'customQueueConfig' => [
+                    'amqp' => [
+                        'host' => 'custom_host',
+                        'port' => 3333,
+                        'user' => 'custom_user',
+                        'password' => 'custom_password',
+                        'virtualhost' => 'custom_vhost',
+                    ],
+                ],
+                'magentoRelationShipsQueueConfig' => [],
+                'expectedQueueConfig' => [
+                    'amqp' => [
+                        'host' => 'custom_host',
+                        'port' => 3333,
+                        'user' => 'custom_user',
+                        'password' => 'custom_password',
+                        'virtualhost' => 'custom_vhost',
+                    ],
+                ],
+            ],
+            'custom and relationship queue configurations exists without merge' => [
+                'customQueueConfig' => [
+                    'amqp' => [
+                        'host' => 'custom_host',
+                        'port' => 3333,
+                        'user' => 'custom_user',
+                        'password' => 'custom_password',
+                        'virtualhost' => 'custom_vhost',
+                    ],
+                ],
                 'magentoRelationShipsQueueConfig' => [
                     0 => [
                         'host' => 'localhost',
                         'port' => 5538,
                         'username' => 'johndoe',
                         'password' => 'qwerty',
+                        'vhost' => '/'
+                    ]
+                ],
+                'expectedQueueConfig' => [
+                    'amqp' => [
+                        'host' => 'custom_host',
+                        'port' => 3333,
+                        'user' => 'custom_user',
+                        'password' => 'custom_password',
+                        'virtualhost' => 'custom_vhost',
+                    ]
+                ],
+            ],
+            'custom and relationship queue configurations exists with merge' => [
+                'customQueueConfig' => [
+                    'amqp' => [
+                        'user' => 'custom_user',
+                        'password' => 'custom_password',
+                        'virtualhost' => 'custom_vhost',
+                    ],
+                    '_merge' => true,
+                ],
+                'magentoRelationShipsQueueConfig' => [
+                    0 => [
+                        'host' => 'localhost',
+                        'port' => 5538,
+                        'username' => 'johndoe',
+                        'password' => 'qwerty',
+                        'vhost' => '/'
+                    ]
+                ],
+                'expectedQueueConfig' => [
+                    'amqp' => [
+                        'host' => 'localhost',
+                        'port' => 5538,
+                        'user' => 'custom_user',
+                        'password' => 'custom_password',
+                        'virtualhost' => 'custom_vhost',
+                    ]
+                ],
+            ],
+            'only relationships queue configuration exists' => [
+                'customQueueConfig' => [],
+                'magentoRelationShipsQueueConfig' => [
+                    0 => [
+                        'host' => 'localhost',
+                        'port' => 5538,
+                        'username' => 'johndoe',
+                        'password' => 'qwerty',
+                        'vhost' => '/'
                     ]
                 ],
                 'expectedQueueConfig' => [
@@ -114,111 +178,10 @@ class ConfigTest extends TestCase
                         'port' => 5538,
                         'user' => 'johndoe',
                         'password' => 'qwerty',
-                        'virtualhost' => '/'
-                    ]
-                ],
-            ],
-            [
-                'magentoRelationShipsQueueConfig' => [
-                    0 => [
-                        'host' => 'localhost',
-                        'port' => 5538,
-                        'username' => 'johndoe',
-                        'password' => 'qwerty',
-                        'vhost' => 'some_virtual_host'
-                    ]
-                ],
-                'expectedQueueConfig' => [
-                    'amqp' => [
-                        'host' => 'localhost',
-                        'port' => 5538,
-                        'user' => 'johndoe',
-                        'password' => 'qwerty',
-                        'virtualhost' => 'some_virtual_host'
+                        'virtualhost' => '/',
                     ]
                 ],
             ],
         ];
-    }
-
-    /**
-     * @return void
-     */
-    public function testGetWithoutMergeConfigurations()
-    {
-        $envQueueConfig = ['some_queue_config'];
-
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_QUEUE_CONFIGURATION)
-            ->willReturn($envQueueConfig);
-        $this->environmentMock->expects($this->any())
-            ->method('getRelationship');
-        $this->configMergerMock->expects($this->once())
-            ->method('isEmpty')
-            ->with($envQueueConfig)
-            ->willReturn(false);
-        $this->configMergerMock->expects($this->once())
-            ->method('isMergeRequired')
-            ->with($envQueueConfig)
-            ->willReturn(false);
-        $this->configMergerMock->expects($this->never())
-            ->method('mergeConfigs');
-        $this->configMergerMock->expects($this->once())
-            ->method('clear')
-            ->with($envQueueConfig);
-
-        $this->config->get();
-    }
-
-    /**
-     * @return void
-     */
-    public function testGetWithMergeConfigurations()
-    {
-        $envQueueConfig = ['some_queue_config'];
-        $magentoRelationShipsQueueConfig = [
-            0 => [
-                'host' => 'localhost',
-                'port' => 5538,
-                'username' => 'johndoe',
-                'password' => 'qwerty',
-            ]
-        ];
-        $mqConfig = [
-            'amqp' => [
-                'host' => 'localhost',
-                'port' => 5538,
-                'user' => 'johndoe',
-                'password' => 'qwerty',
-                'virtualhost' => '/'
-            ]
-        ];
-
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_QUEUE_CONFIGURATION)
-            ->willReturn($envQueueConfig);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('rabbitmq')
-            ->willReturn($magentoRelationShipsQueueConfig);
-        $this->configMergerMock->expects($this->once())
-            ->method('isEmpty')
-            ->with($envQueueConfig)
-            ->willReturn(false);
-        $this->configMergerMock->expects($this->once())
-            ->method('isMergeRequired')
-            ->with($envQueueConfig)
-            ->willReturn(true);
-        $this->configMergerMock->expects($this->once())
-            ->method('mergeConfigs')
-            ->with($mqConfig, $envQueueConfig)
-            ->willReturn([]);
-        $this->configMergerMock->expects($this->never())
-            ->method('clear')
-            ->with($envQueueConfig);
-
-        $this->config->get();
     }
 }
