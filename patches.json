@@ -133,5 +133,10 @@
     "Fix cannot upgrade 2.0 => 2.1 with auto_increment > 1": {
       "101.0.3 - 101.0.5": "2.1/MAGETWO-57799.patch"
     }
+  },
+  "magento/product-enterprise-edition": {
+    "Fix locker process": {
+      "2.2.0 - 2.2.5": "2.2/fix-support-db-dump.patch"
+    }
   }
 }
