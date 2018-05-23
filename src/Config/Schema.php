@@ -191,6 +191,29 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL => [],
                 ],
             ],
+            StageConfigInterface::VAR_MIN_LOGGING_LEVEL => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_VALUE_VALIDATION => [
+                    '',
+                    Log::LEVEL_DEBUG,
+                    Log::LEVEL_INFO,
+                    Log::LEVEL_NOTICE,
+                    Log::LEVEL_WARNING,
+                    Log::LEVEL_ERROR,
+                    Log::LEVEL_CRITICAL,
+                    Log::LEVEL_ALERT,
+                    Log::LEVEL_EMERGENCY,
+                ],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_BUILD,
+                    StageConfigInterface::STAGE_DEPLOY,
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_BUILD => '',
+                    StageConfigInterface::STAGE_DEPLOY => '',
+                ],
+            ],
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
@@ -320,7 +343,7 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_POST_DEPLOY => ['index.php'],
                 ],
-            ]
+            ],
         ];
     }
 }

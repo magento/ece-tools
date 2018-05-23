@@ -5,7 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
+use Magento\MagentoCloud\Config\Log as LogConfig;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 
@@ -20,11 +22,17 @@ class LevelResolverTest extends TestCase
     private $levelResolver;
 
     /**
+     * @var StageConfigInterface|Mock
+     */
+    private $stageConfig;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->levelResolver = new LevelResolver();
+        $this->stageConfig = $this->createMock(StageConfigInterface::class);
+        $this->levelResolver = new LevelResolver($this->stageConfig);
     }
 
     /**
@@ -35,6 +43,21 @@ class LevelResolverTest extends TestCase
     public function testResolve(string $level, int $expectedResult)
     {
         $this->assertSame($expectedResult, $this->levelResolver->resolve($level));
+    }
+
+    /**
+     * @param string $level
+     * @param int $expectedResult
+     * @dataProvider resolveDataProvider
+     */
+    public function testResolveOverride(string $level, int $expectedResult)
+    {
+        $this->stageConfig
+            ->method('get')
+            ->with(StageConfigInterface::VAR_MIN_LOGGING_LEVEL)
+            ->willReturn($level);
+
+        $this->assertSame($expectedResult, $this->levelResolver->resolve('some level'));
     }
 
     /**
@@ -60,6 +83,7 @@ class LevelResolverTest extends TestCase
             ['level' => 'criTical', Logger::CRITICAL],
             ['level' => 'alErt', Logger::ALERT],
             ['level' => 'Emergency', Logger::EMERGENCY],
+            ['level' => 'invalid', Logger::NOTICE]
         ];
     }
 }

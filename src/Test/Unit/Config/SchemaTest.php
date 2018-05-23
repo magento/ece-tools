@@ -41,6 +41,7 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
+                BuildInterface::VAR_MIN_LOGGING_LEVEL => '',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD)
         );
@@ -69,6 +70,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_SCD_MATRIX => [],
+                DeployInterface::VAR_MIN_LOGGING_LEVEL => '',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
