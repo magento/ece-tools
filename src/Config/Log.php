@@ -15,7 +15,19 @@ use Magento\MagentoCloud\App\Logger\HandlerFactory;
  */
 class Log
 {
-    const CONFIG_SECTION = 'log';
+    const SECTION_CONFIG = 'log';
+
+    /**
+     * Log levels.
+     */
+    const LEVEL_DEBUG = 'debug';
+    const LEVEL_INFO = 'info';
+    const LEVEL_NOTICE = 'notice';
+    const LEVEL_WARNING = 'warning';
+    const LEVEL_ERROR = 'error';
+    const LEVEL_CRITICAL = 'critical';
+    const LEVEL_ALERT = 'alert';
+    const LEVEL_EMERGENCY = 'emergencey';
 
     /**
      * @var FileList
@@ -86,7 +98,7 @@ class Log
                 HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getCloudLog()],
             ];
 
-            $this->config = array_merge_recursive($this->config, $this->reader->read()[static::CONFIG_SECTION] ?? []);
+            $this->config = array_merge_recursive($this->config, $this->reader->read()[static::SECTION_CONFIG] ?? []);
         }
 
         return $this->config;
