@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Config\Application\Reader;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @inheritdoc
@@ -17,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 class HookCheckerTest extends TestCase
 {
     /**
-     * @var ConfigFileList|Mock
+     * @var ConfigFileList|MockObject
      */
     private $configFileListMock;
 

@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Application;
 use Magento\MagentoCloud\Config\Application\Reader;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 class ReaderTest extends TestCase
 {
     /**
-     * @var ConfigFileList|Mock
+     * @var ConfigFileList|MockObject
      */
     private $configFileListMock;
 

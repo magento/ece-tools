@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Process\Deploy\BeforePostDeploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @inheritdoc
@@ -23,17 +23,17 @@ class BeforePostDeployTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var HookChecker|Mock
+     * @var HookChecker|MockObject
      */
     private $hookChecker;
 
     /**
-     * @var ProcessInterface|Mock
+     * @var ProcessInterface|MockObject
      */
     private $processMock;
 
