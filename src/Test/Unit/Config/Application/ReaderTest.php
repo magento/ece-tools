@@ -42,8 +42,11 @@ class ReaderTest extends TestCase
         $this->assertEquals(
             [
                 'hooks' => [
-                    'post_deploy' => 'php ece-tools post-deploy',
+                    'post_deploy' => 'php bin/ece-tools post-deploy',
                 ],
+                'config' => [
+                    'key' => 'value'
+                ]
             ],
             $this->reader->read()
         );

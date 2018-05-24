@@ -5,3 +5,5 @@ hooks:
     php bin/ece-tools deploy
   pos_deploy: |
     php some_script.php
+config:
+  key: value
