@@ -5,23 +5,17 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config as AmqpConfig;
 
 /**
  * @inheritdoc
  */
 class Amqp implements ProcessInterface
 {
-    /**
-     * @var Environment
-     */
-    private $environment;
-
     /**
      * @var LoggerInterface
      */
@@ -38,36 +32,26 @@ class Amqp implements ProcessInterface
     private $configReader;
 
     /**
-     * @var DeployInterface
+     * @var AmqpConfig
      */
-    private $stageConfig;
+    private $amqpConfig;
 
     /**
-     * Possible names for amqp relationship
-     *
-     * @var array
-     */
-    private $possibleRelationshipNames = ['rabbitmq', 'mq', 'amqp'];
-
-    /**
-     * @param Environment $environment
      * @param ConfigReader $configReader
      * @param ConfigWriter $configWriter
      * @param LoggerInterface $logger
-     * @param DeployInterface $stageConfig
+     * @param AmqpConfig $amqpConfig
      */
     public function __construct(
-        Environment $environment,
         ConfigReader $configReader,
         ConfigWriter $configWriter,
         LoggerInterface $logger,
-        DeployInterface $stageConfig
+        AmqpConfig $amqpConfig
     ) {
-        $this->environment = $environment;
         $this->configReader = $configReader;
         $this->configWriter = $configWriter;
         $this->logger = $logger;
-        $this->stageConfig = $stageConfig;
+        $this->amqpConfig = $amqpConfig;
     }
 
     /**
@@ -83,63 +67,17 @@ class Amqp implements ProcessInterface
      */
     public function execute()
     {
-        $mqConfig = $this->getAmqpConfig();
-        $envQueueConfig = $this->stageConfig->get(DeployInterface::VAR_QUEUE_CONFIGURATION);
         $config = $this->configReader->read();
+        $amqpConfig = $this->amqpConfig->get();
 
-        if (count($envQueueConfig)) {
+        if (count($amqpConfig)) {
             $this->logger->info('Updating env.php AMQP configuration.');
-            $config['queue'] = $envQueueConfig;
-        } elseif (count($mqConfig)) {
-            $this->logger->info('Updating env.php AMQP configuration.');
-            $amqpConfig = $mqConfig[0];
-            $config['queue'] = [
-                'amqp' => [
-                    'host' => $amqpConfig['host'],
-                    'port' => $amqpConfig['port'],
-                    'user' => $amqpConfig['username'],
-                    'password' => $amqpConfig['password'],
-                    'virtualhost' => isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/',
-                ]
-            ];
-        } else {
-            $config = $this->removeAmqpConfig($config);
-        }
-
-        $this->configWriter->create($config);
-    }
-
-    /**
-     * Remove AMQP configuration from env.php
-     *
-     * @param array $config
-     * @return array
-     */
-    private function removeAmqpConfig(array $config)
-    {
-        if (isset($config['queue'])) {
+            $config['queue'] = $amqpConfig;
+            $this->configWriter->create($config);
+        } elseif (isset($config['queue'])) {
             $this->logger->info('Removing queue configuration from env.php.');
             unset($config['queue']);
+            $this->configWriter->create($config);
         }
-
-        return $config;
-    }
-
-    /**
-     * Finds if configuration exists for one of possible amqp relationship names and return first match,
-     * amqp relationship can have different name on different environment.
-     *
-     * @return array
-     */
-    private function getAmqpConfig(): array
-    {
-        foreach ($this->possibleRelationshipNames as $relationshipName) {
-            $mqConfig = $this->environment->getRelationship($relationshipName);
-            if (!empty($mqConfig)) {
-                return $mqConfig;
-            }
-        }
-
-        return [];
     }
 }
