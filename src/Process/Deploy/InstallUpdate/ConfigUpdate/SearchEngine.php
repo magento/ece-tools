@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Config\Deploy\Reader as EnvReader;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Config\Shared\Reader as SharedReader;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -50,9 +50,11 @@ class SearchEngine implements ProcessInterface
     private $magentoVersion;
 
     /**
-     * @var Config
+     * Returns search configuration
+     *
+     * @var SearchEngineConfig
      */
-    private $config;
+    private $searchEngineConfig;
 
     /**
      * @param LoggerInterface $logger
@@ -61,7 +63,7 @@ class SearchEngine implements ProcessInterface
      * @param SharedWriter $sharedWriter
      * @param SharedReader $sharedReader
      * @param MagentoVersion $version
-     * @param Config $config
+     * @param SearchEngineConfig $searchEngineConfig
      */
     public function __construct(
         LoggerInterface $logger,
@@ -70,7 +72,7 @@ class SearchEngine implements ProcessInterface
         SharedWriter $sharedWriter,
         SharedReader $sharedReader,
         MagentoVersion $version,
-        Config $config
+        SearchEngineConfig $searchEngineConfig
     ) {
         $this->logger = $logger;
         $this->envWriter = $envWriter;
@@ -78,7 +80,7 @@ class SearchEngine implements ProcessInterface
         $this->sharedWriter = $sharedWriter;
         $this->sharedReader = $sharedReader;
         $this->magentoVersion = $version;
-        $this->config = $config;
+        $this->searchEngineConfig = $searchEngineConfig;
     }
 
     /**
@@ -90,7 +92,7 @@ class SearchEngine implements ProcessInterface
     {
         $this->logger->info('Updating search engine configuration.');
 
-        $searchConfig = $this->config->get();
+        $searchConfig = $this->searchEngineConfig->get();
 
         $this->logger->info('Set search engine to: ' . $searchConfig['engine']);
 
