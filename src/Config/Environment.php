@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Config;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Psr\Log\LoggerInterface;
 
 /**
  * Contains logic for interacting with the server environment
@@ -37,11 +36,6 @@ class Environment
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * @var File
      */
     private $file;
@@ -62,18 +56,15 @@ class Environment
     private $data = [];
 
     /**
-     * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
      */
     public function __construct(
-        LoggerInterface $logger,
         File $file,
         DirectoryList $directoryList,
         FlagManager $flagManager
     ) {
-        $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;

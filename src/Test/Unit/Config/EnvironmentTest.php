@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -23,11 +22,6 @@ class EnvironmentTest extends TestCase
      * @var Environment
      */
     private $environment;
-
-    /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
 
     /**
      * @var File|Mock
@@ -55,14 +49,11 @@ class EnvironmentTest extends TestCase
     protected function setUp()
     {
         $this->environmentData = $_ENV;
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->environment = new Environment(
-            $this->loggerMock,
             $this->fileMock,
             $this->directoryListMock,
             $this->flagManagerMock
