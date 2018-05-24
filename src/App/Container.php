@@ -221,14 +221,20 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
+
                         /**
-                         * Remove this line after implementation post-deploy hook
+                         * This process runs processes if only post_deploy hook is not configured.
                          */
+                        $this->container->make(DeployProcess\BeforePostDeploy::class),
+                    ],
+                ]);
+            });
+        $this->container->when(DeployProcess\BeforePostDeploy::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(PostDeployProcess\Backup::class),
-                        /**
-                         * Cache clean process must remain the last one in deploy chain.
-                         * Do not add any processes after it.
-                         */
                         $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);
