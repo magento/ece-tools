@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
@@ -23,9 +23,9 @@ class DeployStaticContent implements ProcessInterface
     private $process;
 
     /**
-     * @var Environment
+     * @var FlagManager
      */
-    private $environment;
+    private $flagManager;
 
     /**
      * @var LoggerInterface
@@ -49,7 +49,7 @@ class DeployStaticContent implements ProcessInterface
 
     /**
      * @param ProcessInterface $process
-     * @param Environment $environment
+     * @param FlagManager $flagManager
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
      * @param GlobalConfig $globalConfig
@@ -57,14 +57,14 @@ class DeployStaticContent implements ProcessInterface
      */
     public function __construct(
         ProcessInterface $process,
-        Environment $environment,
+        FlagManager $flagManager,
         LoggerInterface $logger,
         DeployInterface $stageConfig,
         GlobalConfig $globalConfig,
         StaticContentCleaner $staticContentCleaner
     ) {
         $this->process = $process;
-        $this->environment = $environment;
+        $this->flagManager = $flagManager;
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
         $this->globalConfig = $globalConfig;
@@ -88,7 +88,7 @@ class DeployStaticContent implements ProcessInterface
         }
 
         if ($this->stageConfig->get(DeployInterface::VAR_SKIP_SCD)
-            || !$this->environment->isDeployStaticContent()
+            || $this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
         ) {
             return;
         }

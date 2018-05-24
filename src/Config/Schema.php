@@ -320,7 +320,7 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_POST_DEPLOY => ['index.php'],
                 ],
-            ]
+            ],
         ];
     }
 }
