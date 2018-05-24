@@ -99,7 +99,7 @@ class Config
 
         $slaveConnectionData = $this->getSlaveConnection();
         if ($slaveConnectionData) {
-            if ($this->isEnvConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $redisConfig)) {
+            if ($this->isConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $redisConfig)) {
                 $redisCache['backend_options']['load_from_slave'] = $slaveConnectionData;
                 $this->logger->info('Set Redis slave connection');
             } else {
@@ -164,7 +164,7 @@ class Config
      * @param array $redisConfig
      * @return bool
      */
-    private function isEnvConfigurationCompatibleWithSlaveConnection(
+    private function isConfigurationCompatibleWithSlaveConnection(
         array $envCacheConfig,
         array $redisConfig
     ): bool {
