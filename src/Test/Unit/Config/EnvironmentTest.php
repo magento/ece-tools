@@ -6,9 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -24,21 +21,6 @@ class EnvironmentTest extends TestCase
     private $environment;
 
     /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
-
-    /**
-     * @var FlagManager|Mock
-     */
-    private $flagManagerMock;
-
-    /**
      * @var array
      */
     private $environmentData;
@@ -49,15 +31,8 @@ class EnvironmentTest extends TestCase
     protected function setUp()
     {
         $this->environmentData = $_ENV;
-        $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
-        $this->environment = new Environment(
-            $this->fileMock,
-            $this->directoryListMock,
-            $this->flagManagerMock
-        );
+        $this->environment = new Environment();
     }
 
     /**
@@ -127,34 +102,6 @@ class EnvironmentTest extends TestCase
                 'some_new_value',
                 'some_value',
             ],
-        ];
-    }
-
-    /**
-     * @param bool $isExists
-     * @dataProvider isDeployStaticContentToBeEnabledDataProvider
-     */
-    public function testIsDeployStaticContentToBeEnabled(bool $isExists)
-    {
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-            ->willReturn($isExists);
-
-        $this->assertSame(
-            !$isExists,
-            $this->environment->isDeployStaticContent()
-        );
-    }
-
-    /**
-     * @return array
-     */
-    public function isDeployStaticContentToBeEnabledDataProvider(): array
-    {
-        return [
-            [true],
-            [false],
         ];
     }
 

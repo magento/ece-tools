@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -27,9 +27,9 @@ class DeployStaticContentTest extends TestCase
     private $process;
 
     /**
-     * @var Environment|Mock
+     * @var FlagManager|Mock
      */
-    private $environmentMock;
+    private $flagManagerMock;
 
     /**
      * @var ShellInterface|Mock
@@ -66,7 +66,7 @@ class DeployStaticContentTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
@@ -76,7 +76,7 @@ class DeployStaticContentTest extends TestCase
 
         $this->process = new DeployStaticContent(
             $this->processMock,
-            $this->environmentMock,
+            $this->flagManagerMock,
             $this->loggerMock,
             $this->stageConfigMock,
             $this->globalConfigMock,
@@ -90,9 +90,10 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
-        $this->environmentMock->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(true);
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Generating fresh static content');
@@ -116,9 +117,10 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
-        $this->environmentMock->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(true);
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->withConsecutive(
@@ -144,9 +146,10 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
-        $this->environmentMock->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(false);
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
         $this->staticContentCleanerMock->expects($this->never())
             ->method('clean');
 
@@ -164,8 +167,8 @@ class DeployStaticContentTest extends TestCase
             ->with('Skipping static content deploy. SCD on demand is enabled.');
         $this->loggerMock->expects($this->never())
             ->method('info');
-        $this->environmentMock->expects($this->never())
-            ->method('isDeployStaticContent');
+        $this->flagManagerMock->expects($this->never())
+            ->method('exists');
         $this->staticContentCleanerMock->expects($this->once())
             ->method('clean');
 

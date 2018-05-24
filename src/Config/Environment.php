@@ -5,10 +5,6 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-
 /**
  * Contains logic for interacting with the server environment
  */
@@ -36,39 +32,9 @@ class Environment
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
-     * @var FlagManager
-     */
-    private $flagManager;
-
-    /**
      * @var array
      */
     private $data = [];
-
-    /**
-     * @param File $file
-     * @param DirectoryList $directoryList
-     * @param FlagManager $flagManager
-     */
-    public function __construct(
-        File $file,
-        DirectoryList $directoryList,
-        FlagManager $flagManager
-    ) {
-        $this->file = $file;
-        $this->directoryList = $directoryList;
-        $this->flagManager = $flagManager;
-    }
 
     /**
      * 'getEnv' method is an abstraction for _ENV and getenv.
@@ -178,14 +144,6 @@ class Environment
     public function getVariable($name, $default = null)
     {
         return $this->getVariables()[$name] ?? $default;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDeployStaticContent(): bool
-    {
-        return !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
     }
 
     /**
