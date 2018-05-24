@@ -1,0 +1,5 @@
+hooks:
+   deploy:
+
+ post_deploy: |
+    php ece-tools post-deploy

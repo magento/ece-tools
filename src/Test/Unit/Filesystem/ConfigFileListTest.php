@@ -66,4 +66,9 @@ class ConfigFileListTest extends TestCase
     {
         $this->assertSame('magento_root/.magento.env.yaml', $this->configFileList->getEnvConfig());
     }
+
+    public function testGetAppConfig()
+    {
+        $this->assertSame('magento_root/.magento.app.yaml', $this->configFileList->getAppConfig());
+    }
 }
