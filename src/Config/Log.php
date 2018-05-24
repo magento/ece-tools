@@ -20,14 +20,8 @@ class Log
     /**
      * Log levels.
      */
-    const LEVEL_DEBUG = 'debug';
     const LEVEL_INFO = 'info';
     const LEVEL_NOTICE = 'notice';
-    const LEVEL_WARNING = 'warning';
-    const LEVEL_ERROR = 'error';
-    const LEVEL_CRITICAL = 'critical';
-    const LEVEL_ALERT = 'alert';
-    const LEVEL_EMERGENCY = 'emergencey';
 
     /**
      * @var FileList
@@ -90,15 +84,16 @@ class Log
     /**
      * @return array
      */
-    private function getConfig()
+    private function getConfig(): array
     {
         if ($this->config === null) {
-            $this->config = [
-                HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getCloudLog()],
-            ];
-
-            $this->config = array_merge_recursive($this->config, $this->reader->read()[static::SECTION_CONFIG] ?? []);
+            $this->config = array_replace(
+                [
+                    HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
+                    HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getCloudLog()],
+                ],
+                $this->reader->read()[static::SECTION_CONFIG] ?? []
+            );
         }
 
         return $this->config;

@@ -5,10 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
-use Magento\MagentoCloud\Config\Log as LogConfig;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
 use Magento\MagentoCloud\Config\Environment;
 use Monolog\Logger;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -22,17 +22,18 @@ class LevelResolverTest extends TestCase
     private $levelResolver;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
-    private $environment;
+    private $environmentMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->environment = $this->createMock(Environment::class);
-        $this->levelResolver = new LevelResolver($this->environment);
+        $this->environmentMock = $this->createMock(Environment::class);
+
+        $this->levelResolver = new LevelResolver($this->environmentMock);
     }
 
     /**
@@ -46,23 +47,9 @@ class LevelResolverTest extends TestCase
     }
 
     /**
-     * @param string $level
-     * @param int $expectedResult
-     * @dataProvider resolveDataProvider
-     */
-    public function testResolveOverride(string $level, int $expectedResult)
-    {
-        $this->environment
-            ->method('getMinLoggingLevel')
-            ->willReturn($level);
-
-        $this->assertSame($expectedResult, $this->levelResolver->resolve('some level'));
-    }
-
-    /**
      * @return array
      */
-    public function resolveDataProvider()
+    public function resolveDataProvider(): array
     {
         return [
             ['level' => 'debug', Logger::DEBUG],
@@ -82,7 +69,32 @@ class LevelResolverTest extends TestCase
             ['level' => 'criTical', Logger::CRITICAL],
             ['level' => 'alErt', Logger::ALERT],
             ['level' => 'Emergency', Logger::EMERGENCY],
-            ['level' => 'invalid', Logger::NOTICE]
+            ['level' => 'invalid', Logger::NOTICE],
+        ];
+    }
+
+    /**
+     * @param string $level
+     * @param int $expectedResult
+     * @dataProvider resolveDataProvider
+     * @dataProvider resolveOverrideDataProvider
+     */
+    public function testResolveOverride(string $level, int $expectedResult)
+    {
+        $this->environmentMock
+            ->method('getMinLoggingLevel')
+            ->willReturn($level);
+
+        $this->assertSame($expectedResult, $this->levelResolver->resolve('some level'));
+    }
+
+    /**
+     * @return array
+     */
+    public function resolveOverrideDataProvider(): array
+    {
+        return [
+            ['level' => '', Logger::NOTICE],
         ];
     }
 }

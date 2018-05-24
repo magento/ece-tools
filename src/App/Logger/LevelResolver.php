@@ -32,6 +32,9 @@ class LevelResolver
         'emergency' => Logger::EMERGENCY,
     ];
 
+    /**
+     * @param Environment $environment
+     */
     public function __construct(Environment $environment)
     {
         $this->environment = $environment;
@@ -43,11 +46,7 @@ class LevelResolver
      */
     public function resolve(string $level): int
     {
-        $levelOverride = $this->environment->getMinLoggingLevel();
-
-        if ($levelOverride) {
-            return $this->mapLevels[strtolower($levelOverride)] ?? Logger::NOTICE;
-        }
+        $level = $this->environment->getMinLoggingLevel() ?: $level;
 
         return $this->mapLevels[strtolower($level)] ?? Logger::NOTICE;
     }

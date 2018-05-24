@@ -64,6 +64,7 @@ class Environment
         if (false === $value) {
             return $default;
         }
+
         return json_decode(base64_decode($value), true);
     }
 
@@ -101,11 +102,11 @@ class Environment
      * @param string $key
      * @return array
      */
-    public function getRelationship(string $key)
+    public function getRelationship(string $key): array
     {
         $relationships = $this->getRelationships();
 
-        return isset($relationships[$key]) ? $relationships[$key] : [];
+        return $relationships[$key] ?? [];
     }
 
     /**

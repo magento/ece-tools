@@ -66,20 +66,22 @@ class HandlerFactory
     public function create(string $handler): HandlerInterface
     {
         $configuration = $this->logConfig->get($handler);
-        $minLevelNotice = $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_NOTICE));
-        $minLevelInfo = $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_INFO));
+        $minLevel = $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_NOTICE));
 
         switch ($handler) {
             case static::HANDLER_STREAM:
             case static::HANDLER_FILE:
-                $handlerInstance =  new StreamHandler($configuration->get('stream'), $minLevelInfo);
+                $handlerInstance = new StreamHandler(
+                    $configuration->get('stream'),
+                    $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_INFO))
+                );
                 break;
             case static::HANDLER_EMAIL:
                 $handlerInstance = new NativeMailerHandler(
                     $configuration->get('to'),
                     $configuration->get('subject', 'Log form Magento Cloud'),
                     $configuration->get('from'),
-                    $minLevelNotice
+                    $minLevel
                 );
                 break;
             case static::HANDLER_SLACK:
@@ -89,14 +91,14 @@ class HandlerFactory
                     $configuration->get('username', 'Slack Log Notifier'),
                     true,
                     null,
-                    $minLevelNotice
+                    $minLevel
                 );
                 break;
             case static::HANDLER_SYSLOG:
                 $handlerInstance = new SyslogHandler(
                     $configuration->get('ident'),
                     $configuration->get('facility', LOG_USER),
-                    $minLevelNotice,
+                    $minLevel,
                     true,
                     $configuration->get('logopts', LOG_PID)
                 );
@@ -106,13 +108,13 @@ class HandlerFactory
                     $configuration->get('host'),
                     $configuration->get('port'),
                     $configuration->get('facility', LOG_USER),
-                    $minLevelNotice,
+                    $minLevel,
                     true,
                     $configuration->get('ident', 'php')
                 );
                 break;
             case static::HANDLER_GELF:
-                $handlerInstance = $this->gelfHandlerFactory->create($configuration, $minLevelNotice);
+                $handlerInstance = $this->gelfHandlerFactory->create($configuration, $minLevel);
                 break;
             default:
                 throw new \Exception('Unknown type of log handler: ' . $handler);
