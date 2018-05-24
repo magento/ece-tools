@@ -87,7 +87,7 @@ class Log
     private function getConfig(): array
     {
         if ($this->config === null) {
-            $this->config = array_replace(
+            $this->config = array_replace_recursive(
                 [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
                     HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getCloudLog()],
