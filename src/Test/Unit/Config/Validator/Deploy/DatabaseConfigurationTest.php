@@ -108,6 +108,19 @@ class DatabaseConfigurationTest extends TestCase
                         ],
                     ],
                 ],
+                Error::class,
+            ],
+            [
+                [
+                    'connection' => [
+                        'default' => [
+                            'host' => 'test.host',
+                            'dbname' => 'dbname',
+                            'username' => 'username',
+                            'password' => ''
+                        ],
+                    ],
+                ],
                 Success::class,
             ],
         ];
