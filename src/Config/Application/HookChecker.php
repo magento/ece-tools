@@ -6,47 +6,43 @@
 namespace Magento\MagentoCloud\Config\Application;
 
 use Magento\MagentoCloud\Command\PostDeploy;
+use Magento\MagentoCloud\Config\Environment;
 
 /**
- * Checks if hooks enabled in .magento.app.yaml
+ * Checks hooks enabling in .magento.app.yaml
  */
 class HookChecker
 {
     const HOOK_POST_DEPLOY = 'post_deploy';
 
     /**
-     * @var Reader
+     * @var Environment
      */
-    private $reader;
+    private $environment;
 
     /**
-     * @param Reader $reader
+     * @param Environment $environment
      */
-    public function __construct(Reader $reader)
+    public function __construct(Environment $environment)
     {
-        $this->reader = $reader;
+        $this->environment = $environment;
     }
 
     /**
-     * Checks that `ece-tool post-deploy` is added to post_deploy hook.
+     * Checks that post_deploy hook is configured and `ece-tool post-deploy` is added to post_deploy hook.
      *
      * @return bool
-     * @throws \RuntimeException If configuration file can't be read or parse
      */
     public function isPostDeployHookEnabled(): bool
     {
-        try {
-            $appConfig = $this->reader->read();
+        $appConfig = $this->environment->getApplication();
 
-            if (isset($appConfig['hooks'][self::HOOK_POST_DEPLOY])) {
-                $postDeployHooks = $appConfig['hooks'][self::HOOK_POST_DEPLOY];
+        if (isset($appConfig['hooks'][self::HOOK_POST_DEPLOY])) {
+            $postDeployHooks = $appConfig['hooks'][self::HOOK_POST_DEPLOY];
 
-                if (preg_match(sprintf('/ece-tools\s+%s/', PostDeploy::NAME), $postDeployHooks)) {
-                    return true;
-                }
+            if (preg_match(sprintf('/ece-tools\s+%s/', PostDeploy::NAME), $postDeployHooks)) {
+                return true;
             }
-        } catch (\Exception $e) {
-            throw new \RuntimeException('Error during reading application configuration file: ' . $e->getMessage());
         }
 
         return false;

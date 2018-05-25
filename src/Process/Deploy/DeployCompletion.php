@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Checks if post_deploy hook is configured, if not runs processes otherwise do nothing.
  */
-class BeforePostDeploy implements ProcessInterface
+class DeployCompletion implements ProcessInterface
 {
     /**
      * @var HookChecker

@@ -1,5 +1,0 @@
-hooks:
-  post_deploy:
-    php bin/ece-tools post-deploy
-config:
-  key: value

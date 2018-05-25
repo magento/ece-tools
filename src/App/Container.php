@@ -225,11 +225,11 @@ class Container implements ContainerInterface
                         /**
                          * This process runs processes if only post_deploy hook is not configured.
                          */
-                        $this->container->make(DeployProcess\BeforePostDeploy::class),
+                        $this->container->make(DeployProcess\DeployCompletion::class),
                     ],
                 ]);
             });
-        $this->container->when(DeployProcess\BeforePostDeploy::class)
+        $this->container->when(DeployProcess\DeployCompletion::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [

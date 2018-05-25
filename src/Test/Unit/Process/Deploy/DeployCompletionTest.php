@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Application\HookChecker;
-use Magento\MagentoCloud\Process\Deploy\BeforePostDeploy;
+use Magento\MagentoCloud\Process\Deploy\DeployCompletion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -15,10 +15,10 @@ use PHPUnit\Framework\MockObject\MockObject;
 /**
  * @inheritdoc
  */
-class BeforePostDeployTest extends TestCase
+class DeployCompletionTest extends TestCase
 {
     /**
-     * @var BeforePostDeploy
+     * @var DeployCompletion
      */
     private $process;
 
@@ -46,7 +46,7 @@ class BeforePostDeployTest extends TestCase
         $this->hookChecker = $this->createMock(HookChecker::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
 
-        $this->process = new BeforePostDeploy(
+        $this->process = new DeployCompletion(
             $this->loggerMock,
             $this->hookChecker,
             $this->processMock

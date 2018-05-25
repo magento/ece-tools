@@ -1,7 +1,0 @@
-hooks:
-  build: |
-    php bin/ece-tools build
-  deploy: |
-    php bin/ece-tools deploy
-config:
-  key: value
