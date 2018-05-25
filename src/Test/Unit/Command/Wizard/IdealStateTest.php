@@ -9,7 +9,7 @@ use Magento\MagentoCloud\Command\Wizard\IdealState;
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Validator\Deploy\PostDeploy;
-use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnDeploy;
+use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\ValidatorFactory;
@@ -34,7 +34,7 @@ class IdealStateTest extends TestCase
     private $outputFormatterMock;
 
     /**
-     * @var ScdOnBuild|MockObject
+     * @var ValidatorFactory|MockObject
      */
     private $validatorFactoryMock;
 
@@ -64,12 +64,12 @@ class IdealStateTest extends TestCase
         $inputMock = $this->getMockForAbstractClass(InputInterface::class);
         $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
 
-        $scdOnDeployValidator = $this->createMock(ScdOnDeploy::class);
+        $scdOnDeployValidator = $this->createMock(ScdOnBuild::class);
         $postDeployValidator = $this->createMock(PostDeploy::class);
 
         $scdOnDeployValidator->expects($this->once())
             ->method('validate')
-            ->willReturn(new Error('Some error'));
+            ->willReturn(new Success());
         $postDeployValidator->expects($this->once())
             ->method('validate')
             ->willReturn(new Success());
@@ -77,7 +77,7 @@ class IdealStateTest extends TestCase
         $this->validatorFactoryMock->expects($this->exactly(2))
             ->method('create')
             ->willReturnMap([
-                [ScdOnDeploy::class, $scdOnDeployValidator],
+                [ScdOnBuild::class, $scdOnDeployValidator],
                 [PostDeploy::class, $postDeployValidator],
             ]);
         $this->globalConfigMock->expects($this->once())
@@ -97,12 +97,12 @@ class IdealStateTest extends TestCase
     {
         $inputMock = $this->getMockForAbstractClass(InputInterface::class);
         $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
-        $scdOnDeployValidator = $this->createMock(ScdOnDeploy::class);
+        $scdOnBuildValidator = $this->createMock(ScdOnBuild::class);
         $postDeployValidator = $this->createMock(PostDeploy::class);
 
-        $scdOnDeployValidator->expects($this->once())
+        $scdOnBuildValidator->expects($this->once())
             ->method('validate')
-            ->willReturn(new Success());
+            ->willReturn(new Error('Some error'));
         $postDeployValidator->expects($this->once())
             ->method('validate')
             ->willReturn(new Error('Some error'));
@@ -110,7 +110,7 @@ class IdealStateTest extends TestCase
         $this->validatorFactoryMock->expects($this->exactly(2))
             ->method('create')
             ->willReturnMap([
-                [ScdOnDeploy::class, $scdOnDeployValidator],
+                [ScdOnBuild::class, $scdOnBuildValidator],
                 [PostDeploy::class, $postDeployValidator],
             ]);
         $this->globalConfigMock->expects($this->once())
@@ -120,7 +120,7 @@ class IdealStateTest extends TestCase
         $this->outputFormatterMock->expects($this->exactly(3))
             ->method('writeItem')
             ->withConsecutive(
-                [$outputMock, 'The SCD is not set for on-demand or the build stage'],
+                [$outputMock, 'The SCD is not set for the build stage'],
                 [$outputMock, 'Post-deploy hook is not configured'],
                 [$outputMock, 'Skip HTML minification is disabled']
             );
