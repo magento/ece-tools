@@ -123,7 +123,8 @@ diff -Nuar a/vendor/magento/framework/Locale/Deployed/Options.php b/vendor/magen
 
 
 diff -Nuar a/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProduction.php b/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProduction.php
---- a/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProduction.php
+new file mode 100644
+--- /dev/null
 +++ b/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProduction.php
 @@ -0,0 +1,138 @@
 +<?php
@@ -266,7 +267,8 @@ diff -Nuar a/vendor/magento/module-config/Model/Config/Structure/ElementVisibili
 +}
 
 diff --git a/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProductionWithoutScdOnDemand.php b/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProductionWithoutScdOnDemand.php
---- a/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProductionWithoutScdOnDemand.php
+new file mode 100644
+--- /dev/null
 +++ b/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProductionWithoutScdOnDemand.php
 @@ -0,0 +1,72 @@
 +<?php
