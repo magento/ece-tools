@@ -16,11 +16,11 @@ interface DeployInterface extends StageConfigInterface
     const VAR_SEARCH_CONFIGURATION = 'SEARCH_CONFIGURATION';
     const VAR_CACHE_CONFIGURATION = 'CACHE_CONFIGURATION';
     const VAR_SESSION_CONFIGURATION = 'SESSION_CONFIGURATION';
+    const VAR_DATABASE_CONFIGURATION = 'DATABASE_CONFIGURATION';
     const VAR_CRON_CONSUMERS_RUNNER = 'CRON_CONSUMERS_RUNNER';
     const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
     const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
     const VAR_UPDATE_URLS = 'UPDATE_URLS';
-    const VAR_STATIC_CONTENT_EXCLUDE_THEMES = 'STATIC_CONTENT_EXCLUDE_THEMES';
 
     /**
      * The variable responsible to set Redis slave connection when it has true value.
@@ -36,4 +36,14 @@ interface DeployInterface extends StageConfigInterface
      * @deprecated 2.1 specific variable.
      */
     const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';
+
+    /**
+     * @deprecated use SCD_THREADS instead
+     */
+    const VAR_STATIC_CONTENT_THREADS = 'STATIC_CONTENT_THREADS';
+
+    /**
+     * @deprecated use SKIP_SCD instead
+     */
+    const VAR_DO_DEPLOY_STATIC_CONTENT = 'DO_DEPLOY_STATIC_CONTENT';
 }

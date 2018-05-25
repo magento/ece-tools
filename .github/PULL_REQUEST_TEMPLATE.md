@@ -6,7 +6,6 @@
 ### Fixed Issues (if relevant)
 <!--- Provide a list of fixed issues, if relevant  -->
 1. ...
-2. ...
 
 ### Zephyr Tests
 <!--- Provide links to Zephyr tests -->
@@ -19,3 +18,4 @@
  - [ ] All commits are accompanied by meaningful commit messages
  - [ ] All new or changed code is covered with unit/integration tests (if applicable)
  - [ ] All automated tests passed successfully (all builds on Travis CI are green)
+

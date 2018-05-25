@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Http;
 
 use GuzzleHttp\Psr7\Request;
-use Psr\Container\ContainerInterface;
+use Magento\MagentoCloud\App\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
 
 /**

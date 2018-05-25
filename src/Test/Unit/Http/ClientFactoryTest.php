@@ -6,9 +6,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Http;
 
 use GuzzleHttp\ClientInterface;
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -36,9 +36,7 @@ class ClientFactoryTest extends TestCase
      */
     protected function setUp()
     {
-        $this->containerMock = $this->getMockBuilder(ContainerInterface::class)
-            ->setMethods(['create'])
-            ->getMockForAbstractClass();
+        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->clientMock = $this->getMockForAbstractClass(ClientInterface::class);
 
         $this->clientFactory = new ClientFactory(

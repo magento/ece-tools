@@ -5,14 +5,15 @@
  */
 namespace Magento\MagentoCloud\App\Logger;
 
+use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
+use Magento\MagentoCloud\Config\Log as LogConfig;
+use Monolog\Handler\HandlerInterface;
+use Monolog\Handler\NativeMailerHandler;
 use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
-use Monolog\Handler\NativeMailerHandler;
-use Monolog\Handler\HandlerInterface;
-use Magento\MagentoCloud\Config\Log as LogConfig;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\SyslogUdpHandler;
-use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
+use Monolog\Logger;
 
 /**
  * The handler factory.
@@ -65,12 +66,15 @@ class HandlerFactory
     public function create(string $handler): HandlerInterface
     {
         $configuration = $this->logConfig->get($handler);
-        $minLevel = $this->levelResolver->resolve($configuration->get('min_level', ''));
+        $minLevel = $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_NOTICE));
 
         switch ($handler) {
             case static::HANDLER_STREAM:
             case static::HANDLER_FILE:
-                $handlerInstance =  new StreamHandler($configuration->get('stream'));
+                $handlerInstance = new StreamHandler(
+                    $configuration->get('stream'),
+                    $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_INFO))
+                );
                 break;
             case static::HANDLER_EMAIL:
                 $handlerInstance = new NativeMailerHandler(

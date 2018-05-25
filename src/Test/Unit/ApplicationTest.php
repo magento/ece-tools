@@ -7,11 +7,11 @@ namespace Magento\MagentoCloud\Test\Unit;
 
 use Composer\Composer;
 use Composer\Package\PackageInterface;
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -59,7 +59,6 @@ class ApplicationTest extends TestCase
         Command\CronUnlock::NAME => Command\CronUnlock::class,
         Command\DbDump::NAME => Command\DbDump::class,
         Command\Deploy::NAME => Command\Deploy::class,
-        Command\Prestart::NAME => Command\Prestart::class,
         Command\PostDeploy::NAME => Command\PostDeploy::class,
         Command\BackupRestore::NAME => Command\BackupRestore::class,
         Command\BackupList::NAME => Command\BackupList::class,
@@ -70,6 +69,9 @@ class ApplicationTest extends TestCase
         Command\Wizard\ScdOnBuild::NAME => Command\Wizard\ScdOnBuild::class,
         Command\Wizard\ScdOnDeploy::NAME => Command\Wizard\ScdOnDeploy::class,
         Command\Wizard\ScdOnDemand::NAME => Command\Wizard\ScdOnDemand::class,
+        Command\ModuleRefresh::NAME => Command\ModuleRefresh::class,
+        Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
+        Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
     ];
 
     /**
@@ -82,7 +84,7 @@ class ApplicationTest extends TestCase
         $this->composerMock = $this->createMock(Composer::class);
 
         $map = [
-            [Composer::class, $this->composerMock],
+            [Composer::class, [], $this->composerMock],
         ];
 
         foreach ($this->classMap as $name => $className) {
@@ -96,10 +98,10 @@ class ApplicationTest extends TestCase
             $mock->method('getAliases')
                 ->willReturn([]);
 
-            $map[] = [$className, $mock];
+            $map[] = [$className, [], $mock];
         }
 
-        $this->containerMock->method('get')
+        $this->containerMock->method('create')
             ->willReturnMap($map);
         $this->composerMock->expects($this->any())
             ->method('getPackage')

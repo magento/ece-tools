@@ -57,6 +57,23 @@ class SanitizeProcessorTest extends TestCase
                 ['message' => 'some text --admin-password=\'' . escapeshellarg("Ks81b'USl'13Osd") . '\''],
                 ['message' => 'some text --admin-password=\'******\''],
             ],
+            [
+                ['message' => 'Command: bash -c "set -o pipefail; timeout 3600 mysqldump -h \'127.0.0.1\' -P \'3304\''
+                    . ' -u \'abcdefghijklm_stg\' -p\'OmgSuperSecretPasswordDoNotLeak\' \'abcdefghijklm_stg\''
+                    . ' --single-transaction --no-autocommit --quick | gzip > /tmp/dump-1525977618.sql.gz'],
+                ['message' => 'Command: bash -c "set -o pipefail; timeout 3600 mysqldump -h \'127.0.0.1\' -P \'3304\''
+                    . ' -u \'abcdefghijklm_stg\' -p\'******\' \'abcdefghijklm_stg\''
+                    . ' --single-transaction --no-autocommit --quick | gzip > /tmp/dump-1525977618.sql.gz'],
+            ],
+            [
+                ['message' => 'Command: bash -c "set -o pipefail; timeout 3600 mysqldump -h \'127.0.0.1\' -P \'3304\''
+                    . ' -u \'abcdefghijklm_stg\' \'abcdefghijklm_stg\' --single-transaction --no-autocommit'
+                    . ' --quick | gzip > /tmp/dump-1525977618.sql.gz'],
+                ['message' => 'Command: bash -c "set -o pipefail; timeout 3600 mysqldump -h \'127.0.0.1\' -P \'3304\''
+                    . ' -u \'abcdefghijklm_stg\' \'abcdefghijklm_stg\' --single-transaction --no-autocommit'
+                    . ' --quick | gzip > /tmp/dump-1525977618.sql.gz'],
+            ],
+
         ];
     }
 }

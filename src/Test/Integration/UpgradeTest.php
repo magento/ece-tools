@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Command\Prestart;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -23,7 +22,7 @@ class UpgradeTest extends AbstractTest
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::create()->run('2.2.0');
+        Bootstrap::getInstance()->run('2.2.0');
     }
 
     /**
@@ -55,7 +54,6 @@ class UpgradeTest extends AbstractTest
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
-        $executeAndAssert(Prestart::NAME);
         $executeAndAssert(PostDeploy::NAME);
 
         $this->assertContentPresence();
@@ -63,7 +61,6 @@ class UpgradeTest extends AbstractTest
 
         $executeAndAssert(Build::NAME);
         $executeAndAssert(Deploy::NAME);
-        $executeAndAssert(Prestart::NAME);
         $executeAndAssert(PostDeploy::NAME);
 
         $this->assertContentPresence();

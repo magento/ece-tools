@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Filesystem\DirectoryCopier;
 
-use Psr\Container\ContainerInterface;
+use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
  * Creates instance of CopierInterface
