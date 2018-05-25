@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Patch;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\App\Container;
-use Psr\Container\ContainerInterface;
+use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
  * Creates instances of ApplierInterface.
