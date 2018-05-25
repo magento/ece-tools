@@ -62,12 +62,4 @@ class ConfigFileList
     {
         return $this->systemList->getMagentoRoot() . '/.magento.env.yaml';
     }
-
-    /**
-     * @return string
-     */
-    public function getAppConfig(): string
-    {
-        return $this->systemList->getMagentoRoot() . '/.magento.app.yaml';
-    }
 }
