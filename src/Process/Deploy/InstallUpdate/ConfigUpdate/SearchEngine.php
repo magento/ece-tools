@@ -6,11 +6,11 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
+use Magento\MagentoCloud\Config\Deploy\Reader as EnvReader;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Http\ClientFactory;
+use Magento\MagentoCloud\Config\Shared\Reader as SharedReader;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -19,11 +19,6 @@ use Psr\Log\LoggerInterface;
  */
 class SearchEngine implements ProcessInterface
 {
-    /**
-     * @var Environment
-     */
-    private $environment;
-
     /**
      * @var LoggerInterface
      */
@@ -35,14 +30,19 @@ class SearchEngine implements ProcessInterface
     private $envWriter;
 
     /**
+     * @var EnvReader;
+     */
+    private $envReader;
+
+    /**
      * @var SharedWriter
      */
     private $sharedWriter;
 
     /**
-     * @var DeployInterface
+     * @var SharedReader
      */
-    private $stageConfig;
+    private $sharedReader;
 
     /**
      * @var MagentoVersion
@@ -50,35 +50,37 @@ class SearchEngine implements ProcessInterface
     private $magentoVersion;
 
     /**
-     * @var ClientFactory
+     * Returns search configuration
+     *
+     * @var SearchEngineConfig
      */
-    private $clientFactory;
+    private $searchEngineConfig;
 
     /**
-     * @param Environment $environment
      * @param LoggerInterface $logger
      * @param EnvWriter $envWriter
+     * @param EnvReader $envReader
      * @param SharedWriter $sharedWriter
-     * @param DeployInterface $stageConfig
+     * @param SharedReader $sharedReader
      * @param MagentoVersion $version
-     * @param ClientFactory $client
+     * @param SearchEngineConfig $searchEngineConfig
      */
     public function __construct(
-        Environment $environment,
         LoggerInterface $logger,
         EnvWriter $envWriter,
+        EnvReader $envReader,
         SharedWriter $sharedWriter,
-        DeployInterface $stageConfig,
+        SharedReader $sharedReader,
         MagentoVersion $version,
-        ClientFactory $client
+        SearchEngineConfig $searchEngineConfig
     ) {
-        $this->environment = $environment;
         $this->logger = $logger;
         $this->envWriter = $envWriter;
+        $this->envReader = $envReader;
         $this->sharedWriter = $sharedWriter;
-        $this->stageConfig = $stageConfig;
+        $this->sharedReader = $sharedReader;
         $this->magentoVersion = $version;
-        $this->clientFactory = $client;
+        $this->searchEngineConfig = $searchEngineConfig;
     }
 
     /**
@@ -90,107 +92,21 @@ class SearchEngine implements ProcessInterface
     {
         $this->logger->info('Updating search engine configuration.');
 
-        $searchConfig = $this->getSearchConfiguration();
+        $searchConfig = $this->searchEngineConfig->get();
 
         $this->logger->info('Set search engine to: ' . $searchConfig['engine']);
-        $config['system']['default']['catalog']['search'] = $searchConfig;
 
         // 2.1.x requires search config to be written to the shared config file: MAGECLOUD-1317
         if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $this->sharedWriter->update($config);
+            $config = $this->sharedReader->read();
+            $config['system']['default']['catalog']['search'] = $searchConfig;
+            $this->sharedWriter->create($config);
 
             return;
         }
-        $this->envWriter->update($config);
-    }
 
-    /**
-     * @return array
-     */
-    private function getSearchConfiguration(): array
-    {
-        $envSearchConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_SEARCH_CONFIGURATION);
-        if ($this->isSearchConfigurationValid($envSearchConfiguration)) {
-            return $envSearchConfiguration;
-        }
-
-        $relationships = $this->environment->getRelationships();
-
-        $searchConfig = ['engine' => 'mysql'];
-
-        if (isset($relationships['elasticsearch'])) {
-            $searchConfig = $this->getElasticSearchConfiguration($relationships['elasticsearch'][0]);
-        } elseif (isset($relationships['solr']) && $this->magentoVersion->satisfies('<2.2')) {
-            $searchConfig = $this->getSolrConfiguration($relationships['solr'][0]);
-        }
-
-        return $searchConfig;
-    }
-
-    /**
-     * Returns SOLR configuration
-     *
-     * @param array $config Solr connection configuration
-     * @return array
-     */
-    private function getSolrConfiguration(array $config)
-    {
-        return [
-            'engine' => 'solr',
-            'solr_server_hostname' => $config['host'],
-            'solr_server_port' => $config['port'],
-            'solr_server_username' => $config['scheme'],
-            'solr_server_path' => $config['path'],
-        ];
-    }
-
-    /**
-     * Returns ElasticSearch configuration
-     *
-     * @param array $config Elasticsearch connection configuration
-     * @return array
-     */
-    private function getElasticSearchConfiguration(array $config)
-    {
-        $engine = 'elasticsearch';
-
-        try {
-            $response = $this->clientFactory->create()->get(sprintf(
-                '%s:%s',
-                $config['host'],
-                $config['port']
-            ));
-            $esConfiguration = $response->getBody()->getContents();
-            $esConfiguration = json_decode($esConfiguration, true);
-
-            if (isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5) {
-                $engine = 'elasticsearch5';
-            }
-        } catch (\Exception $exception) {
-            $this->logger->warning($exception->getMessage());
-        }
-
-        $elasticSearchConfig = [
-            'engine' => $engine,
-            "{$engine}_server_hostname" => $config['host'],
-            "{$engine}_server_port" => $config['port'],
-        ];
-
-        if (isset($config['query']['index'])) {
-            $elasticSearchConfig["{$engine}_index_prefix"] = $config['query']['index'];
-        }
-
-        return $elasticSearchConfig;
-    }
-
-    /**
-     * Checks that given configuration is valid.
-     *
-     * @param array $searchConfiguration
-     * @return bool
-     */
-    private function isSearchConfigurationValid(array $searchConfiguration): bool
-    {
-        return !empty($searchConfiguration) && isset($searchConfiguration['engine']);
+        $config = $this->envReader->read();
+        $config['system']['default']['catalog']['search'] = $searchConfig;
+        $this->envWriter->create($config);
     }
 }

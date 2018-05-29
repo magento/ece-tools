@@ -196,6 +196,7 @@ class Container implements ContainerInterface
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),

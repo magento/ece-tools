@@ -5,8 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration;
+use Magento\MagentoCloud\Config\Validator\Deploy\SessionConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -16,10 +17,10 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 /**
  * @inheritdoc
  */
-class DatabaseConfigurationTest extends TestCase
+class SessionConfigurationTest extends TestCase
 {
     /**
-     * @var DatabaseConfiguration
+     * @var SessionConfiguration
      */
     private $validator;
 
@@ -44,23 +45,24 @@ class DatabaseConfigurationTest extends TestCase
         ]);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
-        $this->validator = new DatabaseConfiguration(
+        $this->validator = new SessionConfiguration(
             $this->resultFactoryMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            new ConfigMerger()
         );
     }
 
     /**
-     * @param array $dbConfiguration
+     * @param array $sessionConfiguration
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
      */
-    public function testValidate(array $dbConfiguration, string $expectedResultClass)
+    public function testValidate(array $sessionConfiguration, string $expectedResultClass)
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_DATABASE_CONFIGURATION)
-            ->willReturn($dbConfiguration);
+            ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
+            ->willReturn($sessionConfiguration);
 
         $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
     }
@@ -77,49 +79,43 @@ class DatabaseConfigurationTest extends TestCase
             ],
             [
                 [
-                    'table_prefix' => 'test',
+                    'redis' => ['max_connection' => 10],
                 ],
                 Error::class,
             ],
             [
                 [
-                    'table_prefix' => 'test',
+                    'redis' => ['max_connection' => 10],
                     '_merge' => true,
                 ],
                 Success::class,
             ],
             [
                 [
-                    'connection' => [
-                        'default' => [
-                            'host' => 'some.host'
-                        ],
-                    ],
+                    'redis' => ['max_connection' => 10],
+                    '_merge' => false,
                 ],
                 Error::class,
             ],
             [
                 [
-                    'connection' => [
-                        'default' => [
-                            'host' => 'test.host',
-                            'dbname' => 'dbname',
-                            'username' => 'username',
-                        ],
-                    ],
+                    'save' => 'redis',
+                    'redis' => ['max_connection' => 10],
+                    '_merge' => false,
                 ],
-                Error::class,
+                Success::class,
             ],
             [
                 [
-                    'connection' => [
-                        'default' => [
-                            'host' => 'test.host',
-                            'dbname' => 'dbname',
-                            'username' => 'username',
-                            'password' => ''
-                        ],
-                    ],
+                    'save' => 'redis',
+                    'redis' => ['max_connection' => 10],
+                    '_merge' => true,
+                ],
+                Success::class,
+            ],
+            [
+                [
+                    'save' => 'redis'
                 ],
                 Success::class,
             ],
