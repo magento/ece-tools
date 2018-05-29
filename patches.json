@@ -122,6 +122,9 @@
     "Fix incorrect js-translation.json localization": {
       "2.1.*": "2.1/MAGETWO-62660.composer.patch",
       "2.2.0 - 2.2.1": "2.2/fix-translation-json-preprocessor.patch"
+    },
+    "Unlock locales editing when scd on demand is enabled": {
+      "2.2.0 - 2.2.5": "2.2/unlock-locales-editing-scd-on-demand-is-enabled.patch"
     }
   },
   "magento/module-config": {
