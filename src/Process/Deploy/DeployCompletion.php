@@ -50,7 +50,10 @@ class DeployCompletion implements ProcessInterface
     public function execute()
     {
         if ($this->hookChecker->isPostDeployHookEnabled()) {
-            $this->logger->info('Post deploy hook is configured. Postpones processes to post_deploy.');
+            $this->logger->info(
+                'Post-deploy hook enabled. Cache cleaning and pre-warming operations ' .
+                'are postponed to post-deploy stage.'
+            );
 
             return;
         }
