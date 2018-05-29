@@ -1,88 +1,88 @@
 {
   "magento/magento2-base": {
     "Fix Redis issue": {
-      "2.1.4 - 2.1.10, 2.2.0": "2.2/redis-pipeline.patch"
+      "2.1.4 - 2.1.10, 2.2.0": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
     },
     "Fix locker process": {
-      "2.2.0 - 2.2.4": "2.2/locker-process.patch",
-      "2.1.4 - 2.1.13": "2.1/locker-process.magento-2.1.patch"
+      "2.1.4 - 2.1.13": "MDVA-2470__fix_asset_locking_race_condition__2.1.4.patch",
+      "2.2.0 - 2.2.4": "MDVA-2470__fix_asset_locking_race_condition__2.2.0.patch"
     },
     "Remove permissions check": {
-      "2.1.4 - 2.1.13": "2.1/remove-permission-checks.patch",
-      "2.2.0 - 2.2.4": "2.2/remove-permission-checks.patch"
+      "2.1.4 - 2.1.13": "MAGECLOUD-414__remove_unnecessary_permission_checks__2.1.4.patch",
+      "2.2.0 - 2.2.4": "MAGECLOUD-414__remove_unnecessary_permission_checks__2.2.0.patch"
     },
     "Fix Redis session locking": {
-      "2.2.0 - 2.2.1": "2.2/fix-redis-session-manager-locking.patch",
-      "2.1.10 - 2.1.13" : "2.1/fix-redis-session-manager-locking.patch"
+      "2.1.10 - 2.1.13" : "MAGECLOUD-1582__fix_session_manager_locking__2.1.10.patch",
+      "2.2.0 - 2.2.1": "MAGECLOUD-1582__fix_session_manager_locking__2.2.0.patch"
     },
     "Vendor path workaround because app/etc not available before deploy": {
-      "2.1.4 - 2.1.13": "2.1/change-vendor-path.patch"
+      "2.1.4 - 2.1.13": "MAGETWO-57413__move_vendor_path_autoloader__2.1.4.patch"
     },
     "Static Assets controller changes for cloud relating to rewrite rule in the nginx configuration": {
-      "2.1.4 - 2.1.13": "2.1/fix-static-assets-controller.patch"
+      "2.1.4 - 2.1.13": "MAGETWO-57414__load_static_assets_without_rewrites__2.1.4.patch"
     },
     "var/di compiled path for area in cloud": {
-      "2.1.4 - 2.1.13": "2.1/setup-area.patch"
+      "2.1.4 - 2.1.13": "MAGETWO-45357__avoid_nonexistent_setup_area__2.1.4.patch"
     },
     "bin/magento checks for var/generation write permission": {
-      "2.1.4 - 2.1.13": "2.1/generation-not-writable.patch"
+      "2.1.4 - 2.1.13": "MAGETWO-63032__skip_unnecessary_write_permission_check__2.1.4.patch"
     },
     "Multiple plugins cannot be run in setup area": {
-      "2.1.4 - 2.1.13": "2.1/setup-area-plugins.patch"
+      "2.1.4 - 2.1.13": "MAGETWO-56675__dont_skip_setup_scoped_plugins__2.1.4.patch"
     },
     "Fixed Static Assets deployment throws errors when redis is used for cache": {
-      "2.1.4 - 2.1.12": "2.1/MAGETWO-69847-2.1.x.patch",
-      "2.2.0 - 2.2.4" : "2.2/MAGETWO-69847-2.2.x.patch"
+      "2.1.4 - 2.1.12": "MAGETWO-69847__support_credis_forking_during_scd__2.1.4.patch",
+      "2.2.0 - 2.2.4" : "MAGETWO-69847__support_credis_forking_during_scd__2.2.0.patch"
     },
     "SCD does not work when multiple languages are specified.": {
-      "2.1.4 - 2.1.7": "2.1/flyweightfactory.patch"
+      "2.1.4 - 2.1.7": "MAGETWO-63020__fix_scd_with_multiple_languages__2.1.4.patch"
     },
     "Fixed: When SCD is in build, js resources do not load in admin": {
-      "2.1.4 - 2.1.7": "2.1/secure-static-resource.patch"
+      "2.1.4 - 2.1.7": "MAGECLOUD-589__load_appropriate_js_files__2.1.4.patch"
     },
     "Fixed Bogus emails generated when the recipient name contains special characters": {
-      "2.1.4 - 2.1.13, 2.2.0": "2.2/MDVA-8695_EE_2.1.8_COMPOSER_v1.patch"
+      "2.1.4 - 2.1.13, 2.2.0": "MDVA-8695__properly_encode_characters_in_emails__2.1.4.patch"
     },
     "Enable scd on demand in production": {
-      "2.1.4 - 2.1.13": "2.1/scd-on-demand-in-production.patch",
-      "2.1.4 - 2.1.13, 2.2.0 - 2.2.4": "front-static.patch",
-      "2.2.0 - 2.2.3": "2.2/scd-on-demand-in-production.patch"
+      "2.1.4 - 2.1.13": "MAGECLOUD-1601__configure_scd_on_demand_for_cloud__2.1.4.patch",
+      "2.2.0 - 2.2.3": "MAGECLOUD-1601__configure_scd_on_demand_for_cloud__2.2.0.patch",
+      "2.1.4 - 2.1.13, 2.2.0 - 2.2.4": "MAGECLOUD-1601__trim_static_content_path__2.1.4.patch"
     },
     "Force minification": {
-      "2.1.4 - 2.1.13": "2.1/force-minification.patch",
-      "2.2.0 - 2.2.4": "2.2/force-minification.patch"
+      "2.1.4 - 2.1.13": "MAGECLOUD-1736__respect_minification_override__2.1.4.patch",
+      "2.2.0 - 2.2.4": "MAGECLOUD-1736__respect_minification_override__2.2.0.patch"
     },
     "Fixed issues with CRON": {
-      "2.1.4": "2.1/fix-cron-2.1.4.patch",
-      "2.1.5 - 2.1.12": "2.1/fix-cron-2.1.5-2.1.12.patch",
-      "2.1.13": "2.1/fix-cron-2.1.13.patch",
-      "2.2.0 - 2.2.1": "2.2/fix-cron-2.2.0-2.2.2.patch",
-      "2.2.2 - 2.2.3": "2.2/fix-cron-2.2.3.patch",
-      "2.2.4": "2.2/fix-cron-2.2.4.patch"
+      "2.1.4": "MAGECLOUD-1607__overhaul_cron_implementation__2.1.4.patch",
+      "2.1.5 - 2.1.12": "MAGECLOUD-1607__overhaul_cron_implementation__2.1.5.patch",
+      "2.1.13": "MAGECLOUD-1607__overhaul_cron_implementation__2.1.13.patch",
+      "2.2.0 - 2.2.1": "MAGECLOUD-1607__overhaul_cron_implementation__2.2.0.patch",
+      "2.2.2 - 2.2.3": "MAGECLOUD-1607__overhaul_cron_implementation__2.2.2.patch",
+      "2.2.4": "MAGECLOUD-1607__overhaul_cron_implementation__2.2.4.patch"
     },
     "Fix out of memory during import of customers and addresses": {
-      "2.1.4 - 2.1.10": "2.1/fix-oom-during-import-customers-and-addresses.magento-2.1.5.patch",
-      "2.1.11 - 2.1.12": "2.1/fix-oom-during-import-customers-and-addresses.magento-2.1.11.patch",
-      "2.2.0 - 2.2.3": "2.2/fix-oom-during-import-customers-and-addresses-2.2.0.patch",
-      "2.2.4": "2.2/fix-oom-during-import-customers-and-addresses-2.2.4.patch"
+      "2.1.4 - 2.1.10": "SET-36__fix_oom_during_customer_import__2.1.4.patch",
+      "2.1.11 - 2.1.12": "SET-36__fix_oom_during_customer_import__2.1.11.patch",
+      "2.2.0 - 2.2.3": "SET-36__fix_oom_during_customer_import__2.2.0.patch",
+      "2.2.4": "SET-36__fix_oom_during_customer_import__2.2.4.patch"
     },
     "PayPal TPV tracking for Magento Cloud": {
-      "2.1.8 - 2.1.13": "2.1/MAGETWO-53941.patch"
+      "2.1.8 - 2.1.13": "MAGETWO-53941__fix_enterprise_payment_codes__2.1.8.patch"
     },
     "Mview does not work with Staging": {
-      "2.1.4": "2.1/mview_staging_fix-magento-2.1.4.patch",
-      "2.1.5 - 2.1.9": "2.1/mview_staging_fix-magento-2.1.5.patch",
-      "2.1.10": "2.1/mview_staging_fix-magento-2.1.10.patch"
+      "2.1.4": "MAGETWO-84444__fix_mview_on_staging__2.1.4.patch",
+      "2.1.5 - 2.1.9": "MAGETWO-84444__fix_mview_on_staging__2.1.5.patch",
+      "2.1.10": "MAGETWO-84444__fix_mview_on_staging__2.1.10.patch"
     },
     "Images not sized properly after upgrade to 2.1.6": {
-      "2.1.6": "2.1/MAGETWO-67805.hotfix.git-composer-compatible.patch"
+      "2.1.6": "MAGETWO-67805__fix_image_resizing_after_upgrade__2.1.6.patch"
     },
     "Fixing bundling javascript files with gzip compression": {
-      "2.1.4 - 2.1.12": "2.1/MAGETWO-88336.patch",
-      "2.2.0 - 2.2.3": "2.2/MAGETWO-84507.patch"
+      "2.1.4 - 2.1.12": "MAGETWO-88336__fix_complex_folder_js_bundling__2.1.4.patch",
+      "2.2.0 - 2.2.3": "MAGETWO-84507__fix_complex_folder_js_bundling__2.2.0.patch"
     },
     "Fix app:config:import": {
-      "2.2.2": "2.2/fix-app-config-import.patch"
+      "2.2.2": "MAGECLOUD-1567__fix_import_during_ece_tools_dump__2.2.2.patch"
     }
   }
 }
