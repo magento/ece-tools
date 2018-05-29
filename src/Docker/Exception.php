@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Docker;
 
+/**
+ * @inheritdoc
+ */
 class Exception extends \Exception
 {
 

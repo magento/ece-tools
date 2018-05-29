@@ -63,8 +63,8 @@
   "extra": {
     "map": [
       [
-        ".magento.env.yaml.sample",
-        ".magento.env.yaml.sample"
+        "dist/.magento.env.yaml",
+        ".magento.env.yaml.dist"
       ],
       [
         "dist/config.env",

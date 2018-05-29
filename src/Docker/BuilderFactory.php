@@ -7,6 +7,9 @@ namespace Magento\MagentoCloud\Docker;
 
 use Magento\MagentoCloud\App\ContainerInterface;
 
+/**
+ * Factory class for Docker builder.
+ */
 class BuilderFactory
 {
     /**

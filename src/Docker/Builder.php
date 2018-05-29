@@ -8,9 +8,12 @@ namespace Magento\MagentoCloud\Docker;
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 
+/**
+ * Docker configuration builder.
+ */
 class Builder
 {
-    const CONFIG_DEFAULT_PHP_VERSION = 'latest';
+    const CONFIG_DEFAULT_PHP_VERSION = '7.1';
     const CONFIG_DEFAULT_NGINX_VERSION = 'latest';
     const CONFIG_DEFAULT_DB_VERSION = '10';
 
@@ -20,11 +23,11 @@ class Builder
     private $config;
 
     /**
-     * @param RepositoryFactory $repository
+     * @param RepositoryFactory $repositoryFactory
      */
-    public function __construct(RepositoryFactory $repository)
+    public function __construct(RepositoryFactory $repositoryFactory)
     {
-        $this->config = $repository->create();
+        $this->config = $repositoryFactory->create();
     }
 
     /**
@@ -33,17 +36,10 @@ class Builder
      */
     public function setPhpVersion(string $version)
     {
-        $supportedVersions = [
+        $this->setVersion('php.version', $version, [
             '7.0',
-            '7.1',
             self::CONFIG_DEFAULT_PHP_VERSION,
-        ];
-
-        if (!\in_array($version, $supportedVersions, true)) {
-            throw new Exception('PHP version is not supported');
-        }
-
-        $this->config->set('php.version', $version);
+        ]);
     }
 
     /**
@@ -52,16 +48,10 @@ class Builder
      */
     public function setNginxVersion(string $version)
     {
-        $supportedVersions = [
+        $this->setVersion('nginx.version', $version, [
             '1.9',
             self::CONFIG_DEFAULT_NGINX_VERSION,
-        ];
-
-        if (!\in_array($version, $supportedVersions, true)) {
-            throw new Exception('Nginx version is not supported');
-        }
-
-        $this->config->set('nginx.version', $version);
+        ]);
     }
 
     /**
@@ -70,15 +60,24 @@ class Builder
      */
     public function setDbVersion(string $version)
     {
-        $supportedVersions = [
+        $this->setVersion('db.version', $version, [
             self::CONFIG_DEFAULT_DB_VERSION,
-        ];
+        ]);
+    }
 
+    /**
+     * @param string $key
+     * @param string $version
+     * @param array $supportedVersions
+     * @throws Exception
+     */
+    private function setVersion(string $key, string $version, array $supportedVersions)
+    {
         if (!\in_array($version, $supportedVersions, true)) {
-            throw new Exception('DB version is not supported');
+            throw new Exception('Service version is not supported');
         }
 
-        $this->config->set('db.version', $version);
+        $this->config->set($key, $version);
     }
 
     /**
@@ -166,7 +165,6 @@ class Builder
             ],
             'environment' => [
                 'M2_SAMPLE_DATA=false',
-
             ],
         ];
     }
