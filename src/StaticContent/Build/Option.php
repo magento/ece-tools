@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
@@ -34,11 +34,6 @@ class Option implements OptionInterface
     private $arrayManager;
 
     /**
-     * @var FileList
-     */
-    private $fileList;
-
-    /**
      * @var ThreadCountOptimizer
      */
     private $threadCountOptimizer;
@@ -49,27 +44,32 @@ class Option implements OptionInterface
     private $stageConfig;
 
     /**
+     * @var SharedConfig
+     */
+    private $configResolver;
+
+    /**
      * @param Environment $environment
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
-     * @param FileList $fileList
      * @param ThreadCountOptimizer $threadCountOptimizer
      * @param BuildInterface $stageConfig
+     * @param SharedConfig $configResolver
      */
     public function __construct(
         Environment $environment,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
-        FileList $fileList,
         ThreadCountOptimizer $threadCountOptimizer,
-        BuildInterface $stageConfig
+        BuildInterface $stageConfig,
+        SharedConfig $configResolver
     ) {
         $this->environment = $environment;
         $this->magentoVersion = $magentoVersion;
         $this->arrayManager = $arrayManager;
-        $this->fileList = $fileList;
         $this->threadCountOptimizer = $threadCountOptimizer;
         $this->stageConfig = $stageConfig;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -114,10 +114,7 @@ class Option implements OptionInterface
      */
     public function getLocales(): array
     {
-        $configPath = $this->magentoVersion->satisfies('2.1.*')
-            ? $this->fileList->getConfigLocal()
-            : $this->fileList->getConfig();
-        $configuration = require $configPath;
+        $configuration = require $this->configResolver->resolve();
         $flattenedConfig = $this->arrayManager->flatten($configuration);
 
         $locales = [$this->environment->getAdminLocale()];
