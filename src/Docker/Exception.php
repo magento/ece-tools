@@ -10,5 +10,4 @@ namespace Magento\MagentoCloud\Docker;
  */
 class Exception extends \Exception
 {
-
 }
