@@ -7,13 +7,13 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 use Magento\MagentoCloud\Util\ArrayManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,34 +26,34 @@ class OptionTest extends TestCase
     private $option;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var ArrayManager|Mock
+     * @var ArrayManager|MockObject
      */
     private $arrayManagerMock;
 
     /**
-     * @var FileList|Mock
-     */
-    private $fileListMock;
-
-    /**
-     * @var ThreadCountOptimizer|Mock
+     * @var ThreadCountOptimizer|MockObject
      */
     private $threadCountOptimizerMock;
 
     /**
-     * @var BuildInterface|Mock
+     * @var BuildInterface|MockObject
      */
     private $stageConfigMock;
+
+    /**
+     * @var SharedConfig|MockObject
+     */
+    private $configResolverMock;
 
     /**
      * @inheritdoc
@@ -61,19 +61,19 @@ class OptionTest extends TestCase
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->fileListMock = $this->createMock(FileList::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
+        $this->configResolverMock = $this->createMock(SharedConfig::class);
 
         $this->option = new Option(
             $this->environmentMock,
             $this->arrayManagerMock,
             $this->magentoVersionMock,
-            $this->fileListMock,
             $this->threadCountOptimizerMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->configResolverMock
         );
     }
 
@@ -162,12 +162,8 @@ class OptionTest extends TestCase
 
     public function testGetLocales()
     {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('satisfies')
-            ->with('2.1.*')
-            ->willReturn(false);
-        $this->fileListMock->expects($this->once())
-            ->method('getConfig')
+        $this->configResolverMock->expects($this->once())
+            ->method('resolve')
             ->willReturn(__DIR__ . '/_files/app/etc/config.php');
         $flattenConfig = [
             'scopes' => [
@@ -206,12 +202,8 @@ class OptionTest extends TestCase
 
     public function testGetLocales21()
     {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('satisfies')
-            ->with('2.1.*')
-            ->willReturn(true);
-        $this->fileListMock->expects($this->once())
-            ->method('getConfigLocal')
+        $this->configResolverMock->expects($this->once())
+            ->method('resolve')
             ->willReturn(__DIR__ . '/_files/app/etc/config.php');
         $flattenConfig = [
             'scopes' => [
