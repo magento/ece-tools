@@ -65,6 +65,14 @@
       [
         ".magento.env.yaml.sample",
         ".magento.env.yaml.sample"
+      ],
+      [
+        "dist/config.env",
+        "docker/config.env.dist"
+      ],
+      [
+        "dist/global.env",
+        "docker/global.env.dist"
       ]
     ]
   }
