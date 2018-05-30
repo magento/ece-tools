@@ -73,8 +73,15 @@ class Builder
      */
     private function setVersion(string $key, string $version, array $supportedVersions)
     {
+        $parts = explode('.', $key);
+        $name = reset($parts);
+
         if (!\in_array($version, $supportedVersions, true)) {
-            throw new Exception('Service version is not supported');
+            throw new Exception(sprintf(
+                'Service %s:%s is not supported',
+                $name,
+                $version
+            ));
         }
 
         $this->config->set($key, $version);
