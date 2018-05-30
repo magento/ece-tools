@@ -18,6 +18,21 @@ class Builder
     const CONFIG_DEFAULT_DB_VERSION = '10';
 
     /**
+     * Supported service versions.
+     */
+    const SUPPORTED_PHP_VERSIONS = [
+        '7.0',
+        self::CONFIG_DEFAULT_PHP_VERSION,
+    ];
+    const SUPPORTED_NGINX_VERSIONS = [
+        '1.9',
+        self::CONFIG_DEFAULT_NGINX_VERSION,
+    ];
+    const SUPPORTED_DB_VERSIONS = [
+        self::CONFIG_DEFAULT_DB_VERSION,
+    ];
+
+    /**
      * @var Repository
      */
     private $config;
@@ -36,10 +51,7 @@ class Builder
      */
     public function setPhpVersion(string $version)
     {
-        $this->setVersion('php.version', $version, [
-            '7.0',
-            self::CONFIG_DEFAULT_PHP_VERSION,
-        ]);
+        $this->setVersion('php.version', $version, self::SUPPORTED_PHP_VERSIONS);
     }
 
     /**
@@ -48,10 +60,7 @@ class Builder
      */
     public function setNginxVersion(string $version)
     {
-        $this->setVersion('nginx.version', $version, [
-            '1.9',
-            self::CONFIG_DEFAULT_NGINX_VERSION,
-        ]);
+        $this->setVersion('nginx.version', $version, self::SUPPORTED_NGINX_VERSIONS);
     }
 
     /**
@@ -60,9 +69,7 @@ class Builder
      */
     public function setDbVersion(string $version)
     {
-        $this->setVersion('db.version', $version, [
-            self::CONFIG_DEFAULT_DB_VERSION,
-        ]);
+        $this->setVersion('db.version', $version, self::SUPPORTED_DB_VERSIONS);
     }
 
     /**
