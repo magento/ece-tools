@@ -125,7 +125,7 @@ class Manager
         $flagPath = $this->getFlagPath($flagKey);
 
         if (!$this->exists($flagKey)) {
-            $this->logger->info(sprintf('Flag %s has already been deleted.', $flagPath));
+            $this->logger->debug(sprintf('Flag %s has already been deleted.', $flagPath));
             return true;
         }
 
