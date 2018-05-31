@@ -1,0 +1,345 @@
+diff -Nuar a/vendor/magento/module-backend/etc/adminhtml/di.xml b/vendor/magento/module-backend/etc/adminhtml/di.xml
+--- a/vendor/magento/module-backend/etc/adminhtml/di.xml
++++ b/vendor/magento/module-backend/etc/adminhtml/di.xml
+@@ -139,10 +139,16 @@
+     <type name="Magento\Backend\Model\Menu\Builder">
+         <plugin name="SetupMenuBuilder" type="Magento\Backend\Model\Setup\MenuBuilder" />
+     </type>
+-    <type name="Magento\Config\Model\Config\Structure\ConcealInProductionConfigList">
++    <type name="Magento\Config\Model\Config\Structure\ElementVisibility\ConcealInProduction">
+         <arguments>
+             <argument name="configs" xsi:type="array">
+                 <item name="dev" xsi:type="const">Magento\Config\Model\Config\Structure\ElementVisibilityInterface::HIDDEN</item>
++            </argument>
++        </arguments>
++    </type>
++    <type name="Magento\Config\Model\Config\Structure\ElementVisibility\ConcealInProductionWithoutScdOnDemand">
++        <arguments>
++            <argument name="configs" xsi:type="array">
+                 <item name="general/locale/code" xsi:type="const">Magento\Config\Model\Config\Structure\ElementVisibilityInterface::DISABLED</item>
+             </argument>
+         </arguments>
+
+diff -Nuar a/vendor/magento/module-config/etc/adminhtml/di.xml b/vendor/magento/module-config/etc/adminhtml/di.xml
+--- a/vendor/magento/module-config/etc/adminhtml/di.xml
++++ b/vendor/magento/module-config/etc/adminhtml/di.xml
+@@ -15,6 +15,8 @@
+         <arguments>
+             <argument name="visibility" xsi:type="array">
+                 <item name="productionVisibility" xsi:type="object">Magento\Config\Model\Config\Structure\ConcealInProductionConfigList</item>
++                <item name="concealInProduction" xsi:type="object">Magento\Config\Model\Config\Structure\ElementVisibility\ConcealInProduction</item>
++                <item name="concealInProductionWithoutScdOnDemand" xsi:type="object">Magento\Config\Model\Config\Structure\ElementVisibility\ConcealInProductionWithoutScdOnDemand</item>
+             </argument>
+         </arguments>
+     </type>
+
+diff -Nuar a/vendor/magento/framework/Locale/Deployed/Options.php b/vendor/magento/framework/Locale/Deployed/Options.php
+--- a/vendor/magento/framework/Locale/Deployed/Options.php
++++ b/vendor/magento/framework/Locale/Deployed/Options.php
+@@ -3,9 +3,14 @@
+  * Copyright © Magento, Inc. All rights reserved.
+  * See COPYING.txt for license details.
+  */
++declare(strict_types=1);
++
+ namespace Magento\Framework\Locale\Deployed;
+
++use Magento\Framework\App\DeploymentConfig;
++use Magento\Framework\App\ObjectManager;
+ use Magento\Framework\App\State;
++use Magento\Framework\Config\ConfigOptionsListConstants as Constants;
+ use Magento\Framework\Exception\LocalizedException;
+ use Magento\Framework\Locale\AvailableLocalesInterface;
+ use Magento\Framework\Locale\ListsInterface;
+@@ -45,28 +50,36 @@ class Options implements OptionInterface
+      */
+     private $localeLists;
+
++    /**
++     * @var DeploymentConfig
++     */
++    private $deploymentConfig;
++
+     /**
+      * @param ListsInterface $localeLists locales list
+      * @param State $state application state class
+      * @param AvailableLocalesInterface $availableLocales operates with available locales
+      * @param DesignInterface $design operates with magento design settings
++     * @param DeploymentConfig $deploymentConfig
+      */
+     public function __construct(
+         ListsInterface $localeLists,
+         State $state,
+         AvailableLocalesInterface $availableLocales,
+-        DesignInterface $design
++        DesignInterface $design,
++        DeploymentConfig $deploymentConfig = null
+     ) {
+         $this->localeLists = $localeLists;
+         $this->state = $state;
+         $this->availableLocales = $availableLocales;
+         $this->design = $design;
++        $this->deploymentConfig = $deploymentConfig ?: ObjectManager::getInstance()->get(DeploymentConfig::class);
+     }
+
+     /**
+      * {@inheritdoc}
+      */
+-    public function getOptionLocales()
++    public function getOptionLocales(): array
+     {
+         return $this->filterLocales($this->localeLists->getOptionLocales());
+     }
+@@ -74,7 +87,7 @@ class Options implements OptionInterface
+     /**
+      * {@inheritdoc}
+      */
+-    public function getTranslatedOptionLocales()
++    public function getTranslatedOptionLocales(): array
+     {
+         return $this->filterLocales($this->localeLists->getTranslatedOptionLocales());
+     }
+@@ -82,7 +95,7 @@ class Options implements OptionInterface
+     /**
+      * Filter list of locales by available locales for current theme and depends on running application mode.
+      *
+-     * Applies filters only in production mode.
++     * Applies filters only in production mode when flag 'static_content_on_demand_in_production' is not enabled.
+      * For example, if the current design theme has only one generated locale en_GB then for given array of locales:
+      * ```php
+      *     $locales = [
+@@ -113,9 +126,10 @@ class Options implements OptionInterface
+      * @param array $locales list of locales for filtering
+      * @return array of filtered locales
+      */
+-    private function filterLocales(array $locales)
++    private function filterLocales(array $locales): array
+     {
+-        if ($this->state->getMode() != State::MODE_PRODUCTION) {
++        if ($this->state->getMode() != State::MODE_PRODUCTION
++            || $this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION)) {
+             return $locales;
+         }
+
+
+diff -Nuar a/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProduction.php b/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProduction.php
+new file mode 100644
+--- /dev/null
++++ b/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProduction.php
+@@ -0,0 +1,138 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\Config\Model\Config\Structure\ElementVisibility;
++
++use Magento\Config\Model\Config\Structure\ElementVisibilityInterface;
++use Magento\Framework\App\State;
++
++/**
++ * Defines status of visibility of form elements on Stores > Settings > Configuration page
++ * in Admin Panel in Production mode.
++ * @api
++ */
++class ConcealInProduction implements ElementVisibilityInterface
++{
++    /**
++     * The list of form element paths with concrete visibility status.
++     *
++     * E.g.
++     *
++     * ```php
++     * [
++     *      'general/locale/code' => ElementVisibilityInterface::DISABLED,
++     *      'general/country' => ElementVisibilityInterface::HIDDEN,
++     * ];
++     * ```
++     *
++     * It means that:
++     *  - field Locale (in group Locale Options in section General) will be disabled
++     *  - group Country Options (in section General) will be hidden
++     *
++     * @var array
++     */
++    private $configs = [];
++
++    /**
++     * The object that has information about the state of the system.
++     *
++     * @var State
++     */
++    private $state;
++
++    /**
++     *
++     * The list of form element paths which ignore visibility status.
++     *
++     * E.g.
++     *
++     * ```php
++     * [
++     *      'general/country/default' => '',
++     * ];
++     * ```
++     *
++     * It means that:
++     *  - field 'default' in group Country Options (in section General) will be showed, even if all group(section)
++     *    will be hidden.
++     *
++     * @var array
++     */
++    private $exemptions = [];
++
++    /**
++     * @param State $state The object that has information about the state of the system
++     * @param array $configs The list of form element paths with concrete visibility status.
++     * @param array $exemptions The list of form element paths which ignore visibility status.
++     */
++    public function __construct(State $state, array $configs = [], array $exemptions = [])
++    {
++        $this->state = $state;
++        $this->configs = $configs;
++        $this->exemptions = $exemptions;
++    }
++
++    /**
++     * @inheritdoc
++     * @since 100.2.0
++     */
++    public function isHidden($path)
++    {
++        $path = $this->normalizePath($path);
++        if ($this->state->getMode() === State::MODE_PRODUCTION
++            && preg_match('/(?<group>(?<section>.*?)\/.*?)\/.*?/', $path, $match)) {
++            $group = $match['group'];
++            $section = $match['section'];
++            $exemptions = array_keys($this->exemptions);
++            $checkedItems = [];
++            foreach ([$path, $group, $section] as $itemPath) {
++                $checkedItems[] = $itemPath;
++                if (!empty($this->configs[$itemPath])) {
++                    return $this->configs[$itemPath] === static::HIDDEN
++                        && empty(array_intersect($checkedItems, $exemptions));
++                }
++            }
++        }
++
++        return false;
++    }
++
++    /**
++     * @inheritdoc
++     * @since 100.2.0
++     */
++    public function isDisabled($path)
++    {
++        $path = $this->normalizePath($path);
++        if ($this->state->getMode() === State::MODE_PRODUCTION) {
++            while (true) {
++                if (!empty($this->configs[$path])) {
++                    return $this->configs[$path] === static::DISABLED;
++                }
++
++                $position = strripos($path, '/');
++                if ($position === false) {
++                    break;
++                }
++                $path = substr($path, 0, $position);
++            }
++        }
++
++        return false;
++    }
++
++    /**
++     * Returns normalized path.
++     *
++     * @param string $path The path to be normalized
++     * @return string The normalized path
++     */
++    private function normalizePath($path)
++    {
++        return trim($path, '/');
++    }
++}
+
+diff --git a/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProductionWithoutScdOnDemand.php b/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProductionWithoutScdOnDemand.php
+new file mode 100644
+--- /dev/null
++++ b/vendor/magento/module-config/Model/Config/Structure/ElementVisibility/ConcealInProductionWithoutScdOnDemand.php
+@@ -0,0 +1,72 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\Config\Model\Config\Structure\ElementVisibility;
++
++use Magento\Config\Model\Config\Structure\ElementVisibilityInterface;
++use Magento\Framework\App\DeploymentConfig;
++use Magento\Framework\Config\ConfigOptionsListConstants as Constants;
++
++/**
++ * Defines status of visibility of form elements on Stores > Settings > Configuration page
++ * when Constants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION is enabled
++ * otherwise rule from Magento\Config\Model\Config\Structure\ElementVisibility\ConcealInProduction is used
++ * @see \Magento\Config\Model\Config\Structure\ElementVisibility\ConcealInProduction
++ *
++ * @api
++ */
++class ConcealInProductionWithoutScdOnDemand implements ElementVisibilityInterface
++{
++    /**
++     * @var ConcealInProduction Element visibility rules in the Production mode
++     */
++    private $concealInProduction;
++
++    /**
++     * @var DeploymentConfig The application deployment configuration
++     */
++    private $deploymentConfig;
++
++    /**
++     * @param ConcealInProductionFactory $concealInProductionFactory
++     * @param DeploymentConfig $deploymentConfig Deployment configuration reader
++     * @param array $configs The list of form element paths with concrete visibility status.
++     * @param array $exemptions The list of form element paths which ignore visibility status.
++     */
++    public function __construct(
++        ConcealInProductionFactory $concealInProductionFactory,
++        DeploymentConfig $deploymentConfig,
++        array $configs = [],
++        array $exemptions = []
++    ) {
++        $this->concealInProduction = $concealInProductionFactory
++            ->create(['configs' => $configs, 'exemptions' => $exemptions]);
++        $this->deploymentConfig = $deploymentConfig;
++    }
++
++    /**
++     * @inheritdoc
++     */
++    public function isHidden($path): bool
++    {
++        if (!$this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION)) {
++            return $this->concealInProduction->isHidden($path);
++        }
++        return false;
++    }
++
++    /**
++     * @inheritdoc
++     */
++    public function isDisabled($path): bool
++    {
++        if (!$this->deploymentConfig->getConfigData(Constants::CONFIG_PATH_SCD_ON_DEMAND_IN_PRODUCTION)) {
++            return $this->concealInProduction->isDisabled($path);
++        }
++        return false;
++    }
++}

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Cache;
 
+use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Psr\Log\LoggerInterface;
@@ -30,18 +31,26 @@ class Config
     private $logger;
 
     /**
+     * @var ConfigMerger
+     */
+    private $configMerger;
+
+    /**
      * @param Environment $environment
      * @param DeployInterface $stageConfig
      * @param LoggerInterface $logger
+     * @param ConfigMerger $configMerger
      */
     public function __construct(
         Environment $environment,
         DeployInterface $stageConfig,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ConfigMerger $configMerger
     ) {
         $this->environment = $environment;
         $this->stageConfig = $stageConfig;
         $this->logger = $logger;
+        $this->configMerger = $configMerger;
     }
 
     /**
@@ -57,7 +66,9 @@ class Config
     {
         $envCacheConfiguration = (array)$this->stageConfig->get(DeployInterface::VAR_CACHE_CONFIGURATION);
 
-        if ($this->isCacheConfigurationValid($envCacheConfiguration)) {
+        if ($this->isCacheConfigurationValid($envCacheConfiguration)
+            && !$this->configMerger->isMergeRequired($envCacheConfiguration)
+        ) {
             if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION)) {
                 $this->logger->notice(
                     sprintf(
@@ -67,7 +78,8 @@ class Config
                     )
                 );
             }
-            return $envCacheConfiguration;
+
+            return $this->configMerger->clear($envCacheConfiguration);
         }
 
         $redisConfig = $this->environment->getRelationship('redis');
@@ -87,15 +99,26 @@ class Config
 
         $slaveConnectionData = $this->getSlaveConnection();
         if ($slaveConnectionData) {
-            $redisCache['backend_options']['load_from_slave'] = $slaveConnectionData;
+            if ($this->isConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $redisConfig)) {
+                $redisCache['backend_options']['load_from_slave'] = $slaveConnectionData;
+                $this->logger->info('Set Redis slave connection');
+            } else {
+                $this->logger->notice(
+                    sprintf(
+                        'The variable \'%s\' is ignored as you\'ve changed cache connection settings in \'%s\'',
+                        DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
+                        DeployInterface::VAR_CACHE_CONFIGURATION
+                    )
+                );
+            }
         }
 
-        return [
+        return $this->configMerger->mergeConfigs([
             'frontend' => [
                 'default' => $redisCache,
                 'page_cache' => $redisCache,
             ],
-        ];
+        ], $envCacheConfiguration);
     }
 
     /**
@@ -106,7 +129,7 @@ class Config
      */
     private function isCacheConfigurationValid(array $cacheConfiguration): bool
     {
-        return !empty($cacheConfiguration) && isset($cacheConfiguration['frontend']);
+        return !$this->configMerger->isEmpty($cacheConfiguration) && isset($cacheConfiguration['frontend']);
     }
 
     /**
@@ -122,7 +145,6 @@ class Config
         $slaveHost = $redisSlaveConfig[0]['host'] ?? null;
 
         if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION) && $slaveHost) {
-            $this->logger->info('Set Redis slave connection');
             $connectionData = [
                 'server' => $slaveHost,
                 'port' => $redisSlaveConfig[0]['port'] ?? '',
@@ -130,5 +152,32 @@ class Config
         }
 
         return $connectionData;
+    }
+
+    /**
+     * Checks that cache configuration was changed in CACHE_CONFIGURATION variable
+     * in not compatible way with slave connection.
+     *
+     * Returns false if server or port was changed in merged configuration otherwise false.
+     *
+     * @param array $envCacheConfig
+     * @param array $redisConfig
+     * @return bool
+     */
+    private function isConfigurationCompatibleWithSlaveConnection(
+        array $envCacheConfig,
+        array $redisConfig
+    ): bool {
+        foreach (['default', 'page_cache'] as $type) {
+            if ((isset($envCacheConfig['frontend'][$type]['backend_options']['server'])
+                    && $envCacheConfig['frontend'][$type]['backend_options']['server'] !== $redisConfig[0]['host'])
+                || (isset($envCacheConfig['frontend'][$type]['backend_options']['port'])
+                    && $envCacheConfig['frontend'][$type]['backend_options']['port'] !== $redisConfig[0]['port'])
+            ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
