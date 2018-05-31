@@ -97,7 +97,7 @@ class File
      * @return array|bool
      * @throws FileSystemException
      */
-    public function parseIni($path, $processSections = false, $scannerMode = INI_SCANNER_NORMAL)
+    public function parseIni($path, $processSections = false, $scannerMode = \INI_SCANNER_NORMAL)
     {
         clearstatcache();
         $result = @parse_ini_file($path, $processSections, $scannerMode);
