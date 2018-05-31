@@ -52,7 +52,7 @@ class DeprecatedVariables implements ValidatorInterface
             $errors[] = sprintf(
                 'The %s variable contains deprecated value. Use one of the next values: %s.',
                 DeployInterface::VAR_VERBOSE_COMMANDS,
-                ['-v', '-vv', '-vvv']
+                implode(',', ['-v', '-vv', '-vvv'])
             );
         }
 
@@ -75,12 +75,12 @@ class DeprecatedVariables implements ValidatorInterface
         }
 
         if ($errors) {
-            return $this->resultFactory->create(Validator\Result\Error::ERROR, [
-                'error' => 'The configuration contains deprecated variables or values',
-                'suggestion' => implode(PHP_EOL, $errors),
-            ]);
+            return $this->resultFactory->error(
+                'The configuration contains deprecated variables or values',
+                implode(PHP_EOL, $errors)
+            );
         }
 
-        return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
+        return $this->resultFactory->success();
     }
 }
