@@ -1,7 +1,8 @@
 {
   "magento/magento2-base": {
     "Fix credis pipeline issue": {
-      "2.1.4 - 2.1.10, 2.2.0": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
+      "2.1.4 - 2.1.10": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch",
+      "2.2.0": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
     },
     "Fix asset locker race condition when using Redis": {
       "2.1.4 - 2.1.13": "MDVA-2470__fix_asset_locking_race_condition__2.1.4.patch",
@@ -32,7 +33,7 @@
     },
     "Support SCD forking in the credis connector": {
       "2.1.4 - 2.1.12": "MAGETWO-69847__support_credis_forking_during_scd__2.1.4.patch",
-      "2.2.0 - 2.2.4" : "MAGETWO-69847__support_credis_forking_during_scd__2.2.0.patch"
+      "2.2.0 - 2.2.5" : "MAGETWO-69847__support_credis_forking_during_scd__2.2.0.patch"
     },
     "Allow multiple languages to be specified for the SCD command": {
       "2.1.4 - 2.1.7": "MAGETWO-63020__fix_scd_with_multiple_languages__2.1.4.patch"
@@ -41,12 +42,14 @@
       "2.1.4 - 2.1.7": "MAGECLOUD-589__load_appropriate_js_files__2.1.4.patch"
     },
     "Handle special characters in email headers": {
-      "2.1.4 - 2.1.13, 2.2.0": "MDVA-8695__properly_encode_characters_in_emails__2.1.4.patch"
+      "2.1.4 - 2.1.13": "MDVA-8695__properly_encode_characters_in_emails__2.1.4.patch",
+      "2.2.0": "MDVA-8695__properly_encode_characters_in_emails__2.1.4.patch"
     },
     "Enable SCD on demand in production": {
       "2.1.4 - 2.1.13": "MAGECLOUD-1601__configure_scd_on_demand_for_cloud__2.1.4.patch",
       "2.2.0 - 2.2.3": "MAGECLOUD-1601__configure_scd_on_demand_for_cloud__2.2.0.patch",
-      "2.1.4 - 2.1.13, 2.2.0 - 2.2.4": "MAGECLOUD-1601__trim_static_content_path__2.1.4.patch"
+      "2.1.4 - 2.1.13": "MAGECLOUD-1601__trim_static_content_path__2.1.4.patch",
+      "2.2.0 - 2.2.4": "MAGECLOUD-1601__trim_static_content_path__2.1.4.patch"
     },
     "Respect user-specified minification settings": {
       "2.1.4 - 2.1.13": "MAGECLOUD-1736__respect_minification_override__2.1.4.patch",
