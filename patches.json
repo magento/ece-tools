@@ -97,6 +97,9 @@
     },
     "Unlock locale editing when SCD on demand is enabled": {
       "2.2.0 - 2.2.5": "MAGECLOUD-2159__unlock_locale_editing_when_scd_on_demand__2.2.0.patch"
+    },
+    "Allow DB dumps done with the support module to complete": {
+      "2.2.0 - 2.2.5": "MAGECLOUD-2033__prevent_deadlock_during_db_dump__2.2.0.patch"
     }
   }
 }
