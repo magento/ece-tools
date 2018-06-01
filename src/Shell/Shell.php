@@ -58,7 +58,7 @@ class Shell implements ShellInterface
             $status
         );
 
-        $output = array_map(function($line) {
+        $output = array_map(function ($line) {
             return '  ' . $line;
         }, $output);
 

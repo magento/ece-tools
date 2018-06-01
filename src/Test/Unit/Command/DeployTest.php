@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -23,19 +24,24 @@ class DeployTest extends TestCase
     private $command;
 
     /**
-     * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ProcessInterface|Mock
      */
     private $processMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var FlagManager|\PHPUnit_Framework_MockObject_MockObject
+     * @var FlagManager|Mock
      */
     private $flagManagerMock;
+
+    /**
+     * @var PackageManager|Mock
+     */
+    private $packageManagerMock;
 
     /**
      * @inheritdoc
@@ -45,23 +51,28 @@ class DeployTest extends TestCase
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
+        $this->packageManagerMock = $this->createMock(PackageManager::class);
 
         $this->command = new Deploy(
             $this->processMock,
             $this->loggerMock,
-            $this->flagManagerMock
+            $this->flagManagerMock,
+            $this->packageManagerMock
         );
     }
 
     public function testExecute()
     {
         $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(['Starting deploy.'], ['Deployment completed.']);
+            ->method('notice')
+            ->withConsecutive(['Starting deploy. Some info.'], ['Deployment completed.']);
         $this->processMock->expects($this->once())
             ->method('execute');
         $this->flagManagerMock->expects($this->never())
             ->method('set');
+        $this->packageManagerMock->expects($this->once())
+            ->method('getPrettyInfo')
+            ->willReturn('Some info.');
 
         $tester = new CommandTester(
             $this->command

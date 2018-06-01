@@ -100,7 +100,7 @@ class BuildDirCopierTest extends TestCase
         return [
             [
                 true,
-                'info',
+                'debug',
                 'Directory dir was copied with strategy: copy',
             ],
             [
@@ -150,7 +150,7 @@ class BuildDirCopierTest extends TestCase
             ->with($rootInitDir, $rootDir . '/' . $dir)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('debug')
             ->with('Directory ' . $dir . ' was copied with strategy: ' . $strategy);
         $this->loggerMock->expects($this->never())
             ->method('notice');
