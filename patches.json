@@ -46,9 +46,11 @@
       "2.2.0": "MDVA-8695__properly_encode_characters_in_emails__2.1.4.patch"
     },
     "Enable SCD on demand in production": {
-      "2.1.4 - 2.1.13": "MAGECLOUD-1601__configure_scd_on_demand_for_cloud__2.1.4.patch",
+      "2.1.4 - 2.1.13": [
+        "MAGECLOUD-1601__configure_scd_on_demand_for_cloud__2.1.4.patch",
+        "MAGECLOUD-1601__trim_static_content_path__2.1.4.patch"
+      ],
       "2.2.0 - 2.2.3": "MAGECLOUD-1601__configure_scd_on_demand_for_cloud__2.2.0.patch",
-      "2.1.4 - 2.1.13": "MAGECLOUD-1601__trim_static_content_path__2.1.4.patch",
       "2.2.0 - 2.2.4": "MAGECLOUD-1601__trim_static_content_path__2.1.4.patch"
     },
     "Respect user-specified minification settings": {
