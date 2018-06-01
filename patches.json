@@ -90,6 +90,10 @@
     "Unify robots.txt and sitemap.xml generation": {
       "2.1.0 - 2.1.10": "MAGECLOUD-1998__unify_sitemapxml_and_robotstxt_generation__2.1.4.patch",
       "~2.1.11": "MAGECLOUD-1998__unify_sitemapxml_and_robotstxt_generation__2.1.11.patch"
+    },
+    "Fix javascript localization issues": {
+      "~2.1.0": "MAGETWO-62660__prevent_excessive_js_optimization__2.1.4.patch",
+      "2.2.0 - 2.2.1": "MAGETWO-82752__reload_js_translation_data__2.2.0.patch"
     }
   }
 }
