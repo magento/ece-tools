@@ -42,7 +42,7 @@ class ShellLoggingTest extends AbstractTest
         $this->shell->execute('echo Magento Cloud');
         $logContent = $this->getLogContent();
         $this->assertContains('echo Magento Cloud', $logContent);
-        $this->assertContains('0 => \'Magento Cloud\'', $logContent);
+        $this->assertContains('  Magento Cloud', $logContent);
     }
 
     public function testShellLoggingWithNonZeroCode()
