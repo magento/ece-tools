@@ -94,6 +94,9 @@
     "Fix javascript localization issues": {
       "~2.1.0": "MAGETWO-62660__prevent_excessive_js_optimization__2.1.4.patch",
       "2.2.0 - 2.2.1": "MAGETWO-82752__reload_js_translation_data__2.2.0.patch"
+    },
+    "Unlock locale editing when SCD on demand is enabled": {
+      "2.2.0 - 2.2.5": "MAGECLOUD-2159__unlock_locale_editing_when_scd_on_demand__2.2.0.patch"
     }
   }
 }
