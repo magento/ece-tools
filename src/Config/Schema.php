@@ -174,12 +174,12 @@ class Schema
                 ],
             ],
             StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => [
-                self::SCHEMA_TYPE => ['array', 'boolean'],
+                self::SCHEMA_TYPE => ['string'],
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => false,
+                    StageConfigInterface::STAGE_GLOBAL => '',
                 ],
             ],
             StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [
@@ -281,6 +281,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
             ],
+            DeployInterface::VAR_DATABASE_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+            ],
             DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [
@@ -310,7 +320,7 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_POST_DEPLOY => ['index.php'],
                 ],
-            ]
+            ],
         ];
     }
 }

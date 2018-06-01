@@ -231,6 +231,12 @@ class SchemaValidatorTest extends TestCase
                 'Use one of the next types: array.'
             ],
             [
+                DeployInterface::VAR_DATABASE_CONFIGURATION,
+                'someOption',
+                'The DATABASE_CONFIGURATION variable contains an invalid value of type string. ' .
+                'Use one of the next types: array.'
+            ],
+            [
                 DeployInterface::VAR_SESSION_CONFIGURATION,
                 'someOption',
                 'The SESSION_CONFIGURATION variable contains an invalid value of type string. ' .

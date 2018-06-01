@@ -5,13 +5,19 @@
  */
 namespace Magento\MagentoCloud\App\Logger;
 
-use \Monolog\Logger;
+use Magento\MagentoCloud\Config\Environment;
+use Monolog\Logger;
 
 /**
  * Resolves string level to int level from Logger.
  */
 class LevelResolver
 {
+    /**
+     * @var Environment
+     */
+    private $environment;
+
     /**
      * @var array
      */
@@ -27,11 +33,21 @@ class LevelResolver
     ];
 
     /**
+     * @param Environment $environment
+     */
+    public function __construct(Environment $environment)
+    {
+        $this->environment = $environment;
+    }
+
+    /**
      * @param string $level
      * @return int
      */
     public function resolve(string $level): int
     {
+        $level = $this->environment->getMinLoggingLevel() ?: $level;
+
         return $this->mapLevels[strtolower($level)] ?? Logger::NOTICE;
     }
 }

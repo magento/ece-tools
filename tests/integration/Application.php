@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Integration;
 
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\App\Logger;
-use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 /**

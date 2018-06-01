@@ -89,5 +89,10 @@
     "Allow ece-tools dumps to complete by fixing app:config:import": {
       "2.2.2": "MAGECLOUD-1567__fix_import_during_ece_tools_dump__2.2.2.patch"
     }
+  },
+  "magento/product-enterprise-edition": {
+    "Fix locker process": {
+      "2.2.0 - 2.2.5": "2.2/fix-support-db-dump.patch"
+    }
   }
 }

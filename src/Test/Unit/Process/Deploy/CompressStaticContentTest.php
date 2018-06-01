@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\CompressStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -29,11 +28,6 @@ class CompressStaticContentTest extends TestCase
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
-
-    /**
-     * @var Environment|Mock
-     */
-    private $environmentMock;
 
     /**
      * @var StaticContentCompressor|Mock
@@ -61,7 +55,6 @@ class CompressStaticContentTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
@@ -69,7 +62,6 @@ class CompressStaticContentTest extends TestCase
 
         $this->process = new CompressStaticContent(
             $this->loggerMock,
-            $this->environmentMock,
             $this->compressorMock,
             $this->flagManagerMock,
             $this->stageConfigMock,
@@ -93,13 +85,10 @@ class CompressStaticContentTest extends TestCase
                 [DeployInterface::VAR_SKIP_SCD, false],
                 [DeployInterface::VAR_VERBOSE_COMMANDS, ''],
             ]);
-        $this->environmentMock
+        $this->flagManagerMock
             ->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(true);
-        $this->flagManagerMock->expects($this->once())
             ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
         $this->compressorMock
             ->expects($this->once())
@@ -120,9 +109,6 @@ class CompressStaticContentTest extends TestCase
             ->willReturn(true);
         $this->stageConfigMock->expects($this->never())
             ->method('get');
-        $this->environmentMock
-            ->expects($this->never())
-            ->method('isDeployStaticContent');
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->compressorMock
@@ -144,42 +130,17 @@ class CompressStaticContentTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
-        $this->environmentMock
+        $this->flagManagerMock
             ->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(false);
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with(
                 'Static content deployment was performed during the build phase or disabled. Skipping deploy phase'
                 . ' static content compression.'
             );
-        $this->flagManagerMock->expects($this->never())
-            ->method('exists');
-        $this->compressorMock
-            ->expects($this->never())
-            ->method('process');
-
-        $this->process->execute();
-    }
-
-    public function testExecuteNoCompressBySCDInBuild()
-    {
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
-            ->willReturn(false);
-        $this->environmentMock
-            ->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(true);
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
-            ->willReturn(true);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Postpone static content compression until prestart');
         $this->compressorMock
             ->expects($this->never())
             ->method('process');

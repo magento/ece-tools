@@ -5,11 +5,6 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Psr\Log\LoggerInterface;
-
 /**
  * Contains logic for interacting with the server environment
  */
@@ -37,47 +32,9 @@ class Environment
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
-     * @var FlagManager
-     */
-    private $flagManager;
-
-    /**
      * @var array
      */
     private $data = [];
-
-    /**
-     * @param LoggerInterface $logger
-     * @param File $file
-     * @param DirectoryList $directoryList
-     * @param FlagManager $flagManager
-     */
-    public function __construct(
-        LoggerInterface $logger,
-        File $file,
-        DirectoryList $directoryList,
-        FlagManager $flagManager
-    ) {
-        $this->logger = $logger;
-        $this->file = $file;
-        $this->directoryList = $directoryList;
-        $this->flagManager = $flagManager;
-    }
 
     /**
      * 'getEnv' method is an abstraction for _ENV and getenv.
@@ -107,6 +64,7 @@ class Environment
         if (false === $value) {
             return $default;
         }
+
         return json_decode(base64_decode($value), true);
     }
 
@@ -144,11 +102,11 @@ class Environment
      * @param string $key
      * @return array
      */
-    public function getRelationship(string $key)
+    public function getRelationship(string $key): array
     {
         $relationships = $this->getRelationships();
 
-        return isset($relationships[$key]) ? $relationships[$key] : [];
+        return $relationships[$key] ?? [];
     }
 
     /**
@@ -187,14 +145,6 @@ class Environment
     public function getVariable($name, $default = null)
     {
         return $this->getVariables()[$name] ?? $default;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isDeployStaticContent(): bool
-    {
-        return !$this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
     }
 
     /**
@@ -299,6 +249,14 @@ class Environment
     public function getCryptKey(): string
     {
         return $this->getVariable('CRYPT_KEY', '');
+    }
+
+    /**
+     * @return string
+     */
+    public function getMinLoggingLevel(): string
+    {
+        return $this->getVariable('MIN_LOGGING_LEVEL', '');
     }
 
     /**

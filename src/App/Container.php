@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
-use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
@@ -26,10 +25,7 @@ use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
-use Magento\MagentoCloud\Process\Prestart as PrestartProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
-use Psr\Container\ContainerInterface;
-use Magento\MagentoCloud\Process;
 
 /**
  * @inheritdoc
@@ -88,7 +84,6 @@ class Container implements ContainerInterface
                 return new Flag\Pool([
                     Flag\Manager::FLAG_REGENERATE => 'var/.regenerate',
                     Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
-                    Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_PENDING => 'var/.static_content_deploy_pending',
                     Flag\Manager::FLAG_DEPLOY_HOOK_IS_FAILED => 'var/.deploy_is_failed',
                 ]);
             }
@@ -200,6 +195,8 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
+                                    $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),
@@ -224,14 +221,20 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
+
                         /**
-                         * Remove this line after implementation post-deploy hook
+                         * This process runs processes if only post_deploy hook is not configured.
                          */
+                        $this->container->make(DeployProcess\DeployCompletion::class),
+                    ],
+                ]);
+            });
+        $this->container->when(DeployProcess\DeployCompletion::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(PostDeployProcess\Backup::class),
-                        /**
-                         * Cache clean process must remain the last one in deploy chain.
-                         * Do not add any processes after it.
-                         */
                         $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);
@@ -277,19 +280,9 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class)
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Db\SlaveConfig::class)
             ->needs(ConnectionInterface::class)
             ->give(ReadConnection::class);
-        $this->container->when(Prestart::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(PrestartProcess\DeployStaticContent::class),
-                        $this->container->make(PrestartProcess\CompressStaticContent::class),
-                    ],
-                ]);
-            });
         $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -342,15 +335,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(PrestartProcess\DeployStaticContent::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(PrestartProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
         $this->container->when(DbDump::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -377,7 +361,9 @@ class Container implements ContainerInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @see create() For factory-like usage
      */
     public function get($id)
     {
@@ -387,31 +373,22 @@ class Container implements ContainerInterface
     /**
      * @inheritdoc
      */
-    public function has($id)
+    public function has($id): bool
     {
         return $this->container->has($id);
     }
 
     /**
-     * Register a binding with the container.
-     *
-     * @param string|array $abstract
-     * @param \Closure|string|null $concrete
-     * @param bool $shared
-     * @return void
+     * @inheritdoc
      */
-    public function set($abstract, $concrete, bool $shared = true)
+    public function set(string $abstract, $concrete, bool $shared = true)
     {
         $this->container->forgetInstance($abstract);
         $this->container->bind($abstract, $concrete, $shared);
     }
 
     /**
-     * Creates instance with params.
-     *
-     * @param string $abstract The class name to create
-     * @param array $params Associative array of constructor params
-     * @return object The resolved object
+     * @inheritdoc
      */
     public function create(string $abstract, array $params = [])
     {

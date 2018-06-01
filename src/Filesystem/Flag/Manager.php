@@ -27,11 +27,6 @@ class Manager
     const FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD = 'scd_in_build';
 
     /**
-     * Used for postponing static content deployment until prestart phase.
-     */
-    const FLAG_STATIC_CONTENT_DEPLOY_PENDING = 'scd_pending';
-
-    /**
      * Used to mark that deploy hook is failed.
      */
     const FLAG_DEPLOY_HOOK_IS_FAILED = 'deploy_is_failed';

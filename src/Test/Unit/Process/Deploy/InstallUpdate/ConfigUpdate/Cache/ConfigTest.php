@@ -5,10 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Cache;
 
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Cache\Config;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
@@ -47,7 +49,8 @@ class ConfigTest extends TestCase
         $this->config = new Config(
             $this->environmentMock,
             $this->stageConfigMock,
-            $this->loggerMock
+            $this->loggerMock,
+            new ConfigMerger()
         );
     }
 
@@ -122,21 +125,27 @@ class ConfigTest extends TestCase
     }
 
     /**
-     * @param $masterConnection array
-     * @param $slaveConnection array
-     * @param $useSlave boolean
-     * @param $expectedResult array
+     * @param array $envCacheConfig
+     * @param array $masterConnection
+     * @param array $slaveConnection
+     * @param boolean $useSlave
+     * @param array $expectedResult
      *
      * @dataProvider getFromRelationshipsDataProvider
      */
-    public function testGetFromRelationships($masterConnection, $slaveConnection, $useSlave, $expectedResult)
-    {
+    public function testGetFromRelationships(
+        $envCacheConfig,
+        $masterConnection,
+        $slaveConnection,
+        $useSlave,
+        $expectedResult
+    ) {
         $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
             ->willReturnMap([
                 [
                     DeployInterface::VAR_CACHE_CONFIGURATION,
-                    []
+                    $envCacheConfig
                 ],
                 [
                     DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
@@ -148,7 +157,6 @@ class ConfigTest extends TestCase
             ->willReturnMap([
                 ['redis', $masterConnection],
                 ['redis-slave', $slaveConnection],
-
             ]);
 
         $this->assertEquals(
@@ -161,12 +169,14 @@ class ConfigTest extends TestCase
      * Data provider for testGetFromRelationships.
      *
      * Results value for next data:
-     * 1 - data for 'redis' relationships
-     * 2 - data for 'redis-slave' relationships
-     * 3 - value for REDIS_USE_SLAVE_CONNECTION variable
-     * 4 - expected result
+     * 1 - cache configuration from CACHE_CONFIGURATION variable
+     * 2 - data for 'redis' relationships
+     * 3 - data for 'redis-slave' relationships
+     * 4 - value for REDIS_USE_SLAVE_CONNECTION variable
+     * 5 - expected result
      *
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getFromRelationshipsDataProvider()
     {
@@ -215,30 +225,217 @@ class ConfigTest extends TestCase
             'port' => 'slave.port',
         ];
 
+        $resultMasterSlaveConnectionWithMergedValue = $resultMasterSlaveConnection;
+        $resultMasterSlaveConnectionWithMergedValue['frontend']['default']['backend_options']['value'] = 'key';
+
+        $resultMasterSlaveConnectionWithDiffHost = $resultMasterOnlyConnection;
+        $resultMasterSlaveConnectionWithDiffHost['frontend']['default']['backend_options']['value'] = 'key';
+        $resultMasterSlaveConnectionWithDiffHost['frontend']['default']['backend_options']['server'] = 'new.host';
+
         return [
             [
+                [],
                 $relationshipsRedis,
                 [],
                 false,
                 $resultMasterOnlyConnection
             ],
             [
+                [],
                 $relationshipsRedis,
                 $relationshipsRedisSlave,
                 false,
                 $resultMasterOnlyConnection
             ],
             [
+                [],
                 $relationshipsRedis,
                 [],
                 true,
                 $resultMasterOnlyConnection
             ],
             [
+                [],
                 $relationshipsRedis,
                 $relationshipsRedisSlave,
                 true,
                 $resultMasterSlaveConnection
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'value' => 'key'
+                            ]
+                        ]
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true
+                ],
+                $relationshipsRedis,
+                $relationshipsRedisSlave,
+                true,
+                $resultMasterSlaveConnectionWithMergedValue
+            ],
+            [
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'server' => 'new.host',
+                                'value' => 'key'
+                            ]
+                        ]
+                    ],
+                    StageConfigInterface::OPTION_MERGE => true
+                ],
+                $relationshipsRedis,
+                $relationshipsRedisSlave,
+                true,
+                $resultMasterSlaveConnectionWithDiffHost
+            ],
+        ];
+    }
+
+    /**
+     * @param array $envCacheConfiguration
+     * @param array $relationships
+     * @param array $expected
+     * @dataProvider envConfigurationMergingDataProvider
+     */
+    public function testEnvConfigurationMerging(
+        array $envCacheConfiguration,
+        array $relationships,
+        array $expected
+    ) {
+        $this->stageConfigMock
+            ->method('get')
+            ->willReturnMap([
+                [
+                    DeployInterface::VAR_CACHE_CONFIGURATION,
+                    $envCacheConfiguration
+                ],
+                [
+                    DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
+                    false
+                ]
+            ]);
+        $this->environmentMock
+            ->method('getRelationship')
+            ->willReturnMap([
+                ['redis', $relationships],
+                ['redis-slave', []],
+            ]);
+
+        $this->assertEquals(
+            $expected,
+            $this->config->get()
+        );
+    }
+
+    /**
+     * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
+    public function envConfigurationMergingDataProvider(): array
+    {
+        $relationships = [
+            [
+                'host' => 'master.host',
+                'port' => 'master.port',
+                'scheme' => 'redis',
+            ]
+        ];
+
+        $result = [
+            'frontend' => [
+                'default' => [
+                    'backend' => 'Cm_Cache_Backend_Redis',
+                    'backend_options' => [
+                        'server' => 'master.host',
+                        'port' => 'master.port',
+                        'database' => 1
+                    ],
+                ],
+                'page_cache' => [
+                    'backend' => 'Cm_Cache_Backend_Redis',
+                    'backend_options' => [
+                        'server' => 'master.host',
+                        'port' => 'master.port',
+                        'database' => 1
+                    ],
+                ],
+            ]
+        ];
+
+        $resultWithMergedKey = $result;
+        $resultWithMergedKey['key'] = 'value';
+
+        $resultWithMergedHostAndPort = $result;
+        $resultWithMergedHostAndPort['frontend']['default']['backend_options']['server'] = 'merged.server';
+        $resultWithMergedHostAndPort['frontend']['default']['backend_options']['port'] = 'merged.port';
+        $resultWithMergedHostAndPort['frontend']['default']['backend_options']['database'] = '10';
+
+        return [
+            [
+                [],
+                $relationships,
+                $result,
+            ],
+            [
+                [StageConfigInterface::OPTION_MERGE => true],
+                $relationships,
+                $result,
+            ],
+            [
+                [
+                    StageConfigInterface::OPTION_MERGE => true,
+                    'key' => 'value',
+                ],
+                $relationships,
+                $resultWithMergedKey,
+            ],
+            [
+                [
+                    StageConfigInterface::OPTION_MERGE => true,
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'server' => 'merged.server',
+                                'port' => 'merged.port',
+                                'database' => 10
+                            ],
+                        ],
+                    ],
+                ],
+                $relationships,
+                $resultWithMergedHostAndPort,
+            ],
+            [
+                [
+                    StageConfigInterface::OPTION_MERGE => false,
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'server' => 'merged.server',
+                                'port' => 'merged.port',
+                                'database' => 10
+                            ],
+                        ],
+                    ],
+                ],
+                $relationships,
+                [
+                    'frontend' => [
+                        'default' => [
+                            'backend_options' => [
+                                'server' => 'merged.server',
+                                'port' => 'merged.port',
+                                'database' => 10
+                            ],
+                        ],
+                    ],
+                ],
             ],
         ];
     }

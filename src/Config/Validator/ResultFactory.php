@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Config\Validator;
 
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
-use Psr\Container\ContainerInterface;
 
 /**
  * Creates instance of ResultInterface object

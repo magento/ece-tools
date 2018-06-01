@@ -75,7 +75,7 @@ class ConnectionTest extends TestCase
     public function testSelect()
     {
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('debug')
             ->with('Query: some query');
         $this->statementMock->expects($this->once())
             ->method('fetchAll')
@@ -90,7 +90,7 @@ class ConnectionTest extends TestCase
     public function testSelectOne()
     {
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('debug')
             ->with('Query: some query');
         $this->statementMock->expects($this->once())
             ->method('fetch')
@@ -106,7 +106,7 @@ class ConnectionTest extends TestCase
     public function testListTables()
     {
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('debug')
             ->with('Query: SHOW TABLES');
         $this->statementMock->expects($this->once())
             ->method('fetchAll')

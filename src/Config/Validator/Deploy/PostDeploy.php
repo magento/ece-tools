@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Application\HookChecker;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
@@ -20,20 +20,20 @@ class PostDeploy implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var Environment
+     * @var HookChecker
      */
-    private $environment;
+    private $hookChecker;
 
     /**
      * @param Validator\ResultFactory $resultFactory
-     * @param Environment $environment
+     * @param HookChecker $hookChecker
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
-        Environment $environment
+        HookChecker $hookChecker
     ) {
         $this->resultFactory = $resultFactory;
-        $this->environment = $environment;
+        $this->hookChecker = $hookChecker;
     }
 
     /**
@@ -41,17 +41,10 @@ class PostDeploy implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $applicationEnv = $this->environment->getApplication();
-
-        if (!isset($applicationEnv['hooks']['post_deploy'])) {
-            return $this->resultFactory->create(
-                Validator\ResultInterface::ERROR,
-                [
-                    'error' => 'Your application does not have the \'post_deploy\' hook enabled.',
-                ]
-            );
+        if (!$this->hookChecker->isPostDeployHookEnabled()) {
+            return $this->resultFactory->error('Your application does not have the \'post_deploy\' hook enabled.');
         }
 
-        return $this->resultFactory->create(Validator\ResultInterface::SUCCESS);
+        return $this->resultFactory->success();
     }
 }

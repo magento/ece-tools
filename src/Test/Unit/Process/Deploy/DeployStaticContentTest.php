@@ -5,13 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Util\RemoteDiskIdentifier;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
@@ -29,9 +27,9 @@ class DeployStaticContentTest extends TestCase
     private $process;
 
     /**
-     * @var Environment|Mock
+     * @var FlagManager|Mock
      */
-    private $environmentMock;
+    private $flagManagerMock;
 
     /**
      * @var ShellInterface|Mock
@@ -42,16 +40,6 @@ class DeployStaticContentTest extends TestCase
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
-
-    /**
-     * @var RemoteDiskIdentifier|Mock
-     */
-    private $remoteDiskIdentifierMock;
-
-    /**
-     * @var FlagManager|Mock
-     */
-    private $flagManagerMock;
 
     /**
      * @var ProcessInterface|Mock
@@ -78,25 +66,18 @@ class DeployStaticContentTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->remoteDiskIdentifierMock = $this->createMock(RemoteDiskIdentifier::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
         $this->staticContentCleanerMock = $this->createMock(StaticContentCleaner::class);
-        $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->flagManagerMock->expects($this->once())
-            ->method('delete')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING);
 
         $this->process = new DeployStaticContent(
             $this->processMock,
-            $this->environmentMock,
-            $this->loggerMock,
-            $this->remoteDiskIdentifierMock,
             $this->flagManagerMock,
+            $this->loggerMock,
             $this->stageConfigMock,
             $this->globalConfigMock,
             $this->staticContentCleanerMock
@@ -109,13 +90,10 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
-        $this->remoteDiskIdentifierMock->expects($this->once())
-            ->method('isOnLocalDisk')
-            ->with('pub/static')
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
-        $this->environmentMock->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Generating fresh static content');
@@ -139,17 +117,10 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
-        $this->remoteDiskIdentifierMock->expects($this->once())
-            ->method('isOnLocalDisk')
-            ->with('pub/static')
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
-        $this->flagManagerMock->expects($this->never())
-            ->method('set');
-        $this->flagManagerMock->expects($this->never())
-            ->method('exists');
-        $this->environmentMock->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->withConsecutive(
@@ -175,46 +146,10 @@ class DeployStaticContentTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
-        $this->remoteDiskIdentifierMock->expects($this->once())
-            ->method('isOnLocalDisk')
-            ->with('pub/static')
-            ->willReturn(false);
-        $this->flagManagerMock->expects($this->never())
-            ->method('set');
-        $this->flagManagerMock->expects($this->never())
-            ->method('exists');
-        $this->environmentMock->expects($this->once())
-            ->method('isDeployStaticContent')
-            ->willReturn(false);
-        $this->staticContentCleanerMock->expects($this->never())
-            ->method('clean');
-
-        $this->process->execute();
-    }
-
-    public function testExecuteOnLocal()
-    {
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
-            ->willReturn(false);
-        $this->remoteDiskIdentifierMock->expects($this->once())
-            ->method('isOnLocalDisk')
-            ->with('pub/static')
-            ->willReturn(true);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-            ->willReturn(false);
-        $this->flagManagerMock->expects($this->once())
-            ->method('set')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_PENDING)
-            ->willReturn(false);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Postpone static content deployment until prestart');
-        $this->environmentMock->expects($this->never())
-            ->method('isDeployStaticContent');
+            ->willReturn(true);
         $this->staticContentCleanerMock->expects($this->never())
             ->method('clean');
 
@@ -232,14 +167,8 @@ class DeployStaticContentTest extends TestCase
             ->with('Skipping static content deploy. SCD on demand is enabled.');
         $this->loggerMock->expects($this->never())
             ->method('info');
-        $this->remoteDiskIdentifierMock->expects($this->never())
-            ->method('isOnLocalDisk');
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
-        $this->flagManagerMock->expects($this->never())
-            ->method('set');
-        $this->environmentMock->expects($this->never())
-            ->method('isDeployStaticContent');
         $this->staticContentCleanerMock->expects($this->once())
             ->method('clean');
 
