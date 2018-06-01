@@ -86,11 +86,10 @@
     },
     "Allow ece-tools dumps to complete by fixing app:config:import": {
       "2.2.2": "MAGECLOUD-1567__fix_import_during_ece_tools_dump__2.2.2.patch"
-    }
-  },
-  "magento/product-enterprise-edition": {
-    "Fix locker process": {
-      "2.2.0 - 2.2.5": "2.2/fix-support-db-dump.patch"
+    },
+    "Unify robots.txt and sitemap.xml generation": {
+      "2.1.0 - 2.1.10": "MAGECLOUD-1998__unify_sitemapxml_and_robotstxt_generation__2.1.4.patch",
+      "~2.1.11": "MAGECLOUD-1998__unify_sitemapxml_and_robotstxt_generation__2.1.11.patch"
     }
   }
 }
