@@ -5,12 +5,12 @@
       "2.2.0": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
     },
     "Fix asset locker race condition when using Redis": {
-      "~2.1.4": "MDVA-2470__fix_asset_locking_race_condition__2.1.4.patch",
-      "~2.2.0": "MDVA-2470__fix_asset_locking_race_condition__2.2.0.patch"
+      "2.1.4 - 2.1.14": "MDVA-2470__fix_asset_locking_race_condition__2.1.4.patch",
+      "2.2.0 - 2.2.5": "MDVA-2470__fix_asset_locking_race_condition__2.2.0.patch"
     },
     "Prevent redundant permissions check during build": {
-      "~2.1.4": "MAGECLOUD-414__remove_unnecessary_permission_checks__2.1.4.patch",
-      "~2.2.0": "MAGECLOUD-414__remove_unnecessary_permission_checks__2.2.0.patch"
+      "2.1.4 - 2.1.14": "MAGECLOUD-414__remove_unnecessary_permission_checks__2.1.4.patch",
+      "2.2.0 - 2.2.5": "MAGECLOUD-414__remove_unnecessary_permission_checks__2.2.0.patch"
     },
     "Fix Redis issues with session manager locking": {
       "2.1.10 - 2.1.13" : "MAGECLOUD-1582__fix_session_manager_locking__2.1.10.patch",
@@ -26,7 +26,7 @@
       "~2.1.0": "MAGETWO-45357__avoid_nonexistent_setup_area__2.1.4.patch"
     },
     "Skip checking var/generation for write permissions when it doesn't affect the build process": {
-      "~2.1.4": "MAGETWO-63032__skip_unnecessary_write_permission_check__2.1.4.patch"
+      "2.1.4 - 2.1.14": "MAGETWO-63032__skip_unnecessary_write_permission_check__2.1.4.patch"
     },
     "Fix loading multiple plugins in the setup scope": {
       "~2.1.0": "MAGETWO-56675__dont_skip_setup_scoped_plugins__2.1.4.patch"
@@ -96,10 +96,10 @@
       "2.2.0 - 2.2.1": "MAGETWO-82752__reload_js_translation_data__2.2.0.patch"
     },
     "Unlock locale editing when SCD on demand is enabled": {
-      "~2.2.0": "MAGECLOUD-2159__unlock_locale_editing_when_scd_on_demand__2.2.0.patch"
+      "2.2.0 - 2.2.5": "MAGECLOUD-2159__unlock_locale_editing_when_scd_on_demand__2.2.0.patch"
     },
     "Allow DB dumps done with the support module to complete": {
-      "~2.2.0": "MAGECLOUD-2033__prevent_deadlock_during_db_dump__2.2.0.patch"
+      "2.2.0 - 2.2.5": "MAGECLOUD-2033__prevent_deadlock_during_db_dump__2.2.0.patch"
     }
   }
 }
