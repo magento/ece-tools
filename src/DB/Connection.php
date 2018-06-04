@@ -198,10 +198,10 @@ class Connection implements ConnectionInterface
      */
     private function run(string $query, array $bindings, \Closure $closure)
     {
-        $this->logger->info('Query: ' . $query);
+        $this->logger->debug('Query: ' . $query);
 
         if ($bindings) {
-            $this->logger->info('Query bindings: ' . var_export($bindings, true));
+            $this->logger->debug('Query bindings: ' . var_export($bindings, true));
         }
 
         return $closure($query, $bindings);

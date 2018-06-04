@@ -81,14 +81,18 @@ class HandlerFactoryTest extends TestCase
             ->method('get')
             ->with($handler)
             ->willReturn($this->repositoryMock);
-        $this->repositoryMock->expects($this->once())
+        $this->repositoryMock
             ->method('get')
-            ->with('min_level', '')
-            ->willReturn('');
-        $this->levelResolverMock->expects($this->once())
+            ->willReturnMap([
+                ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
+            ]);
+        $this->levelResolverMock
             ->method('resolve')
-            ->with('')
-            ->willReturn(Logger::NOTICE);
+            ->willReturnMap([
+                [LogConfig::LEVEL_NOTICE, Logger::NOTICE],
+                [LogConfig::LEVEL_INFO, Logger::INFO]
+            ]);
 
         $this->handlerFactory->create($handler);
     }
@@ -101,10 +105,12 @@ class HandlerFactoryTest extends TestCase
             ->method('get')
             ->with($handler)
             ->willReturn($this->repositoryMock);
-        $this->repositoryMock->expects($this->once())
+        $this->repositoryMock
             ->method('get')
-            ->with('min_level', '')
-            ->willReturn('');
+            ->willReturnMap([
+                ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
+            ]);
         $this->gelfHandlerFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($handlerMock);
@@ -121,7 +127,6 @@ class HandlerFactoryTest extends TestCase
      */
     public function testCreate(
         string $handler,
-        int $repositoryMockGetExpects,
         array $repositoryMockReturnMap,
         string $expectedClass
     ) {
@@ -129,8 +134,7 @@ class HandlerFactoryTest extends TestCase
             ->method('get')
             ->with($handler)
             ->willReturn($this->repositoryMock);
-        $this->repositoryMock->expects($this->exactly($repositoryMockGetExpects))
-            ->method('get')
+        $this->repositoryMock->method('get')
             ->willReturnMap($repositoryMockReturnMap);
 
         $handlerInstance = $this->handlerFactory->create($handler);
@@ -147,66 +151,66 @@ class HandlerFactoryTest extends TestCase
         return [
             [
                 'handler' => HandlerFactory::HANDLER_STREAM,
-                'repositoryMockGetExpects' => 2,
                 'repositoryMockReturnMap' => [
                     ['stream', null, 'php://stdout'],
-                    ['min_level', '', ''],
+                    ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                    ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
                 'expectedClass' => StreamHandler::class,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_FILE,
-                'repositoryMockGetExpects' => 2,
                 'repositoryMockReturnMap' => [
                     ['stream', null, 'var/log/cloud.log'],
-                    ['min_level', '', ''],
+                    ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                    ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
                 'expectedClass' => StreamHandler::class,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_SLACK,
-                'repositoryMockGetExpects' => 4,
                 'repositoryMockReturnMap' => [
                     ['token', null, 'someToken'],
                     ['channel', 'general', 'someChannel'],
                     ['username', 'Slack Log Notifier', 'someUser'],
-                    ['min_level', '', ''],
+                    ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                    ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
                 'expectedClass' => SlackHandler::class,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_EMAIL,
-                'repositoryMockGetExpects' => 4,
                 'repositoryMockReturnMap' => [
                     ['to', null, 'user@example.com'],
                     ['from', null, 'user2@example.com'],
                     ['subject', 'Log form Magento Cloud', 'someSubject'],
-                    ['min_level', '', ''],
+                    ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                    ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
                 'expectedClass' => NativeMailerHandler::class,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_SYSLOG,
-                'repositoryMockGetExpects' => 4,
                 'repositoryMockReturnMap' => [
                     ['ident', null, 'user@example.com'],
                     ['facility', LOG_USER, LOG_USER],
                     ['bubble', true, false],
                     ['logopts', LOG_PID, LOG_PERROR],
-                    ['min_level', '', ''],
+                    ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                    ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
                 'expectedClass' => SyslogHandler::class,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_SYSLOG_UDP,
-                'repositoryMockGetExpects' => 5,
                 'repositoryMockReturnMap' => [
                     ['host', null, '127.0.0.1'],
                     ['port', null, 12201],
                     ['facility', LOG_USER, LOG_USER],
                     ['bubble', true, false],
                     ['ident', 'php', 'php'],
-                    ['min_level', '', ''],
+                    ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
+                    ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
                 'expectedClass' => SyslogUdpHandler::class,
             ]

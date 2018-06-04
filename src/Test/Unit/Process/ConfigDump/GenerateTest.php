@@ -7,10 +7,11 @@ namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ConfigDump\Generate;
 use Magento\MagentoCloud\Util\ArrayManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -26,34 +27,34 @@ class GenerateTest extends TestCase
     private $process;
 
     /**
-     * @var ConnectionInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ConnectionInterface|MockObject
      */
     private $connectionMock;
 
     /**
-     * @var FileList|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $fileListMock;
-
-    /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var ArrayManager|\PHPUnit_Framework_MockObject_MockObject
+     * @var ArrayManager|MockObject
      */
     private $arrayManagerMock;
 
     /**
-     * @var MagentoVersion|\PHPUnit_Framework_MockObject_MockObject
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
+     * @var SharedConfig|MockObject
+     */
+    private $sharedConfigMock;
+
+    /**
      * @var string
      */
-    private $timeStamp = "2018-01-19T18:33:42+00:00";
+    private $timeStamp = '2018-01-19T18:33:42+00:00';
 
     /**
      * @inheritdoc
@@ -61,18 +62,21 @@ class GenerateTest extends TestCase
     protected function setUp()
     {
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createMock(File::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->sharedConfigMock = $this->createMock(SharedConfig::class);
+
         $dateMock = $this->getFunctionMock('Magento\MagentoCloud\Process\ConfigDump', 'date');
-        $dateMock->expects($this->any())->willReturn($this->timeStamp);
+        $dateMock->expects($this->any())
+            ->willReturn($this->timeStamp);
+
         $this->process = new Generate(
             $this->connectionMock,
-            $this->fileListMock,
             $this->fileMock,
             $this->arrayManagerMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->sharedConfigMock
         );
     }
 
@@ -89,7 +93,7 @@ class GenerateTest extends TestCase
                 ],
             ],
         ];
-        $this->fileListMock->method('getConfig')
+        $this->sharedConfigMock->method('resolve')
             ->willReturn(__DIR__ . '/_files/app/etc/config.php');
         $this->arrayManagerMock->method('nest')
             ->willReturn(
@@ -111,9 +115,6 @@ class GenerateTest extends TestCase
                 __DIR__ . '/_files/app/etc/config.php',
                 '<?php' . "\n" . 'return ' . var_export($expectedConfig, true) . ";\n"
             );
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->willReturn(true);
 
         $this->process->execute();
     }
@@ -131,7 +132,7 @@ class GenerateTest extends TestCase
                 ],
             ],
         ];
-        $this->fileListMock->method('getConfigLocal')
+        $this->sharedConfigMock->method('resolve')
             ->willReturn(__DIR__ . '/_files/app/etc/config.php');
         $this->arrayManagerMock->method('nest')
             ->willReturn(
@@ -153,9 +154,6 @@ class GenerateTest extends TestCase
                 __DIR__ . '/_files/app/etc/config.php',
                 '<?php' . "\n" . 'return ' . var_export($expectedConfig, true) . ";\n"
             );
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->willReturn(false);
 
         $this->process->execute();
     }

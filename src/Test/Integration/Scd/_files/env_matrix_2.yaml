@@ -1,0 +1,8 @@
+stage:
+  global:
+    SCD_COMPRESSION_LEVEL: 0
+    SCD_MATRIX:
+      "Magento/backend":
+        language:
+          - en_US
+          - fr_FR

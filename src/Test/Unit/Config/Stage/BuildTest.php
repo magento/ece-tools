@@ -5,7 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Build;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
@@ -33,16 +35,35 @@ class BuildTest extends TestCase
     private $buildReaderMock;
 
     /**
+     * @var Schema|Mock
+     */
+    private $schemaMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->buildReaderMock = $this->createMock(BuildReader::class);
+        $this->schemaMock = $this->createMock(Schema::class);
+        $this->schemaMock->expects($this->any())
+            ->method('getDefaults')
+            ->with(StageConfigInterface::STAGE_BUILD)
+            ->willReturn([
+                BuildInterface::VAR_SCD_STRATEGY => '',
+                BuildInterface::VAR_SKIP_SCD => false,
+                BuildInterface::VAR_SCD_COMPRESSION_LEVEL => 6,
+                BuildInterface::VAR_SCD_THREADS => 1,
+                BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
+                BuildInterface::VAR_VERBOSE_COMMANDS => '',
+                BuildInterface::VAR_SCD_MATRIX => [],
+            ]);
 
         $this->config = new Build(
             $this->environmentReaderMock,
-            $this->buildReaderMock
+            $this->buildReaderMock,
+            $this->schemaMock
         );
     }
 

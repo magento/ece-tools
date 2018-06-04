@@ -66,7 +66,7 @@ class ClearInitDirectory implements ProcessInterface
         if ($this->file->isExists($initPath)) {
             $this->file->clearDirectory($initPath);
         }
-
+        // app/etc/env.php appears after running bin/magento on Build phase, so we need to remove it
         if ($this->file->isExists($envPhpPath)) {
             $this->file->deleteFile($envPhpPath);
         }

@@ -92,15 +92,13 @@ class File
      * Parse a configuration file.
      *
      * @param string $path
-     * @param bool $processSections
-     * @param int $scannerMode
      * @return array|bool
      * @throws FileSystemException
      */
-    public function parseIni($path, $processSections = false, $scannerMode = INI_SCANNER_NORMAL)
+    public function parseIni($path)
     {
         clearstatcache();
-        $result = @parse_ini_file($path, $processSections, $scannerMode);
+        $result = @parse_ini_file($path);
         if (false === $result) {
             $this->fileSystemException('Cannot read contents from file "%1" %2', [$path, $this->getWarningMessage()]);
         }
@@ -343,17 +341,14 @@ class File
      * Sets access and modification time of file.
      *
      * @param string $path
-     * @param int|null $modificationTime
+     * @param int|null $time
      * @return bool
      * @throws FileSystemException
      */
-    public function touch($path, $modificationTime = null)
+    public function touch($path, $time = null): bool
     {
-        if (!$modificationTime) {
-            $result = @touch($path);
-        } else {
-            $result = @touch($path, $modificationTime);
-        }
+        $result = @touch($path, $time);
+
         if (!$result) {
             $this->fileSystemException(
                 'The file or directory "%1" cannot be touched %2',

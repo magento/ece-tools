@@ -1,6 +1,7 @@
 {
   "name": "magento/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
+  "type": "magento2-component",
   "version": "2002.0.11",
   "license": "proprietary",
   "require": {
@@ -42,20 +43,37 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Magento\\MagentoCloud\\Test\\": "tests/static/"
+      "Magento\\MagentoCloud\\Test\\": "tests/static/",
+      "Magento\\MagentoCloud\\Test\\Integration\\": "tests/integration/"
     }
   },
   "scripts": {
     "test": [
       "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
       "phpmd src xml tests/static/phpmd-ruleset.xml",
-      "phpunit --configuration tests/unit"
+      "phpunit --configuration tests/unit",
+      "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml"
     ],
-    "test-coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
     "test-coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage"
   },
   "config": {
     "sort-packages": true
   },
-  "prefer-stable": true
+  "prefer-stable": true,
+  "extra": {
+    "map": [
+      [
+        "dist/.magento.env.yaml",
+        ".magento.env.yaml.dist"
+      ],
+      [
+        "dist/config.env",
+        "docker/config.env.dist"
+      ],
+      [
+        "dist/global.env",
+        "docker/global.env.dist"
+      ]
+    ]
+  }
 }

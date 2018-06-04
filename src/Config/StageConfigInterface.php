@@ -34,12 +34,18 @@ interface StageConfigInterface
     const VAR_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
     const VAR_SCD_ON_DEMAND = 'SCD_ON_DEMAND';
     const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
+    const VAR_SCD_MATRIX = 'SCD_MATRIX';
 
     /**
      * Settings for deployment from git.
      */
     const VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT = 'DEPLOYED_MAGENTO_VERSION_FROM_GIT';
     const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
+
+    /**
+     * Option for enabling merging given configuration with default configuration
+     */
+    const OPTION_MERGE = '_merge';
 
     /**
      * Retrieves environment configuration per stage.

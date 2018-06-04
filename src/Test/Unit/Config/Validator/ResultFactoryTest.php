@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -32,9 +32,7 @@ class ResultFactoryTest extends TestCase
      */
     public function setUp()
     {
-        $this->containerMock = $this->getMockBuilder(ContainerInterface::class)
-            ->setMethods(['create'])
-            ->getMockForAbstractClass();
+        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
 
         $this->resultFactory = new ResultFactory(
             $this->containerMock

@@ -6,42 +6,19 @@
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
 class EnvironmentTest extends TestCase
 {
+    use \phpmock\phpunit\PHPMock;
     /**
      * @var Environment
      */
     private $environment;
-
-    /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var File|Mock
-     */
-    private $fileMock;
-
-    /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
-
-    /**
-     * @var FlagManager|Mock
-     */
-    private $flagManagerMock;
 
     /**
      * @var array
@@ -54,18 +31,8 @@ class EnvironmentTest extends TestCase
     protected function setUp()
     {
         $this->environmentData = $_ENV;
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagManagerMock = $this->createMock(FlagManager::class);
 
-        $this->environment = new Environment(
-            $this->loggerMock,
-            $this->fileMock,
-            $this->directoryListMock,
-            $this->flagManagerMock
-        );
+        $this->environment = new Environment();
     }
 
     /**
@@ -78,14 +45,18 @@ class EnvironmentTest extends TestCase
 
     /**
      * @param array $env
+     * @param mixed $getEnv
      * @param string $key
      * @param mixed $default
      * @param mixed $expected
      * @dataProvider getDataProvider
      */
-    public function testGet(array $env, string $key, $default, $expected)
+    public function testGet(array $env, $getEnv, string $key, $default, $expected)
     {
         $_ENV = $env;
+        $getenvMock = $this->getFunctionMock('Magento\MagentoCloud\Config', 'getenv');
+        $getenvMock->expects($this->any())
+            ->willReturn($getEnv);
 
         $this->assertSame($expected, $this->environment->get($key, $default));
     }
@@ -98,50 +69,39 @@ class EnvironmentTest extends TestCase
         return [
             'string value' => [
                 ['some_key' => base64_encode(json_encode('some_value'))],
+                false,
                 'some_key',
                 null,
                 'some_value',
             ],
             'empty value' => [
                 [],
+                false,
                 'some_key',
                 null,
                 null,
             ],
             'empty value with default' => [
                 [],
+                false,
                 'some_key',
                 'some_new_value',
                 'some_new_value',
             ],
-        ];
-    }
-
-    /**
-     * @param bool $isExists
-     * @dataProvider isDeployStaticContentToBeEnabledDataProvider
-     */
-    public function testIsDeployStaticContentToBeEnabled(bool $isExists)
-    {
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
-            ->willReturn($isExists);
-
-        $this->assertSame(
-            !$isExists,
-            $this->environment->isDeployStaticContent()
-        );
-    }
-
-    /**
-     * @return array
-     */
-    public function isDeployStaticContentToBeEnabledDataProvider(): array
-    {
-        return [
-            [true],
-            [false],
+            'empty value with getenv with default' => [
+                [],
+                base64_encode(json_encode('getenv_value')),
+                'some_key',
+                'some_new_value',
+                'getenv_value',
+            ],
+            'string value with getenv with default' => [
+                ['some_key' => base64_encode(json_encode('some_value'))],
+                base64_encode(json_encode('getenv_value')),
+                'some_key',
+                'some_new_value',
+                'some_value',
+            ],
         ];
     }
 

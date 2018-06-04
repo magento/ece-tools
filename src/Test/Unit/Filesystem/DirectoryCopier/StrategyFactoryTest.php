@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 
+use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyInterface;
@@ -12,7 +13,6 @@ use Magento\MagentoCloud\Filesystem\DirectoryCopier\SubSymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SymlinkStrategy;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Psr\Container\ContainerInterface;
 
 /**
  * @inheritdoc

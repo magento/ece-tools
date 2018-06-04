@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Command\Prestart;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
@@ -47,7 +46,6 @@ class AcceptanceTest extends AbstractTest
 
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
-        $this->executeAndAssert(Prestart::NAME, $application);
         $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
@@ -78,6 +76,9 @@ class AcceptanceTest extends AbstractTest
                         'max_messages' => 10000,
                         'consumers' => [],
                     ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
                 ],
             ],
             'test cron_consumers_runner with array' => [
@@ -97,6 +98,9 @@ class AcceptanceTest extends AbstractTest
                         'max_messages' => 5000,
                         'consumers' => ['test'],
                     ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
                 ],
             ],
             'test cron_consumers_runner with string' => [
@@ -111,6 +115,9 @@ class AcceptanceTest extends AbstractTest
                         'cron_run' => true,
                         'max_messages' => 100,
                         'consumers' => ['test2'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
                     ],
                 ],
             ],
@@ -127,6 +134,9 @@ class AcceptanceTest extends AbstractTest
                         'cron_run' => false,
                         'max_messages' => 10000,
                         'consumers' => [],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
                     ],
                 ],
             ],
@@ -153,7 +163,6 @@ class AcceptanceTest extends AbstractTest
 
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
-        $this->executeAndAssert(Prestart::NAME, $application);
         $this->executeAndAssert(PostDeploy::NAME, $application);
 
         $this->assertContentPresence($environment);
