@@ -1,7 +1,10 @@
-Each Magento source file included in this distribution is licensed under OSL 3.0 or the Magento Enterprise Edition (MEE) license
+Copyright © 2013-present Magento
 
-http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
-Please see LICENSE.txt for the full text of the OSL 3.0 license or contact license@magentocommerce.com for a copy.
+Commercial License Use Only
++++++++++++++++++++++++++++
 
-Subject to Licensee's payment of fees and compliance with the terms and conditions of the MEE License, the MEE License supersedes the OSL 3.0 license for each source file.
-Please see <insert file name of the MEE license> for the full text of the MEE License or visit http://magento.com/legal/terms/enterprise.
+Subject to your payment of fees and compliance with all associated terms and conditions, the materials included in this distribution are licensed to you under Magento's commercial agreement terms, available at:
+
+https://magento.com/legal/terms
+
+By using or accessing these materials, you agree to such terms and conditions which supersede all prior licenses and agreements.
