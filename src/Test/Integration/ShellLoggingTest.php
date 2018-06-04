@@ -30,7 +30,12 @@ class ShellLoggingTest extends AbstractTest
     {
         parent::setUp();
 
-        $application = $this->bootstrap->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
+        $application = $this->bootstrap->createApplication([
+            'variables' => [
+                'ADMIN_EMAIL' => 'admin@example.com',
+                'MIN_LOGGING_LEVEL' => 'debug',
+            ],
+        ]);
         $this->shell = $application->getContainer()
             ->get(ShellInterface::class);
         $this->fileList = $application->getContainer()
@@ -41,8 +46,8 @@ class ShellLoggingTest extends AbstractTest
     {
         $this->shell->execute('echo Magento Cloud');
         $logContent = $this->getLogContent();
-        $this->assertContains('echo Magento Cloud', $logContent);
-        $this->assertContains('  Magento Cloud', $logContent);
+        $this->assertContains('INFO: echo Magento Cloud', $logContent);
+        $this->assertContains("DEBUG\n  Magento Cloud", $logContent);
     }
 
     public function testShellLoggingWithNonZeroCode()
