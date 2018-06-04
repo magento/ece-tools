@@ -33,7 +33,7 @@
     },
     "Support SCD forking in the credis connector": {
       "~2.1.0": "MAGETWO-69847__support_credis_forking_during_scd__2.1.4.patch",
-      ">=2.2.0" : "MAGETWO-69847__support_credis_forking_during_scd__2.2.0.patch"
+      "2.2.0 - 2.2.5" : "MAGETWO-69847__support_credis_forking_during_scd__2.2.0.patch"
     },
     "Allow multiple languages to be specified for the SCD command": {
       "2.1.4 - 2.1.7": "MAGETWO-63020__fix_scd_with_multiple_languages__2.1.4.patch"
