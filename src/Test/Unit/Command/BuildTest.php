@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -23,17 +24,17 @@ class BuildTest extends TestCase
     private $command;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ProcessInterface|Mock
+     * @var ProcessInterface|MockObject
      */
     private $processMock;
 
     /**
-     * @var PackageManager|Mock
+     * @var PackageManager|MockObject
      */
     private $packageManagerMock;
 

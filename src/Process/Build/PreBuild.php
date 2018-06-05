@@ -92,7 +92,5 @@ class PreBuild implements ProcessInterface
             );
             $this->file->clearDirectory($generatedMetadata);
         }
-
-        $this->logger->info('Starting pre-build.');
     }
 }
