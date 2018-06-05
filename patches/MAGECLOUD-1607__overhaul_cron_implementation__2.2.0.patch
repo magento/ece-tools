@@ -404,7 +404,7 @@ index f772a6c..d760e92 100644
 +            $count += $connection->delete(
 +                $scheduleResource->getMainTable(),
 +                [
-+                    'status = ?' => Schedule::STATUS_PENDING,
++                    'status = ?' => $status,
 +                    'job_code in (?)' => array_keys($jobs),
 +                    'created_at < ?' => $connection->formatDate($currentTime - $time)
 +                ]
