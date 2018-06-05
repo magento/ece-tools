@@ -11,7 +11,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Package\Manager as PackageManager;
 
 /**
  * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
@@ -36,26 +35,18 @@ class Deploy extends Command
     private $flagManager;
 
     /**
-     * @var PackageManager
-     */
-    private $packageManager;
-
-    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
      * @param FlagManager $flagManager
-     * @param PackageManager $packageManager
      */
     public function __construct(
         ProcessInterface $process,
         LoggerInterface $logger,
-        FlagManager $flagManager,
-        PackageManager $packageManager
+        FlagManager $flagManager
     ) {
         $this->process = $process;
         $this->logger = $logger;
         $this->flagManager = $flagManager;
-        $this->packageManager = $packageManager;
 
         parent::__construct();
     }
@@ -80,14 +71,14 @@ class Deploy extends Command
     {
         try {
             $this->flagManager->delete(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
-            $this->logger->notice('Starting deploy. ' . $this->packageManager->getPrettyInfo());
             $this->process->execute();
-            $this->logger->notice('Deployment completed.');
         } catch (\Exception $exception) {
             $this->flagManager->set(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
             $this->logger->critical($exception->getMessage());
 
             throw $exception;
         }
+
+        $this->logger->notice('Deployment completed.');
     }
 }

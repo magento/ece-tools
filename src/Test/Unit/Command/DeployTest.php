@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -40,11 +39,6 @@ class DeployTest extends TestCase
     private $flagManagerMock;
 
     /**
-     * @var PackageManager|MockObject
-     */
-    private $packageManagerMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -52,32 +46,25 @@ class DeployTest extends TestCase
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->packageManagerMock = $this->createMock(PackageManager::class);
 
         $this->command = new Deploy(
             $this->processMock,
             $this->loggerMock,
-            $this->flagManagerMock,
-            $this->packageManagerMock
+            $this->flagManagerMock
         );
     }
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->withConsecutive(['Starting deploy. Some info.'], ['Deployment completed.']);
+            ->with('Deployment completed.');
         $this->processMock->expects($this->once())
             ->method('execute');
         $this->flagManagerMock->expects($this->never())
             ->method('set');
-        $this->packageManagerMock->expects($this->once())
-            ->method('getPrettyInfo')
-            ->willReturn('Some info.');
 
-        $tester = new CommandTester(
-            $this->command
-        );
+        $tester = new CommandTester($this->command);
         $tester->execute([]);
 
         $this->assertSame(0, $tester->getStatusCode());
@@ -99,9 +86,7 @@ class DeployTest extends TestCase
             ->method('set')
             ->with(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
 
-        $tester = new CommandTester(
-            $this->command
-        );
+        $tester = new CommandTester($this->command);
         $tester->execute([]);
     }
 }
