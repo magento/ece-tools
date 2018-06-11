@@ -90,7 +90,7 @@ class MagentoCloudVariables implements ValidatorInterface
                 && !ctype_digit($variables[$intVarName])
             ) {
                 $errors[] = sprintf(
-                    'Variable "%s" has wrong value: "%s". Please use only integer values.',
+                    '  Variable "%s" has wrong value: "%s". Please use only integer values.',
                     $intVarName,
                     $variables[$intVarName]
                 );
@@ -119,7 +119,7 @@ class MagentoCloudVariables implements ValidatorInterface
         foreach ($enableDisableVariables as $varName) {
             if (isset($variables[$varName]) && !in_array($variables[$varName], $possibleValues, true)) {
                 $errors[] = sprintf(
-                    'Variable "%s" has wrong value: "%s". Please use only %s.',
+                    '  Variable "%s" has wrong value: "%s". Please use only %s.',
                     $varName,
                     $variables[$varName],
                     implode(' or ', $possibleValues)

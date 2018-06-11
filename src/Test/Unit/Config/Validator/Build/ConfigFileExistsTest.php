@@ -90,12 +90,12 @@ class ConfigFileExistsTest extends TestCase
             ->with(
                 ResultInterface::ERROR,
                 [
-                    'error' => 'File app/etc/config.php not exists',
-                    'suggestion' => 'Please run the following commands:' . PHP_EOL
-                            . '1. bin/magento module:enable --all' . PHP_EOL
-                            . '2. git add -f app/etc/config.php' . PHP_EOL
-                            . '3. git commit -m \'Adding config.php\'' . PHP_EOL
-                            . '4. git push'
+                    'error' => 'File app/etc/config.php does not exist',
+                    'suggestion' => '  Please run the following commands:' . PHP_EOL
+                            . '  1. bin/magento module:enable --all' . PHP_EOL
+                            . '  2. git add -f app/etc/config.php' . PHP_EOL
+                            . '  3. git commit -m \'Adding config.php\'' . PHP_EOL
+                            . '  4. git push'
                 ]
             )
             ->willReturn($resultMock);
