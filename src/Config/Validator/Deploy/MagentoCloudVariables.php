@@ -51,7 +51,7 @@ class MagentoCloudVariables implements ValidatorInterface
             && !in_array($variables[DeployInterface::VAR_VERBOSE_COMMANDS], $possibleVerboseValues, true)
         ) {
             $errors[] = sprintf(
-                'Variable %s has wrong value "%s", please use one of possible values: %s',
+                '  Variable %s has wrong value "%s", please use one of possible values: %s',
                 DeployInterface::VAR_VERBOSE_COMMANDS,
                 $variables[DeployInterface::VAR_VERBOSE_COMMANDS],
                 implode(', ', $possibleVerboseValues)
