@@ -60,6 +60,7 @@ class AcceptanceTest extends AbstractTest
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function defaultDataProvider(): array
     {
