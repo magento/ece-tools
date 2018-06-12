@@ -86,7 +86,7 @@ class AcceptanceTest extends AbstractTest
                     'variables' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'CRON_CONSUMERS_RUNNER' => [
-                            'cron_run' => "true",
+                            'cron_run' => true,
                             'max_messages' => 5000,
                             'consumers' => ['test'],
                         ],
@@ -103,7 +103,47 @@ class AcceptanceTest extends AbstractTest
                     ],
                 ],
             ],
+            'test cron_consumers_runner with wrong array' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => [
+                            'cron_run' => 'true',
+                            'max_messages' => 5000,
+                            'consumers' => ['test'],
+                        ],
+                    ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 5000,
+                        'consumers' => ['test'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
             'test cron_consumers_runner with string' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
+                    ],
+                ],
+                'expectedConsumersRunnerConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 100,
+                        'consumers' => ['test2'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
+            'test cron_consumers_runner with wrong string' => [
                 'environment' => [
                     'variables' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
@@ -112,7 +152,7 @@ class AcceptanceTest extends AbstractTest
                 ],
                 'expectedConsumersRunnerConfig' => [
                     'cron_consumers_runner' => [
-                        'cron_run' => true,
+                        'cron_run' => false,
                         'max_messages' => 100,
                         'consumers' => ['test2'],
                     ],

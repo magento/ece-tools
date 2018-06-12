@@ -120,6 +120,7 @@ class CronConsumersRunnerTest extends TestCase
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function executeDataProvider(): array
     {
@@ -182,13 +183,36 @@ class CronConsumersRunnerTest extends TestCase
                         'consumers' => ['test'],
                     ],
                 ],
-                'configFromVariable' => ['cron_run' => 'true'],
+                'configFromVariable' => ['cron_run' => true],
                 'expectedResult' => [
                     'someConfig' => 'someValue',
                     'cron_consumers_runner' => [
                         'cron_run' => true,
                         'max_messages' => 10000,
                         'consumers' => [],
+                    ],
+                ],
+            ],
+            [
+                'config' => [
+                    'someConfig' => 'someValue',
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 6000,
+                        'consumers' => ['test'],
+                    ],
+                ],
+                'configFromVariable' => [
+                    'cron_run' => true,
+                    'max_messages' => 200,
+                    'consumers' => ['test2', 'test3'],
+                ],
+                'expectedResult' => [
+                    'someConfig' => 'someValue',
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 200,
+                        'consumers' => ['test2', 'test3'],
                     ],
                 ],
             ],
@@ -209,7 +233,7 @@ class CronConsumersRunnerTest extends TestCase
                 'expectedResult' => [
                     'someConfig' => 'someValue',
                     'cron_consumers_runner' => [
-                        'cron_run' => true,
+                        'cron_run' => false,
                         'max_messages' => 200,
                         'consumers' => ['test2', 'test3'],
                     ],

@@ -103,7 +103,7 @@ class CronConsumersRunner implements ProcessInterface
         );
 
         $config['cron_consumers_runner'] = [
-            'cron_run' => $runnerConfig->get('cron_run') === 'true',
+            'cron_run' => $runnerConfig->get('cron_run') === true,
             'max_messages' => $runnerConfig->get('max_messages', static::DEFAULT_MAX_MESSAGES),
             'consumers' => $runnerConfig->get('consumers', []),
         ];
