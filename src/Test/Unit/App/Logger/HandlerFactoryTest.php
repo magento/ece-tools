@@ -10,6 +10,7 @@ use Magento\MagentoCloud\App\Logger\Gelf\Handler as GelfHandler;
 use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Magento\MagentoCloud\App\Logger\LevelResolver;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\NativeMailerHandler;
@@ -18,8 +19,8 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Logger;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -29,24 +30,29 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class HandlerFactoryTest extends TestCase
 {
     /**
-     * @var LevelResolver|Mock
+     * @var LevelResolver|MockObject
      */
     private $levelResolverMock;
 
     /**
-     * @var LogConfig|Mock
+     * @var LogConfig|MockObject
      */
     private $logConfigMock;
 
     /**
-     * @var Repository|Mock
+     * @var Repository|MockObject
      */
     private $repositoryMock;
 
     /**
-     * @var GelfHandlerFactory|Mock
+     * @var GelfHandlerFactory|MockObject
      */
     private $gelfHandlerFactoryMock;
+
+    /**
+     * @var GlobalSection|MockObject
+     */
+    private $globalConfigMock;
 
     /**
      * @var HandlerFactory
@@ -62,11 +68,13 @@ class HandlerFactoryTest extends TestCase
         $this->logConfigMock = $this->createMock(LogConfig::class);
         $this->repositoryMock = $this->createMock(Repository::class);
         $this->gelfHandlerFactoryMock = $this->createMock(GelfHandlerFactory::class);
+        $this->globalConfigMock = $this->createMock(GlobalSection::class);
 
         $this->handlerFactory = new HandlerFactory(
             $this->levelResolverMock,
             $this->logConfigMock,
-            $this->gelfHandlerFactoryMock
+            $this->gelfHandlerFactoryMock,
+            $this->globalConfigMock
         );
     }
 
@@ -128,7 +136,9 @@ class HandlerFactoryTest extends TestCase
     public function testCreate(
         string $handler,
         array $repositoryMockReturnMap,
-        string $expectedClass
+        $minLevelOverride,
+        string $expectedClass,
+        int $expectedLevel
     ) {
         $this->logConfigMock->expects($this->once())
             ->method('get')
@@ -136,11 +146,23 @@ class HandlerFactoryTest extends TestCase
             ->willReturn($this->repositoryMock);
         $this->repositoryMock->method('get')
             ->willReturnMap($repositoryMockReturnMap);
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_MIN_LOGGING_LEVEL)
+            ->willReturn($minLevelOverride);
+        $this->levelResolverMock
+            ->method('resolve')
+            ->willReturnMap([
+                [LogConfig::LEVEL_NOTICE, Logger::NOTICE],
+                [LogConfig::LEVEL_INFO, Logger::INFO],
+                [LogConfig::LEVEL_WARNING, Logger::WARNING],
+            ]);
 
         $handlerInstance = $this->handlerFactory->create($handler);
 
         $this->assertInstanceOf(HandlerInterface::class, $handlerInstance);
         $this->assertInstanceOf($expectedClass, $handlerInstance);
+        $this->assertSame($expectedLevel, $handlerInstance->getLevel());
     }
 
     /**
@@ -156,7 +178,19 @@ class HandlerFactoryTest extends TestCase
                     ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
                     ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
+                'minLevelOverride' => null,
                 'expectedClass' => StreamHandler::class,
+                'expectedLevel' => Logger::INFO,
+            ],
+            [
+                'handler' => HandlerFactory::HANDLER_STREAM,
+                'repositoryMockReturnMap' => [
+                    ['stream', null, 'php://stdout'],
+                    ['min_level', LogConfig::LEVEL_WARNING, LogConfig::LEVEL_WARNING],
+                ],
+                'minLevelOverride' => LogConfig::LEVEL_WARNING,
+                'expectedClass' => StreamHandler::class,
+                'expectedLevel' => Logger::WARNING,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_FILE,
@@ -165,7 +199,9 @@ class HandlerFactoryTest extends TestCase
                     ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
                     ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
+                'minLevelOverride' => null,
                 'expectedClass' => StreamHandler::class,
+                'expectedLevel' => Logger::INFO,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_SLACK,
@@ -176,7 +212,21 @@ class HandlerFactoryTest extends TestCase
                     ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
                     ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
+                'minLevelOverride' => null,
                 'expectedClass' => SlackHandler::class,
+                'expectedLevel' => Logger::NOTICE,
+            ],
+            [
+                'handler' => HandlerFactory::HANDLER_SLACK,
+                'repositoryMockReturnMap' => [
+                    ['token', null, 'someToken'],
+                    ['channel', 'general', 'someChannel'],
+                    ['username', 'Slack Log Notifier', 'someUser'],
+                    ['min_level', LogConfig::LEVEL_WARNING, LogConfig::LEVEL_WARNING],
+                ],
+                'minLevelOverride' => LogConfig::LEVEL_WARNING,
+                'expectedClass' => SlackHandler::class,
+                'expectedLevel' => Logger::WARNING,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_EMAIL,
@@ -187,7 +237,9 @@ class HandlerFactoryTest extends TestCase
                     ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
                     ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
+                'minLevelOverride' => null,
                 'expectedClass' => NativeMailerHandler::class,
+                'expectedLevel' => Logger::NOTICE,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_SYSLOG,
@@ -199,7 +251,9 @@ class HandlerFactoryTest extends TestCase
                     ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
                     ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
+                'minLevelOverride' => null,
                 'expectedClass' => SyslogHandler::class,
+                'expectedLevel' => Logger::NOTICE,
             ],
             [
                 'handler' => HandlerFactory::HANDLER_SYSLOG_UDP,
@@ -212,8 +266,10 @@ class HandlerFactoryTest extends TestCase
                     ['min_level', LogConfig::LEVEL_NOTICE, LogConfig::LEVEL_NOTICE],
                     ['min_level', LogConfig::LEVEL_INFO, LogConfig::LEVEL_INFO],
                 ],
+                'minLevelOverride' => null,
                 'expectedClass' => SyslogUdpHandler::class,
-            ]
+                'expectedLevel' => Logger::NOTICE,
+            ],
         ];
     }
 }
