@@ -94,7 +94,7 @@ class SchemaValidatorTest extends TestCase
                 StageConfigInterface::VAR_VERBOSE_COMMANDS,
                 1,
                 'The VERBOSE_COMMANDS variable contains an invalid value of type integer. ' .
-                'Use one of the next types: string.',
+                'Use the following types: string.',
             ],
             [
                 StageConfigInterface::VAR_VERBOSE_COMMANDS,
@@ -113,13 +113,13 @@ class SchemaValidatorTest extends TestCase
                 StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
                 '1',
                 'The SCD_COMPRESSION_LEVEL variable contains an invalid value of type string. '.
-                'Use one of the next types: integer.',
+                'Use the following types: integer.',
             ],
             [
                 StageConfigInterface::VAR_SCD_STRATEGY,
                 12,
                 'The SCD_STRATEGY variable contains an invalid value of type integer. ' .
-                'Use one of the next types: string.',
+                'Use the following types: string.',
             ],
             [
                 StageConfigInterface::VAR_SCD_STRATEGY,
@@ -136,29 +136,29 @@ class SchemaValidatorTest extends TestCase
             [
                 StageConfigInterface::VAR_SCD_THREADS,
                 'test',
-                'The SCD_THREADS variable contains an invalid value of type string. Use one of the next types: integer.'
+                'The SCD_THREADS variable contains an invalid value of type string. Use the following types: integer.'
             ],
             [
                 StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
                 123,
                 'The SCD_EXCLUDE_THEMES variable contains an invalid value of type integer. ' .
-                'Use one of the next types: string.'
+                'Use the following types: string.'
             ],
             [
                 StageConfigInterface::VAR_SKIP_SCD,
                 0,
-                'The SKIP_SCD variable contains an invalid value of type integer. Use one of the next types: boolean.'
+                'The SKIP_SCD variable contains an invalid value of type integer. Use the following types: boolean.'
             ],
             [
                 StageConfigInterface::VAR_SKIP_SCD,
                 'enable',
-                'The SKIP_SCD variable contains an invalid value of type string. Use one of the next types: boolean.'
+                'The SKIP_SCD variable contains an invalid value of type string. Use the following types: boolean.'
             ],
             [
                 StageConfigInterface::VAR_SKIP_HTML_MINIFICATION,
                 0,
                 'The SKIP_HTML_MINIFICATION variable contains an invalid value of type integer. ' .
-                'Use one of the next types: boolean.',
+                'Use the following types: boolean.',
                 StageConfigInterface::STAGE_GLOBAL,
             ],
             [
@@ -172,26 +172,26 @@ class SchemaValidatorTest extends TestCase
                 StageConfigInterface::VAR_SCD_ON_DEMAND,
                 0,
                 'The SCD_ON_DEMAND variable contains an invalid value of type integer. ' .
-                'Use one of the next types: boolean.',
+                'Use the following types: boolean.',
                 StageConfigInterface::STAGE_GLOBAL
             ],
             [
                 StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS,
                 'someOption',
                 'The DEPLOY_FROM_GIT_OPTIONS variable contains an invalid value of type string. ' .
-                'Use one of the next types: array.'
+                'Use the following types: array.'
             ],
             [
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
                 0,
                 'The REDIS_USE_SLAVE_CONNECTION variable contains an invalid value of type integer. ' .
-                'Use one of the next types: boolean.'
+                'Use the following types: boolean.'
             ],
             [
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
                 0,
                 'The MYSQL_USE_SLAVE_CONNECTION variable contains an invalid value of type integer. ' .
-                'Use one of the next types: boolean.'
+                'Use the following types: boolean.'
             ],
             [
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
@@ -204,49 +204,49 @@ class SchemaValidatorTest extends TestCase
                 DeployInterface::VAR_UPDATE_URLS,
                 0,
                 'The UPDATE_URLS variable contains an invalid value of type integer. ' .
-                'Use one of the next types: boolean.'
+                'Use the following types: boolean.'
             ],
             [
                 DeployInterface::VAR_STATIC_CONTENT_SYMLINK,
                 0,
                 'The STATIC_CONTENT_SYMLINK variable contains an invalid value of type integer. ' .
-                'Use one of the next types: boolean.'
+                'Use the following types: boolean.'
             ],
             [
                 DeployInterface::VAR_CLEAN_STATIC_FILES,
                 0,
                 'The CLEAN_STATIC_FILES variable contains an invalid value of type integer. ' .
-                'Use one of the next types: boolean.'
+                'Use the following types: boolean.'
             ],
             [
                 DeployInterface::VAR_SEARCH_CONFIGURATION,
                 'someOption',
                 'The SEARCH_CONFIGURATION variable contains an invalid value of type string. ' .
-                'Use one of the next types: array.'
+                'Use the following types: array.'
             ],
             [
                 DeployInterface::VAR_CACHE_CONFIGURATION,
                 'someOption',
                 'The CACHE_CONFIGURATION variable contains an invalid value of type string. ' .
-                'Use one of the next types: array.'
+                'Use the following types: array.'
             ],
             [
                 DeployInterface::VAR_DATABASE_CONFIGURATION,
                 'someOption',
                 'The DATABASE_CONFIGURATION variable contains an invalid value of type string. ' .
-                'Use one of the next types: array.'
+                'Use the following types: array.'
             ],
             [
                 DeployInterface::VAR_SESSION_CONFIGURATION,
                 'someOption',
                 'The SESSION_CONFIGURATION variable contains an invalid value of type string. ' .
-                'Use one of the next types: array.'
+                'Use the following types: array.'
             ],
             [
                 DeployInterface::VAR_CRON_CONSUMERS_RUNNER,
                 'someOption',
                 'The CRON_CONSUMERS_RUNNER variable contains an invalid value of type string. ' .
-                'Use one of the next types: array.'
+                'Use the following types: array.'
             ],
         ];
     }
