@@ -77,7 +77,7 @@ class HandlerFactory
         $configuration = $this->logConfig->get($handler);
         $levelOverride = $this->globalConfig->get(GlobalSection::VAR_MIN_LOGGING_LEVEL);
         $minLevel = $this->levelResolver->resolve(
-            $configuration->get('min_level', $levelOverride ?? LogConfig::LEVEL_NOTICE)
+            $configuration->get('min_level', !empty($levelOverride) ? $levelOverride : LogConfig::LEVEL_NOTICE)
         );
 
         switch ($handler) {
@@ -86,7 +86,7 @@ class HandlerFactory
                 $handlerInstance = new StreamHandler(
                     $configuration->get('stream'),
                     $this->levelResolver->resolve(
-                        $configuration->get('min_level', $levelOverride ?? LogConfig::LEVEL_INFO)
+                        $configuration->get('min_level', !empty($levelOverride) ? $levelOverride : LogConfig::LEVEL_INFO)
                     )
                 );
                 break;

@@ -194,7 +194,7 @@ class Schema
             StageConfigInterface::VAR_MIN_LOGGING_LEVEL => [
                 self::SCHEMA_TYPE => ['string'],
                 self::SCHEMA_VALUE_VALIDATION => [
-                    null,
+                    '',
                     Log::LEVEL_DEBUG,
                     Log::LEVEL_INFO,
                     Log::LEVEL_NOTICE,
@@ -208,7 +208,7 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL,
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => null,
+                    StageConfigInterface::STAGE_GLOBAL => '',
                 ],
             ],
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => [
