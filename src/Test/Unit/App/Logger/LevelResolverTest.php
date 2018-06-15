@@ -72,29 +72,4 @@ class LevelResolverTest extends TestCase
             ['level' => 'invalid', Logger::NOTICE],
         ];
     }
-
-    /**
-     * @param string $level
-     * @param int $expectedResult
-     * @dataProvider resolveDataProvider
-     * @dataProvider resolveOverrideDataProvider
-     */
-    public function testResolveOverride(string $level, int $expectedResult)
-    {
-        $this->environmentMock
-            ->method('getMinLoggingLevel')
-            ->willReturn($level);
-
-        $this->assertSame($expectedResult, $this->levelResolver->resolve('some level'));
-    }
-
-    /**
-     * @return array
-     */
-    public function resolveOverrideDataProvider(): array
-    {
-        return [
-            ['level' => '', Logger::NOTICE],
-        ];
-    }
 }

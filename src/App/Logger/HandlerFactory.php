@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\App\Logger;
 
 use Magento\MagentoCloud\App\Logger\Gelf\HandlerFactory as GelfHandlerFactory;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Log as LogConfig;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\NativeMailerHandler;
@@ -44,36 +45,48 @@ class HandlerFactory
     private $gelfHandlerFactory;
 
     /**
+     * @var GlobalSection
+     */
+    private $globalConfig;
+
+    /**
      * @param LevelResolver $levelResolver
      * @param LogConfig $logConfig
      * @param GelfHandlerFactory $gelfHandlerFactory
+     * @param GlobalSection $globalConfig
      */
     public function __construct(
         LevelResolver $levelResolver,
         LogConfig $logConfig,
-        GelfHandlerFactory $gelfHandlerFactory
+        GelfHandlerFactory $gelfHandlerFactory,
+        GlobalSection $globalConfig
     ) {
         $this->levelResolver = $levelResolver;
         $this->logConfig = $logConfig;
         $this->gelfHandlerFactory = $gelfHandlerFactory;
+        $this->globalConfig = $globalConfig;
     }
 
     /**
      * @param string $handler
      * @return HandlerInterface
      * @throws \Exception
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function create(string $handler): HandlerInterface
     {
         $configuration = $this->logConfig->get($handler);
-        $minLevel = $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_NOTICE));
+        $levelOverride = $this->globalConfig->get(GlobalSection::VAR_MIN_LOGGING_LEVEL);
+        $defaultLevel = $levelOverride ?: LogConfig::LEVEL_NOTICE;
+        $minLevel = $this->levelResolver->resolve($configuration->get('min_level', $defaultLevel));
 
         switch ($handler) {
             case static::HANDLER_STREAM:
             case static::HANDLER_FILE:
+                $defaultLevelStream = $levelOverride ?: LogConfig::LEVEL_INFO;
                 $handlerInstance = new StreamHandler(
                     $configuration->get('stream'),
-                    $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_INFO))
+                    $this->levelResolver->resolve($configuration->get('min_level', $defaultLevelStream))
                 );
                 break;
             case static::HANDLER_EMAIL:
