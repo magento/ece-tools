@@ -244,6 +244,8 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
+                        $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
                         $this->container->make(DeployProcess\InstallUpdate\Install\ConfigImport::class),
@@ -258,6 +260,7 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
+                        $this->container->make(DeployProcess\InstallUpdate\Update\CleanConfigCache::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\Setup::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
                     ],
@@ -320,8 +323,6 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanViewPreprocessed::class),
-                        $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
-                        $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
                     ],
                 ]);

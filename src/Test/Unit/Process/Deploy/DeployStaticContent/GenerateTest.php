@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -94,23 +95,17 @@ class GenerateTest extends TestCase
             ->with('magento_root/pub/static/deployed_version.txt');
         $this->loggerMock->method('notice')
             ->withConsecutive(
-                ['Enabling Maintenance mode'],
                 ['Extracting locales'],
-                ['Generating static content for locales: en_GB fr_FR'],
-                ['Maintenance mode is disabled.']
+                ['Generating static content for locales: en_GB fr_FR']
             );
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([
                 'php ./bin/magento static:content:deploy:command',
             ]);
-        $this->shellMock->expects($this->exactly(3))
+        $this->shellMock->expects($this->once())
             ->method('execute')
-            ->withConsecutive(
-                ['php ./bin/magento maintenance:enable -vvv'],
-                ['php ./bin/magento static:content:deploy:command'],
-                ['php ./bin/magento maintenance:disable -vvv']
-            );
+            ->with('php ./bin/magento static:content:deploy:command');
         $this->stageConfigMock->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_VERBOSE_COMMANDS, '-vvv'],

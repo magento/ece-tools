@@ -87,10 +87,7 @@ class Generate implements ProcessInterface
     public function execute()
     {
         $this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt');
-        $this->logger->info('Enabling Maintenance mode');
-        $this->shell->execute(
-            "php ./bin/magento maintenance:enable {$this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)}"
-        );
+
         $this->logger->info('Extracting locales');
 
         $logMessage = count($this->deployOption->getLocales()) ?
@@ -107,11 +104,5 @@ class Generate implements ProcessInterface
         foreach ($commands as $command) {
             $this->shell->execute($command);
         }
-
-        $this->shell->execute(
-            "php ./bin/magento maintenance:disable {$this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)}"
-        );
-
-        $this->logger->info('Maintenance mode is disabled.');
     }
 }
