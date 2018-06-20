@@ -16,6 +16,12 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
  */
 class File
 {
+
+    /**
+     * This is the prefix we use for directories we are deleting in the background.
+     */
+    const DELETING_PREFIX = 'DELETING_';
+
     /**
      * Returns last warning message string
      *
@@ -310,7 +316,7 @@ class File
         }
 
         $timestamp = time();
-        $tempDir = $path . '/' . preg_replace('/\//', '_', basename($path)) . '_' . $timestamp;
+        $tempDir = $path . '/' . static::DELETING_PREFIX . preg_replace('/\//', '_', basename($path)) . '_' . $timestamp;
         $excludes[] = $tempDir;
 
         if (!$this->isDirectory($tempDir)) {
@@ -470,3 +476,6 @@ class File
         return require $path;
     }
 }
+
+
+
