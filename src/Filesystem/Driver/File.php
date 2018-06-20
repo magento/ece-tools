@@ -186,10 +186,12 @@ class File
         /**
          * Use shell for best performance.
          */
-        shell_exec(sprintf(
-            '/bin/bash -c "shopt -s dotglob; cp -R %s/* %s/"',
-            $source,
-            $destination
+        shell_exec(sprintf('/bin/bash -c %s',
+            escapeshellarg(sprintf(
+            'shopt -s dotglob; cp -R %s/* %s/',
+                escapeshellarg($source),
+                escapeshellarg($destination)
+            ))
         ));
     }
 
