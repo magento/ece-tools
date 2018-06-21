@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopySubFolderStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
-use PHPUnit\Framework\MockObject\MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,12 +22,12 @@ class CopySubFolderStrategyTest extends TestCase
     private $copySubFolderStrategy;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
@@ -176,9 +176,9 @@ class CopySubFolderStrategyTest extends TestCase
     /**
      * @param string $fileName
      * @param bool $isDot
-     * @return Mock
+     * @return MockObject
      */
-    private function createFileInfoMock(string $fileName, bool $isDot): Mock
+    private function createFileInfoMock(string $fileName, bool $isDot): MockObject
     {
         $splFileInfoMock = $this->createMock(\DirectoryIterator::class);
         $splFileInfoMock->expects($this->once())
@@ -199,11 +199,11 @@ class CopySubFolderStrategyTest extends TestCase
     /**
      * Setup methods required to mock an iterator
      *
-     * @param Mock $iteratorMock The mock to attach the iterator methods to
+     * @param MockObject $iteratorMock The mock to attach the iterator methods to
      * @param array $items The mock data we're going to use with the iterator
-     * @return Mock The iterator mock
+     * @return MockObject The iterator mock
      */
-    private function mockIterator(Mock $iteratorMock, array $items): Mock
+    private function mockIterator(MockObject $iteratorMock, array $items): MockObject
     {
         $iteratorData = new \stdClass();
         $iteratorData->array = $items;
