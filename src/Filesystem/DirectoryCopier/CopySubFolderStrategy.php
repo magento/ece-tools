@@ -10,7 +10,10 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * Copies all folder over by doing individual files thereby only overwriting pre-existing files but keeping files
+ * in $toDirectory that do not exist in $fromDirectory.
+ *
+ * Allows deploying static content in the build phase without cleaning pre-existing static files.
  */
 class CopySubFolderStrategy implements StrategyInterface
 {

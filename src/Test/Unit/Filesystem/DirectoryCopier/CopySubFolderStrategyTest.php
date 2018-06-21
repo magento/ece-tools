@@ -5,11 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 
-use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\CopySubFolderStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -133,9 +132,9 @@ class CopySubFolderStrategyTest extends TestCase
 
     public function testIterativeCopy()
     {
-        $splFileInfoOne = $this->createFileInfoMock(false, 'file1');
-        $splFileInfoTwo = $this->createFileInfoMock(false, 'file2');
-        $splFileInfoDot = $this->createFileInfoMock(true, '.');
+        $splFileInfoOne = $this->createFileInfoMock('file1', false);
+        $splFileInfoTwo = $this->createFileInfoMock('file2', false);
+        $splFileInfoDot = $this->createFileInfoMock('.', true);
 
         $directoryIteratorMock = $this->createMock(\DirectoryIterator::class);
         $this->mockIterator($directoryIteratorMock, [
@@ -175,11 +174,11 @@ class CopySubFolderStrategyTest extends TestCase
     }
 
     /**
-     * @param bool $isDot
      * @param string $fileName
+     * @param bool $isDot
      * @return Mock
      */
-    private function createFileInfoMock(bool $isDot, string $fileName)
+    private function createFileInfoMock(string $fileName, bool $isDot): Mock
     {
         $splFileInfoMock = $this->createMock(\DirectoryIterator::class);
         $splFileInfoMock->expects($this->once())
@@ -204,7 +203,7 @@ class CopySubFolderStrategyTest extends TestCase
      * @param array $items The mock data we're going to use with the iterator
      * @return Mock The iterator mock
      */
-    private function mockIterator(Mock $iteratorMock, array $items)
+    private function mockIterator(Mock $iteratorMock, array $items): Mock
     {
         $iteratorData = new \stdClass();
         $iteratorData->array = $items;

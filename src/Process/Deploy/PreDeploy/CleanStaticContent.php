@@ -47,6 +47,7 @@ class CleanStaticContent implements ProcessInterface
      * @var DeployInterface
      */
     private $stageConfig;
+
     /**
      * @param LoggerInterface $logger
      * @param Environment $env
