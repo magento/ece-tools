@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Util\ForkManager;
 use Magento\MagentoCloud\Util\ForkManager\SingletonFactory as ForkManagerSingletonFactory;
 
-
 /**
  * Class File.
  *
@@ -208,9 +207,10 @@ class File
         /**
          * Use shell for best performance.
          */
-        shell_exec(sprintf('/bin/bash -c %s',
+        shell_exec(sprintf(
+            '/bin/bash -c %s',
             escapeshellarg(sprintf(
-            'shopt -s dotglob; cp -R %s/* %s/',
+                'shopt -s dotglob; cp -R %s/* %s/',
                 escapeshellarg($source),
                 escapeshellarg($destination)
             ))
@@ -332,7 +332,13 @@ class File
         }
 
         $timestamp = time();
-        $tempDir = $path . '/' . static::DELETING_PREFIX . preg_replace('/\//', '_', basename($path)) . '_' . $timestamp;
+        $tempDir = sprintf(
+            '%s/%s%s_%s',
+            $path,
+            static::DELETING_PREFIX,
+            preg_replace('/\//', '_', basename($path)),
+            $timestamp
+        );
         $excludes[] = $tempDir;
 
         if (!$this->isDirectory($tempDir)) {
@@ -496,6 +502,3 @@ class File
         return require $path;
     }
 }
-
-
-

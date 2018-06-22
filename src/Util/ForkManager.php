@@ -15,7 +15,6 @@ use Magento\MagentoCloud\Util\ForkManager\Child;
 /**
  * Utility class for creating forked children and managing their lifecycle
  */
-
 class ForkManager
 {
 
@@ -23,7 +22,6 @@ class ForkManager
      * @var Child[]
      */
     private $children = [];
-
 
     /**
      * @param DirectoryList $directoryList
@@ -36,8 +34,7 @@ class ForkManager
         LoggerInterface $logger,
         ShellInterface $shell,
         UtilityManager $utilityManager
-    )
-    {
+    ) {
         $this->targetDirectory = $directoryList->getPath(DirectoryList::DIR_STATIC);
         $this->logger = $logger;
         $this->shell = $shell;
@@ -52,30 +49,23 @@ class ForkManager
     {
         $pid = pcntl_fork();
         switch ($pid) {
-            case 0:
-                {  // This is run in the child process
-                    fclose(STDIN);
-                    fclose(STDOUT);
-                    fclose(STDERR);
-                    // TODO: We need to close all open file descriptors, not just the default ones.
-                    pcntl_exec('/bin/sh', ['-c', $command]);
-                    // Note: we shouldn't get to this point unless pcntl_exec failed.
-                    exit(1);
-                    break;
-                }
-            case -1:
-                { // If pcntl_fork failed, we'll just run the command in the this process
-                    shell_exec($command);
-                    break;
-                }
-            default:
-                { // This is the parent process
-                    $child = new Child($pid, $command, $description);
-                    $this->children[] = $child;
-                    break;
-                }
+            case 0:   // This is run in the child process
+                fclose(STDIN);
+                fclose(STDOUT);
+                fclose(STDERR);
+                // TODO: We need to close all open file descriptors, not just the default ones.
+                pcntl_exec('/bin/sh', ['-c', $command]);
+                // Note: we shouldn't get to this point unless pcntl_exec failed.
+                throw new \RuntimeException("pcntl_exec failed");
+                break;
+            case -1: // If pcntl_fork failed, we'll just run the command in the this process
+                shell_exec($command);
+                break;
+            default:  // This is the parent process
+                $child = new Child($pid, $command, $description);
+                $this->children[] = $child;
+                break;
         }
-
     }
 
     public function waitForChildren()
@@ -107,5 +97,4 @@ class ForkManager
             }
         }
     }
-
 }

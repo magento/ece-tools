@@ -114,7 +114,7 @@ class StaticContentCompressor
             . " -or -name '*.html' -or -name '*.htm' ')' -print0"
             . " | xargs -0 -n100 -P16 gzip -q --keep -%d",
             escapeshellarg($this->targetDirectory),
-            escapeshellarg(File::DELETING_PREFIX . '*' ),
+            escapeshellarg(File::DELETING_PREFIX . '*'),
             $compressionLevel
         );
     }

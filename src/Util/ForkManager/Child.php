@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Util\ForkManager;
 
+/**
+ * Utility class for child processes created by ForkManager
+ */
 class Child
 {
     /**
@@ -18,17 +21,17 @@ class Child
     private $command;
 
     /**
-     * @var int
+     * @var integer
      */
     private $pid;
 
     /**
-     * @var bool
+     * @var boolean
      */
     private $running;
 
     /**
-     * @var int
+     * @var integer
      */
     private $exitStatus;
 
