@@ -67,7 +67,10 @@ class StaticContentCompressorTest extends TestCase
      */
     public function testCompression(int $compressionLevel)
     {
-        $expectedCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c \'find \'\\\'\'\'\\\'\' -type d -name \'\\\'\'DELETING_*\'\\\'\' -prune -o -type f -size +300c \'\\\'\'(\'\\\'\' -name \'\\\'\'*.js\'\\\'\' -or -name \'\\\'\'*.css\'\\\'\' -or -name \'\\\'\'*.svg\'\\\'\' -or -name \'\\\'\'*.html\'\\\'\' -or -name \'\\\'\'*.htm\'\\\'\' \'\\\'\')\'\\\'\' -print0 | xargs -0 -n100 -P16 gzip -q --keep -4\'';
+        $expectedCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c \'find \'\\\'\'\'\\\'\' -type d -name \'\\\'\''
+            . 'DELETING_*\'\\\'\' -prune -o -type f -size +300c \'\\\'\'(\'\\\'\' -name \'\\\'\'*.js\'\\\'\' -or -name'
+            . ' \'\\\'\'*.css\'\\\'\' -or -name \'\\\'\'*.svg\'\\\'\' -or -name \'\\\'\'*.html\'\\\'\' -or -name'
+            . ' \'\\\'\'*.htm\'\\\'\' \'\\\'\')\'\\\'\' -print0 | xargs -0 -n100 -P16 gzip -q --keep -4\'';
 
         $this->shellMock
             ->expects($this->once())

@@ -45,10 +45,9 @@ class StaticContentCompressor
     private $utilityManager;
 
     /**
-     * Target directory to be compressed relative to the Magento application folder.
-     * @var string
+     * @var DirectoryList
      */
-    private $targetDirectory;
+    private $directoryList;
 
     /**
      * @param DirectoryList $directoryList
@@ -62,7 +61,7 @@ class StaticContentCompressor
         ShellInterface $shell,
         UtilityManager $utilityManager
     ) {
-        $this->targetDirectory = $directoryList->getPath(DirectoryList::DIR_STATIC);
+        $this->directoryList = $directoryList;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->utilityManager = $utilityManager;
@@ -113,7 +112,7 @@ class StaticContentCompressor
             . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
             . " -or -name '*.html' -or -name '*.htm' ')' -print0"
             . " | xargs -0 -n100 -P16 gzip -q --keep -%d",
-            escapeshellarg($this->targetDirectory),
+            escapeshellarg($this->directoryList->getPath(DirectoryList::DIR_STATIC)),
             escapeshellarg(File::DELETING_PREFIX . '*'),
             $compressionLevel
         );
