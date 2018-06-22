@@ -222,6 +222,7 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
+                        $this->container->make(DeployProcess\Config\Syslog::class),
 
                         /**
                          * This process runs processes if only post_deploy hook is not configured.

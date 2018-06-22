@@ -14,20 +14,19 @@ use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\SyslogUdpHandler;
-use Monolog\Logger;
 
 /**
  * The handler factory.
  */
 class HandlerFactory
 {
-    const HANDLER_STREAM = 'stream';
-    const HANDLER_FILE = 'file';
-    const HANDLER_EMAIL = 'email';
-    const HANDLER_SLACK = 'slack';
-    const HANDLER_GELF = 'gelf';
-    const HANDLER_SYSLOG = 'syslog';
-    const HANDLER_SYSLOG_UDP = 'syslog_udp';
+    const HANDLER_STREAM = LogConfig::HANDLER_STREAM;
+    const HANDLER_FILE = LogConfig::HANDLER_FILE;
+    const HANDLER_EMAIL = LogConfig::HANDLER_EMAIL;
+    const HANDLER_SLACK = LogConfig::HANDLER_SLACK;
+    const HANDLER_GELF = LogConfig::HANDLER_GELF;
+    const HANDLER_SYSLOG = LogConfig::HANDLER_SYSLOG;
+    const HANDLER_SYSLOG_UDP = LogConfig::HANDLER_SYSLOG_UDP;
 
     /**
      * @var LevelResolver

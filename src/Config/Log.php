@@ -30,6 +30,17 @@ class Log
     const LEVEL_EMERGENCY = 'emergency';
 
     /**
+     * Handler config keys.
+     */
+    const HANDLER_STREAM = 'stream';
+    const HANDLER_FILE = 'file';
+    const HANDLER_EMAIL = 'email';
+    const HANDLER_SLACK = 'slack';
+    const HANDLER_GELF = 'gelf';
+    const HANDLER_SYSLOG = 'syslog';
+    const HANDLER_SYSLOG_UDP = 'syslog_udp';
+
+    /**
      * @var FileList
      */
     private $fileList;
@@ -78,13 +89,22 @@ class Log
      */
     public function get(string $handler): Repository
     {
-        if (!isset($this->getConfig()[$handler])) {
+        if (!$this->has($handler)) {
             throw new \Exception('Configuration for ' . $handler . ' is not found');
         }
 
         return $this->repositoryFactory->create(
             $this->getConfig()[$handler]
         );
+    }
+
+    /**
+     * @param string $handler
+     * @return bool
+     */
+    public function has(string $handler): bool
+    {
+        return array_key_exists($handler, $this->getConfig());
     }
 
     /**
