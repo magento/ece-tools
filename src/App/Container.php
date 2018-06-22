@@ -226,7 +226,6 @@ class Container implements ContainerInterface
                          * This process runs processes if only post_deploy hook is not configured.
                          */
                         $this->container->make(DeployProcess\DeployCompletion::class),
-                        $this->container->make(DeployProcess\WaitForForkedChildrenToExit::class),
                     ],
                 ]);
             });
