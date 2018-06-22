@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Shell\UtilityManager;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +22,11 @@ class StaticContentCompressorTest extends TestCase
      * @var StaticContentCompressor
      */
     private $staticContentCompressor;
+
+    /**
+     * @var DirectoryList|Mock
+     */
+    private $directoryListMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -42,11 +48,13 @@ class StaticContentCompressorTest extends TestCase
      */
     protected function setUp()
     {
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->utilityManagerMock = $this->createMock(UtilityManager::class);
 
         $this->staticContentCompressor = new StaticContentCompressor(
+            $this->directoryListMock,
             $this->loggerMock,
             $this->shellMock,
             $this->utilityManagerMock
@@ -59,9 +67,7 @@ class StaticContentCompressorTest extends TestCase
      */
     public function testCompression(int $compressionLevel)
     {
-        $expectedCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c "find \'pub/static\' -type f -size +300c'
-            . ' \'(\' -name \'*.js\' -or -name \'*.css\' -or -name \'*.svg\' -or -name \'*.html\' -or -name'
-            . ' \'*.htm\' \')\' -print0 | xargs -0 -n100 -P16 gzip -q --keep -' . $compressionLevel . '"';
+        $expectedCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c \'find \'\\\'\'\'\\\'\' -type d -name \'\\\'\'DELETING_*\'\\\'\' -prune -o -type f -size +300c \'\\\'\'(\'\\\'\' -name \'\\\'\'*.js\'\\\'\' -or -name \'\\\'\'*.css\'\\\'\' -or -name \'\\\'\'*.svg\'\\\'\' -or -name \'\\\'\'*.html\'\\\'\' -or -name \'\\\'\'*.htm\'\\\'\' \'\\\'\')\'\\\'\' -print0 | xargs -0 -n100 -P16 gzip -q --keep -4\'';
 
         $this->shellMock
             ->expects($this->once())

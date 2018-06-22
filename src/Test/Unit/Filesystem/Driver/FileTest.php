@@ -48,7 +48,7 @@ class FileTest extends TestCase
     {
         $this->shellMock->expects($this->once())
             ->with(sprintf(
-                '/bin/bash -c "shopt -s dotglob; cp -R %s/* %s/"',
+                '/bin/bash -c \'shopt -s dotglob; cp -R \'\\\'\'source\'\\\'\'/* \'\\\'\'destination\'\\\'\'/\'',
                 $source,
                 $destination
             ));
