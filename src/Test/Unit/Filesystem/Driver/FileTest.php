@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\Driver;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use Magento\MagentoCloud\Util\ForkManager;
+use Magento\MagentoCloud\Util\ForkManager\SingletonFactory as ForkManagerSingletonFactory;
 
 /**
  * @inheritdoc
@@ -20,6 +22,11 @@ class FileTest extends TestCase
      * @var Mock
      */
     private $shellMock;
+
+    /**
+     * @var ForkManager|Mock
+     */
+    private $forkManagerMock;
 
     /**
      * @var File
@@ -36,7 +43,17 @@ class FileTest extends TestCase
             'shell_exec'
         );
 
-        $this->driver = new File();
+        $this->forkManagerMock = $this->createMock(ForkManager::class);
+
+        /**
+         * @var ForkManagerSingletonFactory|Mock
+         */
+        $forkManagerSingletonFactoryMock = $this->createMock(ForkManagerSingletonFactory::class);
+        $forkManagerSingletonFactoryMock->expects($this->any())
+        ->method('create')
+        ->willReturn($this->forkManagerMock);
+
+        $this->driver = new File($forkManagerSingletonFactoryMock);
     }
 
     /**
