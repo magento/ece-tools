@@ -8,6 +8,8 @@
 namespace Magento\MagentoCloud\Filesystem\Driver;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Util\ForkManager; 
+use Magento\MagentoCloud\Util\ForkManager\SingletonFactory as ForkManagerSingletonFactory;
 
 /**
  * Class File.
@@ -21,6 +23,19 @@ class File
      * This is the prefix we use for directories we are deleting in the background.
      */
     const DELETING_PREFIX = 'DELETING_';
+
+    /**	
+     * @var ForkManagerSingletonFactory	
+     */	
+    private $forkManagerSingletonFactory;	
+
+    /**	
+     * @param ForkManagerSingletonFactory $forkManagerSingletonFactory	
+     */	
+    public function __construct(ForkManagerSingletonFactory $forkManagerSingletonFactory)	
+    {	
+        $this->forkManagerSingletonFactory = $forkManagerSingletonFactory;	
+    }	
 
     /**
      * Returns last warning message string
@@ -349,7 +364,11 @@ class File
             }
             $this->rename($src, $dst);
         }
-        shell_exec('nohup rm -rf ' . escapeshellarg($tempDir) . ' 1>/dev/null 2>&1 &');
+        $forkManager = $this->forkManagerSingletonFactory->create();	+        shell_exec('nohup rm -rf ' . escapeshellarg($tempDir) . ' 1>/dev/null 2>&1 &');
+        $forkManager->createForkedChildAndExec(	
+            sprintf('rm -rf %s', escapeshellarg($tempDir)),	
+            sprintf('Background clearing of directory "%s"', $path)	
+        );
     }
 
     /**
