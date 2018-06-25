@@ -16,6 +16,9 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class ScdOptionsIgnoranceTest extends TestCase
 {
     /**
