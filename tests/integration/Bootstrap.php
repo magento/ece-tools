@@ -9,6 +9,7 @@ use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Util\ForkManager\SingletonFactory as ForkManagerSingletonFactory;
 
 /**
  * Integration testing bootstrap.
@@ -29,6 +30,11 @@ class Bootstrap
     private static $instance;
 
     /**
+     * @var Container
+     */
+    private $container;
+
+    /**
      * @var File
      */
     private $file;
@@ -43,7 +49,8 @@ class Bootstrap
      */
     public function __construct()
     {
-        $this->file = new File();
+        $this->container = new Container(ECE_BP, $this->getSandboxDir());
+        $this->file = new File(new ForkManagerSingletonFactory($this->container));
         $this->shell = new Shell\Shell(
             $this->getSandboxDir()
         );
@@ -120,9 +127,7 @@ class Bootstrap
             )),
         ]);
 
-        $container = new Container(ECE_BP, $this->getSandboxDir());
-
-        return new Application($container);
+        return new Application($this->container);
     }
 
     /**
