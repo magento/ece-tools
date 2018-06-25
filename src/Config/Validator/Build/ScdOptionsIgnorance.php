@@ -89,7 +89,6 @@ class ScdOptionsIgnorance implements ValidatorInterface
         return $this->resultFactory->success();
     }
 
-
     /**
      * Checks that variable is configured in .magento.env.yaml in build section.
      *
@@ -111,7 +110,6 @@ class ScdOptionsIgnorance implements ValidatorInterface
                 return true;
             }
         } catch (\Exception $e) {
-
         }
 
         return false;

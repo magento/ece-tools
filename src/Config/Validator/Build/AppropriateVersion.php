@@ -63,12 +63,12 @@ class AppropriateVersion implements ValidatorInterface
         }
 
         if ($errors) {
-            return $this->resultFactory->create(Validator\Result\Error::ERROR, [
-                'error' => 'Some configuration is not suitable with current version of magento',
-                'suggestion' => implode(PHP_EOL, $errors),
-            ]);
+            return $this->resultFactory->error(
+                'Some configuration is not suitable with current version of magento',
+                implode(PHP_EOL, $errors)
+            );
         }
 
-        return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
+        return $this->resultFactory->success();
     }
 }

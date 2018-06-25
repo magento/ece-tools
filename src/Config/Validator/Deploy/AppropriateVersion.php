@@ -58,7 +58,7 @@ class AppropriateVersion implements ValidatorInterface
                 DeployInterface::VAR_SCD_STRATEGY,
             ];
 
-            foreach($variables as $variableName) {
+            foreach ($variables as $variableName) {
                 if ($this->configurationChecker->isConfigured($variableName, true)) {
                     $errors[] = sprintf(
                         'The variable %s is allowed from magento version 2.2.0',
@@ -78,12 +78,12 @@ class AppropriateVersion implements ValidatorInterface
         }
 
         if ($errors) {
-            return $this->resultFactory->create(Validator\Result\Error::ERROR, [
-                'error' => 'Some configuration is not suitable with current version of magento',
-                'suggestion' => implode(PHP_EOL, $errors),
-            ]);
+            return $this->resultFactory->error(
+                'Some configuration is not suitable with current version of magento',
+                implode(PHP_EOL, $errors)
+            );
         }
 
-        return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
+        return $this->resultFactory->success();
     }
 }

@@ -114,6 +114,7 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Build\Reader::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Environment\Reader::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\PostDeploy::class);
