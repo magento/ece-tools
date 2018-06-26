@@ -6,12 +6,13 @@
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Shell\UtilityManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * Unit test for static content compression.
@@ -24,27 +25,27 @@ class StaticContentCompressorTest extends TestCase
     private $staticContentCompressor;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var UtilityManager|Mock
+     * @var UtilityManager|MockObject
      */
     private $utilityManagerMock;
 
     /**
-     * Setup the test environment.
+     * @inheritdoc
      */
     protected function setUp()
     {
@@ -67,10 +68,31 @@ class StaticContentCompressorTest extends TestCase
      */
     public function testCompression(int $compressionLevel)
     {
-        $expectedCommand = '/usr/bin/timeout -k 30 600 /bin/bash -c \'find \'\\\'\'\'\\\'\' -type d -name \'\\\'\''
-            . 'DELETING_*\'\\\'\' -prune -o -type f -size +300c \'\\\'\'(\'\\\'\' -name \'\\\'\'*.js\'\\\'\' -or -name'
-            . ' \'\\\'\'*.css\'\\\'\' -or -name \'\\\'\'*.svg\'\\\'\' -or -name \'\\\'\'*.html\'\\\'\' -or -name'
-            . ' \'\\\'\'*.htm\'\\\'\' \'\\\'\')\'\\\'\' -print0 | xargs -0 -n100 -P16 gzip -q --keep -4\'';
+        $directoryListDirStatic = 'this/is/a/test/static/directory';
+        $timeout = '/usr/bin/timeout';
+        $bash = '/bin/bash';
+
+        $this->directoryListMock
+            ->expects($this->once())
+            ->method('getPath')
+            ->willReturn($directoryListDirStatic);
+
+        $expectedCommand = sprintf(
+            '%s -k 30 600 %s -c %s',
+            $timeout,
+            $bash,
+            escapeshellarg(
+                sprintf(
+                    "find %s -type d -name %s -prune -o -type f -size +300c"
+                    . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
+                    . " -or -name '*.html' -or -name '*.htm' ')' -print0"
+                    . " | xargs -0 -n100 -P16 gzip -q --keep -%d",
+                    escapeshellarg($directoryListDirStatic),
+                    escapeshellarg(File::DELETING_PREFIX . '*'),
+                    $compressionLevel
+                )
+            )
+        );
 
         $this->shellMock
             ->expects($this->once())
@@ -78,8 +100,8 @@ class StaticContentCompressorTest extends TestCase
             ->with($expectedCommand);
         $this->utilityManagerMock->method('get')
             ->willReturnMap([
-                [UtilityManager::UTILITY_TIMEOUT, '/usr/bin/timeout'],
-                [UtilityManager::UTILITY_BASH, '/bin/bash'],
+                [UtilityManager::UTILITY_TIMEOUT, $timeout],
+                [UtilityManager::UTILITY_BASH, $bash],
             ]);
 
         $this->staticContentCompressor->process($compressionLevel);

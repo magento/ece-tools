@@ -105,7 +105,7 @@ class StaticContentCompressor
      *
      * @return string
      */
-    private function innerCompressionCommand(int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL): string
+    private function innerCompressionCommand(int $compressionLevel): string
     {
         return sprintf(
             "find %s -type d -name %s -prune -o -type f -size +300c"
