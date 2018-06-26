@@ -10,9 +10,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Shell\UtilityManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * Unit test for static content compression.
@@ -25,27 +25,27 @@ class StaticContentCompressorTest extends TestCase
     private $staticContentCompressor;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var UtilityManager|Mock
+     * @var UtilityManager|MockObject
      */
     private $utilityManagerMock;
 
     /**
-     * Setup the test environment.
+     * @inheritdoc
      */
     protected function setUp()
     {
