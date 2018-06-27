@@ -61,7 +61,7 @@ class AppropriateVersion implements ValidatorInterface
             foreach ($variables as $variableName) {
                 if ($this->configurationChecker->isConfigured($variableName, true)) {
                     $errors[] = sprintf(
-                        'The variable %s is allowed from magento version 2.2.0',
+                        '%s is available for Magento 2.2.0 and later.',
                         $variableName
                     );
                 }
@@ -72,14 +72,14 @@ class AppropriateVersion implements ValidatorInterface
             && $this->configurationChecker->isConfigured(DeployInterface::VAR_GENERATED_CODE_SYMLINK, true)
         ) {
             $errors[] = sprintf(
-                'The variable %s is allowed for magento version 2.1.x',
+                '%s is available for Magento 2.1.x.',
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK
             );
         }
 
         if ($errors) {
             return $this->resultFactory->error(
-                'Some configuration is not suitable with current version of magento',
+                'The current configuration is not compatible with this version of Magento',
                 implode(PHP_EOL, $errors)
             );
         }

@@ -104,11 +104,11 @@ class AppropriateVersionTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'Some configuration is not suitable with current version of magento',
+                'The current configuration is not compatible with this version of Magento',
                 implode(PHP_EOL, [
-                    'The variable CRON_CONSUMERS_RUNNER is allowed from magento version 2.2.0',
-                    'The variable SCD_STRATEGY is allowed from magento version 2.2.0',
-                    'The variable GENERATED_CODE_SYMLINK is allowed for magento version 2.1.x'
+                    'CRON_CONSUMERS_RUNNER is available for Magento 2.2.0 and later.',
+                    'SCD_STRATEGY is available for Magento 2.2.0 and later.',
+                    'GENERATED_CODE_SYMLINK is available for Magento 2.1.x.'
                 ])
             );
 

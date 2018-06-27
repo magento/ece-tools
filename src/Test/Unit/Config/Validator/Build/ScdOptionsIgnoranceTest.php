@@ -82,33 +82,42 @@ class ScdOptionsIgnoranceTest extends TestCase
 
     public function testValidateScdNotOnBuild()
     {
+        $errorMock = $this->createConfiguredMock(Error::class, [
+            'getError' => 'skip reason'
+        ]);
         $this->scdOnBuildValidator->expects($this->once())
             ->method('validate')
-            ->willReturn($this->createMock(Error::class));
+            ->willReturn($errorMock);
         $this->buildReader->expects($this->exactly(3))
             ->method('read')
             ->willReturn([
-                StageConfigInterface::VAR_SCD_STRATEGY => 'quick'
+                strtolower(StageConfigInterface::VAR_SCD_STRATEGY)   => 'quick'
             ]);
         $this->environmentReader->expects($this->exactly(2))
             ->method('read')
             ->willReturn([]);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with($this->stringStartsWith('Next variables are ignored: SCD_STRATEGY.'));
+            ->with(
+                'When skip reason, static content deployment does not run during the build phase ' .
+                'and the following variables are ignored: SCD_STRATEGY'
+            );
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());
     }
 
     public function testValidateScdNotOnBuildWithEnvironmentConfig()
     {
+        $errorMock = $this->createConfiguredMock(Error::class, [
+            'getError' => 'skip reason'
+        ]);
         $this->scdOnBuildValidator->expects($this->once())
             ->method('validate')
-            ->willReturn($this->createMock(Error::class));
+            ->willReturn($errorMock);
         $this->buildReader->expects($this->exactly(3))
             ->method('read')
             ->willReturn([
-                StageConfigInterface::VAR_SCD_STRATEGY => 'quick'
+                strtolower(StageConfigInterface::VAR_SCD_STRATEGY) => 'quick'
             ]);
         $this->environmentReader->expects($this->exactly(2))
             ->method('read')
@@ -121,7 +130,10 @@ class ScdOptionsIgnoranceTest extends TestCase
             ]);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with($this->stringStartsWith('Next variables are ignored: SCD_STRATEGY, SCD_THREADS.'));
+            ->with(
+                'When skip reason, static content deployment does not run during the build phase ' .
+                'and the following variables are ignored: SCD_STRATEGY, SCD_THREADS'
+            );
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());
     }

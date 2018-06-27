@@ -95,8 +95,8 @@ class AppropriateVersionTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'Some configuration is not suitable with current version of magento',
-                'The variable SCD_STRATEGY is allowed from magento version 2.2.0'
+                'The current configuration is not compatible with this version of Magento',
+                'SCD_STRATEGY is available for Magento 2.2.0 and later.'
             );
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());

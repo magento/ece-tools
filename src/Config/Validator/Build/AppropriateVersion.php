@@ -57,14 +57,14 @@ class AppropriateVersion implements ValidatorInterface
             && !empty($this->stageConfig->get(StageConfigInterface::VAR_SCD_STRATEGY))
         ) {
                 $errors[] = sprintf(
-                    'The variable %s is allowed from magento version 2.2.0',
+                    '%s is available for Magento 2.2.0 and later.',
                     StageConfigInterface::VAR_SCD_STRATEGY
                 );
         }
 
         if ($errors) {
             return $this->resultFactory->error(
-                'Some configuration is not suitable with current version of magento',
+                'The current configuration is not compatible with this version of Magento',
                 implode(PHP_EOL, $errors)
             );
         }

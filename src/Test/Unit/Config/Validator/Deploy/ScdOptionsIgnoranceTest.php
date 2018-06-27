@@ -69,11 +69,15 @@ class ScdOptionsIgnoranceTest extends TestCase
 
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
+
     public function testValidateScdNotOnDeploy()
     {
+        $errorMock = $this->createConfiguredMock(Error::class, [
+            'getError' => 'skip reason'
+        ]);
         $this->scdOnDeployValidator->expects($this->once())
             ->method('validate')
-            ->willReturn($this->createMock(Error::class));
+            ->willReturn($errorMock);
         $this->configurationCheckerMock->expects($this->exactly(3))
             ->method('isConfigured')
             ->willReturnMap([
@@ -83,7 +87,10 @@ class ScdOptionsIgnoranceTest extends TestCase
             ]);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with($this->stringStartsWith('Next variables are ignored: SCD_STRATEGY, SCD_EXCLUDE_THEMES.'));
+            ->with(
+                'When skip reason, static content deployment does not run during the deploy phase ' .
+                'and the following variables are ignored: SCD_STRATEGY, SCD_EXCLUDE_THEMES'
+            );
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());
     }
