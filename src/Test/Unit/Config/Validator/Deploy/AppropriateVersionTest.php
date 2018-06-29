@@ -66,7 +66,7 @@ class AppropriateVersionTest extends TestCase
             ->willReturn(true);
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
-            ->willReturn(false);
+            ->willReturn(true);
         $this->configurationCheckerMock->expects($this->never())
             ->method('isConfigured');
 
@@ -81,7 +81,7 @@ class AppropriateVersionTest extends TestCase
             ->willReturn(false);
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
-            ->willReturn(true);
+            ->willReturn(false);
         $this->configurationCheckerMock->expects($this->exactly(3))
             ->method('isConfigured')
             ->willReturn(false);
@@ -97,7 +97,7 @@ class AppropriateVersionTest extends TestCase
             ->willReturn(false);
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
-            ->willReturn(true);
+            ->willReturn(false);
         $this->configurationCheckerMock->expects($this->exactly(3))
             ->method('isConfigured')
             ->willReturn(true);

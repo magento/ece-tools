@@ -68,7 +68,7 @@ class AppropriateVersion implements ValidatorInterface
             }
         }
 
-        if ($this->magentoVersion->satisfies('<2.1.0 || >=2.2.0')
+        if (!$this->magentoVersion->satisfies('2.1.*')
             && $this->configurationChecker->isConfigured(DeployInterface::VAR_GENERATED_CODE_SYMLINK, true)
         ) {
             $errors[] = sprintf(
