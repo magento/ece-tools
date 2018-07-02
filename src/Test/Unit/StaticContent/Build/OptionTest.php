@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
@@ -56,6 +57,11 @@ class OptionTest extends TestCase
     private $configResolverMock;
 
     /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -66,6 +72,7 @@ class OptionTest extends TestCase
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
         $this->configResolverMock = $this->createMock(SharedConfig::class);
+        $this->fileMock = $this->createMock(File::class);
 
         $this->option = new Option(
             $this->environmentMock,
@@ -73,7 +80,8 @@ class OptionTest extends TestCase
             $this->magentoVersionMock,
             $this->threadCountOptimizerMock,
             $this->stageConfigMock,
-            $this->configResolverMock
+            $this->configResolverMock,
+            $this->fileMock
         );
     }
 
@@ -211,8 +219,15 @@ class OptionTest extends TestCase
                 'stores' => [],
             ],
         ];
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('requireFile')
+            ->willReturn(['some' => 'config']);
         $this->arrayManagerMock->expects($this->once())
             ->method('flatten')
+            ->with(['some' => 'config'])
             ->willReturn([
                 'scopes' => [
                     'websites' => [],
