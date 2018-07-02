@@ -470,7 +470,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +            $count += $connection->delete(
 +                $scheduleResource->getMainTable(),
 +                [
-+                    'status = ?' => Schedule::STATUS_PENDING,
++                    'status = ?' => $status,
 +                    'job_code in (?)' => array_keys($jobs),
 +                    'created_at < ?' => $connection->formatDate($currentTime - $time)
 +                ]

@@ -2,14 +2,14 @@
   "name": "magento/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
   "type": "magento2-component",
-  "version": "2002.0.11",
+  "version": "2002.0.12",
   "license": "proprietary",
   "require": {
     "php": "^7.0",
     "composer/composer": "@stable",
     "composer/semver": "^1.4",
     "graylog2/gelf-php": "^1.4.2",
-    "guzzlehttp/guzzle": "^6.3",
+    "guzzlehttp/guzzle": "^6.2",
     "illuminate/config": "^5.5",
     "illuminate/container": "^5.5",
     "illuminate/contracts": "^5.5",
@@ -51,9 +51,9 @@
     "test": [
       "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
       "phpmd src xml tests/static/phpmd-ruleset.xml",
-      "phpunit --configuration tests/unit"
+      "phpunit --configuration tests/unit",
+      "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml"
     ],
-    "test-coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
     "test-coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage"
   },
   "config": {
@@ -63,8 +63,16 @@
   "extra": {
     "map": [
       [
-        ".magento.env.yaml.sample",
-        ".magento.env.yaml.sample"
+        "dist/.magento.env.yaml",
+        ".magento.env.yaml.dist"
+      ],
+      [
+        "dist/config.env",
+        "docker/config.env.dist"
+      ],
+      [
+        "dist/global.env",
+        "docker/global.env.dist"
       ]
     ]
   }

@@ -56,7 +56,7 @@ class SchemaValidator
 
         if ($allowedTypes && !in_array($type, $allowedTypes)) {
             return sprintf(
-                'The %s variable contains an invalid value of type %s. Use one of the next types: %s.',
+                'The %s variable contains an invalid value of type %s. Use the following types: %s.',
                 $key,
                 $type,
                 implode(', ', $allowedTypes)

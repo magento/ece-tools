@@ -70,6 +70,7 @@ class ApplicationTest extends TestCase
         Command\ModuleRefresh::NAME => Command\ModuleRefresh::class,
         Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
         Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
+        Command\Docker\Build::NAME => Command\Docker\Build::class,
     ];
 
     /**

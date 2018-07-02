@@ -5,6 +5,9 @@ git:
 services:
   - docker
 language: generic
+addons:
+  apt:
+    update: true
 env:
   global:
     - DIR_TOOLS="/var/www/ece-tools"
