@@ -114,6 +114,8 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\CopySubFolderStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Build\Reader::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Environment\Reader::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\PostDeploy::class);
@@ -151,6 +153,8 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
                                     $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
                                     $this->container->make(ConfigValidator\Build\ModulesExists::class),
+                                    $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
+                                    $this->container->make(ConfigValidator\Build\ScdOptionsIgnorance::class),
                                 ],
                             ],
                         ]),
@@ -204,6 +208,8 @@ class Container implements ContainerInterface
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
+                                    $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
+                                    $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
                                     $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),
                                 ],
                             ],
