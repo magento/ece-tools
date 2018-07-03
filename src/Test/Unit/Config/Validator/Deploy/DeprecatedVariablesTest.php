@@ -35,6 +35,11 @@ class DeprecatedVariablesTest extends TestCase
     private $resultFactoryMock;
 
     /**
+     * @var array
+     */
+    private $envBackup;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -44,6 +49,8 @@ class DeprecatedVariablesTest extends TestCase
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
         ]);
+
+        $this->envBackup = $_ENV;
 
         $this->validator = new DeprecatedVariables(
             $this->environmentMock,
@@ -102,7 +109,7 @@ class DeprecatedVariablesTest extends TestCase
             [
                 [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 1],
                 [],
-                Success::class,
+                Error::class,
             ],
             [
                 [],
@@ -114,6 +121,6 @@ class DeprecatedVariablesTest extends TestCase
 
     public function tearDown()
     {
-        $_ENV = [];
+        $_ENV = $this->envBackup;
     }
 }
