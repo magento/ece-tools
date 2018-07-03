@@ -139,6 +139,22 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(BuildProcess\Generate::class),
+                        $this->container->make(BuildProcess\Backup::class),
+                    ],
+                ]);
+            });
+        $this->container->when(Build\Generate::class)
+            ->needs(ProcessInterface::class)
+            ->give(BuildProcess\Generate::class);
+        $this->container->when(Build\Backup::class)
+            ->needs(ProcessInterface::class)
+            ->give(BuildProcess\Backup::class);
+        $this->container->when(BuildProcess\Generate::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(BuildProcess\PreBuild::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
@@ -162,6 +178,14 @@ class Container implements ContainerInterface
                         $this->container->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->container->make(BuildProcess\DeployStaticContent::class),
                         $this->container->make(BuildProcess\CompressStaticContent::class),
+                    ],
+                ]);
+            });
+        $this->container->when(BuildProcess\Backup::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(BuildProcess\ClearInitDirectory::class),
                         $this->container->make(BuildProcess\BackupData::class),
                     ],

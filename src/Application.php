@@ -52,6 +52,8 @@ class Application extends \Symfony\Component\Console\Application
             parent::getDefaultCommands(),
             [
                 $this->container->create(Command\Build::class),
+                $this->container->create(Command\Build\Generate::class),
+                $this->container->create(Command\Build\Backup::class),
                 $this->container->create(Command\Deploy::class),
                 $this->container->create(Command\ConfigDump::class),
                 $this->container->create(Command\DbDump::class),
