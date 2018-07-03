@@ -81,8 +81,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                'php ./bin/magento setup:static-content:deploy -f -s quick -v --jobs 3 --exclude-theme theme1 '
-                . '--exclude-theme theme2 en_US',
+                'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -f -s quick '
+                . '-v --jobs 3 --exclude-theme theme1 --exclude-theme theme2 en_US',
             ],
             [
                 [
@@ -94,7 +94,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                'php ./bin/magento setup:static-content:deploy -s quick -v --jobs 1 --exclude-theme theme1 en_US de_DE',
+                'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                . '-v --jobs 1 --exclude-theme theme1 en_US de_DE',
             ],
             [
                 [
@@ -106,8 +107,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                'php ./bin/magento setup:static-content:deploy -f -v --jobs 3 --exclude-theme theme1 --exclude-theme'
-                . ' theme2 en_US',
+                'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -f -v --jobs 3 '
+                . '--exclude-theme theme1 --exclude-theme theme2 en_US',
             ],
             [
                 [
@@ -119,7 +120,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                'php ./bin/magento setup:static-content:deploy -v --jobs 1 --exclude-theme theme1 en_US de_DE',
+                'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -v --jobs 1 '
+                . '--exclude-theme theme1 en_US de_DE',
             ],
         ];
     }
@@ -207,8 +209,8 @@ class CommandFactoryTest extends TestCase
                 ],
                 [],
                 [
-                    'php ./bin/magento setup:static-content:deploy -f -s quick -v --exclude-theme theme1'
-                    . ' --exclude-theme theme2 en_US',
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -f -s quick '
+                    . '-v --exclude-theme theme1 --exclude-theme theme2 en_US',
                 ],
             ],
             [
@@ -226,8 +228,8 @@ class CommandFactoryTest extends TestCase
                     ],
                 ],
                 [
-                    'php ./bin/magento setup:static-content:deploy -s quick -v --exclude-theme theme1'
-                    . ' --exclude-theme Magento/backend en_US de_DE',
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                    . '-v --exclude-theme theme1 --exclude-theme Magento/backend en_US de_DE',
                 ],
             ],
             [
@@ -243,8 +245,8 @@ class CommandFactoryTest extends TestCase
                     'Magento/backend' => null,
                 ],
                 [
-                    'php ./bin/magento setup:static-content:deploy -s quick -v --exclude-theme theme1'
-                    . ' --exclude-theme Magento/backend en_US de_DE',
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                    . '-v --exclude-theme theme1 --exclude-theme Magento/backend en_US de_DE',
                 ],
             ],
             [
@@ -262,10 +264,10 @@ class CommandFactoryTest extends TestCase
                     ],
                 ],
                 [
-                    'php ./bin/magento setup:static-content:deploy -s quick -v --exclude-theme theme1'
-                    . ' --exclude-theme Magento/backend en_US de_DE',
-                    'php ./bin/magento setup:static-content:deploy -s quick -v --theme Magento/backend en_US'
-                    . ' fr_FR af_ZA',
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                    . '-v --exclude-theme theme1 --exclude-theme Magento/backend en_US de_DE',
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                    . '-v --theme Magento/backend en_US fr_FR af_ZA',
                 ],
             ],
         ];

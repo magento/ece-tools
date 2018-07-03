@@ -63,7 +63,7 @@ class Export implements ProcessInterface
         $envConfig = $this->reader->read();
 
         try {
-            $this->shell->execute('php ./bin/magento app:config:dump');
+            $this->shell->execute('php ./bin/magento app:config:dump --ansi --no-interaction');
         } finally {
             $this->writer->create($envConfig);
         }

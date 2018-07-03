@@ -31,6 +31,6 @@ class ComposerDumpAutoload implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute('composer dump-autoload -o');
+        $this->shell->execute('composer dump-autoload -o --ansi --no-interaction');
     }
 }

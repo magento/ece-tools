@@ -66,7 +66,7 @@ class CompileDiTest extends TestCase
             ->with('Running DI compilation');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento setup:di:compile -vvv');
+            ->with('php ./bin/magento setup:di:compile -vvv --ansi --no-interaction');
 
         $this->process->execute();
     }

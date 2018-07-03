@@ -100,7 +100,7 @@ class CommandFactory
      */
     private function build(OptionInterface $option): string
     {
-        $command = 'php ./bin/magento setup:static-content:deploy';
+        $command = 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction';
 
         if ($option->isForce()) {
             $command .= ' -f';
