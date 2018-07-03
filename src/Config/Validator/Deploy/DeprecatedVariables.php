@@ -22,6 +22,8 @@ class DeprecatedVariables implements ValidatorInterface
     private $resultFactory;
 
     /**
+     * The source of global and cloud variables.
+     *
      * @var Environment
      */
     private $environment;
