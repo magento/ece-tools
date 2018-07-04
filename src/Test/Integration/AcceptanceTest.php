@@ -185,6 +185,28 @@ class AcceptanceTest extends AbstractTest
     }
 
     /**
+     * This test checks if deployment runs successfully with split build command.
+     */
+    public function testWithSplitBuildCommand()
+    {
+        $environment = [
+            'environment' => [
+                'variables' => [
+                    'ADMIN_EMAIL' => 'admin@example.com',
+                ],
+            ],
+        ];
+        $application = $this->bootstrap->createApplication($environment);
+
+        $this->executeAndAssert(Build\Generate::NAME, $application);
+        $this->executeAndAssert(Build\Backup::NAME, $application);
+        $this->executeAndAssert(Deploy::NAME, $application);
+        $this->executeAndAssert(PostDeploy::NAME, $application);
+
+        $this->assertContentPresence($environment);
+    }
+
+    /**
      * @param array $environment
      * @dataProvider deployInBuildDataProvider
      */
