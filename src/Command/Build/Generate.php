@@ -12,7 +12,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * CLI command that used as part of build hook. Responsible for preparing the codebase.
+ * CLI command that used as part of build hook.
+ * Responsible for patches applying, validating configuration, preparing the codebase, etc.
  */
 class Generate extends Command
 {

@@ -8,7 +8,9 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**
- * @inheritdoc
+ * Composite process for build phase that responsible for preparing codebase.
+ *
+ * {@inheritdoc}
  */
 class Backup implements ProcessInterface
 {
