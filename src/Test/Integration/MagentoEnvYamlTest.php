@@ -21,6 +21,11 @@ class MagentoEnvYamlTest extends TestCase
      */
     private $container;
 
+    /**
+     * The list of variables which are not to be checked
+     *
+     * @var array
+     */
     private $skipVariables = [
         StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS,
         StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT,
