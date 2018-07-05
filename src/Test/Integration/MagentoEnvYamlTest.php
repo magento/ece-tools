@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * Check if the file dist/.magento.env.yaml contains a description of all variables
  */
 class MagentoEnvYamlTest extends TestCase
 {
@@ -46,29 +46,28 @@ class MagentoEnvYamlTest extends TestCase
      */
     public function testCheckVariables()
     {
-        /** @var Schema $schema */
-        $schema = $this->container->get(Schema::class);
         /** @var File $file */
         $file = $this->container->get(File::class);
+        $schema = $this->container->get(Schema::class)->getSchema();
         $path = '/dist/.magento.env.yaml';
         $content = $file->fileGetContents(ECE_BP . $path);
-        $forgottenVariables = [];
+        $matches = [];
 
-        foreach (array_keys($schema->getSchema()) as $variable) {
-            if (in_array($variable, $this->skipVariables)) {
-                continue;
-            }
-
-            if (!preg_match('|# ' . $variable .'|', $content)) {
-                $forgottenVariables[] = $variable;
-            }
+        if (!preg_match_all('|# ([A-Z_]+) |', $content, $matches)) {
+            $this->fail(sprintf('Variables are not found in the file %s', $path));
         }
 
-        if ($forgottenVariables) {
+        $variables = array_keys($schema);
+        // Remove skipped variables from the list
+        $variables = array_diff($variables, $this->skipVariables);
+
+        $diff = array_diff($variables, $matches[1]);
+
+        if ($diff) {
             $message = 'Each new variable should be described in the sample file %s.'
                 . ' Description of next variables is missed %s';
 
-            $this->fail(sprintf($message, $path, implode(', ', $forgottenVariables)));
+            $this->fail(sprintf($message, $path, implode(', ', $diff)));
         }
     }
 }
