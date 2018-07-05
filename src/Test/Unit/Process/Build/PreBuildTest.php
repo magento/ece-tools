@@ -92,12 +92,9 @@ class PreBuildTest extends TestCase
             ->method('get')
             ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn($verbosity);
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Verbosity level is ' . $expectedVerbosity],
-                ['Starting pre-build.']
-            );
+            ->with('Verbosity level is ' . $expectedVerbosity);
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
@@ -125,9 +122,6 @@ class PreBuildTest extends TestCase
     {
         $generatedCode     = 'generated_code';
         $generatedMetadata = 'generated_metadata';
-
-        $this->loggerMock->expects($this->exactly($callCount + 2))
-            ->method('info');
 
         $this->fileMock->expects($this->exactly($callCount))
             ->method('clearDirectory')
