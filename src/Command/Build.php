@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,15 +30,23 @@ class Build extends Command
     private $logger;
 
     /**
+     * @var PackageManager
+     */
+    private $packageManager;
+
+    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
+     * @param PackageManager $packageManager
      */
     public function __construct(
         ProcessInterface $process,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        PackageManager $packageManager
     ) {
         $this->process = $process;
         $this->logger = $logger;
+        $this->packageManager = $packageManager;
 
         parent::__construct();
     }
@@ -59,13 +68,13 @@ class Build extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
+            $this->logger->notice('Starting build. ' . $this->packageManager->getPrettyInfo());
             $this->process->execute();
+            $this->logger->notice('Building completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
             throw $exception;
         }
-
-        $this->logger->notice('Building completed.');
     }
 }
