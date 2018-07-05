@@ -29,11 +29,12 @@ class ShellLoggingTest extends AbstractTest
     protected function setUp()
     {
         parent::setUp();
+        $magentoEnv = ['stage' => ['global' => ['MIN_LOGGING_LEVEL' => 'debug']]];
+        file_put_contents(Bootstrap::getInstance()->getSandboxDir() . '/.magento.env.yaml', json_encode($magentoEnv));
 
         $application = $this->bootstrap->createApplication([
             'variables' => [
                 'ADMIN_EMAIL' => 'admin@example.com',
-                'MIN_LOGGING_LEVEL' => 'debug',
             ],
         ]);
         $this->shell = $application->getContainer()
