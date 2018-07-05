@@ -73,6 +73,13 @@ class Builder
     }
 
     /**
+     * @param bool $enabled
+     */
+    public function setRoMount(bool $enabled) {
+        $this->config->set('disk.roMount', $enabled);
+    }
+
+    /**
      * @param string $key
      * @param string $version
      * @param array $supportedVersions
@@ -109,11 +116,12 @@ class Builder
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
-                        '.:/var/www/magento',
+                        '.:/var/www/magento'. $this->getROMount() ,
                         '/var/www/magento/vendor',
                         '/var/www/magento/generated',
                         '/var/www/magento/pub',
                         '/var/www/magento/var',
+                        '/var/www/magento/app/etc',
                     ],
                 ],
                 'dbdata' => [
@@ -124,6 +132,18 @@ class Builder
                 ],
             ],
         ];
+    }
+
+    /**
+     * @return string
+     */
+    private function getROMount(): string
+    {
+        if ($this->config->get('php.version', self::CONFIG_DEFAULT_PHP_VERSION)) {
+            return ':ro';
+        }
+        return false;
+
     }
 
     /**
