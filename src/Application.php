@@ -9,11 +9,6 @@ use Composer\Composer;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Command;
-use Magento\MagentoCloud\Package\Manager as PackageManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @inheritdoc
@@ -46,21 +41,6 @@ class Application extends \Symfony\Component\Console\Application
     public function getContainer(): ContainerInterface
     {
         return $this->container;
-    }
-
-    /**
-     * Inject a log statement before each command.
-     *
-     * {@inheritdoc}
-     */
-    protected function doRunCommand(SymfonyCommand $command, InputInterface $input, OutputInterface $output)
-    {
-        $packageManager = $this->getContainer()->get(PackageManager::class);
-
-        $this->getContainer()->get(LoggerInterface::class)
-            ->notice('Starting ' . $command->getName() . '. ' . $packageManager->getPrettyInfo());
-
-        return parent::doRunCommand($command, $input, $output);
     }
 
     /**
