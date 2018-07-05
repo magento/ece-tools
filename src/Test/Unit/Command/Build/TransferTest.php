@@ -53,8 +53,8 @@ class TransferTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Starting backup.'],
-                ['Backup completed.']
+                ['Starting transfer files.'],
+                ['Transfer completed.']
             );
         $this->processMock->expects($this->once())
             ->method('execute');
@@ -75,7 +75,7 @@ class TransferTest extends TestCase
     {
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Starting backup.');
+            ->with('Starting transfer files.');
         $this->loggerMock->expects($this->once())
             ->method('critical')
             ->with('Some error');
