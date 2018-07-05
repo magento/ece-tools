@@ -128,7 +128,8 @@ class Bootstrap
             )),
         ]);
 
-        return new Application($this->container);
+        $container = new Container(ECE_BP, $this->getSandboxDir());
+        return new Application($container);
     }
 
     /**
