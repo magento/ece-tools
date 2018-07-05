@@ -141,6 +141,22 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->get('buildGenerateProcess'),
+                        $this->container->get('buildTransferProcess'),
+                    ],
+                ]);
+            });
+        $this->container->when(Build\Generate::class)
+            ->needs(ProcessInterface::class)
+            ->give('buildGenerateProcess');
+        $this->container->when(Build\Transfer::class)
+            ->needs(ProcessInterface::class)
+            ->give('buildTransferProcess');
+        $this->container->bind(
+            'buildGenerateProcess',
+            function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(BuildProcess\PreBuild::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
@@ -166,11 +182,21 @@ class Container implements ContainerInterface
                         $this->container->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->container->make(BuildProcess\DeployStaticContent::class),
                         $this->container->make(BuildProcess\CompressStaticContent::class),
+                    ],
+                ]);
+            }
+        );
+        $this->container->bind(
+            'buildTransferProcess',
+            function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(BuildProcess\ClearInitDirectory::class),
                         $this->container->make(BuildProcess\BackupData::class),
                     ],
                 ]);
-            });
+            }
+        );
         $this->container->when(BuildProcess\DeployStaticContent::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
