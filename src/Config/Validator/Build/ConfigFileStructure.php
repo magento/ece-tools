@@ -8,8 +8,7 @@ namespace Magento\MagentoCloud\Config\Validator\Build;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Util\ArrayManager;
 
 /**
@@ -36,34 +35,26 @@ class ConfigFileStructure implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var MagentoVersion
+     * @var SharedConfig
      */
-    private $magentoVersion;
-
-    /**
-     * @var FileList
-     */
-    private $fileList;
+    private $configResolver;
 
     /**
      * @param ArrayManager $arrayManager
      * @param File $file
-     * @param FileList $fileList
      * @param Validator\ResultFactory $resultFactory
-     * @param MagentoVersion $version
+     * @param SharedConfig $configResolver
      */
     public function __construct(
         ArrayManager $arrayManager,
         File $file,
-        FileList $fileList,
         Validator\ResultFactory $resultFactory,
-        MagentoVersion $version
+        SharedConfig $configResolver
     ) {
         $this->arrayManager = $arrayManager;
         $this->file = $file;
-        $this->fileList = $fileList;
         $this->resultFactory = $resultFactory;
-        $this->magentoVersion = $version;
+        $this->configResolver = $configResolver;
     }
 
     /**
@@ -71,13 +62,8 @@ class ConfigFileStructure implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $configFile = $this->fileList->getConfig();
-            $configFileName = 'config.php';
-        } else {
-            $configFile = $this->fileList->getConfigLocal();
-            $configFileName = 'config.local.php';
-        }
+        $configFile = $this->configResolver->resolve();
+        $configFileName = basename($configFile);
         $config = $this->file->isExists($configFile) ? $this->file->requireFile($configFile) : [];
 
         $flattenedConfig = $this->arrayManager->flatten($config);
@@ -93,7 +79,7 @@ class ConfigFileStructure implements ValidatorInterface
                     '  1. php ./vendor/bin/ece-tools config:dump',
                     '  2. git add -f app/etc/%s',
                     '  3. git commit -m \'Updating %s\'',
-                    '  4. git push'
+                    '  4. git push',
                 ]
             );
             $suggestion = sprintf($suggestion, $configFileName, $configFileName);
@@ -102,7 +88,7 @@ class ConfigFileStructure implements ValidatorInterface
                 Validator\ResultInterface::ERROR,
                 [
                     'error' => $error,
-                    'suggestion' => $suggestion
+                    'suggestion' => $suggestion,
                 ]
             );
         }
