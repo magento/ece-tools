@@ -139,20 +139,20 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(BuildProcess\Generate::class),
-                        $this->container->make(BuildProcess\Backup::class),
+                        $this->container->get('buildGenerateProcess'),
+                        $this->container->get('buildBackupProcess'),
                     ],
                 ]);
             });
         $this->container->when(Build\Generate::class)
             ->needs(ProcessInterface::class)
-            ->give(BuildProcess\Generate::class);
+            ->give('buildGenerateProcess');
         $this->container->when(Build\Backup::class)
             ->needs(ProcessInterface::class)
-            ->give(BuildProcess\Backup::class);
-        $this->container->when(BuildProcess\Generate::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
+            ->give('buildBackupProcess');
+        $this->container->bind(
+            'buildGenerateProcess',
+            function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(BuildProcess\PreBuild::class),
@@ -181,9 +181,9 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(BuildProcess\Backup::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
+        $this->container->bind(
+            'buildBackupProcess',
+            function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(BuildProcess\ClearInitDirectory::class),

@@ -55,6 +55,8 @@ class ApplicationTest extends TestCase
      */
     private $classMap = [
         Command\Build::NAME => Command\Build::class,
+        Command\Build\Generate::NAME => Command\Build\Generate::class,
+        Command\Build\Backup::NAME => Command\Build\Backup::class,
         Command\ConfigDump::NAME => Command\ConfigDump::class,
         Command\CronUnlock::NAME => Command\CronUnlock::class,
         Command\DbDump::NAME => Command\DbDump::class,
