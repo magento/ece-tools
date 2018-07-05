@@ -180,7 +180,8 @@ class Container implements ContainerInterface
                         $this->container->make(BuildProcess\CompressStaticContent::class),
                     ],
                 ]);
-            });
+            }
+        );
         $this->container->bind(
             'buildBackupProcess',
             function () {
@@ -190,7 +191,8 @@ class Container implements ContainerInterface
                         $this->container->make(BuildProcess\BackupData::class),
                     ],
                 ]);
-            });
+            }
+        );
         $this->container->when(BuildProcess\DeployStaticContent::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
