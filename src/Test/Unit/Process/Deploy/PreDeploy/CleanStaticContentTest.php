@@ -5,7 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanStaticContent;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -45,6 +47,11 @@ class CleanStaticContentTest extends TestCase
     private $flagManagerMock;
 
     /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
      * @var CleanStaticContent
      */
     private $process;
@@ -57,13 +64,15 @@ class CleanStaticContentTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->process = new CleanStaticContent(
             $this->loggerMock,
             $this->environmentMock,
             $this->fileMock,
             $this->directoryListMock,
-            $this->flagManagerMock
+            $this->flagManagerMock,
+            $this->stageConfigMock
         );
     }
 
@@ -72,6 +81,10 @@ class CleanStaticContentTest extends TestCase
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_CLEAN_STATIC_FILES)
             ->willReturn(true);
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -94,6 +107,28 @@ class CleanStaticContentTest extends TestCase
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(false);
+        $this->stageConfigMock->expects($this->never())
+            ->method('get');
+        $this->directoryListMock->expects($this->never())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->fileMock->expects($this->never())
+            ->method('backgroundClearDirectory')
+            ->with('magento_root/pub/static');
+
+        $this->process->execute();
+    }
+
+    public function testExecuteWithDeployInBuildNoClean()
+    {
+        $this->flagManagerMock->expects($this->once())
+            ->method('exists')
+            ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_CLEAN_STATIC_FILES)
             ->willReturn(false);
         $this->directoryListMock->expects($this->never())
             ->method('getMagentoRoot')
