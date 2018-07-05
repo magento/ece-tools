@@ -199,7 +199,7 @@ class AcceptanceTest extends AbstractTest
         $application = $this->bootstrap->createApplication($environment);
 
         $this->executeAndAssert(Build\Generate::NAME, $application);
-        $this->executeAndAssert(Build\Backup::NAME, $application);
+        $this->executeAndAssert(Build\Transfer::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
         $this->executeAndAssert(PostDeploy::NAME, $application);
 

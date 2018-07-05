@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command\Build;
 
-use Magento\MagentoCloud\Command\Build\Backup;
+use Magento\MagentoCloud\Command\Build\Transfer;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -15,10 +15,10 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @inheritdoc
  */
-class BackupTest extends TestCase
+class TransferTest extends TestCase
 {
     /**
-     * @var Backup
+     * @var Transfer
      */
     private $command;
 
@@ -42,7 +42,7 @@ class BackupTest extends TestCase
         $this->processMock = $this->getMockBuilder(ProcessInterface::class)
             ->getMockForAbstractClass();
 
-        $this->command = new Backup(
+        $this->command = new Transfer(
             $this->processMock,
             $this->loggerMock
         );

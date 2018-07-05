@@ -140,16 +140,16 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->get('buildGenerateProcess'),
-                        $this->container->get('buildBackupProcess'),
+                        $this->container->get('buildTransferProcess'),
                     ],
                 ]);
             });
         $this->container->when(Build\Generate::class)
             ->needs(ProcessInterface::class)
             ->give('buildGenerateProcess');
-        $this->container->when(Build\Backup::class)
+        $this->container->when(Build\Transfer::class)
             ->needs(ProcessInterface::class)
-            ->give('buildBackupProcess');
+            ->give('buildTransferProcess');
         $this->container->bind(
             'buildGenerateProcess',
             function () {
@@ -183,7 +183,7 @@ class Container implements ContainerInterface
             }
         );
         $this->container->bind(
-            'buildBackupProcess',
+            'buildTransferProcess',
             function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
