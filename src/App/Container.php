@@ -210,6 +210,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
                                     $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
+                                    $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),
                                 ],
                             ],
                         ]),
