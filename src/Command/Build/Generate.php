@@ -49,7 +49,7 @@ class Generate extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Builds application and generates all necessary files');
+            ->setDescription('Generates all necessary files for build stage');
 
         parent::configure();
     }
@@ -60,9 +60,9 @@ class Generate extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->info('Starting build:generate command.');
+            $this->logger->info('Starting generate command.');
             $this->process->execute();
-            $this->logger->info('build:generate command completed.');
+            $this->logger->info('Generate command completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
