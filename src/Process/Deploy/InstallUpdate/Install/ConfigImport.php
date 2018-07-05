@@ -58,6 +58,6 @@ class ConfigImport implements ProcessInterface
         }
 
         $this->logger->info('Run app:config:import command');
-        $this->shell->execute('php ./bin/magento app:config:import -n');
+        $this->shell->execute('php ./bin/magento app:config:import --ansi --no-interaction');
     }
 }

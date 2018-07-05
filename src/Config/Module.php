@@ -43,13 +43,13 @@ class Module
         $moduleConfig = (array)$this->sharedConfig->get('modules');
 
         if (!$moduleConfig) {
-            $this->shell->execute('php ./bin/magento module:enable --all');
+            $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
             $this->sharedConfig->reset();
 
             return;
         }
 
-        $this->shell->execute('php ./bin/magento module:enable --all');
+        $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
         $this->sharedConfig->update(['modules' => $moduleConfig]);
     }
 }

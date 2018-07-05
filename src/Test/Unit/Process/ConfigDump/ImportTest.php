@@ -58,7 +58,7 @@ class ImportTest extends TestCase
             ->willReturn(true);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento app:config:import -n');
+            ->with('php ./bin/magento app:config:import --ansi --no-interaction');
         $this->magentoVersionMock->expects($this->once())
         ->method('isGreaterOrEqual')
         ->willReturn(true);

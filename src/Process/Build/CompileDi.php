@@ -54,6 +54,6 @@ class CompileDi implements ProcessInterface
         $verbosityLevel = $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS);
 
         $this->logger->info('Running DI compilation');
-        $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel}");
+        $this->shell->execute("php ./bin/magento setup:di:compile {$verbosityLevel} --ansi --no-interaction");
     }
 }

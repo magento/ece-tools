@@ -118,7 +118,7 @@ class UpdateComposer extends Command
         );
 
         $output->writeln('Run composer update');
-        $this->shell->execute('composer update');
+        $this->shell->execute('composer update --ansi --no-interaction');
 
         $output->writeln('Composer update finished.');
         $output->writeln('Please commit and push changed files.');

@@ -104,12 +104,13 @@ class SetupTest extends TestCase
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
-                ['php ./bin/magento maintenance:enable -v'],
+                ['php ./bin/magento maintenance:enable --ansi --no-interaction -v'],
                 [
-                    '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade --keep-generated -n -v | tee -a '
+                    '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
+                    . '--keep-generated --ansi --no-interaction -v | tee -a '
                     . $installUpgradeLog . '"',
                 ],
-                ['php ./bin/magento maintenance:disable -v']
+                ['php ./bin/magento maintenance:disable --ansi --no-interaction -v']
             );
         $this->loggerMock->expects($this->once())
             ->method('info')

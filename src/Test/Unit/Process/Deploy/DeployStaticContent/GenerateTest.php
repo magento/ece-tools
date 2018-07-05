@@ -102,14 +102,14 @@ class GenerateTest extends TestCase
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([
-                'php ./bin/magento static:content:deploy:command',
+                'php ./bin/magento static:content:deploy:command --ansi --no-interaction',
             ]);
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
-                ['php ./bin/magento maintenance:enable -vvv'],
-                ['php ./bin/magento static:content:deploy:command'],
-                ['php ./bin/magento maintenance:disable -vvv']
+                ['php ./bin/magento maintenance:enable --ansi --no-interaction -vvv'],
+                ['php ./bin/magento static:content:deploy:command --ansi --no-interaction'],
+                ['php ./bin/magento maintenance:disable --ansi --no-interaction -vvv']
             );
         $this->stageConfigMock->method('get')
             ->willReturnMap([
