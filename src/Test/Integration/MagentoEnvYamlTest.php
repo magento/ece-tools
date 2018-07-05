@@ -67,8 +67,8 @@ class MagentoEnvYamlTest extends TestCase
         if ($forgottenVariables) {
             $message = 'Each new variable should be described in the sample file %s.'
                 . ' Description of next variables is missed %s';
-            $this->fail(
-                sprintf($message, $path, implode(', ', $forgottenVariables)));
+
+            $this->fail(sprintf($message, $path, implode(', ', $forgottenVariables)));
         }
     }
 }
