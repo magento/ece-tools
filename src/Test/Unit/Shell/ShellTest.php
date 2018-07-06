@@ -48,7 +48,6 @@ class ShellTest extends TestCase
 
     /**
      * @param string $execOutput
-     * @param int $loggerInfoExpects
      * @dataProvider executeDataProvider
      */
     public function testExecute($execOutput)
