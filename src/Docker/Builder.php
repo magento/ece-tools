@@ -141,7 +141,7 @@ class Builder
     {
         $volume = ".:/var/www/magento";
         if (!$isCli && $this->config->get('disk.roVolume')) {
-             $volume .= ":ro'";
+             $volume .= ":ro";
         } else {
             $volume .= ":rw'";
         }
