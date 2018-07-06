@@ -43,6 +43,11 @@ interface StageConfigInterface
     const VAR_DEPLOY_FROM_GIT_OPTIONS = 'DEPLOY_FROM_GIT_OPTIONS';
 
     /**
+     * Default minimum logging level.
+     */
+    const VAR_MIN_LOGGING_LEVEL = 'MIN_LOGGING_LEVEL';
+
+    /**
      * Option for enabling merging given configuration with default configuration
      */
     const OPTION_MERGE = '_merge';

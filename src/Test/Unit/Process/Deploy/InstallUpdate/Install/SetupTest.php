@@ -174,7 +174,7 @@ class SetupTest extends TestCase
                 . ' --backend-frontname=\'' . $adminUrlExpected . '\' --admin-user=\'' . $adminNameExpected . '\''
                 . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
                 . '\' --admin-email=\'admin@example.com\' --admin-password=\'' . $adminPasswordExpected . '\''
-                . ' --use-secure-admin=1'
+                . ' --use-secure-admin=1 --ansi --no-interaction'
                 . ' --db-password=\'password\' -v'
                 . ' | tee -a ' . $installUpgradeLog . '"'
             );

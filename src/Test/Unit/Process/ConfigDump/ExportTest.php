@@ -66,7 +66,7 @@ class ExportTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->withConsecutive(
-                ['php ./bin/magento app:config:dump']
+                ['php ./bin/magento app:config:dump --ansi --no-interaction']
             );
         $this->readerMock->expects($this->once())
             ->method('read')

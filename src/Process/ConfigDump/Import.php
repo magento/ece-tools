@@ -52,6 +52,6 @@ class Import implements ProcessInterface
             return;
         }
 
-        $this->shell->execute('php ./bin/magento app:config:import -n');
+        $this->shell->execute('php ./bin/magento app:config:import --ansi --no-interaction');
     }
 }

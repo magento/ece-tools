@@ -5,14 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Application\HookChecker;
 use Magento\MagentoCloud\Config\Validator\Deploy\PostDeploy;
-use Magento\MagentoCloud\Config\Validator\Result\Error;
-use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -25,14 +22,14 @@ class PostDeployTest extends TestCase
     private $validator;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
     /**
-     * @var Environment|Mock
+     * @var HookChecker|MockObject
      */
-    private $environmentMock;
+    private $hookCheckerMock;
 
     /**
      * @inheritdoc
@@ -40,47 +37,34 @@ class PostDeployTest extends TestCase
     protected function setUp()
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->hookCheckerMock = $this->createMock(HookChecker::class);
 
         $this->validator = new PostDeploy(
             $this->resultFactoryMock,
-            $this->environmentMock
+            $this->hookCheckerMock
         );
     }
 
     public function testValidate()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getApplication')
-            ->willReturn([
-                'hooks' => ['post_deploy' => 'some_hook'],
-            ]);
+        $this->hookCheckerMock->expects($this->once())
+            ->method('isPostDeployHookEnabled')
+            ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with(ResultInterface::SUCCESS)
-            ->willReturn($this->createMock(Success::class));
+            ->method('success');
 
-        $this->assertInstanceOf(
-            Success::class,
-            $this->validator->validate()
-        );
+        $this->validator->validate();
     }
 
     public function testValidateWithError()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getApplication')
-            ->willReturn([]);
+        $this->hookCheckerMock->expects($this->once())
+            ->method('isPostDeployHookEnabled')
+            ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with(ResultInterface::ERROR, [
-                'error' => 'Your application does not have the \'post_deploy\' hook enabled.',
-            ])
-            ->willReturn($this->createMock(Error::class));
+            ->method('error')
+            ->with('Your application does not have the \'post_deploy\' hook enabled.');
 
-        $this->assertInstanceOf(
-            Error::class,
-            $this->validator->validate()
-        );
+        $this->validator->validate();
     }
 }

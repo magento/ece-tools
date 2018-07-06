@@ -1,44 +1,35 @@
 diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 --- a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 +++ b/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
-@@ -1,6 +1,6 @@
- <?php
- /**
-- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
-+ * Copyright © Magento, Inc. All rights reserved.
-  * See COPYING.txt for license details.
-  */
- 
 @@ -9,9 +9,12 @@
   */
  namespace Magento\Cron\Observer;
- 
--use Magento\Framework\Console\CLI;
+
 +use Magento\Framework\App\State;
-+use Magento\Framework\Console\Cli;
+ use Magento\Framework\Console\Cli;
  use Magento\Framework\Event\ObserverInterface;
  use \Magento\Cron\Model\Schedule;
 +use Magento\Framework\Profiler\Driver\Standard\Stat;
 +use Magento\Framework\Profiler\Driver\Standard\StatFactory;
- 
+
  /**
   * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
-@@ -96,9 +99,9 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -96,25 +99,54 @@ class ProcessCronQueueObserver implements ObserverInterface
      protected $_shell;
- 
+
      /**
 -     * @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface
 +     * @var \Magento\Framework\Stdlib\DateTime\DateTime
       */
 -    protected $timezone;
 +    protected $dateTime;
- 
+
      /**
       * @var \Symfony\Component\Process\PhpExecutableFinder
-@@ -106,15 +109,44 @@ class ProcessCronQueueObserver implements ObserverInterface
+      */
      protected $phpExecutableFinder;
- 
-     /**
+
++    /**
 +     * @var \Psr\Log\LoggerInterface
 +     */
 +    private $logger;
@@ -63,7 +54,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +     */
 +    private $statProfiler;
 +
-+    /**
+     /**
       * @param \Magento\Framework\ObjectManagerInterface $objectManager
 -     * @param ScheduleFactory $scheduleFactory
 +     * @param \Magento\Cron\Model\ScheduleFactory $scheduleFactory
@@ -108,7 +99,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +        $this->state = $state;
 +        $this->statProfiler = $statFactory->create();
      }
- 
+
      /**
 @@ -151,26 +189,29 @@ class ProcessCronQueueObserver implements ObserverInterface
       */
@@ -127,9 +118,9 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +                    - $this->getCronGroupConfigurationValue($a, 'use_separate_process');
 +            }
 +        );
- 
+
          $phpPath = $this->phpExecutableFinder->find() ?: 'php';
- 
+
          foreach ($jobGroupsRoot as $groupId => $jobsRoot) {
 -            if ($this->_request->getParam('group') !== null
 -                && $this->_request->getParam('group') !== '\'' . ($groupId) . '\''
@@ -147,15 +138,14 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +               && $this->getCronGroupConfigurationValue($groupId, 'use_separate_process') == 1
 +            ) {
                  $this->_shell->execute(
--                    $phpPath . ' %s cron:run --group=' . $groupId . ' --' . CLI::INPUT_KEY_BOOTSTRAP . '='
-+                    $phpPath . ' %s cron:run --group=' . $groupId . ' --' . Cli::INPUT_KEY_BOOTSTRAP . '='
+                     $phpPath . ' %s cron:run --group=' . $groupId . ' --' . Cli::INPUT_KEY_BOOTSTRAP . '='
                      . self::STANDALONE_PROCESS_STARTED . '=1',
                      [
                          BP . '/bin/magento'
 @@ -179,29 +220,9 @@ class ProcessCronQueueObserver implements ObserverInterface
                  continue;
              }
- 
+
 -            foreach ($pendingJobs as $schedule) {
 -                $jobConfig = isset($jobsRoot[$schedule->getJobCode()]) ? $jobsRoot[$schedule->getJobCode()] : null;
 -                if (!$jobConfig) {
@@ -184,7 +174,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +            $this->processPendingJobs($groupId, $jobsRoot, $currentTime);
          }
      }
- 
+
 @@ -218,58 +239,105 @@ class ProcessCronQueueObserver implements ObserverInterface
       */
      protected function _runJob($scheduledTime, $currentTime, $jobConfig, $schedule, $groupId)
@@ -201,7 +191,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +            $this->logger->info(sprintf('Cron Job %s is missed', $jobCode));
              throw new \Exception('Too late for the schedule');
          }
- 
+
          if (!isset($jobConfig['instance'], $jobConfig['method'])) {
              $schedule->setStatus(Schedule::STATUS_ERROR);
 +            $this->logger->error(sprintf('Cron Job %s has an error', $jobCode));
@@ -216,10 +206,10 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
                  sprintf('Invalid callback: %s::%s can\'t be called', $jobConfig['instance'], $jobConfig['method'])
              );
          }
- 
+
 -        $schedule->setExecutedAt(strftime('%Y-%m-%d %H:%M:%S', $this->timezone->scopeTimeStamp()))->save();
 +        $schedule->setExecutedAt(strftime('%Y-%m-%d %H:%M:%S', $this->dateTime->gmtTimestamp()))->save();
- 
+
 +        $this->startProfiling();
          try {
 +            $this->logger->info(sprintf('Cron Job %s is run', $jobCode));
@@ -235,7 +225,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +        } finally {
 +            $this->stopProfiling();
          }
- 
+
          $schedule->setStatus(Schedule::STATUS_SUCCESS)->setFinishedAt(strftime(
              '%Y-%m-%d %H:%M:%S',
 -            $this->timezone->scopeTimeStamp()
@@ -248,8 +238,8 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +            $this->getProfilingStat()
          ));
      }
- 
-     /**
+
++    /**
 +     * Starts profiling
 +     *
 +     * @return void
@@ -282,7 +272,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +        return json_encode($stat);
 +    }
 +
-+    /**
+     /**
       * Return job collection from data base with status 'pending'
       *
       * @return \Magento\Cron\Model\ResourceModel\Schedule\Collection
@@ -303,7 +293,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +        $pendingJobs->addFieldToFilter('job_code', ['in' => array_keys($jobs[$groupId])]);
 +        return $pendingJobs;
      }
- 
+
      /**
 @@ -278,22 +346,32 @@ class ProcessCronQueueObserver implements ObserverInterface
       * @param string $groupId
@@ -328,7 +318,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +        if ($lastRun > $this->dateTime->gmtTimestamp() - $schedulePeriod) {
              return $this;
          }
- 
+
 -        $schedules = $this->_getPendingSchedules();
 +        /**
 +         * save time schedules generation was ran with no expiration
@@ -363,7 +353,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 -            null
 -        );
 +        $this->cleanupScheduleMismatches();
- 
+
          return $this;
      }
 @@ -325,22 +395,12 @@ class ProcessCronQueueObserver implements ObserverInterface
@@ -397,7 +387,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
          }
 -        return $this;
      }
- 
+
      /**
 -     * Clean existed jobs
 +     * Clean expired jobs
@@ -435,7 +425,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +            null
          );
 -        $scheduleLifetime = $scheduleLifetime * self::SECONDS_IN_MINUTE;
- 
+
 -        /**
 -         * @var \Magento\Cron\Model\ResourceModel\Schedule\Collection $history
 -         */
@@ -444,7 +434,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 -            ['in' => [Schedule::STATUS_SUCCESS, Schedule::STATUS_MISSED, Schedule::STATUS_ERROR]]
 -        )->load();
 +        $this->cleanupDisabledJobs($groupId);
- 
+
 -        $historySuccess = (int)$this->_scopeConfig->getValue(
 -            'system/cron/' . $groupId . '/' . self::XML_PATH_HISTORY_SUCCESS,
 -            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
@@ -461,7 +451,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
              Schedule::STATUS_ERROR => $historyFailure * self::SECONDS_IN_MINUTE,
 +            Schedule::STATUS_PENDING => max($historyFailure, $historySuccess) * self::SECONDS_IN_MINUTE,
          ];
- 
+
 -        $now = $this->timezone->scopeTimeStamp();
 -        /** @var Schedule $record */
 -        foreach ($history as $record) {
@@ -478,13 +468,13 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +            $count += $connection->delete(
 +                $scheduleResource->getMainTable(),
 +                [
-+                    'status = ?' => Schedule::STATUS_PENDING,
++                    'status = ?' => $status,
 +                    'job_code in (?)' => array_keys($jobs),
 +                    'created_at < ?' => $connection->formatDate($currentTime - $time)
 +                ]
 +            );
          }
- 
+
 -        // save time history cleanup was ran with no expiration
 -        $this->_cache->save(
 -            $this->timezone->scopeTimeStamp(),
@@ -498,9 +488,9 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +            $this->logger->info(sprintf('%d cron jobs were cleaned', $count));
 +        }
      }
- 
+
      /**
-@@ -442,19 +487,25 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -442,16 +487,23 @@ class ProcessCronQueueObserver implements ObserverInterface
       */
      protected function saveSchedule($jobCode, $cronExpression, $timeInterval, $exists)
      {
@@ -529,11 +519,8 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 +            if (!$alreadyScheduled) {
                  // time matches cron expression
                  $schedule->save();
--                return;
              }
-         }
-     }
-@@ -465,13 +516,13 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -464,13 +516,13 @@ class ProcessCronQueueObserver implements ObserverInterface
       * @param int $time
       * @return Schedule
       */
@@ -547,9 +534,9 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 -            ->setCreatedAt(strftime('%Y-%m-%d %H:%M:%S', $this->timezone->scopeTimeStamp()))
 +            ->setCreatedAt(strftime('%Y-%m-%d %H:%M:%S', $this->dateTime->gmtTimestamp()))
              ->setScheduledAt(strftime('%Y-%m-%d %H:%M', $time));
- 
+
          return $schedule;
-@@ -483,12 +534,174 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -482,12 +534,174 @@ class ProcessCronQueueObserver implements ObserverInterface
       */
      protected function getScheduleTimeInterval($groupId)
      {
@@ -559,7 +546,7 @@ diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/
 -        );
 +        $scheduleAheadFor = (int)$this->getCronGroupConfigurationValue($groupId, self::XML_PATH_SCHEDULE_AHEAD_FOR);
          $scheduleAheadFor = $scheduleAheadFor * self::SECONDS_IN_MINUTE;
- 
+
          return $scheduleAheadFor;
      }
 +
@@ -735,8 +722,7 @@ diff -Naur a/vendor/magento/module-cron/Model/Schedule.php b/vendor/magento/modu
 @@ -1,18 +1,18 @@
  <?php
  /**
-- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
-+ * Copyright © Magento, Inc. All rights reserved.
+  * Copyright © Magento, Inc. All rights reserved.
   * See COPYING.txt for license details.
   */
 
@@ -840,14 +826,6 @@ diff -Naur a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php b/vendo
 index dca4e22..25dd02c 100644
 --- a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
 +++ b/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
-@@ -1,6 +1,6 @@
- <?php
- /**
-- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
-+ * Copyright © Magento, Inc. All rights reserved.
-  * See COPYING.txt for license details.
-  */
- namespace Magento\Cron\Model\ResourceModel;
 @@ -8,7 +8,8 @@ namespace Magento\Cron\Model\ResourceModel;
  /**
   * Schedule resource

@@ -111,8 +111,11 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\DB\Connection::class
         );
         $this->container->singleton(DirectoryCopier\CopyStrategy::class);
+        $this->container->singleton(DirectoryCopier\CopySubFolderStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Build\Reader::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Environment\Reader::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\PostDeploy::class);
@@ -138,6 +141,22 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->get('buildGenerateProcess'),
+                        $this->container->get('buildTransferProcess'),
+                    ],
+                ]);
+            });
+        $this->container->when(Build\Generate::class)
+            ->needs(ProcessInterface::class)
+            ->give('buildGenerateProcess');
+        $this->container->when(Build\Transfer::class)
+            ->needs(ProcessInterface::class)
+            ->give('buildTransferProcess');
+        $this->container->bind(
+            'buildGenerateProcess',
+            function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(BuildProcess\PreBuild::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
@@ -150,6 +169,8 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
                                     $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
                                     $this->container->make(ConfigValidator\Build\ModulesExists::class),
+                                    $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
+                                    $this->container->make(ConfigValidator\Build\ScdOptionsIgnorance::class),
                                 ],
                             ],
                         ]),
@@ -161,11 +182,21 @@ class Container implements ContainerInterface
                         $this->container->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->container->make(BuildProcess\DeployStaticContent::class),
                         $this->container->make(BuildProcess\CompressStaticContent::class),
+                    ],
+                ]);
+            }
+        );
+        $this->container->bind(
+            'buildTransferProcess',
+            function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(BuildProcess\ClearInitDirectory::class),
                         $this->container->make(BuildProcess\BackupData::class),
                     ],
                 ]);
-            });
+            }
+        );
         $this->container->when(BuildProcess\DeployStaticContent::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -196,12 +227,16 @@ class Container implements ContainerInterface
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
+                                    $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
+                                    $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
+                                    $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),
                                 ],
                             ],
                         ]),
@@ -220,14 +255,20 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
+
                         /**
-                         * Remove this line after implementation post-deploy hook
+                         * This process runs processes if only post_deploy hook is not configured.
                          */
+                        $this->container->make(DeployProcess\DeployCompletion::class),
+                    ],
+                ]);
+            });
+        $this->container->when(DeployProcess\DeployCompletion::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
                         $this->container->make(PostDeployProcess\Backup::class),
-                        /**
-                         * Cache clean process must remain the last one in deploy chain.
-                         * Do not add any processes after it.
-                         */
                         $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
                 ]);

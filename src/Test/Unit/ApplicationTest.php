@@ -55,6 +55,8 @@ class ApplicationTest extends TestCase
      */
     private $classMap = [
         Command\Build::NAME => Command\Build::class,
+        Command\Build\Generate::NAME => Command\Build\Generate::class,
+        Command\Build\Transfer::NAME => Command\Build\Transfer::class,
         Command\ConfigDump::NAME => Command\ConfigDump::class,
         Command\CronUnlock::NAME => Command\CronUnlock::class,
         Command\DbDump::NAME => Command\DbDump::class,
@@ -72,6 +74,7 @@ class ApplicationTest extends TestCase
         Command\ModuleRefresh::NAME => Command\ModuleRefresh::class,
         Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
         Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
+        Command\Docker\Build::NAME => Command\Docker\Build::class,
     ];
 
     /**

@@ -16,6 +16,12 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
  */
 class File
 {
+
+    /**
+     * This is the prefix we use for directories we are deleting in the background.
+     */
+    const DELETING_PREFIX = 'DELETING_';
+
     /**
      * Returns last warning message string
      *
@@ -92,15 +98,13 @@ class File
      * Parse a configuration file.
      *
      * @param string $path
-     * @param bool $processSections
-     * @param int $scannerMode
      * @return array|bool
      * @throws FileSystemException
      */
-    public function parseIni($path, $processSections = false, $scannerMode = INI_SCANNER_NORMAL)
+    public function parseIni($path)
     {
         clearstatcache();
-        $result = @parse_ini_file($path, $processSections, $scannerMode);
+        $result = @parse_ini_file($path);
         if (false === $result) {
             $this->fileSystemException('Cannot read contents from file "%1" %2', [$path, $this->getWarningMessage()]);
         }
@@ -189,9 +193,12 @@ class File
          * Use shell for best performance.
          */
         shell_exec(sprintf(
-            '/bin/bash -c "shopt -s dotglob; cp -R %s/* %s/"',
-            $source,
-            $destination
+            '/bin/bash -c %s',
+            escapeshellarg(sprintf(
+                'shopt -s dotglob; cp -R %s/* %s/',
+                escapeshellarg($source),
+                escapeshellarg($destination)
+            ))
         ));
     }
 
@@ -310,7 +317,13 @@ class File
         }
 
         $timestamp = time();
-        $tempDir = $path . '/' . preg_replace('/\//', '_', basename($path)) . '_' . $timestamp;
+        $tempDir = sprintf(
+            '%s/%s%s_%s',
+            $path,
+            static::DELETING_PREFIX,
+            preg_replace('/\//', '_', basename($path)),
+            $timestamp
+        );
         $excludes[] = $tempDir;
 
         if (!$this->isDirectory($tempDir)) {

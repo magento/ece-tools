@@ -53,7 +53,7 @@ class CleanCacheTest extends TestCase
             ->willReturn('-vvv');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento cache:flush -vvv');
+            ->with('php ./bin/magento cache:flush --ansi --no-interaction -vvv');
 
         $this->process->execute();
     }
@@ -66,7 +66,7 @@ class CleanCacheTest extends TestCase
             ->willReturn('-vvv');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento cache:flush -vvv');
+            ->with('php ./bin/magento cache:flush --ansi --no-interaction -vvv');
 
         $this->process->execute();
     }
@@ -78,7 +78,7 @@ class CleanCacheTest extends TestCase
             ->willReturn('');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento cache:flush ');
+            ->with('php ./bin/magento cache:flush --ansi --no-interaction ');
 
         $this->process->execute();
     }

@@ -51,11 +51,12 @@ class DatabaseConfiguration implements ValidatorInterface
         if (!isset(
             $dbConfig['connection']['default']['host'],
             $dbConfig['connection']['default']['dbname'],
-            $dbConfig['connection']['default']['username']
+            $dbConfig['connection']['default']['username'],
+            $dbConfig['connection']['default']['password']
         )) {
             return $this->resultFactory->error(
                 sprintf('Variable %s is not configured properly', DeployInterface::VAR_DATABASE_CONFIGURATION),
-                'At least host, dbname and username options must be configured for default connection'
+                'At least host, dbname, username and password options must be configured for default connection'
             );
         }
 

@@ -1,5 +1,4 @@
 diff -Naur a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php b/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
-index f772a6c..d760e92 100644
 --- a/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 +++ b/vendor/magento/module-cron/Observer/ProcessCronQueueObserver.php
 @@ -13,6 +13,8 @@ use Magento\Framework\App\State;
@@ -11,18 +10,18 @@ index f772a6c..d760e92 100644
 
  /**
   * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
-@@ -127,6 +129,11 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -126,6 +128,11 @@ class ProcessCronQueueObserver implements ObserverInterface
+      */
      private $jobs;
 
-     /**
++    /**
 +     * @var Stat
 +     */
 +    private $statProfiler;
 +
-+    /**
+     /**
       * @param \Magento\Framework\ObjectManagerInterface $objectManager
       * @param \Magento\Cron\Model\ScheduleFactory $scheduleFactory
-      * @param \Magento\Framework\App\CacheInterface $cache
 @@ -138,6 +145,7 @@ class ProcessCronQueueObserver implements ObserverInterface
       * @param \Magento\Framework\Process\PhpExecutableFinderFactory $phpExecutableFinderFactory
       * @param \Psr\Log\LoggerInterface $logger
@@ -165,7 +164,7 @@ index f772a6c..d760e92 100644
              throw new \Exception(
                  sprintf('Invalid callback: %s::%s can\'t be called', $jobConfig['instance'], $jobConfig['method'])
              );
-@@ -288,17 +265,65 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -288,8 +265,12 @@ class ProcessCronQueueObserver implements ObserverInterface
 
          $schedule->setExecutedAt(strftime('%Y-%m-%d %H:%M:%S', $this->dateTime->gmtTimestamp()))->save();
 
@@ -173,8 +172,15 @@ index f772a6c..d760e92 100644
          try {
 +            $this->logger->info(sprintf('Cron Job %s is run', $jobCode));
              call_user_func_array($callback, [$schedule]);
-         } catch (\Exception $e) {
++
++
+         } catch (\Throwable $e) {
              $schedule->setStatus(Schedule::STATUS_ERROR);
+             if (!$e instanceof \Exception) {
+@@ -299,13 +280,59 @@ class ProcessCronQueueObserver implements ObserverInterface
+                     $e
+                 );
+             }
 +            $this->logger->error(sprintf(
 +                'Cron Job %s has an error. Statistics: %s %s',
 +                $jobCode,
@@ -231,7 +237,7 @@ index f772a6c..d760e92 100644
      }
 
      /**
-@@ -306,15 +331,13 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -313,15 +340,13 @@ class ProcessCronQueueObserver implements ObserverInterface
       *
       * @return \Magento\Cron\Model\ResourceModel\Schedule\Collection
       */
@@ -253,7 +259,7 @@ index f772a6c..d760e92 100644
      }
 
      /**
-@@ -323,22 +346,32 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -330,22 +355,32 @@ class ProcessCronQueueObserver implements ObserverInterface
       * @param string $groupId
       * @return $this
       */
@@ -291,7 +297,7 @@ index f772a6c..d760e92 100644
          $exists = [];
          /** @var Schedule $schedule */
          foreach ($schedules as $schedule) {
-@@ -353,16 +386,6 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -360,16 +395,6 @@ class ProcessCronQueueObserver implements ObserverInterface
          $this->_generateJobs($jobs[$groupId], $exists, $groupId);
          $this->cleanupScheduleMismatches();
 
@@ -308,7 +314,7 @@ index f772a6c..d760e92 100644
          return $this;
      }
 
-@@ -372,7 +395,7 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -379,7 +404,7 @@ class ProcessCronQueueObserver implements ObserverInterface
       * @param   array $jobs
       * @param   array $exists
       * @param   string $groupId
@@ -317,7 +323,7 @@ index f772a6c..d760e92 100644
       */
      protected function _generateJobs($jobs, $exists, $groupId)
      {
-@@ -385,77 +408,60 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -392,77 +417,60 @@ class ProcessCronQueueObserver implements ObserverInterface
              $timeInterval = $this->getScheduleTimeInterval($groupId);
              $this->saveSchedule($jobCode, $cronExpression, $timeInterval, $exists);
          }
@@ -404,7 +410,7 @@ index f772a6c..d760e92 100644
 +            $count += $connection->delete(
 +                $scheduleResource->getMainTable(),
 +                [
-+                    'status = ?' => Schedule::STATUS_PENDING,
++                    'status = ?' => $status,
 +                    'job_code in (?)' => array_keys($jobs),
 +                    'created_at < ?' => $connection->formatDate($currentTime - $time)
 +                ]
@@ -426,7 +432,7 @@ index f772a6c..d760e92 100644
      }
 
      /**
-@@ -486,7 +492,7 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -493,7 +501,7 @@ class ProcessCronQueueObserver implements ObserverInterface
          for ($time = $currentTime; $time < $timeAhead; $time += self::SECONDS_IN_MINUTE) {
              $scheduledAt = strftime('%Y-%m-%d %H:%M:00', $time);
              $alreadyScheduled = !empty($exists[$jobCode . '/' . $scheduledAt]);
@@ -435,7 +441,7 @@ index f772a6c..d760e92 100644
              $valid = $schedule->trySchedule();
              if (!$valid) {
                  if ($alreadyScheduled) {
-@@ -510,7 +516,7 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -517,7 +525,7 @@ class ProcessCronQueueObserver implements ObserverInterface
       * @param int $time
       * @return Schedule
       */
@@ -444,7 +450,7 @@ index f772a6c..d760e92 100644
      {
          $schedule = $this->_scheduleFactory->create()
              ->setCronExpr($cronExpression)
-@@ -528,10 +534,7 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -535,10 +543,7 @@ class ProcessCronQueueObserver implements ObserverInterface
       */
      protected function getScheduleTimeInterval($groupId)
      {
@@ -456,7 +462,7 @@ index f772a6c..d760e92 100644
          $scheduleAheadFor = $scheduleAheadFor * self::SECONDS_IN_MINUTE;
 
          return $scheduleAheadFor;
-@@ -547,16 +550,26 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -554,16 +559,26 @@ class ProcessCronQueueObserver implements ObserverInterface
      private function cleanupDisabledJobs($groupId)
      {
          $jobs = $this->getJobs();
@@ -488,7 +494,7 @@ index f772a6c..d760e92 100644
      }
 
      /**
-@@ -586,12 +599,12 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -593,12 +608,12 @@ class ProcessCronQueueObserver implements ObserverInterface
       */
      private function cleanupScheduleMismatches()
      {
@@ -505,7 +511,7 @@ index f772a6c..d760e92 100644
                  'scheduled_at in (?)' => $scheduledAtList,
              ]);
          }
-@@ -608,4 +621,87 @@ class ProcessCronQueueObserver implements ObserverInterface
+@@ -615,4 +630,87 @@ class ProcessCronQueueObserver implements ObserverInterface
          }
          return $this->jobs;
      }
@@ -593,24 +599,3 @@ index f772a6c..d760e92 100644
 +        }
 +    }
  }
-
-diff -Naur a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php b/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
-index a47227b..25dd02c 100644
---- a/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
-+++ b/vendor/magento/module-cron/Model/ResourceModel/Schedule.php
-@@ -66,7 +66,14 @@ class Schedule extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
-     {
-         $connection = $this->getConnection();
-
--        $match = $connection->quoteInto('existing.job_code = current.job_code AND existing.status = ?', $newStatus);
-+        // this condition added to avoid cron jobs locking after incorrect termination of running job
-+        $match = $connection->quoteInto(
-+            'existing.job_code = current.job_code ' .
-+            'AND (existing.executed_at > UTC_TIMESTAMP() - INTERVAL 1 DAY OR existing.executed_at IS NULL) ' .
-+            'AND existing.status = ?',
-+            $newStatus
-+        );
-+
-         $selectIfUnlocked = $connection->select()
-             ->joinLeft(
-                 ['existing' => $this->getTable('cron_schedule')],
