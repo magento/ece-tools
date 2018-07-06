@@ -51,7 +51,7 @@ class Bootstrap
     {
         $this->container = new Container(ECE_BP, $this->getSandboxDir());
         # $this->file = new File(new ForkManagerSingletonFactory($this->container));
-        $this->file =  container()->get(File::class);
+        $this->file =  $this->container()->get(File::class);
         $this->shell = new Shell\Shell(
             $this->getSandboxDir()
         );
