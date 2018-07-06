@@ -75,7 +75,7 @@ class Builder
     /**
      * @param bool $enabled
      */
-    public function setroVolume(bool $enabled)
+    public function setRoVolume(bool $enabled)
     {
         $this->config->set('disk.roVolume', $enabled);
     }
@@ -140,7 +140,6 @@ class Builder
     private function getMagentoVolume($isCli = false): string
     {
         $volume = "'.:/var/www/magento";
-        var_dump($this->config->get('disk.roVolume'));
         if (!$isCli && $this->config->get('disk.roVolume')) {
              $volume .= ":ro'";
         } else {

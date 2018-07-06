@@ -24,7 +24,7 @@ class Build extends Command
     const OPTION_PHP = 'php';
     const OPTION_NGINX = 'nginx';
     const OPTION_DB = 'db';
-    const RO_DISK = 'ro-mount';
+    const OPTION_RO_VOLUME = 'ro-volume';
 
     /**
      * @var BuilderFactory
@@ -89,7 +89,7 @@ class Build extends Command
                 InputOption::VALUE_OPTIONAL,
                 'DB version'
             )->addOption(
-                self::RO_DISK,
+                self::OPTION_RO_VOLUME,
                 null,
                 InputOption::VALUE_NONE,
                 'Read only disk mount'
@@ -120,8 +120,8 @@ class Build extends Command
             $builder->setDbVersion($dbVersion);
         }
 
-        if ($roMount = $input->getOption(self::RO_DISK)) {
-            $builder->setRoMount($roMount);
+        if ($roMount = $input->getOption(self::OPTION_RO_VOLUME)) {
+            $builder->setRoVolume($roMount);
         }
 
         $configFile = $this->fileList->getMagentoDockerCompose();

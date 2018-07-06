@@ -112,6 +112,27 @@ class BuilderTest extends TestCase
     }
 
     /**
+     * @param string $enabled
+     * @dataProvider setRoVolumeDataProvider
+     */
+    public function testSetRoVolume(bool $enabled)
+    {
+        $this->configMock->expects($this->once())
+            ->method('set')
+            ->with('disk.roVolume', $enabled);
+
+        $this->builder->setRoVolume($enabled);
+    }
+
+    public function setRoVolumeDataProvider()
+    {
+        return [
+            [true],
+            [false]
+        ];
+    }
+
+    /**
      * @expectedException Exception
      * @expectedExceptionMessage Service php:2 is not supported
      */
@@ -157,32 +178,6 @@ class BuilderTest extends TestCase
             ->method('set');
 
         $this->builder->setDbVersion('2');
-    }
-
-    /**
-     * @param bool $isCli
-     * @param bool $isRo
-     * @param string $expected
-     * @dataProvider getMagentoVolumeDataProvider
-     */
-    public function testGetMagentoVolume(bool $isCli, bool $isRo, string $expected)
-    {
-        $this->configMock->expects($this->any())
-            ->method('get')
-            ->with('roVolume')
-            ->willReturn($isRo);
-
-        $this->assertEquals($expected, $this->builder->getMagentoVolume($isCli));
-    }
-
-    public function getMagentoVolumeDataProvider() : array
-    {
-        return [
-            [true, true, "'.:/var/www/magento:rw"],
-            [false, true, "'.:/var/www/magento:ro"],
-            [false, false, "'.:/var/www/magento:rw"],
-            [true, false, "'.:/var/www/magento:rw"]
-        ];
     }
 
     public function testBuild()
