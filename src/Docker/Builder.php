@@ -143,7 +143,7 @@ class Builder
         if (!$isCli && $this->config->get('disk.roVolume')) {
              $volume .= ":ro";
         } else {
-            $volume .= ":rw'";
+            $volume .= ":rw";
         }
         return $volume;
     }
