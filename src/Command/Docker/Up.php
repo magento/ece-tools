@@ -9,6 +9,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Config\Environment;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -26,7 +27,7 @@ class Up extends Command
      * @var Environment
      */
     private $environment;
-    
+
     /**
      */
     public function __construct(ShellInterface $shell, Environment $environment)
