@@ -57,9 +57,10 @@ class DriverTest extends AbstractTest
         $this->assertDirectoryNotExists($initPubStaticSubdirectory);
         $this->assertTrue($this->fileDriver->createDirectory($initPubStaticSubdirectory));
         $this->assertDirectoryExists($initPubStaticSubdirectory);
-        $this->fileDriver->backgroundClearDirectory($initPubStaticSubdirectory);
+        $this->fileDriver->backgroundClearDirectory($initPubStatic);
         $forkmanager = $this->forkManagerSingletonFactory->create();
         $forkmanager->waitForChildren();
-        $this->assertDirectoryNotExists($initPubStaticSubdirectory);
+        $this->assertDirectoryExists($initPubStaticSubdirectory);
+        $this->assertTrue($this->fileDriver->isEmptyDirectory($initPubStatic));
     }
 }
