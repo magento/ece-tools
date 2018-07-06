@@ -159,6 +159,32 @@ class BuilderTest extends TestCase
         $this->builder->setDbVersion('2');
     }
 
+    /**
+     * @param bool $isCli
+     * @param bool $isRo
+     * @param string $expected
+     * @dataProvider getMagentoVolumeDataProvider
+     */
+    public function testGetMagentoVolume(bool $isCli, bool $isRo, string $expected)
+    {
+        $this->configMock->expects($this->any())
+            ->method('get')
+            ->with('roVolume')
+            ->willReturn($isRo);
+
+        $this->assertEquals($expected, $this->builder->getMagentoVolume($isCli));
+    }
+
+    public function getMagentoVolumeDataProvider() : array
+    {
+        return [
+            [true, true, "'.:/var/www/magento:rw"],
+            [false, true, "'.:/var/www/magento:ro"],
+            [false, false, "'.:/var/www/magento:rw"],
+            [true, false, "'.:/var/www/magento:rw"]
+        ];
+    }
+
     public function testBuild()
     {
         $config = $this->builder->build();

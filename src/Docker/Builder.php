@@ -75,8 +75,9 @@ class Builder
     /**
      * @param bool $enabled
      */
-    public function setRoMount(bool $enabled) {
-        $this->config->set('disk.roMount', $enabled);
+    public function setroVolume(bool $enabled)
+    {
+        $this->config->set('disk.roVolume', $enabled);
     }
 
     /**
@@ -116,7 +117,6 @@ class Builder
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
-                        '.:/var/www/magento'. $this->getROMount() ,
                         '/var/www/magento/vendor',
                         '/var/www/magento/generated',
                         '/var/www/magento/pub',
@@ -137,13 +137,16 @@ class Builder
     /**
      * @return string
      */
-    private function getROMount(): string
+    private function getMagentoVolume($isCli = false): string
     {
-        if ($this->config->get('php.version', self::CONFIG_DEFAULT_PHP_VERSION)) {
-            return ':ro';
+        $volume = "'.:/var/www/magento";
+        var_dump($this->config->get('disk.roVolume'));
+        if (!$isCli && $this->config->get('disk.roVolume')) {
+             $volume .= ":ro'";
+        } else {
+            $volume .= ":rw'";
         }
-        return false;
-
+        return $volume;
     }
 
     /**
@@ -165,6 +168,9 @@ class Builder
             ],
             'volumes_from' => [
                 'appdata',
+            ],
+            'volumes' => [
+                $this->getMagentoVolume(false),
             ],
             'env_file' => [
                 './docker/global.env',
@@ -189,6 +195,7 @@ class Builder
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
+                $this->getMagentoVolume(true),
             ],
             'volumes_from' => [
                 'appdata',
@@ -247,6 +254,9 @@ class Builder
             ],
             'volumes_from' => [
                 'appdata',
+            ],
+            'volumes' => [
+                $this->getMagentoVolume(false),
             ],
             'env_file' => [
                 './docker/global.env',
