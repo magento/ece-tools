@@ -30,11 +30,6 @@ class Bootstrap
     private static $instance;
 
     /**
-     * @var Container
-     */
-    private $container;
-
-    /**
      * @var File
      */
     private $file;
@@ -49,8 +44,8 @@ class Bootstrap
      */
     public function __construct()
     {
-        $this->container = new Container(ECE_BP, $this->getSandboxDir());
-        $this->file = new File(new ForkManagerSingletonFactory($this->container));
+        $container = new Container(ECE_BP, $this->getSandboxDir());
+        $this->file =  $container->get(File::class);
         $this->shell = new Shell\Shell(
             $this->getSandboxDir()
         );
@@ -127,7 +122,9 @@ class Bootstrap
             )),
         ]);
 
-        return new Application($this->container);
+        $container = new Container(ECE_BP, $this->getSandboxDir());
+
+        return new Application($container);
     }
 
     /**
