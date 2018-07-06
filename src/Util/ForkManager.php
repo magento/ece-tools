@@ -47,19 +47,23 @@ class ForkManager
      */
     public function createForkedChildAndExec(string $command, string $description)
     {
-        $pid = \pcntl_fork();
+        if (function_exists('pcntl_fork')) {
+            $pid = pcntl_fork();
+        } else {
+            $pid = -1;
+        }
         switch ($pid) {
             case 0:   // This is run in the child process
-                \fclose(STDIN);
-                \fclose(STDOUT);
-                \fclose(STDERR);
+                fclose(STDIN);
+                fclose(STDOUT);
+                fclose(STDERR);
                 // TODO: We need to close all open file descriptors, not just the default ones.
-                \pcntl_exec('/bin/sh', ['-c', $command]);
+                pcntl_exec('/bin/sh', ['-c', $command]);
                 // Note: we shouldn't get to this point unless pcntl_exec failed.
                 throw new \RuntimeException("pcntl_exec failed");
                 break;
             case -1: // If pcntl_fork failed, we'll just run the command in the this process
-                \shell_exec($command);
+                shell_exec($command);
                 break;
             default:  // This is the parent process
                 $child = new Child($pid, $command, $description);
