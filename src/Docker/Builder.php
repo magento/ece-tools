@@ -139,7 +139,7 @@ class Builder
      */
     private function getMagentoVolume($isCli = false): string
     {
-        $volume = "'.:/var/www/magento";
+        $volume = ".:/var/www/magento";
         if (!$isCli && $this->config->get('disk.roVolume')) {
              $volume .= ":ro'";
         } else {
