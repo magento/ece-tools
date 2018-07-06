@@ -70,6 +70,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\Wizard\IdealState::class),
                 $this->container->create(Command\Wizard\MasterSlave::class),
                 $this->container->create(Command\Docker\Build::class),
+                $this->container->create(Command\Docker\Up::class),
             ]
         );
     }

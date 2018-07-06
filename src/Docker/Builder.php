@@ -111,7 +111,8 @@ class Builder
             'version' => '2',
             'services' => [
                 'fpm' => $this->getFpmService(),
-                'cli' => $this->getCliService(),
+                'cli_build' => $this->getCliService(true),
+                'cli_deploy' => $this->getCliService(false),
                 'db' => $this->getDbService(),
                 'web' => $this->getWebService(),
                 'appdata' => [
@@ -181,7 +182,7 @@ class Builder
     /**
      * @return array
      */
-    private function getCliService(): array
+    private function getCliService(bool $isBuild): array
     {
         return [
             'hostname' => 'cli.magento2.docker',
@@ -194,7 +195,7 @@ class Builder
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
-                $this->getMagentoVolume(true),
+                $this->getMagentoVolume($isBuild),
             ],
             'volumes_from' => [
                 'appdata',
