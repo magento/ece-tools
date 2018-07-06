@@ -23,10 +23,16 @@ class Up extends Command
     private $shell;
 
     /**
+     * @var Environment
      */
-    public function __construct(ShellInterface $shell)
+    private $environment;
+    
+    /**
+     */
+    public function __construct(ShellInterface $shell, Environment $environment)
     {
         $this->shell = $shell;
+        $this->environment = $environment;
         parent::__construct();
     }
 
