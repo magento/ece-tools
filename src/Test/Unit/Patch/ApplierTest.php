@@ -112,12 +112,9 @@ class ApplierTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('git apply ' . $path);
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                [$expectedLog],
-                ['Done.']
-            );
+            ->with($expectedLog);
         $this->loggerMock->expects($this->never())
             ->method('notice');
 
@@ -155,12 +152,9 @@ class ApplierTest extends TestCase
             ->with('git apply root/' . $path);
         $this->loggerMock->expects($this->never())
             ->method('notice');
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Applying patch patchName (root/path/to/patch) 1.0.'],
-                ['Done.']
-            );
+            ->with('Applying patch patchName (root/path/to/patch) 1.0.');
         $this->directoryListMock->expects($this->once())
             ->method('getPatches')
             ->willReturn('root');
@@ -213,12 +207,9 @@ class ApplierTest extends TestCase
             )
             ->willReturnCallback([$this, 'shellMockReverseCallback']);
 
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Applying patch patchName (path/to/patch) 1.0.'],
-                ['Done.']
-            );
+            ->with('Applying patch patchName (path/to/patch) 1.0.');
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with("Patch patchName (path/to/patch) was already applied.");

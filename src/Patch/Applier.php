@@ -130,8 +130,6 @@ class Applier
 
             $this->logger->notice("Patch {$name} was already applied.");
         }
-
-        $this->logger->info('Done.');
     }
 
     /**
