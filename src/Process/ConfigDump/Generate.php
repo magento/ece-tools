@@ -116,6 +116,8 @@ class Generate implements ProcessInterface
                 $temp = $newConfig['system']['stores'][$configLocale]['general']['locale']['code'];
                 unset($newConfig['system']['stores'][$configLocale]);
                 $newConfig['system']['stores'][$configLocale]['general']['locale']['code'] = $temp;
+            } else {
+                unset($newConfig['system']['stores'][$configLocale]);
             }
         }
 
