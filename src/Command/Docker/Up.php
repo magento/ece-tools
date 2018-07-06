@@ -5,15 +5,10 @@
  */
 namespace Magento\MagentoCloud\Command\Docker;
 
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Docker\BuilderFactory;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Yaml\Yaml;
+use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -21,6 +16,12 @@ use Symfony\Component\Yaml\Yaml;
 class Up extends Command
 {
     const NAME = 'docker:up';
+
+    /**
+     * @var ShellInterface
+     */
+    private $shell;
+
     /**
      */
     public function __construct(ShellInterface $shell)
