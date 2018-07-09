@@ -53,6 +53,11 @@ class Generate implements ProcessInterface
     private $sharedConfig;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param ConnectionInterface $connection
      * @param File $file
      * @param ArrayManager $arrayManager
@@ -70,11 +75,7 @@ class Generate implements ProcessInterface
         $this->file = $file;
         $this->arrayManager = $arrayManager;
         $this->sharedConfig = $sharedConfig;
-
-        if ($magentoVersion->isGreaterOrEqual('2.2')) {
-            $this->configKeys[] = 'modules';
-            $this->configKeys[] = 'system/websites';
-        }
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -82,6 +83,11 @@ class Generate implements ProcessInterface
      */
     public function execute()
     {
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $this->configKeys[] = 'modules';
+            $this->configKeys[] = 'system/websites';
+        }
+
         $configFile = $this->sharedConfig->resolve();
         $oldConfig = require $configFile;
         $newConfig = [];
@@ -108,16 +114,16 @@ class Generate implements ProcessInterface
         /**
          * Only saving general/locale/code.
          */
-        $configLocales = isset($newConfig['system']['stores'])
+        $storeCodes = isset($newConfig['system']['stores'])
             ? array_keys($newConfig['system']['stores'])
             : [];
-        foreach ($configLocales as $configLocale) {
-            if (isset($newConfig['system']['stores'][$configLocale]['general']['locale']['code'])) {
-                $temp = $newConfig['system']['stores'][$configLocale]['general']['locale']['code'];
-                unset($newConfig['system']['stores'][$configLocale]);
-                $newConfig['system']['stores'][$configLocale]['general']['locale']['code'] = $temp;
+        foreach ($storeCodes as $storeCode) {
+            if (isset($newConfig['system']['stores'][$storeCode]['general']['locale']['code'])) {
+                $temp = $newConfig['system']['stores'][$storeCode]['general']['locale']['code'];
+                unset($newConfig['system']['stores'][$storeCode]);
+                $newConfig['system']['stores'][$storeCode]['general']['locale']['code'] = $temp;
             } else {
-                unset($newConfig['system']['stores'][$configLocale]);
+                unset($newConfig['system']['stores'][$storeCode]);
             }
         }
 
