@@ -60,7 +60,7 @@ class PostDeployTest extends TestCase
             ->with(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED)
             ->willReturn(false);
         $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['Starting post-deploy.'],
                 ['Post-deploy is complete.']
@@ -83,7 +83,7 @@ class PostDeployTest extends TestCase
             ->with(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('warning')
             ->with('Post-deploy is skipped because deploy was failed.');
         $this->processMock->expects($this->never())
             ->method('execute');
@@ -103,7 +103,7 @@ class PostDeployTest extends TestCase
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('Starting post-deploy.');
         $this->loggerMock->expects($this->once())
             ->method('critical')

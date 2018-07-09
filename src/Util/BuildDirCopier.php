@@ -63,7 +63,7 @@ class BuildDirCopier
             $result = $strategy->copy($fromDirectory, $toDirectory);
 
             if ($result) {
-                $this->logger->info(
+                $this->logger->debug(
                     sprintf(
                         'Directory %s was copied with strategy: %s',
                         $dir,

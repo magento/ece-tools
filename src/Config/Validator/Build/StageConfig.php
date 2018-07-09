@@ -69,7 +69,7 @@ class StageConfig implements ValidatorInterface
             return $this->resultFactory->create(Validator\Result\Error::ERROR, [
                 'error' => 'Environment configuration is not valid. ' .
                            'Correct the following items in your .magento.env.yaml file:',
-                'suggestion' => PHP_EOL . "\t" .implode(PHP_EOL . "\t", $errors) . PHP_EOL,
+                'suggestion' => '  ' .implode(PHP_EOL . '  ', $errors),
             ]);
         }
 
