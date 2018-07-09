@@ -70,6 +70,21 @@ class ArrayManagerTest extends TestCase
                     'test/test2' => 'value2',
                 ],
             ],
+            [
+                [
+                    'test' => [
+                        'test2' => 'value2',
+                    ],
+                    'test-empty' => [
+                        'test2' => [],
+                    ]
+                ],
+                '#',
+                [
+                    '#test/test2' => 'value2',
+                    '#test-empty/test2' => []
+                ],
+            ],
         ];
     }
 
