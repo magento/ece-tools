@@ -81,9 +81,12 @@ class GitApplierTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('git apply ' . $path);
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->with($expectedLog);
+            ->withConsecutive(
+                [$expectedLog],
+                ['Done.']
+            );
         $this->loggerMock->expects($this->never())
             ->method('notice');
 
@@ -115,7 +118,7 @@ class GitApplierTest extends TestCase
             ->with('git apply root/' . $path);
         $this->loggerMock->expects($this->never())
             ->method('notice');
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Applying patch patchName (root/path/to/patch).'],
@@ -145,7 +148,7 @@ class GitApplierTest extends TestCase
             )
             ->willReturnCallback([$this, 'shellMockReverseCallback']);
 
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Applying patch patchName (path/to/patch).'],
