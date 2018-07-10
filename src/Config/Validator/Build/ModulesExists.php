@@ -41,6 +41,6 @@ class ModulesExists implements ValidatorInterface
     {
         return $this->sharedConfig->has('modules')
             ? $this->resultFactory->success()
-            : $this->resultFactory->error('Shared config file is missing module section.');
+            : $this->resultFactory->error('The modules section is missing from the shared config file.');
     }
 }

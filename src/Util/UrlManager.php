@@ -104,7 +104,7 @@ class UrlManager
             $urls['secure'] = substr_replace($urls['unsecure'], self::PREFIX_SECURE, 0, strlen(self::PREFIX_UNSECURE));
         }
 
-        $this->logger->info(sprintf('Routes: %s', var_export($urls, true)));
+        $this->logger->debug('Routes: ' . var_export($urls, true));
 
         return $this->urls = $urls;
     }

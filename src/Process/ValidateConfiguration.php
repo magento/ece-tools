@@ -56,9 +56,11 @@ class ValidateConfiguration implements ProcessInterface
 
                 if ($result instanceof Error) {
                     $maxLevel = max($maxLevel, $level);
-                    $pattern = $result->getSuggestion() ? '- %s (%s)' : '- %s';
 
-                    $messages[] = sprintf($pattern, $result->getError(), $result->getSuggestion());
+                    $messages[] = '- ' . $result->getError();
+                    if ($result->getSuggestion()) {
+                        $messages[] = $result->getSuggestion();
+                    }
                 }
             }
         }

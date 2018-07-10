@@ -44,7 +44,7 @@ class Shell implements ShellInterface
      */
     public function execute(string $command)
     {
-        $this->logger->info('Command: ' . $command);
+        $this->logger->info($command);
 
         $rootPathCommand = sprintf(
             'cd %s && %s 2>&1',
@@ -58,10 +58,12 @@ class Shell implements ShellInterface
             $status
         );
 
-        $this->logger->info('Status: ' . var_export($status, true));
+        $output = array_map(function ($line) {
+            return '  ' . $line;
+        }, $output);
 
         if ($output) {
-            $this->logger->info('Output: ' . var_export($output, true));
+            $this->logger->debug(PHP_EOL . implode(PHP_EOL, $output));
         }
 
         if ($status != 0) {

@@ -204,10 +204,14 @@ class ManagerTest extends TestCase
                 ->method('deleteFile')
                 ->with('magento_root/' . $path)
                 ->willReturn($deleteResult);
+            $this->loggerMock->expects($this->exactly(count($logs)))
+                ->method('info')
+                ->withConsecutive($logs);
+        } else {
+            $this->loggerMock->expects($this->exactly(count($logs)))
+                ->method('debug')
+                ->withConsecutive($logs);
         }
-        $this->loggerMock->expects($this->exactly(count($logs)))
-            ->method('info')
-            ->withConsecutive($logs);
 
         $this->assertSame(
             $result,

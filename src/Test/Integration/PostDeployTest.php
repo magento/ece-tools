@@ -53,9 +53,9 @@ class PostDeployTest extends AbstractTest
         $fileList = $application->getContainer()->get(FileList::class);
         $cloudLog = file_get_contents($fileList->getCloudLog());
 
-        $this->assertContains('INFO: Starting post-deploy.', $cloudLog);
+        $this->assertContains('NOTICE: Starting post-deploy.', $cloudLog);
         $this->assertContains('INFO: Warmed up page:', $cloudLog);
-        $this->assertContains('INFO: Post-deploy is complete.', $cloudLog);
+        $this->assertContains('NOTICE: Post-deploy is complete.', $cloudLog);
     }
 
     public function testPostDeployIsNotRun()
@@ -82,9 +82,9 @@ class PostDeployTest extends AbstractTest
         $cloudLog = file_get_contents($fileList->getCloudLog());
 
         $this->assertContains('Post-deploy is skipped because deploy was failed.', $cloudLog);
-        $this->assertNotContains('INFO: Starting post-deploy.', $cloudLog);
+        $this->assertNotContains('NOTICE: Starting post-deploy.', $cloudLog);
         $this->assertNotContains('INFO: Warmed up page:', $cloudLog);
-        $this->assertNotContains('INFO: Post-deploy is complete.', $cloudLog);
+        $this->assertNotContains('NOTICE: Post-deploy is complete.', $cloudLog);
     }
 
     /**
