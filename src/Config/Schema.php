@@ -338,7 +338,7 @@ class Schema
                     StageConfigInterface::STAGE_POST_DEPLOY
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_POST_DEPLOY => ['index.php'],
+                    StageConfigInterface::STAGE_POST_DEPLOY => [''],
                 ],
             ],
         ];
