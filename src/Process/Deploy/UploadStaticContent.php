@@ -15,8 +15,6 @@ use Psr\Log\LoggerInterface;
 
 class UploadStaticContent implements ProcessInterface
 {
-    const MEDIA_STORAGE_S3 = 2;
-
     /**
      * @var LoggerInterface
      */
@@ -76,14 +74,8 @@ class UploadStaticContent implements ProcessInterface
             return;
         }
 
-        $mediaStorage = $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] ?? null;
-
-        // Media storage has already been configured to use S3 and nothing in the config has changed.
-        if (
-            $mediaStorage == self::MEDIA_STORAGE_S3 &&
-            !$this->flagManager->exists(FlagManager::FLAG_S3_CONFIG_MODIFIED)
-        ) {
-            $this->logger->debug('Mediat Storage already configured to use S3.');
+        if (!$this->flagManager->exists(FlagManager::FLAG_S3_CONFIG_MODIFIED)) {
+            $this->logger->debug('S3 configuration has not been changed.');
             return;
         }
 
@@ -91,8 +83,6 @@ class UploadStaticContent implements ProcessInterface
 
         $this->shell->execute('php ./bin/magento s3:storage:export --ansi --no-interaction');
 
-        $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] = self::MEDIA_STORAGE_S3;
-
-        $this->configWriter->create($envConfig);
+        $this->flagManager->delete(FlagManager::FLAG_S3_CONFIG_MODIFIED);
     }
 }
