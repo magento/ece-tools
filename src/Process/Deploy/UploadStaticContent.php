@@ -69,12 +69,12 @@ class UploadStaticContent implements ProcessInterface
     public function execute()
     {
         $modules = (array)$this->config->get('modules');
+        $envConfig = $this->configReader->read();
 
-        if (empty($modules['Thai_S3'])) {
+        if (empty($modules['Thai_S3']) || empty($envConfig['system']['default']['thai_s3']['general'])) {
+            $this->logger->debug('S3 Module is not enabled or config has not been set.');
             return;
         }
-
-        $envConfig = $this->configReader->read();
 
         $mediaStorage = $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] ?? null;
 
@@ -83,6 +83,7 @@ class UploadStaticContent implements ProcessInterface
             $mediaStorage == self::MEDIA_STORAGE_S3 &&
             !$this->flagManager->exists(FlagManager::FLAG_S3_CONFIG_MODIFIED)
         ) {
+            $this->logger->debug('Mediat Storage already configured to use S3.');
             return;
         }
 

@@ -62,9 +62,7 @@ class S3Bucket implements ProcessInterface
 
         $envConfig = $this->configReader->read();
 
-        $s3EnvConfig = isset($envConfig['system']['default']['thai_s3']['general'])
-            ? isset($envConfig['system']['default']['thai_s3']['general'])
-            : [];
+        $s3EnvConfig = $envConfig['system']['default']['thai_s3']['general'] ?? [];
 
         asort($s3EnvConfig);
         asort($s3StageConfig);
