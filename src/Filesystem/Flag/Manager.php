@@ -31,6 +31,8 @@ class Manager
      */
     const FLAG_DEPLOY_HOOK_IS_FAILED = 'deploy_is_failed';
 
+    const FLAG_S3_CONFIG_MODIFIED = 's3_config_modified';
+
     /**
      * @var LoggerInterface
      */

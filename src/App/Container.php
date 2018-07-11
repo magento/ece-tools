@@ -85,6 +85,7 @@ class Container implements ContainerInterface
                     Flag\Manager::FLAG_REGENERATE => 'var/.regenerate',
                     Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
                     Flag\Manager::FLAG_DEPLOY_HOOK_IS_FAILED => 'var/.deploy_is_failed',
+                    Flag\Manager::FLAG_S3_CONFIG_MODIFIED => 'var/.s3_config_modified',
                 ]);
             }
         );
@@ -246,6 +247,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate::class),
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
+                        $this->container->make(DeployProcess\UploadStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
