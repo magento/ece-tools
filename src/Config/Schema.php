@@ -161,7 +161,7 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => false,
+                    StageConfigInterface::STAGE_GLOBAL => true,
                 ],
             ],
             StageConfigInterface::VAR_SCD_ON_DEMAND => [
