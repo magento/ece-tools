@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Configure environment to use S3 bucket.
+ */
 class S3Bucket implements ProcessInterface
 {
     const MEDIA_STORAGE_S3 = 2;
@@ -74,8 +77,8 @@ class S3Bucket implements ProcessInterface
 
         $s3EnvConfig = $envConfig['system']['default']['thai_s3']['general'] ?? [];
 
-        asort($s3EnvConfig);
-        asort($s3StageConfig);
+        ksort($s3EnvConfig);
+        ksort($s3StageConfig);
 
         $this->flagManager->delete(FlagManager::FLAG_S3_CONFIG_MODIFIED);
 
@@ -90,7 +93,11 @@ class S3Bucket implements ProcessInterface
         $mediaStorage = $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] ?? null;
 
         // Media storage has already been configured to use S3 and nothing in the config has changed.
-        if (!empty($modules['Thai_S3']) && $mediaStorage != self::MEDIA_STORAGE_S3) {
+        if (
+            !empty($envConfig['system']['default']['thai_s3']['general']) &&
+            !empty($modules['Thai_S3']) &&
+            $mediaStorage != self::MEDIA_STORAGE_S3
+        ) {
             $this->logger->info('Updating Media Storage Configuration');
 
             $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] = self::MEDIA_STORAGE_S3;

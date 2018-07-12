@@ -12,6 +12,9 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Upload static content to S3 (if configured)
+ */
 class UploadStaticContent implements ProcessInterface
 {
     /**

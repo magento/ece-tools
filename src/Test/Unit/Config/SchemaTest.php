@@ -69,6 +69,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_SCD_MATRIX => [],
+                DeployInterface::VAR_S3_CONFIGURATION => [],
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
