@@ -20,7 +20,11 @@ class ArrayManager
         $result = [];
         foreach ($array as $key => $value) {
             if (is_array($value)) {
-                $result = $result + $this->flatten($value, $prefix . $key . '/');
+                if (empty($value)) {
+                    $result[$prefix . $key] = [];
+                } else {
+                    $result = $result + $this->flatten($value, $prefix . $key . '/');
+                }
             } else {
                 $result[$prefix . $key] = $value;
             }

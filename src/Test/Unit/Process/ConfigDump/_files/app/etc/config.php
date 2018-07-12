@@ -439,6 +439,36 @@ return [
                     ],
                 ],
             ],
+            'store1' => [
+                'general' => [
+                    'locale' => [
+                        'code' => 'fr_FR'
+                    ],
+                ],
+                'design' => [
+                    'package' => [
+                        'name' => 'default',
+                    ],
+                    'theme' => [
+                        'default' => 'default',
+                    ],
+                ],
+            ],
+            'store2' => [
+                'general' => [
+                    'locale' => [
+                        'code' => 'kz_KZ'
+                    ],
+                ],
+                'design' => [
+                    'package' => [
+                        'name' => 'default',
+                    ],
+                    'theme' => [
+                        'default' => 'default',
+                    ],
+                ],
+            ],
         ],
         'websites' => [
             'admin' => [

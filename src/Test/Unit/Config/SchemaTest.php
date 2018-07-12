@@ -79,7 +79,7 @@ class SchemaTest extends TestCase
         $this->assertEquals(
             [
                 PostDeployInterface::VAR_WARM_UP_PAGES => [
-                    'index.php',
+                    '',
                 ]
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
