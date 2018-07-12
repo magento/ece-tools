@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -31,11 +30,6 @@ class UploadStaticContent implements ProcessInterface
     private $configReader;
 
     /**
-     * @var ConfigWriter
-     */
-    private $configWriter;
-
-    /**
      * @var FlagManager
      */
     private $flagManager;
@@ -49,14 +43,12 @@ class UploadStaticContent implements ProcessInterface
         LoggerInterface $logger,
         SharedConfig $config,
         ConfigReader $configReader,
-        ConfigWriter $configWriter,
         FlagManager $flagManager,
         ShellInterface $shell
     ) {
         $this->logger = $logger;
         $this->config = $config;
         $this->configReader = $configReader;
-        $this->configWriter = $configWriter;
         $this->flagManager = $flagManager;
         $this->shell = $shell;
     }
