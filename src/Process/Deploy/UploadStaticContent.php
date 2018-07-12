@@ -74,7 +74,7 @@ class UploadStaticContent implements ProcessInterface
             return;
         }
 
-        $this->logger->notice('Uploading static content to S3 bucket');
+        $this->logger->notice('Uploading static content to S3 bucket.');
 
         $this->shell->execute('php ./bin/magento s3:storage:export --ansi --no-interaction');
 

@@ -15,7 +15,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-
+/**
+ * Test S3Bucket config update process.
+ */
 class S3BucketTest extends TestCase
 {
     /**

@@ -90,17 +90,18 @@ class S3Bucket implements ProcessInterface
         }
 
         $modules = (array)$this->sharedConfig->get('modules');
-        $mediaStorage = $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] ?? null;
+        $mediaStorage =
+            $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] ?? null;
 
         // Media storage has already been configured to use S3 and nothing in the config has changed.
-        if (
-            !empty($envConfig['system']['default']['thai_s3']['general']) &&
+        if (!empty($envConfig['system']['default']['thai_s3']['general']) &&
             !empty($modules['Thai_S3']) &&
             $mediaStorage != self::MEDIA_STORAGE_S3
         ) {
             $this->logger->info('Updating Media Storage Configuration');
 
-            $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] = self::MEDIA_STORAGE_S3;
+            $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] =
+                self::MEDIA_STORAGE_S3;
             $this->flagManager->set(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         }
 
