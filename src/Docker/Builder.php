@@ -73,14 +73,6 @@ class Builder
     }
 
     /**
-     * @param bool $enabled
-     */
-    public function setRoVolume(bool $enabled)
-    {
-        $this->config->set('disk.roVolume', $enabled);
-    }
-
-    /**
      * @param string $key
      * @param string $version
      * @param array $supportedVersions
@@ -111,8 +103,10 @@ class Builder
             'version' => '2',
             'services' => [
                 'fpm' => $this->getFpmService(),
-                'cli_build' => $this->getCliService(true),
-                'cli_deploy' => $this->getCliService(false),
+                /** For backward compatibility. */
+                'cli' => $this->getCliService(false),
+                'build' => $this->getCliService(false),
+                'deploy' => $this->getCliService(true),
                 'db' => $this->getDbService(),
                 'web' => $this->getWebService(),
                 'appdata' => [
@@ -136,17 +130,16 @@ class Builder
     }
 
     /**
+     * @param bool $isReadOnly
      * @return string
      */
-    private function getMagentoVolume($isCli = false): string
+    private function getMagentoVolume(bool $isReadOnly): string
     {
-        $volume = ".:/var/www/magento";
-        if (!$isCli && $this->config->get('disk.roVolume')) {
-             $volume .= ":ro";
-        } else {
-            $volume .= ":rw";
-        }
-        return $volume;
+        $volume = '.:/var/www/magento';
+
+        return $isReadOnly
+            ? $volume . ':ro'
+            : $volume . ':rw';
     }
 
     /**
@@ -180,9 +173,10 @@ class Builder
     }
 
     /**
+     * @param bool $isReadOnly
      * @return array
      */
-    private function getCliService(bool $isBuild): array
+    private function getCliService(bool $isReadOnly): array
     {
         return [
             'hostname' => 'cli.magento2.docker',
@@ -195,7 +189,7 @@ class Builder
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
-                $this->getMagentoVolume($isBuild),
+                $this->getMagentoVolume($isReadOnly),
             ],
             'volumes_from' => [
                 'appdata',

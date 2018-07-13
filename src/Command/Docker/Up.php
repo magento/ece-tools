@@ -29,6 +29,8 @@ class Up extends Command
     private $environment;
 
     /**
+     * @param ShellInterface $shell
+     * @param Environment $environment
      */
     public function __construct(ShellInterface $shell, Environment $environment)
     {
@@ -53,8 +55,8 @@ class Up extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->shell->execute('docker-compose run cli_build magento-cloud-build');
-        $this->shell->execute('docker-compose run cli_deploy magento-cloud-deploy');
+        $this->shell->execute('docker-compose run build cloud-build');
+        $this->shell->execute('docker-compose run deploy cloud-deploy');
     }
 
     /**
