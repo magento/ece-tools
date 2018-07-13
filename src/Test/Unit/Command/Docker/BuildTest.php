@@ -108,13 +108,12 @@ class BuildTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
             ->with('magento_rood/docker-compose.yml', "version: '2'\n");
-        $inputMock->expects($this->exactly(4))
+        $inputMock->expects($this->exactly(3))
             ->method('getOption')
             ->willReturnMap([
                 [Build::OPTION_PHP, '7.1'],
                 [Build::OPTION_DB, '10'],
                 [Build::OPTION_NGINX, '1.9'],
-                [Build::OPTION_RO_VOLUME, true]
             ]);
         $this->builderMock->expects($this->once())
             ->method('setPhpVersion')
@@ -125,9 +124,6 @@ class BuildTest extends TestCase
         $this->builderMock->expects($this->once())
             ->method('setDbVersion')
             ->with('10');
-        $this->builderMock->expects($this->once())
-            ->method('setRoVolume')
-            ->with(true);
 
         $this->command->execute($inputMock, $outputMock);
     }
