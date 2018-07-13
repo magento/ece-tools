@@ -3,12 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
+namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
 use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Process\Deploy\UploadStaticContent;
+use Magento\MagentoCloud\Process\PostDeploy\UploadStaticContent;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

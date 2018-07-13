@@ -247,7 +247,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate::class),
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
-                        $this->container->make(DeployProcess\UploadStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
@@ -390,6 +389,7 @@ class Container implements ContainerInterface
                 return $this->container->make(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(PostDeployProcess\Backup::class),
+                        $this->container->make(DeployProcess\UploadStaticContent::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                         $this->container->make(PostDeployProcess\WarmUp::class),
                     ],

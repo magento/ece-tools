@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy;
+namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
 use Magento\MagentoCloud\Config\Deploy as DeployConfig;
