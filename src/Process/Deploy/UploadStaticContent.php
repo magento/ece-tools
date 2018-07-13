@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -25,12 +25,12 @@ class UploadStaticContent implements ProcessInterface
     /**
      * @var SharedConfig
      */
-    private $config;
+    private $sharedConfig;
 
     /**
-     * @var ConfigReader
+     * @var DeployConfig
      */
-    private $configReader;
+    private $deployConfig;
 
     /**
      * @var FlagManager
@@ -44,14 +44,14 @@ class UploadStaticContent implements ProcessInterface
 
     public function __construct(
         LoggerInterface $logger,
-        SharedConfig $config,
-        ConfigReader $configReader,
+        SharedConfig $sharedConfig,
+        DeployConfig $deployConfig,
         FlagManager $flagManager,
         ShellInterface $shell
     ) {
         $this->logger = $logger;
-        $this->config = $config;
-        $this->configReader = $configReader;
+        $this->sharedConfig = $sharedConfig;
+        $this->deployConfig = $deployConfig;
         $this->flagManager = $flagManager;
         $this->shell = $shell;
     }
@@ -61,10 +61,10 @@ class UploadStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        $modules = (array)$this->config->get('modules');
-        $envConfig = $this->configReader->read();
+        $moduleEnabled = (bool)$this->sharedConfig->get('modules.Thai_S3');
+        $bucketConfigured = !empty($this->deployConfig->get('system.default.thai_s3.general'));
 
-        if (empty($modules['Thai_S3']) || empty($envConfig['system']['default']['thai_s3']['general'])) {
+        if (!$moduleEnabled || !$bucketConfigured) {
             $this->logger->debug('S3 Module is not enabled or config has not been set.');
             return;
         }

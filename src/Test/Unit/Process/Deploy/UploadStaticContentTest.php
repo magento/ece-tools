@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\UploadStaticContent;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -15,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * Test UploadStaticContent process.
+ * @inheritdoc
  */
 class UploadStaticContentTest extends TestCase
 {
@@ -27,12 +27,12 @@ class UploadStaticContentTest extends TestCase
     /**
      * @var SharedConfig|MockObject
      */
-    private $configMock;
+    private $sharedConfigMock;
 
     /**
-     * @var ConfigReader|MockObject
+     * @var DeployConfig|MockObject
      */
-    private $configReaderMock;
+    private $deployConfigMock;
 
     /**
      * @var FlagManager|MockObject
@@ -49,18 +49,21 @@ class UploadStaticContentTest extends TestCase
      */
     private $process;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->loggerMock = $this->createMock(LoggerInterface::class);
-        $this->configMock = $this->createMock(SharedConfig::class);
-        $this->configReaderMock = $this->createMock(ConfigReader::class);
+        $this->sharedConfigMock = $this->createMock(SharedConfig::class);
+        $this->deployConfigMock = $this->createMock(DeployConfig::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->shellMock = $this->createMock(ShellInterface::class);
 
         $this->process = new UploadStaticContent(
             $this->loggerMock,
-            $this->configMock,
-            $this->configReaderMock,
+            $this->sharedConfigMock,
+            $this->deployConfigMock,
             $this->flagManagerMock,
             $this->shellMock
         );
@@ -68,25 +71,14 @@ class UploadStaticContentTest extends TestCase
 
     public function testModuleNotSet()
     {
-        $envConfig = [
-            'system' => [
-                'default' => [
-                    'thai_s3' => [
-                        'general' => [
-                            'S3 Bucket Configuration',
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $this->configMock->expects($this->once())
+        $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
+            ->with('modules.Thai_S3')
             ->willReturn(null);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($envConfig);
+        $this->deployConfigMock->expects($this->once())
+            ->method('get')
+            ->with('system.default.thai_s3.general')
+            ->willReturn(['S3 Bucket Configuration']);
         $this->loggerMock->expects($this->once())
             ->method('debug')
             ->with('S3 Module is not enabled or config has not been set.');
@@ -102,12 +94,13 @@ class UploadStaticContentTest extends TestCase
 
     public function testConfigNotSet()
     {
-        $this->configMock->expects($this->once())
+        $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
-            ->willReturn(['Thai_S3' => '1']);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
+            ->with('modules.Thai_S3')
+            ->willReturn('1');
+        $this->deployConfigMock->expects($this->once())
+            ->method('get')
+            ->with('system.default.thai_s3.general')
             ->willReturn([]);
         $this->loggerMock->expects($this->once())
             ->method('debug')
@@ -124,25 +117,14 @@ class UploadStaticContentTest extends TestCase
 
     public function testFlagNotSet()
     {
-        $envConfig = [
-            'system' => [
-                'default' => [
-                    'thai_s3' => [
-                        'general' => [
-                            'S3 Bucket Configuration',
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $this->configMock->expects($this->once())
+        $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
-            ->willReturn(['Thai_S3' => '1']);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($envConfig);
+            ->with('modules.Thai_S3')
+            ->willReturn('1');
+        $this->deployConfigMock->expects($this->once())
+            ->method('get')
+            ->with('system.default.thai_s3.general')
+            ->willReturn(['S3 Bucket Configuration']);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED)
@@ -162,25 +144,14 @@ class UploadStaticContentTest extends TestCase
 
     public function testExecute()
     {
-        $envConfig = [
-            'system' => [
-                'default' => [
-                    'thai_s3' => [
-                        'general' => [
-                            'S3 Bucket Configuration',
-                        ]
-                    ]
-                ]
-            ]
-        ];
-
-        $this->configMock->expects($this->once())
+        $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
-            ->willReturn(['Thai_S3' => '1']);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($envConfig);
+            ->with('modules.Thai_S3')
+            ->willReturn('1');
+        $this->deployConfigMock->expects($this->once())
+            ->method('get')
+            ->with('system.default.thai_s3.general')
+            ->willReturn(['S3 Bucket Configuration']);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED)

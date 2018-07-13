@@ -5,10 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
-use Magento\MagentoCloud\Config\Stage\DeployInterface as DeployConfig;
+use Magento\MagentoCloud\Config\Stage\DeployInterface as StageConfig;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -31,17 +30,12 @@ class S3Bucket implements ProcessInterface
     private $sharedConfig;
 
     /**
-     * @var ConfigReader
-     */
-    private $configReader;
-
-    /**
-     * @var ConfigWriter
-     */
-    private $configWriter;
-
-    /**
      * @var DeployConfig
+     */
+    private $deployConfig;
+
+    /**
+     * @var StageConfig
      */
     private $stageConfig;
 
@@ -53,15 +47,13 @@ class S3Bucket implements ProcessInterface
     public function __construct(
         LoggerInterface $logger,
         SharedConfig $sharedConfig,
-        ConfigReader $configReader,
-        ConfigWriter $configWriter,
-        DeployConfig $stageConfig,
+        DeployConfig $deployConfig,
+        StageConfig $stageConfig,
         FlagManager $flagManager
     ) {
         $this->logger = $logger;
         $this->sharedConfig = $sharedConfig;
-        $this->configReader = $configReader;
-        $this->configWriter = $configWriter;
+        $this->deployConfig = $deployConfig;
         $this->stageConfig = $stageConfig;
         $this->flagManager = $flagManager;
     }
@@ -71,11 +63,11 @@ class S3Bucket implements ProcessInterface
      */
     public function execute()
     {
-        $s3StageConfig = $this->stageConfig->get(DeployConfig::VAR_S3_CONFIGURATION);
+        $s3ConfigKey = 'system.default.thai_s3.general';
+        $mediaStorageConfigKey = 'system.default.system.media_storage_configuration.media_storage';
 
-        $envConfig = $this->configReader->read();
-
-        $s3EnvConfig = $envConfig['system']['default']['thai_s3']['general'] ?? [];
+        $s3StageConfig = $this->stageConfig->get(StageConfig::VAR_S3_CONFIGURATION);
+        $s3EnvConfig = $this->deployConfig->get($s3ConfigKey, []);
 
         ksort($s3EnvConfig);
         ksort($s3StageConfig);
@@ -85,26 +77,21 @@ class S3Bucket implements ProcessInterface
         if ($s3EnvConfig != $s3StageConfig) {
             $this->logger->info('Updating S3 Configuration');
 
-            $envConfig['system']['default']['thai_s3']['general'] = $s3StageConfig;
+            $this->deployConfig->set($s3ConfigKey, $s3StageConfig);
             $this->flagManager->set(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         }
 
-        $modules = (array)$this->sharedConfig->get('modules');
-        $mediaStorage =
-            $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] ?? null;
+        $s3ModuleEnabled = (bool)$this->sharedConfig->get('modules.Thai_S3');
+        $mediaStorage = $this->deployConfig->get($mediaStorageConfigKey);
 
-        // Media storage has already been configured to use S3 and nothing in the config has changed.
-        if (!empty($envConfig['system']['default']['thai_s3']['general']) &&
-            !empty($modules['Thai_S3']) &&
+        if (!empty($this->deployConfig->get($s3ConfigKey, [])) &&
+            $s3ModuleEnabled &&
             $mediaStorage != self::MEDIA_STORAGE_S3
         ) {
             $this->logger->info('Updating Media Storage Configuration');
 
-            $envConfig['system']['default']['system']['media_storage_configuration']['media_storage'] =
-                self::MEDIA_STORAGE_S3;
+            $this->deployConfig->set($mediaStorageConfigKey, self::MEDIA_STORAGE_S3);
             $this->flagManager->set(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         }
-
-        $this->configWriter->create($envConfig);
     }
 }

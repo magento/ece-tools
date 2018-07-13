@@ -7,45 +7,45 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
-use Magento\MagentoCloud\Config\Shared;
+use Magento\MagentoCloud\Config\Deploy;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @inheritdoc
  */
-class SharedTest extends TestCase
+class DeploydTest extends TestCase
 {
     /**
-     * @var Shared
+     * @var Deploy
      */
-    private $shared;
+    private $deploy;
 
     /**
-     * @var Shared\Reader|\PHPUnit_Framework_MockObject_MockObject
+     * @var Deploy\Reader|MockObject
      */
     private $readerMock;
 
     /**
-     * @var Shared\Writer|\PHPUnit_Framework_MockObject_MockObject
+     * @var Deploy\Writer|MockObject
      */
     private $writerMock;
 
     /**
-     * @var RepositoryFactory|Mock
+     * @var RepositoryFactory|MockObject
      */
-    private $repositoryFactoryMock;
+    private $factoryMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->readerMock = $this->createMock(Shared\Reader::class);
-        $this->writerMock = $this->createMock(Shared\Writer::class);
-        $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
+        $this->readerMock = $this->createMock(Deploy\Reader::class);
+        $this->writerMock = $this->createMock(Deploy\Writer::class);
+        $this->factoryMock = $this->createMock(RepositoryFactory::class);
 
-        $this->shared = new Shared($this->readerMock, $this->writerMock, $this->repositoryFactoryMock);
+        $this->deploy = new Deploy($this->readerMock, $this->writerMock, $this->factoryMock);
     }
 
     public function testGet()
@@ -58,15 +58,15 @@ class SharedTest extends TestCase
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
-        $this->repositoryFactoryMock->expects($this->once())
+        $this->factoryMock->expects($this->once())
             ->method('create')
             ->with($config)
             ->willReturn(new Repository($config));
 
-        $this->assertSame('value1', $this->shared->get('key1'));
-        $this->assertSame('value2', $this->shared->get('key2'));
-        $this->assertNull($this->shared->get('undefined'));
-        $this->assertSame('default value', $this->shared->get('missing_key', 'default value'));
+        $this->assertSame('value1', $this->deploy->get('key1'));
+        $this->assertSame('value2', $this->deploy->get('key2'));
+        $this->assertNull($this->deploy->get('undefined'));
+        $this->assertSame('default value', $this->deploy->get('missing_key', 'default value'));
     }
 
     public function testSet()
@@ -87,13 +87,13 @@ class SharedTest extends TestCase
         $this->writerMock->expects($this->once())
             ->method('update')
             ->with($configFinal);
-        $this->repositoryFactoryMock->expects($this->once())
+        $this->factoryMock->expects($this->once())
             ->method('create')
             ->with($configInit)
             ->willReturn(new Repository($configInit));
 
-        $this->shared->set('key3', 'value3');
-        $this->assertSame('value3', $this->shared->get('key3'));
+        $this->deploy->set('key3', 'value3');
+        $this->assertSame('value3', $this->deploy->get('key3'));
     }
 
     public function testAll()
@@ -106,12 +106,12 @@ class SharedTest extends TestCase
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
-        $this->repositoryFactoryMock->expects($this->once())
+        $this->factoryMock->expects($this->once())
             ->method('create')
             ->with($config)
             ->willReturn(new Repository($config));
 
-        $this->assertSame($config, $this->shared->all());
+        $this->assertSame($config, $this->deploy->all());
     }
 
     public function testHas()
@@ -124,14 +124,14 @@ class SharedTest extends TestCase
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn($config);
-        $this->repositoryFactoryMock->expects($this->once())
+        $this->factoryMock->expects($this->once())
             ->method('create')
             ->with($config)
             ->willReturn(new Repository($config));
 
-        $this->assertTrue($this->shared->has('key1'));
-        $this->assertTrue($this->shared->has('key2'));
-        $this->assertFalse($this->shared->has('key3'));
+        $this->assertTrue($this->deploy->has('key1'));
+        $this->assertTrue($this->deploy->has('key2'));
+        $this->assertFalse($this->deploy->has('key3'));
     }
 
     public function testReset()
@@ -144,14 +144,14 @@ class SharedTest extends TestCase
         $this->readerMock->expects($this->exactly(2))
             ->method('read')
             ->willReturn($config);
-        $this->repositoryFactoryMock->expects($this->exactly(2))
+        $this->factoryMock->expects($this->exactly(2))
             ->method('create')
             ->with($config)
             ->willReturn(new Repository($config));
 
-        $this->shared->all();
-        $this->shared->reset();
-        $this->shared->all();
+        $this->deploy->all();
+        $this->deploy->reset();
+        $this->deploy->all();
     }
 
     public function testUpdate()
@@ -160,6 +160,6 @@ class SharedTest extends TestCase
             ->method('update')
             ->with(['some' => 'config']);
 
-        $this->shared->update(['some' => 'config']);
+        $this->deploy->update(['some' => 'config']);
     }
 }

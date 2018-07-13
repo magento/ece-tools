@@ -14,9 +14,10 @@ interface ConfigInterface
      * Retrieve data by key.
      *
      * @param string $key
+     * @param mixed $default
      * @return string|int|bool|array|null
      */
-    public function get(string $key);
+    public function get(string $key, $default = null);
 
     /**
      * Assert data by key.
@@ -32,6 +33,14 @@ interface ConfigInterface
      * @return array
      */
     public function all(): array;
+
+    /**
+     * Update data by key.
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function set(string $key, $value);
 
     /**
      * Update current data.

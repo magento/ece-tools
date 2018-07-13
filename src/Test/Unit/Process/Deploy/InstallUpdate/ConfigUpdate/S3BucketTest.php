@@ -5,10 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Deploy as DeployConfig;
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
-use Magento\MagentoCloud\Config\Stage\DeployInterface as DeployConfig;
+use Magento\MagentoCloud\Config\Stage\DeployInterface as StageConfig;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\S3Bucket;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -16,7 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * Test S3Bucket config update process.
+ * @inheritdoc
  */
 class S3BucketTest extends TestCase
 {
@@ -31,17 +30,12 @@ class S3BucketTest extends TestCase
     private $sharedConfigMock;
 
     /**
-     * @var ConfigReader|MockObject
-     */
-    private $configReaderMock;
-
-    /**
-     * @var ConfigWriter|MockObject
-     */
-    private $configWriterMock;
-
-    /**
      * @var DeployConfig|MockObject
+     */
+    private $deployConfigMock;
+
+    /**
+     * @var StageConfig|MockObject
      */
     private $stageConfigMock;
 
@@ -55,20 +49,21 @@ class S3BucketTest extends TestCase
      */
     private $process;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->sharedConfigMock = $this->createMock(SharedConfig::class);
-        $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->configWriterMock = $this->createMock(ConfigWriter::class);
-        $this->stageConfigMock = $this->createMock(DeployConfig::class);
+        $this->deployConfigMock = $this->createMock(DeployConfig::class);
+        $this->stageConfigMock = $this->createMock(StageConfig::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
 
         $this->process = new S3Bucket(
             $this->loggerMock,
             $this->sharedConfigMock,
-            $this->configReaderMock,
-            $this->configWriterMock,
+            $this->deployConfigMock,
             $this->stageConfigMock,
             $this->flagManagerMock
         );
@@ -78,23 +73,25 @@ class S3BucketTest extends TestCase
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with($this->equalTo(DeployConfig::VAR_S3_CONFIGURATION))
+            ->with(StageConfig::VAR_S3_CONFIGURATION)
             ->willReturn([]);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([]);
+        $this->deployConfigMock->expects($this->atLeastOnce())
+            ->method('get')
+            ->willReturnMap([
+                ['system.default.thai_s3.general', [], []],
+                ['system.default.system.media_storage_configuration.media_storage', []],
+            ]);
+        $this->deployConfigMock->expects($this->never())
+            ->method('set');
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with($this->equalTo(FlagManager::FLAG_S3_CONFIG_MODIFIED));
+            ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         $this->flagManagerMock->expects($this->never())
             ->method('set');
         $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
+            ->with('modules.Thai_S3')
             ->willReturn(null);
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with([]);
 
         $this->process->execute();
     }
@@ -108,39 +105,33 @@ class S3BucketTest extends TestCase
             'secret_key' => 'AWS_SECRET_KEY',
         ];
 
-        $envConfig = [
-            'system' => [
-                'default' => [
-                    'thai_s3' => [
-                        'general' => $s3Config,
-                    ]
-                ]
-            ]
-        ];
-
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with($this->equalTo(DeployConfig::VAR_S3_CONFIGURATION))
+            ->with(StageConfig::VAR_S3_CONFIGURATION)
             ->willReturn($s3Config);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([]);
+        $this->deployConfigMock->expects($this->atLeastOnce())
+            ->method('get')
+            ->willReturnMap([
+                ['system.default.thai_s3.general', [], []],
+                ['system.default.system.media_storage_configuration.media_storage', []],
+                ['system.default.thai_s3.general', [], $s3Config],
+            ]);
+        $this->deployConfigMock->expects($this->once())
+            ->method('set')
+            ->with('system.default.thai_s3.general', $s3Config);
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with($this->equalTo(FlagManager::FLAG_S3_CONFIG_MODIFIED));
+            ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         $this->flagManagerMock->expects($this->once())
             ->method('set')
-            ->with($this->equalTo(FlagManager::FLAG_S3_CONFIG_MODIFIED));
+            ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating S3 Configuration');
         $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
+            ->with('modules.Thai_S3')
             ->willReturn(null);
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with($envConfig);
 
         $this->process->execute();
     }
@@ -154,35 +145,27 @@ class S3BucketTest extends TestCase
             'secret_key' => 'AWS_SECRET_KEY',
         ];
 
-        $envConfig = [
-            'system' => [
-                'default' => [
-                    'thai_s3' => [
-                        'general' => $s3Config,
-                    ]
-                ]
-            ]
-        ];
-
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with($this->equalTo(DeployConfig::VAR_S3_CONFIGURATION))
+            ->with(StageConfig::VAR_S3_CONFIGURATION)
             ->willReturn($s3Config);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($envConfig);
+        $this->deployConfigMock->expects($this->atLeastOnce())
+            ->method('get')
+            ->willReturnMap([
+                ['system.default.thai_s3.general', [], $s3Config],
+                ['system.default.system.media_storage_configuration.media_storage', null],
+            ]);
+        $this->deployConfigMock->expects($this->never())
+            ->method('set');
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with($this->equalTo(FlagManager::FLAG_S3_CONFIG_MODIFIED));
+            ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         $this->flagManagerMock->expects($this->never())
             ->method('set');
         $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
-            ->willReturn(['Thai_S3' => '0']);
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with($envConfig);
+            ->with('modules.Thai_S3')
+            ->willReturn(null);
 
         $this->process->execute();
     }
@@ -196,45 +179,33 @@ class S3BucketTest extends TestCase
             'secret_key' => 'AWS_SECRET_KEY',
         ];
 
-        $envConfig = [
-            'system' => [
-                'default' => [
-                    'system' => [
-                        'media_storage_configuration' => [
-                            'media_storage' => S3Bucket::MEDIA_STORAGE_S3,
-                        ],
-                    ],
-                    'thai_s3' => [
-                        'general' => $s3Config,
-                    ],
-                ],
-            ],
-        ];
-
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with($this->equalTo(DeployConfig::VAR_S3_CONFIGURATION))
+            ->with(StageConfig::VAR_S3_CONFIGURATION)
             ->willReturn($s3Config);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($envConfig);
+        $this->deployConfigMock->expects($this->atLeastOnce())
+            ->method('get')
+            ->withConsecutive(
+                ['system.default.thai_s3.general', []],
+                ['system.default.system.media_storage_configuration.media_storage'],
+                ['system.default.thai_s3.general', []]
+            )->willReturnOnConsecutiveCalls($s3Config, S3Bucket::MEDIA_STORAGE_S3, $s3Config);
+        $this->deployConfigMock->expects($this->never())
+            ->method('set');
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with($this->equalTo(FlagManager::FLAG_S3_CONFIG_MODIFIED));
+            ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         $this->flagManagerMock->expects($this->never())
             ->method('set');
         $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
-            ->willReturn(['Thai_S3' => '1']);
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with($envConfig);
+            ->with('modules.Thai_S3')
+            ->willReturn('1');
 
         $this->process->execute();
     }
 
-    public function testConfigurationSetMediaStorage()
+    public function testExecuteSetMediaStorage()
     {
         $s3Config = [
             'access_key' => 'AWS_ACCESS_KEY',
@@ -242,51 +213,33 @@ class S3BucketTest extends TestCase
             'region' => 'some-region-1',
             'secret_key' => 'AWS_SECRET_KEY',
         ];
-        $thaiConfig = ['general' => $s3Config];
-        $storageConfig = [
-            'media_storage_configuration' => [
-                'media_storage' => S3Bucket::MEDIA_STORAGE_S3,
-            ],
-        ];
-        $envConfigFinal = [
-            'system' => [
-                'default' => [
-                    'system' => $storageConfig,
-                    'thai_s3' => $thaiConfig,
-                ],
-            ],
-        ];
-        $envConfigInit = [
-            'system' => [
-                'default' => [
-                    'thai_s3' => $thaiConfig,
-                ],
-            ],
-        ];
 
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with($this->equalTo(DeployConfig::VAR_S3_CONFIGURATION))
+            ->with(StageConfig::VAR_S3_CONFIGURATION)
             ->willReturn($s3Config);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($envConfigInit);
+        $this->deployConfigMock->expects($this->atLeastOnce())
+            ->method('get')
+            ->willReturnMap([
+                ['system.default.thai_s3.general', [], $s3Config],
+                ['system.default.system.media_storage_configuration.media_storage', null],
+            ]);
+        $this->deployConfigMock->expects($this->once())
+            ->method('set')
+            ->with('system.default.system.media_storage_configuration.media_storage', S3Bucket::MEDIA_STORAGE_S3);
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
-            ->with($this->equalTo(FlagManager::FLAG_S3_CONFIG_MODIFIED));
+            ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         $this->flagManagerMock->expects($this->once())
             ->method('set')
-            ->with($this->equalTo(FlagManager::FLAG_S3_CONFIG_MODIFIED));
+            ->with(FlagManager::FLAG_S3_CONFIG_MODIFIED);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating Media Storage Configuration');
         $this->sharedConfigMock->expects($this->once())
             ->method('get')
-            ->with('modules')
-            ->willReturn(['Thai_S3' => '1']);
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with($envConfigFinal);
+            ->with('modules.Thai_S3')
+            ->willReturn('1');
 
         $this->process->execute();
     }

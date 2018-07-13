@@ -6,13 +6,13 @@
 namespace Magento\MagentoCloud\Config;
 
 use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\Config\Shared\Reader;
-use Magento\MagentoCloud\Config\Shared\Writer;
+use Magento\MagentoCloud\Config\Deploy\Reader;
+use Magento\MagentoCloud\Config\Deploy\Writer;
 
 /**
- * Class Shared.
+ * Repository for deploy config.
  */
-class Shared implements ConfigInterface
+class Deploy implements ConfigInterface
 {
     /**
      * @var Reader
@@ -32,29 +32,13 @@ class Shared implements ConfigInterface
     /**
      * @var RepositoryFactory
      */
-    private $repositoryFactory;
+    private $factory;
 
-    /**
-     * @param Reader $reader
-     * @param Writer $writer
-     * @param RepositoryFactory $repositoryFactory
-     */
-    public function __construct(
-        Reader $reader,
-        Writer $writer,
-        RepositoryFactory $repositoryFactory
-    ) {
+    public function __construct(Reader $reader, Writer $writer, RepositoryFactory $factory)
+    {
         $this->reader = $reader;
         $this->writer = $writer;
-        $this->repositoryFactory = $repositoryFactory;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function has(string $key): bool
-    {
-        return $this->read()->has($key);
+        $this->factory = $factory;
     }
 
     /**
@@ -63,6 +47,14 @@ class Shared implements ConfigInterface
     public function get(string $key, $default = null)
     {
         return $this->read()->get($key, $default);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function has(string $key): bool
+    {
+        return $this->read()->has($key);
     }
 
     /**
@@ -100,14 +92,14 @@ class Shared implements ConfigInterface
     }
 
     /**
+     * Lod config data from disk (if necessary).
+     *
      * @return Repository
      */
     private function read(): Repository
     {
         if ($this->config === null) {
-            $this->config = $this->repositoryFactory->create(
-                $this->reader->read()
-            );
+            $this->config = $this->factory->create($this->reader->read());
         }
 
         return $this->config;
