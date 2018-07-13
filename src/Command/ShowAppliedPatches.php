@@ -10,6 +10,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Magento\MagentoCloud\Patch\ApplierFactory;
 
 /**
  * @inheritdoc
@@ -28,17 +29,24 @@ class ShowAppliedPatches extends Command
      */
     private $manager;
 
+        /**
+         * @var ApplierFactory
+         */
+        private $applierFactory;
+
     /**
      * @param LoggerInterface $logger
      * @param Manager $manager
+     * @param ApplierFactory $applierFactory
      */
     public function __construct(
         LoggerInterface $logger,
-        Manager $manager
+        Manager $manager,
+        ApplierFactory $applierFactory
     ) {
         $this->logger = $logger;
         $this->manager = $manager;
-
+        $this->applierFactory = $applierFactory;
         parent::__construct();
     }
 
@@ -49,7 +57,9 @@ class ShowAppliedPatches extends Command
     {
         $this->setName(static::NAME)
             ->setDescription('Shows which patches are applied');
-
+        if (!$this->applierFactory->create()->supportsShowAppliedPatches()) {
+            $this->setHidden(true);
+        }
         parent::configure();
     }
 
@@ -62,7 +72,6 @@ class ShowAppliedPatches extends Command
             $this->manager->showApplied();
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
-
             throw $exception;
         }
     }

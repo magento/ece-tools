@@ -11,6 +11,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Magento\MagentoCloud\Patch\ApplierFactory;
 
 /**
  * @inheritdoc
@@ -30,16 +31,23 @@ class UnapplyPatches extends Command
     private $manager;
 
     /**
+     * @var ApplierFactory
+     */
+    private $applierFactory;
+
+    /**
      * @param LoggerInterface $logger
      * @param Manager $manager
+     * @param ApplierFactory $applierFactory
      */
     public function __construct(
         LoggerInterface $logger,
-        Manager $manager
+        Manager $manager,
+        ApplierFactory $applierFactory
     ) {
         $this->logger = $logger;
         $this->manager = $manager;
-
+        $this->applierFactory = $applierFactory;
         parent::__construct();
     }
 
@@ -56,6 +64,9 @@ class UnapplyPatches extends Command
             InputOption::VALUE_NONE,
             "Force unapplying patches even if some don't seem to be applied."
         );
+        if (!$this->applierFactory->create()->supportsUnapplyAllPatches()) {
+            $this->setHidden(true);
+        }
         parent::configure();
     }
 

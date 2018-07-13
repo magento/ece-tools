@@ -126,4 +126,13 @@ class GitApplier implements ApplierInterface
             'Git applier does not support showing applied patches.  If you need this feature, install quilt.'
         );
     }
+
+    public function supportsUnapplyAllPatches()
+    {
+        return false;
+    }
+
+    public function supportsShowAppliedPatches() {
+        return false;
+    }
 }

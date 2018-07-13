@@ -33,4 +33,18 @@ interface ApplierInterface
      * @return void
      */
     public function showAppliedPatches();
+
+    /**
+     * * Whether or not the Applier supports unapplyAllPatches()
+     *
+     * @return bool
+     */
+    public function supportsUnapplyAllPatches();
+
+    /**
+     * Whether or not the Applier supports showAppliedPatches()
+     *
+     * @return bool
+     */
+    public function supportsShowAppliedPatches();
 }

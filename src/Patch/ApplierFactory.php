@@ -5,9 +5,8 @@
  */
 namespace Magento\MagentoCloud\Patch;
 
-use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\App\ContainerInterface;
+use Magento\MagentoCloud\Config\Environment;
 
 /**
  * Creates instances of ApplierInterface.
@@ -15,17 +14,25 @@ use Magento\MagentoCloud\App\ContainerInterface;
  */
 class ApplierFactory
 {
+    const APPLIER_VARIABLE_NAME = 'APPLIER';
     /**
      * @var ContainerInterface
      */
     private $container;
 
     /**
-     * @param ContainerInterface $container
+     * @var Environment
      */
-    public function __construct(ContainerInterface $container)
+    private $environment;
+
+    /**
+     * @param ContainerInterface $container
+     * @param Environment $environment
+     */
+    public function __construct(ContainerInterface $container, Environment $environment)
     {
         $this->container = $container;
+        $this->environment = $environment;
     }
 
     /**
@@ -35,14 +42,11 @@ class ApplierFactory
      */
     public function create(): ApplierInterface
     {
-        if ($this->isQuiltInstalled()) {
-            return $this->container->create(QuiltApplier::class);
+        switch ( $this->environment->get(static::APPLIER_VARIABLE_NAME)) {
+            case 'QUILT':
+                return $this->container->create(QuiltApplier::class);
+            default:
+                return $this->container->create(GitApplier::class);
         }
-        return $this->container->create(GitApplier::class);
-    }
-
-    private function isQuiltInstalled() : bool
-    {
-        return !!shell_exec('which quilt');
     }
 }
