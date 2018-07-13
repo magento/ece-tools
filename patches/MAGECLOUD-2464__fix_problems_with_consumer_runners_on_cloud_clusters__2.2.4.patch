@@ -3,7 +3,7 @@ diff -Nuar a/vendor/magento/module-message-queue/Model/Cron/ConsumersRunner.php 
 +++ b/vendor/magento/module-message-queue/Model/Cron/ConsumersRunner.php
 @@ -139,6 +139,8 @@ class ConsumersRunner
       */
-     private func`]tion getPidFilePath($consumerName)
+     private function getPidFilePath($consumerName)
      {
 -        return $consumerName . static::PID_FILE_EXT;
 +        $sanitizedHostname = preg_replace('/[^a-z0-9]/i', '', gethostname());
