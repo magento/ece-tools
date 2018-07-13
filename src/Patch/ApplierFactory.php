@@ -42,7 +42,7 @@ class ApplierFactory
      */
     public function create(): ApplierInterface
     {
-        switch ( $this->environment->get(static::APPLIER_VARIABLE_NAME)) {
+        switch ($this->environment->get(static::APPLIER_VARIABLE_NAME)) {
             case 'QUILT':
                 return $this->container->create(QuiltApplier::class);
             default:

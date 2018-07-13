@@ -132,7 +132,8 @@ class GitApplier implements ApplierInterface
         return false;
     }
 
-    public function supportsShowAppliedPatches() {
+    public function supportsShowAppliedPatches()
+    {
         return false;
     }
 }

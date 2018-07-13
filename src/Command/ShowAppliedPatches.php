@@ -29,10 +29,10 @@ class ShowAppliedPatches extends Command
      */
     private $manager;
 
-        /**
-         * @var ApplierFactory
-         */
-        private $applierFactory;
+    /**
+     * @var ApplierFactory
+     */
+    private $applierFactory;
 
     /**
      * @param LoggerInterface $logger
