@@ -94,24 +94,25 @@ class GenerateTest extends TestCase
             ->with('magento_root/pub/static/deployed_version.txt');
         $this->loggerMock->method('notice')
             ->withConsecutive(
-                ['Enabling Maintenance mode'],
                 ['Extracting locales'],
-                ['Generating static content for locales: en_GB fr_FR'],
-                ['Maintenance mode is disabled.']
+                ['Generating static content for locales: en_GB fr_FR']
             );
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([
-                'php ./bin/magento static:content:deploy:command --ansi --no-interaction',
+                'php ./bin/magento setup:static-content:deploy --some-option1 --ansi --no-interaction',
+                'php ./bin/magento setup:static-content:deploy --some-option2 --ansi --no-interaction',
+                'php ./bin/magento setup:static-content:deploy --some-option3 --ansi --no-interaction',
             ]);
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
-                ['php ./bin/magento maintenance:enable --ansi --no-interaction -vvv'],
-                ['php ./bin/magento static:content:deploy:command --ansi --no-interaction'],
-                ['php ./bin/magento maintenance:disable --ansi --no-interaction -vvv']
+                ['php ./bin/magento setup:static-content:deploy --some-option1 --ansi --no-interaction'],
+                ['php ./bin/magento setup:static-content:deploy --some-option2 --ansi --no-interaction'],
+                ['php ./bin/magento setup:static-content:deploy --some-option3 --ansi --no-interaction']
             );
-        $this->stageConfigMock->method('get')
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_VERBOSE_COMMANDS, '-vvv'],
                 [DeployInterface::VAR_SCD_MATRIX, []],

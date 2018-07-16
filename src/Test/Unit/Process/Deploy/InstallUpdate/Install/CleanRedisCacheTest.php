@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanRedisCache;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\CleanRedisCache;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;

@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
+namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessInterface;
