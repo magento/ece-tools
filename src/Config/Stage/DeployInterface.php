@@ -32,6 +32,8 @@ interface DeployInterface extends StageConfigInterface
      */
     const VAR_MYSQL_USE_SLAVE_CONNECTION = 'MYSQL_USE_SLAVE_CONNECTION';
 
+    const VAR_S3_CONFIGURATION = 'S3_CONFIGURATION';
+
     /**
      * @deprecated 2.1 specific variable.
      */

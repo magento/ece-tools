@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Illuminate\Contracts\Config\Repository;
+use Illuminate\Config\Repository;
+use Illuminate\Contracts\Config\Repository as RepositoryInterface;
 use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
@@ -14,26 +15,13 @@ use Magento\MagentoCloud\App\ContainerInterface;
 class RepositoryFactory
 {
     /**
-     * @var ContainerInterface
-     */
-    private $container;
-
-    /**
-     * @param ContainerInterface $container
-     */
-    public function __construct(ContainerInterface $container)
-    {
-        $this->container = $container;
-    }
-
-    /**
      * Creates instances of Repository.
      *
      * @param array $items The config array
-     * @return Repository
+     * @return RepositoryInterface
      */
-    public function create(array $items = []): Repository
+    public function create(array $items = []): RepositoryInterface
     {
-        return $this->container->create(\Illuminate\Config\Repository::class, ['items' => $items]);
+        return new Repository($items);
     }
 }

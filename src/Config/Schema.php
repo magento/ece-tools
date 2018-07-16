@@ -331,6 +331,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => true,
                 ],
             ],
+            DeployInterface::VAR_S3_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+            ],
             PostDeployInterface::VAR_WARM_UP_PAGES => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [
