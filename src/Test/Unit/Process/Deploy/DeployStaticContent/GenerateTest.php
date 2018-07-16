@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -101,12 +100,19 @@ class GenerateTest extends TestCase
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([
-                'php ./bin/magento static:content:deploy:command',
+                'php ./bin/magento setup:static-content:deploy',
+                'php ./bin/magento setup:static-content:deploy --some-option1',
+                'php ./bin/magento setup:static-content:deploy --some-option2',
             ]);
-        $this->shellMock->expects($this->once())
+        $this->shellMock->expects($this->exactly(3))
             ->method('execute')
-            ->with('php ./bin/magento static:content:deploy:command');
-        $this->stageConfigMock->method('get')
+            ->withConsecutive(
+                ['php ./bin/magento setup:static-content:deploy'],
+                ['php ./bin/magento setup:static-content:deploy --some-option1'],
+                ['php ./bin/magento setup:static-content:deploy --some-option2']
+            );
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_VERBOSE_COMMANDS, '-vvv'],
                 [DeployInterface::VAR_SCD_MATRIX, []],

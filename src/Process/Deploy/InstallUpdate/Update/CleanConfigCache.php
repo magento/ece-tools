@@ -45,10 +45,13 @@ class CleanConfigCache implements ProcessInterface
         $this->shell = $shell;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
         $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
         $this->logger->info('Clean configuration cache');
-        $this->shell->execute('php ./bin/magento cache:flush config '.$verbosityLevel);
+        $this->shell->execute('php ./bin/magento cache:flush config ' . $verbosityLevel);
     }
 }
