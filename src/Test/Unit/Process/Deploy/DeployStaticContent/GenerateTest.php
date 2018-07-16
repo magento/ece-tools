@@ -100,16 +100,16 @@ class GenerateTest extends TestCase
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([
-                'php ./bin/magento setup:static-content:deploy',
-                'php ./bin/magento setup:static-content:deploy --some-option1',
-                'php ./bin/magento setup:static-content:deploy --some-option2',
+                'php ./bin/magento setup:static-content:deploy --some-option1 --ansi --no-interaction',
+                'php ./bin/magento setup:static-content:deploy --some-option2 --ansi --no-interaction',
+                'php ./bin/magento setup:static-content:deploy --some-option3 --ansi --no-interaction',
             ]);
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
-                ['php ./bin/magento setup:static-content:deploy'],
-                ['php ./bin/magento setup:static-content:deploy --some-option1'],
-                ['php ./bin/magento setup:static-content:deploy --some-option2']
+                ['php ./bin/magento setup:static-content:deploy --some-option1 --ansi --no-interaction'],
+                ['php ./bin/magento setup:static-content:deploy --some-option2 --ansi --no-interaction'],
+                ['php ./bin/magento setup:static-content:deploy --some-option3 --ansi --no-interaction']
             );
         $this->stageConfigMock->expects($this->once())
             ->method('get')
