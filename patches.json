@@ -104,6 +104,10 @@
     "Write Logs for Failed Process of Generating Factories in Extensions": {
       "2.2.0 - 2.2.5": "MAGECLOUD-2209__write_logs_for_failed_process_of_generating_factories_in_extensions__2.2.0.patch"
     },
+    "Fix Problems with Consumer Runners on Cloud Clusters": {
+      "2.2.0 - 2.2.3": "MAGECLOUD-2464__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.0.patch",
+      "2.2.4 - 2.2.5": "MAGECLOUD-2464__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.4.patch"
+    },
     "Resolve Issues with Cron Schedule": {
       "2.1.10 - 2.1.14 || 2.2.2 - 2.2.5": "MAGECLOUD-2427__resolve_issues_with_cron_schedule.patch"
     }
