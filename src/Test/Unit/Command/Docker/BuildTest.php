@@ -113,7 +113,7 @@ class BuildTest extends TestCase
             ->willReturnMap([
                 [Build::OPTION_PHP, '7.1'],
                 [Build::OPTION_DB, '10'],
-                [Build::OPTION_NGINX, '1.9']
+                [Build::OPTION_NGINX, '1.9'],
             ]);
         $this->builderMock->expects($this->once())
             ->method('setPhpVersion')

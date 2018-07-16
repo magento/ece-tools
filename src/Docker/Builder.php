@@ -103,17 +103,20 @@ class Builder
             'version' => '2',
             'services' => [
                 'fpm' => $this->getFpmService(),
-                'cli' => $this->getCliService(),
+                /** For backward compatibility. */
+                'cli' => $this->getCliService(false),
+                'build' => $this->getCliService(false),
+                'deploy' => $this->getCliService(true),
                 'db' => $this->getDbService(),
                 'web' => $this->getWebService(),
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
-                        '.:/var/www/magento',
                         '/var/www/magento/vendor',
                         '/var/www/magento/generated',
                         '/var/www/magento/pub',
                         '/var/www/magento/var',
+                        '/var/www/magento/app/etc',
                     ],
                 ],
                 'dbdata' => [
@@ -124,6 +127,19 @@ class Builder
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param bool $isReadOnly
+     * @return string
+     */
+    private function getMagentoVolume(bool $isReadOnly): string
+    {
+        $volume = '.:/var/www/magento';
+
+        return $isReadOnly
+            ? $volume . ':ro'
+            : $volume . ':rw';
     }
 
     /**
@@ -146,6 +162,9 @@ class Builder
             'volumes_from' => [
                 'appdata',
             ],
+            'volumes' => [
+                $this->getMagentoVolume(false),
+            ],
             'env_file' => [
                 './docker/global.env',
                 './docker/config.env',
@@ -154,9 +173,10 @@ class Builder
     }
 
     /**
+     * @param bool $isReadOnly
      * @return array
      */
-    private function getCliService(): array
+    private function getCliService(bool $isReadOnly): array
     {
         return [
             'hostname' => 'cli.magento2.docker',
@@ -169,6 +189,7 @@ class Builder
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
+                $this->getMagentoVolume($isReadOnly),
             ],
             'volumes_from' => [
                 'appdata',
@@ -227,6 +248,9 @@ class Builder
             ],
             'volumes_from' => [
                 'appdata',
+            ],
+            'volumes' => [
+                $this->getMagentoVolume(false),
             ],
             'env_file' => [
                 './docker/global.env',
