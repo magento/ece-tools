@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Package\Manager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,11 +19,6 @@ class PreDeploy implements ProcessInterface
     private $logger;
 
     /**
-     * @var Manager
-     */
-    private $packageManager;
-
-    /**
      * @var ProcessInterface
      */
     private $process;
@@ -36,12 +30,10 @@ class PreDeploy implements ProcessInterface
      */
     public function __construct(
         LoggerInterface $logger,
-        ProcessInterface $process,
-        Manager $packageManager
+        ProcessInterface $process
     ) {
         $this->logger = $logger;
         $this->process = $process;
-        $this->packageManager = $packageManager;
     }
 
     /**
@@ -49,7 +41,7 @@ class PreDeploy implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Starting pre-deploy. ' . $this->packageManager->getPrettyInfo());
+        $this->logger->info('Starting pre-deploy.');
         $this->process->execute();
     }
 }

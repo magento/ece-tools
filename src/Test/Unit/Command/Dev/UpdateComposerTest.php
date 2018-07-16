@@ -111,7 +111,7 @@ class UpdateComposerTest extends TestCase
             ->withConsecutive(
                 ['script2'],
                 ['script3'],
-                ['composer update']
+                ['composer update --ansi --no-interaction']
             );
         $this->fileListMock->expects($this->once())
             ->method('getMagentoComposer')

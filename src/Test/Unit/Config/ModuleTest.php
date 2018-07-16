@@ -55,7 +55,7 @@ class ModuleTest extends TestCase
             ->method('reset');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento module:enable --all');
+            ->with('php ./bin/magento module:enable --all --ansi --no-interaction');
         $this->sharedConfigMock->expects($this->never())
             ->method('update');
 
@@ -70,7 +70,7 @@ class ModuleTest extends TestCase
             ->willReturn(['Some_OtherModule' => 1]);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento module:enable --all');
+            ->with('php ./bin/magento module:enable --all --ansi --no-interaction');
         $this->sharedConfigMock->expects($this->never())
             ->method('reset');
         $this->sharedConfigMock->expects($this->once())

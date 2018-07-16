@@ -11,10 +11,11 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Util\ArrayManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -27,61 +28,49 @@ class ConfigFileStructureTest extends TestCase
     private $configFileStructure;
 
     /**
-     * @var FileList|Mock
-     */
-    private $fileListMock;
-
-    /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
     /**
-     * @var ArrayManager|Mock
+     * @var ArrayManager|MockObject
      */
     private $arrayManagerMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var SharedConfig|MockObject
      */
-    private $magentoVersionMock;
+    private $configResolverMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createMock(File::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
-        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->configResolverMock = $this->createMock(SharedConfig::class);
 
         $this->configFileStructure = new ConfigFileStructure(
             $this->arrayManagerMock,
             $this->fileMock,
-            $this->fileListMock,
             $this->resultFactoryMock,
-            $this->magentoVersionMock
+            $this->configResolverMock
         );
     }
 
     public function testRun()
     {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-        $this->fileListMock->expects($this->once())
-            ->method('getConfig')
+
+        $this->configResolverMock->expects($this->once())
+            ->method('resolve')
             ->willReturn('magento_root/app/etc/config.php');
-        $this->fileListMock->expects($this->never())
-            ->method('getConfigLocal');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->willReturn(true);
@@ -91,9 +80,9 @@ class ConfigFileStructureTest extends TestCase
             ->willReturn([
                 'scopes' => [
                     'websites' => [
-                        'key' => 'value'
-                    ]
-                ]
+                        'key' => 'value',
+                    ],
+                ],
             ]);
         $this->arrayManagerMock->expects($this->once())
             ->method('flatten')
@@ -120,15 +109,9 @@ class ConfigFileStructureTest extends TestCase
 
     public function testRunScdConfigNotExists()
     {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(true);
-        $this->fileListMock->expects($this->once())
-            ->method('getConfig')
+        $this->configResolverMock->expects($this->once())
+            ->method('resolve')
             ->willReturn('magento_root/app/etc/config.php');
-        $this->fileListMock->expects($this->never())
-            ->method('getConfigLocal');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->willReturn(true);
@@ -151,11 +134,11 @@ class ConfigFileStructureTest extends TestCase
                 ResultInterface::ERROR,
                 [
                     'error' => 'No stores/website/locales found in config.php',
-                    'suggestion' => 'To speed up the deploy process, please run the following commands:' . PHP_EOL
-                        . '1. php ./vendor/bin/ece-tools config:dump' . PHP_EOL
-                        . '2. git add -f app/etc/config.php' . PHP_EOL
-                        . '3. git commit -m \'Updating config.php\'' . PHP_EOL
-                        . '4. git push'
+                    'suggestion' => '  To speed up the deploy process, please run the following commands:' . PHP_EOL
+                        . '  1. php ./vendor/bin/ece-tools config:dump' . PHP_EOL
+                        . '  2. git add -f app/etc/config.php' . PHP_EOL
+                        . '  3. git commit -m \'Updating config.php\'' . PHP_EOL
+                        . '  4. git push',
                 ]
             )
             ->willReturn($resultMock);
@@ -167,15 +150,9 @@ class ConfigFileStructureTest extends TestCase
 
     public function testRunScdConfigNotExistsVersion21x()
     {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
-        $this->fileListMock->expects($this->once())
-            ->method('getConfigLocal')
+        $this->configResolverMock->expects($this->once())
+            ->method('resolve')
             ->willReturn('magento_root/app/etc/config.local.php');
-        $this->fileListMock->expects($this->never())
-            ->method('getConfig');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->willReturn(true);
@@ -198,11 +175,11 @@ class ConfigFileStructureTest extends TestCase
                 ResultInterface::ERROR,
                 [
                     'error' => 'No stores/website/locales found in config.local.php',
-                    'suggestion' => 'To speed up the deploy process, please run the following commands:' . PHP_EOL
-                        . '1. php ./vendor/bin/ece-tools config:dump' . PHP_EOL
-                        . '2. git add -f app/etc/config.local.php' . PHP_EOL
-                        . '3. git commit -m \'Updating config.local.php\'' . PHP_EOL
-                        . '4. git push'
+                    'suggestion' => '  To speed up the deploy process, please run the following commands:' . PHP_EOL
+                        . '  1. php ./vendor/bin/ece-tools config:dump' . PHP_EOL
+                        . '  2. git add -f app/etc/config.local.php' . PHP_EOL
+                        . '  3. git commit -m \'Updating config.local.php\'' . PHP_EOL
+                        . '  4. git push',
                 ]
             )
             ->willReturn($resultMock);

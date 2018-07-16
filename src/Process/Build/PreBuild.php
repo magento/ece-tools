@@ -10,7 +10,6 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Package\Manager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,11 +26,6 @@ class PreBuild implements ProcessInterface
      * @var LoggerInterface
      */
     private $logger;
-
-    /**
-     * @var Manager
-     */
-    private $packageManager;
 
     /**
      * @var FlagManager
@@ -51,7 +45,6 @@ class PreBuild implements ProcessInterface
     /**
      * @param BuildInterface $stageConfig
      * @param LoggerInterface $logger
-     * @param Manager $packageManager
      * @param FlagManager $flagManager
      * @param File $file
      * @param DirectoryList $directoryList
@@ -59,14 +52,12 @@ class PreBuild implements ProcessInterface
     public function __construct(
         BuildInterface $stageConfig,
         LoggerInterface $logger,
-        Manager $packageManager,
         FlagManager $flagManager,
         File $file,
         DirectoryList $directoryList
     ) {
         $this->stageConfig = $stageConfig;
         $this->logger = $logger;
-        $this->packageManager = $packageManager;
         $this->flagManager = $flagManager;
         $this->file = $file;
         $this->directoryList = $directoryList;
@@ -101,7 +92,5 @@ class PreBuild implements ProcessInterface
             );
             $this->file->clearDirectory($generatedMetadata);
         }
-
-        $this->logger->info('Starting build. ' . $this->packageManager->getPrettyInfo());
     }
 }

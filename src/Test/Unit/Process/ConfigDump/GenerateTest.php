@@ -37,11 +37,6 @@ class GenerateTest extends TestCase
     private $fileMock;
 
     /**
-     * @var ArrayManager|MockObject
-     */
-    private $arrayManagerMock;
-
-    /**
      * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
@@ -63,7 +58,6 @@ class GenerateTest extends TestCase
     {
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
         $this->fileMock = $this->createMock(File::class);
-        $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->sharedConfigMock = $this->createMock(SharedConfig::class);
 
@@ -74,36 +68,26 @@ class GenerateTest extends TestCase
         $this->process = new Generate(
             $this->connectionMock,
             $this->fileMock,
-            $this->arrayManagerMock,
+            new ArrayManager(),
             $this->magentoVersionMock,
             $this->sharedConfigMock
         );
     }
 
-    public function testExecute()
+    /**
+     * @param bool $versionGreaterTwoDotTwo
+     * @param string $expectedResultFilePath
+     * @dataProvider executeDataProvider
+     */
+    public function testExecute(bool $versionGreaterTwoDotTwo, string $expectedConfigFilePath)
     {
-        $expectedConfig = [
-            'modules' => [
-                'Magento_Store' => 1,
-                'Magento_Directory' => 1,
-            ],
-            'admin_user' => [
-                'locale' => [
-                    'code' => ['fr_FR', 'ua_UA',],
-                ],
-            ],
-        ];
+        $expectedConfig = require $expectedConfigFilePath;
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn($versionGreaterTwoDotTwo);
         $this->sharedConfigMock->method('resolve')
             ->willReturn(__DIR__ . '/_files/app/etc/config.php');
-        $this->arrayManagerMock->method('nest')
-            ->willReturn(
-                [
-                    'modules' => [
-                        'Magento_Store' => 1,
-                        'Magento_Directory' => 1,
-                    ],
-                ]
-            );
         $this->connectionMock->method('select')
             ->with('SELECT DISTINCT `interface_locale` FROM `admin_user`')
             ->willReturn([
@@ -119,42 +103,20 @@ class GenerateTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecute21()
+    /**
+     * @return array
+     */
+    public function executeDataProvider(): array
     {
-        $expectedConfig = [
-            'modules' => [
-                'Magento_Store' => 1,
-                'Magento_Directory' => 1,
+        return [
+            'magento version greater 2.2' => [
+                true,
+                __DIR__ . '/_files/app/etc/generated_config.php'
             ],
-            'admin_user' => [
-                'locale' => [
-                    'code' => ['fr_FR', 'ua_UA',],
-                ],
+            'magento version lower 2.2' => [
+                false,
+                __DIR__ . '/_files/app/etc/generated_config_2.1.php'
             ],
         ];
-        $this->sharedConfigMock->method('resolve')
-            ->willReturn(__DIR__ . '/_files/app/etc/config.php');
-        $this->arrayManagerMock->method('nest')
-            ->willReturn(
-                [
-                    'modules' => [
-                        'Magento_Store' => 1,
-                        'Magento_Directory' => 1,
-                    ],
-                ]
-            );
-        $this->connectionMock->method('select')
-            ->with('SELECT DISTINCT `interface_locale` FROM `admin_user`')
-            ->willReturn([
-                ['interface_locale' => 'fr_FR'],
-                ['interface_locale' => 'ua_UA'],
-            ]);
-        $this->fileMock->method('filePutContents')
-            ->with(
-                __DIR__ . '/_files/app/etc/config.php',
-                '<?php' . "\n" . 'return ' . var_export($expectedConfig, true) . ";\n"
-            );
-
-        $this->process->execute();
     }
 }

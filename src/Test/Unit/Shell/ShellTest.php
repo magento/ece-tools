@@ -48,10 +48,9 @@ class ShellTest extends TestCase
 
     /**
      * @param string $execOutput
-     * @param int $loggerInfoExpects
      * @dataProvider executeDataProvider
      */
-    public function testExecute($execOutput, $loggerInfoExpects)
+    public function testExecute($execOutput)
     {
         $testCase = $this;
         $command = 'ls -al';
@@ -70,13 +69,14 @@ class ShellTest extends TestCase
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
 
-        $this->loggerMock->expects($this->exactly($loggerInfoExpects))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Command: ' . $command],
-                ['Status: 0'],
-                ['Output: ' . var_export($execOutput, true)]
-            );
+            ->with($command);
+        if ($execOutput) {
+            $this->loggerMock->expects($this->once())
+                ->method('debug')
+                ->with(PHP_EOL . '  ' . $execOutput[0]);
+        }
 
         $this->shell->execute($command);
     }
@@ -87,14 +87,8 @@ class ShellTest extends TestCase
     public function executeDataProvider()
     {
         return [
-            [
-                'execOutput' => null,
-                'loggerInfoExpects' => 2,
-            ],
-            [
-                'execOutput' => 'test',
-                'loggerInfoExpects' => 3,
-            ],
+            [ 'execOutput' => [] ],
+            [ 'execOutput' => ['test'] ],
         ];
     }
 
@@ -115,19 +109,16 @@ class ShellTest extends TestCase
             ->willReturnCallback(function ($cmd, &$output, &$status) use ($testCase, $execCommand) {
                 $testCase->assertSame($execCommand, $cmd);
                 $status = 123;
-                $output = null;
+                $output = [];
             });
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
 
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Command: ' . $command],
-                ['Status: 123']
-            );
+            ->with($command);
 
         $this->shell->execute($command);
     }

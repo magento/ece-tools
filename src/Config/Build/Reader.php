@@ -27,6 +27,13 @@ class Reader implements ReaderInterface
     private $fileList;
 
     /**
+     * Cached configuration
+     *
+     * @var array|null
+     */
+    private $config;
+
+    /**
      * @param File $file
      * @param FileList $fileList
      */
@@ -43,8 +50,12 @@ class Reader implements ReaderInterface
      */
     public function read(): array
     {
-        $fileName = $this->fileList->getBuildConfig();
+        if ($this->config === null) {
+            $fileName = $this->fileList->getBuildConfig();
 
-        return $this->file->isExists($fileName) ? $this->file->parseIni($fileName) : [];
+            $this->config = $this->file->isExists($fileName) ? $this->file->parseIni($fileName) : [];
+        }
+
+        return $this->config;
     }
 }

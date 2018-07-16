@@ -95,18 +95,21 @@ class RecoverableDirectoryListTest extends TestCase
     /**
      * @param bool $isSymlinkOn
      * @param bool $isStaticInBuild
+     * @param bool $isStaticCleanFiles
      * @param array $expected
      * @dataProvider getListDataProvider22
      */
     public function testGetList22(
         bool $isSymlinkOn,
         bool $isStaticInBuild,
+        bool $isStaticCleanFiles,
         array $expected
     ) {
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
+                [DeployInterface::VAR_CLEAN_STATIC_FILES, $isStaticCleanFiles]
             ]);
 
         $this->directoryListMock->expects($this->exactly(count($expected)))
@@ -139,6 +142,7 @@ class RecoverableDirectoryListTest extends TestCase
             'symlink and static in build' => [
                 'isSymlinkOn' => true,
                 'isStaticInBuild' => true,
+                'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
@@ -161,6 +165,7 @@ class RecoverableDirectoryListTest extends TestCase
             'no symlink and static in build' => [
                 'isSymlinkOn' => false,
                 'isStaticInBuild' => true,
+                'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
@@ -180,9 +185,33 @@ class RecoverableDirectoryListTest extends TestCase
                     ],
                 ],
             ],
+            'static in build and clean' => [
+                'isSymlinkOn' => false,
+                'isStaticInBuild' => true,
+                'isStaticCleanFiles' => false,
+                'expected' => [
+                    [
+                        'directory' => 'app/etc',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'pub/media',
+                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                    ],
+                    [
+                        'directory' => 'var/view_preprocessed',
+                        'strategy' => StrategyInterface::STRATEGY_COPY_SUB_FOLDERS,
+                    ],
+                    [
+                        'directory' => 'pub/static',
+                        'strategy' => StrategyInterface::STRATEGY_COPY_SUB_FOLDERS,
+                    ],
+                ],
+            ],
             'symlink and no static in build' => [
                 'isSymlinkOn' => true,
                 'isStaticInBuild' => false,
+                'isStaticCleanFiles' => false,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
@@ -201,6 +230,7 @@ class RecoverableDirectoryListTest extends TestCase
      * @param bool $isSymlinkOn
      * @param bool $isStaticInBuild
      * @param bool $isGeneratedSymlinkOn
+     * @param bool $isStaticCleanFiles
      * @param array $expected
      * @dataProvider getListDataProvider21
      */
@@ -208,6 +238,7 @@ class RecoverableDirectoryListTest extends TestCase
         bool $isSymlinkOn,
         bool $isGeneratedSymlinkOn,
         bool $isStaticInBuild,
+        bool $isStaticCleanFiles,
         array $expected
     ) {
         $this->stageConfigMock->expects($this->any())
@@ -215,6 +246,7 @@ class RecoverableDirectoryListTest extends TestCase
             ->willReturnMap([
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK, $isGeneratedSymlinkOn],
+                [DeployInterface::VAR_CLEAN_STATIC_FILES, $isStaticCleanFiles]
             ]);
 
         $this->flagManagerMock->expects($this->once())
@@ -248,6 +280,7 @@ class RecoverableDirectoryListTest extends TestCase
                 'isSymlinkOn' => true,
                 'isGeneratedSymlinkOn' => false,
                 'isStaticInBuild' => true,
+                'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
@@ -279,6 +312,7 @@ class RecoverableDirectoryListTest extends TestCase
                 'isSymlinkOn' => false,
                 'isGeneratedSymlinkOn' => false,
                 'isStaticInBuild' => true,
+                'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
@@ -310,6 +344,7 @@ class RecoverableDirectoryListTest extends TestCase
                 'isSymlinkOn' => true,
                 'isGeneratedSymlinkOn' => false,
                 'isStaticInBuild' => false,
+                'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
@@ -333,6 +368,7 @@ class RecoverableDirectoryListTest extends TestCase
                 'isSymlinkOn' => true,
                 'isGeneratedSymlinkOn' => true,
                 'isStaticInBuild' => false,
+                'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
@@ -357,16 +393,21 @@ class RecoverableDirectoryListTest extends TestCase
 
     /**
      * @param bool $skipCopyingViewPreprocessed
+     * @param bool $isStaticCleanFiles
      * @param array $expected
      * @dataProvider getListSkipCopyingVarViewPreprocessedDataProvider
      */
-    public function testGetListSkipCopyingVarViewPreprocessed($skipCopyingViewPreprocessed, $expected)
-    {
-        $this->stageConfigMock->expects($this->once())
+    public function testGetListSkipCopyingVarViewPreprocessed(
+        bool $skipCopyingViewPreprocessed,
+        bool $isStaticCleanFiles,
+        array $expected
+    ) {
+        $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, false],
-                [DeployInterface::VAR_SKIP_HTML_MINIFICATION, $skipCopyingViewPreprocessed]
+                [DeployInterface::VAR_SKIP_HTML_MINIFICATION, $skipCopyingViewPreprocessed],
+                [DeployInterface::VAR_CLEAN_STATIC_FILES, $isStaticCleanFiles]
             ]);
 
         $this->globalConfigMock->expects($this->once())
@@ -403,6 +444,7 @@ class RecoverableDirectoryListTest extends TestCase
         return [
             'copying view preprocessed dir' => [
                 'skipCopyingViewPreprocessed' => false,
+                'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
@@ -424,6 +466,7 @@ class RecoverableDirectoryListTest extends TestCase
             ],
             'skip copying view preprocessed dir' => [
                 'skipCopyingViewPreprocessed' => true,
+                'isStaticCleanFiles' => true,
                 'expected' => [
                     [
                         'directory' => 'app/etc',
