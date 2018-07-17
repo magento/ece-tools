@@ -67,11 +67,11 @@
         ".magento.env.yaml.dist"
       ],
       [
-        "dist/config.php",
+        "dist/docker/config.php",
         "docker/config.php.dist"
       ],
       [
-        "dist/global.env",
+        "dist/docker/global.env",
         "docker/global.php.dist"
       ]
     ]
