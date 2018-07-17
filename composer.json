@@ -17,8 +17,7 @@
     "psr/container": "^1.0",
     "psr/log": "^1.0",
     "symfony/console": "^2.6||^4.0",
-    "symfony/yaml": "^2.3||^3.3",
-    "vlucas/phpdotenv": "^2.5"
+    "symfony/yaml": "^2.3||^3.3"
   },
   "require-dev": {
     "php-mock/php-mock-phpunit": "^2.0",
