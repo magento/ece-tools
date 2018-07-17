@@ -67,12 +67,12 @@
         ".magento.env.yaml.dist"
       ],
       [
-        "dist/config.env",
-        "docker/config.env.dist"
+        "dist/docker/config.php",
+        "docker/config.php.dist"
       ],
       [
-        "dist/global.env",
-        "docker/global.env.dist"
+        "dist/docker/global.php",
+        "docker/global.php.dist"
       ]
     ]
   }
