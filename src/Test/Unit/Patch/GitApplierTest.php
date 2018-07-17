@@ -5,13 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Patch;
 
-use Composer\Composer;
-use Composer\Package\PackageInterface;
-use Composer\Repository\RepositoryManager;
-use Composer\Repository\WritableRepositoryInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Patch\Applier;
+use Magento\MagentoCloud\Patch\GitApplier;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Config\GlobalSection;
 use PHPUnit\Framework\TestCase;
@@ -21,17 +17,12 @@ use Psr\Log\LoggerInterface;
 /**
  * Class ApplierTest.
  */
-class ApplierTest extends TestCase
+class GitApplierTest extends TestCase
 {
     /**
-     * @var Applier
+     * @var GitApplier
      */
     private $applier;
-
-    /**
-     * @var Composer|Mock
-     */
-    private $composerMock;
 
     /**
      * @var ShellInterface|Mock
@@ -42,11 +33,6 @@ class ApplierTest extends TestCase
      * @var LoggerInterface|Mock
      */
     private $loggerMock;
-
-    /**
-     * @var WritableRepositoryInterface|Mock
-     */
-    private $localRepositoryMock;
 
     /**
      * @var DirectoryList|Mock
@@ -65,24 +51,13 @@ class ApplierTest extends TestCase
 
     protected function setUp()
     {
-        $this->composerMock = $this->createMock(Composer::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->localRepositoryMock = $this->getMockForAbstractClass(WritableRepositoryInterface::class);
-        $repositoryManagerMock = $this->createMock(RepositoryManager::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileMock = $this->createMock(File::class);
         $this->globalSection = $this->createMock(GlobalSection::class);
 
-        $repositoryManagerMock->expects($this->once())
-            ->method('getLocalRepository')
-            ->willReturn($this->localRepositoryMock);
-        $this->composerMock->expects($this->once())
-            ->method('getRepositoryManager')
-            ->willReturn($repositoryManagerMock);
-
-        $this->applier = new Applier(
-            $this->composerMock,
+        $this->applier = new GitApplier(
             $this->shellMock,
             $this->loggerMock,
             $this->directoryListMock,
@@ -94,31 +69,28 @@ class ApplierTest extends TestCase
     /**
      * @param string $path
      * @param string|null $name
-     * @param string|null $packageName
-     * @param string|null $constraint
      * @param string $expectedLog
      * @dataProvider applyDataProvider
      */
-    public function testApply(string $path, $name, $packageName, $constraint, string $expectedLog)
+    public function testApply(string $path, $name, string $expectedLog)
     {
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($path)
             ->willReturn(true);
-        $this->localRepositoryMock->expects($this->any())
-            ->method('findPackage')
-            ->with($packageName, $constraint)
-            ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('git apply ' . $path);
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->with($expectedLog);
+            ->withConsecutive(
+                [$expectedLog],
+                ['Done.']
+            );
         $this->loggerMock->expects($this->never())
             ->method('notice');
 
-        $this->applier->apply($path, $name, $packageName, $constraint);
+        $this->applier->applyPatches([['path' => $path, 'name' => $name]]);
     }
 
     /**
@@ -127,8 +99,8 @@ class ApplierTest extends TestCase
     public function applyDataProvider(): array
     {
         return [
-            ['path/to/patch', 'patchName', 'packageName', '1.0', 'Applying patch patchName (path/to/patch) 1.0.'],
-            ['path/to/patch2', null, null, null, 'Applying patch path/to/patch2.'],
+            ['path/to/patch', 'patchName', 'Applying patch patchName (path/to/patch).'],
+            ['path/to/patch2', null, 'Applying patch path/to/patch2.'],
         ];
     }
 
@@ -136,69 +108,38 @@ class ApplierTest extends TestCase
     {
         $path = 'path/to/patch';
         $name = 'patchName';
-        $packageName = 'packageName';
-        $constraint = '1.0';
 
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($path)
             ->willReturn(false);
-        $this->localRepositoryMock->expects($this->once())
-            ->method('findPackage')
-            ->with($packageName, $constraint)
-            ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('git apply root/' . $path);
         $this->loggerMock->expects($this->never())
             ->method('notice');
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->with('Applying patch patchName (root/path/to/patch) 1.0.');
+            ->withConsecutive(
+                ['Applying patch patchName (root/path/to/patch).'],
+                ['Done.']
+            );
         $this->directoryListMock->expects($this->once())
             ->method('getPatches')
             ->willReturn('root');
 
-        $this->applier->apply($path, $name, $packageName, $constraint);
-    }
-
-    public function testApplyPathNotExistsAndNotMatchedConstraints()
-    {
-        $path = 'path/to/patch';
-        $name = 'patchName';
-        $packageName = 'packageName';
-        $constraint = '1.0';
-
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with($path)
-            ->willReturn(false);
-        $this->localRepositoryMock->expects($this->once())
-            ->method('findPackage')
-            ->with($packageName, $constraint)
-            ->willReturn(null);
-        $this->shellMock->expects($this->never())
-            ->method('execute');
-
-        $this->applier->apply($path, $name, $packageName, $constraint);
+        $this->applier->applyPatches([['path' => $path, 'name' => $name]]);
     }
 
     public function testApplyPatchAlreadyApplied()
     {
         $path = 'path/to/patch';
         $name = 'patchName';
-        $packageName = 'packageName';
-        $constraint = '1.0';
 
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($path)
             ->willReturn(true);
-        $this->localRepositoryMock->expects($this->once())
-            ->method('findPackage')
-            ->with($packageName, $constraint)
-            ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
-
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
@@ -207,14 +148,17 @@ class ApplierTest extends TestCase
             )
             ->willReturnCallback([$this, 'shellMockReverseCallback']);
 
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->with('Applying patch patchName (path/to/patch) 1.0.');
+            ->withConsecutive(
+                ['Applying patch patchName (path/to/patch).'],
+                ['Done.']
+            );
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with("Patch patchName (path/to/patch) was already applied.");
 
-        $this->applier->apply($path, $name, $packageName, $constraint);
+        $this->applier->applyPatches([['path' => $path, 'name' => $name]]);
     }
 
     /**
@@ -240,18 +184,11 @@ class ApplierTest extends TestCase
     {
         $path = 'path/to/patch';
         $name = 'patchName';
-        $packageName = 'packageName';
-        $constraint = '1.0';
 
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($path)
             ->willReturn(true);
-        $this->localRepositoryMock->expects($this->once())
-            ->method('findPackage')
-            ->with($packageName, $constraint)
-            ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
-
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
@@ -262,26 +199,20 @@ class ApplierTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Applying patch patchName (path/to/patch) 1.0.');
+            ->with('Applying patch patchName (path/to/patch).');
 
-        $this->applier->apply($path, $name, $packageName, $constraint);
+        $this->applier->applyPatches([['path' => $path, 'name' => $name]]);
     }
 
     public function testApplyPatchErrorDuringInstallationFromGit()
     {
         $path = 'path/to/patch';
         $name = 'patchName';
-        $packageName = 'packageName';
-        $constraint = '1.0';
 
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with($path)
             ->willReturn(true);
-        $this->localRepositoryMock->expects($this->once())
-            ->method('findPackage')
-            ->with($packageName, $constraint)
-            ->willReturn($this->getMockForAbstractClass(PackageInterface::class));
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('git apply ' . $path)
@@ -292,12 +223,12 @@ class ApplierTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Applying patch patchName (path/to/patch) 1.0.');
+            ->with('Applying patch patchName (path/to/patch).');
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Patch patchName (path/to/patch) wasn\'t applied.');
 
-        $this->applier->apply($path, $name, $packageName, $constraint);
+        $this->applier->applyPatches([['path' => $path, 'name' => $name]]);
     }
 
     /**
@@ -313,5 +244,29 @@ class ApplierTest extends TestCase
 
         // Not a reverse, better throw an exception.
         throw new \RuntimeException('Applying the patch has failed for some reason');
+    }
+
+    public function testUnapplyAllPatchesDoesNothing()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Git applier does not support unapplying patches.  If you need this feature, install quilt.');
+        $this->loggerMock->expects($this->never())
+            ->method('notice');
+        $this->shellMock->expects($this->never())
+            ->method('execute');
+        $this->applier->unapplyAllPatches();
+    }
+
+    public function testShowAppliedPatchesDoesNothing()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Git applier does not support showing applied patches.  If you need this feature, install quilt.');
+        $this->loggerMock->expects($this->never())
+            ->method('notice');
+        $this->shellMock->expects($this->never())
+            ->method('execute');
+        $this->applier->showAppliedPatches();
     }
 }

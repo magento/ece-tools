@@ -22,9 +22,14 @@ class Manager
     const HOTFIXES_DIR = 'm2-hotfixes';
 
     /**
-     * @var Applier
+     * @var ApplierInterface
      */
     private $applier;
+
+    /**
+     * @var ConstraintTester
+     */
+    private $constraintTester;
 
     /**
      * @var LoggerInterface
@@ -47,20 +52,23 @@ class Manager
     private $directoryList;
 
     /**
-     * @param Applier $applier
+     * @param ApplierFactory $applierFactory
+     * @param ConstraintTester $constraintTester
      * @param LoggerInterface $logger
      * @param File $file
      * @param FileList $fileList
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        Applier $applier,
+        ApplierFactory $applierFactory,
+        ConstraintTester $constraintTester,
         LoggerInterface $logger,
         File $file,
         FileList $fileList,
         DirectoryList $directoryList
     ) {
-        $this->applier = $applier;
+        $this->applier = $applierFactory->create();
+        $this->constraintTester = $constraintTester;
         $this->logger = $logger;
         $this->file = $file;
         $this->fileList = $fileList;
@@ -76,10 +84,37 @@ class Manager
     public function applyAll()
     {
         $this->copyStaticFile();
-        $this->applyComposerPatches();
-        $this->applyHotFixes();
+        $this->logger->notice('Patching started.');
+        $patchList = array_merge(
+            $this->getApplicableComposerPatches(),
+            $this->getApplicableHotFixes()
+        );
+        if (empty($patchList)) {
+            $this->logger->notice('Patching finished - no patches applied.');
+            return;
+        }
+        $this->applier->applyPatches($patchList);
+        $this->logger->notice('Patching finished.');
     }
 
+    /**
+     * Unapplies all patches
+     * @param bool $force Forces the patches to be unapplied even if they don't seem to be applied
+     */
+    public function unapplyAll(bool $force = false)
+    {
+        $this->logger->notice('Unapplying patches started.');
+        $this->applier->unapplyAllPatches($force);
+        $this->logger->notice('Unapplying patches finished.');
+    }
+
+    /**
+     * Shows applied patches.  Prints to stdout.
+     */
+    public function showApplied()
+    {
+        $this->applier->showAppliedPatches();
+    }
     /**
      * Copying static file endpoint.
      * This resolves issue MAGECLOUD-314
@@ -90,7 +125,10 @@ class Manager
     private function copyStaticFile()
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
-
+        if ($this->file->isExists($magentoRoot . '/pub/front-static.php')) {
+            // Already copied.  Don't copy again, otherwise unpatching will fail.
+            return;
+        }
         if (!$this->file->isExists($magentoRoot . '/pub/static.php')) {
             $this->logger->notice('File static.php was not found.');
 
@@ -118,60 +156,65 @@ class Manager
      * - 1.6.*
      * - ^1.6
      *
-     * @return void
+     * @return string[]
      * @throws \RuntimeException
      * @throws FileSystemException
      */
-    private function applyComposerPatches()
+    private function getApplicableComposerPatches()
     {
+        $patchListToApply = [];
         $patches = json_decode(
             $this->file->fileGetContents($this->fileList->getPatches()),
             true
         );
-
         if (!$patches) {
             $this->logger->notice('Patching skipped.');
-
-            return;
+            return $patchListToApply;
         }
-
         foreach ($patches as $packageName => $patchesInfo) {
             foreach ($patchesInfo as $patchName => $packageInfo) {
                 if (is_string($packageInfo)) {
-                    $this->applier->apply($packageInfo, $patchName, $packageName, '*');
+                    $appliedPath = $this->constraintTester->testConstraint($packageInfo, $packageName, '*');
+                    if (!empty($appliedPath)) {
+                        $patchListToApply[] = ['path' => $appliedPath, 'name' => $patchName];
+                    }
                 } elseif (is_array($packageInfo)) {
                     foreach ($packageInfo as $constraint => $path) {
-                        $this->applier->apply($path, $patchName, $packageName, $constraint);
+                        $appliedPath = $this->constraintTester->testConstraint($path, $packageName, $constraint);
+                        if (!empty($appliedPath)) {
+                            $patchListToApply[] = ['path' => $appliedPath, 'name' => $patchName];
+                        }
                     }
                 }
             }
         }
+        return $patchListToApply;
     }
 
     /**
      * Applies patches from root directory m2-hotfixes.
      *
-     * @return void
+     * @return string[]
      * @throws \RuntimeException
      * @throws FileSystemException
      */
-    private function applyHotFixes()
+    private function getApplicableHotFixes()
     {
-        $hotFixesDir = $this->directoryList->getMagentoRoot() . '/' . static::HOTFIXES_DIR;
-
+        $patchListToApply = [];
+        $hotFixesDir = $this->directoryList->getPatches() . '/' . static::HOTFIXES_DIR;
         if (!$this->file->isDirectory($hotFixesDir)) {
             $this->logger->notice('Hot-fixes directory was not found. Skipping.');
-
-            return;
+            return $patchListToApply;
         }
-
         $this->logger->info('Applying hot-fixes.');
-
         $files = glob($hotFixesDir . '/*.patch');
         sort($files);
-
         foreach ($files as $file) {
-            $this->applier->apply($file, null, null, null);
+            $path = $this->constraintTester->testConstraint($file, null, null);
+            if (!empty($path)) {
+                $patchListToApply[] = ['path' => $path];
+            }
         }
+        return $patchListToApply;
     }
 }

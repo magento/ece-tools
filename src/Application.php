@@ -62,6 +62,8 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\BackupRestore::class),
                 $this->container->create(Command\BackupList::class),
                 $this->container->create(Command\ApplyPatches::class),
+                $this->container->create(Command\UnapplyPatches::class),
+                $this->container->create(Command\ShowAppliedPatches::class),
                 $this->container->create(Command\Dev\UpdateComposer::class),
                 $this->container->create(Command\Wizard\ScdOnDemand::class),
                 $this->container->create(Command\Wizard\ScdOnBuild::class),

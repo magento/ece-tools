@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Integration\Patch;
 
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Patch\Applier;
+use Magento\MagentoCloud\Patch\GitApplier;
 use Magento\MagentoCloud\Test\Integration\AbstractTest;
 use Magento\MagentoCloud\Test\Integration\Bootstrap;
 
@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Test\Integration\Bootstrap;
 class ApplierTest extends AbstractTest
 {
     /**
-     * @var Applier
+     * @var GitApplier
      */
     private $applier;
 
@@ -41,7 +41,7 @@ class ApplierTest extends AbstractTest
         $application = $this->bootstrap->createApplication([]);
 
         $this->applier = $application->getContainer()
-            ->get(Applier::class);
+            ->get(GitApplier::class);
         $this->fileList = $application->getContainer()
             ->get(FileList::class);
 
@@ -62,7 +62,7 @@ class ApplierTest extends AbstractTest
 
     public function testApplyingPatch()
     {
-        $this->applier->apply($this->patchFile);
+        $this->applier->applyPatches([['path' => $this->patchFile]]);
         $content = $this->getTargetFileContents();
         $this->assertContains('# Hello Magento', $content);
         $this->assertContains('## Additional Info', $content);
@@ -76,7 +76,7 @@ class ApplierTest extends AbstractTest
             $this->patchFile
         ));
 
-        $this->applier->apply($this->patchFile);
+        $this->applier->applyPatches([['path' => $this->patchFile]]);
 
         $content = $this->getTargetFileContents();
         $this->assertContains('# Hello Magento', $content);

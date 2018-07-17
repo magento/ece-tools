@@ -65,6 +65,8 @@ class ApplicationTest extends TestCase
         Command\BackupRestore::NAME => Command\BackupRestore::class,
         Command\BackupList::NAME => Command\BackupList::class,
         Command\ApplyPatches::NAME => Command\ApplyPatches::class,
+        Command\UnapplyPatches::NAME => Command\UnapplyPatches::class,
+        Command\ShowAppliedPatches::NAME => Command\ShowAppliedPatches::class,
         Command\Dev\UpdateComposer::NAME => Command\Dev\UpdateComposer::class,
         Command\Wizard\ScdOnBuild::NAME => Command\Wizard\ScdOnBuild::class,
         Command\Wizard\ScdOnDeploy::NAME => Command\Wizard\ScdOnDeploy::class,

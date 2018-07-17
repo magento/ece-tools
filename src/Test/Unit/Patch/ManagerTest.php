@@ -9,7 +9,9 @@ use Composer\Package\RootPackageInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Patch\Applier;
+use Magento\MagentoCloud\Patch\ApplierFactory;
+use Magento\MagentoCloud\Patch\ApplierInterface;
+use Magento\MagentoCloud\Patch\ConstraintTester;
 use Magento\MagentoCloud\Patch\Manager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -26,9 +28,14 @@ class ManagerTest extends TestCase
     private $manager;
 
     /**
-     * @var Applier|Mock
+     * @var ApplierInterface|Mock
      */
     private $applierMock;
+
+    /**
+     * @var ConstraintTester|Mock
+     */
+    private $constraintTesterMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -60,7 +67,10 @@ class ManagerTest extends TestCase
      */
     protected function setUp()
     {
-        $this->applierMock = $this->createMock(Applier::class);
+        $this->applierMock = $this->createMock(ApplierInterface::class);
+        $applierFactoryMock = $this->createMock(ApplierFactory::class);
+        $applierFactoryMock->expects($this->any())->method('create')->willReturn($this->applierMock);
+        $this->constraintTesterMock = $this->createMock(ConstraintTester::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->composerPackageMock = $this->getMockForAbstractClass(RootPackageInterface::class);
         $this->fileMock = $this->createMock(File::class);
@@ -68,7 +78,8 @@ class ManagerTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
 
         $this->manager = new Manager(
-            $this->applierMock,
+            $applierFactoryMock,
+            $this->constraintTesterMock,
             $this->loggerMock,
             $this->fileMock,
             $this->fileListMock,
@@ -78,7 +89,11 @@ class ManagerTest extends TestCase
 
     public function testExecuteCopyStaticFiles()
     {
-        $this->fileMock->expects($this->once())
+        $this->fileMock->expects($this->at(0))
+            ->method('isExists')
+            ->with('/pub/front-static.php')
+            ->willReturn(false);
+        $this->fileMock->expects($this->at(1))
             ->method('isExists')
             ->with('/pub/static.php')
             ->willReturn(true);
@@ -98,6 +113,9 @@ class ManagerTest extends TestCase
 
     public function testExecuteApplyComposerPatches()
     {
+        $this->fileMock->expects($this->any())
+            ->method('isExists')
+            ->willReturn(false);
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
             ->willReturn(json_encode(
@@ -120,38 +138,61 @@ class ManagerTest extends TestCase
                     ],
                 ]
             ));
-        $this->applierMock->expects($this->exactly(4))
-            ->method('apply')
-            ->withConsecutive(
-                ['patchPath1', 'patchName1', 'package1', '100'],
-                ['patchPath2', 'patchName2', 'package2', '101.*'],
-                ['patchPath3', 'patchName3', 'package2', '102.*'],
-                ['patchPath4', 'patchName4', 'package3', '*']
-            );
+        $this->applierMock->expects($this->once())
+            ->method('applyPatches')
+            ->with([
+                ['path' => 'patchPath1', 'name' => 'patchName1'],
+                ['path' => 'patchPath2', 'name' => 'patchName2'],
+                ['path' => 'patchPath3', 'name' => 'patchName3'],
+                ['path' => 'patchPath4', 'name' => 'patchName4'],
+            ]);
+        $this->constraintTesterMock->expects($this->any())
+            ->method('testConstraint')
+            ->willReturnArgument(0);
 
         $this->manager->applyAll();
     }
 
     public function testExecuteApplyHotFixes()
     {
+        $this->fileMock->expects($this->any())
+            ->method('isExists')
+            ->willReturn(false);
         $this->directoryListMock->expects($this->any())
-            ->method('getMagentoRoot')
+            ->method('getPatches')
             ->willReturn(__DIR__ . '/_files');
         $this->fileMock->expects($this->once())
             ->method('isDirectory')
             ->willReturn(true);
-        $this->applierMock->expects($this->exactly(2))
-            ->method('apply')
-            ->withConsecutive(
-                [__DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch1.patch'],
-                [__DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch2.patch']
-            );
+        $this->applierMock->expects($this->once())
+            ->method('applyPatches')
+            ->with([
+                ['path' => __DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch1.patch'],
+                ['path' => __DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch2.patch'],
+            ]);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->withConsecutive(
                 ['Applying hot-fixes.']
             );
+        $this->constraintTesterMock->expects($this->any())
+            ->method('testConstraint')
+            ->willReturnArgument(0);
 
         $this->manager->applyAll();
+    }
+
+    public function testUnapplyAll()
+    {
+        $this->applierMock->expects($this->once())
+            ->method('unapplyAllPatches');
+        $this->manager->unapplyAll();
+    }
+
+    public function testShowApplied()
+    {
+        $this->applierMock->expects($this->once())
+            ->method('showAppliedPatches');
+        $this->manager->showApplied();
     }
 }
