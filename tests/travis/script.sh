@@ -18,9 +18,11 @@ case $TEST_SUITE in
     integration)
         case $PHP in
             7.0)
+                echo "${DIR_TOOLS}/vendor/bin/phpunit --group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 ;;
             7.1)
+                echo "${DIR_TOOLS}/vendor/bin/phpunit --exclude-group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --exclude-group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 ;;
         esac

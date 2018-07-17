@@ -2,7 +2,7 @@ version: '2'
 services:
   fpm:
     hostname: fpm.magento2.docker
-    image: magento/magento-cloud-docker-php:7.0-fpm
+    image: jacobbrownaustin/magento-cloud-docker:7.0-fpm
     ports:
       - 9000
     links:
@@ -15,7 +15,7 @@ services:
 
   cli:
     hostname: cli.magento2.docker
-    image: magento/magento-cloud-docker-php:7.0-cli
+    image: jacobbrownaustin/magento-cloud-docker:7.0-cli
     links:
       - db
     volumes:
