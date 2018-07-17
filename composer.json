@@ -71,7 +71,7 @@
         "docker/config.php.dist"
       ],
       [
-        "dist/docker/global.env",
+        "dist/docker/global.php",
         "docker/global.php.dist"
       ]
     ]
