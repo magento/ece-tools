@@ -108,6 +108,8 @@ class Builder
                 'build' => $this->getCliService(false),
                 'deploy' => $this->getCliService(true),
                 'db' => $this->getDbService(),
+                'varnish' => $this->getVarnishService(),
+                'redis' => $this->getRedisService(),
                 'web' => $this->getWebService(),
                 'appdata' => [
                     'image' => 'tianon/true',
@@ -255,6 +257,43 @@ class Builder
             'env_file' => [
                 './docker/global.env',
                 './docker/config.env',
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getVarnishService(): array
+    {
+        return [
+            'image' => 'magento/magento-cloud-docker-nginx:latest',
+            'environment' => [
+                'VIRTUAL_HOST' => 'magento2.docker',
+                'VIRTUAL_PORT' => 80,
+                'HTTPS_METHOD' => 'noredirect',
+            ],
+            'ports' => [
+                80,
+            ],
+            'links' => [
+                'web',
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getRedisService(): array
+    {
+        return [
+            'image' => 'magento/magento-cloud-docker-redis:latest',
+            'volumes' => [
+                '/data',
+            ],
+            'ports' => [
+                6379,
             ],
         ];
     }
