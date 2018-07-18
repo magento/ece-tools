@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Docker\Service;
 
 use Magento\MagentoCloud\App\ContainerInterface;
-use Magento\MagentoCloud\Docker\Service\RedisService;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
+use Magento\MagentoCloud\Docker\Service\VarnishService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -42,9 +42,9 @@ class ServiceFactoryTest extends TestCase
     {
         $this->containerMock->expects($this->once())
             ->method('create')
-            ->with(RedisService::class)
-            ->willReturn($this->createMock(RedisService::class));
+            ->with(VarnishService::class)
+            ->willReturn($this->createMock(VarnishService::class));
 
-        $this->factory->create(ServiceFactory::SERVICE_REDIS);
+        $this->factory->create(ServiceFactory::SERVICE_VARNISH);
     }
 }
