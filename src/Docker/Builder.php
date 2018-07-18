@@ -110,14 +110,14 @@ class Builder
         return [
             'version' => '2',
             'services' => [
+                'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
+                'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
                 'cli' => $this->getCliService(false),
                 'build' => $this->getCliService(false),
                 'deploy' => $this->getCliService(true),
                 'db' => $this->getDbService(),
-                'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH),
-                'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS),
                 'web' => $this->getWebService(),
                 'appdata' => [
                     'image' => 'tianon/true',
