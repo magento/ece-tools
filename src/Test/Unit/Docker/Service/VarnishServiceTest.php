@@ -29,7 +29,7 @@ class VarnishServiceTest extends TestCase
     public function testGet()
     {
         $this->assertSame([
-            'image' => 'magento/magento-cloud-docker-nginx:latest',
+            'image' => 'magento/magento-cloud-docker-varnish:latest',
             'environment' => [
                 'VIRTUAL_HOST' => 'magento2.docker',
                 'VIRTUAL_PORT' => 80,

@@ -16,7 +16,7 @@ class VarnishService implements ServiceInterface
     public function get(): array
     {
         return [
-            'image' => 'magento/magento-cloud-docker-nginx:latest',
+            'image' => 'magento/magento-cloud-docker-varnish:latest',
             'environment' => [
                 'VIRTUAL_HOST' => 'magento2.docker',
                 'VIRTUAL_PORT' => 80,
