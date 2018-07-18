@@ -9,6 +9,8 @@ use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Shell\Shell;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
+use Monolog\Logger;
+use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
 
 /**
  * @inheritdoc
@@ -74,8 +76,8 @@ class ShellTest extends TestCase
             ->with($command);
         if ($execOutput) {
             $this->loggerMock->expects($this->once())
-                ->method('debug')
-                ->with(PHP_EOL . '  ' . $execOutput[0]);
+                ->method('log')
+                ->with(Logger::DEBUG, PHP_EOL . '  ' . $execOutput[0]);
         }
 
         $this->shell->execute($command);
@@ -93,11 +95,14 @@ class ShellTest extends TestCase
     }
 
     /**
+     * @param InvokedCountMatcher $logExpects
+     * @param array $execOutput
      * @expectedException \RuntimeException
      * @expectedExceptionMessage Command ls -al returned code 123
      * @expectedExceptionCode 123
+     * @dataProvider executeExceptionDataProvider
      */
-    public function testExecuteException()
+    public function testExecuteException($logExpects, array $execOutput)
     {
         $testCase = $this;
         $command = 'ls -al';
@@ -106,10 +111,10 @@ class ShellTest extends TestCase
 
         $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
         $execMock->expects($this->once())
-            ->willReturnCallback(function ($cmd, &$output, &$status) use ($testCase, $execCommand) {
+            ->willReturnCallback(function ($cmd, &$output, &$status) use ($testCase, $execCommand, $execOutput) {
                 $testCase->assertSame($execCommand, $cmd);
                 $status = 123;
-                $output = [];
+                $output = $execOutput;
             });
 
         $this->directoryListMock->expects($this->once())
@@ -119,7 +124,27 @@ class ShellTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($command);
+        $this->loggerMock->expects($logExpects)
+            ->method('log')
+            ->with(Logger::CRITICAL, PHP_EOL . '  test');
 
         $this->shell->execute($command);
+    }
+
+    /**
+     * @return array
+     */
+    public function executeExceptionDataProvider()
+    {
+        return [
+            [
+                'logExpects' => $this->never(),
+                'execOutput' => []
+            ],
+            [
+                'logExpects' => $this->once(),
+                'execOutput' => ['test']
+            ],
+        ];
     }
 }
