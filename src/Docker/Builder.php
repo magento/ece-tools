@@ -178,6 +178,11 @@ class Builder
      */
     private function getCliService(bool $isReadOnly): array
     {
+        if (file_exists(getenv("HOME") . '/.cache/composer')) {
+            $composeCacheDirectory = '~/.cache/composer';
+        } else {
+            $composeCacheDirectory = '~/.composer/cache';
+        }
         return [
             'hostname' => 'cli.magento2.docker',
             'image' => sprintf(
@@ -188,7 +193,7 @@ class Builder
                 'db',
             ],
             'volumes' => [
-                '~/.composer/cache:/root/.composer/cache',
+                $composeCacheDirectory . ':/root/.composer/cache',
                 $this->getMagentoVolume($isReadOnly),
             ],
             'volumes_from' => [
