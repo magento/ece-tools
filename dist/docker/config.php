@@ -12,15 +12,6 @@ return [
                     'port' => '3306',
                 ],
             ],
-            'redis' => [
-                [
-                    'host' => 'redis',
-                    'service' => 'redis',
-                    'port' => '6379',
-                    'rel' => 'redis',
-                    'scheme' => 'redis',
-                ],
-            ],
         ]
     )),
     'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
