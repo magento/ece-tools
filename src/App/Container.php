@@ -231,6 +231,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),
+                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
