@@ -1,5 +1,4 @@
-diff --git a/vendor/magento/framework/Setup/FilePermissions.php b/vendor/magento/framework/Setup/FilePermissions.php
-index 36194b853..e257a6c15 100644
+diff -Nuar a/vendor/magento/framework/Setup/FilePermissions.php b/vendor/magento/framework/Setup/FilePermissions.php
 --- a/vendor/magento/framework/Setup/FilePermissions.php
 +++ b/vendor/magento/framework/Setup/FilePermissions.php
 @@ -137,6 +137,7 @@ class FilePermissions
