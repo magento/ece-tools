@@ -23,7 +23,7 @@ class VarnishService implements ServiceInterface
                 'HTTPS_METHOD' => 'noredirect',
             ],
             'ports' => [
-                80,
+                '80:80',
             ],
             'links' => [
                 'web',

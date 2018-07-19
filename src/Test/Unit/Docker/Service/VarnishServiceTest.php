@@ -36,7 +36,7 @@ class VarnishServiceTest extends TestCase
                 'HTTPS_METHOD' => 'noredirect',
             ],
             'ports' => [
-                80,
+                '80:80',
             ],
             'links' => [
                 'web',
