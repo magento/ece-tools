@@ -91,7 +91,10 @@ class ElasticSearchVersion implements ValidatorInterface
                     && !Semver::satisfies($esVersion, $versionInfo['esVersion'])
                 ) {
                     return $this->resultFactory->error(
-                        'Elasticsearch version is not compatible with current version of magento',
+                        sprintf(
+                            'Elasticsearch version #%s is not compatible with current version of magento',
+                            $esVersion
+                        ),
                         'Upgrade elasticsearch version to ' . $versionInfo['esVersion']
                     );
                 }
