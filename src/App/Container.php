@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
+use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
@@ -389,6 +390,16 @@ class Container implements ContainerInterface
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                         $this->container->make(PostDeployProcess\WarmUp::class),
+                    ],
+                ]);
+            });
+
+        $this->container->when(CronKill::class)
+            ->needs(ProcessInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(ProcessComposite::class, [
+                    'processes' => [
+                        $this->container->make(DeployProcess\PreDeploy\CronProcessKill::class),
                     ],
                 ]);
             });
