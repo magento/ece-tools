@@ -65,6 +65,7 @@ class Container implements ContainerInterface
          */
         $this->container->singleton(DirectoryList::class);
         $this->container->singleton(FileList::class);
+        $this->container->singleton(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class);
         $this->container->singleton(\Composer\Composer::class, function () use ($systemList) {
             $composerFactory = new \Composer\Factory();
             $composerFile = file_exists($systemList->getMagentoRoot() . '/composer.json')

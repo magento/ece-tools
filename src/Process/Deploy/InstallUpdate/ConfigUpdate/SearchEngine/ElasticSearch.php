@@ -30,6 +30,11 @@ class ElasticSearch
     private $logger;
 
     /**
+     * @var string
+     */
+    private $version;
+
+    /**
      * @param Environment $environment
      * @param ClientFactory $clientFactory
      * @param LoggerInterface $logger
@@ -53,27 +58,31 @@ class ElasticSearch
      */
     public function getVersion(): string
     {
-        $relationships = $this->environment->getRelationships();
-        if (!isset($relationships['elasticsearch'])) {
-            return '0';
+        if ($this->version === null) {
+            $this->version = '0';
+
+            $relationships = $this->environment->getRelationships();
+            if (!isset($relationships['elasticsearch'])) {
+                return $this->version;
+            }
+
+            $esConfig = $relationships['elasticsearch'][0];
+
+            try {
+                $response = $this->clientFactory->create()->get(sprintf(
+                    '%s:%s',
+                    $esConfig['host'],
+                    $esConfig['port']
+                ));
+                $esConfiguration = $response->getBody()->getContents();
+                $esConfiguration = json_decode($esConfiguration, true);
+
+                $this->version = $esConfiguration['version']['number'];
+            } catch (\Exception $exception) {
+                $this->logger->warning('Can\'t get version of elasticsearch: ' . $exception->getMessage());
+            }
         }
 
-        $esConfig = $relationships['elasticsearch'][0];
-
-        try {
-            $response = $this->clientFactory->create()->get(sprintf(
-                '%s:%s',
-                $esConfig['host'],
-                $esConfig['port']
-            ));
-            $esConfiguration = $response->getBody()->getContents();
-            $esConfiguration = json_decode($esConfiguration, true);
-
-            return $esConfiguration['version']['number'];
-        } catch (\Exception $exception) {
-            $this->logger->warning('Can\'t get version of elasticsearch: ' . $exception->getMessage());
-        }
-
-        return '0';
+        return $this->version;
     }
 }
