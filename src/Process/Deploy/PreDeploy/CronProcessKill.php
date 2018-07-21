@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Restoring writable directories.
+ * Kills all running Magento cron processes
  */
 class CronProcessKill implements ProcessInterface
 {
@@ -37,20 +37,25 @@ class CronProcessKill implements ProcessInterface
     }
 
     /**
-     * Executes the process.
+     * Kills all running Magento cron jobs.
      *
      * @return void
      */
     public function execute()
     {
-        $cronPids = $this->shell->execute("pgrep -f 'bin/magento cron:run'");
-        if ($cronPids) {
+        try {
+            $cronPids = $this->shell->execute("pgrep -f 'bin/magento cron:run'");
             foreach ($cronPids as $pid) {
                 $this->shell->execute("kill $pid");
-                $this->logger->info(sprintf('Cron process with pid % was killed', $pid));
+                $this->logger->info(sprintf('Cron process with pid % was killed.', $pid));
             }
-        } else {
-            $this->logger->info('Cron processes were not found to be killed');
+        } catch (\RuntimeException $e) {
+            // pgrep returns 1 when no processes matched. Returns 2 and 3 in case of error
+            if ($e->getCode() == 1) {
+                $this->logger->info('Running Magento cron processes were not found.');
+            } else {
+                throw $e;
+            }
         }
     }
 }
