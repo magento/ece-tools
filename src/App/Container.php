@@ -65,6 +65,7 @@ class Container implements ContainerInterface
          */
         $this->container->singleton(DirectoryList::class);
         $this->container->singleton(FileList::class);
+        $this->container->singleton(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class);
         $this->container->singleton(\Composer\Composer::class, function () use ($systemList) {
             $composerFactory = new \Composer\Factory();
             $composerFile = file_exists($systemList->getMagentoRoot() . '/composer.json')
@@ -231,6 +232,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),
+                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
