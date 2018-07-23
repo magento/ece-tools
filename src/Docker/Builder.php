@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Docker;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 
 /**
  * Docker configuration builder.
@@ -38,11 +39,18 @@ class Builder
     private $config;
 
     /**
-     * @param RepositoryFactory $repositoryFactory
+     * @var ServiceFactory
      */
-    public function __construct(RepositoryFactory $repositoryFactory)
+    private $serviceFactory;
+
+    /**
+     * @param RepositoryFactory $repositoryFactory
+     * @param ServiceFactory $serviceFactory
+     */
+    public function __construct(RepositoryFactory $repositoryFactory, ServiceFactory $serviceFactory)
     {
         $this->config = $repositoryFactory->create();
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
@@ -102,6 +110,7 @@ class Builder
         return [
             'version' => '2',
             'services' => [
+                'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
                 'cli' => $this->getCliService(false),
@@ -241,6 +250,7 @@ class Builder
             ),
             'ports' => [
                 '8080:80',
+                '443:443',
             ],
             'links' => [
                 'fpm',
