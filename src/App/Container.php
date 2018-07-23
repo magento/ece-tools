@@ -223,6 +223,8 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy::class),
+                        $this->container->make(DeployProcess\DisableCron::class),
+                        $this->container->make(DeployProcess\CronProcessKill::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -248,6 +250,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
+                        $this->container->make(DeployProcess\EnableCron::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
@@ -358,7 +361,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
-                        $this->container->make(DeployProcess\PreDeploy\CronProcessKill::class),
                     ],
                 ]);
             });
@@ -400,7 +402,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(DeployProcess\PreDeploy\CronProcessKill::class),
+                        $this->container->make(DeployProcess\CronProcessKill::class),
                     ],
                 ]);
             });
