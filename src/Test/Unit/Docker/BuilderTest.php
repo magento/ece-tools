@@ -175,7 +175,7 @@ class BuilderTest extends TestCase
             ->method('get')
             ->willReturn([]);
 
-        $this->serviceFactoryMock->expects($this->once())
+        $this->serviceFactoryMock->expects($this->any())
             ->method('create')
             ->willReturn($serviceMock);
 

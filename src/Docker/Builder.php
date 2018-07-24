@@ -111,6 +111,7 @@ class Builder
             'version' => '2',
             'services' => [
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
+                'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
                 'cli' => $this->getCliService(false),
@@ -195,6 +196,7 @@ class Builder
             ),
             'links' => [
                 'db',
+                'redis'
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
