@@ -196,6 +196,7 @@ class Builder
             ),
             'links' => [
                 'db',
+                'redis'
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
