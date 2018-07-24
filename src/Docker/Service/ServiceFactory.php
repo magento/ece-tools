@@ -13,12 +13,14 @@ use Magento\MagentoCloud\App\ContainerInterface;
 class ServiceFactory
 {
     const SERVICE_VARNISH = 'varnish';
+    const SERVICE_REDIS = 'redis';
 
     /**
      * @var array
      */
     private static $map = [
         self::SERVICE_VARNISH => VarnishService::class,
+        self::SERVICE_REDIS => RedisService::class,
     ];
 
     /**
