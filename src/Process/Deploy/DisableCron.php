@@ -29,6 +29,7 @@ class DisableCron implements ProcessInterface
     private $logger;
 
     /**
+     * @param CronProcessKill $cronProcessKill
      * @param LoggerInterface $logger
      * @param Writer $deployConfigWriter
      */
@@ -43,14 +44,15 @@ class DisableCron implements ProcessInterface
     }
 
     /**
-     * @inheritdoc
+     * Process set Magento flag for disabling running cron jobs
+     * and kill all existed Magento cron processes
+     * {@inheritdoc}
      */
     public function execute()
     {
         $this->logger->info("Disable cron");
         $this->writer->update(['cron' => ['enabled' => 0]]);
 
-        $this->logger->info("Trying to kill running cron jobs");
         $this->cronProcessKill->execute();
     }
 }

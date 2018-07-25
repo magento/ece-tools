@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
+use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
@@ -19,6 +20,11 @@ class EnableCron implements ProcessInterface
     private $writer;
 
     /**
+     * @var Reader
+     */
+    private $reader;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -26,13 +32,16 @@ class EnableCron implements ProcessInterface
     /**
      * @param LoggerInterface $logger
      * @param Writer $deployConfigWriter
+     * @param Reader $reader
      */
     public function __construct(
         LoggerInterface $logger,
-        Writer $deployConfigWriter
+        Writer $deployConfigWriter,
+        Reader $reader
     ) {
         $this->logger = $logger;
         $this->writer = $deployConfigWriter;
+        $this->reader = $reader;
     }
 
     /**
@@ -41,6 +50,8 @@ class EnableCron implements ProcessInterface
     public function execute()
     {
         $this->logger->info("Enable cron");
-        $this->writer->update(['cron' => ['enabled' ]]);
+        $config = $this->reader->read();
+        unset($config['cron']);
+        $this->writer->create($config);
     }
 }

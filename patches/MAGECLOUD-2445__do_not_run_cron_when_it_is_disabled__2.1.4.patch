@@ -1,8 +1,13 @@
-diff --git a/vendor/magento/module-cron/Console/Command/CronCommand.php b/vendor/magento/module-cron/Console/Command/CronCommand.php
-index 78bbb2329f8..d238cb9ac34 100644
+diff -Nuar a/vendor/magento/module-cron/Console/Command/CronCommand.php b/vendor/magento/module-cron/Console/Command/CronCommand.php
+index 6a9686c514e..4df6888f461 100644
 --- a/vendor/magento/module-cron/Console/Command/CronCommand.php
 +++ b/vendor/magento/module-cron/Console/Command/CronCommand.php
-@@ -14,6 +14,7 @@ use Magento\Framework\App\ObjectManagerFactory;
+@@ -9,10 +9,12 @@ use Symfony\Component\Console\Command\Command;
+ use Symfony\Component\Console\Input\InputInterface;
+ use Symfony\Component\Console\Output\OutputInterface;
+ use Symfony\Component\Console\Input\InputOption;
++use Magento\Framework\App\ObjectManager;
+ use Magento\Framework\App\ObjectManagerFactory;
  use Magento\Store\Model\Store;
  use Magento\Store\Model\StoreManager;
  use Magento\Cron\Observer\ProcessCronQueueObserver;
@@ -10,7 +15,7 @@ index 78bbb2329f8..d238cb9ac34 100644
  use Magento\Framework\Console\Cli;
  use Magento\Framework\Shell\ComplexParameter;
  
-@@ -35,13 +36,20 @@ class CronCommand extends Command
+@@ -34,13 +36,24 @@ class CronCommand extends Command
      private $objectManagerFactory;
  
      /**
@@ -23,17 +28,22 @@ index 78bbb2329f8..d238cb9ac34 100644
 +
 +    /**
       * @param ObjectManagerFactory $objectManagerFactory
-+     * @param DeploymentConfig $deploymentConfig
++     * @param DeploymentConfig $deploymentConfig Application deployment configuration
       */
 -    public function __construct(ObjectManagerFactory $objectManagerFactory)
-+    public function __construct(ObjectManagerFactory $objectManagerFactory, DeploymentConfig $deploymentConfig)
-     {
+-    {
++    public function __construct(
++        ObjectManagerFactory $objectManagerFactory,
++        DeploymentConfig $deploymentConfig = null
++    ) {
          $this->objectManagerFactory = $objectManagerFactory;
-+        $this->deploymentConfig = $deploymentConfig;
++        $this->deploymentConfig = $deploymentConfig ?: ObjectManager::getInstance()->get(
++            DeploymentConfig::class
++        );
          parent::__construct();
      }
  
-@@ -71,10 +79,16 @@ class CronCommand extends Command
+@@ -70,10 +83,16 @@ class CronCommand extends Command
      }
  
      /**
