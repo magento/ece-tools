@@ -50,32 +50,75 @@ class CronProcessKillTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Trying to kill running cron jobs');
-        $this->shellMock->expects($this->once())
+        $this->shellMock->expects($this->exactly(3))
             ->method('execute')
-            ->with("pkill -f 'bin/magento cron:run'");
-        $this->loggerMock->expects($this->never())
-            ->method('warning');
+            ->willReturnMap(
+                [
+                    ["pgrep -f 'bin/magento cron:run'", [111, 222]],
+                    ["kill 111", []],
+                    ["kill 222", []],
+                ]
+            );
         $this->process->execute();
     }
 
     /**
-     * Check that if shell command returns error - it is logged as warning message
-     *
-     * @return void
+     * Test situation when pgrep process returns code 1 because of no processes mathed
      */
-    public function testExecuteWithExeption()
+    public function testExecuteWithNoRunningCrons()
     {
-        $errorMessage = 'pkill returns error code';
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Trying to kill running cron jobs'],
+                ['Running Magento cron processes were not found.']);
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with("pgrep -f 'bin/magento cron:run'")
+            ->willThrowException(new \RuntimeException('return code 1', 1));
+        $this->process->execute();
+    }
+
+    /**
+     * Test situation when pgrep process returns error code
+     *
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage return code 2
+     * @expectedExceptionCode 2
+     */
+    public function testExecuteWithError()
+    {
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Trying to kill running cron jobs');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with("pkill -f 'bin/magento cron:run'")
-            ->willThrowException(new \RuntimeException($errorMessage));
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('There is an error during killing the cron processes: ' . $errorMessage);
+            ->with("pgrep -f 'bin/magento cron:run'")
+            ->willThrowException(new \RuntimeException('return code 2', 2));
+        $this->process->execute();
+    }
+
+    /**
+     * Check that if shell command returns error when killing the process - it is logged as info message
+     *
+     * @return void
+     */
+    public function testExecuteWithExeption()
+    {
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Trying to kill running cron jobs'],
+                ['There is an error during killing the cron processes: some error']
+            );
+        $this->shellMock->expects($this->at(0))
+            ->method('execute')
+            ->with("pgrep -f 'bin/magento cron:run'")
+            ->willReturn([111, 222]);
+        $this->shellMock->expects($this->at(1))
+            ->method('execute')
+            ->with("kill 111")
+            ->willThrowException(new \RuntimeException('some error', 1));
         $this->process->execute();
     }
 }
