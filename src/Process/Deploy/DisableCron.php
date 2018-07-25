@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
 
 /**
+ * Set flag for disabling Magento cron jobs and kills all existed Magento cron processes
  */
 class DisableCron implements ProcessInterface
 {
@@ -45,7 +46,8 @@ class DisableCron implements ProcessInterface
 
     /**
      * Process set Magento flag for disabling running cron jobs
-     * and kill all existed Magento cron processes
+     * and kill all existed Magento cron processes.
+     *
      * {@inheritdoc}
      */
     public function execute()

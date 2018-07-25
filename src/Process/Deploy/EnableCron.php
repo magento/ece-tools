@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
 
 /**
+ * Enables running Magento cron
  */
 class EnableCron implements ProcessInterface
 {
@@ -45,7 +46,9 @@ class EnableCron implements ProcessInterface
     }
 
     /**
-     * @inheritdoc
+     * Removes cron enabled flag from Magento configuration file.
+     *
+     * {@inheritdoc}
      */
     public function execute()
     {
