@@ -12,6 +12,9 @@ use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * Test class for Magento\MagentoCloud\Process\Deploy\EnableCron
+ */
 class EnableCronTest extends TestCase
 {
     /**
