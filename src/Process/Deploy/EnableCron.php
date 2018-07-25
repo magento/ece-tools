@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -16,11 +16,15 @@ use Psr\Log\LoggerInterface;
 class EnableCron implements ProcessInterface
 {
     /**
+     * Deploy Config Writer
+     *
      * @var Writer
      */
     private $writer;
 
     /**
+     * Deploy Config Reader
+     *
      * @var Reader
      */
     private $reader;
@@ -32,16 +36,16 @@ class EnableCron implements ProcessInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param Writer $deployConfigWriter
-     * @param Reader $reader
+     * @param Writer $writer Deploy Config Writer
+     * @param Reader $reader Deploy Config Reader
      */
     public function __construct(
         LoggerInterface $logger,
-        Writer $deployConfigWriter,
+        Writer $writer,
         Reader $reader
     ) {
         $this->logger = $logger;
-        $this->writer = $deployConfigWriter;
+        $this->writer = $writer;
         $this->reader = $reader;
     }
 

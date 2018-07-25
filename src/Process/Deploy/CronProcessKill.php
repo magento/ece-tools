@@ -43,7 +43,7 @@ class CronProcessKill implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info("Trying to kill running cron jobs");
+        $this->logger->info('Trying to kill running cron jobs');
         try {
             $this->shell->execute("pkill -f 'bin/magento cron:run'");
         } catch (\Exception $e) {
