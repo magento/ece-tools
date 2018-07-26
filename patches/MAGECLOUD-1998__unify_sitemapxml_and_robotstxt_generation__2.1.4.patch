@@ -139,8 +139,9 @@ diff -Naur a/vendor/magento/module-sitemap/Model/Sitemap.php b/vendor/magento/mo
          \Magento\Framework\Stdlib\DateTime $dateTime,
          \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
          \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
-+        DocumentRoot $documentRoot = null,
-         array $data = []
+-        array $data = []
++        array $data = [],
++        DocumentRoot $documentRoot = null
      ) {
          $this->_escaper = $escaper;
          $this->_sitemapData = $sitemapData;
