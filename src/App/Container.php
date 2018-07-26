@@ -400,13 +400,7 @@ class Container implements ContainerInterface
 
         $this->container->when(CronKill::class)
             ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\CronProcessKill::class),
-                    ],
-                ]);
-            });
+            ->give(DeployProcess\CronProcessKill::class);
     }
 
     /**
