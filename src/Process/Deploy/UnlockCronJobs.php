@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Cron\JobUnlocker;
-use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -30,23 +29,15 @@ class UnlockCronJobs implements ProcessInterface
     private $jobUnlocker;
 
     /**
-     * @var MagentoVersion
-     */
-    private $magentoVersion;
-
-    /**
      * @param JobUnlocker $jobUnlocker
      * @param LoggerInterface $logger
-     * @param MagentoVersion $version
      */
     public function __construct(
         JobUnlocker $jobUnlocker,
-        LoggerInterface $logger,
-        MagentoVersion $version
+        LoggerInterface $logger
     ) {
         $this->jobUnlocker = $jobUnlocker;
         $this->logger = $logger;
-        $this->magentoVersion = $version;
     }
 
     /**
@@ -56,10 +47,6 @@ class UnlockCronJobs implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            return;
-        }
-
         $updatedJobsCount = $this->jobUnlocker->unlockAll();
 
         if ($updatedJobsCount) {
