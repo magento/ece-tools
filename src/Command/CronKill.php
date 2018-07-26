@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * CLI command for build hook. Responsible for preparing the codebase before it's moved to the server.
+ * CLI command for killing Magento cron processes
  */
 class CronKill extends Command
 {
@@ -63,7 +63,7 @@ class CronKill extends Command
     }
 
     /**
-     * This method is a proxy for calling build:generate and build:transfer commands.
+     * Runs process which finds all running Magento cron processes and kills them
      *
      * {@inheritdoc}
      */

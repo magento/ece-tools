@@ -71,7 +71,8 @@ class CronProcessKillTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Trying to kill running cron jobs'],
-                ['Running Magento cron processes were not found.']);
+                ['Running Magento cron processes were not found.']
+            );
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with("pgrep -f 'bin/magento cron:run'")
