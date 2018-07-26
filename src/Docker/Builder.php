@@ -178,7 +178,7 @@ class Builder
      */
     private function getCliService(bool $isReadOnly): array
     {
-        if (file_exists(getenv("HOME") . '/.cache/composer')) {
+        if (file_exists(getenv('HOME') . '/.cache/composer')) {
             $composeCacheDirectory = '~/.cache/composer';
         } else {
             $composeCacheDirectory = '~/.composer/cache';
