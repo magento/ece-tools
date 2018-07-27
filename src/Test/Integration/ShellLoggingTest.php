@@ -29,8 +29,14 @@ class ShellLoggingTest extends AbstractTest
     protected function setUp()
     {
         parent::setUp();
+        $magentoEnv = ['stage' => ['global' => ['MIN_LOGGING_LEVEL' => 'debug']]];
+        file_put_contents(Bootstrap::getInstance()->getSandboxDir() . '/.magento.env.yaml', json_encode($magentoEnv));
 
-        $application = $this->bootstrap->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
+        $application = $this->bootstrap->createApplication([
+            'variables' => [
+                'ADMIN_EMAIL' => 'admin@example.com',
+            ],
+        ]);
         $this->shell = $application->getContainer()
             ->get(ShellInterface::class);
         $this->fileList = $application->getContainer()
@@ -41,8 +47,8 @@ class ShellLoggingTest extends AbstractTest
     {
         $this->shell->execute('echo Magento Cloud');
         $logContent = $this->getLogContent();
-        $this->assertContains('echo Magento Cloud', $logContent);
-        $this->assertContains('0 => \'Magento Cloud\'', $logContent);
+        $this->assertContains('INFO: echo Magento Cloud', $logContent);
+        $this->assertContains("DEBUG: \n  Magento Cloud", $logContent);
     }
 
     public function testShellLoggingWithNonZeroCode()
@@ -54,7 +60,7 @@ class ShellLoggingTest extends AbstractTest
         $this->shell->execute('non-exist-command');
         $logContent = $this->getLogContent();
         $this->assertContains('Command: non-exist-command ', $logContent);
-        $this->assertContains('Command: non-exist-command ', $logContent);
+        $this->assertRegExp('/CRITICAL:\n.*non-exist-command: command not found/', $logContent);
     }
 
     private function getLogContent()

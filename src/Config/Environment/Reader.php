@@ -28,6 +28,13 @@ class Reader implements ReaderInterface
     private $file;
 
     /**
+     * Cached configuration
+     *
+     * @var array|null
+     */
+    private $config;
+
+    /**
      * @param ConfigFileList $configFileList
      * @param File $file
      */
@@ -44,8 +51,13 @@ class Reader implements ReaderInterface
      */
     public function read(): array
     {
-        $path = $this->configFileList->getEnvConfig();
+        if ($this->config === null) {
+            $path = $this->configFileList->getEnvConfig();
 
-        return !$this->file->isExists($path) ? [] : (array)Yaml::parse($this->file->fileGetContents($path));
+            $this->config = !$this->file->isExists($path) ?
+                [] : (array)Yaml::parse($this->file->fileGetContents($path));
+        }
+
+        return $this->config;
     }
 }

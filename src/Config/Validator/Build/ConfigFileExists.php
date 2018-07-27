@@ -55,15 +55,15 @@ class ConfigFileExists implements ValidatorInterface
         $configFile = $this->fileList->getConfig();
 
         if (!$this->file->isExists($configFile)) {
-            $error = 'File app/etc/config.php not exists';
+            $error = 'File app/etc/config.php does not exist';
             $suggestion = implode(
                 PHP_EOL,
                 [
-                    'Please run the following commands:',
-                    '1. bin/magento module:enable --all',
-                    '2. git add -f app/etc/config.php',
-                    '3. git commit -m \'Adding config.php\'',
-                    '4. git push'
+                    '  Please run the following commands:',
+                    '  1. bin/magento module:enable --all',
+                    '  2. git add -f app/etc/config.php',
+                    '  3. git commit -m \'Adding config.php\'',
+                    '  4. git push'
                 ]
             );
 

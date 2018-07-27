@@ -9,7 +9,7 @@
     "composer/composer": "@stable",
     "composer/semver": "^1.4",
     "graylog2/gelf-php": "^1.4.2",
-    "guzzlehttp/guzzle": "^6.3",
+    "guzzlehttp/guzzle": "^6.2",
     "illuminate/config": "^5.5",
     "illuminate/container": "^5.5",
     "illuminate/contracts": "^5.5",
@@ -67,12 +67,12 @@
         ".magento.env.yaml.dist"
       ],
       [
-        "dist/config.env",
-        "docker/config.env.dist"
+        "dist/docker/config.php",
+        "docker/config.php.dist"
       ],
       [
-        "dist/global.env",
-        "docker/global.env.dist"
+        "dist/docker/global.php",
+        "docker/global.php.dist"
       ]
     ]
   }

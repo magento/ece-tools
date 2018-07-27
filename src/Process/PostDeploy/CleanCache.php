@@ -42,8 +42,9 @@ class CleanCache implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute(
-            'php ./bin/magento cache:flush ' . $this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)
-        );
+        $this->shell->execute(sprintf(
+            'php ./bin/magento cache:flush --ansi --no-interaction %s',
+            $this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)
+        ));
     }
 }

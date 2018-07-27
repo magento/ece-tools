@@ -98,7 +98,7 @@ class WritableDirectories implements ProcessInterface
                 continue;
             }
 
-            $this->logger->info(sprintf('Copying %s->%s', $originalDir, $initDir));
+            $this->logger->debug(sprintf('Copying %s->%s', $originalDir, $initDir));
             $this->backupDir($originalDir, $initDir);
         }
 
@@ -107,7 +107,7 @@ class WritableDirectories implements ProcessInterface
 
     protected function backupLogDir($originalLogDir, $initLogDir)
     {
-        $this->logger->info(sprintf('Copying %s->%s', $originalLogDir, $initLogDir));
+        $this->logger->debug(sprintf('Copying %s->%s', $originalLogDir, $initLogDir));
         $this->stopLogging();
         $this->backupDir($originalLogDir, $initLogDir);
         $this->restoreLogging();

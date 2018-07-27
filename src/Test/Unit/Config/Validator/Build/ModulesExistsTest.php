@@ -65,7 +65,7 @@ class ModulesExistsTest extends TestCase
             ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with('Shared config file is missing module section.');
+            ->with('The modules section is missing from the shared config file.');
 
         $this->validator->validate();
     }

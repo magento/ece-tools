@@ -62,7 +62,7 @@ class ConfigImportTest extends TestCase
             ->with('Run app:config:import command');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento app:config:import -n');
+            ->with('php ./bin/magento app:config:import --ansi --no-interaction');
 
         $this->process->execute();
     }

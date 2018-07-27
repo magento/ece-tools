@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Shell\UtilityManager;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -14,10 +16,6 @@ use Psr\Log\LoggerInterface;
  */
 class StaticContentCompressor
 {
-    /**
-     * Target directory to be compressed relative to the Magento application folder.
-     */
-    const TARGET_DIR = 'pub/static';
 
     /**
      * Default gzip compression level if not otherwise specified.
@@ -47,15 +45,23 @@ class StaticContentCompressor
     private $utilityManager;
 
     /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @param DirectoryList $directoryList
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param UtilityManager $utilityManager
      */
     public function __construct(
+        DirectoryList $directoryList,
         LoggerInterface $logger,
         ShellInterface $shell,
         UtilityManager $utilityManager
     ) {
+        $this->directoryList = $directoryList;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->utilityManager = $utilityManager;
@@ -95,15 +101,21 @@ class StaticContentCompressor
 
     /**
      * Return the inner find/xargs/gzip command that compresses the content.
+     * Ignores any of the directories that are deleting in the background.
      *
      * @return string
      */
-    private function innerCompressionCommand(): string
+    private function innerCompressionCommand(int $compressionLevel): string
     {
-        return "find " . escapeshellarg(static::TARGET_DIR) . " -type f -size +300c"
+        return sprintf(
+            "find %s -type d -name %s -prune -o -type f -size +300c"
             . " '(' -name '*.js' -or -name '*.css' -or -name '*.svg'"
             . " -or -name '*.html' -or -name '*.htm' ')' -print0"
-            . " | xargs -0 -n100 -P16 gzip -q --keep";
+            . " | xargs -0 -n100 -P16 gzip -q --keep -%d",
+            escapeshellarg($this->directoryList->getPath(DirectoryList::DIR_STATIC)),
+            escapeshellarg(File::DELETING_PREFIX . '*'),
+            $compressionLevel
+        );
     }
 
     /**
@@ -121,11 +133,10 @@ class StaticContentCompressor
             : static::DEFAULT_COMPRESSION_LEVEL;
 
         return sprintf(
-            '%s -k 30 600 %s -c "%s -%s"',
+            '%s -k 30 600 %s -c %s',
             $this->utilityManager->get(UtilityManager::UTILITY_TIMEOUT),
             $this->utilityManager->get(UtilityManager::UTILITY_BASH),
-            $this->innerCompressionCommand(),
-            $compressionLevel
+            escapeshellarg($this->innerCompressionCommand($compressionLevel))
         );
     }
 }

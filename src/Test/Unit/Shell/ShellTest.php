@@ -9,6 +9,8 @@ use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Shell\Shell;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
+use Monolog\Logger;
+use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
 
 /**
  * @inheritdoc
@@ -48,10 +50,9 @@ class ShellTest extends TestCase
 
     /**
      * @param string $execOutput
-     * @param int $loggerInfoExpects
      * @dataProvider executeDataProvider
      */
-    public function testExecute($execOutput, $loggerInfoExpects)
+    public function testExecute($execOutput)
     {
         $testCase = $this;
         $command = 'ls -al';
@@ -70,13 +71,14 @@ class ShellTest extends TestCase
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
 
-        $this->loggerMock->expects($this->exactly($loggerInfoExpects))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Command: ' . $command],
-                ['Status: 0'],
-                ['Output: ' . var_export($execOutput, true)]
-            );
+            ->with($command);
+        if ($execOutput) {
+            $this->loggerMock->expects($this->once())
+                ->method('log')
+                ->with(Logger::DEBUG, PHP_EOL . '  ' . $execOutput[0]);
+        }
 
         $this->shell->execute($command);
     }
@@ -87,23 +89,20 @@ class ShellTest extends TestCase
     public function executeDataProvider()
     {
         return [
-            [
-                'execOutput' => null,
-                'loggerInfoExpects' => 2,
-            ],
-            [
-                'execOutput' => 'test',
-                'loggerInfoExpects' => 3,
-            ],
+            [ 'execOutput' => [] ],
+            [ 'execOutput' => ['test'] ],
         ];
     }
 
     /**
+     * @param InvokedCountMatcher $logExpects
+     * @param array $execOutput
      * @expectedException \RuntimeException
      * @expectedExceptionMessage Command ls -al returned code 123
      * @expectedExceptionCode 123
+     * @dataProvider executeExceptionDataProvider
      */
-    public function testExecuteException()
+    public function testExecuteException($logExpects, array $execOutput)
     {
         $testCase = $this;
         $command = 'ls -al';
@@ -112,23 +111,40 @@ class ShellTest extends TestCase
 
         $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
         $execMock->expects($this->once())
-            ->willReturnCallback(function ($cmd, &$output, &$status) use ($testCase, $execCommand) {
+            ->willReturnCallback(function ($cmd, &$output, &$status) use ($testCase, $execCommand, $execOutput) {
                 $testCase->assertSame($execCommand, $cmd);
                 $status = 123;
-                $output = null;
+                $output = $execOutput;
             });
 
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
 
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Command: ' . $command],
-                ['Status: 123']
-            );
+            ->with($command);
+        $this->loggerMock->expects($logExpects)
+            ->method('log')
+            ->with(Logger::CRITICAL, PHP_EOL . '  test');
 
         $this->shell->execute($command);
+    }
+
+    /**
+     * @return array
+     */
+    public function executeExceptionDataProvider()
+    {
+        return [
+            [
+                'logExpects' => $this->never(),
+                'execOutput' => []
+            ],
+            [
+                'logExpects' => $this->once(),
+                'execOutput' => ['test']
+            ],
+        ];
     }
 }

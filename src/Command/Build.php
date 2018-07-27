@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Command\Build\Generate;
+use Magento\MagentoCloud\Command\Build\Transfer;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,30 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 class Build extends Command
 {
     const NAME = 'build';
-
-    /**
-     * @var ProcessInterface
-     */
-    private $process;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @param ProcessInterface $process
-     * @param LoggerInterface $logger
-     */
-    public function __construct(
-        ProcessInterface $process,
-        LoggerInterface $logger
-    ) {
-        $this->process = $process;
-        $this->logger = $logger;
-
-        parent::__construct();
-    }
 
     /**
      * @inheritdoc
@@ -54,18 +30,13 @@ class Build extends Command
     }
 
     /**
-     * @inheritdoc
+     * This method is a proxy for calling build:generate and build:transfer commands.
+     *
+     * {@inheritdoc}
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
-            $this->logger->info('Starting build.');
-            $this->process->execute();
-            $this->logger->info('Building completed.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            throw $exception;
-        }
+        $this->getApplication()->find(Generate::NAME)->execute($input, $output);
+        $this->getApplication()->find(Transfer::NAME)->execute($input, $output);
     }
 }

@@ -52,6 +52,8 @@ class Application extends \Symfony\Component\Console\Application
             parent::getDefaultCommands(),
             [
                 $this->container->create(Command\Build::class),
+                $this->container->create(Command\Build\Generate::class),
+                $this->container->create(Command\Build\Transfer::class),
                 $this->container->create(Command\Deploy::class),
                 $this->container->create(Command\ConfigDump::class),
                 $this->container->create(Command\DbDump::class),
@@ -68,6 +70,8 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\Wizard\IdealState::class),
                 $this->container->create(Command\Wizard\MasterSlave::class),
                 $this->container->create(Command\Docker\Build::class),
+                $this->container->create(Command\Docker\ConfigConvert::class),
+                $this->container->create(Command\CronKill::class),
             ]
         );
     }

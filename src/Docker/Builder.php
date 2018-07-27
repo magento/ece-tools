@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Docker;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 
 /**
  * Docker configuration builder.
@@ -38,11 +39,18 @@ class Builder
     private $config;
 
     /**
-     * @param RepositoryFactory $repositoryFactory
+     * @var ServiceFactory
      */
-    public function __construct(RepositoryFactory $repositoryFactory)
+    private $serviceFactory;
+
+    /**
+     * @param RepositoryFactory $repositoryFactory
+     * @param ServiceFactory $serviceFactory
+     */
+    public function __construct(RepositoryFactory $repositoryFactory, ServiceFactory $serviceFactory)
     {
         $this->config = $repositoryFactory->create();
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
@@ -102,18 +110,23 @@ class Builder
         return [
             'version' => '2',
             'services' => [
+                'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
+                'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
                 'fpm' => $this->getFpmService(),
-                'cli' => $this->getCliService(),
+                /** For backward compatibility. */
+                'cli' => $this->getCliService(false),
+                'build' => $this->getCliService(false),
+                'deploy' => $this->getCliService(true),
                 'db' => $this->getDbService(),
                 'web' => $this->getWebService(),
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
-                        '.:/var/www/magento',
                         '/var/www/magento/vendor',
                         '/var/www/magento/generated',
                         '/var/www/magento/pub',
                         '/var/www/magento/var',
+                        '/var/www/magento/app/etc',
                     ],
                 ],
                 'dbdata' => [
@@ -124,6 +137,19 @@ class Builder
                 ],
             ],
         ];
+    }
+
+    /**
+     * @param bool $isReadOnly
+     * @return string
+     */
+    private function getMagentoVolume(bool $isReadOnly): string
+    {
+        $volume = '.:/var/www/magento';
+
+        return $isReadOnly
+            ? $volume . ':ro'
+            : $volume . ':rw';
     }
 
     /**
@@ -146,6 +172,9 @@ class Builder
             'volumes_from' => [
                 'appdata',
             ],
+            'volumes' => [
+                $this->getMagentoVolume(false),
+            ],
             'env_file' => [
                 './docker/global.env',
                 './docker/config.env',
@@ -154,9 +183,10 @@ class Builder
     }
 
     /**
+     * @param bool $isReadOnly
      * @return array
      */
-    private function getCliService(): array
+    private function getCliService(bool $isReadOnly): array
     {
         return [
             'hostname' => 'cli.magento2.docker',
@@ -166,9 +196,11 @@ class Builder
             ),
             'links' => [
                 'db',
+                'redis'
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
+                $this->getMagentoVolume($isReadOnly),
             ],
             'volumes_from' => [
                 'appdata',
@@ -220,6 +252,7 @@ class Builder
             ),
             'ports' => [
                 '8080:80',
+                '443:443',
             ],
             'links' => [
                 'fpm',
@@ -227,6 +260,9 @@ class Builder
             ],
             'volumes_from' => [
                 'appdata',
+            ],
+            'volumes' => [
+                $this->getMagentoVolume(false),
             ],
             'env_file' => [
                 './docker/global.env',

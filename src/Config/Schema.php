@@ -161,7 +161,7 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => false,
+                    StageConfigInterface::STAGE_GLOBAL => true,
                 ],
             ],
             StageConfigInterface::VAR_SCD_ON_DEMAND => [
@@ -338,7 +338,7 @@ class Schema
                     StageConfigInterface::STAGE_POST_DEPLOY
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_POST_DEPLOY => ['index.php'],
+                    StageConfigInterface::STAGE_POST_DEPLOY => [''],
                 ],
             ],
         ];

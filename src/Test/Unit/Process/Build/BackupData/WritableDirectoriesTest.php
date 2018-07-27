@@ -119,10 +119,12 @@ class WritableDirectoriesTest extends TestCase
 
     public function testExecuteCopyingViewPreprocessed()
     {
-        $this->loggerMock->expects($this->exactly(4))
+        $this->loggerMock->expects($this->once())
             ->method('info')
+            ->with(sprintf('Copying writable directories to %s/ directory.', $this->rootInitDir));
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('debug')
             ->withConsecutive(
-                [sprintf('Copying writable directories to %s/ directory.', $this->rootInitDir)],
                 [
                     sprintf(
                         'Copying %s/some/path/1->%s/some/path/1',
@@ -196,10 +198,12 @@ class WritableDirectoriesTest extends TestCase
 
     public function testExecuteSkipCopyingViewPreprocessed()
     {
-        $this->loggerMock->expects($this->exactly(3))
+        $this->loggerMock->expects($this->once())
             ->method('info')
+            ->with(sprintf('Copying writable directories to %s/ directory.', $this->rootInitDir));
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('debug')
             ->withConsecutive(
-                [sprintf('Copying writable directories to %s/ directory.', $this->rootInitDir)],
                 [
                     sprintf(
                         'Copying %s/some/path/1->%s/some/path/1',

@@ -41,7 +41,7 @@ class ComposerDumpAutoloadTest extends TestCase
     {
         $this->shell->expects($this->once())
             ->method('execute')
-            ->with('composer dump-autoload -o');
+            ->with('composer dump-autoload -o --ansi --no-interaction');
 
         $this->process->execute();
     }
