@@ -5,12 +5,13 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
-use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
+use Psr\Log\LoggerInterface;
 
 /**
  * Compress static content at deploy time.
@@ -43,24 +44,32 @@ class CompressStaticContent implements ProcessInterface
     private $globalConfig;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @param LoggerInterface $logger
      * @param StaticContentCompressor $staticContentCompressor
      * @param FlagManager $flagManager
      * @param DeployInterface $stageConfig
      * @param GlobalConfig $globalConfig
+     * @param Environment $environment
      */
     public function __construct(
         LoggerInterface $logger,
         StaticContentCompressor $staticContentCompressor,
         FlagManager $flagManager,
         DeployInterface $stageConfig,
-        GlobalConfig $globalConfig
+        GlobalConfig $globalConfig,
+        Environment $environment
     ) {
         $this->logger = $logger;
         $this->staticContentCompressor = $staticContentCompressor;
         $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
         $this->globalConfig = $globalConfig;
+        $this->environment = $environment;
     }
 
     /**
@@ -70,7 +79,9 @@ class CompressStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND)) {
+        if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND) ||
+            $this->environment->getVariable(DeployInterface::VAR_SCD_ON_DEMAND) == Environment::VAL_ENABLED
+        ) {
             $this->logger->notice('Skipping static content compression. SCD on demand is enabled.');
 
             return;

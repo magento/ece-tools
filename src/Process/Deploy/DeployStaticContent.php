@@ -5,12 +5,13 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -43,6 +44,11 @@ class DeployStaticContent implements ProcessInterface
     private $globalConfig;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @var StaticContentCleaner
      */
     private $staticContentCleaner;
@@ -53,6 +59,7 @@ class DeployStaticContent implements ProcessInterface
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
      * @param GlobalConfig $globalConfig
+     * @param Environment $environment
      * @param StaticContentCleaner $staticContentCleaner
      */
     public function __construct(
@@ -61,6 +68,7 @@ class DeployStaticContent implements ProcessInterface
         LoggerInterface $logger,
         DeployInterface $stageConfig,
         GlobalConfig $globalConfig,
+        Environment $environment,
         StaticContentCleaner $staticContentCleaner
     ) {
         $this->process = $process;
@@ -68,6 +76,7 @@ class DeployStaticContent implements ProcessInterface
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
         $this->globalConfig = $globalConfig;
+        $this->environment = $environment;
         $this->staticContentCleaner = $staticContentCleaner;
     }
 
@@ -80,7 +89,9 @@ class DeployStaticContent implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND)) {
+        if ($this->globalConfig->get(DeployInterface::VAR_SCD_ON_DEMAND) ||
+            $this->environment->getVariable(DeployInterface::VAR_SCD_ON_DEMAND) == Environment::VAL_ENABLED
+        ) {
             $this->logger->notice('Skipping static content deploy. SCD on demand is enabled.');
             $this->staticContentCleaner->clean();
 
