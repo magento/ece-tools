@@ -6,18 +6,17 @@
 namespace Magento\MagentoCloud\Command\Docker;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Docker\BuilderInterface;
 use Magento\MagentoCloud\Docker\Exception;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -36,11 +35,6 @@ class Build extends Command
     private $builderFactory;
 
     /**
-     * @var RepositoryFactory
-     */
-    private $configFactory;
-
-    /**
      * @var File
      */
     private $file;
@@ -57,20 +51,17 @@ class Build extends Command
 
     /**
      * @param BuilderFactory $builderFactory
-     * @param RepositoryFactory $configFactory
      * @param File $file
      * @param FileList $fileList
      * @param Environment $environment
      */
     public function __construct(
         BuilderFactory $builderFactory,
-        RepositoryFactory $configFactory,
         File $file,
         FileList $fileList,
         Environment $environment
     ) {
         $this->builderFactory = $builderFactory;
-        $this->configFactory = $configFactory;
         $this->file = $file;
         $this->fileList = $fileList;
         $this->environment = $environment;
@@ -121,7 +112,7 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($input->hasOption(self::OPTION_IS_TEST)) {
+        if ($input->getOption(self::OPTION_IS_TEST)) {
             $strategy = BuilderFactory::BUILDER_TEST;
             $path = $this->fileList->getToolsDockerCompose();
         } else {

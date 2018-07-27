@@ -15,6 +15,9 @@ class BuilderFactory
     const BUILDER_DEV = 'dev';
     const BUILDER_TEST = 'test';
 
+    /**
+     * @var array
+     */
     private static $map = [
         self::BUILDER_DEV => DevBuilder::class,
         self::BUILDER_TEST => TestBuilder::class,

@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @inheritdoc
  */
-class BuilderTest extends TestCase
+class DevBuilderTest extends TestCase
 {
     /**
      * @var DevBuilder
@@ -79,7 +79,7 @@ class BuilderTest extends TestCase
     {
         return [
             ['1.9'],
-            [DevBuilder::CONFIG_DEFAULT_NGINX_VERSION,],
+            [DevBuilder::DEFAULT_NGINX_VERSION,],
         ];
     }
 
@@ -116,7 +116,7 @@ class BuilderTest extends TestCase
     {
         return [
             ['7.0'],
-            [DevBuilder::CONFIG_DEFAULT_PHP_VERSION,],
+            [DevBuilder::DEFAULT_PHP_VERSION,],
         ];
     }
 
@@ -152,7 +152,7 @@ class BuilderTest extends TestCase
     public function setDbVersionDataProvider(): array
     {
         return [
-            [DevBuilder::CONFIG_DEFAULT_DB_VERSION],
+            [DevBuilder::DEFAULT_DB_VERSION],
         ];
     }
 

@@ -5,8 +5,9 @@
  */
 namespace Magento\MagentoCloud\Docker;
 
-use Illuminate\Contracts\Config\Repository;
-
+/**
+ * General Builder interface.
+ */
 interface BuilderInterface
 {
     const DEFAULT_PHP_VERSION = '7.1';
@@ -21,7 +22,6 @@ interface BuilderInterface
      * @return array
      */
     public function build(): array;
-
 
     /**
      * @param string $version
