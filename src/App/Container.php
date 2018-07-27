@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
+use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
@@ -223,6 +224,7 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy::class),
+                        $this->container->make(DeployProcess\DisableCron::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -250,6 +252,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
+                        $this->container->make(DeployProcess\EnableCron::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_WARNING => [
@@ -394,6 +397,10 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+
+        $this->container->when(CronKill::class)
+            ->needs(ProcessInterface::class)
+            ->give(DeployProcess\CronProcessKill::class);
     }
 
     /**
