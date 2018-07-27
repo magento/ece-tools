@@ -5,9 +5,11 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session;
 
+use Composer\Semver\Comparator;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Package\Manager;
 
 /**
  * Returns session configuration.
@@ -30,18 +32,34 @@ class Config
     private $configMerger;
 
     /**
+     * @var Manager
+     */
+    private $manager;
+
+    /**
+     * @var Comparator
+     */
+    private $comparator;
+
+    /**
      * @param Environment $environment
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
+     * @param Manager $manager
+     * @param Comparator $comparator
      */
     public function __construct(
         Environment $environment,
         DeployInterface $stageConfig,
-        ConfigMerger $configMerger
+        ConfigMerger $configMerger,
+        Manager $manager,
+        Comparator $comparator
     ) {
         $this->environment = $environment;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
+        $this->manager = $manager;
+        $this->comparator = $comparator;
     }
 
     /**
@@ -70,13 +88,42 @@ class Config
             return [];
         }
 
-        return $this->configMerger->mergeConfigs([
+        $defaultConfig = [
             'save' => 'redis',
             'redis' => [
                 'host' => $redisConfig[0]['host'],
                 'port' => $redisConfig[0]['port'],
-                'database' => 0
-            ]
-        ], $envSessionConfiguration);
+                'database' => 0,
+            ],
+        ];
+
+        $disableLocking = $this->resolveDefaultDisableLocking();
+
+        if (null !== $disableLocking) {
+            $defaultConfig['redis']['disable_locking'] = $disableLocking;
+        }
+
+        return $this->configMerger->mergeConfigs($defaultConfig, $envSessionConfiguration);
+    }
+
+    /**
+     * This to correctly handle inverted value in `disable_locking` parameter.
+     *
+     * @return int|null
+     * @link https://github.com/colinmollenhour/php-redis-session-abstract/commit/6f005b2c3755e4a96ddad821e2ea15d66fb314ae
+     */
+    private function resolveDefaultDisableLocking()
+    {
+        try {
+            $package = $this->manager->get('colinmollenhour/php-redis-session-abstract');
+        } catch (\Exception $exception) {
+            return null;
+        }
+
+        if ($this->comparator::greaterThanOrEqualTo($package->getVersion(), '1.3.4')) {
+            return 0;
+        }
+
+        return 1;
     }
 }
