@@ -6,7 +6,10 @@
 namespace Magento\MagentoCloud\Command\Docker;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
+use Magento\MagentoCloud\Docker\BuilderInterface;
+use Magento\MagentoCloud\Docker\Exception;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Symfony\Component\Console\Command\Command;
@@ -14,6 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -24,11 +28,17 @@ class Build extends Command
     const OPTION_PHP = 'php';
     const OPTION_NGINX = 'nginx';
     const OPTION_DB = 'db';
+    const OPTION_IS_TEST = 'test';
 
     /**
      * @var BuilderFactory
      */
     private $builderFactory;
+
+    /**
+     * @var RepositoryFactory
+     */
+    private $configFactory;
 
     /**
      * @var File
@@ -47,17 +57,20 @@ class Build extends Command
 
     /**
      * @param BuilderFactory $builderFactory
+     * @param RepositoryFactory $configFactory
      * @param File $file
      * @param FileList $fileList
      * @param Environment $environment
      */
     public function __construct(
         BuilderFactory $builderFactory,
+        RepositoryFactory $configFactory,
         File $file,
         FileList $fileList,
         Environment $environment
     ) {
         $this->builderFactory = $builderFactory;
+        $this->configFactory = $configFactory;
         $this->file = $file;
         $this->fileList = $fileList;
         $this->environment = $environment;
@@ -76,17 +89,25 @@ class Build extends Command
                 self::OPTION_PHP,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'PHP version'
+                'PHP version',
+                BuilderInterface::DEFAULT_PHP_VERSION
             )->addOption(
                 self::OPTION_NGINX,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Nginx version'
+                'Nginx version',
+                BuilderInterface::DEFAULT_NGINX_VERSION
             )->addOption(
                 self::OPTION_DB,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'DB version'
+                'DB version',
+                BuilderInterface::DEFAULT_DB_VERSION
+            )->addOption(
+                self::OPTION_IS_TEST,
+                null,
+                InputOption::VALUE_NONE,
+                'Is test config'
             );
 
         parent::configure();
@@ -95,12 +116,20 @@ class Build extends Command
     /**
      * {@inheritdoc}
      *
-     * @throws \Magento\MagentoCloud\Docker\Exception
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
+     * @throws Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $builder = $this->builderFactory->create();
+        if ($input->hasOption(self::OPTION_IS_TEST)) {
+            $strategy = BuilderFactory::BUILDER_TEST;
+            $path = $this->fileList->getToolsDockerCompose();
+        } else {
+            $strategy = BuilderFactory::BUILDER_DEV;
+            $path = $this->fileList->getMagentoDockerCompose();
+        }
+
+        $builder = $this->builderFactory->create($strategy);
 
         if ($phpVersion = $input->getOption(self::OPTION_PHP)) {
             $builder->setPhpVersion($phpVersion);
@@ -114,10 +143,9 @@ class Build extends Command
             $builder->setDbVersion($dbVersion);
         }
 
-        $configFile = $this->fileList->getMagentoDockerCompose();
         $config = Yaml::dump($builder->build(), 4, 2);
 
-        $this->file->filePutContents($configFile, $config);
+        $this->file->filePutContents($path, $config);
 
         $output->writeln('<info>Configuration was built</info>');
     }

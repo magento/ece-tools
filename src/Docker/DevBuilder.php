@@ -12,27 +12,8 @@ use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 /**
  * Docker configuration builder.
  */
-class Builder
+class DevBuilder implements BuilderInterface
 {
-    const CONFIG_DEFAULT_PHP_VERSION = '7.1';
-    const CONFIG_DEFAULT_NGINX_VERSION = 'latest';
-    const CONFIG_DEFAULT_DB_VERSION = '10';
-
-    /**
-     * Supported service versions.
-     */
-    const SUPPORTED_PHP_VERSIONS = [
-        '7.0',
-        self::CONFIG_DEFAULT_PHP_VERSION,
-    ];
-    const SUPPORTED_NGINX_VERSIONS = [
-        '1.9',
-        self::CONFIG_DEFAULT_NGINX_VERSION,
-    ];
-    const SUPPORTED_DB_VERSIONS = [
-        self::CONFIG_DEFAULT_DB_VERSION,
-    ];
-
     /**
      * @var Repository
      */
@@ -54,30 +35,35 @@ class Builder
     }
 
     /**
-     * @param string $version
-     * @throws Exception
+     * @inheritdoc
      */
     public function setPhpVersion(string $version)
     {
-        $this->setVersion('php.version', $version, self::SUPPORTED_PHP_VERSIONS);
+        $this->setVersion(self::PHP_VERSION, $version, [
+            '7.0',
+            self::DEFAULT_PHP_VERSION,
+        ]);
     }
 
     /**
-     * @param string $version
-     * @throws Exception
+     * @inheritdoc
      */
     public function setNginxVersion(string $version)
     {
-        $this->setVersion('nginx.version', $version, self::SUPPORTED_NGINX_VERSIONS);
+        $this->setVersion(self::NGINX_VERSION, $version, [
+            '1.9',
+            self::DEFAULT_NGINX_VERSION,
+        ]);
     }
 
     /**
-     * @param string $version
-     * @throws Exception
+     * @inheritdoc
      */
     public function setDbVersion(string $version)
     {
-        $this->setVersion('db.version', $version, self::SUPPORTED_DB_VERSIONS);
+        $this->setVersion(self::DB_VERSION, $version, [
+            self::DEFAULT_DB_VERSION,
+        ]);
     }
 
     /**
@@ -161,7 +147,7 @@ class Builder
             'hostname' => 'fpm.magento2.docker',
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-fpm',
-                $this->config->get('php.version', self::CONFIG_DEFAULT_PHP_VERSION)
+                $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
             ),
             'ports' => [
                 9000,
@@ -192,11 +178,11 @@ class Builder
             'hostname' => 'cli.magento2.docker',
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-cli',
-                $this->config->get('php.version', self::CONFIG_DEFAULT_PHP_VERSION)
+                $this->config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION)
             ),
             'links' => [
                 'db',
-                'redis'
+                'redis',
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
@@ -223,7 +209,7 @@ class Builder
         return [
             'image' => sprintf(
                 'mariadb:%s',
-                $this->config->get('db.version', self::CONFIG_DEFAULT_DB_VERSION)
+                $this->config->get(self::DB_VERSION, self::DEFAULT_DB_VERSION)
             ),
             'ports' => [
                 3306,
@@ -248,7 +234,7 @@ class Builder
         return [
             'image' => sprintf(
                 'magento/magento-cloud-docker-nginx:%s',
-                $this->config->get('nginx.version', self::CONFIG_DEFAULT_NGINX_VERSION)
+                $this->config->get('nginx.version', self::DEFAULT_NGINX_VERSION)
             ),
             'ports' => [
                 '8080:80',

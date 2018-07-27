@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Docker;
 
 use Magento\MagentoCloud\Command\Docker\Build;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Docker\Builder;
+use Magento\MagentoCloud\Docker\DevBuilder;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -32,7 +32,7 @@ class BuildTest extends TestCase
     private $builderFactoryMock;
 
     /**
-     * @var Builder|MockObject
+     * @var DevBuilder|MockObject
      */
     private $builderMock;
 
@@ -57,7 +57,7 @@ class BuildTest extends TestCase
     protected function setUp()
     {
         $this->builderFactoryMock = $this->createMock(BuilderFactory::class);
-        $this->builderMock = $this->createMock(Builder::class);
+        $this->builderMock = $this->createMock(DevBuilder::class);
         $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createMock(File::class);
         $this->environmentMock = $this->createMock(Environment::class);

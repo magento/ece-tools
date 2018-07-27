@@ -12,6 +12,14 @@ use Magento\MagentoCloud\App\ContainerInterface;
  */
 class BuilderFactory
 {
+    const BUILDER_DEV = 'dev';
+    const BUILDER_TEST = 'test';
+
+    private static $map = [
+        self::BUILDER_DEV => DevBuilder::class,
+        self::BUILDER_TEST => TestBuilder::class,
+    ];
+
     /**
      * @var ContainerInterface
      */
@@ -26,10 +34,13 @@ class BuilderFactory
     }
 
     /**
-     * @return Builder
+     * @param string $strategy
+     * @return BuilderInterface
      */
-    public function create(): Builder
+    public function create(string $strategy): BuilderInterface
     {
-        return $this->container->create(Builder::class);
+        return $this->container->create(
+            self::$map[$strategy]
+        );
     }
 }
