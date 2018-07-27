@@ -152,6 +152,7 @@ class TestBuilder implements BuilderInterface
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
+                '/var/www/ece-tool/vendor'
             ],
             'volumes_from' => [
                 'appdata',
