@@ -5,15 +5,16 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\GlobalStage;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection;
+use Magento\MagentoCloud\Config\Stage\Build as BuildConfig;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Stage\Build as BuildConfig;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,22 +27,27 @@ class ScdOnBuildTest extends TestCase
     private $scdOnBuild;
 
     /**
-     * @var GlobalSection|Mock
+     * @var GlobalSection|MockObject
      */
     private $globalConfigMock;
 
     /**
-     * @var BuildConfig|Mock
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
+
+    /**
+     * @var BuildConfig|MockObject
      */
     private $buildConfigMock;
 
     /**
-     * @var ConfigFileStructure|Mock
+     * @var ConfigFileStructure|MockObject
      */
     private $configFileStructureMock;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
@@ -52,50 +58,89 @@ class ScdOnBuildTest extends TestCase
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->globalConfigMock = $this->createMock(GlobalSection::class);
+        $this->environmentMock = $this->createMock(Environment::class);
         $this->buildConfigMock = $this->createMock(BuildConfig::class);
         $this->configFileStructureMock = $this->createMock(ConfigFileStructure::class);
 
         $this->scdOnBuild = new ScdOnBuild(
             $this->resultFactoryMock,
             $this->globalConfigMock,
+            $this->environmentMock,
             $this->buildConfigMock,
             $this->configFileStructureMock
         );
     }
 
-    public function testExecute()
+    public function testExecuteSuccess()
     {
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
+        $success = new Result\Success();
+
+        $this->globalConfigMock->method('get')
             ->with(GlobalSection::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
             ->with(BuildInterface::VAR_SKIP_SCD)
             ->willReturn(false);
-        $resultMock = $this->createMock(Result\Success::class);
         $this->configFileStructureMock->expects($this->once())
             ->method('validate')
-            ->willReturn($resultMock);
+            ->willReturn($success);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success')
+            ->willReturn($success);
 
-        $this->scdOnBuild->validate();
+        $this->assertSame($success, $this->scdOnBuild->validate());
     }
 
-    public function testExecuteWithNotValidConfig()
+    public function testExecuteError()
     {
-        $resultMock = $this->createMock(Result\Error::class);
-        $this->configFileStructureMock->expects($this->once())
-            ->method('validate')
-            ->willReturn($resultMock);
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
+        $error = new Result\Error('some error');
+
+        $this->globalConfigMock->method('get')
             ->with(GlobalSection::VAR_SCD_ON_DEMAND)
-            ->willReturn(false);
+            ->willReturn(true);
+        $this->environmentMock->method('getVariable')
+            ->with(GlobalSection::VAR_SCD_ON_DEMAND)
+            ->willReturn(Environment::VAL_ENABLED);
         $this->buildConfigMock->expects($this->once())
             ->method('get')
             ->with(BuildInterface::VAR_SKIP_SCD)
-            ->willReturn(false);
+            ->willReturn(true);
+        $this->configFileStructureMock->expects($this->once())
+            ->method('validate')
+            ->willReturn($error);
+        $this->resultFactoryMock->expects($this->never())
+            ->method('success');
 
-        $this->scdOnBuild->validate();
+        $this->assertInstanceOf(Result\Error::class, $this->scdOnBuild->validate());
+    }
+
+    public function testGetErrors()
+    {
+        $error = new Result\Error('some error');
+
+        $this->globalConfigMock->method('get')
+            ->with(GlobalSection::VAR_SCD_ON_DEMAND)
+            ->willReturn(true);
+        $this->environmentMock->method('getVariable')
+            ->with(GlobalSection::VAR_SCD_ON_DEMAND)
+            ->willReturn(Environment::VAL_ENABLED);
+        $this->buildConfigMock->expects($this->once())
+            ->method('get')
+            ->with(BuildInterface::VAR_SKIP_SCD)
+            ->willReturn(true);
+        $this->configFileStructureMock->expects($this->once())
+            ->method('validate')
+            ->willReturn($error);
+        $this->resultFactoryMock->expects($this->exactly(2))
+            ->method('error')
+            ->withConsecutive(
+                ['SCD_ON_DEMAND variable is enabled'],
+                ['SKIP_SCD variable is enabled']
+            );
+
+        $result = $this->scdOnBuild->getErrors();
+        $this->assertCount(3, $result);
+        $this->assertContainsOnlyInstancesOf(Result\Error::class, $result);
     }
 }

@@ -5,11 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
-use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,19 +24,24 @@ class PrepareConfigTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
     /**
-     * @var GlobalConfig|Mock
+     * @var GlobalConfig|MockObject
      */
     private $globalConfigMock;
+
+    /**
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
 
     /**
      * @inheritdoc
@@ -45,22 +51,29 @@ class PrepareConfigTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
+        $this->environmentMock = $this->createMock(Environment::class);
 
         $this->process = new PrepareConfig(
             $this->loggerMock,
             $this->configWriterMock,
-            $this->globalConfigMock
+            $this->globalConfigMock,
+            $this->environmentMock
         );
     }
 
     /**
      * @param bool $scdOnDemand
      * @param bool $skipHtmlMinification
+     * @param string $envScdOnDemand
      * @param array $expectedResult
      * @dataProvider executeDataProvider
      */
-    public function testExecute(bool $scdOnDemand, bool $skipHtmlMinification, array $expectedResult)
-    {
+    public function testExecute(
+        bool $scdOnDemand,
+        bool $skipHtmlMinification,
+        string $envScdOnDemand,
+        array $expectedResult
+    ) {
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php.');
@@ -70,6 +83,9 @@ class PrepareConfigTest extends TestCase
                 [GlobalConfig::VAR_SCD_ON_DEMAND, $scdOnDemand],
                 [GlobalConfig::VAR_SKIP_HTML_MINIFICATION, $skipHtmlMinification],
             ]);
+        $this->environmentMock->method('getVariable')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn($envScdOnDemand);
         $this->configWriterMock->expects($this->once())
             ->method('update')
             ->with($expectedResult);
@@ -86,6 +102,7 @@ class PrepareConfigTest extends TestCase
             [
                 'scdOnDemand' => false,
                 'skipHtmlMinification' => true,
+                'envScdOnDemand' => Environment::VAL_DISABLED,
                 'expectedResult' => [
                     'static_content_on_demand_in_production' => 0,
                     'force_html_minification' => 1,
@@ -94,6 +111,16 @@ class PrepareConfigTest extends TestCase
             [
                 'scdOnDemand' => true,
                 'skipHtmlMinification' => false,
+                'envScdOnDemand' => Environment::VAL_DISABLED,
+                'expectedResult' => [
+                    'static_content_on_demand_in_production' => 1,
+                    'force_html_minification' => 0,
+                ],
+            ],
+            [
+                'scdOnDemand' => false,
+                'skipHtmlMinification' => false,
+                'envScdOnDemand' => Environment::VAL_ENABLED,
                 'expectedResult' => [
                     'static_content_on_demand_in_production' => 1,
                     'force_html_minification' => 0,
