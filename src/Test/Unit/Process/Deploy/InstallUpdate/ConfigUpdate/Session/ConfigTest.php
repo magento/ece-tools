@@ -8,13 +8,13 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use Composer\Package\PackageInterface;
 use Composer\Semver\Comparator;
 use Magento\MagentoCloud\Config\ConfigMerger;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
 
 /**
  * @inheritdoc
@@ -137,7 +137,7 @@ class ConfigTest extends TestCase
                 'host' => 'host',
                 'port' => 'port',
                 'database' => 0,
-                'disable_locking' => 0
+                'disable_locking' => 1
             ],
         ];
 
@@ -234,7 +234,7 @@ class ConfigTest extends TestCase
                 'host' => 'host',
                 'port' => 'port',
                 'database' => 0,
-                'disable_locking' => 1
+                'disable_locking' => 0
             ],
         ];
 

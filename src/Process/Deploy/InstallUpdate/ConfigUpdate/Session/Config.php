@@ -121,9 +121,9 @@ class Config
         }
 
         if ($this->comparator::greaterThanOrEqualTo($package->getVersion(), '1.3.4')) {
-            return 0;
+            return 1;
         }
 
-        return 1;
+        return 0;
     }
 }
