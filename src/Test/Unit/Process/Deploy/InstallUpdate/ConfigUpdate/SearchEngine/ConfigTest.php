@@ -131,6 +131,8 @@ class ConfigTest extends TestCase
 
     /**
      * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function testGetWithElasticSearchDataProvider(): array
     {
