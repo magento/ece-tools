@@ -15,21 +15,6 @@ use PHPUnit\Framework\TestCase;
  */
 class DirectoryListTest extends TestCase
 {
-    public function testGetPath()
-    {
-        $directoryList = $this->get22DirectoryList();
-
-        $this->assertSame(
-            __DIR__ . '/_files/test/var',
-            $directoryList->getPath('test_var')
-        );
-
-        $this->assertSame(
-            '_files/test/var',
-            $directoryList->getPath('test_var', true)
-        );
-    }
-
     /**
      * @expectedExceptionMessage Code some_code is not registered
      * @expectedException \RuntimeException
@@ -37,15 +22,6 @@ class DirectoryListTest extends TestCase
     public function testGetPathWithException()
     {
         $this->get22DirectoryList()->getPath('some_code');
-    }
-
-    /**
-     * @expectedExceptionMessage Config var "path" does not exists
-     * @expectedException \RuntimeException
-     */
-    public function testGetPathWithEmptyPathException()
-    {
-        $this->get22DirectoryList()->getPath('empty_path');
     }
 
     public function testGetRoot()
@@ -229,8 +205,7 @@ class DirectoryListTest extends TestCase
 
         return new DirectoryList(
             $systemMock,
-            $magentoVersionMock,
-            ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
+            $magentoVersionMock
         );
     }
 
@@ -254,8 +229,7 @@ class DirectoryListTest extends TestCase
 
         return new DirectoryList(
             $systemMock,
-            $magentoVersionMock,
-            ['empty_path' => [], 'test_var' => [DirectoryList::PATH => '_files/test/var']]
+            $magentoVersionMock
         );
     }
 }
