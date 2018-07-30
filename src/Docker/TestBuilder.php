@@ -95,7 +95,7 @@ class TestBuilder implements BuilderInterface
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
-                        '.:/var/www/ece-tool',
+                        '.:/var/www/ece-tools',
                         '/var/www/magento',
                     ],
                 ],
@@ -152,7 +152,7 @@ class TestBuilder implements BuilderInterface
             ],
             'volumes' => [
                 '~/.composer/cache:/root/.composer/cache',
-                '/var/www/ece-tool/vendor'
+                '/var/www/ece-tools/vendor'
             ],
             'volumes_from' => [
                 'appdata',
