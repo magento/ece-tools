@@ -45,17 +45,20 @@ class ScdOnDeploy implements CompositeValidator
     /**
      * @param Validator\ResultFactory $resultFactory
      * @param GlobalSection $globalSection
+     * @param Environment $environment
      * @param DeployInterface $deployConfig
      * @param ScdOnBuild $scdOnBuild
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
         GlobalSection $globalSection,
+        Environment $environment,
         DeployInterface $deployConfig,
         ScdOnBuild $scdOnBuild
     ) {
         $this->resultFactory = $resultFactory;
         $this->globalConfig = $globalSection;
+        $this->environment = $environment;
         $this->deployConfig = $deployConfig;
         $this->scdOnBuild = $scdOnBuild;
     }
