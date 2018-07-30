@@ -170,6 +170,39 @@ class ConfigTest extends TestCase
                 ],
             ],
             [
+                'customSearchConfig' => [
+                    'elasticsearch_server_port' => 2345,
+                    'elasticsearch_index_prefix' => 'new_prefix',
+                    '_merge' => true,
+                ],
+                'version' => '2.4',
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 2345,
+                    'elasticsearch_index_prefix' => 'new_prefix',
+                ],
+            ],
+            [
+                'customSearchConfig' => [
+                    '_merge' => true,
+                ],
+                'version' => '2.4',
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
+                ],
+            ],
+            [
                 'customSearchConfig' => [],
                 'version' => '5',
                 'relationships' => [
