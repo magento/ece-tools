@@ -5,15 +5,16 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
-use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,37 +28,42 @@ class DeployStaticContentTest extends TestCase
     private $process;
 
     /**
-     * @var FlagManager|Mock
+     * @var FlagManager|MockObject
      */
     private $flagManagerMock;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ProcessInterface|Mock
+     * @var ProcessInterface|MockObject
      */
     private $processMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var GlobalConfig|Mock
+     * @var GlobalConfig|MockObject
      */
     private $globalConfigMock;
 
     /**
-     * @var StaticContentCleaner|Mock
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
+
+    /**
+     * @var StaticContentCleaner|MockObject
      */
     private $staticContentCleanerMock;
 
@@ -72,6 +78,7 @@ class DeployStaticContentTest extends TestCase
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
+        $this->environmentMock = $this->createMock(Environment::class);
         $this->staticContentCleanerMock = $this->createMock(StaticContentCleaner::class);
 
         $this->process = new DeployStaticContent(
@@ -80,6 +87,7 @@ class DeployStaticContentTest extends TestCase
             $this->loggerMock,
             $this->stageConfigMock,
             $this->globalConfigMock,
+            $this->environmentMock,
             $this->staticContentCleanerMock
         );
     }
@@ -156,12 +164,35 @@ class DeployStaticContentTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteScdOnDemandInProduction()
+    public function testExecuteScdOnDemandInProductionByYaml()
     {
         $this->globalConfigMock->expects($this->once())
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(true);
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Skipping static content deploy. SCD on demand is enabled.');
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+        $this->flagManagerMock->expects($this->never())
+            ->method('exists');
+        $this->staticContentCleanerMock->expects($this->once())
+            ->method('clean');
+
+        $this->process->execute();
+    }
+
+    public function testExecuteScdOnDemandInProductionByEnv()
+    {
+        $this->globalConfigMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(false);
+        $this->environmentMock->expects($this->once())
+            ->method('getVariable')
+            ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
+            ->willReturn(Environment::VAL_ENABLED);
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Skipping static content deploy. SCD on demand is enabled.');

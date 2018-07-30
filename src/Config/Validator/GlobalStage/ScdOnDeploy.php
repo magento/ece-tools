@@ -5,9 +5,10 @@
  */
 namespace Magento\MagentoCloud\Config\Validator\GlobalStage;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\GlobalSection;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\CompositeValidator;
 
@@ -37,19 +38,27 @@ class ScdOnDeploy implements CompositeValidator
     private $scdOnBuild;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @param Validator\ResultFactory $resultFactory
      * @param GlobalSection $globalSection
+     * @param Environment $environment
      * @param DeployInterface $deployConfig
      * @param ScdOnBuild $scdOnBuild
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
         GlobalSection $globalSection,
+        Environment $environment,
         DeployInterface $deployConfig,
         ScdOnBuild $scdOnBuild
     ) {
         $this->resultFactory = $resultFactory;
         $this->globalConfig = $globalSection;
+        $this->environment = $environment;
         $this->deployConfig = $deployConfig;
         $this->scdOnBuild = $scdOnBuild;
     }
@@ -73,7 +82,9 @@ class ScdOnDeploy implements CompositeValidator
     {
         $errors = [];
 
-        if ($this->globalConfig->get(StageConfigInterface::VAR_SCD_ON_DEMAND)) {
+        if ($this->globalConfig->get(StageConfigInterface::VAR_SCD_ON_DEMAND) ||
+            $this->environment->getVariable(StageConfigInterface::VAR_SCD_ON_DEMAND) == Environment::VAL_ENABLED
+        ) {
             $errors[] = $this->resultFactory->error('SCD_ON_DEMAND variable is enabled');
         }
 
