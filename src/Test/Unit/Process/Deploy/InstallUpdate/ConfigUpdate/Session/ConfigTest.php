@@ -5,13 +5,16 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Session;
 
+use Composer\Package\PackageInterface;
+use Composer\Semver\Comparator;
 use Magento\MagentoCloud\Config\ConfigMerger;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
@@ -19,14 +22,29 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class ConfigTest extends TestCase
 {
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
+
+    /**
+     * @var ConfigMerger|MockObject
+     */
+    private $configMergerMock;
+
+    /**
+     * @var Manager|MockObject
+     */
+    private $managerMock;
+
+    /**
+     * @var Comparator|MockObject
+     */
+    private $comparatorMock;
 
     /**
      * @var Config
@@ -37,11 +55,16 @@ class ConfigTest extends TestCase
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->configMergerMock = $this->createTestProxy(ConfigMerger::class);
+        $this->managerMock = $this->createMock(Manager::class);
+        $this->comparatorMock = new Comparator();
 
         $this->config = new Config(
             $this->environmentMock,
             $this->stageConfigMock,
-            new ConfigMerger()
+            $this->configMergerMock,
+            $this->managerMock,
+            $this->comparatorMock
         );
     }
 
@@ -80,6 +103,14 @@ class ConfigTest extends TestCase
             ->method('getRelationship')
             ->with('redis')
             ->willReturn($relationships);
+        $package = $this->getMockForAbstractClass(PackageInterface::class);
+        $this->managerMock->expects($this->once())
+            ->method('get')
+            ->with('colinmollenhour/php-redis-session-abstract')
+            ->willReturn($package);
+        $package->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('1.3.4');
 
         $this->assertEquals(
             $expected,
@@ -106,6 +137,104 @@ class ConfigTest extends TestCase
                 'host' => 'host',
                 'port' => 'port',
                 'database' => 0,
+                'disable_locking' => 1
+            ],
+        ];
+
+        $resultWithMergedKey = $result;
+        $resultWithMergedKey['key'] = 'value';
+
+        $resultWithMergedHostAndPort = $result;
+        $resultWithMergedHostAndPort['redis']['host'] = 'new_host';
+        $resultWithMergedHostAndPort['redis']['port'] = 'new_port';
+
+        return [
+            [
+                [],
+                $relationships,
+                $result,
+            ],
+            [
+                [StageConfigInterface::OPTION_MERGE => true],
+                $relationships,
+                $result,
+            ],
+            [
+                [
+                    StageConfigInterface::OPTION_MERGE => true,
+                    'key' => 'value',
+                ],
+                $relationships,
+                $resultWithMergedKey,
+            ],
+            [
+                [
+                    StageConfigInterface::OPTION_MERGE => true,
+                    'redis' => [
+                        'host' => 'new_host',
+                        'port' => 'new_port',
+                    ],
+                ],
+                $relationships,
+                $resultWithMergedHostAndPort,
+            ],
+        ];
+    }
+
+    /**
+     * @param array $envSessionConfiguration
+     * @param array $relationships
+     * @param array $expected
+     * @dataProvider envConfigurationMergingWithPrevVersionDataProvider
+     */
+    public function testEnvConfigurationMergingWithPrevVersion(
+        array $envSessionConfiguration,
+        array $relationships,
+        array $expected
+    ) {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
+            ->willReturn($envSessionConfiguration);
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with('redis')
+            ->willReturn($relationships);
+        $package = $this->getMockForAbstractClass(PackageInterface::class);
+        $this->managerMock->expects($this->once())
+            ->method('get')
+            ->with('colinmollenhour/php-redis-session-abstract')
+            ->willReturn($package);
+        $package->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('1.3.3');
+
+        $this->assertEquals(
+            $expected,
+            $this->config->get()
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function envConfigurationMergingWithPrevVersionDataProvider(): array
+    {
+        $relationships = [
+            [
+                'host' => 'host',
+                'port' => 'port',
+                'scheme' => 'redis',
+            ],
+        ];
+
+        $result = [
+            'save' => 'redis',
+            'redis' => [
+                'host' => 'host',
+                'port' => 'port',
+                'database' => 0,
+                'disable_locking' => 0
             ],
         ];
 
