@@ -6,10 +6,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Cron\JobUnlocker;
-use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\UnlockCronJobs;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,19 +17,14 @@ use Psr\Log\LoggerInterface;
 class UnlockCronJobsTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var JobUnlocker|Mock
+     * @var JobUnlocker|MockObject
      */
     private $jobUnlockerMock;
-
-    /**
-     * @var MagentoVersion|Mock
-     */
-    private $magentoVersionMock;
 
     /**
      * @var UnlockCronJobs
@@ -44,19 +38,15 @@ class UnlockCronJobsTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
-        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->process = new UnlockCronJobs(
             $this->jobUnlockerMock,
-            $this->loggerMock,
-            $this->magentoVersionMock
+            $this->loggerMock
         );
     }
 
     public function testExecute()
     {
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
         $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll')
             ->willReturn(5);
@@ -69,29 +59,11 @@ class UnlockCronJobsTest extends TestCase
 
     public function testExecuteNoJobsUpdated()
     {
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
         $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll')
             ->willReturn(0);
         $this->loggerMock->expects($this->never())
             ->method('info');
-
-        $this->process->execute();
-    }
-
-    public function testSkipExecute()
-    {
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2')
-            ->willReturn(false);
-        $this->jobUnlockerMock->expects($this->never())
-            ->method('unlockAll');
 
         $this->process->execute();
     }

@@ -68,19 +68,14 @@ class Config
     public function get(): array
     {
         $envSearchConfig = (array)$this->stageConfig->get(DeployInterface::VAR_SEARCH_CONFIGURATION);
-        $envSearchConfigValidFlag = $this->isSearchConfigValid($envSearchConfig);
 
-        if ($envSearchConfigValidFlag && !$this->configMerger->isMergeRequired($envSearchConfig)) {
+        if ($this->isSearchConfigValid($envSearchConfig)
+            && !$this->configMerger->isMergeRequired($envSearchConfig)
+        ) {
             return $this->configMerger->clear($envSearchConfig);
         }
 
-        $searchConfig = $this->getSearchConfig();
-
-        if ($envSearchConfigValidFlag && $this->configMerger->isMergeRequired($envSearchConfig)) {
-            return $this->configMerger->mergeConfigs($searchConfig, $envSearchConfig);
-        }
-
-        return $searchConfig;
+        return $this->configMerger->mergeConfigs($this->getSearchConfig(), $envSearchConfig);
     }
 
     /**

@@ -1,0 +1,62 @@
+diff -Nuar a/vendor/magento/module-cron/Console/Command/CronCommand.php b/vendor/magento/module-cron/Console/Command/CronCommand.php
+index 6a9686c514e..4df6888f461 100644
+--- a/vendor/magento/module-cron/Console/Command/CronCommand.php
++++ b/vendor/magento/module-cron/Console/Command/CronCommand.php
+@@ -9,10 +9,12 @@ use Symfony\Component\Console\Command\Command;
+ use Symfony\Component\Console\Input\InputInterface;
+ use Symfony\Component\Console\Output\OutputInterface;
+ use Symfony\Component\Console\Input\InputOption;
++use Magento\Framework\App\ObjectManager;
+ use Magento\Framework\App\ObjectManagerFactory;
+ use Magento\Store\Model\Store;
+ use Magento\Store\Model\StoreManager;
+ use Magento\Cron\Observer\ProcessCronQueueObserver;
++use Magento\Framework\App\DeploymentConfig;
+ use Magento\Framework\Console\Cli;
+ use Magento\Framework\Shell\ComplexParameter;
+ 
+@@ -34,13 +36,24 @@ class CronCommand extends Command
+     private $objectManagerFactory;
+ 
+     /**
+-     * Constructor
++     * Application deployment configuration
+      *
++     * @var DeploymentConfig
++     */
++    private $deploymentConfig;
++
++    /**
+      * @param ObjectManagerFactory $objectManagerFactory
++     * @param DeploymentConfig $deploymentConfig Application deployment configuration
+      */
+-    public function __construct(ObjectManagerFactory $objectManagerFactory)
+-    {
++    public function __construct(
++        ObjectManagerFactory $objectManagerFactory,
++        DeploymentConfig $deploymentConfig = null
++    ) {
+         $this->objectManagerFactory = $objectManagerFactory;
++        $this->deploymentConfig = $deploymentConfig ?: ObjectManager::getInstance()->get(
++            DeploymentConfig::class
++        );
+         parent::__construct();
+     }
+ 
+@@ -70,10 +83,16 @@ class CronCommand extends Command
+     }
+ 
+     /**
++     * Runs cron jobs if cron is not disabled in Magento configurations
++     *
+      * {@inheritdoc}
+      */
+     protected function execute(InputInterface $input, OutputInterface $output)
+     {
++        if (!$this->deploymentConfig->get('cron/enabled', 1)) {
++            $output->writeln('<info>' . 'Cron is disabled. Jobs were not run.' . '</info>');
++            return;
++        }
+         $omParams = $_SERVER;
+         $omParams[StoreManager::PARAM_RUN_CODE] = 'admin';
+         $omParams[Store::CUSTOM_ENTRY_POINT_PARAM] = true;
