@@ -105,6 +105,7 @@ class DevBuilder implements BuilderInterface
                 'deploy' => $this->getCliService(true),
                 'db' => $this->getDbService(),
                 'web' => $this->getWebService(),
+                'cron' => $this->getCronService(),
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
@@ -178,7 +179,7 @@ class DevBuilder implements BuilderInterface
             'hostname' => 'cli.magento2.docker',
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-cli',
-                $this->config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION)
+                $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
             ),
             'links' => [
                 'db',
@@ -234,7 +235,7 @@ class DevBuilder implements BuilderInterface
         return [
             'image' => sprintf(
                 'magento/magento-cloud-docker-nginx:%s',
-                $this->config->get('nginx.version', self::DEFAULT_NGINX_VERSION)
+                $this->config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION)
             ),
             'ports' => [
                 '8080:80',
@@ -255,5 +256,18 @@ class DevBuilder implements BuilderInterface
                 './docker/config.env',
             ],
         ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getCronService(): array
+    {
+        $cliService = $this->getCliService(true);
+
+        $cliService['hostname'] = 'magento2-cron.docker';
+        $cliService['command'] = 'run-cron';
+
+        return $cliService;
     }
 }

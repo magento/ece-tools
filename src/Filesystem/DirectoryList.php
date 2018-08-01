@@ -83,9 +83,8 @@ class DirectoryList
         }
 
         $path = $directories[$code][self::PATH];
-        $normalizedPath = $magentoRoot . ($magentoRoot && $path ? '/' : '') . $path;
 
-        return $normalizedPath;
+        return $magentoRoot . ($magentoRoot && $path ? '/' : '') . $path;
     }
 
     /**
