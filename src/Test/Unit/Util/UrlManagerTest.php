@@ -317,6 +317,34 @@ class UrlManagerTest extends TestCase
                     ],
                 ],
             ],
+            'domain with www by default' => [
+                'routes' => [
+                    'http://example.com/' => ['original_url' => 'http://www.{default}/', 'type' => 'upstream'],
+                    'https://example.com/' => ['original_url' => 'https://www.{default}/', 'type' => 'upstream'],
+                    'http://*.example.com/' => ['original_url' => 'http://*.{default}/', 'type' => 'upstream'],
+                    'https://*.example.com/' => ['original_url' => 'https://*.{default}/', 'type' => 'upstream'],
+                    'http://french.example.com/' => [
+                        'original_url' => 'http://french.{default}/',
+                        'type' => 'upstream',
+                    ],
+                    'https://french.example.com/' => [
+                        'original_url' => 'https://french.{default}/',
+                        'type' => 'upstream',
+                    ],
+                ],
+                [
+                    'secure' => [
+                        '' => 'https://example.com/',
+                        '*' => 'https://*.example.com/',
+                        'french' => 'https://french.example.com/',
+                    ],
+                    'unsecure' => [
+                        '' => 'http://example.com/',
+                        '*' => 'http://*.example.com/',
+                        'french' => 'http://french.example.com/',
+                    ],
+                ],
+            ],
         ];
     }
 

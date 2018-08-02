@@ -61,7 +61,7 @@ class UrlManager
             }
 
             $host = parse_url($val['original_url'], PHP_URL_HOST);
-            $originalUrlRegEx = sprintf('/\.?%s/', preg_quote(self::MAGIC_ROUTE));
+            $originalUrlRegEx = sprintf('/(www)?\.?%s/', preg_quote(self::MAGIC_ROUTE));
             $originalUrl = preg_replace($originalUrlRegEx, '', $host);
 
             if (strpos($key, self::PREFIX_UNSECURE) === 0) {
