@@ -98,7 +98,7 @@ class Build extends Command
                 self::OPTION_IS_TEST,
                 null,
                 InputOption::VALUE_NONE,
-                'Is test config'
+                'Generates ECE-Tools testing configuration (internal usage only)'
             );
 
         parent::configure();
