@@ -115,15 +115,21 @@ class IdealStateTest extends TestCase
             ->willReturn(false);
         $this->resultFactoryMock->expects($this->atLeastOnce())
             ->method('error')
-            ->willReturnCallback(function ($message) {
-                return new Error($message);
+            ->willReturnCallback(function ($message, $suggestion = '') {
+                return new Error($message, $suggestion);
             });
         $this->resultFactoryMock->expects($this->never())
             ->method('success');
 
         $result = $this->validator->validate();
+
         $this->assertInstanceOf(Error::class, $result);
         $this->assertSame('The configured state is not ideal', $result->getError());
+
+        $suggestion = '  The SCD is not set for the build stage' . PHP_EOL;
+        $suggestion .= '  Post-deploy hook is not configured' . PHP_EOL;
+        $suggestion .= '  Skip HTML minification is disabled';
+        $this->assertSame($suggestion, $result->getSuggestion());
     }
 
     public function testGetErrorsSuccess()
