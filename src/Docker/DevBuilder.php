@@ -194,9 +194,6 @@ class DevBuilder implements BuilderInterface
                 './docker/global.env',
                 './docker/config.env',
             ],
-            'environment' => [
-                'M2_SAMPLE_DATA=false',
-            ],
         ];
     }
 
