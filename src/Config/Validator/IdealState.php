@@ -56,7 +56,10 @@ class IdealState implements CompositeValidator
     public function validate(): ResultInterface
     {
         if ($this->getErrors()) {
-            return $this->resultFactory->error('The configured state is not ideal');
+            $suggestion = trim(array_reduce($this->getErrors(), function($suggestion, $error) {
+                return $suggestion . PHP_EOL . '  ' . $error->getError();
+            }, ''));
+            return $this->resultFactory->error('The configured state is not ideal', '  ' . $suggestion);
         }
 
         return $this->resultFactory->success();

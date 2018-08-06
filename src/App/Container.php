@@ -168,7 +168,6 @@ class Container implements ContainerInterface
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
-                                    $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
                                     $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
                                     $this->container->make(ConfigValidator\Build\ModulesExists::class),
                                     $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
@@ -254,13 +253,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(DeployProcess\EnableCron::class),
-                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
-                            'validators' => [
-                                ValidatorInterface::LEVEL_WARNING => [
-                                    $this->container->make(ConfigValidator\Deploy\PostDeploy::class),
-                                ],
-                            ],
-                        ]),
 
                         /**
                          * This process runs processes if only post_deploy hook is not configured.
