@@ -173,6 +173,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Build\ModulesExists::class),
                                     $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Build\ScdOptionsIgnorance::class),
+                                    $this->container->make(ConfigValidator\IdealState::class),
                                 ],
                             ],
                         ]),
