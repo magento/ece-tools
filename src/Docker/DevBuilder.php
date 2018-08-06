@@ -145,7 +145,6 @@ class DevBuilder implements BuilderInterface
     private function getFpmService(): array
     {
         return [
-            'hostname' => 'fpm.magento2.docker',
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-fpm',
                 $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
@@ -176,7 +175,6 @@ class DevBuilder implements BuilderInterface
     private function getCliService(bool $isReadOnly): array
     {
         return [
-            'hostname' => 'cli.magento2.docker',
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-cli',
                 $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
@@ -264,8 +262,6 @@ class DevBuilder implements BuilderInterface
     private function getCronService(): array
     {
         $cliService = $this->getCliService(true);
-
-        $cliService['hostname'] = 'magento2-cron.docker';
         $cliService['command'] = 'run-cron';
 
         return $cliService;
