@@ -7,8 +7,8 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Docker;
 
 use Magento\MagentoCloud\Command\Docker\Build;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Docker\Builder;
 use Magento\MagentoCloud\Docker\BuilderFactory;
+use Magento\MagentoCloud\Docker\DevBuilder;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -32,7 +32,7 @@ class BuildTest extends TestCase
     private $builderFactoryMock;
 
     /**
-     * @var Builder|MockObject
+     * @var DevBuilder|MockObject
      */
     private $builderMock;
 
@@ -57,7 +57,7 @@ class BuildTest extends TestCase
     protected function setUp()
     {
         $this->builderFactoryMock = $this->createMock(BuilderFactory::class);
-        $this->builderMock = $this->createMock(Builder::class);
+        $this->builderMock = $this->createMock(DevBuilder::class);
         $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createMock(File::class);
         $this->environmentMock = $this->createMock(Environment::class);
@@ -80,13 +80,39 @@ class BuildTest extends TestCase
             ->willReturn($this->builderMock);
         $this->fileListMock->expects($this->once())
             ->method('getMagentoDockerCompose')
-            ->willReturn('magento_rood/docker-compose.yml');
+            ->willReturn('magento_root/docker-compose.yml');
         $this->builderMock->expects($this->once())
             ->method('build')
             ->willReturn(['version' => '2']);
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
-            ->with('magento_rood/docker-compose.yml', "version: '2'\n");
+            ->with('magento_root/docker-compose.yml', "version: '2'\n");
+
+        $this->command->execute($inputMock, $outputMock);
+    }
+
+    public function testExecuteTestSet()
+    {
+        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
+        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+
+        $inputMock->method('getOption')
+            ->willReturnMap([
+                [Build::OPTION_IS_TEST, true],
+            ]);
+
+        $this->builderFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($this->builderMock);
+        $this->fileListMock->expects($this->once())
+            ->method('getToolsDockerCompose')
+            ->willReturn('ece_root/docker-compose.yml');
+        $this->builderMock->expects($this->once())
+            ->method('build')
+            ->willReturn(['version' => '2']);
+        $this->fileMock->expects($this->once())
+            ->method('filePutContents')
+            ->with('ece_root/docker-compose.yml', "version: '2'\n");
 
         $this->command->execute($inputMock, $outputMock);
     }
@@ -108,12 +134,12 @@ class BuildTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
             ->with('magento_rood/docker-compose.yml', "version: '2'\n");
-        $inputMock->expects($this->exactly(3))
-            ->method('getOption')
+        $inputMock->method('getOption')
             ->willReturnMap([
                 [Build::OPTION_PHP, '7.1'],
                 [Build::OPTION_DB, '10'],
                 [Build::OPTION_NGINX, '1.9'],
+                [Build::OPTION_IS_TEST, false],
             ]);
         $this->builderMock->expects($this->once())
             ->method('setPhpVersion')
