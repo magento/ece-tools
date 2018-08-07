@@ -57,7 +57,9 @@ class IdealState implements CompositeValidator
     {
         if ($this->getErrors()) {
             $suggestion = trim(array_reduce($this->getErrors(), function ($suggestion, $error) {
-                return $suggestion . PHP_EOL . '  ' . $error->getError();
+                $suggestion .= PHP_EOL . '  ' . $error->getError();
+                $suggestion .= ($error->getSuggestion()) ? PHP_EOL . $error->getSuggestion() : '';
+                return $suggestion;
             }, ''));
             return $this->resultFactory->error('The configured state is not ideal', '  ' . $suggestion);
         }
@@ -73,12 +75,15 @@ class IdealState implements CompositeValidator
         if (!isset($this->errors)) {
             $this->errors = [];
 
-            if (!$this->validatorFactory->create(GlobalStage\ScdOnBuild::class)->validate() instanceof Result\Success) {
-                $this->errors[] = $this->resultFactory->error('The SCD is not set for the build stage');
+            $scdBuildError = $this->validatorFactory->create(GlobalStage\ScdOnBuild::class)->validate();
+            $postDeployError = $this->validatorFactory->create(Deploy\PostDeploy::class)->validate();
+
+            if (!$scdBuildError instanceof Result\Success) {
+                $this->errors[] = $scdBuildError;
             }
 
-            if (!$this->validatorFactory->create(Deploy\PostDeploy::class)->validate() instanceof Result\Success) {
-                $this->errors[] = $this->resultFactory->error('Post-deploy hook is not configured');
+            if (!$postDeployError instanceof Result\Success) {
+                $this->errors[] = $postDeployError;
             }
 
             if (!$this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
