@@ -75,11 +75,11 @@ class ConfigFileStructure implements ValidatorInterface
             $suggestion = implode(
                 PHP_EOL,
                 [
-                    '  To speed up the deploy process, please run the following commands:',
-                    '  1. php ./vendor/bin/ece-tools config:dump',
-                    '  2. git add -f app/etc/%s',
-                    '  3. git commit -m \'Updating %s\'',
-                    '  4. git push',
+                    '  To speed up the deploy process do the following:',
+                    '  1. SSH to your Magento Cloud account',
+                    '  2. Run "php ./vendor/bin/ece-tools config:dump"',
+                    '  3. SCP app/etc/%s to your local repository',
+                    '  4. Add, commit, and push app/etc/%s',
                 ]
             );
             $suggestion = sprintf($suggestion, $configFileName, $configFileName);
