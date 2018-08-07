@@ -98,10 +98,10 @@ class IdealStateTest extends TestCase
 
         $scdOnBuildValidator->expects($this->once())
             ->method('validate')
-            ->willReturn(new Error('validation failed'));
+            ->willReturn(new Error('SCD validation failed'));
         $postDeployValidator->expects($this->once())
             ->method('validate')
-            ->willReturn(new Error('validation failed'));
+            ->willReturn(new Error('Post Deploy validation failed', '  Suggestion for post_deploy'));
 
         $this->validatorFactoryMock->expects($this->exactly(2))
             ->method('create')
@@ -126,8 +126,9 @@ class IdealStateTest extends TestCase
         $this->assertInstanceOf(Error::class, $result);
         $this->assertSame('The configured state is not ideal', $result->getError());
 
-        $suggestion = '  The SCD is not set for the build stage' . PHP_EOL;
-        $suggestion .= '  Post-deploy hook is not configured' . PHP_EOL;
+        $suggestion = '  SCD validation failed' . PHP_EOL;
+        $suggestion .= '  Post Deploy validation failed' . PHP_EOL;
+        $suggestion .= '  Suggestion for post_deploy' . PHP_EOL;
         $suggestion .= '  Skip HTML minification is disabled';
         $this->assertSame($suggestion, $result->getSuggestion());
     }
@@ -173,10 +174,10 @@ class IdealStateTest extends TestCase
 
         $scdOnBuildValidator->expects($this->once())
             ->method('validate')
-            ->willReturn(new Error('validation failed'));
+            ->willReturn($scdBuildError);
         $postDeployValidator->expects($this->once())
             ->method('validate')
-            ->willReturn(new Error('validation failed'));
+            ->willReturn($postDeployError);
 
         $this->validatorFactoryMock->expects($this->exactly(2))
             ->method('create')
@@ -188,13 +189,9 @@ class IdealStateTest extends TestCase
             ->method('get')
             ->with(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
             ->willReturn(false);
-        $this->resultFactoryMock->expects($this->exactly(3))
+        $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->willReturnMap([
-                ['The SCD is not set for the build stage', '', $scdBuildError],
-                ['Post-deploy hook is not configured', '', $postDeployError],
-                ['Skip HTML minification is disabled', '', $skipMinificationError],
-            ]);
+            ->willReturn($skipMinificationError);
         $this->resultFactoryMock->expects($this->never())
             ->method('success');
 
