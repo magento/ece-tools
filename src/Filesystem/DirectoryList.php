@@ -46,21 +46,14 @@ class DirectoryList
     private $magentoVersion;
 
     /**
-     * @var array
-     */
-    private $directories;
-
-    /**
      * @param SystemList $systemList
-     * @param MagentoVersion $version
-     * @param array $config
+     * @param MagentoVersion $magentoVersion
      */
-    public function __construct(SystemList $systemList, MagentoVersion $version, array $config = [])
+    public function __construct(SystemList $systemList, MagentoVersion $magentoVersion)
     {
         $this->root = $systemList->getRoot();
         $this->magentoRoot = $systemList->getMagentoRoot();
-        $this->magentoVersion = $version;
-        $this->directories = $config + $this->getDefaultConfig();
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -73,7 +66,11 @@ class DirectoryList
     public function getPath(string $code, bool $relativePath = false): string
     {
         $magentoRoot = $relativePath ? '' : $this->getMagentoRoot();
-        $directories = $this->getDirectories();
+        $directories = $this->getDefaultDirectories();
+
+        if (!array_key_exists($code, $directories)) {
+            $directories = $this->getDefaultVariadicDirectories();
+        }
 
         if (!array_key_exists($code, $directories)) {
             throw  new \RuntimeException("Code {$code} is not registered");
@@ -86,9 +83,8 @@ class DirectoryList
         }
 
         $path = $directories[$code][self::PATH];
-        $normalizedPath = $magentoRoot . ($magentoRoot && $path ? '/' : '') . $path;
 
-        return $normalizedPath;
+        return $magentoRoot . ($magentoRoot && $path ? '/' : '') . $path;
     }
 
     /**
@@ -97,14 +93,6 @@ class DirectoryList
     public function getRoot(): string
     {
         return $this->root;
-    }
-
-    /**
-     * @return array
-     */
-    public function getDirectories(): array
-    {
-        return $this->directories;
     }
 
     /**
@@ -182,7 +170,7 @@ class DirectoryList
     /**
      * @return array
      */
-    public function getDefaultConfig(): array
+    private function getDefaultDirectories(): array
     {
         $config = [
             static::DIR_INIT => [static::PATH => 'init'],
@@ -193,6 +181,16 @@ class DirectoryList
             static::DIR_STATIC => [static::PATH => 'pub/static'],
             static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
         ];
+
+        return $config;
+    }
+
+    /**
+     * @return array
+     */
+    private function getDefaultVariadicDirectories(): array
+    {
+        $config = [];
 
         if ($this->magentoVersion->satisfies('2.1.*')) {
             $config[static::DIR_GENERATED_CODE] = [static::PATH => 'var/generation'];
