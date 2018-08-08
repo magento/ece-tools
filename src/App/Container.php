@@ -94,6 +94,10 @@ class Container implements ContainerInterface
          * Interface to implementation binding.
          */
         $this->container->singleton(
+            \Magento\MagentoCloud\Config\ConfigInterface::class,
+            \Magento\MagentoCloud\Config\Shared::class
+        );
+        $this->container->singleton(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
             \Magento\MagentoCloud\Shell\Shell::class
         );
