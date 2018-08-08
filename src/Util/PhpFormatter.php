@@ -44,7 +44,7 @@ class PhpFormatter
             return '<?php' . "\n" . 'return ' . var_export($data, true) . ";\n";
         }
 
-        return "<?php\nreturn " . $this->varExportShort($data, true) . ";\n";
+        return "<?php\nreturn " . $this->varExportShort($data) . ";\n";
     }
 
     /**
@@ -55,7 +55,7 @@ class PhpFormatter
      * @param int $depth
      * @return string
      */
-    private function varExportShort($var, int $depth = 0): string
+    private function varExportShort($var, int $depth = 1): string
     {
         if (!is_array($var)) {
             return var_export($var, true);
