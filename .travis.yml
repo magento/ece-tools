@@ -4,7 +4,9 @@ git:
   depth: 1
 services:
   - docker
-language: generic
+language: php
+php:
+  7.1
 addons:
   apt:
     update: true
@@ -24,7 +26,11 @@ before_install:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
-install: docker-compose -f docker-compose-${PHP}.yml run cli bash -c "composer install -n -d ${DIR_TOOLS}"
-before_script: docker-compose -f docker-compose-${PHP}.yml up -d --build
+install:
+  - composer update -n
+  - ./bin/ece-tools docker:build --test --php ${PHP}
+before_script:
+  - docker-compose run cli bash -c "composer update -n -d ${DIR_TOOLS}"
+  - docker-compose up -d --build
 script: ./tests/travis/script.sh
 after_failure: docker ps -s

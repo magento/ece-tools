@@ -61,14 +61,14 @@ class Manager
      * @param string $packageName
      * @param string $version
      * @return PackageInterface
-     * @throws \Exception
+     * @throws UndefinedPackageException
      */
     public function get(string $packageName, string $version = '*'): PackageInterface
     {
         $package = $this->repository->findPackage($packageName, $version);
 
         if (!$package instanceof PackageInterface) {
-            throw new \Exception(sprintf(
+            throw new UndefinedPackageException(sprintf(
                 'Package %s:%s was not found',
                 $packageName,
                 $version

@@ -131,6 +131,8 @@ class ConfigTest extends TestCase
 
     /**
      * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function testGetWithElasticSearchDataProvider(): array
     {
@@ -167,6 +169,39 @@ class ConfigTest extends TestCase
                     'elasticsearch_server_hostname' => 'some_host',
                     'elasticsearch_server_port' => 1234,
                     'elasticsearch_index_prefix' => 'prefix',
+                ],
+            ],
+            [
+                'customSearchConfig' => [
+                    'elasticsearch_server_port' => 2345,
+                    'elasticsearch_index_prefix' => 'new_prefix',
+                    '_merge' => true,
+                ],
+                'version' => '2.4',
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 2345,
+                    'elasticsearch_index_prefix' => 'new_prefix',
+                ],
+            ],
+            [
+                'customSearchConfig' => [
+                    '_merge' => true,
+                ],
+                'version' => '2.4',
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
                 ],
             ],
             [
