@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
 use Magento\MagentoCloud\Config\Shared as SharedConfig;
 
 /**
@@ -25,9 +25,9 @@ class Module
 
     /**
      * @param Shared $sharedConfig
-     * @param ShellInterface $shell
+     * @param ExecBinMagento $shell
      */
-    public function __construct(SharedConfig $sharedConfig, ShellInterface $shell)
+    public function __construct(SharedConfig $sharedConfig, ExecBinMagento $shell)
     {
         $this->sharedConfig = $sharedConfig;
         $this->shell = $shell;
@@ -42,14 +42,12 @@ class Module
     {
         $moduleConfig = (array)$this->sharedConfig->get('modules');
 
-        if (!$moduleConfig) {
-            $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
+        $this->shell->execute('module:enable', ['--all']);
+
+        if ($moduleConfig) {
+            $this->sharedConfig->update(['modules' => $moduleConfig]);
+        } else {
             $this->sharedConfig->reset();
-
-            return;
         }
-
-        $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
-        $this->sharedConfig->update(['modules' => $moduleConfig]);
     }
 }
