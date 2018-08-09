@@ -7,8 +7,10 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Build\MarshallFiles;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @inheritdoc
@@ -21,33 +23,36 @@ class MarshallFilesTest extends TestCase
     private $process;
 
     /**
-     * @var File|\PHPUnit_Framework_MockObject_MockObject
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
+
+    /**
+     * @var MagentoVersion|MockObject
+     */
+    private $magentoVersionMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->fileMock = $this->getMockBuilder(File::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->fileMock = $this->createMock(File::class);
+        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
 
         $this->process = new MarshallFiles(
             $this->fileMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->magentoVersionMock
         );
     }
 
@@ -57,11 +62,15 @@ class MarshallFilesTest extends TestCase
      * @param int $createDirectory
      * @dataProvider executeDataProvider
      */
-    public function testExecute($isExist, $deleteDirectory, $createDirectory)
+    public function testExecuteForMagento2_1($isExist, $deleteDirectory, $createDirectory)
     {
         $enterpriseFolder = 'magento_root/app/enterprise';
         $varCache = 'magento_root/var/cache/';
 
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(false);
         $this->fileMock->expects($this->exactly($deleteDirectory))
             ->method('deleteDirectory')
             ->with($varCache)
@@ -96,5 +105,27 @@ class MarshallFilesTest extends TestCase
             ['isExist' => true, 'deleteDirectory' => 1, 'createDirectory' => 0],
             ['isExist' => false, 'deleteDirectory' => 0, 'createDirectory' => 1],
         ];
+    }
+
+    public function testExecuteFroMagentoGreater2_2()
+    {
+        $varCache = 'magento_root/var/cache/';
+
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($varCache)
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('deleteDirectory')
+            ->with($varCache)
+            ->willReturn(true);
+        $this->fileMock->expects($this->never())
+            ->method('copy');
+
+        $this->process->execute();
     }
 }
