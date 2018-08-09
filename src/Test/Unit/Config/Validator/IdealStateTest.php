@@ -159,8 +159,6 @@ class IdealStateTest extends TestCase
             ->method('error');
 
         $this->assertSame([], $this->validator->getErrors());
-        // Run twice to make sure cached result returned
-        $this->assertSame([], $this->validator->getErrors());
     }
 
     public function testGetErrorsError()
@@ -195,13 +193,11 @@ class IdealStateTest extends TestCase
         $this->resultFactoryMock->expects($this->never())
             ->method('success');
 
-        $initResult = $this->validator->getErrors();
-        $this->assertCount(3, $initResult);
-        $this->assertContainsOnlyInstancesOf(Error::class, $initResult);
-        $this->assertContains($scdBuildError, $initResult);
-        $this->assertContains($postDeployError, $initResult);
-        $this->assertContains($skipMinificationError, $initResult);
-        // Run twice to make sure cached result returned
-        $this->assertSame($initResult, $this->validator->getErrors());
+        $result = $this->validator->getErrors();
+        $this->assertCount(3, $result);
+        $this->assertContainsOnlyInstancesOf(Error::class, $result);
+        $this->assertContains($scdBuildError, $result);
+        $this->assertContains($postDeployError, $result);
+        $this->assertContains($skipMinificationError, $result);
     }
 }

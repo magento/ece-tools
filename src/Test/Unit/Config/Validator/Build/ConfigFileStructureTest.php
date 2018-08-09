@@ -135,10 +135,10 @@ class ConfigFileStructureTest extends TestCase
                 [
                     'error' => 'No stores/website/locales found in config.php',
                     'suggestion' => '  To speed up the deploy process do the following:' . PHP_EOL
-                        . '  1. SSH to your Magento Cloud account' . PHP_EOL
+                        . '  1. Using SSH, log in to your Magento Cloud account' . PHP_EOL
                         . '  2. Run "php ./vendor/bin/ece-tools config:dump"' . PHP_EOL
-                        . '  3. SCP app/etc/config.php to your local repository' . PHP_EOL
-                        . '  4. Add, commit, and push app/etc/config.php',
+                        . '  3. Using SCP, copy the app/etc/config.php file to your local repository' . PHP_EOL
+                        . '  4. Add, commit, and push your changes to the app/etc/config.php file',
                 ]
             )
             ->willReturn($resultMock);
@@ -176,10 +176,10 @@ class ConfigFileStructureTest extends TestCase
                 [
                     'error' => 'No stores/website/locales found in config.local.php',
                     'suggestion' => '  To speed up the deploy process do the following:' . PHP_EOL
-                        . '  1. SSH to your Magento Cloud account' . PHP_EOL
+                        . '  1. Using SSH, log in to your Magento Cloud account' . PHP_EOL
                         . '  2. Run "php ./vendor/bin/ece-tools config:dump"' . PHP_EOL
-                        . '  3. SCP app/etc/config.local.php to your local repository' . PHP_EOL
-                        . '  4. Add, commit, and push app/etc/config.local.php',
+                        . '  3. Using SCP, copy the app/etc/config.local.php file to your local repository' . PHP_EOL
+                        . '  4. Add, commit, and push your changes to the app/etc/config.local.php file',
                 ]
             )
             ->willReturn($resultMock);

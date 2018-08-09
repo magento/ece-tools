@@ -31,11 +31,6 @@ class IdealState implements CompositeValidator
     private $resultFactory;
 
     /**
-     * @var array $errors
-     */
-    private $errors;
-
-    /**
      * @param ResultFactory $resultFactory
      * @param ValidatorFactory $validatorFactory
      * @param GlobalSection $globalSection
@@ -55,8 +50,9 @@ class IdealState implements CompositeValidator
      */
     public function validate(): ResultInterface
     {
-        if ($this->getErrors()) {
-            $suggestion = trim(array_reduce($this->getErrors(), function ($suggestion, $error) {
+        $errors = $this->getErrors();
+        if ($errors) {
+            $suggestion = trim(array_reduce($errors, function ($suggestion, $error) {
                 $suggestion .= PHP_EOL . '  ' . $error->getError();
                 $suggestion .= ($error->getSuggestion()) ? PHP_EOL . $error->getSuggestion() : '';
                 return $suggestion;
@@ -72,25 +68,23 @@ class IdealState implements CompositeValidator
      */
     public function getErrors(): array
     {
-        if (!isset($this->errors)) {
-            $this->errors = [];
+        $errors = [];
 
-            $scdBuildError = $this->validatorFactory->create(GlobalStage\ScdOnBuild::class)->validate();
-            $postDeployError = $this->validatorFactory->create(Deploy\PostDeploy::class)->validate();
+        $scdBuildError = $this->validatorFactory->create(GlobalStage\ScdOnBuild::class)->validate();
+        $postDeployError = $this->validatorFactory->create(Deploy\PostDeploy::class)->validate();
 
-            if (!$scdBuildError instanceof Result\Success) {
-                $this->errors[] = $scdBuildError;
-            }
-
-            if (!$postDeployError instanceof Result\Success) {
-                $this->errors[] = $postDeployError;
-            }
-
-            if (!$this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
-                $this->errors[] = $this->resultFactory->error('Skip HTML minification is disabled');
-            }
+        if (!$scdBuildError instanceof Result\Success) {
+            $errors[] = $scdBuildError;
         }
 
-        return $this->errors;
+        if (!$postDeployError instanceof Result\Success) {
+            $errors[] = $postDeployError;
+        }
+
+        if (!$this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
+            $errors[] = $this->resultFactory->error('Skip HTML minification is disabled');
+        }
+
+        return $errors;
     }
 }
