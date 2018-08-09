@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ConfigDump\Generate;
 use Magento\MagentoCloud\Util\ArrayManager;
+use Magento\MagentoCloud\Util\PhpFormatter;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -47,6 +48,11 @@ class GenerateTest extends TestCase
     private $sharedConfigMock;
 
     /**
+     * @var PhpFormatter|MockObject
+     */
+    private $formatterMock;
+
+    /**
      * @var string
      */
     private $timeStamp = '2018-01-19T18:33:42+00:00';
@@ -60,6 +66,7 @@ class GenerateTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->sharedConfigMock = $this->createMock(SharedConfig::class);
+        $this->formatterMock = $this->createMock(PhpFormatter::class);
 
         $dateMock = $this->getFunctionMock('Magento\MagentoCloud\Process\ConfigDump', 'date');
         $dateMock->expects($this->any())
@@ -70,18 +77,21 @@ class GenerateTest extends TestCase
             $this->fileMock,
             new ArrayManager(),
             $this->magentoVersionMock,
-            $this->sharedConfigMock
+            $this->sharedConfigMock,
+            $this->formatterMock
         );
     }
 
     /**
      * @param bool $versionGreaterTwoDotTwo
-     * @param string $expectedResultFilePath
+     * @param string $generatedConfig
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     *
      * @dataProvider executeDataProvider
      */
-    public function testExecute(bool $versionGreaterTwoDotTwo, string $expectedConfigFilePath)
+    public function testExecute(bool $versionGreaterTwoDotTwo, string $generatedConfig)
     {
-        $expectedConfig = require $expectedConfigFilePath;
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->with('2.2')
@@ -94,10 +104,14 @@ class GenerateTest extends TestCase
                 ['interface_locale' => 'fr_FR'],
                 ['interface_locale' => 'ua_UA'],
             ]);
+        $this->formatterMock->expects($this->once())
+            ->method('format')
+            ->with(require $generatedConfig)
+            ->willReturn('<?php some_config');
         $this->fileMock->method('filePutContents')
             ->with(
                 __DIR__ . '/_files/app/etc/config.php',
-                '<?php' . "\n" . 'return ' . var_export($expectedConfig, true) . ";\n"
+                '<?php some_config'
             );
 
         $this->process->execute();
@@ -111,11 +125,11 @@ class GenerateTest extends TestCase
         return [
             'magento version greater 2.2' => [
                 true,
-                __DIR__ . '/_files/app/etc/generated_config.php'
+                __DIR__ . '/_files/app/etc/generated_config.php',
             ],
             'magento version lower 2.2' => [
                 false,
-                __DIR__ . '/_files/app/etc/generated_config_2.1.php'
+                __DIR__ . '/_files/app/etc/generated_config_2.1.php',
             ],
         ];
     }
