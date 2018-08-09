@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\DB\ConnectionInterface;
@@ -61,7 +62,7 @@ class State
      * 3. check install date
      *
      * @return bool
-     * @throws \Exception
+     * @throws GenericException
      */
     public function isInstalled(): bool
     {
@@ -74,7 +75,7 @@ class State
         }
 
         if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
-            throw new \Exception('Missing either core_config_data or setup_module table', 5);
+            throw new GenericException('Missing either core_config_data or setup_module table', 5);
         }
 
         $data = $this->reader->read();

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Config\Validator;
@@ -55,8 +56,15 @@ class AdminCredentials implements ValidatorInterface
     }
 
     /**
-     * {@inheritdoc}
+     * Check duplicate email/username usage. General flow:
      *
+     * 1. Search for admin/username in DB.
+     * 2. If no found - skip.
+     * 3. If found - check if they're assigned to first admin user.
+     * 4. If no - fail.
+     *
+     * @return Validator\ResultInterface
+     * @throws GenericException
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     public function validate(): Validator\ResultInterface
@@ -77,21 +85,27 @@ class AdminCredentials implements ValidatorInterface
 
         $storedData = $this->getStoredData();
 
+        /**
+         * Check of found email is not related to first admin user.
+         */
         if ($isEmailUsed && $adminEmail !== $storedData['email']) {
             return $this->resultFactory->create(
                 Validator\Result\Error::ERROR,
                 [
-                    'error' => 'This email is already used',
-                    'suggestion' => 'Use different email',
+                    'error' => 'The same email is already used by different admin',
+                    'suggestion' => 'Use different email address',
                 ]
             );
         }
 
+        /**
+         *  Check of found username is not related to first admin user.
+         */
         if ($isUsernameUsed && $adminUsername !== $storedData['username']) {
             return $this->resultFactory->create(
                 Validator\Result\Error::ERROR,
                 [
-                    'error' => 'This username is already used',
+                    'error' => 'The same username is already used by different admin',
                     'suggestion' => 'Use different username',
                 ]
             );

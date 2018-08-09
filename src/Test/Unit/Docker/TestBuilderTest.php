@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Unit\Docker;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
-use Magento\MagentoCloud\Docker\Exception;
 use Magento\MagentoCloud\Docker\Service\ServiceInterface;
 use Magento\MagentoCloud\Docker\TestBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -53,7 +52,7 @@ class TestBuilderTest extends TestCase
     /**
      * @param string $version
      * @dataProvider setNginxVersionDataProvider
-     * @throws \Magento\MagentoCloud\Docker\Exception
+     * @throws \Magento\MagentoCloud\Docker\ConfigurationMismatchException
      */
     public function testSetNginxVersion(string $version)
     {
@@ -76,7 +75,7 @@ class TestBuilderTest extends TestCase
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
      * @expectedExceptionMessage Service nginx:2 is not supported
      */
     public function testSetNginxWithError()
@@ -90,7 +89,7 @@ class TestBuilderTest extends TestCase
     /**
      * @param string $version
      * @dataProvider setPhpVersionDataProvider
-     * @throws \Magento\MagentoCloud\Docker\Exception
+     * @throws \Magento\MagentoCloud\Docker\ConfigurationMismatchException
      */
     public function testSetPhpVersion(string $version)
     {
@@ -113,7 +112,7 @@ class TestBuilderTest extends TestCase
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
      * @expectedExceptionMessage Service php:2 is not supported
      */
     public function testSetPhpWithError()
@@ -127,7 +126,7 @@ class TestBuilderTest extends TestCase
     /**
      * @param string $version
      * @dataProvider setDbVersionDataProvider
-     * @throws \Magento\MagentoCloud\Docker\Exception
+     * @throws \Magento\MagentoCloud\Docker\ConfigurationMismatchException
      */
     public function testSetDbVersion(string $version)
     {
@@ -149,7 +148,7 @@ class TestBuilderTest extends TestCase
     }
 
     /**
-     * @expectedException Exception
+     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
      * @expectedExceptionMessage Service db:2 is not supported
      */
     public function testSetDbWithError()
