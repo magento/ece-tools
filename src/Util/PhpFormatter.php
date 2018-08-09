@@ -41,7 +41,7 @@ class PhpFormatter
     public function format(array $data): string
     {
         if (!$this->magentoVersion->isGreaterOrEqual('2.2.5')) {
-            return '<?php' . "\n" . 'return ' . var_export($data, true) . ";\n";
+            return "<?php\nreturn " . var_export($data, true) . ";\n";
         }
 
         return "<?php\nreturn " . $this->varExportShort($data) . ";\n";
