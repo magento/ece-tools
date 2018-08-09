@@ -62,7 +62,7 @@ class MarshallFilesTest extends TestCase
      * @param int $createDirectory
      * @dataProvider executeDataProvider
      */
-    public function testExecuteForMagento2_1($isExist, $deleteDirectory, $createDirectory)
+    public function testExecuteForMagento21($isExist, $deleteDirectory, $createDirectory)
     {
         $enterpriseFolder = 'magento_root/app/enterprise';
         $varCache = 'magento_root/var/cache/';
@@ -107,7 +107,7 @@ class MarshallFilesTest extends TestCase
         ];
     }
 
-    public function testExecuteFroMagentoGreater2_2()
+    public function testExecuteFroMagentoGreater22()
     {
         $varCache = 'magento_root/var/cache/';
 
