@@ -42,7 +42,7 @@ class Module
     {
         $moduleConfig = (array)$this->sharedConfig->get('modules');
 
-        $this->shell->execute('module:enable', ['--all']);
+        $this->shell->execute('module:enable', '--all');
 
         if ($moduleConfig) {
             $this->sharedConfig->update(['modules' => $moduleConfig]);

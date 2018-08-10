@@ -34,13 +34,13 @@ class ExecBinMagento implements ShellInterface
      * Run a bin/magento command
      *
      * @param string $command
-     * @param array $args additional args
+     * @param array|string $args additional args
      * @throws \RuntimeException If command was executed with error
      * @return array The output of command
      */
-    public function execute(string $command, array $args = [])
+    public function execute(string $command, $args = [])
     {
-        $args = array_map('escapeshellarg', array_merge($this->defaultArgs, $args));
+        $args = array_map('escapeshellarg', array_merge($this->defaultArgs, (array)$args));
 
         $command = sprintf('php ./bin/magento %s %s', escapeshellarg($command), implode(' ', $args));
 
