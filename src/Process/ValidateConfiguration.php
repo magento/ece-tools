@@ -59,7 +59,12 @@ class ValidateConfiguration implements ProcessInterface
 
                     $messages[] = '- ' . $result->getError();
                     if ($result->getSuggestion()) {
-                        $messages[] = $result->getSuggestion();
+                        $messages[] = implode(PHP_EOL, array_map(
+                            function ($line) {
+                                return '  ' . $line;
+                            },
+                            explode(PHP_EOL, $result->getSuggestion())
+                        ));
                     }
                 }
             }

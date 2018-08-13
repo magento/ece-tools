@@ -118,7 +118,7 @@ class ValidateConfigurationTest extends TestCase
             ->with(
                 ValidatorInterface::LEVEL_WARNING,
                 'Fix configuration with given suggestions:'
-                . PHP_EOL . "- some warning\nsome warning suggestion"
+                . PHP_EOL . "- some warning\n  some warning suggestion"
             );
 
         $process = new ValidateConfiguration(
@@ -174,9 +174,9 @@ class ValidateConfigurationTest extends TestCase
                 Logger::WARNING,
                 'Fix configuration with given suggestions:'
                 . PHP_EOL . '- some warning'
-                . PHP_EOL . 'some warning suggestion'
+                . PHP_EOL . '  some warning suggestion'
                 . PHP_EOL . '- some warning 2'
-                . PHP_EOL . 'some warning suggestion 2'
+                . PHP_EOL . '  some warning suggestion 2'
             );
 
         $process = new ValidateConfiguration(
