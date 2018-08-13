@@ -8,7 +8,8 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -35,7 +36,7 @@ class Setup implements ProcessInterface
     private $environment;
 
     /**
-     * @var ShellInterface
+     * @var ExecBinMagento
      */
     private $shell;
 
@@ -58,7 +59,7 @@ class Setup implements ProcessInterface
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
      * @param Environment $environment
-     * @param ShellInterface $shell
+     * @param ExecBinMagento $shell
      * @param PasswordGenerator $passwordGenerator
      * @param FileList $fileList
      * @param DeployInterface $stageConfig
@@ -67,7 +68,7 @@ class Setup implements ProcessInterface
         LoggerInterface $logger,
         UrlManager $urlManager,
         Environment $environment,
-        ShellInterface $shell,
+        ExecBinMagento $shell,
         PasswordGenerator $passwordGenerator,
         FileList $fileList,
         DeployInterface $stageConfig
@@ -88,46 +89,43 @@ class Setup implements ProcessInterface
     {
         $this->logger->info('Installing Magento.');
 
-        $urlUnsecure = $this->urlManager->getUnSecureUrls()[''];
-        $urlSecure = $this->urlManager->getSecureUrls()[''];
-
-        $command =
-            'php ./bin/magento setup:install'
-            . ' -n --session-save=db --cleanup-database'
-            . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
-            . ' --base-url=' . escapeshellarg($urlUnsecure)
-            . ' --base-url-secure=' . escapeshellarg($urlSecure)
-            . ' --language=' . escapeshellarg($this->environment->getAdminLocale())
-            . ' --timezone=America/Los_Angeles'
-            . ' --db-host=' . escapeshellarg($this->environment->getDbHost())
-            . ' --db-name=' . escapeshellarg($this->environment->getDbName())
-            . ' --db-user=' . escapeshellarg($this->environment->getDbUser())
-            . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
-                ? $this->environment->getAdminUrl() : Environment::DEFAULT_ADMIN_URL)
-            . ' --admin-user=' . escapeshellarg($this->environment->getAdminUsername()
-                ? $this->environment->getAdminUsername() : Environment::DEFAULT_ADMIN_NAME)
-            . ' --admin-firstname=' . escapeshellarg($this->environment->getAdminFirstname()
-                ? $this->environment->getAdminFirstname() : Environment::DEFAULT_ADMIN_FIRSTNAME)
-            . ' --admin-lastname=' . escapeshellarg($this->environment->getAdminLastname()
-                ? $this->environment->getAdminLastname() : Environment::DEFAULT_ADMIN_LASTNAME)
-            . ' --admin-email=' . escapeshellarg($this->environment->getAdminEmail())
-            . ' --admin-password=' . escapeshellarg($this->environment->getAdminPassword()
-                ? $this->environment->getAdminPassword() : $this->passwordGenerator->generateRandomPassword())
-            . ' --use-secure-admin=1 --ansi --no-interaction';
+        $args = [
+            '--session-save=db',
+            '--cleanup-database',
+            '--currency=' . $this->environment->getDefaultCurrency(),
+            '--base-url=' . $this->urlManager->getUnSecureUrls()[''],
+            '--base-url-secure=' . $this->urlManager->getSecureUrls()[''],
+            '--language=' . $this->environment->getAdminLocale(),
+            '--timezone=America/Los_Angeles',
+            '--db-host=' . $this->environment->getDbHost(),
+            '--db-name=' . $this->environment->getDbName(),
+            '--db-user=' . $this->environment->getDbUser(),
+            '--backend-frontname=' . $this->environment->getAdminUrl() ?: Environment::DEFAULT_ADMIN_URL,
+            '--admin-user=' . $this->environment->getAdminUsername() ?: Environment::DEFAULT_ADMIN_NAME,
+            '--admin-firstname=' . $this->environment->getAdminFirstname() ?: Environment::DEFAULT_ADMIN_FIRSTNAME,
+            '--admin-lastname=' . $this->environment->getAdminLastname() ?: Environment::DEFAULT_ADMIN_LASTNAME,
+            '--admin-email=' . $this->environment->getAdminEmail(),
+            '--admin-password=' . $this->environment->getAdminPassword()
+                ?: $this->passwordGenerator->generateRandomPassword(),
+            '--use-secure-admin=1',
+        ];
 
         $dbPassword = $this->environment->getDbPassword();
-        if (strlen($dbPassword)) {
-            $command .= ' --db-password=' . escapeshellarg($dbPassword);
+        if ($dbPassword) {
+            $args[] = '--db-password=' . $dbPassword;
         }
 
         if ($this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)) {
-            $command .= ' ' . $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+            $args[] = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
         }
 
-        $this->shell->execute(sprintf(
-            '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
-            escapeshellcmd($command),
-            $this->fileList->getInstallUpgradeLog()
-        ));
+        try {
+            $output = $this->shell->execute('setup:install', $arg);
+        } catch (ShellException $e) {
+            $output = $e->getOutupt();
+            throw $e;
+        } finally {
+            file_put_contents($this->fileList->getInstallUpgradeLog(), $output, FILE_APPEND);
+        }
     }
 }

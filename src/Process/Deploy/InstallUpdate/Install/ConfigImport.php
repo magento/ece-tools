@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\VersionAwareProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 class ConfigImport implements ProcessInterface
 {
     /**
-     * @var ShellInterface
+     * @var ExecBinMagento
      */
     private $shell;
 
@@ -34,12 +34,12 @@ class ConfigImport implements ProcessInterface
     private $magentoVersion;
 
     /**
-     * @param ShellInterface $shell
+     * @param ExecBinMagento $shell
      * @param LoggerInterface $logger
      * @param MagentoVersion $version
      */
     public function __construct(
-        ShellInterface $shell,
+        ExecBinMagento $shell,
         LoggerInterface $logger,
         MagentoVersion $version
     ) {
@@ -58,6 +58,6 @@ class ConfigImport implements ProcessInterface
         }
 
         $this->logger->info('Run app:config:import command');
-        $this->shell->execute('php ./bin/magento app:config:import --ansi --no-interaction');
+        $this->shell->execute('app:config:import');
     }
 }

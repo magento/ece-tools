@@ -10,7 +10,8 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Psr\Log\LoggerInterface;
 
@@ -31,7 +32,7 @@ class Setup implements ProcessInterface
     private $environment;
 
     /**
-     * @var ShellInterface
+     * @var ExecBinMagento
      */
     private $shell;
 
@@ -59,7 +60,7 @@ class Setup implements ProcessInterface
     /**
      * @param LoggerInterface $logger
      * @param Environment $environment
-     * @param ShellInterface $shell
+     * @param ExecBinMagento $shell
      * @param DirectoryList $directoryList
      * @param FileList $fileList
      * @param FlagManager $flagManager
@@ -68,7 +69,7 @@ class Setup implements ProcessInterface
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
-        ShellInterface $shell,
+        ExecBinMagento $shell,
         DirectoryList $directoryList,
         FileList $fileList,
         FlagManager $flagManager,
@@ -96,20 +97,19 @@ class Setup implements ProcessInterface
             $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
 
             $this->logger->notice('Enabling Maintenance mode.');
-            $this->shell->execute('php ./bin/magento maintenance:enable --ansi --no-interaction ' . $verbosityLevel);
+            $this->shell->execute('maintenance:enable', $verbosityLevel);
             $this->logger->info('Running setup upgrade.');
 
-            $this->shell->execute(sprintf(
-                '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
-                'php ./bin/magento setup:upgrade --keep-generated --ansi --no-interaction ' . $verbosityLevel,
-                $this->fileList->getInstallUpgradeLog()
-            ));
+            $output = $this->shell->execute('setup:upgrade', ['--keep-generated', $verbosityLevel]);
 
-            $this->shell->execute('php ./bin/magento maintenance:disable --ansi --no-interaction ' . $verbosityLevel);
+            $this->shell->execute('maintenance:disable', $verbosityLevel);
             $this->logger->notice('Maintenance mode is disabled.');
-        } catch (\RuntimeException $e) {
+        } catch (ShellException $e) {
+            $output = $e->getOutput();
             //Rollback required by database
-            throw new \RuntimeException($e->getMessage(), 6);
+            throw new \RuntimeException($e->getMessage(), 6, $e);
+        } finally {
+            file_put_contents($this->fileList->getInstallUpgradeLog(), $output, FILE_APPEND);
         }
 
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);

@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Process\Build\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
 use Magento\MagentoCloud\StaticContent\Build\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Psr\Log\LoggerInterface;
@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 class Generate implements ProcessInterface
 {
     /**
-     * @var ShellInterface
+     * @var ExecBinMagento
      */
     private $shell;
 
@@ -43,14 +43,14 @@ class Generate implements ProcessInterface
     private $buildConfig;
 
     /**
-     * @param ShellInterface $shell
+     * @param ExecBinMagento $shell
      * @param LoggerInterface $logger
      * @param CommandFactory $commandFactory
      * @param Option $buildOption
      * @param BuildInterface $buildConfig
      */
     public function __construct(
-        ShellInterface $shell,
+        ExecBinMagento $shell,
         LoggerInterface $logger,
         CommandFactory $commandFactory,
         Option $buildOption,
@@ -87,13 +87,13 @@ class Generate implements ProcessInterface
 
             $this->logger->info($logMessage);
 
-            $commands = $this->commandFactory->matrix(
+            $argCollection = $this->commandFactory->matrix(
                 $this->buildOption,
                 $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
             );
 
-            foreach ($commands as $command) {
-                $this->shell->execute($command);
+            foreach ($argCollection as $args) {
+                $this->shell->execute('setup:static-content:deploy', $args);
             }
         } catch (\Exception $e) {
             throw new \RuntimeException($e->getMessage(), 5);

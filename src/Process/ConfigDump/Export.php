@@ -9,7 +9,7 @@ use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
 
 /**
  * @inheritdoc
@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 class Export implements ProcessInterface
 {
     /**
-     * @var ShellInterface
+     * @var ExecBinMagento
      */
     private $shell;
 
@@ -37,13 +37,13 @@ class Export implements ProcessInterface
     private $writer;
 
     /**
-     * @param ShellInterface $shell
+     * @param ExecBinMagento $shell
      * @param File $file
      * @param Reader $reader
      * @param Writer $writer
      */
     public function __construct(
-        ShellInterface $shell,
+        ExecBinMagento $shell,
         File $file,
         Reader $reader,
         Writer $writer
@@ -63,7 +63,7 @@ class Export implements ProcessInterface
         $envConfig = $this->reader->read();
 
         try {
-            $this->shell->execute('php ./bin/magento app:config:dump --ansi --no-interaction');
+            $this->shell->execute('app:config:dump');
         } finally {
             $this->writer->create($envConfig);
         }
