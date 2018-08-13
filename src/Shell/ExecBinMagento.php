@@ -40,7 +40,7 @@ class ExecBinMagento implements ShellInterface
      */
     public function execute(string $command, $args = [])
     {
-        $args = array_map('escapeshellarg', array_merge($this->defaultArgs, (array)$args));
+        $args = array_map('escapeshellarg', array_merge($this->defaultArgs, array_filter((array)$args)));
 
         $command = sprintf('php ./bin/magento %s %s', escapeshellarg($command), implode(' ', $args));
 

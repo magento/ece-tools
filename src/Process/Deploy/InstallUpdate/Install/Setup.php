@@ -120,7 +120,7 @@ class Setup implements ProcessInterface
         }
 
         try {
-            $output = $this->shell->execute('setup:install', $arg);
+            $output = $this->shell->execute('setup:install', $args);
         } catch (ShellException $e) {
             $output = $e->getOutupt();
             throw $e;

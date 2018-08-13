@@ -23,7 +23,7 @@ class ShellException extends \RuntimeException
      * @param string[] $ouptut
      * @param Throwable $previous
      */
-    public function __construct(string $message, int $code, array $ouptut = [], \Throwable $previous = null)
+    public function __construct(string $message, int $code, array $output = [], \Throwable $previous = null)
     {
         $this->output = $output;
 
