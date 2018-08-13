@@ -241,7 +241,6 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
                                     $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),
-                                    $this->container->make(ConfigValidator\Deploy\DebugLogging::class),
                                 ],
                             ],
                         ]),
@@ -392,6 +391,13 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->make(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+                            'validators' => [
+                                ValidatorInterface::LEVEL_WARNING => [
+                                    $this->container->make(ConfigValidator\Deploy\DebugLogging::class),
+                                ],
+                            ],
+                        ]),
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                         $this->container->make(PostDeployProcess\WarmUp::class),
