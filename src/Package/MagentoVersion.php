@@ -35,6 +35,11 @@ class MagentoVersion
     private $globalSection;
 
     /**
+     * @var string
+     */
+    private $version;
+
+    /**
      * @param Manager $manager
      * @param Comparator $comparator
      * @param Semver $semver
@@ -50,20 +55,25 @@ class MagentoVersion
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getVersion(): string
     {
-        if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
-            return $this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT);
+        if (null !== $this->version) {
+            return $this->version;
         }
 
-        return $this->manager->get('magento/magento2-base')->getVersion();
+        if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+            return $this->version = $this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT);
+        }
+
+        return $this->version = $this->manager->get('magento/magento2-base')->getVersion();
     }
 
     /**
      * @param string $version
-     *
      * @return bool
+     * @throws UndefinedPackageException
      */
     public function isGreaterOrEqual(string $version): bool
     {
@@ -74,8 +84,8 @@ class MagentoVersion
      * Check the current Magento version against Composer-style constraints.
      *
      * @param string $constraints
-     *
      * @return bool
+     * @throws UndefinedPackageException
      */
     public function satisfies(string $constraints): bool
     {

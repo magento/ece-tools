@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Docker;
 
 use Magento\MagentoCloud\App\ContainerInterface;
-use Magento\MagentoCloud\Docker\Builder;
 use Magento\MagentoCloud\Docker\BuilderFactory;
+use Magento\MagentoCloud\Docker\DevBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -42,8 +42,8 @@ class BuilderFactoryTest extends TestCase
     {
         $this->containerMock->expects($this->once())
             ->method('create')
-            ->willReturn($this->createMock(Builder::class));
+            ->willReturn($this->createMock(DevBuilder::class));
 
-        $this->builderFactory->create();
+        $this->builderFactory->create(BuilderFactory::BUILDER_DEV);
     }
 }
