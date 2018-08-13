@@ -38,7 +38,7 @@ class MagentoConfigValidator
     public function validate(string $key, $expectedValue, $defaultValue = null): bool
     {
         try {
-            $result = trim($this->shell->execute('config:show', $key));
+            $result = implode(PHP_EOL, array_map('trim', $this->shell->execute('config:show', $key)));
         } catch (\RunTimeException $e) {
             $result = $defaultValue;
         }

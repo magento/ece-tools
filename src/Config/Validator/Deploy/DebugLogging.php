@@ -61,6 +61,10 @@ class DebugLogging implements ValidatorInterface
             return $this->resultFactory->success();
         }
 
-        return $this->resultFactory->error('Debug logging is enabled in Magento');
+        return $this->resultFactory->error(
+            'Debug logging is enabled in Magento',
+            'To save space space in Magento Cloud, '
+            . 'debug logging should not be enabled for your master/production environments.'
+        );
     }
 }
