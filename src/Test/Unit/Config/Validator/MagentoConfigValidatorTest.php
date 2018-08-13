@@ -41,7 +41,7 @@ class MagentoConfigValidatorTest extends TestCase
         $this->binMagentoMock->expects($this->once())
             ->method('execute')
             ->with('config:show', 'some/key')
-            ->willReturn([$mockValue . PHP_EOL]);
+            ->willReturn([$mockValue]);
 
         $this->assertSame($expectedResult, $this->configValidator->validate('some/key', 'expected value'));
     }

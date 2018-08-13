@@ -53,21 +53,18 @@ class Shell implements ShellInterface
             $command
         );
 
-        exec(
-            $rootPathCommand,
-            $output,
-            $status
-        );
-
-        $output = array_map(function ($line) {
-            return '  ' . $line;
-        }, $output);
+        exec($rootPathCommand, $output, $status);
 
         if ($output) {
-            $this->logger->log(
-                $status != 0 ? Logger::CRITICAL : Logger::DEBUG,
-                PHP_EOL . implode(PHP_EOL, $output)
+            $message = array_reduce(
+                $output,
+                function ($message, $line) {
+                    return $message . PHP_EOL . '  ' . $line;
+                },
+                ''
             );
+
+            $this->logger->log($status != 0 ? Logger::CRITICAL : Logger::DEBUG, $message);
         }
 
         if ($status != 0) {
