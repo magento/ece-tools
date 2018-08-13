@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator;
 
 use Magento\MagentoCloud\Shell\ExecBinMagento;
+use Magento\MagentoCloud\Shell\ShellException;
 
 /**
  * Validate a value by running bin/magento config:show
@@ -39,7 +40,7 @@ class MagentoConfigValidator
     {
         try {
             $result = implode(PHP_EOL, $this->shell->execute('config:show', $key));
-        } catch (\RunTimeException $e) {
+        } catch (ShellException $e) {
             $result = $defaultValue;
         }
 

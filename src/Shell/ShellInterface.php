@@ -15,7 +15,7 @@ interface ShellInterface
      *
      * @param string $command The command.
      * @return array The output of command.
-     * @throws \RuntimeException If command was executed with error
+     * @throws ShellException If command was executed with error
      */
     public function execute(string $command);
 }

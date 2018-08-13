@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 
 use Magento\MagentoCloud\Config\Validator\MagentoConfigValidator;
 use Magento\MagentoCloud\Shell\ExecBinMagento;
+use Magento\MagentoCloud\Shell\ShellException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -56,7 +57,7 @@ class MagentoConfigValidatorTest extends TestCase
         $this->binMagentoMock->expects($this->once())
             ->method('execute')
             ->with('config:show', 'some/key')
-            ->willThrowException(new \RunTimeException('Command bin/magento returned code 1', 1));
+            ->willThrowException(new ShellException('Command bin/magento returned code 1', 1, ['no some/key']));
 
         $this->assertSame($expectedResult, $this->configValidator->validate('some/key', 'expected value', $mockValue));
     }

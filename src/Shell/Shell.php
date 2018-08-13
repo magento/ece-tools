@@ -68,7 +68,7 @@ class Shell implements ShellInterface
         }
 
         if ($status != 0) {
-            throw new \RuntimeException("Command $command returned code $status", $status);
+            throw new ShellException("Command $command returned code $status", $status, $output);
         }
 
         return $output;
