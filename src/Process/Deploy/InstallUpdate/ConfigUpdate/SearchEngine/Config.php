@@ -63,6 +63,8 @@ class Config
     }
 
     /**
+     * Returns search engine configuration. At least contains 'engine' option.
+     *
      * @return array
      */
     public function get(): array
