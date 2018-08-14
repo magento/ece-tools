@@ -50,14 +50,20 @@ class IdealState implements CompositeValidator
      */
     public function validate(): ResultInterface
     {
-        $errors = $this->getErrors();
-        if ($errors) {
-            $suggestion = trim(array_reduce($errors, function ($suggestion, $error) {
-                $suggestion .= PHP_EOL . '  ' . $error->getError();
-                $suggestion .= ($error->getSuggestion()) ? PHP_EOL . $error->getSuggestion() : '';
-                return $suggestion;
-            }, ''));
-            return $this->resultFactory->error('The configured state is not ideal', '  ' . $suggestion);
+        if ($errors = $this->getErrors()) {
+            $suggestion = array_reduce($errors, function ($suggestion, $item) {
+                $suggestion .= $item->getError() . PHP_EOL;
+
+                if ($itemSuggestion = $item->getSuggestion()) {
+                    $suggestion .= array_reduce(explode(PHP_EOL, $itemSuggestion), function ($itemSuggestion, $line) {
+                        return $itemSuggestion . '  ' . $line . PHP_EOL;
+                    }, '');
+                }
+
+                return $suggestion . PHP_EOL;
+            }, '');
+
+            return $this->resultFactory->error('The configured state is not ideal', trim($suggestion));
         }
 
         return $this->resultFactory->success();
@@ -82,7 +88,10 @@ class IdealState implements CompositeValidator
         }
 
         if (!$this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
-            $errors[] = $this->resultFactory->error('Skip HTML minification is disabled');
+            $errors[] = $this->resultFactory->error(
+                'Skip HTML minification is disabled',
+                'Make sure "SKIP_HTML_MINIFICATION" is set to true in .magento.env.yaml.'
+            );
         }
 
         return $errors;

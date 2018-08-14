@@ -101,7 +101,7 @@ class IdealStateTest extends TestCase
             ->willReturn(new Error('SCD validation failed'));
         $postDeployValidator->expects($this->once())
             ->method('validate')
-            ->willReturn(new Error('Post Deploy validation failed', '  Suggestion for post_deploy'));
+            ->willReturn(new Error('Post Deploy validation failed', 'Suggestion for post_deploy'));
 
         $this->validatorFactoryMock->expects($this->exactly(2))
             ->method('create')
@@ -126,10 +126,11 @@ class IdealStateTest extends TestCase
         $this->assertInstanceOf(Error::class, $result);
         $this->assertSame('The configured state is not ideal', $result->getError());
 
-        $suggestion = '  SCD validation failed' . PHP_EOL;
-        $suggestion .= '  Post Deploy validation failed' . PHP_EOL;
-        $suggestion .= '  Suggestion for post_deploy' . PHP_EOL;
-        $suggestion .= '  Skip HTML minification is disabled';
+        $suggestion = 'SCD validation failed' . PHP_EOL . PHP_EOL;
+        $suggestion .= 'Post Deploy validation failed' . PHP_EOL;
+        $suggestion .= '  Suggestion for post_deploy' . PHP_EOL . PHP_EOL;
+        $suggestion .= 'Skip HTML minification is disabled' . PHP_EOL;
+        $suggestion .= '  Make sure "SKIP_HTML_MINIFICATION" is set to true in .magento.env.yaml.';
         $this->assertSame($suggestion, $result->getSuggestion());
     }
 
