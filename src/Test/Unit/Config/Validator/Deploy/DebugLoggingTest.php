@@ -16,14 +16,29 @@ use Magento\MagentoCloud\Config\Validator\Result\Success;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * {@inheritdoc}
+ */
 class DebugLoggingTest extends TestCase
 {
+    /**
+     * @var DebugLogging
+     */
     private $validator;
 
+    /**
+     * @var MagentoConfigValidator|MockObject
+     */
     private $configValidatorMock;
 
+    /**
+     * @var Environment|MockObject
+     */
     private $environmentMock;
 
+    /**
+     * @var ResultFactory|MockObject
+     */
     private $resultFactoryMock;
 
     protected function setUp()

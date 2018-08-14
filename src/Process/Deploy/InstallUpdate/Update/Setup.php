@@ -92,6 +92,7 @@ class Setup implements ProcessInterface
     public function execute()
     {
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
+        $output = [];
 
         try {
             $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
@@ -105,11 +106,18 @@ class Setup implements ProcessInterface
             $this->shell->execute('maintenance:disable', $verbosityLevel);
             $this->logger->notice('Maintenance mode is disabled.');
         } catch (ShellException $e) {
-            $output = $e->getOutput();
+            $output = array_merge($output, $e->getOutput());
             //Rollback required by database
             throw new \RuntimeException($e->getMessage(), 6, $e);
+        } catch (\Exception $e) {
+            $output[] = $e->getMessage();
+            throw $e;
         } finally {
-            file_put_contents($this->fileList->getInstallUpgradeLog(), $output, FILE_APPEND);
+            file_put_contents(
+                $this->fileList->getInstallUpgradeLog(),
+                implode(PHP_EOL, $output) . PHP_EOL,
+                FILE_APPEND
+            );
         }
 
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);

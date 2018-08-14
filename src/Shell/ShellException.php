@@ -35,6 +35,6 @@ class ShellException extends \RuntimeException
      */
     public function getOutput(): array
     {
-        return $output;
+        return $this->output;
     }
 }

@@ -9,9 +9,9 @@ use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ConfigDump\Export;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,22 +24,22 @@ class ExportTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ExecBinMagento|MockObject
      */
     private $shellMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var Reader|Mock
+     * @var Reader|MockObject
      */
     private $readerMock;
 
     /**
-     * @var Writer|Mock
+     * @var Writer|MockObject
      */
     private $writerMock;
 
@@ -48,7 +48,7 @@ class ExportTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->shellMock = $this->createMock(ExecBinMagento::class);
         $this->fileMock = $this->createMock(File::class);
         $this->readerMock = $this->createMock(Reader::class);
         $this->writerMock = $this->createMock(Writer::class);
@@ -65,9 +65,7 @@ class ExportTest extends TestCase
     {
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->withConsecutive(
-                ['php ./bin/magento app:config:dump --ansi --no-interaction']
-            );
+            ->with('app:config:dump');
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn([

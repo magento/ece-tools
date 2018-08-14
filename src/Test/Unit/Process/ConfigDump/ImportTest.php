@@ -7,10 +7,10 @@ namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ConfigDump\Import;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -23,17 +23,17 @@ class ImportTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ExecBinMagento|MockObject
      */
     private $shellMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
@@ -42,7 +42,7 @@ class ImportTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->shellMock = $this->createMock(ExecBinMagento::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->process = new Import(
@@ -58,7 +58,7 @@ class ImportTest extends TestCase
             ->willReturn(true);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento app:config:import --ansi --no-interaction');
+            ->with('app:config:import');
         $this->magentoVersionMock->expects($this->once())
         ->method('isGreaterOrEqual')
         ->willReturn(true);

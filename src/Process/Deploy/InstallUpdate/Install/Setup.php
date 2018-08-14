@@ -89,7 +89,40 @@ class Setup implements ProcessInterface
     {
         $this->logger->info('Installing Magento.');
 
-        $args = [
+        $args = $this->initArgs();
+
+        $dbPassword = $this->environment->getDbPassword();
+        if ($dbPassword) {
+            $args[] = '--db-password=' . $dbPassword;
+        }
+
+        if ($this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)) {
+            $args[] = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+        }
+
+        try {
+            $output = $this->shell->execute('setup:install', $args);
+        } catch (ShellException $e) {
+            $output = $e->getOutput();
+            throw $e;
+        } catch (\Exception $e) {
+            $output = (array)$e->getMessage();
+            throw $e;
+        } finally {
+            file_put_contents(
+                $this->fileList->getInstallUpgradeLog(),
+                implode(PHP_EOL, $output) . PHP_EOL,
+                FILE_APPEND
+            );
+        }
+    }
+
+    /**
+     * @return array
+     */
+    private function initArgs(): array
+    {
+        return [
             '--session-save=db',
             '--cleanup-database',
             '--currency=' . $this->environment->getDefaultCurrency(),
@@ -105,27 +138,9 @@ class Setup implements ProcessInterface
             '--admin-firstname=' . ($this->environment->getAdminFirstname() ?: Environment::DEFAULT_ADMIN_FIRSTNAME),
             '--admin-lastname=' . ($this->environment->getAdminLastname() ?: Environment::DEFAULT_ADMIN_LASTNAME),
             '--admin-email=' . $this->environment->getAdminEmail(),
-            '--admin-password=' . $this->environment->getAdminPassword()
-                ?: $this->passwordGenerator->generateRandomPassword(),
+            '--admin-password=' . ($this->environment->getAdminPassword()
+                ?: $this->passwordGenerator->generateRandomPassword()),
             '--use-secure-admin=1',
         ];
-
-        $dbPassword = $this->environment->getDbPassword();
-        if ($dbPassword) {
-            $args[] = '--db-password=' . $dbPassword;
-        }
-
-        if ($this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)) {
-            $args[] = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
-        }
-
-        try {
-            $output = $this->shell->execute('setup:install', $args);
-        } catch (ShellException $e) {
-            $output = $e->getOutupt();
-            throw $e;
-        } finally {
-            file_put_contents($this->fileList->getInstallUpgradeLog(), $output, FILE_APPEND);
-        }
     }
 }

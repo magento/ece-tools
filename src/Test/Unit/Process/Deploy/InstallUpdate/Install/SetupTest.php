@@ -8,7 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -27,7 +28,7 @@ class SetupTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ExecBinMagento|Mock
      */
     private $shellMock;
 
@@ -62,6 +63,11 @@ class SetupTest extends TestCase
     private $stageConfigMock;
 
     /**
+     * @var string
+     */
+    private $logPath = ECE_BP . '/tests/unit/tmp/install.log';
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -71,8 +77,7 @@ class SetupTest extends TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
+        $this->shellMock = $this->createMock(ExecBinMagento::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
@@ -88,6 +93,9 @@ class SetupTest extends TestCase
             $this->fileListMock,
             $this->stageConfigMock
         );
+
+        // Initialize log file
+        file_put_contents($this->logPath, 'Previous log' . PHP_EOL);
     }
 
     /**
@@ -116,7 +124,31 @@ class SetupTest extends TestCase
         $adminFirstnameExpected,
         $adminLastnameExpected
     ) {
-        $installUpgradeLog = '/tmp/log.log';
+        $argumentMatcher = function (array $subject) use (
+            $adminUrlExpected,
+            $adminNameExpected,
+            $adminFirstnameExpected,
+            $adminLastnameExpected,
+            $adminPasswordExpected
+        ) {
+            $this->assertContains('--session-save=db', $subject);
+            $this->assertContains('--cleanup-database', $subject);
+            $this->assertContains('--currency=USD', $subject);
+            $this->assertContains('--base-url=http://unsecure.url', $subject);
+            $this->assertContains('--base-url-secure=https://secure.url', $subject);
+            $this->assertContains('--language=fr_FR', $subject);
+            $this->assertContains('--backend-frontname=' . $adminUrlExpected, $subject);
+            $this->assertContains('--admin-user=' . $adminNameExpected, $subject);
+            $this->assertContains('--admin-firstname=' . $adminFirstnameExpected, $subject);
+            $this->assertContains('--admin-lastname=' . $adminLastnameExpected, $subject);
+            $this->assertContains('--admin-email=admin@example.com', $subject);
+            $this->assertContains('--admin-password=' . $adminPasswordExpected, $subject);
+            $this->assertContains('--use-secure-admin=1', $subject);
+            $this->assertContains('--db-password=password', $subject);
+            $this->assertContains('-v', $subject);
+
+            return true;
+        };
 
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -162,24 +194,17 @@ class SetupTest extends TestCase
 
         $this->fileListMock->expects($this->once())
             ->method('getInstallUpgradeLog')
-            ->willReturn($installUpgradeLog);
+            ->willReturn($this->logPath);
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with(
-                '/bin/bash -c "set -o pipefail;'
-                . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
-                . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\' --language=\'fr_FR\''
-                . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
-                . ' --backend-frontname=\'' . $adminUrlExpected . '\' --admin-user=\'' . $adminNameExpected . '\''
-                . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
-                . '\' --admin-email=\'admin@example.com\' --admin-password=\'' . $adminPasswordExpected . '\''
-                . ' --use-secure-admin=1 --ansi --no-interaction'
-                . ' --db-password=\'password\' -v'
-                . ' | tee -a ' . $installUpgradeLog . '"'
-            );
+            ->with('setup:install', $this->callback($argumentMatcher))
+            ->willReturn(['Doing install', 'Install complete']);
 
         $this->process->execute();
+
+        $this->assertFileIsReadable($this->logPath);
+        $this->assertSame("Previous log\nDoing install\nInstall complete\n", file_get_contents($this->logPath));
     }
 
     /**
@@ -213,5 +238,41 @@ class SetupTest extends TestCase
                 'adminLastnameExpected' => Environment::DEFAULT_ADMIN_LASTNAME,
             ],
         ];
+    }
+
+    /**
+     * @expectedException Magento\MagentoCloud\Shell\ShellException
+     * @expectedExceptionMessage Error during command execution
+     */
+    public function testExecuteWithException()
+    {
+        $this->fileListMock->expects($this->once())
+            ->method('getInstallUpgradeLog')
+            ->willReturn($this->logPath);
+        $this->shellMock->method('execute')
+            ->willThrowException(new ShellException('Error during command execution', 1, ['Output from command']));
+
+        $this->process->execute();
+
+        $this->assertFileIsReadable($this->logPath);
+        $this->assertSame("Previous log\nOutput from command\n", file_get_contents($this->logPath));
+    }
+
+    /**
+     * @expectedException Exception
+     * @expectedExceptionMessage Something else has gone wrong
+     */
+    public function testExecuteWithExceptionOther()
+    {
+        $this->fileListMock->expects($this->once())
+            ->method('getInstallUpgradeLog')
+            ->willReturn($this->logPath);
+        $this->shellMock->method('execute')
+            ->willThrowException(new \Exception('Something else has gone wrong'));
+
+        $this->process->execute();
+
+        $this->assertFileIsReadable($this->logPath);
+        $this->assertSame("Previous log\nSomething else has gone wrong\n", file_get_contents($this->logPath));
     }
 }

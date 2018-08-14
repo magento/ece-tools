@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Shell\ShellException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * {@inheritdoc}
+ */
 class MagentoConfigValidatorTest extends TestCase
 {
     /**

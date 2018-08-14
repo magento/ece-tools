@@ -9,11 +9,11 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ExecBinMagento;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,37 +27,37 @@ class GenerateTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ExecBinMagento|MockObject
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var CommandFactory|Mock
+     * @var CommandFactory|MockObject
      */
     private $commandFactoryMock;
 
     /**
-     * @var Option|Mock
+     * @var Option|MockObject
      */
     private $deployOption;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
@@ -66,7 +66,7 @@ class GenerateTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->shellMock = $this->createMock(ExecBinMagento::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -102,14 +102,14 @@ class GenerateTest extends TestCase
         $this->commandFactoryMock->expects($this->once())
             ->method('matrix')
             ->willReturn([
-                'php ./bin/magento static:content:deploy:command --ansi --no-interaction',
+                ['--strategy=quick', '--theme=Magento/backend', 'en_US']
             ]);
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
-                ['php ./bin/magento maintenance:enable --ansi --no-interaction -vvv'],
-                ['php ./bin/magento static:content:deploy:command --ansi --no-interaction'],
-                ['php ./bin/magento maintenance:disable --ansi --no-interaction -vvv']
+                ['maintenance:enable', '-vvv'],
+                ['setup:static-content:deploy', ['--strategy=quick', '--theme=Magento/backend', 'en_US']],
+                ['maintenance:disable', '-vvv']
             );
         $this->stageConfigMock->method('get')
             ->willReturnMap([
