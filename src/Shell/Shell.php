@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Shell;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
+use Monolog\Logger;
 
 /**
  * @inheritdoc
@@ -63,7 +64,10 @@ class Shell implements ShellInterface
         }, $output);
 
         if ($output) {
-            $this->logger->debug(PHP_EOL . implode(PHP_EOL, $output));
+            $this->logger->log(
+                $status != 0 ? Logger::CRITICAL : Logger::DEBUG,
+                PHP_EOL . implode(PHP_EOL, $output)
+            );
         }
 
         if ($status != 0) {

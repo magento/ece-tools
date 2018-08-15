@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
+use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ConfigDump;
@@ -65,6 +66,7 @@ class Container implements ContainerInterface
          */
         $this->container->singleton(DirectoryList::class);
         $this->container->singleton(FileList::class);
+        $this->container->singleton(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class);
         $this->container->singleton(\Composer\Composer::class, function () use ($systemList) {
             $composerFactory = new \Composer\Factory();
             $composerFile = file_exists($systemList->getMagentoRoot() . '/composer.json')
@@ -222,6 +224,7 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy::class),
+                        $this->container->make(DeployProcess\DisableCron::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -231,6 +234,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\AdminCredentials::class),
+                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
@@ -248,6 +252,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
+                        $this->container->make(DeployProcess\EnableCron::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_WARNING => [
@@ -392,6 +397,10 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+
+        $this->container->when(CronKill::class)
+            ->needs(ProcessInterface::class)
+            ->give(DeployProcess\CronProcessKill::class);
     }
 
     /**

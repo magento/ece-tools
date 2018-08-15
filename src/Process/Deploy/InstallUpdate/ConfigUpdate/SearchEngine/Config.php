@@ -5,23 +5,17 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 
+use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Psr\Log\LoggerInterface;
 
 /**
  * Returns search configuration.
  */
 class Config
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
     /**
      * @var Environment
      */
@@ -33,9 +27,9 @@ class Config
     private $stageConfig;
 
     /**
-     * @var ClientFactory
+     * @var ElasticSearch
      */
-    private $clientFactory;
+    private $elasticSearch;
 
     /**
      * @var MagentoVersion
@@ -50,24 +44,21 @@ class Config
     /**
      * @param Environment $environment
      * @param DeployInterface $stageConfig
-     * @param ClientFactory $client
+     * @param ElasticSearch $elasticSearch
      * @param MagentoVersion $version
-     * @param LoggerInterface $logger
      * @param ConfigMerger $configMerger
      */
     public function __construct(
         Environment $environment,
         DeployInterface $stageConfig,
-        ClientFactory $client,
+        ElasticSearch $elasticSearch,
         MagentoVersion $version,
-        LoggerInterface $logger,
         ConfigMerger $configMerger
     ) {
         $this->environment = $environment;
         $this->stageConfig = $stageConfig;
-        $this->clientFactory = $client;
+        $this->elasticSearch = $elasticSearch;
         $this->magentoVersion = $version;
-        $this->logger = $logger;
         $this->configMerger = $configMerger;
     }
 
@@ -77,19 +68,14 @@ class Config
     public function get(): array
     {
         $envSearchConfig = (array)$this->stageConfig->get(DeployInterface::VAR_SEARCH_CONFIGURATION);
-        $envSearchConfigValidFlag = $this->isSearchConfigValid($envSearchConfig);
 
-        if ($envSearchConfigValidFlag && !$this->configMerger->isMergeRequired($envSearchConfig)) {
+        if ($this->isSearchConfigValid($envSearchConfig)
+            && !$this->configMerger->isMergeRequired($envSearchConfig)
+        ) {
             return $this->configMerger->clear($envSearchConfig);
         }
 
-        $searchConfig = $this->getSearchConfig();
-
-        if ($envSearchConfigValidFlag && $this->configMerger->isMergeRequired($envSearchConfig)) {
-            return $this->configMerger->mergeConfigs($searchConfig, $envSearchConfig);
-        }
-
-        return $searchConfig;
+        return $this->configMerger->mergeConfigs($this->getSearchConfig(), $envSearchConfig);
     }
 
     /**
@@ -136,20 +122,8 @@ class Config
     {
         $engine = 'elasticsearch';
 
-        try {
-            $response = $this->clientFactory->create()->get(sprintf(
-                '%s:%s',
-                $config['host'],
-                $config['port']
-            ));
-            $esConfiguration = $response->getBody()->getContents();
-            $esConfiguration = json_decode($esConfiguration, true);
-
-            if (isset($esConfiguration['version']['number']) && $esConfiguration['version']['number'] >= 5) {
-                $engine = 'elasticsearch5';
-            }
-        } catch (\Exception $exception) {
-            $this->logger->warning($exception->getMessage());
+        if (Semver::satisfies($this->elasticSearch->getVersion(), '>= 5')) {
+            $engine = 'elasticsearch5';
         }
 
         $elasticSearchConfig = [

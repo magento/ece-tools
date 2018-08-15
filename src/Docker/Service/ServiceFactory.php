@@ -3,24 +3,24 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Docker;
+namespace Magento\MagentoCloud\Docker\Service;
 
 use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
- * Factory class for Docker builder.
+ * Create instance of Docker service configuration.
  */
-class BuilderFactory
+class ServiceFactory
 {
-    const BUILDER_DEV = 'dev';
-    const BUILDER_TEST = 'test';
+    const SERVICE_VARNISH = 'varnish';
+    const SERVICE_REDIS = 'redis';
 
     /**
      * @var array
      */
     private static $map = [
-        self::BUILDER_DEV => DevBuilder::class,
-        self::BUILDER_TEST => TestBuilder::class,
+        self::SERVICE_VARNISH => VarnishService::class,
+        self::SERVICE_REDIS => RedisService::class,
     ];
 
     /**
@@ -37,13 +37,11 @@ class BuilderFactory
     }
 
     /**
-     * @param string $strategy
-     * @return BuilderInterface
+     * @param string $name
+     * @return ServiceInterface
      */
-    public function create(string $strategy): BuilderInterface
+    public function create(string $name): ServiceInterface
     {
-        return $this->container->create(
-            self::$map[$strategy]
-        );
+        return $this->container->create(self::$map[$name]);
     }
 }

@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
 use Psr\Http\Message\StreamInterface;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
@@ -33,11 +34,6 @@ class ConfigTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
      * @var Environment|Mock
      */
     private $environmentMock;
@@ -48,9 +44,9 @@ class ConfigTest extends TestCase
     private $magentoVersionMock;
 
     /**
-     * @var ClientFactory|Mock
+     * @var ElasticSearch|Mock
      */
-    private $clientFactoryMock;
+    private $elasticSearchMock;
 
     /**
      * @inheritdoc
@@ -59,17 +55,14 @@ class ConfigTest extends TestCase
     {
         $this->environmentMock = $this->createMock(Environment::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->clientFactoryMock = $this->createMock(ClientFactory::class);
+        $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
 
         $this->config = new Config(
             $this->environmentMock,
             $this->stageConfigMock,
-            $this->clientFactoryMock,
+            $this->elasticSearchMock,
             $this->magentoVersionMock,
-            $this->loggerMock,
             new ConfigMerger()
         );
     }
@@ -92,10 +85,8 @@ class ConfigTest extends TestCase
             ->method('getRelationships');
         $this->magentoVersionMock->expects($this->never())
             ->method('satisfies');
-        $this->clientFactoryMock->expects($this->never())
-            ->method('create');
-        $this->loggerMock->expects($this->never())
-            ->method('warning');
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getVersion');
 
         $this->assertEquals($expectedConfig, $this->config->get());
     }
@@ -124,12 +115,6 @@ class ConfigTest extends TestCase
         array $relationships,
         array $expected
     ) {
-        $clientMock = $this->getMockBuilder(Client::class)
-            ->setMethods(['get'])
-            ->getMock();
-        $responseMock = $this->createMock(Response::class);
-        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
-
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
@@ -137,40 +122,17 @@ class ConfigTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getRelationships')
             ->willReturn(['elasticsearch' => [$relationships]]);
-        $clientMock->expects($this->once())
-            ->method('get')
-            ->with($relationships['host'] . ':' . $relationships['port'])
-            ->willReturn($responseMock);
-        $responseMock->expects($this->once())
-            ->method('getBody')
-            ->willReturn($streamMock);
-        $streamMock->expects($this->once())
-            ->method('getContents')
-            ->willReturn('{
-                "name" : "ZaIj9mo",
-                "cluster_name" : "elasticsearch",
-                "cluster_uuid" : "CIXBGIVdS6mwM_0lmVhF4g",
-                "version" : {
-                    "number" : "' . $version . '",
-                    "build_hash" : "c59ff00",
-                    "build_date" : "2018-03-13T10:06:29.741383Z",
-                    "build_snapshot" : false,
-                    "lucene_version" : "7.2.1",
-                    "minimum_wire_compatibility_version" : "5.6.0",
-                    "minimum_index_compatibility_version" : "5.0.0"
-                },
-                "tagline" : "You Know, for Search"
-            }
-        ');
-        $this->clientFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn($clientMock);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getVersion')
+            ->willReturn($version);
 
         $this->assertEquals($expected, $this->config->get());
     }
 
     /**
      * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function testGetWithElasticSearchDataProvider(): array
     {
@@ -207,6 +169,39 @@ class ConfigTest extends TestCase
                     'elasticsearch_server_hostname' => 'some_host',
                     'elasticsearch_server_port' => 1234,
                     'elasticsearch_index_prefix' => 'prefix',
+                ],
+            ],
+            [
+                'customSearchConfig' => [
+                    'elasticsearch_server_port' => 2345,
+                    'elasticsearch_index_prefix' => 'new_prefix',
+                    '_merge' => true,
+                ],
+                'version' => '2.4',
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 2345,
+                    'elasticsearch_index_prefix' => 'new_prefix',
+                ],
+            ],
+            [
+                'customSearchConfig' => [
+                    '_merge' => true,
+                ],
+                'version' => '2.4',
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
                 ],
             ],
             [
@@ -261,43 +256,6 @@ class ConfigTest extends TestCase
 
     /**
      * @return void
-     */
-    public function testGetWithElasticSearchException()
-    {
-        $relationships = ['host' => 'localhost', 'port' => 1234];
-        $expected = [
-            'engine' => 'elasticsearch',
-            'elasticsearch_server_hostname' => 'localhost',
-            'elasticsearch_server_port' => 1234,
-        ];
-        $clientMock = $this->getMockBuilder(Client::class)
-            ->setMethods(['get'])
-            ->getMock();
-
-        $clientMock->expects($this->once())
-            ->method('get')
-            ->with($relationships['host'] . ':' . $relationships['port'])
-            ->willThrowException(new \RuntimeException('ES is not available'));
-        $this->clientFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn($clientMock);
-        $this->magentoVersionMock->method('isGreaterOrEqual')
-            ->willReturn(true);
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
-            ->willReturn([]);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationships')
-            ->willReturn(['elasticsearch' => [$relationships]]);
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('ES is not available');
-
-        $this->assertEquals($expected, $this->config->get());
-    }
-
-    /**]@return void
      */
     public function testGetWithSolr()
     {

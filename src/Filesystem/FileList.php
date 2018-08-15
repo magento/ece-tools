@@ -73,4 +73,12 @@ class FileList extends ConfigFileList
     {
         return $this->directoryList->getMagentoRoot() . '/docker-compose.yml';
     }
+
+    /**
+     * @return string
+     */
+    public function getToolsDockerCompose(): string
+    {
+        return $this->directoryList->getRoot() . '/docker-compose.yml';
+    }
 }

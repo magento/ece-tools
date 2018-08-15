@@ -60,7 +60,7 @@ class ShellLoggingTest extends AbstractTest
         $this->shell->execute('non-exist-command');
         $logContent = $this->getLogContent();
         $this->assertContains('Command: non-exist-command ', $logContent);
-        $this->assertContains('Command: non-exist-command ', $logContent);
+        $this->assertRegExp('/CRITICAL:\n.*non-exist-command: command not found/', $logContent);
     }
 
     private function getLogContent()

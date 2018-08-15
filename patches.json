@@ -110,6 +110,12 @@
     },
     "Resolve Issues with Cron Schedule": {
       "2.1.10 - 2.1.14 || 2.2.2 - 2.2.5": "MAGECLOUD-2427__resolve_issues_with_cron_schedule.patch"
+    },
+    "Change the depth of a recursive check of directory write permissions": {
+      "2.1.4 - 2.1.14": "MAGETWO-93265__fix_depth_of_recursive_check_of_directory_permissions__2.1.4.patch"
+    },
+    "Do not run cron when it is disabled": {
+      "2.1.4 - 2.2.5": "MAGECLOUD-2445__do_not_run_cron_when_it_is_disabled__2.1.4.patch"
     }
   }
 }

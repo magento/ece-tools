@@ -7,18 +7,20 @@ namespace Magento\MagentoCloud\Test\Unit\Docker;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
-use Magento\MagentoCloud\Docker\Builder;
+use Magento\MagentoCloud\Docker\DevBuilder;
 use Magento\MagentoCloud\Docker\Exception;
+use Magento\MagentoCloud\Docker\Service\ServiceFactory;
+use Magento\MagentoCloud\Docker\Service\ServiceInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
-class BuilderTest extends TestCase
+class DevBuilderTest extends TestCase
 {
     /**
-     * @var Builder
+     * @var DevBuilder
      */
     private $builder;
 
@@ -26,6 +28,11 @@ class BuilderTest extends TestCase
      * @var RepositoryFactory|MockObject
      */
     private $repositoryFactoryMock;
+
+    /**
+     * @var ServiceFactory|MockObject
+     */
+    private $serviceFactoryMock;
 
     /**
      * @var Repository|MockObject
@@ -39,13 +46,15 @@ class BuilderTest extends TestCase
     {
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
         $this->configMock = $this->getMockForAbstractClass(Repository::class);
+        $this->serviceFactoryMock = $this->createMock(ServiceFactory::class);
 
         $this->repositoryFactoryMock->expects($this->any())
             ->method('create')
             ->willReturn($this->configMock);
 
-        $this->builder = new Builder(
-            $this->repositoryFactoryMock
+        $this->builder = new DevBuilder(
+            $this->repositoryFactoryMock,
+            $this->serviceFactoryMock
         );
     }
 
@@ -70,7 +79,7 @@ class BuilderTest extends TestCase
     {
         return [
             ['1.9'],
-            [Builder::CONFIG_DEFAULT_NGINX_VERSION,],
+            [DevBuilder::DEFAULT_NGINX_VERSION,],
         ];
     }
 
@@ -107,7 +116,7 @@ class BuilderTest extends TestCase
     {
         return [
             ['7.0'],
-            [Builder::CONFIG_DEFAULT_PHP_VERSION,],
+            [DevBuilder::DEFAULT_PHP_VERSION,],
         ];
     }
 
@@ -143,7 +152,7 @@ class BuilderTest extends TestCase
     public function setDbVersionDataProvider(): array
     {
         return [
-            [Builder::CONFIG_DEFAULT_DB_VERSION],
+            [DevBuilder::DEFAULT_DB_VERSION],
         ];
     }
 
@@ -161,6 +170,15 @@ class BuilderTest extends TestCase
 
     public function testBuild()
     {
+        $serviceMock = $this->getMockForAbstractClass(ServiceInterface::class);
+        $serviceMock->expects($this->any())
+            ->method('get')
+            ->willReturn([]);
+
+        $this->serviceFactoryMock->expects($this->any())
+            ->method('create')
+            ->willReturn($serviceMock);
+
         $config = $this->builder->build();
 
         $this->assertArrayHasKey('version', $config);

@@ -3,23 +3,23 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Docker;
+namespace Magento\MagentoCloud\Test\Unit\Docker\Service;
 
 use Magento\MagentoCloud\App\ContainerInterface;
-use Magento\MagentoCloud\Docker\BuilderFactory;
-use Magento\MagentoCloud\Docker\DevBuilder;
+use Magento\MagentoCloud\Docker\Service\ServiceFactory;
+use Magento\MagentoCloud\Docker\Service\VarnishService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
-class BuilderFactoryTest extends TestCase
+class ServiceFactoryTest extends TestCase
 {
     /**
-     * @var BuilderFactory
+     * @var ServiceFactory
      */
-    private $builderFactory;
+    private $factory;
 
     /**
      * @var ContainerInterface|MockObject
@@ -33,7 +33,7 @@ class BuilderFactoryTest extends TestCase
     {
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
 
-        $this->builderFactory = new BuilderFactory(
+        $this->factory = new ServiceFactory(
             $this->containerMock
         );
     }
@@ -42,8 +42,9 @@ class BuilderFactoryTest extends TestCase
     {
         $this->containerMock->expects($this->once())
             ->method('create')
-            ->willReturn($this->createMock(DevBuilder::class));
+            ->with(VarnishService::class)
+            ->willReturn($this->createMock(VarnishService::class));
 
-        $this->builderFactory->create(BuilderFactory::BUILDER_DEV);
+        $this->factory->create(ServiceFactory::SERVICE_VARNISH);
     }
 }
