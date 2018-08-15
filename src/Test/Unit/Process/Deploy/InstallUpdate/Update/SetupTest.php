@@ -91,6 +91,9 @@ class SetupTest extends TestCase
         );
 
         // Initialize log file
+        if (!is_dir(dirname($this->logPath))) {
+            mkdir(dirname($this->logPath), 0777, true);
+        }
         file_put_contents($this->logPath, 'Previous log' . PHP_EOL);
     }
 
