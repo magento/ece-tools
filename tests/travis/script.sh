@@ -6,7 +6,7 @@
 set -e
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
-BASH="docker-compose run --user 1001 cli bash"
+BASH="docker-compose run cli bash"
 
 case $TEST_SUITE in
     static-unit)
