@@ -174,6 +174,11 @@ class DevBuilder implements BuilderInterface
      */
     private function getCliService(bool $isReadOnly): array
     {
+        if (file_exists(getenv('HOME') . '/.cache/composer')) {
+            $composeCacheDirectory = '~/.cache/composer';
+        } else {
+            $composeCacheDirectory = '~/.composer/cache';
+        }
         return [
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-cli',
@@ -184,7 +189,7 @@ class DevBuilder implements BuilderInterface
                 'redis',
             ],
             'volumes' => [
-                '~/.composer/cache:/root/.composer/cache',
+                $composeCacheDirectory . ':/root/.composer/cache',
                 $this->getMagentoVolume($isReadOnly),
             ],
             'volumes_from' => [
