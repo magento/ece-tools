@@ -150,18 +150,25 @@ class ElasticSearchVersion implements ValidatorInterface
             $esPackageVersion
         );
 
-        $suggestion = ['Please use one of the following ways to resolve compatibility issue:'];
-        $suggestion[] = sprintf(
-            '  Change Elasticsearch version on infrastructure layer to %s (preferred)',
-            $versionInfo['esVersionRaw']
-        );
-
         if (Semver::satisfies($esPackageVersion, '~5.0')
             && Semver::satisfies($esServiceVersion, '>= 1.0 < 3.0')
             && Semver::satisfies($this->magentoVersion->getVersion(), '~2.2.3')
         ) {
-            $suggestion[] =
-                '  Require elasticsearch/elasticsearch module version ~2.0 to get your application\'s code compatible';
+            $suggestion = ['Use one of the following methods to fix this issue:'];
+            $suggestion[] = sprintf(
+                '  Upgrade the Elasticsearch service on your Magento Cloud infrastructure to version %s (preferred).',
+                $versionInfo['esVersionRaw']
+            );
+            $suggestion[] = '  Update the composer.json file for your Magento Cloud project to ' .
+                'require elasticsearch/elasticsearch module version ~2.0.';
+        } else {
+            $suggestion = [
+                sprintf(
+                    'You can fix this issue by upgrading the Elasticsearch service on your ' .
+                    'Magento Cloud infrastructure to version %s.',
+                    $versionInfo['esVersionRaw']
+                )
+            ];
         }
 
         return $this->resultFactory->error($error, implode(PHP_EOL, $suggestion));
