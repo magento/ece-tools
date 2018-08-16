@@ -28,6 +28,8 @@ return [
         ],
     ],
     'variables' => [
-        'ADMIN_EMAIL' => 'admin@example.com',
+        'ADMIN_EMAIL' => getenv('ADMIN_EMAIL', 'admin@example.com'),
+        'ADMIN_PASSWORD' => getenv('ADMIN_PASSWORD', '123123q'),
+        'MIN_LOGGING_LEVEL' => getenv('MIN_LOGGING_LEVEL', \Magento\MagentoCloud\App\Logger::WARNING),
     ],
 ];
