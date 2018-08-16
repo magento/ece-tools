@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent\Generate;
-use Magento\MagentoCloud\Shell\ExecBinMagento;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Build\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -25,7 +25,7 @@ class GenerateTest extends TestCase
     private $process;
 
     /**
-     * @var ExecBinMagento|MockObject
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
@@ -54,7 +54,7 @@ class GenerateTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->createMock(ExecBinMagento::class);
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->commandFactoryMock = $this->createMock(CommandFactory::class);
         $this->optionMock = $this->createMock(Option::class);
@@ -72,8 +72,8 @@ class GenerateTest extends TestCase
     public function testExecute()
     {
         $commands = [
-            ['en_US'],
-            ['en_US', 'fr_FR', 'es_ES'],
+            'setup:static-content:deploy with locales',
+            'setup:static-content:deploy with locales en_US',
         ];
         $this->optionMock->expects($this->once())
             ->method('getLocales')
@@ -92,8 +92,8 @@ class GenerateTest extends TestCase
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
-                ['setup:static-content:deploy', ['en_US']],
-                ['setup:static-content:deploy', ['en_US', 'fr_FR', 'es_ES']]
+                ['setup:static-content:deploy with locales'],
+                ['setup:static-content:deploy with locales en_US']
             );
         $this->buildConfigMock->expects($this->once())
             ->method('get')

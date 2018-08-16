@@ -9,8 +9,8 @@ use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -18,14 +18,9 @@ use PHPUnit\Framework\TestCase;
 class CommandFactoryTest extends TestCase
 {
     /**
-     * @var MagentoVersion|MockObject
+     * @var MagentoVersion|Mock
      */
     private $magentoVersionMock;
-
-    /**
-     * @var GlobalSection|MockObject
-     */
-    private $globalConfigMock;
 
     /**
      * @var CommandFactory
@@ -33,14 +28,22 @@ class CommandFactoryTest extends TestCase
     private $commandFactory;
 
     /**
+     * @var GlobalSection
+     */
+    private $globalConfig;
+
+    /**
      * @inheritdoc
      */
     public function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->globalConfigMock = $this->createMock(GlobalSection::class);
+        $this->globalConfig = $this->createMock(GlobalSection::class);
 
-        $this->commandFactory = new CommandFactory($this->magentoVersionMock, $this->globalConfigMock);
+        $this->commandFactory = new CommandFactory(
+            $this->magentoVersionMock,
+            $this->globalConfig
+        );
     }
 
     /**
@@ -49,7 +52,7 @@ class CommandFactoryTest extends TestCase
      * @param string $expected
      * @dataProvider createDataProvider
      */
-    public function testCreate(array $optionConfig, bool $useScdStrategy, array $expected)
+    public function testCreate(array $optionConfig, bool $useScdStrategy, string $expected)
     {
         $this->magentoVersionMock
             ->expects($this->exactly(2))
@@ -78,15 +81,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                [
-                    '-f',
-                    '--strategy=quick',
-                    '-v',
-                    '--jobs=3',
-                    '--exclude-theme=theme1',
-                    '--exclude-theme=theme2',
-                    'en_US',
-                ],
+                'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -f -s quick '
+                . '-v --jobs 3 --exclude-theme theme1 --exclude-theme theme2 en_US',
             ],
             [
                 [
@@ -98,14 +94,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 true,
-                [
-                    '--strategy=quick',
-                    '-v',
-                    '--jobs=1',
-                    '--exclude-theme=theme1',
-                    'en_US',
-                    'de_DE',
-                ],
+                'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                . '-v --jobs 1 --exclude-theme theme1 en_US de_DE',
             ],
             [
                 [
@@ -117,14 +107,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                [
-                    '-f',
-                    '-v',
-                    '--jobs=3',
-                    '--exclude-theme=theme1',
-                    '--exclude-theme=theme2',
-                    'en_US',
-                ],
+                'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -f -v --jobs 3 '
+                . '--exclude-theme theme1 --exclude-theme theme2 en_US',
             ],
             [
                 [
@@ -136,13 +120,8 @@ class CommandFactoryTest extends TestCase
                     'verbosity_level' => '-v',
                 ],
                 false,
-                [
-                    '-v',
-                    '--jobs=1',
-                    '--exclude-theme=theme1',
-                    'en_US',
-                    'de_DE',
-                ],
+                'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -v --jobs 1 '
+                . '--exclude-theme theme1 en_US de_DE',
             ],
         ];
     }
@@ -207,12 +186,14 @@ class CommandFactoryTest extends TestCase
             ->method('getVerbosityLevel')
             ->willReturn($optionConfig['verbosity_level']);
 
-        $this->assertSame($expected, $this->commandFactory->matrix($optionMock, $matrix));
+        $this->assertSame(
+            $expected,
+            $this->commandFactory->matrix($optionMock, $matrix)
+        );
     }
 
     /**
      * @return array
-     * @SuppressWarnings(ExcessiveMethodLength)
      */
     public function matrixDataProvider(): array
     {
@@ -228,14 +209,8 @@ class CommandFactoryTest extends TestCase
                 ],
                 [],
                 [
-                    [
-                        '-f',
-                        '--strategy=quick',
-                        '-v',
-                        '--exclude-theme=theme1',
-                        '--exclude-theme=theme2',
-                        'en_US',
-                    ],
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -f -s quick '
+                    . '-v --exclude-theme theme1 --exclude-theme theme2 en_US',
                 ],
             ],
             [
@@ -253,14 +228,8 @@ class CommandFactoryTest extends TestCase
                     ],
                 ],
                 [
-                    [
-                        '--strategy=quick',
-                        '-v',
-                        '--exclude-theme=theme1',
-                        '--exclude-theme=Magento/backend',
-                        'en_US',
-                        'de_DE',
-                    ],
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                    . '-v --exclude-theme theme1 --exclude-theme Magento/backend en_US de_DE',
                 ],
             ],
             [
@@ -276,14 +245,8 @@ class CommandFactoryTest extends TestCase
                     'Magento/backend' => null,
                 ],
                 [
-                    [
-                        '--strategy=quick',
-                        '-v',
-                        '--exclude-theme=theme1',
-                        '--exclude-theme=Magento/backend',
-                        'en_US',
-                        'de_DE',
-                    ],
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                    . '-v --exclude-theme theme1 --exclude-theme Magento/backend en_US de_DE',
                 ],
             ],
             [
@@ -301,22 +264,10 @@ class CommandFactoryTest extends TestCase
                     ],
                 ],
                 [
-                    [
-                        '--strategy=quick',
-                        '-v',
-                        '--exclude-theme=theme1',
-                        '--exclude-theme=Magento/backend',
-                        'en_US',
-                        'de_DE',
-                    ],
-                    [
-                        '--strategy=quick',
-                        '-v',
-                        '--theme=Magento/backend',
-                        'en_US',
-                        'fr_FR',
-                        'af_ZA',
-                    ],
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                    . '-v --exclude-theme theme1 --exclude-theme Magento/backend en_US de_DE',
+                    'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
+                    . '-v --theme Magento/backend en_US fr_FR af_ZA',
                 ],
             ],
         ];

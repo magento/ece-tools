@@ -7,8 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Process\Build\CompileDi;
-use Magento\MagentoCloud\Shell\ExecBinMagento;
-use PHPUnit\Framework\MockObject\MockObject;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -23,17 +22,17 @@ class CompileDiTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|MockObject
+     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ExecBinMagento|MockObject
+     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $shellMock;
 
     /**
-     * @var BuildInterface|MockObject
+     * @var BuildInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $stageConfigMock;
 
@@ -44,7 +43,8 @@ class CompileDiTest extends TestCase
     {
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->shellMock = $this->createMock(ExecBinMagento::class);
+        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
+            ->getMockForAbstractClass();
         $this->stageConfigMock = $this->getMockBuilder(BuildInterface::class)
             ->getMockForAbstractClass();
 
@@ -66,7 +66,7 @@ class CompileDiTest extends TestCase
             ->with('Running DI compilation');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('setup:di:compile', '-vvv');
+            ->with('php ./bin/magento setup:di:compile -vvv --ansi --no-interaction');
 
         $this->process->execute();
     }

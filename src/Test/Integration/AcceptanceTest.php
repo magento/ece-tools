@@ -280,9 +280,9 @@ class AcceptanceTest extends AbstractTest
         $fileList = $application->getContainer()->get(FileList::class);
         $logContent = file_get_contents($fileList->getCloudLog());
 
-        $this->assertContains('\'--admin-password=******\'', $logContent);
+        $this->assertContains('--admin-password=\'******\'', $logContent);
         if (strpos($logContent, '--db-password') !== false) {
-            $this->assertContains('\'--db-password=******\'', $logContent);
+            $this->assertContains('--db-password=\'******\'', $logContent);
         }
     }
 }

@@ -10,11 +10,10 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup;
-use Magento\MagentoCloud\Shell\ExecBinMagento;
-use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -28,44 +27,39 @@ class SetupTest extends TestCase
     private $process;
 
     /**
-     * @var Environment|MockObject
+     * @var Environment|Mock
      */
     private $environmentMock;
 
     /**
-     * @var LoggerInterface|MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var ExecBinMagento|MockObject
+     * @var ShellInterface|Mock
      */
     private $shellMock;
 
     /**
-     * @var FlagManager|MockObject
+     * @var FlagManager|Mock
      */
     private $flagManagerMock;
 
     /**
-     * @var FileList|MockObject
+     * @var FileList|Mock
      */
     private $fileListMock;
 
     /**
-     * @var DirectoryList|MockObject
+     * @var DirectoryList|Mock
      */
     private $directoryListMock;
 
     /**
-     * @var DeployInterface|MockObject
+     * @var DeployInterface|Mock
      */
     private $stageConfigMock;
-
-    /**
-     * @var string
-     */
-    private $logPath = ECE_BP . '/tests/unit/tmp/update.log';
 
     /**
      * @inheritdoc
@@ -73,7 +67,7 @@ class SetupTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->shellMock = $this->createMock(ExecBinMagento::class);
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileListMock = $this->createMock(FileList::class);
@@ -89,21 +83,17 @@ class SetupTest extends TestCase
             $this->flagManagerMock,
             $this->stageConfigMock
         );
-
-        // Initialize log file
-        if (!is_dir(dirname($this->logPath))) {
-            mkdir(dirname($this->logPath), 0777, true);
-        }
-        file_put_contents($this->logPath, 'Previous log' . PHP_EOL);
     }
 
     public function testExecute()
     {
+        $installUpgradeLog = '/tmp/log.log';
+
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
         $this->fileListMock->expects($this->once())
             ->method('getInstallUpgradeLog')
-            ->willReturn($this->logPath);
+            ->willReturn($installUpgradeLog);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
@@ -114,14 +104,13 @@ class SetupTest extends TestCase
         $this->shellMock->expects($this->exactly(3))
             ->method('execute')
             ->withConsecutive(
-                ['maintenance:enable', '-v'],
-                ['setup:upgrade', ['--keep-generated', '-v']],
-                ['maintenance:disable', '-v']
-            )
-            ->willReturnOnConsecutiveCalls(
-                [],
-                ['Doing upgrade', 'Upgrade complete'],
-                []
+                ['php ./bin/magento maintenance:enable --ansi --no-interaction -v'],
+                [
+                    '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
+                    . '--keep-generated --ansi --no-interaction -v | tee -a '
+                    . $installUpgradeLog . '"',
+                ],
+                ['php ./bin/magento maintenance:disable --ansi --no-interaction -v']
             );
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -134,9 +123,6 @@ class SetupTest extends TestCase
             );
 
         $this->process->execute();
-
-        $this->assertFileIsReadable($this->logPath);
-        $this->assertSame("Previous log\nDoing upgrade\nUpgrade complete\n", file_get_contents($this->logPath));
     }
 
     /**
@@ -148,36 +134,10 @@ class SetupTest extends TestCase
         $this->flagManagerMock->expects($this->once())
             ->method('delete')
             ->with(FlagManager::FLAG_REGENERATE);
-        $this->fileListMock->expects($this->once())
-            ->method('getInstallUpgradeLog')
-            ->willReturn($this->logPath);
-        $this->shellMock->method('execute')
-            ->willThrowException(new ShellException('Error during command execution', 1, ['Output from command']));
+        $this->shellMock->expects($this->at(0))
+            ->method('execute')
+            ->willThrowException(new \RuntimeException('Error during command execution'));
 
         $this->process->execute();
-
-        $this->assertFileIsReadable($this->logPath);
-        $this->assertSame("Previous log\nOutput from command\n", file_get_contents($this->logPath));
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Something else has gone wrong
-     */
-    public function testExecuteOtherException()
-    {
-        $this->flagManagerMock->expects($this->once())
-            ->method('delete')
-            ->with(FlagManager::FLAG_REGENERATE);
-        $this->fileListMock->expects($this->once())
-            ->method('getInstallUpgradeLog')
-            ->willReturn($this->logPath);
-        $this->shellMock->method('execute')
-            ->willThrowException(new \Exception('Something else has gone wrong'));
-
-        $this->process->execute();
-
-        $this->assertFileIsReadable($this->logPath);
-        $this->assertSame("Previous log\nSomething else has gone wrong\n", file_get_contents($this->logPath));
     }
 }

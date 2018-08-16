@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process\PostDeploy;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ExecBinMagento;
+use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Cleans all cache by tags.
@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Shell\ExecBinMagento;
 class CleanCache implements ProcessInterface
 {
     /**
-     * @var ExecBinMagento
+     * @var ShellInterface
      */
     private $shell;
 
@@ -26,11 +26,11 @@ class CleanCache implements ProcessInterface
     private $stageConfig;
 
     /**
-     * @param ExecBinMagento $shell
+     * @param ShellInterface $shell
      * @param DeployInterface $stageConfig
      */
     public function __construct(
-        ExecBinMagento $shell,
+        ShellInterface $shell,
         DeployInterface $stageConfig
     ) {
         $this->shell = $shell;
@@ -42,6 +42,9 @@ class CleanCache implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute('cache:flush', $this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS));
+        $this->shell->execute(sprintf(
+            'php ./bin/magento cache:flush --ansi --no-interaction %s',
+            $this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)
+        ));
     }
 }

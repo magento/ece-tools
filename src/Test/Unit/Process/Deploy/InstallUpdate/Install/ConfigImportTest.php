@@ -7,9 +7,9 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ConfigImport;
-use Magento\MagentoCloud\Shell\ExecBinMagento;
-use PHPUnit\Framework\MockObject\MockObject;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,17 +23,17 @@ class ConfigImportTest extends TestCase
     private $process;
 
     /**
-     * @var ExecBinMagento|MockObject
+     * @var ShellInterface|Mock
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|MockObject
+     * @var LoggerInterface|Mock
      */
     private $loggerMock;
 
     /**
-     * @var MagentoVersion|MockObject
+     * @var MagentoVersion|Mock
      */
     private $magentoVersionMock;
 
@@ -42,7 +42,7 @@ class ConfigImportTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->createMock(ExecBinMagento::class);
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
@@ -62,7 +62,7 @@ class ConfigImportTest extends TestCase
             ->with('Run app:config:import command');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('app:config:import');
+            ->with('php ./bin/magento app:config:import --ansi --no-interaction');
 
         $this->process->execute();
     }

@@ -43,27 +43,25 @@ class CommandFactory
      *
      * @param OptionInterface $option
      * @param array $excludedThemes
-     * @return string[]
+     * @return string
      */
-    public function create(OptionInterface $option, array $excludedThemes = []): array
+    public function create(OptionInterface $option, array $excludedThemes = []): string
     {
-        $args = $this->build($option);
-        $excludedThemes = array_unique(array_merge($option->getExcludedThemes(), $excludedThemes));
+        $command = $this->build($option);
+        $excludedThemes = array_unique(array_merge(
+            $option->getExcludedThemes(),
+            $excludedThemes
+        ));
 
         if ($excludedThemes) {
-            $args = array_merge($args, array_map(
-                function ($theme) {
-                    return '--exclude-theme=' . $theme;
-                },
-                $excludedThemes
-            ));
+            $command .= ' --exclude-theme ' . implode(' --exclude-theme ', $excludedThemes);
         }
 
         if ($locales = $option->getLocales()) {
-            $args = array_merge($args, $locales);
+            $command .= ' ' . implode(' ', $locales);
         }
 
-        return $args;
+        return $command;
     }
 
     /**
@@ -75,7 +73,7 @@ class CommandFactory
      */
     public function matrix(OptionInterface $option, array $matrix): array
     {
-        $argCollection = [
+        $commands = [
             $this->create($option, array_keys($matrix)),
         ];
 
@@ -84,54 +82,54 @@ class CommandFactory
                 continue;
             }
 
-            $args = $this->build($option);
-            $args[] = '--theme=' . $theme;
-            $args = array_merge($args, $config['language']);
+            $command = $this->build($option);
+            $command .= ' --theme ' . $theme;
+            $command .= ' ' . implode(' ', $config['language']);
 
-            $argCollection[] = $args;
+            $commands[] = $command;
         }
 
-        return $argCollection;
+        return $commands;
     }
 
     /**
      * @param OptionInterface $option
-     * @return string[]
+     * @return string
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    private function build(OptionInterface $option): array
+    private function build(OptionInterface $option): string
     {
-        $args = [];
+        $command = 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction';
 
         if ($option->isForce()) {
-            $args[] = '-f';
+            $command .= ' -f';
         }
 
         if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)) {
             // Magento 2.1 doesn't have a "-s" option and can't take a strategy option.
             $strategy = $option->getStrategy();
             if (!empty($strategy)) {
-                $args[] = '--strategy=' . $strategy;
+                $command .= ' -s ' . $strategy;
             }
         }
 
         $verbosityLevel = $option->getVerbosityLevel();
         if ($verbosityLevel) {
-            $args[] = $verbosityLevel;
+            $command .= ' ' . $verbosityLevel;
         }
 
         $threadCount = $option->getThreadCount();
         if ($threadCount) {
-            $args[] = '--jobs=' . $threadCount;
+            $command .= ' --jobs ' . $threadCount;
         }
 
         if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)
             && $this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
         ) {
-            $args[] = '--no-html-minify';
+            $command .= ' --no-html-minify';
         }
 
-        return $args;
+        return $command;
     }
 }

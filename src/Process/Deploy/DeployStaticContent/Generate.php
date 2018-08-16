@@ -9,7 +9,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ExecBinMagento;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Psr\Log\LoggerInterface;
@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
 class Generate implements ProcessInterface
 {
     /**
-     * @var ExecBinMagento
+     * @var ShellInterface
      */
     private $shell;
 
@@ -55,7 +55,7 @@ class Generate implements ProcessInterface
     private $stageConfig;
 
     /**
-     * @param ExecBinMagento $shell
+     * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
@@ -64,7 +64,7 @@ class Generate implements ProcessInterface
      * @param DeployInterface $stageConfig
      */
     public function __construct(
-        ExecBinMagento $shell,
+        ShellInterface $shell,
         LoggerInterface $logger,
         File $file,
         DirectoryList $directoryList,
@@ -88,7 +88,10 @@ class Generate implements ProcessInterface
     {
         $this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt');
         $this->logger->info('Enabling Maintenance mode');
-        $this->shell->execute('maintenance:enable', $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS));
+        $this->shell->execute(sprintf(
+            'php ./bin/magento maintenance:enable --ansi --no-interaction %s',
+            $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
+        ));
         $this->logger->info('Extracting locales');
 
         $logMessage = count($this->deployOption->getLocales()) ?
@@ -97,16 +100,19 @@ class Generate implements ProcessInterface
 
         $this->logger->info($logMessage);
 
-        $argCollection = $this->commandFactory->matrix(
+        $commands = $this->commandFactory->matrix(
             $this->deployOption,
             $this->stageConfig->get(DeployInterface::VAR_SCD_MATRIX)
         );
 
-        foreach ($argCollection as $args) {
-            $this->shell->execute('setup:static-content:deploy', $args);
+        foreach ($commands as $command) {
+            $this->shell->execute($command);
         }
 
-        $this->shell->execute('maintenance:disable', $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS));
+        $this->shell->execute(sprintf(
+            'php ./bin/magento maintenance:disable --ansi --no-interaction %s',
+            $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
+        ));
 
         $this->logger->info('Maintenance mode is disabled.');
     }
