@@ -157,9 +157,6 @@ class TestBuilder implements BuilderInterface
             'env_file' => [
                 './docker/global.env',
                 './docker/composer.env',
-            ],
-            'environment' => [
-                '- UID=$(id -u)'
             ]
         ];
     }
