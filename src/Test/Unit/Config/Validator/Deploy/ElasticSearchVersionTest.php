@@ -209,7 +209,7 @@ class ElasticSearchVersionTest extends TestCase
                 'Elasticsearch service version 6.2 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (5.0), used by your Magento application.',
                 'Please use one of the following ways to resolve compatibility issue:' . PHP_EOL .
-                '- Change Elasticsearch version on infrastructure layer to 5.x (preferred)'
+                '  Change Elasticsearch version on infrastructure layer to 5.x (preferred)'
             ],
             [
                 '5.0',
@@ -219,7 +219,7 @@ class ElasticSearchVersionTest extends TestCase
                 'Elasticsearch service version 5.0 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (6.0), used by your Magento application.',
                 'Please use one of the following ways to resolve compatibility issue:' . PHP_EOL .
-                '- Change Elasticsearch version on infrastructure layer to 6.x (preferred)'
+                '  Change Elasticsearch version on infrastructure layer to 6.x (preferred)'
             ],
             ['5.0', '2.9', Error::class],
             [
@@ -230,7 +230,7 @@ class ElasticSearchVersionTest extends TestCase
                 'Elasticsearch service version 5.0 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (2.0), used by your Magento application.',
                 'Please use one of the following ways to resolve compatibility issue:' . PHP_EOL .
-                '- Change Elasticsearch version on infrastructure layer to 1.x or 2.x (preferred)'
+                '  Change Elasticsearch version on infrastructure layer to 1.x or 2.x (preferred)'
             ],
             [
                 '2.0',
@@ -240,7 +240,7 @@ class ElasticSearchVersionTest extends TestCase
                 'Elasticsearch service version 2.0 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (5.1), used by your Magento application.',
                 'Please use one of the following ways to resolve compatibility issue:' . PHP_EOL .
-                '- Change Elasticsearch version on infrastructure layer to 5.x (preferred)'
+                '  Change Elasticsearch version on infrastructure layer to 5.x (preferred)'
             ],
             [
                 '2.0',
@@ -250,8 +250,8 @@ class ElasticSearchVersionTest extends TestCase
                 'Elasticsearch service version 2.0 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (5.1), used by your Magento application.',
                 'Please use one of the following ways to resolve compatibility issue:' . PHP_EOL .
-                '- Change Elasticsearch version on infrastructure layer to 5.x (preferred)' . PHP_EOL .
-                '- Require elasticsearch/elasticsearch module version ~2.0 to get your application\'s code compatible'
+                '  Change Elasticsearch version on infrastructure layer to 5.x (preferred)' . PHP_EOL .
+                '  Require elasticsearch/elasticsearch module version ~2.0 to get your application\'s code compatible'
             ],
             [
                 '1.7',
@@ -261,8 +261,8 @@ class ElasticSearchVersionTest extends TestCase
                 'Elasticsearch service version 1.7 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (5.0), used by your Magento application.',
                 'Please use one of the following ways to resolve compatibility issue:' . PHP_EOL .
-                '- Change Elasticsearch version on infrastructure layer to 5.x (preferred)' . PHP_EOL .
-                '- Require elasticsearch/elasticsearch module version ~2.0 to get your application\'s code compatible'
+                '  Change Elasticsearch version on infrastructure layer to 5.x (preferred)' . PHP_EOL .
+                '  Require elasticsearch/elasticsearch module version ~2.0 to get your application\'s code compatible'
             ],
             [
                 '1.7',
@@ -272,7 +272,7 @@ class ElasticSearchVersionTest extends TestCase
                 'Elasticsearch service version 1.7 on infrastructure layer is not compatible with current version of ' .
                 'elasticsearch/elasticsearch module (5.1), used by your Magento application.',
                 'Please use one of the following ways to resolve compatibility issue:' . PHP_EOL .
-                '- Change Elasticsearch version on infrastructure layer to 5.x (preferred)'
+                '  Change Elasticsearch version on infrastructure layer to 5.x (preferred)'
             ],
         ];
     }
