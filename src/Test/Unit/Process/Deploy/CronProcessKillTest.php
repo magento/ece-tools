@@ -39,6 +39,8 @@ class CronProcessKillTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->shellMock = $this->createMock(ShellInterface::class);
 
+        putenv('MAGENTO_ROOT=');
+
         $this->process = new CronProcessKill(
             $this->loggerMock,
             $this->shellMock
@@ -67,7 +69,7 @@ class CronProcessKillTest extends TestCase
      */
     public function testExecuteWithNoRunningCrons()
     {
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->atLeastOnce())
             ->method('info')
             ->withConsecutive(
                 ['Trying to kill running cron jobs'],
