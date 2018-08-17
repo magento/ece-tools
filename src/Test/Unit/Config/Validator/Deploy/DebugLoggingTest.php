@@ -84,7 +84,7 @@ class DebugLoggingTest extends TestCase
             ->willReturn(true);
         $this->configValidatorMock->expects($this->once())
             ->method('get')
-            ->with('dev/debug/debug_logging')
+            ->with(DebugLogging::CONFIG_PATH)
             ->willReturn('0');
         $this->resultFactoryMock->expects($this->never())
             ->method('error');
@@ -104,7 +104,7 @@ class DebugLoggingTest extends TestCase
             ->willReturn(true);
         $this->configValidatorMock->expects($this->once())
             ->method('get')
-            ->with('dev/debug/debug_logging')
+            ->with(DebugLogging::CONFIG_PATH)
             ->willReturn('1');
         $this->resultFactoryMock->expects($this->once())
             ->method('error')

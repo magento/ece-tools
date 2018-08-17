@@ -18,6 +18,8 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
  */
 class DebugLogging implements ValidatorInterface
 {
+    const CONFIG_PATH = 'dev/debug/debug_logging';
+
     /**
      * @var System
      */
@@ -57,7 +59,7 @@ class DebugLogging implements ValidatorInterface
             return $this->resultFactory->success();
         }
 
-        if (!$this->config->get('dev/debug/debug_logging')) {
+        if (!$this->config->get(self::CONFIG_PATH)) {
             return $this->resultFactory->success();
         }
 
