@@ -86,6 +86,22 @@ class EnvironmentConfigTest extends TestCase
                 ['STATIC_CONTENT_EXCLUDE_THEMES' => 'theme']
             ],
             [
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => 3],
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '3']
+            ],
+            [
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => 3],
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => 3]
+            ],
+            [
+                [],
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => 'test']
+            ],
+            [
+                [],
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '10']
+            ],
+            [
                 [DeployInterface::VAR_SCD_THREADS => 3],
                 [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3']
             ],

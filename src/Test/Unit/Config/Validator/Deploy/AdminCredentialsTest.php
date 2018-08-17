@@ -138,8 +138,8 @@ class AdminCredentialsTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(Error::ERROR, [
-                'error' => 'This email is already used',
-                'suggestion' => 'Use different email',
+                'error' => 'The same email is already used by different admin',
+                'suggestion' => 'Use different email address',
             ])
             ->willReturn(new Error('some_error'));
 
@@ -184,7 +184,7 @@ class AdminCredentialsTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(Error::ERROR, [
-                'error' => 'This username is already used',
+                'error' => 'The same username is already used by different admin',
                 'suggestion' => 'Use different username',
             ])
             ->willReturn(new Error('some_error'));

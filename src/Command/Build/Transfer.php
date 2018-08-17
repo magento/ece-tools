@@ -62,10 +62,10 @@ class Transfer extends Command
             $this->logger->info('Starting transfer files.');
             $this->process->execute();
             $this->logger->info('Transfer completed.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
+        } catch (\Throwable $e) {
+            $this->logger->critical($e->getMessage());
 
-            throw $exception;
+            throw $e;
         }
     }
 }
