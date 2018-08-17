@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Magento;
 
+use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
@@ -20,11 +22,18 @@ class System
     private $shell;
 
     /**
-     * @param ShellInterface $shell
+     * @var MagentoVersion
      */
-    public function __construct(ShellInterface $shell)
+    private $magentoVersion;
+
+    /**
+     * @param ShellInterface $shell
+     * @param MagentoVersion $magentoVersion
+     */
+    public function __construct(ShellInterface $shell, MagentoVersion $magentoVersion)
     {
         $this->shell = $shell;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
@@ -32,9 +41,15 @@ class System
      *
      * @param string $key
      * @return string|null
+     *
+     * @throws UndefinedPackageException
      */
     public function get(string $key)
     {
+        if (!$this->magentoVersion->isGreaterOrEqual('2.2.0')) {
+            return null;
+        }
+
         try {
             $result = implode(PHP_EOL, $this->shell->execute(sprintf(
                 './bin/magento config:show %s',
