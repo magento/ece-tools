@@ -7,10 +7,13 @@ namespace Magento\MagentoCloud\Process\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ArrayManager;
+use Magento\MagentoCloud\Util\PhpFormatter;
 
 /**
  * @inheritdoc
@@ -58,28 +61,39 @@ class Generate implements ProcessInterface
     private $magentoVersion;
 
     /**
+     * @var PhpFormatter
+     */
+    private $phpFormatter;
+
+    /**
      * @param ConnectionInterface $connection
      * @param File $file
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
      * @param SharedConfig $sharedConfig
+     * @param PhpFormatter $phpFormatter
      */
     public function __construct(
         ConnectionInterface $connection,
         File $file,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
-        SharedConfig $sharedConfig
+        SharedConfig $sharedConfig,
+        PhpFormatter $phpFormatter
     ) {
         $this->connection = $connection;
         $this->file = $file;
         $this->arrayManager = $arrayManager;
         $this->sharedConfig = $sharedConfig;
         $this->magentoVersion = $magentoVersion;
+        $this->phpFormatter = $phpFormatter;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws UndefinedPackageException
+     * @throws FileSystemException
      */
     public function execute()
     {
@@ -143,7 +157,9 @@ class Generate implements ProcessInterface
             'interface_locale'
         );
 
-        $updatedConfig = '<?php' . "\n" . 'return ' . var_export($newConfig, true) . ";\n";
-        $this->file->filePutContents($configFile, $updatedConfig);
+        $this->file->filePutContents(
+            $configFile,
+            $this->phpFormatter->format($newConfig)
+        );
     }
 }
