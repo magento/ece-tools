@@ -61,7 +61,7 @@ class SystemTest extends TestCase
             ->willReturn(true);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('./bin/magento config:show \'some/key\'')
+            ->with('php ./bin/magento config:show \'some/key\'')
             ->willReturn([$expectedResult]);
 
         $this->assertSame($expectedResult, $this->config->get('some/key'));
@@ -90,7 +90,7 @@ class SystemTest extends TestCase
             ->willReturn(true);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('./bin/magento config:show \'some/key\'')
+            ->with('php ./bin/magento config:show \'some/key\'')
             ->willThrowException(new \Exception('Command bin/magento returned code 1', 1));
 
         $this->assertNull($this->config->get('some/key'));

@@ -52,7 +52,7 @@ class System
 
         try {
             $result = implode(PHP_EOL, $this->shell->execute(sprintf(
-                './bin/magento config:show %s',
+                'php ./bin/magento config:show %s',
                 escapeshellarg($key)
             )));
         } catch (\Exception $e) {
