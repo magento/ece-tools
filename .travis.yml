@@ -8,8 +8,8 @@ services:
 
 language: php
 php:
-  - "7.0"
-  - "7.1"
+  - '7.0'
+  - '7.1'
 
 addons:
   apt:

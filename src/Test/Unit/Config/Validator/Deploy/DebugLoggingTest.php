@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\Deploy\DebugLogging;
-use Magento\MagentoCloud\Config\Validator\MagentoConfigValidator;
+use Magento\MagentoCloud\Config\Magento\System;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
@@ -27,7 +27,7 @@ class DebugLoggingTest extends TestCase
     private $validator;
 
     /**
-     * @var MagentoConfigValidator|MockObject
+     * @var System|MockObject
      */
     private $configValidatorMock;
 
@@ -41,9 +41,12 @@ class DebugLoggingTest extends TestCase
      */
     private $resultFactoryMock;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
-        $this->configValidatorMock = $this->createMock(MagentoConfigValidator::class);
+        $this->configValidatorMock = $this->createMock(System::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
@@ -62,7 +65,7 @@ class DebugLoggingTest extends TestCase
             ->method('isMasterBranch')
             ->willReturn(false);
         $this->configValidatorMock->expects($this->never())
-            ->method('validate');
+            ->method('get');
         $this->resultFactoryMock->expects($this->never())
             ->method('error');
         $this->resultFactoryMock->expects($this->once())
@@ -80,9 +83,9 @@ class DebugLoggingTest extends TestCase
             ->method('isMasterBranch')
             ->willReturn(true);
         $this->configValidatorMock->expects($this->once())
-            ->method('validate')
-            ->with('dev/debug/debug_logging', '0', '0')
-            ->willReturn(true);
+            ->method('get')
+            ->with('dev/debug/debug_logging')
+            ->willReturn('0');
         $this->resultFactoryMock->expects($this->never())
             ->method('error');
         $this->resultFactoryMock->expects($this->once())
@@ -100,9 +103,9 @@ class DebugLoggingTest extends TestCase
             ->method('isMasterBranch')
             ->willReturn(true);
         $this->configValidatorMock->expects($this->once())
-            ->method('validate')
-            ->with('dev/debug/debug_logging', '0', '0')
-            ->willReturn(false);
+            ->method('get')
+            ->with('dev/debug/debug_logging')
+            ->willReturn('1');
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with('Debug logging is enabled in Magento')

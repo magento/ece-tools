@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Validator\MagentoConfigValidator;
+use Magento\MagentoCloud\Config\Magento\System;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 
@@ -19,9 +19,9 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 class DebugLogging implements ValidatorInterface
 {
     /**
-     * @var MagentoConfigValidator
+     * @var System
      */
-    private $configValidator;
+    private $config;
 
     /**
      * @var Environment
@@ -34,16 +34,16 @@ class DebugLogging implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @param MagentoConfigValidator $validator
+     * @param System $config
      * @param Environment $environment
      * @param ResultFactory $resultFactory
      */
     public function __construct(
-        MagentoConfigValidator $validator,
+        System $config,
         Environment $environment,
         ResultFactory $resultFactory
     ) {
-        $this->configValidator = $validator;
+        $this->config = $config;
         $this->environment = $environment;
         $this->resultFactory = $resultFactory;
     }
@@ -57,7 +57,7 @@ class DebugLogging implements ValidatorInterface
             return $this->resultFactory->success();
         }
 
-        if ($this->configValidator->validate('dev/debug/debug_logging', '0', '0')) {
+        if (!$this->config->get('dev/debug/debug_logging')) {
             return $this->resultFactory->success();
         }
 
