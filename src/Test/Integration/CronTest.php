@@ -63,7 +63,9 @@ class CronTest extends AbstractTest
             $this->bootstrap->getSandboxDir()
         ));
 
-        $application = $this->bootstrap->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
+        $application = $this->bootstrap->createApplication([
+            'variables' => ['ADMIN_EMAIL' => 'admin@example.com', 'ADMIN_LOCALE' => 'ar_KW']
+        ]);
 
         /** @var File $file */
         $file = $application->getContainer()->get(File::class);
@@ -98,6 +100,15 @@ class CronTest extends AbstractTest
         $updateRunningJob = 'UPDATE cron_schedule '
             . 'SET created_at = NOW() - INTERVAL 3 day, scheduled_at = NOW() - INTERVAL 2 day, '
             . 'executed_at = NOW() - INTERVAL 2 day WHERE job_code = "cron_test_job" AND status = "running"';
+
+        $checkFormatDateForArabicLocale = $db->select('SELECT * FROM cron_schedule WHERE job_code = "cron_test_job_timeformat"');
+        $this->assertTrue(count($checkFormatDateForArabicLocale) > 0);
+        $currentTime = time();
+        foreach ($checkFormatDateForArabicLocale as $value) {
+            $scheduledAt = strtotime($value['scheduled_at']);
+            $this->assertSame(0, $scheduledAt % 300);
+            $this->assertTrue($scheduledAt - $currentTime <= 86400);
+        }
 
         $countSuccess = count($db->select($selectSuccessJobs));
         $this->assertTrue($db->query($addRunningJob));
