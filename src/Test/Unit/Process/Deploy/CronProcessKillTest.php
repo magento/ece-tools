@@ -39,8 +39,6 @@ class CronProcessKillTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->shellMock = $this->createMock(ShellInterface::class);
 
-        putenv('MAGENTO_ROOT=');
-
         $this->process = new CronProcessKill(
             $this->loggerMock,
             $this->shellMock
@@ -56,7 +54,7 @@ class CronProcessKillTest extends TestCase
             ->method('execute')
             ->willReturnMap(
                 [
-                    ['exec pgrep -U "$USER" -f "bin/magento cron:run"', [111, 222]],
+                    ['exec pgrep -U "$UID" -f "bin/magento cron:run"', [111, 222]],
                     ["kill 111", []],
                     ["kill 222", []],
                 ]
@@ -77,17 +75,13 @@ class CronProcessKillTest extends TestCase
             );
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('exec pgrep -U "$USER" -f "bin/magento cron:run"')
+            ->with('exec pgrep -U "$UID" -f "bin/magento cron:run"')
             ->willThrowException(new \RuntimeException('return code 1', 1));
         $this->process->execute();
     }
 
     /**
      * Test situation when pgrep process returns error code
-     *
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage return code 2
-     * @expectedExceptionCode 2
      */
     public function testExecuteWithError()
     {
@@ -96,8 +90,12 @@ class CronProcessKillTest extends TestCase
             ->with('Trying to kill running cron jobs');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('exec pgrep -U "$USER" -f "bin/magento cron:run"')
+            ->with('exec pgrep -U "$UID" -f "bin/magento cron:run"')
             ->willThrowException(new \RuntimeException('return code 2', 2));
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Error happening during kill cron: return code 2');
+
         $this->process->execute();
     }
 
@@ -116,7 +114,7 @@ class CronProcessKillTest extends TestCase
             );
         $this->shellMock->expects($this->at(0))
             ->method('execute')
-            ->with('exec pgrep -U "$USER" -f "bin/magento cron:run"')
+            ->with('exec pgrep -U "$UID" -f "bin/magento cron:run"')
             ->willReturn([111, 222]);
         $this->shellMock->expects($this->at(1))
             ->method('execute')
