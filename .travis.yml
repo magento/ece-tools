@@ -31,8 +31,8 @@ before_install:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
-
   - if [ -n "$MIN_LOGGING_LEVEL" ]; then echo "MIN_LOGGING_LEVEL=${MIN_LOGGING_LEVEL}" >> ./docker/global.env; fi;
+
 install:
   - composer update -n --no-suggest
   - ./bin/ece-tools docker:build --test --php ${TRAVIS_PHP_VERSION}
