@@ -28,7 +28,7 @@ return [
         ],
     ],
     'variables' => [
-        'ADMIN_EMAIL' => getenv('ADMIN_EMAIL') ?? 'admin@example.com',
-        'MIN_LOGGING_LEVEL' => getenv('MIN_LOGGING_LEVEL') ?? \Magento\MagentoCloud\Config\Log::LEVEL_NOTICE,
+        'ADMIN_EMAIL' => getenv('ADMIN_EMAIL') ?: 'admin@example.com',
+        'MIN_LOGGING_LEVEL' => getenv('MIN_LOGGING_LEVEL') ?: \Magento\MagentoCloud\Config\Log::LEVEL_NOTICE,
     ],
 ];
