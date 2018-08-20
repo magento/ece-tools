@@ -20,6 +20,11 @@ use Symfony\Component\Console\Tester\CommandTester;
 class CronTest extends AbstractTest
 {
     /**
+     * @var ConnectionInterface $db
+     */
+    private $db;
+
+    /**
      * @param string $commandName
      * @param Application $application
      * @return void
@@ -53,9 +58,10 @@ class CronTest extends AbstractTest
 
     /**
      * @param string $version
+     * @param string $locale
      * @dataProvider cronDataProvider
      */
-    public function testCron($version = null)
+    public function testCron($version = null, $locale = 'en_US')
     {
         $this->bootstrap->run($version);
         $this->bootstrap->execute(sprintf(
@@ -64,7 +70,7 @@ class CronTest extends AbstractTest
         ));
 
         $application = $this->bootstrap->createApplication([
-            'variables' => ['ADMIN_EMAIL' => 'admin@example.com', 'ADMIN_LOCALE' => 'ar_KW']
+            'variables' => ['ADMIN_EMAIL' => 'admin@example.com', 'ADMIN_LOCALE' => $locale]
         ]);
 
         /** @var File $file */
@@ -81,11 +87,10 @@ class CronTest extends AbstractTest
         $this->executeAndAssert(Build::NAME, $application);
         $this->executeAndAssert(Deploy::NAME, $application);
 
-        /** @var ConnectionInterface $db */
-        $db = $application->getContainer()->get(ConnectionInterface::class);
-        $db->close();
+        $this->db = $application->getContainer()->get(ConnectionInterface::class);
+        $this->db->close();
 
-        $this->assertTrue($db->query('DELETE FROM cron_schedule;'));
+        $this->assertTrue($this->db->query('DELETE FROM cron_schedule;'));
         $this->bootstrap->execute(sprintf(
             'cd %s && php bin/magento cron:run && php bin/magento cron:run',
             $this->bootstrap->getSandboxDir()
@@ -101,37 +106,31 @@ class CronTest extends AbstractTest
             . 'SET created_at = NOW() - INTERVAL 3 day, scheduled_at = NOW() - INTERVAL 2 day, '
             . 'executed_at = NOW() - INTERVAL 2 day WHERE job_code = "cron_test_job" AND status = "running"';
 
-        $checkFormatDateForArabicLocale = $db->select('SELECT * FROM cron_schedule WHERE job_code = "cron_test_job_timeformat"');
-        $this->assertTrue(count($checkFormatDateForArabicLocale) > 0);
-        $currentTime = time();
-        foreach ($checkFormatDateForArabicLocale as $value) {
-            $scheduledAt = strtotime($value['scheduled_at']);
-            $this->assertSame(0, $scheduledAt % 300);
-            $this->assertTrue($scheduledAt - $currentTime <= 86400);
-        }
+        $this->checkCronJobForLocale('cron_test_job_timeformat', 300);
+        $this->checkCronJobForLocale('cron_test_job_timeformat_seven', 420);
 
-        $countSuccess = count($db->select($selectSuccessJobs));
-        $this->assertTrue($db->query($addRunningJob));
-        $this->assertTrue($db->query($updatePendingJobs));
+        $countSuccess = count($this->db->select($selectSuccessJobs));
+        $this->assertTrue($this->db->query($addRunningJob));
+        $this->assertTrue($this->db->query($updatePendingJobs));
 
         $this->bootstrap->execute(sprintf(
             'cd %s && php bin/magento cron:run',
             $this->bootstrap->getSandboxDir()
         ));
 
-        $this->assertTrue($countSuccess == count($db->select($selectSuccessJobs)));
+        $this->assertTrue($countSuccess == count($this->db->select($selectSuccessJobs)));
 
-        $this->assertTrue($db->query($updateRunningJob));
-        $this->assertTrue($db->query($updatePendingJobs));
+        $this->assertTrue($this->db->query($updateRunningJob));
+        $this->assertTrue($this->db->query($updatePendingJobs));
 
         $this->bootstrap->execute(sprintf(
             'cd %s && php bin/magento cron:run',
             $this->bootstrap->getSandboxDir()
         ));
 
-        $this->assertTrue($countSuccess < count($db->select($selectSuccessJobs)));
+        $this->assertTrue($countSuccess < count($this->db->select($selectSuccessJobs)));
 
-        $db->close();
+        $this->db->close();
     }
 
     /**
@@ -140,10 +139,27 @@ class CronTest extends AbstractTest
     public function cronDataProvider(): array
     {
         return [
-            ['version' => '2.2.0'],
-            ['version' => '2.2.2'],
-            ['version' => '@stable'],
+            ['version' => '2.2.0', 'locale' => 'en_US'],
+            ['version' => '2.2.2', 'locale' => 'ar_KW'],
+            ['version' => '@stable', 'locale' => 'fr_FR'],
         ];
+    }
+
+    /**
+     * @param string $jobCode
+     * @param int $timeInterval
+     * @return void
+     */
+    private function checkCronJobForLocale(string $jobCode, int $timeInterval)
+    {
+        $jobs = $this->db->select('SELECT * FROM cron_schedule WHERE job_code = "' . $jobCode . '"');
+        $this->assertTrue(count($jobs) > 0);
+        $currentTime = time();
+        foreach ($jobs as $job) {
+            $scheduledAt = strtotime($job['scheduled_at']);
+            $this->assertSame(0, $scheduledAt % $timeInterval);
+            $this->assertTrue($scheduledAt - $currentTime <= 86400);
+        }
     }
 
     /**
