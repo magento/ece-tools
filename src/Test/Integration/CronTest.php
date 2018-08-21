@@ -153,12 +153,18 @@ class CronTest extends AbstractTest
     private function checkCronJobForLocale(string $jobCode, int $timeInterval)
     {
         $jobs = $this->db->select('SELECT * FROM cron_schedule WHERE job_code = "' . $jobCode . '"');
-        $this->assertTrue(count($jobs) > 0);
         $currentTime = time();
-        foreach ($jobs as $job) {
-            $scheduledAt = strtotime($job['scheduled_at']);
-            $this->assertSame(0, $scheduledAt % $timeInterval);
-            $this->assertTrue($scheduledAt - $currentTime <= 86400);
+        $this->assertTrue(count($jobs) > 1);
+
+        reset($jobs);
+        $currentJob = current($jobs);
+        while ($nextJob = next($jobs)) {
+            $currentJobTime = strtotime($currentJob['scheduled_at']);
+            $nextJobTime = strtotime($nextJob['scheduled_at']);
+            $currentJob = $nextJob;
+
+            $this->assertTrue($currentJobTime - $currentTime <= 86400);
+            $this->assertSame($timeInterval, $nextJobTime - $currentJobTime, $nextJobTime . ' - ' . $currentJobTime);
         }
     }
 
