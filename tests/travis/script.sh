@@ -16,7 +16,7 @@ case $TEST_SUITE in
         $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --configuration ${DIR_TOOLS}/tests/unit"
         ;;
     integration)
-        case $PHP in
+        case $TRAVIS_PHP_VERSION in
             7.0)
                 $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 ;;

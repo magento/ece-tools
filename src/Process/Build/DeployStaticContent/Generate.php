@@ -70,33 +70,29 @@ class Generate implements ProcessInterface
      */
     public function execute()
     {
-        try {
-            $locales = $this->buildOption->getLocales();
-            $excludeThemes = $this->buildOption->getExcludedThemes();
-            $threadCount = $this->buildOption->getThreadCount();
+        $locales = $this->buildOption->getLocales();
+        $excludeThemes = $this->buildOption->getExcludedThemes();
+        $threadCount = $this->buildOption->getThreadCount();
 
-            $logMessage = 'Generating static content for locales: ' . implode(' ', $locales);
+        $logMessage = 'Generating static content for locales: ' . implode(' ', $locales);
 
-            if (count($excludeThemes)) {
-                $logMessage .= PHP_EOL . 'Excluding Themes: ' . implode(' ', $excludeThemes);
-            }
+        if (count($excludeThemes)) {
+            $logMessage .= PHP_EOL . 'Excluding Themes: ' . implode(' ', $excludeThemes);
+        }
 
-            if ($threadCount) {
-                $logMessage .= PHP_EOL . 'Using ' . $threadCount . ' Threads';
-            }
+        if ($threadCount) {
+            $logMessage .= PHP_EOL . 'Using ' . $threadCount . ' Threads';
+        }
 
-            $this->logger->info($logMessage);
+        $this->logger->info($logMessage);
 
-            $commands = $this->commandFactory->matrix(
-                $this->buildOption,
-                $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
-            );
+        $commands = $this->commandFactory->matrix(
+            $this->buildOption,
+            $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
+        );
 
-            foreach ($commands as $command) {
-                $this->shell->execute($command);
-            }
-        } catch (\Exception $e) {
-            throw new \RuntimeException($e->getMessage(), 5);
+        foreach ($commands as $command) {
+            $this->shell->execute($command);
         }
     }
 }

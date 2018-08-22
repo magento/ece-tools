@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Shell\ShellInterface;
-use Magento\MagentoCloud\Config\Shared as SharedConfig;
 
 /**
  * Performs module management operations.
@@ -14,9 +13,9 @@ use Magento\MagentoCloud\Config\Shared as SharedConfig;
 class Module
 {
     /**
-     * @var SharedConfig
+     * @var ConfigInterface
      */
-    private $sharedConfig;
+    private $config;
 
     /**
      * @var ShellInterface
@@ -24,12 +23,12 @@ class Module
     private $shell;
 
     /**
-     * @param Shared $sharedConfig
+     * @param ConfigInterface $config
      * @param ShellInterface $shell
      */
-    public function __construct(SharedConfig $sharedConfig, ShellInterface $shell)
+    public function __construct(ConfigInterface $config, ShellInterface $shell)
     {
-        $this->sharedConfig = $sharedConfig;
+        $this->config = $config;
         $this->shell = $shell;
     }
 
@@ -40,16 +39,16 @@ class Module
      */
     public function refresh()
     {
-        $moduleConfig = (array)$this->sharedConfig->get('modules');
+        $moduleConfig = (array)$this->config->get('modules');
 
         if (!$moduleConfig) {
             $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
-            $this->sharedConfig->reset();
+            $this->config->reset();
 
             return;
         }
 
         $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
-        $this->sharedConfig->update(['modules' => $moduleConfig]);
+        $this->config->update(['modules' => $moduleConfig]);
     }
 }

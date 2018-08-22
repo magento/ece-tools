@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\Config\ConfigInterface;
 use Magento\MagentoCloud\Config\Module;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Shared as SharedConfig;
 
 /**
  * @inheritdoc
@@ -22,9 +22,9 @@ class ModuleTest extends TestCase
     private $module;
 
     /**
-     * @var SharedConfig|MockObject
+     * @var ConfigInterface|MockObject
      */
-    private $sharedConfigMock;
+    private $configMock;
 
     /**
      * @var ShellInterface|MockObject
@@ -36,27 +36,27 @@ class ModuleTest extends TestCase
      */
     protected function setUp()
     {
-        $this->sharedConfigMock = $this->createMock(SharedConfig::class);
+        $this->configMock = $this->getMockForAbstractClass(ConfigInterface::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
 
         $this->module = new Module(
-            $this->sharedConfigMock,
+            $this->configMock,
             $this->shellMock
         );
     }
 
     public function testRefreshWithMissingModuleConfig()
     {
-        $this->sharedConfigMock->expects($this->once())
+        $this->configMock->expects($this->once())
             ->method('get')
             ->with('modules')
             ->willReturn(null);
-        $this->sharedConfigMock->expects($this->once())
+        $this->configMock->expects($this->once())
             ->method('reset');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./bin/magento module:enable --all --ansi --no-interaction');
-        $this->sharedConfigMock->expects($this->never())
+        $this->configMock->expects($this->never())
             ->method('update');
 
         $this->module->refresh();
@@ -64,16 +64,16 @@ class ModuleTest extends TestCase
 
     public function testRefreshWithNewModules()
     {
-        $this->sharedConfigMock->expects($this->once())
+        $this->configMock->expects($this->once())
             ->method('get')
             ->with('modules')
             ->willReturn(['Some_OtherModule' => 1]);
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./bin/magento module:enable --all --ansi --no-interaction');
-        $this->sharedConfigMock->expects($this->never())
+        $this->configMock->expects($this->never())
             ->method('reset');
-        $this->sharedConfigMock->expects($this->once())
+        $this->configMock->expects($this->once())
             ->method('update')
             ->with(['modules' => ['Some_OtherModule' => 1]])
             ->willReturn(null);
@@ -83,14 +83,14 @@ class ModuleTest extends TestCase
 
     public function testRefreshWithNoNewModules()
     {
-        $this->sharedConfigMock->expects($this->once())
+        $this->configMock->expects($this->once())
             ->method('get')
             ->with('modules')
             ->willReturn(['Some_ExistingModule' => 1]);
-        $this->sharedConfigMock->expects($this->any())
+        $this->configMock->expects($this->any())
             ->method('all')
             ->willReturn(['modules' => ['Some_ExistingModule' => 1]]);
-        $this->sharedConfigMock->expects($this->any())
+        $this->configMock->expects($this->any())
             ->method('update')
             ->willReturn(null);
 

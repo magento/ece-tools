@@ -1,0 +1,58 @@
+diff -Nuar a/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Imap.php b/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Imap.php
+--- a/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Imap.php
++++ b/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Imap.php
+@@ -111,7 +111,8 @@ class Zend_Mail_Protocol_Imap
+ 
+         if ($ssl === 'TLS') {
+             $result = $this->requestAndResponse('STARTTLS');
+-            $result = $result && stream_socket_enable_crypto($this->_socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
++            // TODO: Add STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT in the future when it is supported by PHP
++            $result = $result && stream_socket_enable_crypto($this->_socket, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT);
+             if (!$result) {
+                 /**
+                  * @see Zend_Mail_Protocol_Exception
+
+diff -Nuar a/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Pop3.php b/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Pop3.php
+--- a/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Pop3.php
++++ b/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Pop3.php
+@@ -122,7 +122,8 @@ class Zend_Mail_Protocol_Pop3
+ 
+         if ($ssl === 'TLS') {
+             $this->request('STLS');
+-            $result = stream_socket_enable_crypto($this->_socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
++            // TODO: Add STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT in the future when it is supported by PHP
++            $result = stream_socket_enable_crypto($this->_socket, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT);
+             if (!$result) {
+                 /**
+                  * @see Zend_Mail_Protocol_Exception
+
+diff -Nuar a/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Smtp.php b/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Smtp.php
+--- a/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Smtp.php
++++ b/vendor/magento/zendframework1/library/Zend/Mail/Protocol/Smtp.php
+@@ -203,7 +203,8 @@ class Zend_Mail_Protocol_Smtp extends Ze
+         if ($this->_secure == 'tls') {
+             $this->_send('STARTTLS');
+             $this->_expect(220, 180);
+-            if (!stream_socket_enable_crypto($this->_socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
++            // TODO: Add STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT in the future when it is supported by PHP
++            if (!stream_socket_enable_crypto($this->_socket, true, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT)) {
+                 /**
+                  * @see Zend_Mail_Protocol_Exception
+                  */
+
+diff -Nuar a/vendor/magento/zendframework1/library/Zend/Http/Client/Adapter/Proxy.php b/vendor/magento/zendframework1/library/Zend/Http/Client/Adapter/Proxy.php
+--- a/vendor/magento/zendframework1/library/Zend/Http/Client/Adapter/Proxy.php
++++ b/vendor/magento/zendframework1/library/Zend/Http/Client/Adapter/Proxy.php
+@@ -297,10 +297,8 @@ class Zend_Http_Client_Adapter_Proxy ext
+         // If all is good, switch socket to secure mode. We have to fall back
+         // through the different modes
+         $modes = array(
+-            STREAM_CRYPTO_METHOD_TLS_CLIENT,
+-            STREAM_CRYPTO_METHOD_SSLv3_CLIENT,
+-            STREAM_CRYPTO_METHOD_SSLv23_CLIENT,
+-            STREAM_CRYPTO_METHOD_SSLv2_CLIENT
++            // TODO: Add STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT in the future when it is supported by PHP
++            STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT
+         );
+ 
+         $success = false;
