@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**
@@ -27,19 +28,32 @@ class MarshallFiles implements ProcessInterface
     private $directoryList;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        MagentoVersion $magentoVersion
     ) {
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
-     * @inheritdoc
+     * Clears var/cache directory.
+     * Copying di.xml files for Magento version < 2.2.
+     *
+     * Magento version 2.1.x won't install without copying di.xml files.
+     *
+     * {@inheritdoc}
      */
     public function execute()
     {
@@ -49,6 +63,10 @@ class MarshallFiles implements ProcessInterface
 
         if ($this->file->isExists($varCache)) {
             $this->file->deleteDirectory($varCache);
+        }
+
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+            return;
         }
 
         $this->file->copy(
