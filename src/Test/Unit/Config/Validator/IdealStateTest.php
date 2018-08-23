@@ -7,10 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 
-use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\ValidatorFactory;
 use Magento\MagentoCloud\Config\Validator\Deploy\PostDeploy;
 use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
+use Magento\MagentoCloud\Config\Validator\GlobalStage\SkipHtmlMinification;
 use Magento\MagentoCloud\Config\Validator\IdealState;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -39,9 +39,19 @@ class IdealStateTest extends TestCase
     private $validatorFactoryMock;
 
     /**
-     * @var GlobalSection|MockObject
+     * @var ScdOnBuild|MockObject
      */
-    private $globalConfigMock;
+    private $scdOnBuildMock;
+
+    /**
+     * @var PostDeploy|MockObject
+     */
+    private $postDeployMock;
+
+    /**
+     * @var SkipHtmlMinification|MockObject
+     */
+    private $skipHtmlMinificationMock;
 
     /**
      * @inheritdoc
@@ -50,38 +60,35 @@ class IdealStateTest extends TestCase
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->validatorFactoryMock = $this->createMock(ValidatorFactory::class);
-        $this->globalConfigMock = $this->createMock(GlobalSection::class);
 
-        $this->validator = new IdealState(
-            $this->resultFactoryMock,
-            $this->validatorFactoryMock,
-            $this->globalConfigMock
-        );
+        $this->scdOnBuildMock = $this->createMock(ScdOnBuild::class);
+        $this->postDeployMock = $this->createMock(PostDeploy::class);
+        $this->skipHtmlMinificationMock = $this->createMock(SkipHtmlMinification::class);
+
+        $this->validatorFactoryMock->method('create')
+            ->willReturnMap([
+                [ScdOnBuild::class, $this->scdOnBuildMock],
+                [PostDeploy::class, $this->postDeployMock],
+                [SkipHtmlMinification::class, $this->skipHtmlMinificationMock],
+            ]);
+
+        $this->validator = new IdealState($this->resultFactoryMock, $this->validatorFactoryMock);
     }
 
     public function testValidateSuccess()
     {
-        $scdOnBuildValidator = $this->createMock(ScdOnBuild::class);
-        $postDeployValidator = $this->createMock(PostDeploy::class);
         $result = new Success();
 
-        $scdOnBuildValidator->expects($this->once())
+        $this->scdOnBuildMock->expects($this->once())
             ->method('validate')
             ->willReturn(new Success());
-        $postDeployValidator->expects($this->once())
+        $this->postDeployMock->expects($this->once())
+            ->method('validate')
+            ->willReturn(new Success());
+        $this->skipHtmlMinificationMock->expects($this->once())
             ->method('validate')
             ->willReturn(new Success());
 
-        $this->validatorFactoryMock->expects($this->exactly(2))
-            ->method('create')
-            ->willReturnMap([
-                [ScdOnBuild::class, $scdOnBuildValidator],
-                [PostDeploy::class, $postDeployValidator],
-            ]);
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
-            ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
             ->method('success')
             ->willReturn($result);
@@ -93,26 +100,16 @@ class IdealStateTest extends TestCase
 
     public function testValidateError()
     {
-        $scdOnBuildValidator = $this->createMock(ScdOnBuild::class);
-        $postDeployValidator = $this->createMock(PostDeploy::class);
-
-        $scdOnBuildValidator->expects($this->once())
+        $this->scdOnBuildMock->expects($this->once())
             ->method('validate')
             ->willReturn(new Error('SCD validation failed'));
-        $postDeployValidator->expects($this->once())
+        $this->postDeployMock->expects($this->once())
             ->method('validate')
             ->willReturn(new Error('Post Deploy validation failed', 'Suggestion for post_deploy'));
+        $this->skipHtmlMinificationMock->expects($this->once())
+            ->method('validate')
+            ->willReturn(new Error('Skip HTML minification error', 'Set SKIP_HTML_MINIFICATION'));
 
-        $this->validatorFactoryMock->expects($this->exactly(2))
-            ->method('create')
-            ->willReturnMap([
-                [ScdOnBuild::class, $scdOnBuildValidator],
-                [PostDeploy::class, $postDeployValidator],
-            ]);
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
-            ->willReturn(false);
         $this->resultFactoryMock->expects($this->atLeastOnce())
             ->method('error')
             ->willReturnCallback(function ($message, $suggestion = '') {
@@ -129,33 +126,23 @@ class IdealStateTest extends TestCase
         $suggestion = 'SCD validation failed' . PHP_EOL . PHP_EOL;
         $suggestion .= 'Post Deploy validation failed' . PHP_EOL;
         $suggestion .= '  Suggestion for post_deploy' . PHP_EOL . PHP_EOL;
-        $suggestion .= 'Skip HTML minification is disabled' . PHP_EOL;
-        $suggestion .= '  Make sure "SKIP_HTML_MINIFICATION" is set to true in .magento.env.yaml.';
+        $suggestion .= 'Skip HTML minification error' . PHP_EOL;
+        $suggestion .= '  Set SKIP_HTML_MINIFICATION';
         $this->assertSame($suggestion, $result->getSuggestion());
     }
 
     public function testGetErrorsSuccess()
     {
-        $scdOnBuildValidator = $this->createMock(ScdOnBuild::class);
-        $postDeployValidator = $this->createMock(PostDeploy::class);
-
-        $scdOnBuildValidator->expects($this->once())
+        $this->scdOnBuildMock->expects($this->once())
             ->method('validate')
             ->willReturn(new Success());
-        $postDeployValidator->expects($this->once())
+        $this->postDeployMock->expects($this->once())
+            ->method('validate')
+            ->willReturn(new Success());
+        $this->skipHtmlMinificationMock->expects($this->once())
             ->method('validate')
             ->willReturn(new Success());
 
-        $this->validatorFactoryMock->expects($this->exactly(2))
-            ->method('create')
-            ->willReturnMap([
-                [ScdOnBuild::class, $scdOnBuildValidator],
-                [PostDeploy::class, $postDeployValidator],
-            ]);
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
-            ->willReturn(true);
         $this->resultFactoryMock->expects($this->never())
             ->method('error');
 
@@ -164,33 +151,20 @@ class IdealStateTest extends TestCase
 
     public function testGetErrorsError()
     {
-        $scdOnBuildValidator = $this->createMock(ScdOnBuild::class);
-        $postDeployValidator = $this->createMock(PostDeploy::class);
-
         $scdBuildError = new Error('The SCD is not set for the build stage');
         $postDeployError = new Error('Post-deploy hook is not configured');
         $skipMinificationError = new Error('Skip HTML minification is disabled');
 
-        $scdOnBuildValidator->expects($this->once())
+        $this->scdOnBuildMock->expects($this->once())
             ->method('validate')
             ->willReturn($scdBuildError);
-        $postDeployValidator->expects($this->once())
+        $this->postDeployMock->expects($this->once())
             ->method('validate')
             ->willReturn($postDeployError);
-
-        $this->validatorFactoryMock->expects($this->exactly(2))
-            ->method('create')
-            ->willReturnMap([
-                [ScdOnBuild::class, $scdOnBuildValidator],
-                [PostDeploy::class, $postDeployValidator],
-            ]);
-        $this->globalConfigMock->expects($this->once())
-            ->method('get')
-            ->with(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
-            ->willReturn(false);
-        $this->resultFactoryMock->expects($this->once())
-            ->method('error')
+        $this->skipHtmlMinificationMock->expects($this->once())
+            ->method('validate')
             ->willReturn($skipMinificationError);
+
         $this->resultFactoryMock->expects($this->never())
             ->method('success');
 

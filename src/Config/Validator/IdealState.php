@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator;
 
-use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\ValidatorFactory;
 
 /**
@@ -15,11 +14,6 @@ use Magento\MagentoCloud\Config\ValidatorFactory;
  */
 class IdealState implements CompositeValidator
 {
-    /**
-     * @var GlobalSection
-     */
-    private $globalConfig;
-
     /**
      * @var ValidatorFactory $validatorFactory
      */
@@ -33,16 +27,11 @@ class IdealState implements CompositeValidator
     /**
      * @param ResultFactory $resultFactory
      * @param ValidatorFactory $validatorFactory
-     * @param GlobalSection $globalSection
      */
-    public function __construct(
-        ResultFactory $resultFactory,
-        ValidatorFactory $validatorFactory,
-        GlobalSection $globalConfig
-    ) {
+    public function __construct(ResultFactory $resultFactory, ValidatorFactory $validatorFactory)
+    {
         $this->resultFactory = $resultFactory;
         $this->validatorFactory = $validatorFactory;
-        $this->globalConfig = $globalConfig;
     }
 
     /**
@@ -78,6 +67,7 @@ class IdealState implements CompositeValidator
 
         $scdBuildError = $this->validatorFactory->create(GlobalStage\ScdOnBuild::class)->validate();
         $postDeployError = $this->validatorFactory->create(Deploy\PostDeploy::class)->validate();
+        $htmlMinificationError = $this->validatorFactory->create(GlobalStage\SkipHtmlMinification::class)->validate();
 
         if (!$scdBuildError instanceof Result\Success) {
             $errors[] = $scdBuildError;
@@ -87,11 +77,8 @@ class IdealState implements CompositeValidator
             $errors[] = $postDeployError;
         }
 
-        if (!$this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
-            $errors[] = $this->resultFactory->error(
-                'Skip HTML minification is disabled',
-                'Make sure "SKIP_HTML_MINIFICATION" is set to true in .magento.env.yaml.'
-            );
+        if (!$htmlMinificationError instanceof Result\Success) {
+            $errors[] = $htmlMinificationError;
         }
 
         return $errors;
