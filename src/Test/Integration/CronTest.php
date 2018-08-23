@@ -107,7 +107,7 @@ class CronTest extends AbstractTest
             . 'executed_at = NOW() - INTERVAL 2 day WHERE job_code = "cron_test_job" AND status = "running"';
 
         $this->checkCronJobForLocale('cron_test_job_timeformat', 300);
-        $this->checkCronJobForLocale('cron_test_job_timeformat_seven', 420);
+        $this->checkCronJobForLocale('cron_test_job_timeformat_six', 360);
 
         $countSuccess = count($this->db->select($selectSuccessJobs));
         $this->assertTrue($this->db->query($addRunningJob));
