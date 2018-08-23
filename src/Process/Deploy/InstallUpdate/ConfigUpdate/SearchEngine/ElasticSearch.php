@@ -50,7 +50,7 @@ class ElasticSearch
     }
 
     /**
-     * Returns version of elasticsearch.
+     * Returns version of elasticsearch service.
      * Returns 0 if response from elasticsearch doesn't contain version number or
      *   elasticsearch doesn't exist in relationships.
      *

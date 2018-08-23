@@ -75,7 +75,7 @@ class State
         }
 
         if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
-            throw new GenericException('Missing either core_config_data or setup_module table', 5);
+            throw new GenericException('Missing either core_config_data or setup_module table');
         }
 
         $data = $this->reader->read();

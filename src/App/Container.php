@@ -94,6 +94,10 @@ class Container implements ContainerInterface
          * Interface to implementation binding.
          */
         $this->container->singleton(
+            \Magento\MagentoCloud\Config\ConfigInterface::class,
+            \Magento\MagentoCloud\Config\Shared::class
+        );
+        $this->container->singleton(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
             \Magento\MagentoCloud\Shell\Shell::class
         );
@@ -238,6 +242,7 @@ class Container implements ContainerInterface
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
+                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
                                     $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
                                     $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),

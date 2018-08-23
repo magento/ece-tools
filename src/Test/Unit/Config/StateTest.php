@@ -93,7 +93,6 @@ class StateTest extends TestCase
 
     /**
      * @param array $tables
-     * @expectedExceptionCode 5
      * @expectedException \Exception
      * @dataProvider tablesWithExceptionDataProvider
      */

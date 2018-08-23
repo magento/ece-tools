@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
-use Magento\MagentoCloud\Config\Shared;
+use Magento\MagentoCloud\Config\ConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
@@ -15,9 +15,9 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 class ModulesExists implements ValidatorInterface
 {
     /**
-     * @var Shared
+     * @var ConfigInterface
      */
-    private $sharedConfig;
+    private $config;
 
     /**
      * @var Validator\ResultFactory
@@ -25,12 +25,12 @@ class ModulesExists implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @param Shared $sharedConfig
+     * @param ConfigInterface $config
      * @param Validator\ResultFactory $resultFactory
      */
-    public function __construct(Shared $sharedConfig, Validator\ResultFactory $resultFactory)
+    public function __construct(ConfigInterface $config, Validator\ResultFactory $resultFactory)
     {
-        $this->sharedConfig = $sharedConfig;
+        $this->config = $config;
         $this->resultFactory = $resultFactory;
     }
 
@@ -39,7 +39,7 @@ class ModulesExists implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        return $this->sharedConfig->has('modules')
+        return $this->config->has('modules')
             ? $this->resultFactory->success()
             : $this->resultFactory->error('The modules section is missing from the shared config file.');
     }
