@@ -44,17 +44,18 @@ class CronProcessKill implements ProcessInterface
     public function execute()
     {
         try {
-            $this->logger->info("Trying to kill running cron jobs");
-            $cronPids = $this->shell->execute("exec pgrep -f 'bin/magento cron:run'");
+            $this->logger->info('Trying to kill running cron jobs');
+
+            $cronPids = $this->shell->execute('exec pgrep -U "$UID" -f "bin/magento cron:run"');
             foreach ($cronPids as $pid) {
                 $this->killProcess($pid);
             }
         } catch (\RuntimeException $e) {
             // pgrep returns 1 when no processes matched. Returns 2 and 3 in case of error
-            if ($e->getCode() == 1) {
+            if ($e->getCode() === 1) {
                 $this->logger->info('Running Magento cron processes were not found.');
             } else {
-                throw $e;
+                $this->logger->warning('Error happening during kill cron: ' . $e->getMessage());
             }
         }
     }
