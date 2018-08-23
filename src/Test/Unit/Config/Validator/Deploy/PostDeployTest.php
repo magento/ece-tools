@@ -63,7 +63,7 @@ class PostDeployTest extends TestCase
             ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
-            ->with('Your application does not have the \'post_deploy\' hook enabled.');
+            ->with('Your application does not have the "post_deploy" hook enabled.');
 
         $this->validator->validate();
     }

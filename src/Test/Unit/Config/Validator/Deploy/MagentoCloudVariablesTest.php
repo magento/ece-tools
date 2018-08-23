@@ -97,7 +97,7 @@ class MagentoCloudVariablesTest extends TestCase
             [
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '3a'],
                 ResultInterface::ERROR,
-                '  Variable "SCD_COMPRESSION_LEVEL" has wrong value: "3a". Please use only integer values.'
+                'Variable "SCD_COMPRESSION_LEVEL" has wrong value: "3a". Please use only integer values.'
             ],
             [
                 [DeployInterface::VAR_SCD_THREADS => '3'],
@@ -110,18 +110,18 @@ class MagentoCloudVariablesTest extends TestCase
             [
                 [DeployInterface::VAR_SCD_THREADS => '3a'],
                 ResultInterface::ERROR,
-                '  Variable "SCD_THREADS" has wrong value: "3a". Please use only integer values.'
+                'Variable "SCD_THREADS" has wrong value: "3a". Please use only integer values.'
             ],
             [
                 [DeployInterface::VAR_VERBOSE_COMMANDS => '1'],
                 ResultInterface::ERROR,
-                '  Variable VERBOSE_COMMANDS has wrong value "1", please use one of possible values: ' .
+                'Variable VERBOSE_COMMANDS has wrong value "1", please use one of possible values: ' .
                 '-v, -vv, -vvv, enabled'
             ],
             [
                 [DeployInterface::VAR_VERBOSE_COMMANDS => 'true'],
                 ResultInterface::ERROR,
-                '  Variable VERBOSE_COMMANDS has wrong value "true", please use one of possible values: ' .
+                'Variable VERBOSE_COMMANDS has wrong value "true", please use one of possible values: ' .
                 '-v, -vv, -vvv, enabled'
             ],
             [
@@ -135,27 +135,27 @@ class MagentoCloudVariablesTest extends TestCase
             [
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => '1'],
                 ResultInterface::ERROR,
-                '  Variable "CLEAN_STATIC_FILES" has wrong value: "1". Please use only disabled or enabled.'
+                'Variable "CLEAN_STATIC_FILES" has wrong value: "1". Please use only disabled or enabled.'
             ],
             [
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => '1'],
                 ResultInterface::ERROR,
-                '  Variable "STATIC_CONTENT_SYMLINK" has wrong value: "1". Please use only disabled or enabled.'
+                'Variable "STATIC_CONTENT_SYMLINK" has wrong value: "1". Please use only disabled or enabled.'
             ],
             [
                 [DeployInterface::VAR_UPDATE_URLS => '1'],
                 ResultInterface::ERROR,
-                '  Variable "UPDATE_URLS" has wrong value: "1". Please use only disabled or enabled.'
+                'Variable "UPDATE_URLS" has wrong value: "1". Please use only disabled or enabled.'
             ],
             [
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK => '1'],
                 ResultInterface::ERROR,
-                '  Variable "GENERATED_CODE_SYMLINK" has wrong value: "1". Please use only disabled or enabled.'
+                'Variable "GENERATED_CODE_SYMLINK" has wrong value: "1". Please use only disabled or enabled.'
             ],
             [
                 [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => '1'],
                 ResultInterface::ERROR,
-                '  Variable "DO_DEPLOY_STATIC_CONTENT" has wrong value: "1". Please use only disabled or enabled.'
+                'Variable "DO_DEPLOY_STATIC_CONTENT" has wrong value: "1". Please use only disabled or enabled.'
             ],
             [
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => 'enabled'],
@@ -184,9 +184,9 @@ class MagentoCloudVariablesTest extends TestCase
                     DeployInterface::VAR_VERBOSE_COMMANDS => '1'
                 ],
                 ResultInterface::ERROR,
-                '  Variable "SCD_COMPRESSION_LEVEL" has wrong value: "3a". Please use only integer values.' . PHP_EOL .
-                '  Variable "CLEAN_STATIC_FILES" has wrong value: "1". Please use only disabled or enabled.' . PHP_EOL .
-                '  Variable VERBOSE_COMMANDS has wrong value "1", ' .
+                'Variable "SCD_COMPRESSION_LEVEL" has wrong value: "3a". Please use only integer values.' . PHP_EOL .
+                'Variable "CLEAN_STATIC_FILES" has wrong value: "1". Please use only disabled or enabled.' . PHP_EOL .
+                'Variable VERBOSE_COMMANDS has wrong value "1", ' .
                 'please use one of possible values: -v, -vv, -vvv, enabled'
             ],
         ];
