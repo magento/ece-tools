@@ -6,14 +6,11 @@
 namespace Magento\MagentoCloud\Command\Wizard;
 
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
-use Magento\MagentoCloud\Config\GlobalSection;
-use Magento\MagentoCloud\Config\Validator\Deploy\PostDeploy;
+use Magento\MagentoCloud\Config\Validator\IdealState as IdealStateValidator;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
-use Magento\MagentoCloud\Config\ValidatorFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
 
 /**
  * @inheritdoc
@@ -28,28 +25,18 @@ class IdealState extends Command
     private $outputFormatter;
 
     /**
-     * @var ValidatorFactory
+     * @var IdealStateValidator
      */
-    private $validatorFactory;
-
-    /**
-     * @var GlobalSection
-     */
-    private $globalConfig;
+    private $validator;
 
     /**
      * @param OutputFormatter $outputFormatter
-     * @param ValidatorFactory $validatorFactory
-     * @param GlobalSection $globalConfig
+     * @param IdealStateValidator $validator
      */
-    public function __construct(
-        OutputFormatter $outputFormatter,
-        ValidatorFactory $validatorFactory,
-        GlobalSection $globalConfig
-    ) {
+    public function __construct(OutputFormatter $outputFormatter, IdealStateValidator $validator)
+    {
         $this->outputFormatter = $outputFormatter;
-        $this->validatorFactory = $validatorFactory;
-        $this->globalConfig = $globalConfig;
+        $this->validator = $validator;
 
         parent::__construct();
     }
@@ -70,28 +57,18 @@ class IdealState extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $errors = [];
+        $message = 'The configured state is ideal';
 
-        if (!$this->validatorFactory->create(ScdOnBuild::class)->validate() instanceof Success) {
-            $errors[] = 'The SCD is not set for the build stage';
+        if (!($result = $this->validator->validate()) instanceof Success) {
+            $message = $result->getError();
+
+            foreach ($this->validator->getErrors() as $error) {
+                $this->outputFormatter->writeItem($output, $error);
+            }
         }
 
-        if (!$this->validatorFactory->create(PostDeploy::class)->validate() instanceof Success) {
-            $errors[] = 'Post-deploy hook is not configured';
-        }
+        $this->outputFormatter->writeResult($output, $result instanceof Success, $message);
 
-        if (!$this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
-            $errors[] = 'Skip HTML minification is disabled';
-        }
-
-        foreach ($errors as $error) {
-            $this->outputFormatter->writeItem($output, $error);
-        }
-
-        $message = $errors
-            ? 'The configured state is not ideal'
-            : 'The configured state is ideal';
-
-        $this->outputFormatter->writeResult($output, !$errors, $message);
+        return count($this->validator->getErrors());
     }
 }

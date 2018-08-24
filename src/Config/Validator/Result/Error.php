@@ -49,4 +49,12 @@ class Error implements ResultInterface
     {
         return $this->suggestion;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString(): string
+    {
+        return $this->getError();
+    }
 }

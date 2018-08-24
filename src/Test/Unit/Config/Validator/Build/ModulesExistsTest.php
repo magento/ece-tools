@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
-use Magento\MagentoCloud\Config\Shared;
+use Magento\MagentoCloud\Config\ConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Build\ModulesExists;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -22,9 +22,9 @@ class ModulesExistsTest extends TestCase
     private $validator;
 
     /**
-     * @var Shared|MockObject
+     * @var ConfigInterface|MockObject
      */
-    private $sharedConfigMock;
+    private $configMock;
 
     /**
      * @var ResultFactory|MockObject
@@ -36,18 +36,18 @@ class ModulesExistsTest extends TestCase
      */
     protected function setUp()
     {
-        $this->sharedConfigMock = $this->createMock(Shared::class);
+        $this->configMock = $this->getMockForAbstractClass(ConfigInterface::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
         $this->validator = new ModulesExists(
-            $this->sharedConfigMock,
+            $this->configMock,
             $this->resultFactoryMock
         );
     }
 
     public function testValidate()
     {
-        $this->sharedConfigMock->expects($this->once())
+        $this->configMock->expects($this->once())
             ->method('has')
             ->with('modules')
             ->willReturn(true);
@@ -59,7 +59,7 @@ class ModulesExistsTest extends TestCase
 
     public function testValidateWithoutModules()
     {
-        $this->sharedConfigMock->expects($this->once())
+        $this->configMock->expects($this->once())
             ->method('has')
             ->with('modules')
             ->willReturn(false);

@@ -94,6 +94,10 @@ class Container implements ContainerInterface
          * Interface to implementation binding.
          */
         $this->container->singleton(
+            \Magento\MagentoCloud\Config\ConfigInterface::class,
+            \Magento\MagentoCloud\Config\Shared::class
+        );
+        $this->container->singleton(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
             \Magento\MagentoCloud\Shell\Shell::class
         );
@@ -168,11 +172,11 @@ class Container implements ContainerInterface
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
-                                    $this->container->make(ConfigValidator\Build\ConfigFileStructure::class),
                                     $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
                                     $this->container->make(ConfigValidator\Build\ModulesExists::class),
                                     $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Build\ScdOptionsIgnorance::class),
+                                    $this->container->make(ConfigValidator\IdealState::class),
                                 ],
                             ],
                         ]),
@@ -235,6 +239,7 @@ class Container implements ContainerInterface
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
+                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
                                     $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
                                     $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),
@@ -252,13 +257,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
                         $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(DeployProcess\EnableCron::class),
-                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
-                            'validators' => [
-                                ValidatorInterface::LEVEL_WARNING => [
-                                    $this->container->make(ConfigValidator\Deploy\PostDeploy::class),
-                                ],
-                            ],
-                        ]),
 
                         /**
                          * This process runs processes if only post_deploy hook is not configured.
@@ -390,6 +388,13 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->make(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+                            'validators' => [
+                                ValidatorInterface::LEVEL_WARNING => [
+                                    $this->container->make(ConfigValidator\Deploy\DebugLogging::class),
+                                ],
+                            ],
+                        ]),
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                         $this->container->make(PostDeployProcess\WarmUp::class),
