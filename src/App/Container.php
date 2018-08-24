@@ -235,11 +235,11 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
                                     $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
-                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
+                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
                                     $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),
