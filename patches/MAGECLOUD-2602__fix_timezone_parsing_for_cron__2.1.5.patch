@@ -1,0 +1,170 @@
+diff -Nuar a/vendor/magento/module-catalog/Block/Product/View/Options/Type/Date.php b/vendor/magento/module-catalog/Block/Product/View/Options/Type/Date.php
+--- a/vendor/magento/module-catalog/Block/Product/View/Options/Type/Date.php
++++ b/vendor/magento/module-catalog/Block/Product/View/Options/Type/Date.php
+@@ -1,6 +1,6 @@
+ <?php
+ /**
+- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
++ * Copyright © Magento, Inc. All rights reserved.
+  * See COPYING.txt for license details.
+  */
+ namespace Magento\Catalog\Block\Product\View\Options\Type;
+@@ -82,6 +82,9 @@ class Date extends \Magento\Catalog\Block\Product\View\Options\AbstractOptions
+         $yearStart = $this->_catalogProductOptionTypeDate->getYearStart();
+         $yearEnd = $this->_catalogProductOptionTypeDate->getYearEnd();
+ 
++        $dateFormat = $this->_localeDate->getDateFormat(\IntlDateFormatter::SHORT);
++        /** Escape RTL characters which are present in some locales and corrupt formatting */
++        $escapedDateFormat = preg_replace('/[^MmDdYy\/\.\-]/', '', $dateFormat);
+         $calendar = $this->getLayout()->createBlock(
+             'Magento\Framework\View\Element\Html\Date'
+         )->setId(
+@@ -93,7 +96,7 @@ class Date extends \Magento\Catalog\Block\Product\View\Options\AbstractOptions
+         )->setImage(
+             $this->getViewFileUrl('Magento_Theme::calendar.png')
+         )->setDateFormat(
+-            $this->_localeDate->getDateFormat(\IntlDateFormatter::SHORT)
++            $escapedDateFormat
+         )->setValue(
+             $value
+         )->setYearsRange(
+diff -Nuar a/vendor/magento/module-catalog/Model/Product/Option/Type/Date.php b/vendor/magento/module-catalog/Model/Product/Option/Type/Date.php
+--- a/vendor/magento/module-catalog/Model/Product/Option/Type/Date.php
++++ b/vendor/magento/module-catalog/Model/Product/Option/Type/Date.php
+@@ -1,6 +1,6 @@
+ <?php
+ /**
+- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
++ * Copyright © Magento, Inc. All rights reserved.
+  * See COPYING.txt for license details.
+  */
+ namespace Magento\Catalog\Model\Product\Option\Type;
+@@ -142,7 +142,7 @@ class Date extends \Magento\Catalog\Model\Product\Option\Type\DefaultType
+ 
+             if ($this->_dateExists()) {
+                 if ($this->useCalendar()) {
+-                    $timestamp += (new \DateTime($value['date']))->getTimestamp();
++                    $timestamp += $this->_localeDate->date($value['date'], null, true, false)->getTimestamp();
+                 } else {
+                     $timestamp += mktime(0, 0, 0, $value['month'], $value['day'], $value['year']);
+                 }
+diff -Nuar a/vendor/magento/framework/Stdlib/DateTime/Timezone.php b/vendor/magento/framework/Stdlib/DateTime/Timezone.php
+--- a/vendor/magento/framework/Stdlib/DateTime/Timezone.php
++++ b/vendor/magento/framework/Stdlib/DateTime/Timezone.php
+@@ -1,6 +1,6 @@
+ <?php
+ /**
+- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
++ * Copyright © Magento, Inc. All rights reserved.
+  * See COPYING.txt for license details.
+  */
+ namespace Magento\Framework\Stdlib\DateTime;
+@@ -151,28 +151,33 @@ class Timezone implements TimezoneInterface
+ 
+     /**
+      * {@inheritdoc}
+-     * @SuppressWarnings(PHPMD.NPathComplexity)
+      */
+-    public function date($date = null, $locale = null, $useTimezone = true)
++    public function date($date = null, $locale = null, $useTimezone = true, $includeTime = true)
+     {
+         $locale = $locale ?: $this->_localeResolver->getLocale();
+         $timezone = $useTimezone
+             ? $this->getConfigTimezone()
+             : date_default_timezone_get();
+ 
+-        if (empty($date)) {
+-            return new \DateTime('now', new \DateTimeZone($timezone));
+-        } elseif ($date instanceof \DateTime) {
+-            return $date->setTimezone(new \DateTimeZone($timezone));
+-        } elseif (!is_numeric($date)) {
+-            $formatter = new \IntlDateFormatter(
+-                $locale,
+-                \IntlDateFormatter::SHORT,
+-                \IntlDateFormatter::SHORT,
+-                new \DateTimeZone($timezone)
+-            );
+-            $date = $formatter->parse($date) ?: (new \DateTime($date))->getTimestamp();
++        switch (true) {
++            case (empty($date)):
++                return new \DateTime('now', new \DateTimeZone($timezone));
++            case ($date instanceof \DateTime):
++                return $date->setTimezone(new \DateTimeZone($timezone));
++            case ($date instanceof \DateTimeImmutable):
++                return new \DateTime($date->format('Y-m-d H:i:s'), $date->getTimezone());
++            case (!is_numeric($date)):
++                $timeType = $includeTime ? \IntlDateFormatter::SHORT : \IntlDateFormatter::NONE;
++                $formatter = new \IntlDateFormatter(
++                    $locale,
++                    \IntlDateFormatter::SHORT,
++                    $timeType,
++                    new \DateTimeZone($timezone)
++                );
++                $date = $formatter->parse($date) ?: (new \DateTime($date))->getTimestamp();
++                break;
+         }
++
+         return (new \DateTime(null, new \DateTimeZone($timezone)))->setTimestamp($date);
+     }
+ 
+@@ -196,7 +201,7 @@ class Timezone implements TimezoneInterface
+     {
+         $formatTime = $showTime ? $format : \IntlDateFormatter::NONE;
+ 
+-        if (!($date instanceof \DateTime)) {
++        if (!($date instanceof \DateTimeInterface)) {
+             $date = new \DateTime($date);
+         }
+ 
+@@ -259,7 +264,7 @@ class Timezone implements TimezoneInterface
+         $timezone = null,
+         $pattern = null
+     ) {
+-        if (!($date instanceof \DateTime)) {
++        if (!($date instanceof \DateTimeInterface)) {
+             $date = new \DateTime($date);
+         }
+ 
+@@ -295,8 +300,12 @@ class Timezone implements TimezoneInterface
+      */
+     public function convertConfigTimeToUtc($date, $format = 'Y-m-d H:i:s')
+     {
+-        if (!($date instanceof \DateTime)) {
+-            $date = new \DateTime($date, new \DateTimeZone($this->getConfigTimezone()));
++        if (!($date instanceof \DateTimeInterface)) {
++            if ($date instanceof \DateTimeImmutable) {
++                $date = new \DateTime($date->format('Y-m-d H:i:s'), new \DateTimeZone($this->getConfigTimezone()));
++            } else {
++                $date = new \DateTime($date, new \DateTimeZone($this->getConfigTimezone()));
++            }
+         } else {
+             if ($date->getTimezone()->getName() !== $this->getConfigTimezone()) {
+                 throw new LocalizedException(
+diff -Nuar a/vendor/magento/framework/Stdlib/DateTime/TimezoneInterface.php b/vendor/magento/framework/Stdlib/DateTime/TimezoneInterface.php
+--- a/vendor/magento/framework/Stdlib/DateTime/TimezoneInterface.php
++++ b/vendor/magento/framework/Stdlib/DateTime/TimezoneInterface.php
+@@ -1,6 +1,6 @@
+ <?php
+ /**
+- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
++ * Copyright © Magento, Inc. All rights reserved.
+  * See COPYING.txt for license details.
+  */
+ 
+@@ -62,12 +62,13 @@ interface TimezoneInterface
+     /**
+      * Create \DateTime object for current locale
+      *
+-     * @param mixed              $date
++     * @param mixed $date
+      * @param string $locale
+-     * @param bool               $useTimezone
++     * @param bool $useTimezone
++     * @param bool $includeTime
+      * @return \DateTime
+      */
+-    public function date($date = null, $locale = null, $useTimezone = true);
++    public function date($date = null, $locale = null, $useTimezone = true, $includeTime = true);
+ 
+     /**
+      * Create \DateTime object with date converted to scope timezone and scope Locale
