@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -41,21 +42,29 @@ class Deploy extends Command
     private $packageManager;
 
     /**
+     * @var MaintenanceModeSwitcher
+     */
+    private $maintenanceModeSwitcher;
+
+    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
      * @param FlagManager $flagManager
      * @param PackageManager $packageManager
+     * @param MaintenanceModeSwitcher $maintenanceModeSwitcher
      */
     public function __construct(
         ProcessInterface $process,
         LoggerInterface $logger,
         FlagManager $flagManager,
-        PackageManager $packageManager
+        PackageManager $packageManager,
+        MaintenanceModeSwitcher $maintenanceModeSwitcher
     ) {
         $this->process = $process;
         $this->logger = $logger;
         $this->flagManager = $flagManager;
         $this->packageManager = $packageManager;
+        $this->maintenanceModeSwitcher = $maintenanceModeSwitcher;
 
         parent::__construct();
     }
@@ -81,13 +90,17 @@ class Deploy extends Command
         try {
             $this->flagManager->delete(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
             $this->logger->notice('Starting deploy. ' . $this->packageManager->getPrettyInfo());
-            $this->process->execute();
-            $this->logger->notice('Deployment completed.');
-        } catch (\Exception $exception) {
-            $this->flagManager->set(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
-            $this->logger->critical($exception->getMessage());
+            $this->maintenanceModeSwitcher->enable();
 
-            throw $exception;
+            $this->process->execute();
+
+            $this->maintenanceModeSwitcher->disable();
+            $this->logger->notice('Deployment completed.');
+        } catch (\Throwable $e) {
+            $this->flagManager->set(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
+            $this->logger->critical($e->getMessage());
+
+            throw $e;
         }
     }
 }

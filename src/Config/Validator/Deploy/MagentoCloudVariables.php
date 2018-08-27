@@ -51,21 +51,21 @@ class MagentoCloudVariables implements ValidatorInterface
             && !in_array($variables[DeployInterface::VAR_VERBOSE_COMMANDS], $possibleVerboseValues, true)
         ) {
             $errors[] = sprintf(
-                'Variable %s has wrong value "%s", please use one of possible values: %s',
+                '  The variable %s has wrong value "%s" and will be ignored, use one of possible values: %s',
                 DeployInterface::VAR_VERBOSE_COMMANDS,
                 $variables[DeployInterface::VAR_VERBOSE_COMMANDS],
-                implode(', ', $possibleVerboseValues)
+                implode(', ', array_slice($possibleVerboseValues, 0, -1))
             );
         }
 
         if ($errors) {
-            return $this->resultFactory->create(Validator\Result\Error::ERROR, [
-                'error' => 'Environment configuration is not valid',
-                'suggestion' => implode(PHP_EOL, $errors),
-            ]);
+            return $this->resultFactory->error(
+                'Environment configuration is not valid',
+                implode(PHP_EOL, $errors)
+            );
         }
 
-        return $this->resultFactory->create(Validator\Result\Success::SUCCESS);
+        return $this->resultFactory->success();
     }
 
     /**
@@ -80,7 +80,6 @@ class MagentoCloudVariables implements ValidatorInterface
 
         $intVariables = [
             DeployInterface::VAR_STATIC_CONTENT_THREADS,
-            DeployInterface::VAR_SCD_COMPRESSION_LEVEL,
             DeployInterface::VAR_SCD_THREADS,
         ];
 
@@ -90,10 +89,24 @@ class MagentoCloudVariables implements ValidatorInterface
                 && !ctype_digit($variables[$intVarName])
             ) {
                 $errors[] = sprintf(
-                    'Variable "%s" has wrong value: "%s". Please use only integer values.',
+                    '  The variable %s has wrong value "%s" and will be ignored, use only integer value',
                     $intVarName,
                     $variables[$intVarName]
                 );
+            }
+        }
+
+        if (isset($variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL])) {
+            if (!ctype_digit($variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL])
+                || !in_array(intval($variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL]), range(0, 9))
+            ) {
+                $errors[] = sprintf(
+                    '  The variable %s has wrong value "%s" and will be ignored, use only integer value from 0 to 9',
+                    DeployInterface::VAR_SCD_COMPRESSION_LEVEL,
+                    $variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL]
+                );
+            } else {
+                unset($variables[DeployInterface::VAR_SCD_COMPRESSION_LEVEL]);
             }
         }
 
@@ -119,7 +132,7 @@ class MagentoCloudVariables implements ValidatorInterface
         foreach ($enableDisableVariables as $varName) {
             if (isset($variables[$varName]) && !in_array($variables[$varName], $possibleValues, true)) {
                 $errors[] = sprintf(
-                    'Variable "%s" has wrong value: "%s". Please use only %s.',
+                    '  The variable %s has wrong value: "%s" and will be ignored, use only %s',
                     $varName,
                     $variables[$varName],
                     implode(' or ', $possibleValues)

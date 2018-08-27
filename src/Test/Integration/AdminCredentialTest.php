@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Integration;
 
+use Magento\MagentoCloud\Application;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -149,6 +149,45 @@ class AdminCredentialTest extends AbstractTest
         $this->executeAndAssert(Deploy::NAME, $application);
 
         $this->assertContains('Updating admin credentials: nothing to update.', $this->getCloudLog());
+    }
+
+    /**
+     * Test that admin email/username won't be changed if admin with such email/username exist in database.
+     */
+    public function testUpdateAdminExists()
+    {
+        $application = $this->bootstrap->createApplication([]);
+
+        $this->executeAndAssert(Build::NAME, $application);
+
+        $application = $this->bootstrap->createApplication([
+            'variables' => [
+                'ADMIN_EMAIL' => 'admin@example.com',
+                'ADMIN_USERNAME' => 'admin'
+            ]
+        ]);
+        // Install Magento
+        $this->executeAndAssert(Deploy::NAME, $application);
+
+        $this->bootstrap->execute(sprintf(
+            'cd %s && php bin/magento admin:user:create --admin-user=%s --admin-email=%s ' .
+            '--admin-password=123123Qq --admin-firstname=admin --admin-lastname=admin',
+            $this->bootstrap->getSandboxDir(),
+            'admin2',
+            'admin2@example.com'
+        ));
+
+        $application = $this->bootstrap->createApplication([
+            'variables' => [
+                'ADMIN_EMAIL' => 'admin2@example.com',
+                'ADMIN_USERNAME' => 'admin2'
+            ]
+        ]);
+
+        // Upgrade Magento with admin email and name that already exist
+        $this->executeAndAssert(Deploy::NAME, $application);
+
+        $this->assertContains('Skipping updating admin credentials', $this->getCloudLog());
     }
 
     private function getCloudLog()
