@@ -42,7 +42,13 @@ class PostDeploy implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         if (!$this->hookChecker->isPostDeployHookEnabled()) {
-            return $this->resultFactory->error('Your application does not have the \'post_deploy\' hook enabled.');
+            return $this->resultFactory->error(
+                'Your application does not have the "post_deploy" hook enabled.',
+                'In order to minimize downtime, add the following to ".magento.app.yaml":' . PHP_EOL .
+                'hooks:' . PHP_EOL .
+                '    post_deploy: |' . PHP_EOL .
+                '        php ./vendor/bin/ece-tools post-deploy'
+            );
         }
 
         return $this->resultFactory->success();

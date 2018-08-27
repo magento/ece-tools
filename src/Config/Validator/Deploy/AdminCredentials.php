@@ -81,8 +81,8 @@ class AdminCredentials implements ValidatorInterface
             return $this->resultFactory->create(
                 Validator\Result\Error::ERROR,
                 [
-                    'error' => 'This email is already used',
-                    'suggestion' => 'Use different email',
+                    'error' => 'The same email is already used by different admin',
+                    'suggestion' => 'Use different email address',
                 ]
             );
         }
@@ -91,7 +91,7 @@ class AdminCredentials implements ValidatorInterface
             return $this->resultFactory->create(
                 Validator\Result\Error::ERROR,
                 [
-                    'error' => 'This username is already used',
+                    'error' => 'The same username is already used by different admin',
                     'suggestion' => 'Use different username',
                 ]
             );

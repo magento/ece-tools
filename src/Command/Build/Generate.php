@@ -72,10 +72,10 @@ class Generate extends Command
             $this->logger->info('Starting generate command. ' . $this->packageManager->getPrettyInfo());
             $this->process->execute();
             $this->logger->info('Generate command completed.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
+        } catch (\Throwable $e) {
+            $this->logger->critical($e->getMessage());
 
-            throw $exception;
+            throw $e;
         }
     }
 }

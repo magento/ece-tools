@@ -5,12 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\Deploy\RawEnvVariable;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -23,9 +23,14 @@ class RawEnvVariableTest extends TestCase
     private $validator;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
+
+    /**
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
 
     /**
      * @inheritdoc
@@ -33,8 +38,9 @@ class RawEnvVariableTest extends TestCase
     protected function setUp()
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
+        $this->environmentMock = $this->createMock(Environment::class);
 
-        $this->validator = new RawEnvVariable($this->resultFactoryMock);
+        $this->validator = new RawEnvVariable($this->resultFactoryMock, $this->environmentMock);
     }
 
     /**
@@ -44,8 +50,9 @@ class RawEnvVariableTest extends TestCase
      */
     public function testExecute(string $scdThreadsValue, string $expectedResultMethodName)
     {
-        $_ENV[DeployInterface::VAR_STATIC_CONTENT_THREADS] = $scdThreadsValue;
-
+        $this->environmentMock->expects($this->once())
+            ->method('getEnv')
+            ->willReturn($scdThreadsValue);
         $this->resultFactoryMock->expects($this->once())
             ->method($expectedResultMethodName);
 
@@ -78,15 +85,6 @@ class RawEnvVariableTest extends TestCase
                 'two',
                 ResultInterface::ERROR
             ],
-            [
-                '',
-                ResultInterface::ERROR
-            ]
         ];
-    }
-
-    public function tearDown()
-    {
-        $_ENV = [];
     }
 }

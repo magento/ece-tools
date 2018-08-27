@@ -5,12 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\Deploy\MagentoCloudVariables;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Validator;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -61,12 +61,12 @@ class MagentoCloudVariablesTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getVariables')
             ->willReturn($magentoCloudVariables);
-        $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with($expectedResultType, $suggestionMessage ? [
-                'error' => 'Environment configuration is not valid',
-                'suggestion' => $suggestionMessage
-            ] : $this->anything());
+        $resultMock = $this->resultFactoryMock->expects($this->once())
+            ->method(strtolower($expectedResultType));
+
+        if ($suggestionMessage) {
+            $resultMock->with('Environment configuration is not valid', $this->stringContains($suggestionMessage));
+        }
 
         $this->validator->validate();
     }
@@ -97,7 +97,20 @@ class MagentoCloudVariablesTest extends TestCase
             [
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '3a'],
                 ResultInterface::ERROR,
-                '  Variable "SCD_COMPRESSION_LEVEL" has wrong value: "3a". Please use only integer values.'
+                'The variable SCD_COMPRESSION_LEVEL has wrong value "3a" and will be ignored, ' .
+                'use only integer value from 0 to 9'
+            ],
+            [
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => 25],
+                ResultInterface::ERROR,
+                'The variable SCD_COMPRESSION_LEVEL has wrong value "25" and will be ignored, ' .
+                'use only integer value from 0 to 9'
+            ],
+            [
+                [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '10'],
+                ResultInterface::ERROR,
+                'The variable SCD_COMPRESSION_LEVEL has wrong value "10" and will be ignored, ' .
+                'use only integer value from 0 to 9'
             ],
             [
                 [DeployInterface::VAR_SCD_THREADS => '3'],
@@ -110,19 +123,19 @@ class MagentoCloudVariablesTest extends TestCase
             [
                 [DeployInterface::VAR_SCD_THREADS => '3a'],
                 ResultInterface::ERROR,
-                '  Variable "SCD_THREADS" has wrong value: "3a". Please use only integer values.'
+                'The variable SCD_THREADS has wrong value "3a" and will be ignored, use only integer value'
             ],
             [
                 [DeployInterface::VAR_VERBOSE_COMMANDS => '1'],
                 ResultInterface::ERROR,
-                '  Variable VERBOSE_COMMANDS has wrong value "1", please use one of possible values: ' .
-                '-v, -vv, -vvv, enabled'
+                'The variable VERBOSE_COMMANDS has wrong value "1" and will be ignored, use one of possible values:' .
+                ' -v, -vv, -vvv'
             ],
             [
                 [DeployInterface::VAR_VERBOSE_COMMANDS => 'true'],
                 ResultInterface::ERROR,
-                '  Variable VERBOSE_COMMANDS has wrong value "true", please use one of possible values: ' .
-                '-v, -vv, -vvv, enabled'
+                'The variable VERBOSE_COMMANDS has wrong value "true" and will be ignored,' .
+                ' use one of possible values: -v, -vv, -vvv'
             ],
             [
                 [DeployInterface::VAR_VERBOSE_COMMANDS => '-v'],
@@ -135,27 +148,29 @@ class MagentoCloudVariablesTest extends TestCase
             [
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => '1'],
                 ResultInterface::ERROR,
-                '  Variable "CLEAN_STATIC_FILES" has wrong value: "1". Please use only disabled or enabled.'
+                'The variable CLEAN_STATIC_FILES has wrong value: "1" and will be ignored, use only disabled or enabled'
             ],
             [
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => '1'],
                 ResultInterface::ERROR,
-                '  Variable "STATIC_CONTENT_SYMLINK" has wrong value: "1". Please use only disabled or enabled.'
+                'The variable STATIC_CONTENT_SYMLINK has wrong value: "1" and will be ignored'
             ],
             [
                 [DeployInterface::VAR_UPDATE_URLS => '1'],
                 ResultInterface::ERROR,
-                '  Variable "UPDATE_URLS" has wrong value: "1". Please use only disabled or enabled.'
+                'The variable UPDATE_URLS has wrong value: "1" and will be ignored, use only disabled or enabled'
             ],
             [
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK => '1'],
                 ResultInterface::ERROR,
-                '  Variable "GENERATED_CODE_SYMLINK" has wrong value: "1". Please use only disabled or enabled.'
+                'The variable GENERATED_CODE_SYMLINK has wrong value: "1" and will be ignored,' .
+                ' use only disabled or enabled'
             ],
             [
                 [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => '1'],
                 ResultInterface::ERROR,
-                '  Variable "DO_DEPLOY_STATIC_CONTENT" has wrong value: "1". Please use only disabled or enabled.'
+                'The variable DO_DEPLOY_STATIC_CONTENT has wrong value: "1" and will be ignored,' .
+                ' use only disabled or enable'
             ],
             [
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => 'enabled'],
@@ -184,10 +199,12 @@ class MagentoCloudVariablesTest extends TestCase
                     DeployInterface::VAR_VERBOSE_COMMANDS => '1'
                 ],
                 ResultInterface::ERROR,
-                '  Variable "SCD_COMPRESSION_LEVEL" has wrong value: "3a". Please use only integer values.' . PHP_EOL .
-                '  Variable "CLEAN_STATIC_FILES" has wrong value: "1". Please use only disabled or enabled.' . PHP_EOL .
-                '  Variable VERBOSE_COMMANDS has wrong value "1", ' .
-                'please use one of possible values: -v, -vv, -vvv, enabled'
+                '  The variable SCD_COMPRESSION_LEVEL has wrong value "3a" and will be ignored, ' .
+                'use only integer value from 0 to 9' . PHP_EOL .
+                '  The variable CLEAN_STATIC_FILES has wrong value: "1" and will be ignored, ' .
+                'use only disabled or enabled' . PHP_EOL .
+                '  The variable VERBOSE_COMMANDS has wrong value "1" and will be ignored, ' .
+                'use one of possible values: -v, -vv, -vvv'
             ],
         ];
     }

@@ -101,26 +101,16 @@ class SetupTest extends TestCase
         $this->flagManagerMock->expects($this->exactly(2))
             ->method('delete')
             ->with(FlagManager::FLAG_REGENERATE);
-        $this->shellMock->expects($this->exactly(3))
+        $this->shellMock->expects($this->once())
             ->method('execute')
-            ->withConsecutive(
-                ['php ./bin/magento maintenance:enable --ansi --no-interaction -v'],
-                [
-                    '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
-                    . '--keep-generated --ansi --no-interaction -v | tee -a '
-                    . $installUpgradeLog . '"',
-                ],
-                ['php ./bin/magento maintenance:disable --ansi --no-interaction -v']
+            ->with(
+                '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
+                . '--keep-generated --ansi --no-interaction -v | tee -a '
+                . $installUpgradeLog . '"'
             );
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Running setup upgrade.');
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('notice')
-            ->withConsecutive(
-                ['Enabling Maintenance mode.'],
-                ['Maintenance mode is disabled.']
-            );
 
         $this->process->execute();
     }

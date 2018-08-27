@@ -5,11 +5,13 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
+use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Util\PasswordGenerator;
+use Magento\MagentoCloud\Config\Validator\Deploy\AdminCredentials as AdminCredentialsValidator;
 
 /**
  * Updates admin credentials.
@@ -37,21 +39,29 @@ class AdminCredentials implements ProcessInterface
     private $connection;
 
     /**
+     * @var AdminCredentialsValidator
+     */
+    private $adminCredentialsValidator;
+
+    /**
      * @param LoggerInterface $logger
      * @param ConnectionInterface $connection
      * @param Environment $environment
      * @param PasswordGenerator $passwordGenerator
+     * @param AdminCredentialsValidator $adminCredentialsValidator
      */
     public function __construct(
         LoggerInterface $logger,
         ConnectionInterface $connection,
         Environment $environment,
-        PasswordGenerator $passwordGenerator
+        PasswordGenerator $passwordGenerator,
+        AdminCredentialsValidator $adminCredentialsValidator
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
         $this->environment = $environment;
         $this->passwordGenerator = $passwordGenerator;
+        $this->adminCredentialsValidator = $adminCredentialsValidator;
     }
 
     /**
@@ -59,32 +69,19 @@ class AdminCredentials implements ProcessInterface
      */
     public function execute()
     {
-        $data = [];
-
-        $adminEmail = $this->environment->getAdminEmail();
-        if ($adminEmail && !$this->isEmailUsed($adminEmail)) {
-            $data['`email`'] = $adminEmail;
+        $result = $this->adminCredentialsValidator->validate();
+        if ($result instanceof Error) {
+            $this->logger->notice(
+                sprintf(
+                    'Skipping updating admin credentials: %s (%s)',
+                    $result->getError(),
+                    $result->getSuggestion()
+                )
+            );
+            return;
         }
 
-        $adminUserName = $this->environment->getAdminUsername();
-        if ($adminUserName && !$this->isUsernameUsed($adminUserName)) {
-            $data['`username`'] = $adminUserName;
-        }
-
-        $adminFirstName = $this->environment->getAdminFirstname();
-        if ($adminFirstName) {
-            $data['`firstname`'] = $adminFirstName;
-        }
-
-        $adminLastName = $this->environment->getAdminLastname();
-        if ($adminLastName) {
-            $data['`lastname`'] = $adminLastName;
-        }
-
-        $adminPassword = $this->environment->getAdminPassword();
-        if ($adminPassword) {
-            $data['`password`'] = $this->passwordGenerator->generateSaltAndHash($adminPassword);
-        }
+        $data = $this->getAdminData();
 
         if (!$data) {
             $this->logger->info('Updating admin credentials: nothing to update.');
@@ -124,5 +121,42 @@ class AdminCredentials implements ProcessInterface
     private function isUsernameUsed(string $username): bool
     {
         return count($this->connection->select('SELECT 1 FROM `admin_user` WHERE `username` = ?', [$username])) > 0;
+    }
+
+    /**
+     * Returns admin data to be updated
+     *
+     * @return array
+     */
+    private function getAdminData(): array
+    {
+        $data = [];
+
+        $adminEmail = $this->environment->getAdminEmail();
+        if ($adminEmail && !$this->isEmailUsed($adminEmail)) {
+            $data['`email`'] = $adminEmail;
+        }
+
+        $adminUserName = $this->environment->getAdminUsername();
+        if ($adminUserName && !$this->isUsernameUsed($adminUserName)) {
+            $data['`username`'] = $adminUserName;
+        }
+
+        $adminFirstName = $this->environment->getAdminFirstname();
+        if ($adminFirstName) {
+            $data['`firstname`'] = $adminFirstName;
+        }
+
+        $adminLastName = $this->environment->getAdminLastname();
+        if ($adminLastName) {
+            $data['`lastname`'] = $adminLastName;
+        }
+
+        $adminPassword = $this->environment->getAdminPassword();
+        if ($adminPassword) {
+            $data['`password`'] = $this->passwordGenerator->generateSaltAndHash($adminPassword);
+        }
+
+        return $data;
     }
 }

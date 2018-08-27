@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -45,6 +46,11 @@ class DeployTest extends TestCase
     private $packageManagerMock;
 
     /**
+     * @var MaintenanceModeSwitcher|MockObject
+     */
+    private $maintenanceModeSwitcher;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -53,12 +59,14 @@ class DeployTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->packageManagerMock = $this->createMock(PackageManager::class);
+        $this->maintenanceModeSwitcher = $this->createMock(MaintenanceModeSwitcher::class);
 
         $this->command = new Deploy(
             $this->processMock,
             $this->loggerMock,
             $this->flagManagerMock,
-            $this->packageManagerMock
+            $this->packageManagerMock,
+            $this->maintenanceModeSwitcher
         );
     }
 
@@ -74,6 +82,8 @@ class DeployTest extends TestCase
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('Some info.');
+        $this->maintenanceModeSwitcher->expects($this->once())
+            ->method('enable');
 
         $tester = new CommandTester(
             $this->command

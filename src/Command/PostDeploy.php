@@ -77,10 +77,10 @@ class PostDeploy extends Command
             $this->logger->notice('Starting post-deploy.');
             $this->process->execute();
             $this->logger->notice('Post-deploy is complete.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
+        } catch (\Throwable $e) {
+            $this->logger->critical($e->getMessage());
 
-            throw $exception;
+            throw $e;
         }
     }
 }

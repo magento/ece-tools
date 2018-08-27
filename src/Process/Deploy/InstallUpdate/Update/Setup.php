@@ -95,8 +95,6 @@ class Setup implements ProcessInterface
         try {
             $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
 
-            $this->logger->notice('Enabling Maintenance mode.');
-            $this->shell->execute('php ./bin/magento maintenance:enable --ansi --no-interaction ' . $verbosityLevel);
             $this->logger->info('Running setup upgrade.');
 
             $this->shell->execute(sprintf(
@@ -104,9 +102,6 @@ class Setup implements ProcessInterface
                 'php ./bin/magento setup:upgrade --keep-generated --ansi --no-interaction ' . $verbosityLevel,
                 $this->fileList->getInstallUpgradeLog()
             ));
-
-            $this->shell->execute('php ./bin/magento maintenance:disable --ansi --no-interaction ' . $verbosityLevel);
-            $this->logger->notice('Maintenance mode is disabled.');
         } catch (\RuntimeException $e) {
             //Rollback required by database
             throw new \RuntimeException($e->getMessage(), 6);

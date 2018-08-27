@@ -134,11 +134,11 @@ class ConfigFileStructureTest extends TestCase
                 ResultInterface::ERROR,
                 [
                     'error' => 'No stores/website/locales found in config.php',
-                    'suggestion' => '  To speed up the deploy process, please run the following commands:' . PHP_EOL
-                        . '  1. php ./vendor/bin/ece-tools config:dump' . PHP_EOL
-                        . '  2. git add -f app/etc/config.php' . PHP_EOL
-                        . '  3. git commit -m \'Updating config.php\'' . PHP_EOL
-                        . '  4. git push',
+                    'suggestion' => 'To speed up the deploy process do the following:' . PHP_EOL
+                        . '1. Using SSH, log in to your Magento Cloud account' . PHP_EOL
+                        . '2. Run "php ./vendor/bin/ece-tools config:dump"' . PHP_EOL
+                        . '3. Using SCP, copy the app/etc/config.php file to your local repository' . PHP_EOL
+                        . '4. Add, commit, and push your changes to the app/etc/config.php file',
                 ]
             )
             ->willReturn($resultMock);
@@ -175,11 +175,11 @@ class ConfigFileStructureTest extends TestCase
                 ResultInterface::ERROR,
                 [
                     'error' => 'No stores/website/locales found in config.local.php',
-                    'suggestion' => '  To speed up the deploy process, please run the following commands:' . PHP_EOL
-                        . '  1. php ./vendor/bin/ece-tools config:dump' . PHP_EOL
-                        . '  2. git add -f app/etc/config.local.php' . PHP_EOL
-                        . '  3. git commit -m \'Updating config.local.php\'' . PHP_EOL
-                        . '  4. git push',
+                    'suggestion' => 'To speed up the deploy process do the following:' . PHP_EOL
+                        . '1. Using SSH, log in to your Magento Cloud account' . PHP_EOL
+                        . '2. Run "php ./vendor/bin/ece-tools config:dump"' . PHP_EOL
+                        . '3. Using SCP, copy the app/etc/config.local.php file to your local repository' . PHP_EOL
+                        . '4. Add, commit, and push your changes to the app/etc/config.local.php file',
                 ]
             )
             ->willReturn($resultMock);
