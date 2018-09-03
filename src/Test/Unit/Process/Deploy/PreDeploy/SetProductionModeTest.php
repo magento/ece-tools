@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Deploy\Writer;
-use Magento\MagentoCloud\Process\Deploy\SetMode;
+use Magento\MagentoCloud\Process\Deploy\PreDeploy\SetProductionMode;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -14,10 +14,10 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class SetModeTest extends TestCase
+class SetProductionModeTest extends TestCase
 {
     /**
-     * @var SetMode
+     * @var SetProductionMode
      */
     private $process;
 
@@ -39,7 +39,7 @@ class SetModeTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->writer = $this->createMock(Writer::class);
 
-        $this->process = new SetMode(
+        $this->process = new SetProductionMode(
             $this->loggerMock,
             $this->writer
         );

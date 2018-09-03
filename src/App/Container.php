@@ -357,7 +357,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
-                        $this->container->make(DeployProcess\PreDeploy\SetMode::class),
+                        $this->container->make(DeployProcess\PreDeploy\SetProductionMode::class),
                     ],
                 ]);
             });
