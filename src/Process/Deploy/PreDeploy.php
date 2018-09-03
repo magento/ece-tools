@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,24 +25,39 @@ class PreDeploy implements ProcessInterface
     private $process;
 
     /**
+     * @var MaintenanceModeSwitcher
+     */
+    private $maintenanceModeSwitcher;
+
+    /**
      * @param LoggerInterface $logger
      * @param ProcessInterface $process
-     * @param Manager $packageManager
+     * @param MaintenanceModeSwitcher $maintenanceModeSwitcher
      */
     public function __construct(
         LoggerInterface $logger,
-        ProcessInterface $process
+        ProcessInterface $process,
+        MaintenanceModeSwitcher $maintenanceModeSwitcher
     ) {
         $this->logger = $logger;
         $this->process = $process;
+        $this->maintenanceModeSwitcher = $maintenanceModeSwitcher;
     }
 
     /**
-     * @inheritdoc
+     * Runs all processes that have to be run before deploy starting.
+     * Enabling maintenance mode afterward.
+     *
+     * It's impossible to enable maintenance mode before pre-deploy processes as bin/magento command
+     * can't be run without some files that are copying during files restoring from build phase.
+     *
+     * {@inheritdoc}
      */
     public function execute()
     {
         $this->logger->info('Starting pre-deploy.');
         $this->process->execute();
+
+        $this->maintenanceModeSwitcher->enable();
     }
 }
