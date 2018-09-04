@@ -124,6 +124,9 @@
     },
     "Zendframework1 should use TLS 1.2": {
       ">=2.1.4 <2.3": "MAGECLOUD-2521__zendframework1_use_TLS_1.2.patch"
+    },
+    "Remove the permission check for the console application": {
+      "2.2.0 - 2.2.5": "MAGECLOUD-2509__remove_permission_check_for_console_application__2.2.0.patch"
     }
   }
 }
