@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Process\Deploy\PreDeploy;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -27,6 +28,11 @@ class PreDeployTest extends TestCase
     private $processMock;
 
     /**
+     * @var MaintenanceModeSwitcher|MockObject
+     */
+    private $maintenanceModeSwitcher;
+
+    /**
      * @var PreDeploy
      */
     private $process;
@@ -36,14 +42,14 @@ class PreDeployTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->maintenanceModeSwitcher = $this->createMock(MaintenanceModeSwitcher::class);
 
         $this->process = new PreDeploy(
             $this->loggerMock,
-            $this->processMock
+            $this->processMock,
+            $this->maintenanceModeSwitcher
         );
     }
 
@@ -52,6 +58,8 @@ class PreDeployTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting pre-deploy.');
+        $this->maintenanceModeSwitcher->expects($this->once())
+            ->method('enable');
         $this->processMock->expects($this->once())
             ->method('execute');
 

@@ -90,7 +90,6 @@ class Deploy extends Command
         try {
             $this->flagManager->delete(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
             $this->logger->notice('Starting deploy. ' . $this->packageManager->getPrettyInfo());
-            $this->maintenanceModeSwitcher->enable();
 
             $this->process->execute();
 
