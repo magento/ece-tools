@@ -143,4 +143,33 @@ class EnvironmentTest extends TestCase
             ],
         ];
     }
+
+    public function testExecuteWithPlaceholders()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->withConsecutive(
+                ['Updating secure and unsecure URLs in app/etc/env.php file']
+            );
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'system' => [
+                    'default' => [
+                        'web' => [
+                            'secure' => ['base_url' => '{{base_url}}'],
+                            'unsecure' => ['base_url' => '{{unsecure_base_url}}'],
+                        ],
+                    ],
+                ],
+            ]);
+        $this->urlManagerMock->expects($this->once())
+            ->method('getUrls')
+            ->willReturn([
+                'secure' => ['' => 'https://example1.com/', '*' => 'https://subsite---example1.com'],
+                'unsecure' => ['' => 'http://example1.com/', '*' => 'http://subsite---example1.com'],
+            ]);
+
+        $this->process->execute();
+    }
 }
