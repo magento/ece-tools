@@ -270,4 +270,14 @@ class Environment
         return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
             && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
     }
+
+    /**
+     * Returns branch name of the current environment.
+     *
+     * @return string
+     */
+    public function getBranchName(): string
+    {
+        return $_ENV['MAGENTO_CLOUD_BRANCH'] ?? '';
+    }
 }
