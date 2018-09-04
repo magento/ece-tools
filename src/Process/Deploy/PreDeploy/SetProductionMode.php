@@ -3,16 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy;
+namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * Switching magento to production mode.
+ * This is making for compatibility magento with cloud environment read-only file system.
+ * As magento contains logic that skips checking on read-only file system only in production mode.
  */
-class SetMode implements ProcessInterface
+class SetProductionMode implements ProcessInterface
 {
     /**
      * @var Writer
