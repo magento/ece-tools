@@ -43,8 +43,12 @@ class Shell implements ShellInterface
      * $this->shell->execute('/bin/bash -c "set -o pipefail; firstCommand | secondCommand"');
      * ```
      */
-    public function execute(string $command)
+    public function execute(string $command, array $args = []): array
     {
+        if ($args) {
+            $command .= implode(' ', $args);
+        }
+
         $this->logger->info($command);
 
         $rootPathCommand = sprintf(
@@ -68,7 +72,7 @@ class Shell implements ShellInterface
         }
 
         if ($status != 0) {
-            throw new \RuntimeException("Command $command returned code $status", $status);
+            throw new ShellException("Command $command returned code $status", $status);
         }
 
         return $output;

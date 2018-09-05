@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Config\Magento;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ShellFactory;
 
 /**
  * Retrieves a value by running bin/magento config:show
@@ -17,9 +17,9 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 class System
 {
     /**
-     * @var ShellInterface
+     * @var ShellFactory
      */
-    private $shell;
+    private $shellFactory;
 
     /**
      * @var MagentoVersion
@@ -27,12 +27,12 @@ class System
     private $magentoVersion;
 
     /**
-     * @param ShellInterface $shell
+     * @param ShellFactory $shellFactory
      * @param MagentoVersion $magentoVersion
      */
-    public function __construct(ShellInterface $shell, MagentoVersion $magentoVersion)
+    public function __construct(ShellFactory $shellFactory, MagentoVersion $magentoVersion)
     {
-        $this->shell = $shell;
+        $this->shellFactory = $shellFactory;
         $this->magentoVersion = $magentoVersion;
     }
 
@@ -50,14 +50,10 @@ class System
             return null;
         }
 
-        try {
-            $result = implode(PHP_EOL, $this->shell->execute(sprintf(
-                'php ./bin/magento config:show %s',
-                escapeshellarg($key)
-            )));
-        } catch (\Exception $e) {
-            return null;
-        }
+        $result = implode(PHP_EOL, $this->shellFactory->create(ShellFactory::STRATEGY_MAGENTO_SHELL)->execute(
+            'config:show',
+            [$key]
+        ));
 
         return $result;
     }
