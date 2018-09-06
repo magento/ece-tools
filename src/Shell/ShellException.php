@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Shell;
 
+/**
+ * Exception for shell operations.
+ */
 class ShellException extends \RuntimeException
 {
 }

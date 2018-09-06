@@ -32,6 +32,6 @@ class MagentoShell implements ShellInterface
     {
         $defaultArgs = ['--ansi', '--no-interaction'];
 
-        return $this->shell->execute('php ./bin/magento ' . $command, array_merge($defaultArgs, $args));
+        return $this->shell->execute('php ./bin/magento ' . $command, array_merge($defaultArgs, (array)$args));
     }
 }

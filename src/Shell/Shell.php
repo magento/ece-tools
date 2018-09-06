@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Shell;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\SystemList;
 use Psr\Log\LoggerInterface;
 use Monolog\Logger;
 
@@ -22,18 +22,18 @@ class Shell implements ShellInterface
     private $logger;
 
     /**
-     * @var DirectoryList
+     * @var SystemList
      */
-    private $directoryList;
+    private $systemList;
 
     /**
      * @param LoggerInterface $logger
-     * @param DirectoryList $directoryList
+     * @param SystemList $systemList
      */
-    public function __construct(LoggerInterface $logger, DirectoryList $directoryList)
+    public function __construct(LoggerInterface $logger, SystemList $systemList)
     {
         $this->logger = $logger;
-        $this->directoryList = $directoryList;
+        $this->systemList = $systemList;
     }
 
     /**
@@ -58,13 +58,13 @@ class Shell implements ShellInterface
 
         $this->logger->info($command);
 
-        $command = sprintf(
+        $fullCommand = sprintf(
             'cd %s && %s 2>&1',
-            $this->directoryList->getMagentoRoot(),
+            $this->systemList->getMagentoRoot(),
             $command
         );
 
-        exec($command, $output, $status);
+        exec($fullCommand, $output, $status);
 
         /**
          * Edge case.

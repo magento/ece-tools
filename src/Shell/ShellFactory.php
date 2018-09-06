@@ -9,6 +9,9 @@ namespace Magento\MagentoCloud\Shell;
 
 use Magento\MagentoCloud\App\ContainerInterface;
 
+/**
+ * Factory class for shell wrappers.
+ */
 class ShellFactory
 {
     const STRATEGY_SHELL = 'shell';
