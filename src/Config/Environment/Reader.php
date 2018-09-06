@@ -43,6 +43,7 @@ class Reader implements ReaderInterface
      * @var File
      */
     private $file;
+
     /**
      * Cached configuration
      *
