@@ -77,6 +77,10 @@ class Environment implements ProcessInterface
                 continue;
             }
 
+            if (in_array($baseUrls[$typeUrl], ['{{base_url}}', '{{unsecure_base_url}}'])) {
+                continue;
+            }
+
             $baseHost = parse_url($baseUrls[$typeUrl])['host'];
             $actualHost = parse_url($actualUrls[''])['host'];
 
