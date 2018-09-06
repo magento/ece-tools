@@ -124,6 +124,9 @@
     },
     "Zendframework1 should use TLS 1.2": {
       ">=2.1.4 <2.3": "MAGECLOUD-2521__zendframework1_use_TLS_1.2.patch"
+    },
+    "The recursion detected error during deployment": {
+      "2.2.0 - 2.2.6": "MAGECLOUD-2173__the_recursion_error_during_deployment__2.2.0.patch"
     }
   }
 }
