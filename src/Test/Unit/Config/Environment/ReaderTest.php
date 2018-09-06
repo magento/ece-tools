@@ -63,7 +63,7 @@ class ReaderTest extends TestCase
             ->method('getEnvConfig')
             ->willReturn($baseDir . '/.magento.env.yaml');
         $this->systemListMock->expects($this->once())
-            ->method('getRoot')
+            ->method('getMagentoRoot')
             ->willReturn($baseDir);
         $this->environmentMock->expects($this->once())
             ->method('getBranchName')
@@ -84,7 +84,7 @@ class ReaderTest extends TestCase
             ->method('getEnvConfig')
             ->willReturn($baseDir . '/.magento.env.yaml');
         $this->systemListMock->expects($this->once())
-            ->method('getRoot')
+            ->method('getMagentoRoot')
             ->willReturn($baseDir);
         $this->environmentMock->expects($this->once())
             ->method('getBranchName')

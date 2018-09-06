@@ -80,7 +80,7 @@ class Reader implements ReaderInterface
 
             $branchConfigPath = sprintf(
                 '%s/%s/%s.yaml',
-                $this->systemList->getRoot(),
+                $this->systemList->getMagentoRoot(),
                 self::DIR_ENV_CONFIG,
                 $this->environment->getBranchName()
             );
