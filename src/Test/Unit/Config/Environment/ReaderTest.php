@@ -8,8 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Environment;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\SystemList;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -19,9 +19,9 @@ use PHPUnit\Framework\TestCase;
 class ReaderTest extends TestCase
 {
     /**
-     * @var DirectoryList|MockObject
+     * @var SystemList|MockObject
      */
-    private $directoryListMock;
+    private $systemListMock;
 
     /**
      * @var Environment|MockObject
@@ -43,12 +43,12 @@ class ReaderTest extends TestCase
      */
     protected function setUp()
     {
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->systemListMock = $this->createMock(SystemList::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
 
         $this->reader = new Reader(
-            $this->directoryListMock,
+            $this->systemListMock,
             $this->environmentMock,
             $this->configFileListMock,
             new File()
@@ -62,9 +62,9 @@ class ReaderTest extends TestCase
         $this->configFileListMock->expects($this->once())
             ->method('getEnvConfig')
             ->willReturn($baseDir . '/.magento.env.yaml');
-        $this->directoryListMock->expects($this->once())
-            ->method('getEnvConfig')
-            ->willReturn($baseDir . '/.magento.env/');
+        $this->systemListMock->expects($this->once())
+            ->method('getRoot')
+            ->willReturn($baseDir);
         $this->environmentMock->expects($this->once())
             ->method('getBranchName')
             ->willReturn('test-branch');
@@ -83,9 +83,9 @@ class ReaderTest extends TestCase
         $this->configFileListMock->expects($this->once())
             ->method('getEnvConfig')
             ->willReturn($baseDir . '/.magento.env.yaml');
-        $this->directoryListMock->expects($this->once())
-            ->method('getEnvConfig')
-            ->willReturn($baseDir . '/.magento.env/');
+        $this->systemListMock->expects($this->once())
+            ->method('getRoot')
+            ->willReturn($baseDir);
         $this->environmentMock->expects($this->once())
             ->method('getBranchName')
             ->willReturn('not-exist');

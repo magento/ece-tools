@@ -29,7 +29,6 @@ class DirectoryList
     const DIR_MEDIA = 'media';
     const DIR_VIEW_PREPROCESSED = 'view-preprocessed';
     const DIR_STATIC = 'static';
-    const DIR_ENV_CONFIG = 'magento-env';
 
     /**
      * @var string
@@ -145,16 +144,6 @@ class DirectoryList
     }
 
     /**
-     * Returns path to the dir that contains configuration file for concrete environment.
-     *
-     * @return string
-     */
-    public function getEnvConfig(): string
-    {
-        return $this->getPath(static::DIR_ENV_CONFIG);
-    }
-
-    /**
      * Retrieves writable directories.
      *
      * @return array
@@ -191,7 +180,6 @@ class DirectoryList
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
             static::DIR_STATIC => [static::PATH => 'pub/static'],
             static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
-            static::DIR_ENV_CONFIG => [static::PATH => '.magento.env'],
         ];
 
         return $config;

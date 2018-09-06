@@ -7,10 +7,10 @@ namespace Magento\MagentoCloud\Config\Environment;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\SystemList;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -20,9 +20,14 @@ use Symfony\Component\Yaml\Exception\ParseException;
 class Reader implements ReaderInterface
 {
     /**
-     * @var DirectoryList
+     * @string
      */
-    private $directoryList;
+    const DIR_ENV_CONFIG = '.magento.env';
+
+    /**
+     * @var SystemList
+     */
+    private $systemList;
 
     /**
      * @var Environment
@@ -46,18 +51,18 @@ class Reader implements ReaderInterface
     private $config;
 
     /**
-     * @param DirectoryList $directoryList
+     * @param SystemList $systemList
      * @param Environment $environment
      * @param ConfigFileList $configFileList
      * @param File $file
      */
     public function __construct(
-        DirectoryList $directoryList,
+        SystemList $systemList,
         Environment $environment,
         ConfigFileList $configFileList,
         File $file
     ) {
-        $this->directoryList = $directoryList;
+        $this->systemList = $systemList;
         $this->environment = $environment;
         $this->configFileList = $configFileList;
         $this->file = $file;
@@ -74,8 +79,9 @@ class Reader implements ReaderInterface
             $mainConfigPath = $this->configFileList->getEnvConfig();
 
             $branchConfigPath = sprintf(
-                '%s/%s.yaml',
-                $this->directoryList->getEnvConfig(),
+                '%s/%s/%s.yaml',
+                $this->systemList->getRoot(),
+                self::DIR_ENV_CONFIG,
                 $this->environment->getBranchName()
             );
 
