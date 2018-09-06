@@ -67,7 +67,7 @@ class Shell implements ShellInterface
         exec($fullCommand, $output, $status);
 
         /**
-         * Edge case.
+         * config:show will return non-zero exit code, if the value was not changed and remains default.
          */
         if ($status !== 0 && strpos($command, 'config:show') !== false) {
             return [];

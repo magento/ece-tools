@@ -50,11 +50,9 @@ class System
             return null;
         }
 
-        $result = implode(PHP_EOL, $this->shellFactory->create(ShellFactory::STRATEGY_MAGENTO_SHELL)->execute(
+        return implode(PHP_EOL, $this->shellFactory->create(ShellFactory::STRATEGY_MAGENTO_SHELL)->execute(
             'config:show',
             $key
         ));
-
-        return $result;
     }
 }
