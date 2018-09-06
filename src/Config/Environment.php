@@ -252,14 +252,6 @@ class Environment
     }
 
     /**
-     * @return string
-     */
-    public function getMinLoggingLevel(): string
-    {
-        return $this->getVariable('MIN_LOGGING_LEVEL', '');
-    }
-
-    /**
      * Checks that environment uses the main branch depending on environment variable MAGENTO_CLOUD_ENVIRONMENT
      * which contains the name of the git branch.
      *
