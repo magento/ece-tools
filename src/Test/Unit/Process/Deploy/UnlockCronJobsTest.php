@@ -86,10 +86,6 @@ class UnlockCronJobsTest extends TestCase
             ->method('isGreaterOrEqual')
             ->with('2.2.2')
             ->willReturn(true);
-        $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->with('2.2.2')
-            ->willReturn(true);
         $this->jobUnlockerMock->expects($this->never())
             ->method('unlockAll');
 
