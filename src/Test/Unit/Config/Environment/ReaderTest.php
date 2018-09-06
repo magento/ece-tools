@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\SystemList;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -18,6 +19,8 @@ use PHPUnit\Framework\TestCase;
  */
 class ReaderTest extends TestCase
 {
+    use PHPMock;
+
     /**
      * @var SystemList|MockObject
      */
@@ -34,6 +37,11 @@ class ReaderTest extends TestCase
     private $configFileListMock;
 
     /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
      * @var Reader
      */
     private $reader;
@@ -43,15 +51,22 @@ class ReaderTest extends TestCase
      */
     protected function setUp()
     {
+        /**
+         * This lines are required for proper running of Magento\MagentoCloud\Test\Unit\Filesystem\Driver\FileTest
+         */
+        self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_get_contents');
+        self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_exists');
+
         $this->systemListMock = $this->createMock(SystemList::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
+        $this->fileMock = $this->createPartialMock(File::class, []);
 
         $this->reader = new Reader(
             $this->systemListMock,
             $this->environmentMock,
             $this->configFileListMock,
-            new File()
+            $this->fileMock
         );
     }
 
