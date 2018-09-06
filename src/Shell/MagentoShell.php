@@ -7,64 +7,31 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Shell;
 
-use Magento\MagentoCloud\Filesystem\SystemList;
-use Psr\Log\LoggerInterface;
-
+/**
+ * ./bin/magento shell wrapper.
+ */
 class MagentoShell implements ShellInterface
 {
     /**
-     * @var LoggerInterface
+     * @var Shell
      */
-    private $logger;
+    private $shell;
 
     /**
-     * @var SystemList
+     * @param Shell $shell
      */
-    private $systemList;
-
-    /**
-     * @param LoggerInterface $logger
-     * @param SystemList $systemList
-     */
-    public function __construct(LoggerInterface $logger, SystemList $systemList)
+    public function __construct(Shell $shell)
     {
-        $this->logger = $logger;
-        $this->systemList = $systemList;
+        $this->shell = $shell;
     }
 
     /**
      * @inheritdoc
      */
-    public function execute(string $command, array $args = []): array
+    public function execute(string $command, $args = []): array
     {
-        $fullCommand = 'php ./bin/magento ' . $command;
+        $defaultArgs = ['--ansi', '--no-interaction'];
 
-        if ($args) {
-            $fullCommand .= implode(' ', $args);
-        }
-
-        $this->logger->info('Command: ' . $fullCommand);
-
-        $fullCommand = sprintf(
-            'cd %s && %s 2>&1',
-            $this->systemList->getMagentoRoot(),
-            $fullCommand
-        );
-
-        exec(
-            $fullCommand,
-            $output,
-            $status
-        );
-
-        if ($command === 'config:show') {
-            return $output;
-        }
-
-        if ($status !== 0) {
-            throw new ShellException("Command $command returned code $status", $status);
-        }
-
-        return $output;
+        return $this->shell->execute('php ./bin/magento ' . $command, array_merge($defaultArgs, $args));
     }
 }

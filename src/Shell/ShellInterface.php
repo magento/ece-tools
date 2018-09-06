@@ -16,9 +16,9 @@ interface ShellInterface
      * Runs shell command.
      *
      * @param string $command The command.
-     * @param array $args Arguments to pass
+     * @param string|array $args Arguments to pass
      * @return array The output of command.
      * @throws ShellException If command was executed with error
      */
-    public function execute(string $command, array $args = []): array;
+    public function execute(string $command, $args = []): array;
 }
