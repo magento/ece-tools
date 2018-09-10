@@ -28,7 +28,7 @@ class Shell implements ShellInterface
     /**
      * @inheritdoc
      */
-    public function execute(string $command)
+    public function execute(string $command, $args = []): array
     {
         $rootPathCommand = sprintf(
             'cd %s && %s 2>&1',
