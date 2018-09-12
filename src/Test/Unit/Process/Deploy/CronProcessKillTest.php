@@ -54,9 +54,9 @@ class CronProcessKillTest extends TestCase
             ->method('execute')
             ->willReturnMap(
                 [
-                    ['exec pgrep -U "$UID" -f "bin/magento cron:run"', [111, 222]],
-                    ["kill 111", []],
-                    ["kill 222", []],
+                    ['exec pgrep -U "$UID" -f "bin/magento cron:run"', [], [111, 222]],
+                    ["kill 111", [], []],
+                    ["kill 222", [], []],
                 ]
             );
         $this->process->execute();

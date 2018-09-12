@@ -42,8 +42,8 @@ class UtilityManagerTest extends TestCase
         $this->shellMock->expects($this->any())
             ->method('execute')
             ->willReturnMap([
-                ['which ' . UtilityManager::UTILITY_BASH, ['/usr/bash']],
-                ['which ' . UtilityManager::UTILITY_TIMEOUT, ['/usr/timeout']],
+                ['which ' . UtilityManager::UTILITY_BASH, [], ['/usr/bash']],
+                ['which ' . UtilityManager::UTILITY_TIMEOUT, [], ['/usr/timeout']],
             ]);
 
         $this->assertSame(
@@ -61,8 +61,8 @@ class UtilityManagerTest extends TestCase
         $this->shellMock->expects($this->any())
             ->method('execute')
             ->willReturnMap([
-                ['which ' . UtilityManager::UTILITY_BASH, ['/usr/bash']],
-                ['which ' . UtilityManager::UTILITY_TIMEOUT, ['/usr/timeout']],
+                ['which ' . UtilityManager::UTILITY_BASH, [], ['/usr/bash'],],
+                ['which ' . UtilityManager::UTILITY_TIMEOUT, [], ['/usr/timeout']],
             ]);
 
         $this->assertSame(

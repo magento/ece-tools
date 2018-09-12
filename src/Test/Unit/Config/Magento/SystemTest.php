@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 use Magento\MagentoCloud\Config\Magento\System;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -23,6 +24,11 @@ class SystemTest extends TestCase
      * @var System
      */
     private $config;
+
+    /**
+     * @var ShellFactory|MockObject
+     */
+    private $shellFactoryMock;
 
     /**
      * @var ShellInterface|MockObject
@@ -39,11 +45,16 @@ class SystemTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->shellFactoryMock = $this->createMock(ShellFactory::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+
+        $this->shellFactoryMock->method('create')
+            ->with(ShellFactory::STRATEGY_MAGENTO_SHELL)
+            ->willReturn($this->shellMock);
 
         $this->config = new System(
-            $this->shellMock,
+            $this->shellFactoryMock,
             $this->magentoVersionMock
         );
     }
@@ -61,7 +72,7 @@ class SystemTest extends TestCase
             ->willReturn(true);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento config:show \'some/key\'')
+            ->with('config:show', 'some/key')
             ->willReturn([$expectedResult]);
 
         $this->assertSame($expectedResult, $this->config->get('some/key'));
@@ -90,10 +101,10 @@ class SystemTest extends TestCase
             ->willReturn(true);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento config:show \'some/key\'')
-            ->willThrowException(new \Exception('Command bin/magento returned code 1', 1));
+            ->with('config:show', 'some/key')
+            ->willReturn([]);
 
-        $this->assertNull($this->config->get('some/key'));
+        $this->assertSame('', $this->config->get('some/key'));
     }
 
     /**
