@@ -229,6 +229,7 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy::class),
                         $this->container->make(DeployProcess\DisableCron::class),
+                        $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -248,14 +249,11 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
-                        $this->container->make(DeployProcess\CreateConfigFile::class),
-                        $this->container->make(DeployProcess\SetMode::class),
                         $this->container->make(DeployProcess\SetCryptKey::class),
                         $this->container->make(DeployProcess\InstallUpdate::class),
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
-                        $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(DeployProcess\EnableCron::class),
 
                         /**
@@ -359,6 +357,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
+                        $this->container->make(DeployProcess\PreDeploy\SetProductionMode::class),
                     ],
                 ]);
             });

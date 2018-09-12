@@ -219,13 +219,14 @@ class ApplierTest extends TestCase
 
     /**
      * @param string $command
-     * @throws RuntimeException when the command isn't a reverse
+     * @return array
+     * @throws \RuntimeException when the command isn't a reverse
      */
     public function shellMockReverseCallback(string $command)
     {
         if (strpos($command, '--reverse') !== false && strpos($command, '--check') !== false) {
             // Command was the reverse check, it's all good.
-            return;
+            return [];
         }
 
         // Not a reverse, better throw an exception.

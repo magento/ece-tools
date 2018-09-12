@@ -82,7 +82,7 @@ class DeployTest extends TestCase
         $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('Some info.');
-        $this->maintenanceModeSwitcher->expects($this->once())
+        $this->maintenanceModeSwitcher->expects($this->never())
             ->method('enable');
 
         $tester = new CommandTester(

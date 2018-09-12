@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Cron\JobUnlocker;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\UnlockCronJobs;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -27,6 +28,11 @@ class UnlockCronJobsTest extends TestCase
     private $jobUnlockerMock;
 
     /**
+     * @var MagentoVersion|MockObject
+     */
+    private $magentoVersionMock;
+
+    /**
      * @var UnlockCronJobs
      */
     private $process;
@@ -38,15 +44,19 @@ class UnlockCronJobsTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
+        $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->process = new UnlockCronJobs(
             $this->jobUnlockerMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->magentoVersionMock
         );
     }
 
     public function testExecute()
     {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(false);
         $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll')
             ->willReturn(5);
@@ -59,11 +69,25 @@ class UnlockCronJobsTest extends TestCase
 
     public function testExecuteNoJobsUpdated()
     {
+        $this->magentoVersionMock->method('isGreaterOrEqual')
+            ->willReturn(false);
         $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll')
             ->willReturn(0);
         $this->loggerMock->expects($this->never())
             ->method('info');
+
+        $this->process->execute();
+    }
+
+    public function testSkipExecute()
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2.2')
+            ->willReturn(true);
+        $this->jobUnlockerMock->expects($this->never())
+            ->method('unlockAll');
 
         $this->process->execute();
     }

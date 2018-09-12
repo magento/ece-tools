@@ -5,12 +5,13 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
+use Magento\MagentoCloud\Filesystem\SystemList;
+use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Shell\Shell;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
 use Monolog\Logger;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
 
 /**
  * @inheritdoc
@@ -25,27 +26,24 @@ class ShellTest extends TestCase
     private $shell;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var DirectoryList|\PHPUnit_Framework_MockObject_MockObject
+     * @var SystemList|MockObject
      */
-    private $directoryListMock;
+    private $systemListMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->directoryListMock = $this->getMockBuilder(DirectoryList::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->systemListMock = $this->createMock(SystemList::class);
 
-        $this->shell = new Shell($this->loggerMock, $this->directoryListMock);
+        $this->shell = new Shell($this->loggerMock, $this->systemListMock);
     }
 
     /**
@@ -54,20 +52,19 @@ class ShellTest extends TestCase
      */
     public function testExecute($execOutput)
     {
-        $testCase = $this;
         $command = 'ls -al';
         $magentoRoot = '/magento';
         $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' 2>&1';
 
         $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
         $execMock->expects($this->once())
-            ->willReturnCallback(function ($cmd, &$output, &$status) use ($testCase, $execCommand, $execOutput) {
-                $testCase->assertSame($execCommand, $cmd);
+            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand, $execOutput) {
+                $this->assertSame($execCommand, $cmd);
                 $status = 0;
                 $output = $execOutput;
             });
 
-        $this->directoryListMock->expects($this->once())
+        $this->systemListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
 
@@ -86,16 +83,16 @@ class ShellTest extends TestCase
     /**
      * @return array
      */
-    public function executeDataProvider()
+    public function executeDataProvider(): array
     {
         return [
-            [ 'execOutput' => [] ],
-            [ 'execOutput' => ['test'] ],
+            ['execOutput' => []],
+            ['execOutput' => ['test']],
         ];
     }
 
     /**
-     * @param InvokedCountMatcher $logExpects
+     * @param InvokedCount $logExpects
      * @param array $execOutput
      * @expectedException \RuntimeException
      * @expectedExceptionMessage Command ls -al returned code 123
@@ -104,20 +101,19 @@ class ShellTest extends TestCase
      */
     public function testExecuteException($logExpects, array $execOutput)
     {
-        $testCase = $this;
         $command = 'ls -al';
         $magentoRoot = '/magento';
         $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' 2>&1';
 
         $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
         $execMock->expects($this->once())
-            ->willReturnCallback(function ($cmd, &$output, &$status) use ($testCase, $execCommand, $execOutput) {
-                $testCase->assertSame($execCommand, $cmd);
+            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand, $execOutput) {
+                $this->assertSame($execCommand, $cmd);
                 $status = 123;
                 $output = $execOutput;
             });
 
-        $this->directoryListMock->expects($this->once())
+        $this->systemListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
 
@@ -134,17 +130,65 @@ class ShellTest extends TestCase
     /**
      * @return array
      */
-    public function executeExceptionDataProvider()
+    public function executeExceptionDataProvider(): array
     {
         return [
             [
                 'logExpects' => $this->never(),
-                'execOutput' => []
+                'execOutput' => [],
             ],
             [
                 'logExpects' => $this->once(),
-                'execOutput' => ['test']
+                'execOutput' => ['test'],
             ],
         ];
+    }
+
+    public function testExecuteWithArguments()
+    {
+        $command = 'ls -al';
+        $magentoRoot = '/magento';
+        $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' \'arg1\' \'arg2\' 2>&1';
+
+        $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
+        $execMock->expects($this->once())
+            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand) {
+                $this->assertSame($execCommand, $cmd);
+                $status = 0;
+                $output = [];
+            });
+
+        $this->systemListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($magentoRoot);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with($command . ' \'arg1\' \'arg2\'');
+
+        $this->shell->execute($command, ['arg1', 'arg2']);
+    }
+
+    public function testExecuteWithStringArgument()
+    {
+        $command = 'ls -al';
+        $magentoRoot = '/magento';
+        $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' \'arg1\' 2>&1';
+
+        $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
+        $execMock->expects($this->once())
+            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand) {
+                $this->assertSame($execCommand, $cmd);
+                $status = 0;
+                $output = [];
+            });
+
+        $this->systemListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($magentoRoot);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with($command . ' \'arg1\'');
+
+        $this->shell->execute($command, 'arg1');
     }
 }

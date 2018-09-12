@@ -9,9 +9,9 @@ use Magento\MagentoCloud\DB\DumpInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\DbDump\DbDump;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,22 +26,22 @@ class DbDumpTest extends TestCase
     private $process;
 
     /**
-     * @var DumpInterface|Mock
+     * @var DumpInterface|MockObject
      */
     private $dbDumpMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
@@ -62,12 +62,9 @@ class DbDumpTest extends TestCase
      */
     protected function setUp()
     {
-        $this->dbDumpMock = $this->getMockBuilder(DumpInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
+        $this->dbDumpMock = $this->getMockForAbstractClass(DumpInterface::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->tmpDir = sys_get_temp_dir();
@@ -83,8 +80,8 @@ class DbDumpTest extends TestCase
         $timeMock->expects($this->once())
             ->willReturn($time);
 
-        $this->defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'fopen');
-        $this->defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'flock');
+        self::defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'fopen');
+        self::defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'flock');
 
         $this->process = new DbDump(
             $this->dbDumpMock,
@@ -215,8 +212,8 @@ class DbDumpTest extends TestCase
                 [$command],
                 ['rm ' . $this->dumpFilePath]
             )->willReturnMap([
-                [$command, $executeOutput],
-                ['rm ' . $this->dumpFilePath, true]
+                [$command, [], $executeOutput],
+                ['rm ' . $this->dumpFilePath, [], []],
             ]);
 
         $this->process->execute();
