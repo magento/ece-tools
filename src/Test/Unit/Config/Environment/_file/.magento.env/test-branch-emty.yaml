@@ -1,0 +1,6 @@
+stage:
+  global:
+  deploy:
+  build:
+
+log:

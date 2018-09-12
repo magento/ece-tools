@@ -1,0 +1,19 @@
+stage:
+  global:
+    SCD_ON_DEMAND: false
+  deploy:
+    DATABASE_CONFIGURATION:
+      host: localhost
+    SCD_THREADS: 3
+  build:
+    SCD_THREADS: 2
+
+log:
+  gelf:
+    min_level: "info"
+    use_default_formatter: true
+    additional:
+      project: "project"
+  syslog:
+    ident: "ident-branch"
+    facility: 7
