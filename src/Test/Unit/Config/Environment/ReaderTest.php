@@ -182,4 +182,39 @@ class ReaderTest extends TestCase
             $this->reader->read()
         );
     }
+
+    public function testReadMainConfigWithEmptySectionAndStage()
+    {
+        $baseDir = __DIR__ . '/_file/';
+
+        $this->configFileListMock->expects($this->once())
+            ->method('getEnvConfig')
+            ->willReturn($baseDir . '/.magento-with-empty-sections.env.yaml');
+        $this->systemListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($baseDir);
+        $this->environmentMock->expects($this->once())
+            ->method('getBranchName')
+            ->willReturn('test-branch');
+
+        $this->reader->read();
+        $this->assertEquals(
+            [
+                'stage' => [
+                    'global' => ['SCD_ON_DEMAND' => false],
+                    'deploy' => ['DATABASE_CONFIGURATION' => ['host' => 'localhost'], 'SCD_THREADS' => 3],
+                    'build' => ['SCD_THREADS' => 2],
+                ],
+                'log' => [
+                    'gelf' => [
+                        'min_level' => 'info',
+                        'use_default_formatter' => true,
+                        'additional' => ['project' => 'project'],
+                    ],
+                    'syslog' => ['ident' => 'ident-branch', 'facility' => 7],
+                ],
+            ],
+            $this->reader->read()
+        );
+    }
 }
