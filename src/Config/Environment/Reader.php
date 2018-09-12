@@ -86,7 +86,7 @@ class Reader implements ReaderInterface
                 $this->environment->getBranchName()
             );
 
-            $this->config = array_replace_recursive(
+            $this->config = $this->mergeConfigs(
                 $this->parseConfig($mainConfigPath),
                 $this->parseConfig($branchConfigPath)
             );
@@ -107,5 +107,35 @@ class Reader implements ReaderInterface
     {
         return !$this->file->isExists($path) ?
             [] : (array)Yaml::parse($this->file->fileGetContents($path));
+    }
+
+    /**
+     * Merges configuration from $branchConfig into $mainConfig by each stage or by each logger configuration.
+     *
+     * Separately merges each stage and logger configuration to avoid cases when the variable has an array value
+     * and it should be replaced instead of recursive merging.
+     *
+     * @param array $mainConfig
+     * @param array $branchConfig
+     * @return array
+     */
+    private function mergeConfigs(array $mainConfig, array $branchConfig): array
+    {
+        $newConfig = $mainConfig;
+
+        foreach ($branchConfig as $sectionName => $sectionConfig) {
+            foreach ($sectionConfig as $stageName => $stageConfig) {
+                if (isset($newConfig[$sectionName][$stageName])) {
+                    $newConfig[$sectionName][$stageName] = array_merge(
+                        $newConfig[$sectionName][$stageName],
+                        $stageConfig
+                    );
+                } else {
+                    $newConfig[$sectionName][$stageName] = $stageConfig;
+                }
+            }
+        }
+
+        return $newConfig;
     }
 }

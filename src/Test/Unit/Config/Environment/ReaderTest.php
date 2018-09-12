@@ -86,7 +86,21 @@ class ReaderTest extends TestCase
 
         $this->reader->read();
         $this->assertEquals(
-            ['stage' => ['global' => ['SCD_ON_DEMAND' => false, 'UPDATE_URLS' => false]]],
+            [
+                'stage' => [
+                    'global' => ['SCD_ON_DEMAND' => false, 'UPDATE_URLS' => false],
+                    'deploy' => ['DATABASE_CONFIGURATION' => ['host' => 'localhost'], 'SCD_THREADS' => 3],
+                    'build' => ['SCD_THREADS' => 2],
+                ],
+                'log' => [
+                    'gelf' => [
+                        'min_level' => 'info',
+                        'use_default_formatter' => true,
+                        'additional' => ['project' => 'project'],
+                    ],
+                    'syslog' => ['ident' => 'ident-branch', 'facility' => 7],
+                ],
+            ],
             $this->reader->read()
         );
     }
@@ -106,7 +120,26 @@ class ReaderTest extends TestCase
             ->willReturn('not-exist');
 
         $this->assertEquals(
-            ['stage' => ['global' => ['SCD_ON_DEMAND' => true, 'UPDATE_URLS' => false]]],
+            [
+                'stage' => [
+                    'global' => ['SCD_ON_DEMAND' => true, 'UPDATE_URLS' => false],
+                    'deploy' => [
+                        'DATABASE_CONFIGURATION' => [
+                            'host' => '127.0.0.1',
+                            'port' => '3306',
+                            'schema' => 'test_schema',
+                        ],
+                        'SCD_THREADS' => 5,
+                    ],
+                ],
+                'log' => [
+                    'gelf' => [
+                        'min_level' => 'info',
+                        'use_default_formatter' => true,
+                        'additional' => ['project' => 'project', 'app_id' => 'app'],
+                    ],
+                ],
+            ],
             $this->reader->read()
         );
     }
