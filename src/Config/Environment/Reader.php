@@ -124,7 +124,15 @@ class Reader implements ReaderInterface
         $newConfig = $mainConfig;
 
         foreach ($branchConfig as $sectionName => $sectionConfig) {
+            if (!is_array($sectionConfig)) {
+                continue;
+            }
+
             foreach ($sectionConfig as $stageName => $stageConfig) {
+                if (!is_array($stageConfig)) {
+                    continue;
+                }
+
                 if (isset($newConfig[$sectionName][$stageName])) {
                     $newConfig[$sectionName][$stageName] = array_merge(
                         $newConfig[$sectionName][$stageName],
