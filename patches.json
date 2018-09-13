@@ -127,6 +127,10 @@
     },
     "The recursion detected error during deployment": {
       "2.2.0 - 2.2.6": "MAGECLOUD-2173__the_recursion_error_during_deployment__2.2.0.patch"
+    },
+    "Remove the permission check for the console application": {
+      "2.2.0 - 2.2.5": "MAGECLOUD-2509__remove_permission_check_for_console_application__2.2.0.patch",
+      "2.2.6": "MAGECLOUD-2509__remove_permission_check_for_console_application__2.2.6.patch"
     }
   }
 }
