@@ -152,16 +152,4 @@ class EnvironmentTest extends TestCase
             [true, 'production-lad13m'],
         ];
     }
-
-    public function testGetBranchName()
-    {
-        $_ENV['MAGENTO_CLOUD_BRANCH'] = 'test-branch';
-
-        $this->assertEquals('test-branch', $this->environment->getBranchName());
-    }
-
-    public function testGetBranchNameEmpty()
-    {
-        $this->assertEquals('', $this->environment->getBranchName());
-    }
 }
