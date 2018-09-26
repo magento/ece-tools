@@ -25,19 +25,19 @@ interface BuilderInterface
 
     /**
      * @param string $version
-     * @throws Exception
+     * @throws ConfigurationMismatchException
      */
     public function setPhpVersion(string $version);
 
     /**
      * @param string $version
-     * @throws Exception
+     * @throws ConfigurationMismatchException
      */
     public function setNginxVersion(string $version);
 
     /**
      * @param string $version
-     * @throws Exception
+     * @throws ConfigurationMismatchException
      */
     public function setDbVersion(string $version);
 }
