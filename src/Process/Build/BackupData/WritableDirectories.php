@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Build\BackupData;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Monolog\Logger;
@@ -67,6 +68,9 @@ class WritableDirectories implements ProcessInterface
         $this->loggerPool = $loggerPool;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
         $magentoRoot = $this->directoryList->getMagentoRoot() . '/';
@@ -78,7 +82,7 @@ class WritableDirectories implements ProcessInterface
         $this->logger->info(sprintf('Copying writable directories to %s directory.', $rootInitDir));
 
         foreach ($writableDirectories as $dir) {
-            if ($dir == $logDir) {
+            if ($dir === $logDir) {
                 continue;
             }
 
@@ -91,7 +95,7 @@ class WritableDirectories implements ProcessInterface
 
             $initDir = $rootInitDir . $dir;
 
-            if (($dir == $viewPreprocessedDir)
+            if (($dir === $viewPreprocessedDir)
                 && $this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION)
             ) {
                 $this->logger->notice(sprintf('Skip copying %s->%s', $originalDir, $initDir));
@@ -102,15 +106,24 @@ class WritableDirectories implements ProcessInterface
             $this->backupDir($originalDir, $initDir);
         }
 
-        $this->backupLogDir($magentoRoot . $logDir, $rootInitDir . $logDir);
+        try {
+            $this->backupLogDir($magentoRoot . $logDir, $rootInitDir . $logDir);
+        } catch (\Exception $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getMessage(), $exception);
+        }
     }
 
-    protected function backupLogDir($originalLogDir, $initLogDir)
+    /**
+     * @param $originalLogDir
+     * @param $initLogDir
+     * @throws \Exception
+     */
+    private function backupLogDir($originalLogDir, $initLogDir)
     {
         $this->logger->debug(sprintf('Copying %s->%s', $originalLogDir, $initLogDir));
-        $this->stopLogging();
+        $this->logger->setHandlers([]);
         $this->backupDir($originalLogDir, $initLogDir);
-        $this->restoreLogging();
+        $this->logger->setHandlers($this->loggerPool->getHandlers());
     }
 
     /**
@@ -121,24 +134,5 @@ class WritableDirectories implements ProcessInterface
     {
         $this->file->createDirectory($destination);
         $this->file->copyDirectory($source, $destination);
-    }
-
-    /**
-     * Removes all log handlers for closing all connections to files that are opened for logging.
-     *
-     * It's done for avoiding file system exceptions while file opened for writing is not physically exists
-     * and some process trying to write into that file.
-     */
-    private function stopLogging()
-    {
-        $this->logger->setHandlers([]);
-    }
-
-    /**
-     * Restore all log handlers.
-     */
-    private function restoreLogging()
-    {
-        $this->logger->setHandlers($this->loggerPool->getHandlers());
     }
 }

@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Command\Docker;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Docker\BuilderInterface;
-use Magento\MagentoCloud\Docker\Exception;
+use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -108,7 +108,7 @@ class Build extends Command
      * {@inheritdoc}
      *
      * @throws FileSystemException
-     * @throws Exception
+     * @throws ConfigurationMismatchException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

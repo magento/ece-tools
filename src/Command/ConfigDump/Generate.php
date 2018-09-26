@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\ConfigDump;
+namespace Magento\MagentoCloud\Command\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -11,14 +11,13 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\ArrayManager;
 use Magento\MagentoCloud\Util\PhpFormatter;
 
 /**
  * @inheritdoc
  */
-class Generate implements ProcessInterface
+class Generate
 {
     /**
      * @var array

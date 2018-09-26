@@ -6,6 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -101,6 +103,11 @@ class ResetPassword implements ProcessInterface
             'From: Magento Cloud <accounts@magento.cloud>'
         );
         $this->logger->info('Saving email with admin URL: ' . $credentialsFile);
-        $this->file->filePutContents($credentialsFile, $emailContent);
+
+        try {
+            $this->file->filePutContents($credentialsFile, $emailContent);
+        } catch (FileSystemException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

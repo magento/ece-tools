@@ -65,9 +65,7 @@ class WarmUp implements ProcessInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @inheritdoc
      */
     public function execute()
     {

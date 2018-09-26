@@ -6,6 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
@@ -54,11 +56,17 @@ class SetAdminUrl implements ProcessInterface
 
         if (!$adminUrl) {
             $this->logger->info('Not updating env.php backend front name. (ADMIN_URL not set)');
+
             return;
         }
 
         $this->logger->info('Updating env.php backend front name.');
         $config['backend']['frontName'] = $adminUrl;
-        $this->configWriter->update($config);
+
+        try {
+            $this->configWriter->update($config);
+        } catch (FileSystemException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

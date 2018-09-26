@@ -84,6 +84,8 @@ class Deploy extends Command
      * Deploy application: copy writable directories back, install or update Magento data.
      *
      * {@inheritdoc}
+     *
+     * @throws \Throwable
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

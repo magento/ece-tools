@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -56,11 +58,15 @@ class UnlockCronJobs implements ProcessInterface
      */
     public function execute()
     {
-        /**
-         * Since version 2.2.2 Magento unlocks cron jobs during upgrade
-         */
-        if ($this->magentoVersion->isGreaterOrEqual('2.2.2')) {
-            return;
+        try {
+            /**
+             * Since version 2.2.2 Magento unlocks cron jobs during upgrade
+             */
+            if ($this->magentoVersion->isGreaterOrEqual('2.2.2')) {
+                return;
+            }
+        } catch (UndefinedPackageException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         $updatedJobsCount = $this->jobUnlocker->unlockAll();

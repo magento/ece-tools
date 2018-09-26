@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
@@ -35,7 +37,8 @@ class Module
     /**
      * Reconciling installed modules with shared config.
      *
-     * @throws \RuntimeException
+     * @throws ShellException
+     * @throws FileSystemException
      */
     public function refresh()
     {

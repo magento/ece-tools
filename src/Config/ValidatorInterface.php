@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\App\Logger;
 
 /**

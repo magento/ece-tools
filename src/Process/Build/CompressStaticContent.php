@@ -35,7 +35,7 @@ class CompressStaticContent implements ProcessInterface
     /**
      * @var StaticContentCompressor
      */
-    private $staticContentCompressor;
+    private $compressor;
 
     /**
      * @var FlagManager
@@ -49,19 +49,20 @@ class CompressStaticContent implements ProcessInterface
 
     /**
      * CompressStaticContent constructor.
+     *
      * @param LoggerInterface $logger
-     * @param StaticContentCompressor $staticContentCompressor
+     * @param StaticContentCompressor $compressor
      * @param FlagManager $flagManager
      * @param BuildInterface $stageConfig
      */
     public function __construct(
         LoggerInterface $logger,
-        StaticContentCompressor $staticContentCompressor,
+        StaticContentCompressor $compressor,
         FlagManager $flagManager,
         BuildInterface $stageConfig
     ) {
         $this->logger = $logger;
-        $this->staticContentCompressor = $staticContentCompressor;
+        $this->compressor = $compressor;
         $this->flagManager = $flagManager;
         $this->stageConfig = $stageConfig;
     }
@@ -69,18 +70,18 @@ class CompressStaticContent implements ProcessInterface
     /**
      * Execute the build-time static content compression process.
      *
-     * @return void
+     * {@inheritdoc}
      */
     public function execute()
     {
         if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
-            $this->staticContentCompressor->process(
+            $this->compressor->process(
                 $this->stageConfig->get(BuildInterface::VAR_SCD_COMPRESSION_LEVEL),
                 $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS)
             );
         } else {
             $this->logger->info(
-                "Skipping build-time static content compression because static content deployment hasn't happened."
+                'Skipping build-time static content compression because static content deployment has not happened.'
             );
 
             return;

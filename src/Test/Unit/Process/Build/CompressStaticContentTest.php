@@ -7,11 +7,12 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\CompressStaticContent;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * Unit test for build-time static content compressor.
@@ -24,34 +25,32 @@ class CompressStaticContentTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var BuildInterface|Mock
+     * @var BuildInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var StaticContentCompressor|Mock
+     * @var StaticContentCompressor|MockObject
      */
     private $compressorMock;
 
     /**
-     * @var FlagManager|Mock
+     * @var FlagManager|MockObject
      */
     private $flagManagerMock;
 
     /**
-     * Setup the test environment.
+     * @inheritdoc
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->stageConfigMock = $this->getMockBuilder(BuildInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
         $this->compressorMock = $this->createMock(StaticContentCompressor::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
 
@@ -65,6 +64,8 @@ class CompressStaticContentTest extends TestCase
 
     /**
      * Test build-time compression.
+     *
+     * @throws ProcessException
      */
     public function testExecute()
     {
@@ -88,6 +89,8 @@ class CompressStaticContentTest extends TestCase
 
     /**
      * Test that build-time compression will fail appropriately.
+     *
+     * @throws ProcessException
      */
     public function testExecuteNoCompress()
     {
@@ -98,7 +101,7 @@ class CompressStaticContentTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with(
-                'Skipping build-time static content compression because static content deployment hasn\'t happened.'
+                'Skipping build-time static content compression because static content deployment has not happened.'
             );
         $this->stageConfigMock->expects($this->never())
             ->method('get');

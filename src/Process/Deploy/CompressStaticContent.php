@@ -66,7 +66,7 @@ class CompressStaticContent implements ProcessInterface
     /**
      * Execute the deploy-time static content compression process.
      *
-     * @return void
+     * {@inheritdoc}
      */
     public function execute()
     {
@@ -85,8 +85,8 @@ class CompressStaticContent implements ProcessInterface
             );
         } else {
             $this->logger->info(
-                "Static content deployment was performed during the build phase or disabled. Skipping deploy phase"
-                . " static content compression."
+                'Static content deployment was performed during the build phase or disabled. Skipping deploy phase'
+                . ' static content compression.'
             );
         }
     }

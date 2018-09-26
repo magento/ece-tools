@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -48,7 +49,7 @@ class MaintenanceModeSwitcher
      * Enables maintenance mode
      *
      * @return void
-     * @throws \RuntimeException If shell command was executed with error
+     * @throws ShellException If shell command was executed with error
      */
     public function enable()
     {
@@ -63,7 +64,7 @@ class MaintenanceModeSwitcher
      * Disable maintenance mode
      *
      * @return void
-     * @throws \RuntimeException If shell command was executed with error
+     * @throws ShellException If shell command was executed with error
      */
     public function disable()
     {

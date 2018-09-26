@@ -3,13 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Package;
+namespace Magento\MagentoCloud\Process;
 
 use Magento\MagentoCloud\App\GenericException;
 
 /**
- * @inheritdoc
+ * General process exception.
  */
-class UndefinedPackageException extends GenericException
+class ProcessException extends GenericException
 {
 }

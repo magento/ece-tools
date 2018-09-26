@@ -358,20 +358,10 @@ class File
      * @param string $path
      * @param int|null $time
      * @return bool
-     * @throws FileSystemException
      */
     public function touch($path, $time = null): bool
     {
-        $result = @touch($path, $time);
-
-        if (!$result) {
-            $this->fileSystemException(
-                'The file or directory "%1" cannot be touched %2',
-                [$path, $this->getWarningMessage()]
-            );
-        }
-
-        return $result;
+        return @touch($path, $time);
     }
 
     /**
