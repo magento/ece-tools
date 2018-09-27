@@ -98,11 +98,15 @@ class ResetPassword implements ProcessInterface
 
         $this->logger->info('Emailing admin URL to admin user ' . $adminUsername . ' at ' . $adminEmail);
 
+        $headers = 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-type:text/html;charset=UTF-8' . "\r\n";
+        $headers .= 'From: Magento Cloud <accounts@magento.cloud>' . "\r\n";
+
         mail(
             $adminEmail,
             'Magento Commerce Cloud - Admin URL',
             $emailContent,
-            'From: Magento Cloud <accounts@magento.cloud>'
+            $headers
         );
         $this->logger->info('Saving email with admin URL: ' . $credentialsFile);
         $this->file->filePutContents($credentialsFile, $emailContent);
