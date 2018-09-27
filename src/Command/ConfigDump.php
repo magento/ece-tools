@@ -116,6 +116,8 @@ class ConfigDump extends Command
             $this->generate->execute();
 
             if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+                $this->logger->info('Dump completed.');
+
                 return;
             }
 

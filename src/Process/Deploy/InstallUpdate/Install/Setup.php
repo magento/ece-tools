@@ -112,6 +112,9 @@ class Setup implements ProcessInterface
         }
     }
 
+    /**
+     * @return string
+     */
     private function getBaseCommand(): string
     {
         $urlUnsecure = $this->urlManager->getUnSecureUrls()[''];

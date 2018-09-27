@@ -121,10 +121,11 @@ class ConfigDumpTest extends TestCase
 
     public function testExecute21Version()
     {
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
-                ['Starting dump.']
+                ['Starting dump.'],
+                ['Dump completed.']
             );
         $this->generateMock->expects($this->once())
             ->method('execute');

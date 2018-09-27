@@ -109,16 +109,18 @@ class WritableDirectories implements ProcessInterface
         try {
             $this->backupLogDir($magentoRoot . $logDir, $rootInitDir . $logDir);
         } catch (\Exception $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getMessage(), $exception);
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 
     /**
-     * @param $originalLogDir
-     * @param $initLogDir
+     * Stops logging and restores it after backup directory.
+     *
+     * @param string $originalLogDir
+     * @param string $initLogDir
      * @throws \Exception
      */
-    private function backupLogDir($originalLogDir, $initLogDir)
+    private function backupLogDir(string $originalLogDir, string $initLogDir)
     {
         $this->logger->debug(sprintf('Copying %s->%s', $originalLogDir, $initLogDir));
         $this->logger->setHandlers([]);
