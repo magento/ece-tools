@@ -139,6 +139,10 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Stage\PostDeploy::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Shell\UtilityManager::class);
+        $this->container->singleton(
+            \Magento\MagentoCloud\View\RendererInterface::class,
+            \Magento\MagentoCloud\View\TwigRenderer::class
+        );
         /**
          * Contextual binding.
          */
