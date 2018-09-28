@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
@@ -25,7 +24,6 @@ use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
-use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 
 /**
@@ -328,26 +326,6 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Database::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Environment::class),
-                    ],
-                ]);
-            });
-        $this->container->when(ConfigDump::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->make(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(ConfigDumpProcess\Export::class),
-                        $this->container->make(ConfigDumpProcess\Generate::class),
-                        $this->container->make(ConfigDumpProcess\Import::class),
-                    ],
-                ]);
-            });
-        $this->container->when(ConfigDumpProcess\Export::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->make(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(ConfigDumpProcess\Generate::class),
                     ],
                 ]);
             });
