@@ -7,7 +7,9 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
@@ -88,11 +90,37 @@ class Setup implements ProcessInterface
     {
         $this->logger->info('Installing Magento.');
 
+        $command = $this->getBaseCommand();
+
+        $dbPassword = $this->environment->getDbPassword();
+        if (strlen($dbPassword)) {
+            $command .= ' --db-password=' . escapeshellarg($dbPassword);
+        }
+
+        if ($this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)) {
+            $command .= ' ' . $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+        }
+
+        try {
+            $this->shell->execute(sprintf(
+                '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
+                escapeshellcmd($command),
+                $this->fileList->getInstallUpgradeLog()
+            ));
+        } catch (ShellException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
+
+    /**
+     * @return string
+     */
+    private function getBaseCommand(): string
+    {
         $urlUnsecure = $this->urlManager->getUnSecureUrls()[''];
         $urlSecure = $this->urlManager->getSecureUrls()[''];
 
-        $command =
-            'php ./bin/magento setup:install'
+        return 'php ./bin/magento setup:install'
             . ' -n --session-save=db --cleanup-database'
             . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
             . ' --base-url=' . escapeshellarg($urlUnsecure)
@@ -114,20 +142,5 @@ class Setup implements ProcessInterface
             . ' --admin-password=' . escapeshellarg($this->environment->getAdminPassword()
                 ? $this->environment->getAdminPassword() : $this->passwordGenerator->generateRandomPassword())
             . ' --use-secure-admin=1 --ansi --no-interaction';
-
-        $dbPassword = $this->environment->getDbPassword();
-        if (strlen($dbPassword)) {
-            $command .= ' --db-password=' . escapeshellarg($dbPassword);
-        }
-
-        if ($this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)) {
-            $command .= ' ' . $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
-        }
-
-        $this->shell->execute(sprintf(
-            '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
-            escapeshellcmd($command),
-            $this->fileList->getInstallUpgradeLog()
-        ));
     }
 }

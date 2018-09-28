@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+
 /**
  * General config interface.
  */
@@ -37,6 +39,7 @@ interface ConfigInterface
      * Update current data.
      *
      * @param array $config
+     * @throws FileSystemException
      */
     public function update(array $config);
 

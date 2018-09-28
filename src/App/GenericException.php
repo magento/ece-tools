@@ -3,11 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Docker;
+namespace Magento\MagentoCloud\App;
 
 /**
- * @inheritdoc
+ * Base exception for general purposes.
  */
-class Exception extends \Exception
+class GenericException extends \Exception
 {
 }

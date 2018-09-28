@@ -11,6 +11,7 @@ use Composer\Repository\WritableRepositoryInterface;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -28,11 +29,6 @@ class Applier
      * @var ShellInterface
      */
     private $shell;
-
-    /**
-     * @var Composer
-     */
-    private $composer;
 
     /**
      * @var LoggerInterface
@@ -70,7 +66,6 @@ class Applier
         File $file,
         GlobalSection $globalSection
     ) {
-        $this->composer = $composer;
         $this->repository = $composer->getRepositoryManager()->getLocalRepository();
         $this->shell = $shell;
         $this->logger = $logger;
@@ -89,7 +84,7 @@ class Applier
      * @param string|null $packageName Name of package to be patched
      * @param string|null $constraint Specific constraint of package to be fixed
      * @return void
-     * @throws \RuntimeException
+     * @throws ShellException
      */
     public function apply(string $path, string $name = null, string $packageName = null, $constraint = null)
     {
@@ -115,17 +110,21 @@ class Applier
 
         try {
             $this->shell->execute('git apply ' . $path);
-        } catch (\RuntimeException $applyException) {
+        } catch (ShellException $applyException) {
             if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
-                $this->logger->notice("Patch {$name} wasn't applied.");
+                $this->logger->notice(sprintf(
+                    'Patch %s was not applied. (%s)',
+                    $name,
+                    $applyException->getMessage()
+                ));
 
                 return;
             }
 
             try {
                 $this->shell->execute('git apply --check --reverse ' . $path);
-            } catch (\RuntimeException $reverseException) {
-                throw $applyException;
+            } catch (ShellException $reverseException) {
+                throw $reverseException;
             }
 
             $this->logger->notice("Patch {$name} was already applied.");

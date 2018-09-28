@@ -54,7 +54,9 @@ class Transfer extends Command
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws \Throwable
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

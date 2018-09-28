@@ -5,7 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
@@ -31,6 +33,10 @@ class ComposerDumpAutoload implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute('composer dump-autoload -o --ansi --no-interaction');
+        try {
+            $this->shell->execute('composer dump-autoload -o --ansi --no-interaction');
+        } catch (ShellException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

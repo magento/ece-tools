@@ -3,9 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Command\ConfigDump\Generate;
+use Magento\MagentoCloud\Config\Deploy\Reader;
+use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellFactory;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -24,18 +33,52 @@ class ConfigDump extends Command
     private $logger;
 
     /**
-     * @var ProcessInterface
+     * @var ShellInterface
      */
-    private $process;
+    private $shell;
 
     /**
-     * @param ProcessInterface $process
-     * @param LoggerInterface $logger
+     * @var ProcessInterface
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
-    {
-        $this->process = $process;
+    private $generate;
+
+    /**
+     * @var Reader
+     */
+    private $reader;
+
+    /**
+     * @var Writer
+     */
+    private $writer;
+
+    /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
+     * @param LoggerInterface $logger
+     * @param ShellFactory $shellFactory
+     * @param Generate $generate
+     * @param Reader $reader
+     * @param Writer $writer
+     * @param MagentoVersion $magentoVersion
+     */
+    public function __construct(
+        LoggerInterface $logger,
+        ShellFactory $shellFactory,
+        Generate $generate,
+        Reader $reader,
+        Writer $writer,
+        MagentoVersion $magentoVersion
+    ) {
         $this->logger = $logger;
+        $this->shell = $shellFactory->createMagento();
+        $this->generate = $generate;
+        $this->reader = $reader;
+        $this->writer = $writer;
+        $this->magentoVersion = $magentoVersion;
 
         parent::__construct();
     }
@@ -53,18 +96,38 @@ class ConfigDump extends Command
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws GenericException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->logger->info('Starting dump.');
+
+        $envConfig = $this->reader->read();
+
         try {
-            $this->logger->info('Starting dump.');
-            $this->process->execute();
-            $this->logger->info('Dump completed.');
-        } catch (\Exception $exception) {
+            $this->shell->execute('app:config:dump');
+        } finally {
+            $this->writer->create($envConfig);
+        }
+
+        try {
+            $this->generate->execute();
+
+            if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
+                $this->logger->info('Dump completed.');
+
+                return;
+            }
+
+            $this->shell->execute('app:config:import');
+        } catch (GenericException $exception) {
             $this->logger->critical($exception->getMessage());
 
             throw $exception;
         }
+
+        $this->logger->info('Dump completed.');
     }
 }

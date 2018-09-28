@@ -6,7 +6,9 @@
 namespace Magento\MagentoCloud\Process\Build;
 
 use Magento\MagentoCloud\Config\Module;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -37,13 +39,16 @@ class RefreshModules implements ProcessInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @throws \RuntimeException
+     * @inheritdoc
      */
     public function execute()
     {
         $this->logger->info('Reconciling installed modules with shared config.');
-        $this->config->refresh();
+
+        try {
+            $this->config->refresh();
+        } catch (ShellException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

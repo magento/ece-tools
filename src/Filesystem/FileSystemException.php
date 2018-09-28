@@ -5,10 +5,11 @@
  */
 namespace Magento\MagentoCloud\Filesystem;
 
+use Magento\MagentoCloud\App\GenericException;
+
 /**
- * Filesystem exception
- * @codeCoverageIgnore
+ * Filesystem operations exception.
  */
-class FileSystemException extends \Exception
+class FileSystemException extends GenericException
 {
 }

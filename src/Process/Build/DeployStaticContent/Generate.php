@@ -6,7 +6,9 @@
 namespace Magento\MagentoCloud\Process\Build\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Build\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
@@ -64,9 +66,7 @@ class Generate implements ProcessInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @throws \RuntimeException
+     * @inheritdoc
      */
     public function execute()
     {
@@ -91,8 +91,12 @@ class Generate implements ProcessInterface
             $this->buildConfig->get(BuildInterface::VAR_SCD_MATRIX)
         );
 
-        foreach ($commands as $command) {
-            $this->shell->execute($command);
+        try {
+            foreach ($commands as $command) {
+                $this->shell->execute($command);
+            }
+        } catch (ShellException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

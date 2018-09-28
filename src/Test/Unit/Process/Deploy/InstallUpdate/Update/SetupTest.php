@@ -10,10 +10,11 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,37 +28,37 @@ class SetupTest extends TestCase
     private $process;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var FlagManager|Mock
+     * @var FlagManager|MockObject
      */
     private $flagManagerMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
@@ -85,6 +86,9 @@ class SetupTest extends TestCase
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecute()
     {
         $installUpgradeLog = '/tmp/log.log';
@@ -116,7 +120,7 @@ class SetupTest extends TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
      * @expectedExceptionMessage Error during command execution
      */
     public function testExecuteWithException()

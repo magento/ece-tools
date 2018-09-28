@@ -8,7 +8,10 @@ namespace Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
@@ -86,7 +89,9 @@ class Generate implements ProcessInterface
      */
     public function execute()
     {
-        $this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt');
+        if (!$this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt')) {
+            throw new ProcessException('Cannot update deployed version.');
+        }
 
         $this->logger->info('Extracting locales');
 
@@ -101,8 +106,12 @@ class Generate implements ProcessInterface
             $this->stageConfig->get(DeployInterface::VAR_SCD_MATRIX)
         );
 
-        foreach ($commands as $command) {
-            $this->shell->execute($command);
+        try {
+            foreach ($commands as $command) {
+                $this->shell->execute($command);
+            }
+        } catch (ShellException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

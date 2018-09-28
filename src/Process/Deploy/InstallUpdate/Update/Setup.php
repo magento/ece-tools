@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -84,9 +85,7 @@ class Setup implements ProcessInterface
     }
 
     /**
-     * Executes the process.
-     *
-     * @return void
+     * @inheritdoc
      */
     public function execute()
     {
@@ -102,9 +101,9 @@ class Setup implements ProcessInterface
                 'php ./bin/magento setup:upgrade --keep-generated --ansi --no-interaction ' . $verbosityLevel,
                 $this->fileList->getInstallUpgradeLog()
             ));
-        } catch (\RuntimeException $e) {
+        } catch (\RuntimeException $exception) {
             //Rollback required by database
-            throw new \RuntimeException($e->getMessage(), 6);
+            throw new ProcessException($exception->getMessage(), 6, $exception);
         }
 
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);

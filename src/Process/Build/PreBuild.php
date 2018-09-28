@@ -71,7 +71,7 @@ class PreBuild implements ProcessInterface
         $verbosityLevel = $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS);
 
         $generatedCode = $this->directoryList->getGeneratedCode();
-        $generatedMetadata = $this->directoryList->getGeneratedMetaData();
+        $generatedMetadata = $this->directoryList->getGeneratedMetadata();
 
         $this->logger->info('Verbosity level is ' . ($verbosityLevel ?: 'not set'));
 
@@ -79,7 +79,7 @@ class PreBuild implements ProcessInterface
 
         if ($this->file->isExists($generatedCode)) {
             $this->logger->info(
-                "Generated code exists from an old deployment - clearing it now.",
+                'Generated code exists from an old deployment - clearing it now.',
                 ['metadataPath' => $generatedCode]
             );
             $this->file->clearDirectory($generatedCode);
@@ -87,7 +87,7 @@ class PreBuild implements ProcessInterface
 
         if ($this->file->isExists($generatedMetadata)) {
             $this->logger->info(
-                "Generated metadata exists from an old deployment - clearing it now.",
+                'Generated metadata exists from an old deployment - clearing it now.',
                 ['metadataPath' => $generatedMetadata]
             );
             $this->file->clearDirectory($generatedMetadata);

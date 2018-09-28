@@ -5,9 +5,11 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -55,12 +57,16 @@ class InstallUpdate implements ProcessInterface
 
     public function execute()
     {
-        if (!$this->deployConfig->isInstalled()) {
-            $this->logger->info('Starting install.');
-            $this->installProcess->execute();
-        } else {
-            $this->logger->info('Starting update.');
-            $this->updateProcess->execute();
+        try {
+            if (!$this->deployConfig->isInstalled()) {
+                $this->logger->info('Starting install.');
+                $this->installProcess->execute();
+            } else {
+                $this->logger->info('Starting update.');
+                $this->updateProcess->execute();
+            }
+        } catch (GenericException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

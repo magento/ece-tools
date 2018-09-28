@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
@@ -43,7 +45,12 @@ class SetProductionMode implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info("Set Magento application mode to 'production'");
-        $this->writer->update(['MAGE_MODE' => 'production']);
+        $this->logger->info('Set Magento application mode to \'production\'');
+
+        try {
+            $this->writer->update(['MAGE_MODE' => 'production']);
+        } catch (FileSystemException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

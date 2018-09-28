@@ -56,7 +56,7 @@ class EnableCron implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info("Enable cron");
+        $this->logger->info('Enable cron');
         $config = $this->reader->read();
         unset($config['cron']);
         $this->writer->create($config);

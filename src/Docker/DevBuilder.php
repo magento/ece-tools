@@ -70,7 +70,7 @@ class DevBuilder implements BuilderInterface
      * @param string $key
      * @param string $version
      * @param array $supportedVersions
-     * @throws Exception
+     * @throws ConfigurationMismatchException
      */
     private function setVersion(string $key, string $version, array $supportedVersions)
     {
@@ -78,7 +78,7 @@ class DevBuilder implements BuilderInterface
         $name = reset($parts);
 
         if (!\in_array($version, $supportedVersions, true)) {
-            throw new Exception(sprintf(
+            throw new ConfigurationMismatchException(sprintf(
                 'Service %s:%s is not supported',
                 $name,
                 $version

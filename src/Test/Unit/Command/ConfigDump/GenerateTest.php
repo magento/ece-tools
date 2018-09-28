@@ -3,13 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\ConfigDump;
+namespace Magento\MagentoCloud\Test\Unit\Command\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Process\ConfigDump\Generate;
+use Magento\MagentoCloud\Command\ConfigDump\Generate;
 use Magento\MagentoCloud\Util\ArrayManager;
 use Magento\MagentoCloud\Util\PhpFormatter;
 use PHPUnit\Framework\MockObject\MockObject;

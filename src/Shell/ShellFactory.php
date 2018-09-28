@@ -37,9 +37,17 @@ class ShellFactory
     public function create(string $strategy): ShellInterface
     {
         if ($strategy === self::STRATEGY_MAGENTO_SHELL) {
-            return $this->container->create(MagentoShell::class);
+            return $this->createMagento();
         }
 
         return $this->container->create(Shell::class);
+    }
+
+    /**
+     * @return MagentoShell
+     */
+    public function createMagento(): MagentoShell
+    {
+        return $this->container->create(MagentoShell::class);
     }
 }
