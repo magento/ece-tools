@@ -210,4 +210,12 @@ class DirectoryList
     {
         return $this->getRoot() . '/patches';
     }
+
+    /**
+     * @return string
+     */
+    public function getViews(): string
+    {
+        return $this->getRoot() . '/views';
+    }
 }
