@@ -471,6 +471,21 @@ return [
             ],
         ],
         'websites' => [
+            'base' => [
+                'general' => [
+                    'locale' => [
+                        'code' => 'kz_KZ'
+                    ],
+                ],
+                'design' => [
+                    'package' => [
+                        'name' => 'default',
+                    ],
+                    'theme' => [
+                        'default' => 'default',
+                    ],
+                ],
+            ],
             'admin' => [
                 'web' => [
                     'routers' => [

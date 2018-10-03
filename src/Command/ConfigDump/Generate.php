@@ -32,6 +32,7 @@ class Generate
         'system/default/dev/css',
         'system/default/advanced/modules_disable_output',
         'system/stores',
+        'system/websites',
     ];
 
     /**
@@ -98,7 +99,6 @@ class Generate
     {
         if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
             $this->configKeys[] = 'modules';
-            $this->configKeys[] = 'system/websites';
         }
 
         $configFile = $this->sharedConfig->resolve();
@@ -127,18 +127,9 @@ class Generate
         /**
          * Only saving general/locale/code.
          */
-        $storeCodes = isset($newConfig['system']['stores'])
-            ? array_keys($newConfig['system']['stores'])
-            : [];
-        foreach ($storeCodes as $storeCode) {
-            if (isset($newConfig['system']['stores'][$storeCode]['general']['locale']['code'])) {
-                $temp = $newConfig['system']['stores'][$storeCode]['general']['locale']['code'];
-                unset($newConfig['system']['stores'][$storeCode]);
-                $newConfig['system']['stores'][$storeCode]['general']['locale']['code'] = $temp;
-            } else {
-                unset($newConfig['system']['stores'][$storeCode]);
-            }
-        }
+
+        $newConfig = $this->filterData($newConfig, 'stores');
+        $newConfig = $this->filterData($newConfig, 'websites');
 
         /**
          * Un-setting base_url.
@@ -160,5 +151,31 @@ class Generate
             $configFile,
             $this->phpFormatter->format($newConfig)
         );
+    }
+
+    /**
+     * Leaves only necessary for deployment data
+     *
+     * @param array $config
+     * @param string $scope
+     * @return array
+     */
+    private function filterData(&$config, $scope)
+    {
+        $scopeCodes = isset($config['system'][$scope])
+            ? array_keys($config['system'][$scope])
+            : [];
+
+        foreach ($scopeCodes as $code) {
+            if (isset($config['system'][$scope][$code]['general']['locale']['code'])) {
+                $temp = $config['system'][$scope][$code]['general']['locale']['code'];
+                unset($config['system'][$scope][$code]);
+                $config['system'][$scope][$code]['general']['locale']['code'] = $temp;
+            } else {
+                unset($config['system'][$scope][$code]);
+            }
+        }
+
+        return $config;
     }
 }
