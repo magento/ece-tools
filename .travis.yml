@@ -40,7 +40,7 @@ script: ./tests/travis/script.sh
 
 jobs:
   include:
-    - stage: Code quality
+    - stage: Test
       env: TEST_SUITE=static-unit XDEBUG=true
     - stage: Integration
       env: TEST_SUITE=integration
