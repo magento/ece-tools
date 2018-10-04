@@ -18,9 +18,6 @@ addons:
 env:
   global:
     - DIR_TOOLS="/var/www/ece-tools"
-  matrix:
-    - TEST_SUITE=static-unit XDEBUG=true
-    - TEST_SUITE=integration
 
 cache:
   apt: true
@@ -40,5 +37,12 @@ before_script:
   - docker-compose up -d --build
 
 script: ./tests/travis/script.sh
+
+jobs:
+  include:
+    - stage: Code quality
+      env: TEST_SUITE=static-unit XDEBUG=true
+    - stage: Integration
+      env: TEST_SUITE=integration
 
 after_failure: docker ps -s
