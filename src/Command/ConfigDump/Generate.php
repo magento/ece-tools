@@ -128,8 +128,8 @@ class Generate
          * Only saving general/locale/code.
          */
 
-        $newConfig = $this->filterData($newConfig, 'stores');
-        $newConfig = $this->filterData($newConfig, 'websites');
+        $newConfig = $this->filterSystemData($newConfig, 'stores');
+        $newConfig = $this->filterSystemData($newConfig, 'websites');
 
         /**
          * Un-setting base_url.
@@ -154,13 +154,13 @@ class Generate
     }
 
     /**
-     * Leaves only necessary for deployment data
+     * Removes all data from provided scopes in system section, except general/locale/code
      *
-     * @param array $config
-     * @param string $scope
-     * @return array
+     * @param array $config Config data
+     * @param string $scope Name of scope: websites or stores
+     * @return array Result of config data after filtering
      */
-    private function filterData(&$config, $scope)
+    private function filterSystemData($config, $scope)
     {
         $scopeCodes = isset($config['system'][$scope])
             ? array_keys($config['system'][$scope])
@@ -168,9 +168,9 @@ class Generate
 
         foreach ($scopeCodes as $code) {
             if (isset($config['system'][$scope][$code]['general']['locale']['code'])) {
-                $temp = $config['system'][$scope][$code]['general']['locale']['code'];
+                $localeCode = $config['system'][$scope][$code]['general']['locale']['code'];
                 unset($config['system'][$scope][$code]);
-                $config['system'][$scope][$code]['general']['locale']['code'] = $temp;
+                $config['system'][$scope][$code]['general']['locale']['code'] = $localeCode;
             } else {
                 unset($config['system'][$scope][$code]);
             }
