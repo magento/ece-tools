@@ -42,15 +42,15 @@ jobs:
   include:
     - stage: Test
       env: TEST_SUITE=static-unit XDEBUG=true
-      php: 7.0
+      php: '7.0'
     - stage: Test
       env: TEST_SUITE=static-unit XDEBUG=true
-      php: 7.1
+      php: '7.1'
     - stage: Integration
       env: TEST_SUITE=integration
-      php: 7.0
+      php: '7.0'
     - stage: Integration
       env: TEST_SUITE=integration
-      php: 7.1
+      php: '7.1'
 
 after_failure: docker ps -s
