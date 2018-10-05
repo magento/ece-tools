@@ -46,11 +46,15 @@ jobs:
     - stage: Code quality
       env: TEST_SUITE=static-unit XDEBUG=true
       php: '7.1'
-    - stage: Test
+    - stage: Integration
       env: TEST_SUITE=integration
       php: '7.0'
-    - stage: Test
+    - stage: Integration
       env: TEST_SUITE=integration
       php: '7.1'
+
+stages:
+  - Code quality
+  - Integration
 
 after_failure: docker ps -s
