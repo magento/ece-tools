@@ -88,15 +88,10 @@ return [
             ],
         ],
         'websites' => [
-            'admin' => [
-                'web' => [
-                    'routers' => [
-                        'frontend' => [
-                            'disabled' => 'true',
-                        ],
-                    ],
-                    'default' => [
-                        'no_route' => 'admin/noroute/index',
+            'base' => [
+                'general' => [
+                    'locale' => [
+                        'code' => 'kz_KZ'
                     ],
                 ],
             ],
