@@ -87,6 +87,15 @@ return [
                 ],
             ],
         ],
+        'websites' => [
+            'base' => [
+                'general' => [
+                    'locale' => [
+                        'code' => 'kz_KZ'
+                    ],
+                ],
+            ],
+        ],
     ],
     'admin_user' => [
         'locale' => [

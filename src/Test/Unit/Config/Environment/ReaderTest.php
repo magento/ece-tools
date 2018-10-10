@@ -108,4 +108,30 @@ class ReaderTest extends TestCase
             $this->reader->read()
         );
     }
+
+    public function testReadWithConstants()
+    {
+        $baseDir = __DIR__ . '/_file/';
+
+        $this->configFileListMock->expects($this->once())
+            ->method('getEnvConfig')
+            ->willReturn($baseDir . '/.magento-with-constants.env.yaml');
+
+        $this->assertEquals(
+            [
+                'stage' => [
+                    'deploy' => [
+                        'DATABASE_CONFIGURATION' => [
+                            'connection' => [
+                                'default' => ['driver_options' => [1001 => 1]],
+                                'indexer' => ['driver_options' => [1002 => 1]],
+                            ],
+                            '_merge' => true,
+                        ],
+                    ],
+                ],
+            ],
+            $this->reader->read()
+        );
+    }
 }
