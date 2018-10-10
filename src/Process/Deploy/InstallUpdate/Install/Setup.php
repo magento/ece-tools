@@ -132,7 +132,16 @@ class Setup implements ProcessInterface
             . ' --db-user=' . escapeshellarg($this->environment->getDbUser())
             . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
                 ? $this->environment->getAdminUrl() : Environment::DEFAULT_ADMIN_URL)
-            . ' --admin-user=' . escapeshellarg($this->environment->getAdminUsername()
+            . ($this->environment->getAdminEmail() ? $this->getAdminCredentials() : '')
+            . ' --use-secure-admin=1 --ansi --no-interaction';
+    }
+
+    /**
+     * @return string
+     */
+    private function getAdminCredentials(): string
+    {
+        return ' --admin-user=' . escapeshellarg($this->environment->getAdminUsername()
                 ? $this->environment->getAdminUsername() : Environment::DEFAULT_ADMIN_NAME)
             . ' --admin-firstname=' . escapeshellarg($this->environment->getAdminFirstname()
                 ? $this->environment->getAdminFirstname() : Environment::DEFAULT_ADMIN_FIRSTNAME)
@@ -140,7 +149,6 @@ class Setup implements ProcessInterface
                 ? $this->environment->getAdminLastname() : Environment::DEFAULT_ADMIN_LASTNAME)
             . ' --admin-email=' . escapeshellarg($this->environment->getAdminEmail())
             . ' --admin-password=' . escapeshellarg($this->environment->getAdminPassword()
-                ? $this->environment->getAdminPassword() : $this->passwordGenerator->generateRandomPassword())
-            . ' --use-secure-admin=1 --ansi --no-interaction';
+                ? $this->environment->getAdminPassword() : $this->passwordGenerator->generateRandomPassword());
     }
 }
