@@ -211,7 +211,9 @@ class File
     public function isEmptyDirectory(string $path): bool
     {
         if ($this->isDirectory($path)) {
-            if (count(scandir($path)) > 2) {
+            $dirs = scandir($path, SCANDIR_SORT_NONE);
+
+            if ($dirs && count($dirs) > 2) {
                 return false;
             }
         }
