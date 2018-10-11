@@ -15,7 +15,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * {@inheritdoc}
  *
- * @group php71
+ * @group php72
  */
 class CronTest extends AbstractTest
 {
@@ -139,9 +139,7 @@ class CronTest extends AbstractTest
     public function cronDataProvider(): array
     {
         return [
-            ['version' => '2.2.0', 'locale' => 'en_US'],
-            ['version' => '2.2.2', 'locale' => 'ar_KW'],
-            ['version' => '@stable', 'locale' => 'fr_FR'],
+            ['version' => '~2.3.0', 'locale' => 'fr_FR'],
         ];
     }
 

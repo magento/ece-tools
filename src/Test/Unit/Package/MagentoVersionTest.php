@@ -10,8 +10,9 @@ use Composer\Semver\Comparator;
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 
 /**
@@ -25,17 +26,17 @@ class MagentoVersionTest extends TestCase
     private $magentoVersion;
 
     /**
-     * @var Manager|Mock
+     * @var Manager|MockObject
      */
     private $managerMock;
 
     /**
-     * @var PackageInterface|Mock
+     * @var PackageInterface|MockObject
      */
     private $packageMock;
 
     /**
-     * @var GlobalConfig|Mock
+     * @var GlobalConfig|MockObject
      */
     private $globalConfigMock;
 
@@ -97,6 +98,8 @@ class MagentoVersionTest extends TestCase
 
     /**
      * Test getting the version number from the installed version of Magento.
+     *
+     * @throws UndefinedPackageException
      */
     public function testGetVersionFromBasePackage()
     {
@@ -111,6 +114,8 @@ class MagentoVersionTest extends TestCase
             ->method('getVersion')
             ->willReturn('2.2.1');
 
+        $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
+        // Test lazy-load.
         $this->assertSame('2.2.1', $this->magentoVersion->getVersion());
     }
 

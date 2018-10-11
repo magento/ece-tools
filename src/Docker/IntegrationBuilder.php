@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\RepositoryFactory;
 /**
  * @inheritdoc
  */
-class TestBuilder implements BuilderInterface
+class IntegrationBuilder implements BuilderInterface
 {
     /**
      * @var Repository
@@ -31,10 +31,7 @@ class TestBuilder implements BuilderInterface
      */
     public function setPhpVersion(string $version)
     {
-        $this->setVersion(self::PHP_VERSION, $version, [
-            '7.0',
-            self::DEFAULT_PHP_VERSION,
-        ]);
+        $this->setVersion(self::PHP_VERSION, $version, self::PHP_VERSIONS);
     }
 
     /**

@@ -8,17 +8,17 @@ namespace Magento\MagentoCloud\Test\Unit\Docker;
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\Service\ServiceInterface;
-use Magento\MagentoCloud\Docker\TestBuilder;
+use Magento\MagentoCloud\Docker\IntegrationBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
-class TestBuilderTest extends TestCase
+class IntegrationBuilderTest extends TestCase
 {
     /**
-     * @var TestBuilder
+     * @var IntegrationBuilder
      */
     private $builder;
 
@@ -44,7 +44,7 @@ class TestBuilderTest extends TestCase
             ->method('create')
             ->willReturn($this->configMock);
 
-        $this->builder = new TestBuilder(
+        $this->builder = new IntegrationBuilder(
             $this->repositoryFactoryMock
         );
     }
@@ -70,7 +70,7 @@ class TestBuilderTest extends TestCase
     {
         return [
             ['1.9'],
-            [TestBuilder::DEFAULT_NGINX_VERSION,],
+            [IntegrationBuilder::DEFAULT_NGINX_VERSION,],
         ];
     }
 
@@ -107,7 +107,7 @@ class TestBuilderTest extends TestCase
     {
         return [
             ['7.0'],
-            [TestBuilder::DEFAULT_PHP_VERSION,],
+            [IntegrationBuilder::DEFAULT_PHP_VERSION,],
         ];
     }
 
@@ -143,7 +143,7 @@ class TestBuilderTest extends TestCase
     public function setDbVersionDataProvider(): array
     {
         return [
-            [TestBuilder::DEFAULT_DB_VERSION],
+            [IntegrationBuilder::DEFAULT_DB_VERSION],
         ];
     }
 

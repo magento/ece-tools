@@ -20,7 +20,7 @@ class BuilderFactory
      */
     private static $map = [
         self::BUILDER_DEV => DevBuilder::class,
-        self::BUILDER_TEST => TestBuilder::class,
+        self::BUILDER_TEST => IntegrationBuilder::class,
     ];
 
     /**
