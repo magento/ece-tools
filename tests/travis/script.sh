@@ -21,7 +21,7 @@ case $TEST_SUITE in
                 $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 ;;
             7.1)
-                $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --exclude-group php70 --exclude-group php72 --verbose --configuration ${DIR_TOOLS}/tests/integration"
+                $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --exclude-group php70,php72 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 ;;
             7.2)
                 $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php72 --verbose --configuration ${DIR_TOOLS}/tests/integration"
