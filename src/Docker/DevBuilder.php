@@ -98,6 +98,7 @@ class DevBuilder implements BuilderInterface
             'services' => [
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
                 'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
+                'rabbitmq' => $this->serviceFactory->create(ServiceFactory::SERVICE_RABBITMQ)->get(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
                 'cli' => $this->getCliService(false),
