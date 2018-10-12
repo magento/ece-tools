@@ -63,8 +63,9 @@ class Bootstrap
 
     /**
      * @param string $version
+     * @param string $stability
      */
-    public function run($version = '@stable')
+    public function run(string $version = '@stable', string $stability = 'stable')
     {
         $sandboxDir = $this->getSandboxDir();
 
@@ -82,7 +83,8 @@ class Bootstrap
         }
 
         $this->shell->execute(sprintf(
-            'composer create-project --no-dev --repository-url=%s %s %s %s',
+            'composer create-project --no-dev --stability=%s --repository-url=%s %s %s "%s"',
+            $stability,
             getenv('MAGENTO_REPO') ?: 'https://repo.magento.com/',
             getenv('MAGENTO_PROJECT') ?: 'magento/project-enterprise-edition',
             $sandboxDir,
