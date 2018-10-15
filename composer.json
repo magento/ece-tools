@@ -6,6 +6,7 @@
   "license": "proprietary",
   "require": {
     "php": "^7.0",
+    "ext-PDO": "*",
     "ext-json": "*",
     "composer/composer": "@stable",
     "composer/semver": "^1.4",

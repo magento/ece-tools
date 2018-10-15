@@ -10,6 +10,7 @@ language: php
 php:
   - '7.0'
   - '7.1'
+  - '7.2'
 
 addons:
   apt:
@@ -36,8 +37,7 @@ install:
   - composer update -n --no-suggest
   - ./bin/ece-tools docker:build --test --php ${TRAVIS_PHP_VERSION}
 
-before_script:
-  - docker-compose up -d --build
+before_script: docker-compose up -d
 
 script: ./tests/travis/script.sh
 
