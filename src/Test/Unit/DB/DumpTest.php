@@ -80,7 +80,7 @@ class DumpTest extends TestCase
                 'main',
                 'user',
                 null,
-                sprintf($command, "-h 'localhost' -P '3306' -u 'user' 'main'")
+                sprintf($command, "-h 'localhost' -u 'user' -P '3306' 'main'")
             ],
             [
                 'localhost',
@@ -88,7 +88,7 @@ class DumpTest extends TestCase
                 'main',
                 'user',
                 'pswd',
-                sprintf($command, "-h 'localhost' -P '3306' -u 'user' -p'pswd' 'main'")
+                sprintf($command, "-h 'localhost' -u 'user' -P '3306' -p'pswd' 'main'")
             ]
         ];
     }

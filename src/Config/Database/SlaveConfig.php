@@ -39,7 +39,7 @@ class SlaveConfig implements ConfigInterface
             $host = $this->connectionData->getHost();
 
             if (!empty($this->connectionData->getPort())) {
-                $host .= $this->connectionData->getPort();
+                $host .= ':' . $this->connectionData->getPort();
             }
 
             $slaveConnection = [

@@ -437,7 +437,8 @@ class Container implements ContainerInterface
                 $config = $this->container->make(ConfigInterface::class);
 
                 return $this->container->makeWith(
-                    \Magento\MagentoCloud\DB\Data\Connection::class, [
+                    \Magento\MagentoCloud\DB\Data\Connection::class,
+                    [
                         'connectionData' => $config->get()['connection']['default'] ?? []
                     ]
                 );
@@ -450,7 +451,8 @@ class Container implements ContainerInterface
                 $config = $this->container->make(ConfigInterface::class);
 
                 return $this->container->makeWith(
-                    \Magento\MagentoCloud\DB\Data\Connection::class, [
+                    \Magento\MagentoCloud\DB\Data\Connection::class,
+                    [
                         'connectionData' => $config->get()['slave_connection']['default']
                             ?? $config->get()['connection']['default']
                             ?? []
@@ -465,7 +467,8 @@ class Container implements ContainerInterface
                 $environment = $this->container->get(Environment::class);
 
                 return $this->container->makeWith(
-                    RelationshipConnection::class, [
+                    RelationshipConnection::class,
+                    [
                         'connectionData' => $environment->getRelationship('database')[0] ?? []
                     ]
                 );
@@ -478,7 +481,8 @@ class Container implements ContainerInterface
                 $environment = $this->container->get(Environment::class);
 
                 return $this->container->makeWith(
-                    RelationshipConnection::class, [
+                    RelationshipConnection::class,
+                    [
                         'connectionData' => $environment->getRelationship('database-slave')[0] ?? []
                     ]
                 );

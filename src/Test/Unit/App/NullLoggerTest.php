@@ -9,9 +9,12 @@ use Magento\MagentoCloud\App\NullLogger;
 use Monolog\Handler\NullHandler;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class NullLoggerTest extends TestCase
 {
-    public function testHasNullHandler()
+    public function testContainNullHandler()
     {
         $logger = new NullLogger(new NullHandler());
 
