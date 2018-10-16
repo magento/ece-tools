@@ -3,11 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Db;
+namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\DB\Data\ReadConnection;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db\SlaveConfig;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\Config\Database\SlaveConfig;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -17,23 +17,20 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class SlaveConfigTest extends TestCase
 {
     /**
-     * @param array $relationships
+     * @param array $connectionData
      * @param array $expectedConfig
      * @dataProvider getDataProvider
      */
     public function testGet(
-        array $relationships,
+        array $connectionData,
         array $expectedConfig
     ) {
-        /** @var Environment|Mock $readConnectionEnvironmentMock */
-        $readConnectionEnvironmentMock = $this->createPartialMock(Environment::class, ['getRelationships']);
-        $readConnectionEnvironmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn($relationships);
+        /* @var Mock|ConnectionInterface $connectionDataMock */
+        $connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class, [
+            $connectionData
+        ]);
 
-        $readConnection = new ReadConnection($readConnectionEnvironmentMock);
-
-        $dbSlaveConfig = new SlaveConfig($readConnection);
+        $dbSlaveConfig = new SlaveConfig($connectionDataMock);
 
         $this->assertEquals($expectedConfig, $dbSlaveConfig->get());
     }
@@ -72,7 +69,13 @@ class SlaveConfigTest extends TestCase
                 []
             ],
             [
-                $relationships,
+                [
+                    'host' => 'localhost',
+                    'port' => '3306',
+                    'path' => 'magento',
+                    'username' => 'user',
+                    'password' => 'password',
+                ],
                 [
                     'host' => 'slave.host:slave.port',
                     'username' => 'slave.user',

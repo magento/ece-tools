@@ -5,11 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\Database\ConfigInterface;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db\Config;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -34,18 +32,18 @@ class DbConnection implements ProcessInterface
     private $configReader;
 
     /**
-     * @var Config
+     * @var ConfigInterface
      */
     private $dbConfig;
 
     /**
-     * @param Config $dbConfig
+     * @param ConfigInterface $dbConfig
      * @param ConfigWriter $configWriter
      * @param ConfigReader $configReader
      * @param LoggerInterface $logger
      */
     public function __construct(
-        Config $dbConfig,
+        ConfigInterface $dbConfig,
         ConfigWriter $configWriter,
         ConfigReader $configReader,
         LoggerInterface $logger

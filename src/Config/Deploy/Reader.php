@@ -10,7 +10,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
 /**
- * @inheritdoc
+ * Reads configuration from /app/etc/env.php file
+ *
+ * {@inheritdoc}
  */
 class Reader implements ReaderInterface
 {

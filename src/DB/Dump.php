@@ -36,8 +36,13 @@ class Dump implements DumpInterface
     public function getCommand(): string
     {
         $command = 'mysqldump -h ' . escapeshellarg($this->connectionData->getHost())
-            . ' -P ' . escapeshellarg($this->connectionData->getPort())
             . ' -u ' . escapeshellarg($this->connectionData->getUser());
+
+        $port = $this->connectionData->getPort();
+        if (!empty($port)) {
+            $command .= ' -P ' . escapeshellarg($port);
+        }
+
         $password = $this->connectionData->getPassword();
         if ($password) {
             $command .= ' -p' . escapeshellarg($password);

@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface as DatabaseConnectionInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,23 +26,22 @@ class Connection implements ConnectionInterface
     private $logger;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var integer
      */
     private $fetchMode = \PDO::FETCH_ASSOC;
+    /**
+     * @var DatabaseConnectionInterface
+     */
+    private $connectionData;
 
     /**
      * @param LoggerInterface $logger
-     * @param Environment $environment
+     * @param DatabaseConnectionInterface $connectionData
      */
-    public function __construct(LoggerInterface $logger, Environment $environment)
+    public function __construct(LoggerInterface $logger, DatabaseConnectionInterface $connectionData)
     {
         $this->logger = $logger;
-        $this->environment = $environment;
+        $this->connectionData = $connectionData;
     }
 
     /**
@@ -178,12 +177,14 @@ class Connection implements ConnectionInterface
             return;
         }
 
-        $environment = $this->environment;
-
         $this->pdo = new \PDO(
-            sprintf('mysql:dbname=%s;host=%s', $environment->getDbName(), $environment->getDbHost()),
-            $environment->getDbUser(),
-            $environment->getDbPassword(),
+            sprintf(
+                'mysql:dbname=%s;host=%s',
+                $this->connectionData->getDbName(),
+                $this->connectionData->getHost()
+            ),
+            $this->connectionData->getUser(),
+            $this->connectionData->getPassword(),
             [
                 \PDO::ATTR_PERSISTENT => true,
             ]

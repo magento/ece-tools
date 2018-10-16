@@ -10,10 +10,14 @@ use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
+use Magento\MagentoCloud\Config\Database\ConfigInterface;
+use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\SlaveConfig;
+use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
-use Magento\MagentoCloud\DB\Data\ReadConnection;
+use Magento\MagentoCloud\DB\Data\RelationshipConnection;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -25,6 +29,7 @@ use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -316,9 +321,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Db\SlaveConfig::class)
-            ->needs(ConnectionInterface::class)
-            ->give(ReadConnection::class);
         $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -361,9 +363,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(\Magento\MagentoCloud\DB\Dump::class)
-            ->needs(ConnectionInterface::class)
-            ->give(ReadConnection::class);
         $this->container->when(PostDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -386,6 +385,8 @@ class Container implements ContainerInterface
         $this->container->when(CronKill::class)
             ->needs(ProcessInterface::class)
             ->give(DeployProcess\CronProcessKill::class);
+
+        $this->configureDatabaseConnection();
     }
 
     /**
@@ -421,5 +422,92 @@ class Container implements ContainerInterface
     public function create(string $abstract, array $params = [])
     {
         return $this->container->make($abstract, $params);
+    }
+
+    /**
+     * Configure classes responsible for database connection.
+     *
+     * @return void
+     */
+    private function configureDatabaseConnection()
+    {
+        $this->container->bind(
+            'mainConnectionData',
+            function () {
+                $config = $this->container->make(ConfigInterface::class);
+
+                return $this->container->makeWith(
+                    \Magento\MagentoCloud\DB\Data\Connection::class, [
+                        'connectionData' => $config->get()['connection']['default'] ?? []
+                    ]
+                );
+            }
+        );
+
+        $this->container->bind(
+            'readConnectionData',
+            function () {
+                $config = $this->container->make(ConfigInterface::class);
+
+                return $this->container->makeWith(
+                    \Magento\MagentoCloud\DB\Data\Connection::class, [
+                        'connectionData' => $config->get()['slave_connection']['default']
+                            ?? $config->get()['connection']['default']
+                            ?? []
+                    ]
+                );
+            }
+        );
+
+        $this->container->bind(
+            'mainRelationshipConnection',
+            function () {
+                $environment = $this->container->get(Environment::class);
+
+                return $this->container->makeWith(
+                    RelationshipConnection::class, [
+                        'connectionData' => $environment->getRelationship('database')[0] ?? []
+                    ]
+                );
+            }
+        );
+
+        $this->container->bind(
+            'readRelationshipConnection',
+            function () {
+                $environment = $this->container->get(Environment::class);
+
+                return $this->container->makeWith(
+                    RelationshipConnection::class, [
+                        'connectionData' => $environment->getRelationship('database-slave')[0] ?? []
+                    ]
+                );
+            }
+        );
+
+        $this->container->bind(ConnectionInterface::class, 'mainConnectionData');
+        $this->container->when(\Magento\MagentoCloud\DB\Dump::class)
+            ->needs(ConnectionInterface::class)
+            ->give('readConnectionData');
+        $this->container->singleton(
+            ConfigInterface::class,
+            MergedConfig::class
+        );
+        $this->container->when(MergedConfig::class)
+            ->needs(ConnectionInterface::class)
+            ->give('mainRelationshipConnection');
+        $this->container->when(SlaveConfig::class)
+            ->needs(ConnectionInterface::class)
+            ->give('readRelationshipConnection');
+        $this->container->when(MergedConfig::class)
+            ->needs(LoggerInterface::class)
+            ->give(NullLogger::class);
+        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class)
+            ->needs(ConfigInterface::class)
+            ->give(function () {
+                return $this->container->makeWith(MergedConfig::class, [
+                    'logger' => $this->container->make(Logger::class),
+                ]);
+            });
     }
 }

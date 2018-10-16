@@ -3,26 +3,26 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db;
+namespace Magento\MagentoCloud\Config\Database;
 
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 
 /**
  * Returns mysql slave connection
  */
-class SlaveConfig
+class SlaveConfig implements ConfigInterface
 {
     /**
      * @var ConnectionInterface
      */
-    private $readConnection;
+    private $connectionData;
 
     /**
-     * @param ConnectionInterface $readConnection
+     * @param ConnectionInterface $connectionData
      */
-    public function __construct(ConnectionInterface $readConnection)
+    public function __construct(ConnectionInterface $connectionData)
     {
-        $this->readConnection = $readConnection;
+        $this->connectionData = $connectionData;
     }
 
     /**
@@ -35,12 +35,18 @@ class SlaveConfig
     {
         $slaveConnection = [];
 
-        if ($this->readConnection->getHost()) {
+        if ($this->connectionData->getHost()) {
+            $host = $this->connectionData->getHost();
+
+            if (!empty($this->connectionData->getPort())) {
+                $host .= $this->connectionData->getPort();
+            }
+
             $slaveConnection = [
-                'host' => $this->readConnection->getHost() . ':' . $this->readConnection->getPort(),
-                'username' => $this->readConnection->getUser(),
-                'dbname' => $this->readConnection->getDBName(),
-                'password' => $this->readConnection->getPassword(),
+                'host' => $host,
+                'username' => $this->connectionData->getUser(),
+                'dbname' => $this->connectionData->getDBName(),
+                'password' => $this->connectionData->getPassword(),
                 'model' => 'mysql4',
                 'engine' => 'innodb',
                 'initStatements' => 'SET NAMES utf8;',

@@ -3,32 +3,23 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Db;
+namespace Magento\MagentoCloud\Config\Database;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Psr\Log\LoggerInterface;
 
 /**
- * Returns database configuration.
+ * Returns merged final database configuration.
  */
-class Config
+class MergedConfig implements ConfigInterface
 {
-    /**
-     * @var Environment
-     */
-    private $environment;
-
     /**
      * @var DeployInterface
      */
     private $stageConfig;
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
 
     /**
      * @var SlaveConfig
@@ -41,24 +32,49 @@ class Config
     private $configMerger;
 
     /**
-     * @param Environment $environment
+     * @var ConnectionInterface
+     */
+    private $connectionData;
+
+    /**
+     * @var ConfigReader
+     */
+    private $configReader;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * Final database configuration after merging.
+     *
+     * @var array
+     */
+    private $mergedConfig;
+
+    /**
+     * @param ConnectionInterface $connectionData
+     * @param ConfigReader $configReader
      * @param SlaveConfig $slaveConfig
      * @param DeployInterface $stageConfig
      * @param LoggerInterface $logger
      * @param ConfigMerger $configMerger
      */
     public function __construct(
-        Environment $environment,
+        ConnectionInterface $connectionData,
+        ConfigReader $configReader,
         SlaveConfig $slaveConfig,
         DeployInterface $stageConfig,
         LoggerInterface $logger,
         ConfigMerger $configMerger
     ) {
-        $this->environment = $environment;
+        $this->connectionData = $connectionData;
+        $this->configReader = $configReader;
         $this->slaveConfig = $slaveConfig;
         $this->stageConfig = $stageConfig;
-        $this->logger = $logger;
         $this->configMerger = $configMerger;
+        $this->logger = $logger;
     }
 
     /**
@@ -68,23 +84,46 @@ class Config
      */
     public function get(): array
     {
+        if ($this->mergedConfig !== null) {
+            return $this->mergedConfig;
+        }
+
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
 
         if (!$this->configMerger->isEmpty($envDbConfig) && !$this->configMerger->isMergeRequired($envDbConfig)) {
             return $this->configMerger->clear($envDbConfig);
         }
 
-        $mainConnectionData = [
-            'username' => $this->environment->getDbUser(),
-            'host' => $this->environment->getDbHost(),
-            'dbname' => $this->environment->getDbName(),
-            'password' => $this->environment->getDbPassword(),
+        if (!empty($this->connectionData->getHost())) {
+            $dbConfig = $this->generateDbConfig($envDbConfig);
+        } else {
+            $dbConfig = $this->getDbConfigFromEnvFile();
+        }
+
+        $this->mergedConfig = $this->configMerger->mergeConfigs($dbConfig, $envDbConfig);
+
+        return $this->mergedConfig;
+    }
+
+    /**
+     * Generates database configuration from environment relationships.
+     *
+     * @param array envDbConfig
+     * @return array
+     */
+    private function generateDbConfig(array $envDbConfig): array
+    {
+        $connectionData = [
+            'username' => $this->connectionData->getUser(),
+            'host' => $this->connectionData->getHost(),
+            'dbname' => $this->connectionData->getDbName(),
+            'password' => $this->connectionData->getPassword(),
         ];
 
         $dbConfig = [
             'connection' => [
-                'default' => $mainConnectionData,
-                'indexer' => $mainConnectionData,
+                'default' => $connectionData,
+                'indexer' => $connectionData,
             ],
         ];
 
@@ -99,11 +138,13 @@ class Config
                 if (!empty($slaveConfiguration)) {
                     $this->logger->info('Set DB slave connection.');
                     $dbConfig['slave_connection']['default'] = $slaveConfiguration;
+                } else {
+                    $this->logger->info('Slave connection is not configured.');
                 }
             }
         }
 
-        return $this->configMerger->mergeConfigs($dbConfig, $envDbConfig);
+        return $dbConfig;
     }
 
     /**
@@ -120,13 +161,25 @@ class Config
     private function isDbConfigurationCompatible(array $envDbConfig)
     {
         if ((isset($envDbConfig['connection']['default']['host'])
-                && $envDbConfig['connection']['default']['host'] !== $this->environment->getDbHost())
+                && $envDbConfig['connection']['default']['host'] !== $this->connectionData->getHost())
             || (isset($envDbConfig['connection']['default']['dbname'])
-                && $envDbConfig['connection']['default']['dbname'] !== $this->environment->getDbName())
+                && $envDbConfig['connection']['default']['dbname'] !== $this->connectionData->getDbName())
         ) {
             return false;
         }
 
         return true;
+    }
+
+    /**
+     * Returns db configuration from env.php.
+     *
+     * This method is calling only in case when database relationship configuration doesn't exist and
+     * database is not configured through .magento.env.yaml or env variable.
+     * It's workaround for scenarios when magento was installed by raw setup:install command not by deploy scripts.
+     */
+    private function getDbConfigFromEnvFile(): array
+    {
+        return $this->configReader->read()['db'] ?? [];
     }
 }
