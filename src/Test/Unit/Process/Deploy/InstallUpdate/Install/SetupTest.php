@@ -91,20 +91,22 @@ class SetupTest extends TestCase
     }
 
     /**
-     * @param $adminName
-     * @param $adminPassword
-     * @param $adminUrl
-     * @param $adminFirstname
-     * @param $adminLastname
-     * @param $adminNameExpected
-     * @param $adminPasswordExpected
-     * @param $adminUrlExpected
-     * @param $adminFirstnameExpected
-     * @param $adminLastnameExpected
+     * @param string $adminEmail
+     * @param string $adminName
+     * @param string $adminPassword
+     * @param string $adminUrl
+     * @param string $adminFirstname
+     * @param string $adminLastname
+     * @param string $adminNameExpected
+     * @param string $adminPasswordExpected
+     * @param string $adminUrlExpected
+     * @param string $adminFirstnameExpected
+     * @param string $adminLastnameExpected
      * @dataProvider executeDataProvider
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function testExecute(
+        $adminEmail,
         $adminName,
         $adminPassword,
         $adminUrl,
@@ -151,7 +153,7 @@ class SetupTest extends TestCase
                 'ADMIN_LOCALE' => 'fr_FR',
                 'ADMIN_FIRSTNAME' => $adminFirstname,
                 'ADMIN_LASTNAME' => $adminLastname,
-                'ADMIN_EMAIL' => 'admin@example.com',
+                'ADMIN_EMAIL' => $adminEmail,
                 'ADMIN_PASSWORD' => $adminPassword,
                 'ADMIN_USERNAME' => $adminName,
             ]);
@@ -164,6 +166,11 @@ class SetupTest extends TestCase
             ->method('getInstallUpgradeLog')
             ->willReturn($installUpgradeLog);
 
+        $adminCredential = $adminEmail
+            ? ' --admin-user=\'' . $adminNameExpected . '\''
+                . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
+                . '\' --admin-email=\'' . $adminEmail . '\' --admin-password=\'' . $adminPasswordExpected . '\''
+            : '';
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with(
@@ -171,9 +178,8 @@ class SetupTest extends TestCase
                 . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
                 . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\' --language=\'fr_FR\''
                 . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
-                . ' --backend-frontname=\'' . $adminUrlExpected . '\' --admin-user=\'' . $adminNameExpected . '\''
-                . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
-                . '\' --admin-email=\'admin@example.com\' --admin-password=\'' . $adminPasswordExpected . '\''
+                . ' --backend-frontname=\'' . $adminUrlExpected . '\''
+                . $adminCredential
                 . ' --use-secure-admin=1 --ansi --no-interaction'
                 . ' --db-password=\'password\' -v'
                 . ' | tee -a ' . $installUpgradeLog . '"'
@@ -189,6 +195,7 @@ class SetupTest extends TestCase
     {
         return [
             [
+                'adminEmail' => 'admin@example.com',
                 'adminName' => 'root',
                 'adminPassword' => 'myPassword',
                 'adminUrl' => 'admino4ka',
@@ -201,6 +208,33 @@ class SetupTest extends TestCase
                 'adminLastnameExpected' => 'Lastname',
             ],
             [
+                'adminEmail' => 'admin@example.com',
+                'adminName' => '',
+                'adminPassword' => '',
+                'adminUrl' => '',
+                'adminFirstname' => '',
+                'adminLastname' => '',
+                'adminNameExpected' => Environment::DEFAULT_ADMIN_NAME,
+                'adminPasswordExpected' => 'generetedPassword',
+                'adminUrlExpected' => Environment::DEFAULT_ADMIN_URL,
+                'adminFirstnameExpected' => Environment::DEFAULT_ADMIN_FIRSTNAME,
+                'adminLastnameExpected' => Environment::DEFAULT_ADMIN_LASTNAME,
+            ],
+            [
+                'adminEmail' => '',
+                'adminName' => 'root',
+                'adminPassword' => 'myPassword',
+                'adminUrl' => 'admino4ka',
+                'adminFirstname' => 'Firstname',
+                'adminLastname' => 'Lastname',
+                'adminNameExpected' => 'root',
+                'adminPasswordExpected' => 'myPassword',
+                'adminUrlExpected' => 'admino4ka',
+                'adminFirstnameExpected' => 'Firstname',
+                'adminLastnameExpected' => 'Lastname',
+            ],
+            [
+                'adminEmail' => '',
                 'adminName' => '',
                 'adminPassword' => '',
                 'adminUrl' => '',
