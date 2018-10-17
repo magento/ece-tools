@@ -6,43 +6,70 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Database\SlaveConfig;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
-class ConfigTest extends TestCase
+class MergedConfigTest extends TestCase
 {
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var SlaveConfig|Mock
+     * @var SlaveConfig|MockObject
      */
     private $slaveConfigMock;
 
+    /**
+     * @var ConnectionInterface|MockObject
+     */
+    private $connectionDataMock;
+
+    /**
+     * @var ConfigReader|MockObject
+     */
+    private $configReaderMock;
+
+    /**
+     * @var MergedConfig
+     */
+    private $mergedConfig;
+
     protected function setUp()
     {
+        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->configReaderMock = $this->createMock(ConfigReader::class);
+        $this->slaveConfigMock = $this->createMock(SlaveConfig::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->slaveConfigMock = $this->createMock(SlaveConfig::class);
+
+        $this->mergedConfig = new MergedConfig(
+            $this->connectionDataMock,
+            $this->configReaderMock,
+            $this->slaveConfigMock,
+            $this->stageConfigMock,
+            $this->loggerMock,
+            new ConfigMerger()
+        );
     }
 
     /**
-     * @param array $magentoRelationShips
+     * @param array $relationShipConnectionData
      * @param array $envDbConfig
      * @param array $slaveConfiguration
      * @param boolean $setSlave
@@ -50,17 +77,13 @@ class ConfigTest extends TestCase
      * @dataProvider getDataProvider
      */
     public function testGet(
-        array $magentoRelationShips,
+        array $relationShipConnectionData,
         array $envDbConfig,
         array $slaveConfiguration,
         $setSlave,
         array $expectedConfig
     ) {
-        /** @var Environment|Mock $dbConfigEnvironmentMock */
-        $dbConfigEnvironmentMock = $this->createPartialMock(Environment::class, ['getRelationships']);
-        $dbConfigEnvironmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn($magentoRelationShips);
+        $this->setConnectionData($relationShipConnectionData);
         $this->slaveConfigMock->expects($this->any())
             ->method('get')
             ->willReturn($slaveConfiguration);
@@ -75,22 +98,14 @@ class ConfigTest extends TestCase
                 $setSlave
             );
 
-        $dbConfig = new MergedConfig(
-            $dbConfigEnvironmentMock,
-            $this->slaveConfigMock,
-            $this->stageConfigMock,
-            $this->loggerMock,
-            new ConfigMerger()
-        );
-
-        $this->assertEquals($expectedConfig, $dbConfig->get());
+        $this->assertEquals($expectedConfig, $this->mergedConfig->get());
     }
 
     /**
      * Data provider for testExecute.
      *
      * Return data for 2 parameters:
-     * 1 - relationships data
+     * 1 - relationship connection data
      * 2 - custom db configuration
      * 2 - slave configuration
      * 3 - value for VAR_MYSQL_USE_SLAVE_CONNECTION variable
@@ -102,16 +117,12 @@ class ConfigTest extends TestCase
      */
     public function getDataProvider()
     {
-        $relationships = [
-            'database' => [
-                0 => [
-                    'host' => 'localhost',
-                    'port' => '3306',
-                    'path' => 'magento',
-                    'username' => 'user',
-                    'password' => 'password',
-                ]
-            ],
+        $connectionData = [
+            'host' => 'localhost',
+            'port' => '3306',
+            'path' => 'magento',
+            'username' => 'user',
+            'password' => 'password',
         ];
 
         $slaveConfig = [
@@ -127,7 +138,7 @@ class ConfigTest extends TestCase
 
         return [
             'default connection without slave' => [
-                $relationships,
+                $connectionData,
                 [],
                 $slaveConfig,
                 false,
@@ -149,7 +160,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'default connection with slave' => [
-                $relationships,
+                $connectionData,
                 [],
                 $slaveConfig,
                 true,
@@ -172,7 +183,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration only merge option' => [
-                $relationships,
+                $connectionData,
                 [
                     '_merge' => true,
                 ],
@@ -197,7 +208,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration without merge' => [
-                $relationships,
+                $connectionData,
                 [
                     'connection' => [
                         'default' => [
@@ -226,7 +237,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with merge and without slave' => [
-                $relationships,
+                $connectionData,
                 [
                     'connection' => [
                         'default' => [
@@ -262,7 +273,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with merge set to false and without slave' => [
-                $relationships,
+                $connectionData,
                 [
                     'connection' => [
                         'default' => [
@@ -292,7 +303,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with merge and with slave' => [
-                $relationships,
+                $connectionData,
                 [
                     'connection' => [
                         'default' => [
@@ -327,7 +338,7 @@ class ConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with merge, with slave, and host changed' => [
-                $relationships,
+                $connectionData,
                 [
                     'connection' => [
                         'default' => [
@@ -362,5 +373,24 @@ class ConfigTest extends TestCase
                 ],
             ],
         ];
+    }
+
+    private function setConnectionData(array $relationShipConnectionData)
+    {
+        $this->connectionDataMock->expects($this->any())
+            ->method('getHost')
+            ->willReturn($relationShipConnectionData['host']);
+        $this->connectionDataMock->expects($this->any())
+            ->method('getPort')
+            ->willReturn($relationShipConnectionData['host']);
+        $this->connectionDataMock->expects($this->any())
+            ->method('getDbName')
+            ->willReturn($relationShipConnectionData['path']);
+        $this->connectionDataMock->expects($this->any())
+            ->method('getUser')
+            ->willReturn($relationShipConnectionData['username']);
+        $this->connectionDataMock->expects($this->any())
+            ->method('getPassword')
+            ->willReturn($relationShipConnectionData['password']);
     }
 }

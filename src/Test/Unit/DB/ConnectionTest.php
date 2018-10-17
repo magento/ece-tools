@@ -5,8 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\DB;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\Connection;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -21,41 +22,34 @@ class ConnectionTest extends TestCase
     private $connection;
 
     /**
-     * @var \PDO|\PHPUnit_Framework_MockObject_MockObject
+     * @var \PDO|MockObject
      */
     private $pdoMock;
 
     /**
-     * @var \PDOStatement|\PHPUnit_Framework_MockObject_MockObject
+     * @var \PDOStatement|MockObject
      */
     private $statementMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var Environment
+     * @var ConnectionInterface
      */
-    private $environmentMock;
+    private $connectionDataMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->pdoMock = $this->getMockBuilder(\PDO::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->statementMock = $this->getMockBuilder(\PDOStatement::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->pdoMock = $this->createMock(\PDO::class);
+        $this->statementMock = $this->createMock(\PDOStatement::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 
         $this->pdoMock->expects($this->any())
             ->method('prepare')
@@ -63,7 +57,7 @@ class ConnectionTest extends TestCase
 
         $this->connection = new Connection(
             $this->loggerMock,
-            $this->environmentMock
+            $this->connectionDataMock
         );
 
         $reflection = new \ReflectionClass(get_class($this->connection));
