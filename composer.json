@@ -70,6 +70,10 @@
         ".magento.env.yaml.dist"
       ],
       [
+        "dist/Makefile",
+        "Makefile"
+      ],
+      [
         "dist/docker",
         "docker"
       ]
