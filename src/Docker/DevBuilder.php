@@ -117,6 +117,7 @@ class DevBuilder implements BuilderInterface
                     'image' => 'tianon/true',
                     'volumes' => [
                         '/var/lib/mysql',
+                        './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
                     ],
                 ],
             ],
