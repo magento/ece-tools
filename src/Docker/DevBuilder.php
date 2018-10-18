@@ -106,6 +106,7 @@ class DevBuilder implements BuilderInterface
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
+                        './docker/mnt:/mnt',
                         '/var/www/magento/vendor',
                         '/var/www/magento/generated',
                         '/var/www/magento/pub',
