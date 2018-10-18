@@ -1,0 +1,148 @@
+diff -Nuar a/vendor/amzn/amazon-pay-module/etc/di.xml b/vendor/amzn/amazon-pay-module/etc/di.xml
+index c954f48e..09626be3 100644
+--- a/vendor/amzn/amazon-pay-module/etc/di.xml
++++ b/vendor/amzn/amazon-pay-module/etc/di.xml
+@@ -55,8 +55,8 @@
+     <virtualType name="Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper"
+                  type="Magento\Payment\Gateway\ErrorMapper\ErrorMessageMapper">
+         <arguments>
+-            <argument name="messageMapping" xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualMappingData
+-            </argument>
++            <argument name="messageMapping"
++                xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualMappingData</argument>
+         </arguments>
+     </virtualType>
+
+@@ -120,19 +120,18 @@
+     <!-- Authorize command -->
+     <virtualType name="AmazonAuthorizeCommand" type="Amazon\Payment\Gateway\Command\AmazonAuthCommand">
+         <arguments>
+-            <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\AuthorizationRequest
+-            </argument>
++            <argument name="requestBuilder"
++                      xsi:type="object">Amazon\Payment\Gateway\Request\AuthorizationRequestBuilder</argument>
+             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\CompleteAuthHandler</argument>
+             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
+             <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
+             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\AuthorizeClient</argument>
+             <argument name="errorMessageMapper"
+-                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper
+-            </argument>
++                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
+         </arguments>
+     </virtualType>
+
+-    <type name="Amazon\Payment\Gateway\Request\AuthorizationRequest">
++    <type name="Amazon\Payment\Gateway\Request\AuthorizationRequestBuilder">
+         <arguments>
+             <argument name="config" xsi:type="object">AmazonGatewayConfig</argument>
+         </arguments>
+@@ -141,35 +140,33 @@
+     <!-- Authorize and Capture command -->
+     <virtualType name="AmazonSaleCommand" type="Amazon\Payment\Gateway\Command\AmazonAuthCommand">
+         <arguments>
+-            <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\AuthorizationRequest
+-            </argument>
++            <argument name="requestBuilder"
++                      xsi:type="object">Amazon\Payment\Gateway\Request\AuthorizationRequestBuilder</argument>
+             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\CompleteSaleHandler</argument>
+             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
+             <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
+             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\CaptureClient</argument>
+             <argument name="errorMessageMapper"
+-                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper
+-            </argument>
++                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
+         </arguments>
+     </virtualType>
+
+     <!-- Capture settlement command -->
+     <virtualType name="AmazonSettlementCommand" type="Amazon\Payment\Gateway\Command\AmazonAuthCommand">
+         <arguments>
+-            <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\SettlementRequest
+-            </argument>
++            <argument name="requestBuilder"
++                      xsi:type="object">Amazon\Payment\Gateway\Request\SettlementRequestBuilder</argument>
+             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\SettlementHandler</argument>
+             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
+             <argument name="validator" xsi:type="object">AmazonAuthorizationValidators</argument>
+             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\SettlementClient</argument>
+             <argument name="errorMessageMapper"
+-                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper
+-            </argument>
++                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
+         </arguments>
+     </virtualType>
+
+     <!-- Capture Request -->
+-    <type name="Amazon\Payment\Gateway\Request\CaptureRequest">
++    <type name="Amazon\Payment\Gateway\Request\CaptureRequestBuilder">
+         <arguments>
+             <argument name="config" xsi:type="object">AmazonGatewayConfig</argument>
+             <argument name="coreHelper" xsi:type="object">Amazon\Core\Helper\Data</argument>
+@@ -180,35 +177,33 @@
+     <!-- Refund Command -->
+     <virtualType name="AmazonRefundCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+         <arguments>
+-            <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\RefundRequest</argument>
++            <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\RefundRequestBuilder</argument>
+             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\RefundHandler</argument>
+             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
+-            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator
+-            </argument>
++            <argument name="validator"
++                      xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
+             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\RefundClient</argument>
+             <argument name="errorMessageMapper"
+-                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper
+-            </argument>
++                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
+         </arguments>
+     </virtualType>
+
+     <!-- Void command -->
+     <virtualType name="AmazonVoidCommand" type="Magento\Payment\Gateway\Command\GatewayCommand">
+         <arguments>
+-            <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\VoidRequest</argument>
++            <argument name="requestBuilder" xsi:type="object">Amazon\Payment\Gateway\Request\VoidRequestBuilder</argument>
+             <argument name="handler" xsi:type="object">Amazon\Payment\Gateway\Response\VoidHandler</argument>
+             <argument name="transferFactory" xsi:type="object">Amazon\Payment\Gateway\Http\TransferFactory</argument>
+-            <argument name="validator" xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator
+-            </argument>
++            <argument name="validator"
++                      xsi:type="object">Amazon\Payment\Gateway\Validator\AuthorizationValidator</argument>
+             <argument name="client" xsi:type="object">Amazon\Payment\Gateway\Http\Client\VoidClient</argument>
+             <argument name="errorMessageMapper"
+-                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper
+-            </argument>
++                      xsi:type="object">Amazon\Payment\Gateway\ErrorMapper\VirtualErrorMessageMapper</argument>
+         </arguments>
+     </virtualType>
+
+     <!-- Void Request -->
+-    <type name="Amazon\Payment\Gateway\Request\VoidRequest">
++    <type name="Amazon\Payment\Gateway\Request\VoidRequestBuilder">
+         <arguments>
+             <argument name="config" xsi:type="object">AmazonGatewayConfig</argument>
+         </arguments>
+@@ -280,8 +275,8 @@
+     </type>
+     <type name="Amazon\Payment\Model\QueuedRefundUpdater">
+         <arguments>
+-            <argument name="adminNotifier" xsi:type="object">Magento\Framework\Notification\NotifierInterface\Proxy
+-            </argument>
++            <argument name="adminNotifier"
++                  xsi:type="object">Magento\Framework\Notification\NotifierInterface\Proxy</argument>
+         </arguments>
+     </type>
+     <type name="Amazon\Payment\Api\Ipn\CompositeProcessorInterface">
+@@ -289,8 +284,7 @@
+             <argument name="processors" xsi:type="array">
+                 <item name="captureprocessor" xsi:type="object">Amazon\Payment\Model\Ipn\CaptureProcessor\Proxy</item>
+                 <item name="authorizationprocessor"
+-                      xsi:type="object">Amazon\Payment\Model\Ipn\AuthorizationProcessor\Proxy
+-                </item>
++                      xsi:type="object">Amazon\Payment\Model\Ipn\AuthorizationProcessor\Proxy</item>
+                 <item name="orderprocessor" xsi:type="object">Amazon\Payment\Model\Ipn\OrderProcessor\Proxy</item>
+                 <item name="refundprocessor" xsi:type="object">Amazon\Payment\Model\Ipn\RefundProcessor\Proxy</item>
+             </argument>
