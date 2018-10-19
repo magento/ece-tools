@@ -74,8 +74,20 @@
         "Makefile"
       ],
       [
-        "dist/docker",
-        "docker"
+        "dist/docker/mnt",
+        "docker/mnt"
+      ],
+      [
+        "dist/docker/mysql",
+        "docker/mysql"
+      ],
+      [
+        "dist/docker/config.php",
+        "docker/config.php.dist"
+      ],
+      [
+        "dist/docker/global.php",
+        "docker/global.php.dist"
       ]
     ]
   }
