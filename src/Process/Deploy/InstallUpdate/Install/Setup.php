@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -56,6 +57,7 @@ class Setup implements ProcessInterface
      * @var DeployInterface
      */
     private $stageConfig;
+
     /**
      * @var ConnectionInterface
      */
@@ -65,7 +67,7 @@ class Setup implements ProcessInterface
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
      * @param Environment $environment
-     * @param ConnectionInterface $connectionData
+     * @param ConnectionFactory $connectionFactory
      * @param ShellInterface $shell
      * @param PasswordGenerator $passwordGenerator
      * @param FileList $fileList
@@ -75,7 +77,7 @@ class Setup implements ProcessInterface
         LoggerInterface $logger,
         UrlManager $urlManager,
         Environment $environment,
-        ConnectionInterface $connectionData,
+        ConnectionFactory $connectionFactory,
         ShellInterface $shell,
         PasswordGenerator $passwordGenerator,
         FileList $fileList,
@@ -84,7 +86,7 @@ class Setup implements ProcessInterface
         $this->logger = $logger;
         $this->urlManager = $urlManager;
         $this->environment = $environment;
-        $this->connectionData = $connectionData;
+        $this->connectionData = $connectionFactory->create(ConnectionFactory::CONNECTION_MAIN);
         $this->shell = $shell;
         $this->passwordGenerator = $passwordGenerator;
         $this->fileList = $fileList;

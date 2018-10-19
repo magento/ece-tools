@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\DB;
 
 use Magento\MagentoCloud\DB\Connection;
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -50,6 +51,11 @@ class ConnectionTest extends TestCase
         $this->statementMock = $this->createMock(\PDOStatement::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        /** @var ConnectionFactory|MockObject $connectionFactoryMock */
+        $connectionFactoryMock = $this->createMock(ConnectionFactory::class);
+        $connectionFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($this->connectionDataMock);
 
         $this->pdoMock->expects($this->any())
             ->method('prepare')
@@ -57,7 +63,7 @@ class ConnectionTest extends TestCase
 
         $this->connection = new Connection(
             $this->loggerMock,
-            $this->connectionDataMock
+            $connectionFactoryMock
         );
 
         $reflection = new \ReflectionClass(get_class($this->connection));

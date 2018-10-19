@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface as DatabaseConnectionInterface;
 use Psr\Log\LoggerInterface;
 
@@ -29,6 +30,7 @@ class Connection implements ConnectionInterface
      * @var integer
      */
     private $fetchMode = \PDO::FETCH_ASSOC;
+
     /**
      * @var DatabaseConnectionInterface
      */
@@ -36,12 +38,12 @@ class Connection implements ConnectionInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param DatabaseConnectionInterface $connectionData
+     * @param ConnectionFactory $connectionFactory
      */
-    public function __construct(LoggerInterface $logger, DatabaseConnectionInterface $connectionData)
+    public function __construct(LoggerInterface $logger, ConnectionFactory $connectionFactory)
     {
         $this->logger = $logger;
-        $this->connectionData = $connectionData;
+        $this->connectionData = $connectionFactory->create(ConnectionFactory::CONNECTION_MAIN);
     }
 
     /**

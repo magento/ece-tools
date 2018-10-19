@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -85,12 +86,17 @@ class SetupTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        /** @var ConnectionFactory|MockObject $connectionFactoryMock */
+        $connectionFactoryMock = $this->createMock(ConnectionFactory::class);
+        $connectionFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($this->connectionDataMock);
 
         $this->process = new Setup(
             $this->loggerMock,
             $this->urlManagerMock,
             $this->environmentMock,
-            $this->connectionDataMock,
+            $connectionFactoryMock,
             $this->shellMock,
             $this->passwordGeneratorMock,
             $this->fileListMock,

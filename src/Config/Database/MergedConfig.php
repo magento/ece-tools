@@ -6,9 +6,10 @@
 namespace Magento\MagentoCloud\Config\Database;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
+use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -54,7 +55,7 @@ class MergedConfig implements ConfigInterface
     private $mergedConfig;
 
     /**
-     * @param ConnectionInterface $connectionData
+     * @param RelationshipConnectionFactory $connectionFactory
      * @param ConfigReader $configReader
      * @param SlaveConfig $slaveConfig
      * @param DeployInterface $stageConfig
@@ -62,14 +63,14 @@ class MergedConfig implements ConfigInterface
      * @param ConfigMerger $configMerger
      */
     public function __construct(
-        ConnectionInterface $connectionData,
+        RelationshipConnectionFactory $connectionFactory,
         ConfigReader $configReader,
         SlaveConfig $slaveConfig,
         DeployInterface $stageConfig,
         LoggerInterface $logger,
         ConfigMerger $configMerger
     ) {
-        $this->connectionData = $connectionData;
+        $this->connectionData = $connectionFactory->create(RelationshipConnectionFactory::CONNECTION_MAIN);
         $this->configReader = $configReader;
         $this->slaveConfig = $slaveConfig;
         $this->stageConfig = $stageConfig;

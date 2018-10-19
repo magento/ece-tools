@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config\Database;
 
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 
 /**
  * Returns mysql slave connection
@@ -13,16 +13,16 @@ use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 class SlaveConfig implements ConfigInterface
 {
     /**
-     * @var ConnectionInterface
+     * @var RelationshipConnectionFactory
      */
-    private $connectionData;
+    private $connectionFactory;
 
     /**
-     * @param ConnectionInterface $connectionData
+     * @param RelationshipConnectionFactory $connectionFactory
      */
-    public function __construct(ConnectionInterface $connectionData)
+    public function __construct(RelationshipConnectionFactory $connectionFactory)
     {
-        $this->connectionData = $connectionData;
+        $this->connectionFactory = $connectionFactory;
     }
 
     /**
@@ -35,18 +35,19 @@ class SlaveConfig implements ConfigInterface
     {
         $slaveConnection = [];
 
-        if ($this->connectionData->getHost()) {
-            $host = $this->connectionData->getHost();
+        $connectionData = $this->connectionFactory->create(RelationshipConnectionFactory::CONNECTION_SLAVE);
+        if ($connectionData->getHost()) {
+            $host = $connectionData->getHost();
 
-            if (!empty($this->connectionData->getPort())) {
-                $host .= ':' . $this->connectionData->getPort();
+            if (!empty($connectionData->getPort())) {
+                $host .= ':' . $connectionData->getPort();
             }
 
             $slaveConnection = [
                 'host' => $host,
-                'username' => $this->connectionData->getUser(),
-                'dbname' => $this->connectionData->getDBName(),
-                'password' => $this->connectionData->getPassword(),
+                'username' => $connectionData->getUser(),
+                'dbname' => $connectionData->getDBName(),
+                'password' => $connectionData->getPassword(),
                 'model' => 'mysql4',
                 'engine' => 'innodb',
                 'initStatements' => 'SET NAMES utf8;',

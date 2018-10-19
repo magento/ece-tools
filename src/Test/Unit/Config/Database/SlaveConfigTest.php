@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
 use Magento\MagentoCloud\Config\Database\SlaveConfig;
+use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -24,6 +25,8 @@ class SlaveConfigTest extends TestCase
         array $connectionData,
         array $expectedConfig
     ) {
+        /** @var RelationshipConnectionFactory $connectionFactoryMock */
+        $connectionFactoryMock = $this->createMock(RelationshipConnectionFactory::class);
         /** @var ConnectionInterface|MockObject $connectionDataMock */
         $connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
         $connectionDataMock->expects($this->any())
@@ -41,8 +44,11 @@ class SlaveConfigTest extends TestCase
         $connectionDataMock->expects($this->any())
             ->method('getPassword')
             ->willReturn($connectionData['password'] ?? '');
+        $connectionFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($connectionDataMock);
 
-        $dbSlaveConfig = new SlaveConfig($connectionDataMock);
+        $dbSlaveConfig = new SlaveConfig($connectionFactoryMock);
 
         $this->assertEquals($expectedConfig, $dbSlaveConfig->get());
     }

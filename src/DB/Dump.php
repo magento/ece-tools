@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface as DatabaseConnectionInterface;
 
 /**
@@ -20,12 +21,12 @@ class Dump implements DumpInterface
     private $connectionData;
 
     /**
-     * @param DatabaseConnectionInterface $connectionData
+     * @param ConnectionFactory $connectionFactory
      */
     public function __construct(
-        DatabaseConnectionInterface $connectionData
+        ConnectionFactory $connectionFactory
     ) {
-        $this->connectionData = $connectionData;
+        $this->connectionData = $connectionFactory->create(ConnectionFactory::CONNECTION_SLAVE);
     }
 
     /**

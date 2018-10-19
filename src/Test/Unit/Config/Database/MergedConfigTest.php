@@ -6,11 +6,12 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Database\SlaveConfig;
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -46,6 +47,11 @@ class MergedConfigTest extends TestCase
     private $configReaderMock;
 
     /**
+     * @var RelationshipConnectionFactory|MockObject
+     */
+    private $connectionFactoryMock;
+
+    /**
      * @var MergedConfig
      */
     private $mergedConfig;
@@ -53,13 +59,17 @@ class MergedConfigTest extends TestCase
     protected function setUp()
     {
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionFactoryMock = $this->createMock(RelationshipConnectionFactory::class);
+        $this->connectionFactoryMock->expects($this->any())
+            ->method('create')
+            ->willReturn($this->connectionDataMock);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->slaveConfigMock = $this->createMock(SlaveConfig::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->mergedConfig = new MergedConfig(
-            $this->connectionDataMock,
+            $this->connectionFactoryMock,
             $this->configReaderMock,
             $this->slaveConfigMock,
             $this->stageConfigMock,
