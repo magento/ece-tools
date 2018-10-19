@@ -95,6 +95,7 @@ class DevBuilder implements BuilderInterface
             'services' => [
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
                 'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
+                'elasticsearch' => $this->serviceFactory->create(ServiceFactory::SERVICE_ELASTICSEARCH)->get(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
                 'cli' => $this->getCliService(false),
