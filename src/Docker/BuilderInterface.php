@@ -11,6 +11,12 @@ namespace Magento\MagentoCloud\Docker;
 interface BuilderInterface
 {
     const DEFAULT_PHP_VERSION = '7.1';
+    const PHP_VERSIONS = [
+        '7.0',
+        '7.1',
+        '7.2',
+    ];
+
     const DEFAULT_NGINX_VERSION = 'latest';
     const DEFAULT_DB_VERSION = '10';
 

@@ -6,6 +6,7 @@
   "license": "proprietary",
   "require": {
     "php": "^7.0",
+    "ext-PDO": "*",
     "ext-json": "*",
     "composer/composer": "@stable",
     "composer/semver": "^1.4",
@@ -67,6 +68,18 @@
       [
         "dist/.magento.env.yaml",
         ".magento.env.yaml.dist"
+      ],
+      [
+        "dist/Makefile",
+        "Makefile"
+      ],
+      [
+        "dist/docker/mnt",
+        "docker/mnt"
+      ],
+      [
+        "dist/docker/mysql",
+        "docker/mysql"
       ],
       [
         "dist/docker/config.php",

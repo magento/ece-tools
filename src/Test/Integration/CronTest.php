@@ -15,7 +15,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * {@inheritdoc}
  *
- * @group php71
+ * @group php72
  */
 class CronTest extends AbstractTest
 {
@@ -57,13 +57,14 @@ class CronTest extends AbstractTest
     }
 
     /**
-     * @param string $version
+     * @param null $version
      * @param string $locale
+     * @param string $stability
      * @dataProvider cronDataProvider
      */
-    public function testCron($version = null, $locale = 'en_US')
+    public function testCron($version = null, $locale = 'en_US', $stability = 'stable')
     {
-        $this->bootstrap->run($version);
+        $this->bootstrap->run($version, $stability);
         $this->bootstrap->execute(sprintf(
             'cd %s && composer install -n --no-dev --no-progress',
             $this->bootstrap->getSandboxDir()
@@ -139,9 +140,7 @@ class CronTest extends AbstractTest
     public function cronDataProvider(): array
     {
         return [
-            ['version' => '2.2.0', 'locale' => 'en_US'],
-            ['version' => '2.2.2', 'locale' => 'ar_KW'],
-            ['version' => '@stable', 'locale' => 'fr_FR'],
+            ['version' => '~2.3.0', 'locale' => 'fr_FR', 'stability' => 'beta'],
         ];
     }
 

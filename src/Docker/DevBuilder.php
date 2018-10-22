@@ -39,10 +39,7 @@ class DevBuilder implements BuilderInterface
      */
     public function setPhpVersion(string $version)
     {
-        $this->setVersion(self::PHP_VERSION, $version, [
-            '7.0',
-            self::DEFAULT_PHP_VERSION,
-        ]);
+        $this->setVersion(self::PHP_VERSION, $version, self::PHP_VERSIONS);
     }
 
     /**
@@ -109,6 +106,7 @@ class DevBuilder implements BuilderInterface
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
+                        './docker/mnt:/mnt',
                         '/var/www/magento/vendor',
                         '/var/www/magento/generated',
                         '/var/www/magento/pub',
@@ -120,6 +118,7 @@ class DevBuilder implements BuilderInterface
                     'image' => 'tianon/true',
                     'volumes' => [
                         '/var/lib/mysql',
+                        './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
                     ],
                 ],
             ],
@@ -179,6 +178,7 @@ class DevBuilder implements BuilderInterface
         } else {
             $composeCacheDirectory = '~/.composer/cache';
         }
+
         return [
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-cli',

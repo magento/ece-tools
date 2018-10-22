@@ -35,6 +35,7 @@ return [
     'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode([
             'ADMIN_EMAIL' => 'admin@example.com',
             'ADMIN_PASSWORD' => '123123q',
+            'ADMIN_URL' => 'admin',
         ]
     )),
 ];
