@@ -46,4 +46,9 @@ interface DeployInterface extends StageConfigInterface
      * @deprecated use SKIP_SCD instead
      */
     const VAR_DO_DEPLOY_STATIC_CONTENT = 'DO_DEPLOY_STATIC_CONTENT';
+
+    /**
+     * The variable responsible for enabling google analytics in environments other than prod.
+     */
+    const VAR_ENABLE_GOOLGE_ANALYTICS = 'ENABLE_GOOGLE_ANALYTICS';
 }
