@@ -3,11 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
+namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
-use Magento\MagentoCloud\Process\Deploy\EnableCron;
+use Magento\MagentoCloud\Process\PostDeploy\EnableCron;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
