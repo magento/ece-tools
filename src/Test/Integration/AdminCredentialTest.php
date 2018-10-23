@@ -57,8 +57,7 @@ class AdminCredentialTest extends AbstractTest
     }
 
     /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Fix configuration with given suggestions
+     * @return void
      */
     public function testInstallWithoutAdminEmail()
     {
@@ -76,7 +75,7 @@ class AdminCredentialTest extends AbstractTest
         );
         $commandTester->execute([]);
 
-        $this->assertSame(1, $commandTester->getStatusCode());
+        $this->assertSame(0, $commandTester->getStatusCode());
     }
 
     /**
