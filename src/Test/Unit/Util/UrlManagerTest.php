@@ -7,7 +7,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Util\UrlManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -22,14 +24,19 @@ class UrlManagerTest extends TestCase
     private $manager;
 
     /**
-     * @var LoggerInterface |\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var Environment |\PHPUnit_Framework_MockObject_MockObject
+     * @var Environment|MockObject
      */
     private $environmentMock;
+
+    /**
+     * @var ConnectionInterface|MockObject
+     */
+    private $connection;
 
     /**
      * @inheritdoc
@@ -38,10 +45,12 @@ class UrlManagerTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
+        $this->connection = $this->getMockForAbstractClass(ConnectionInterface::class);
 
         $this->manager = new UrlManager(
             $this->environmentMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->connection
         );
     }
 
@@ -132,9 +141,9 @@ class UrlManagerTest extends TestCase
     /**
      * @param array $routes
      * @param array $expectedResult
-     * @dataProvider returnedDataProvider
+     * @dataProvider getUrlsDataProvider
      */
-    public function testReturnedData(array $routes, array $expectedResult)
+    public function testGetUrls(array $routes, array $expectedResult)
     {
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -257,7 +266,7 @@ class UrlManagerTest extends TestCase
         ];
     }
 
-    public function returnedDataProvider()
+    public function getUrlsDataProvider(): array
     {
         return [
             [
@@ -348,15 +357,38 @@ class UrlManagerTest extends TestCase
         ];
     }
 
-    /**
-     * @param array $secureRoute
-     * @dataProvider getBaseUrlDataProvider
-     */
-    public function testGetBaseUrl(array $secureRoute)
+    public function testGetBaseUrl()
     {
+        $this->connection->expects($this->once())
+            ->method('selectOne')
+            ->with(
+                'SELECT `value` from `core_config_data` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1'
+            )->willReturn([
+                'value' => 'https://example.com/',
+            ]);
+
+        $this->assertEquals(
+            'https://example.com/',
+            $this->manager->getBaseUrl()
+        );
+    }
+
+    /**
+     * @param array $routes
+     * @dataProvider getBaseUrlPlaceholderDataProvider
+     */
+    public function testGetBaseUrlPlaceholder(array $routes)
+    {
+        $this->connection->expects($this->once())
+            ->method('selectOne')
+            ->with(
+                'SELECT `value` from `core_config_data` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1'
+            )->willReturn([
+                'value' => '{base_url}/',
+            ]);
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
-            ->willReturn($secureRoute);
+            ->willReturn($routes);
 
         $this->assertEquals(
             'https://example.com/',
@@ -367,15 +399,12 @@ class UrlManagerTest extends TestCase
     /**
      * @return array
      */
-    public function getBaseUrlDataProvider(): array
+    public function getBaseUrlPlaceholderDataProvider(): array
     {
         return [
             [
-                [
-                    'https://example.com/' => [
-                        'original_url' => 'https://{default}',
-                        'type' => 'upstream',
-                    ],
+                'routes' => [
+                    'http://example.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream'],
                 ],
             ],
         ];

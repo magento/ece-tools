@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Filesystem;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
  * Directory path configurations.
@@ -62,6 +63,7 @@ class DirectoryList
      * @param string $code
      * @param bool $relativePath
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getPath(string $code, bool $relativePath = false): string
     {
@@ -105,6 +107,7 @@ class DirectoryList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getInit(): string
     {
@@ -113,6 +116,7 @@ class DirectoryList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getVar(): string
     {
@@ -121,6 +125,7 @@ class DirectoryList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getLog(): string
     {
@@ -129,6 +134,7 @@ class DirectoryList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getGeneratedCode(): string
     {
@@ -137,6 +143,7 @@ class DirectoryList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getGeneratedMetadata(): string
     {
@@ -147,6 +154,7 @@ class DirectoryList
      * Retrieves writable directories.
      *
      * @return array
+     * @throws UndefinedPackageException
      */
     public function getWritableDirectories(): array
     {
@@ -187,6 +195,7 @@ class DirectoryList
 
     /**
      * @return array
+     * @throws UndefinedPackageException
      */
     private function getDefaultVariadicDirectories(): array
     {

@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\DB\ConnectionInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,15 +35,23 @@ class UrlManager
     private $logger;
 
     /**
+     * @var ConnectionInterface
+     */
+    private $connection;
+
+    /**
      * @param Environment $environment
      * @param LoggerInterface $logger
+     * @param ConnectionInterface $connection
      */
     public function __construct(
         Environment $environment,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ConnectionInterface $connection
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
+        $this->connection = $connection;
     }
 
     /**
@@ -93,14 +102,14 @@ class UrlManager
 
         $urls = $this->parseRoutes($this->environment->getRoutes());
 
-        if (0 == count($urls['unsecure']) && 0 == count($urls['secure'])) {
+        if (0 === count($urls['unsecure']) && 0 === count($urls['secure'])) {
             throw new \RuntimeException('Expected at least one valid unsecure or secure route. None found.');
         }
-        if (0 == count($urls['unsecure'])) {
+        if (0 === count($urls['unsecure'])) {
             $urls['unsecure'] = $urls['secure'];
         }
 
-        if (0 == count($urls['secure'])) {
+        if (0 === count($urls['secure'])) {
             $urls['secure'] = substr_replace($urls['unsecure'], self::PREFIX_SECURE, 0, strlen(self::PREFIX_UNSECURE));
         }
 
@@ -112,9 +121,17 @@ class UrlManager
     /**
      * @return array
      */
-    public function getSecureUrls()
+    public function getSecureUrls(): array
     {
         return $this->getUrls()['secure'] ?? [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getUnSecureUrls(): array
+    {
+        return $this->getUrls()['unsecure'] ?? [];
     }
 
     /**
@@ -122,14 +139,17 @@ class UrlManager
      */
     public function getBaseUrl(): string
     {
-        return $this->getUnSecureUrls()[''];
-    }
+        $baseUrl = $this->connection->selectOne(
+            'SELECT `value` from `core_config_data` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1',
+            ['web/unsecure/base_url']
+        )['value'];
 
-    /**
-     * @return array
-     */
-    public function getUnSecureUrls()
-    {
-        return $this->getUrls()['unsecure'] ?? [];
+        if (strpos($baseUrl, self::PREFIX_SECURE) === 0
+            || strpos($baseUrl, self::PREFIX_UNSECURE) === 0
+        ) {
+            return $baseUrl;
+        }
+
+        return $this->getSecureUrls()[''];
     }
 }
