@@ -50,5 +50,5 @@ interface DeployInterface extends StageConfigInterface
     /**
      * The variable responsible for enabling google analytics in environments other than prod.
      */
-    const VAR_ENABLE_GOOLGE_ANALYTICS = 'ENABLE_GOOGLE_ANALYTICS';
+    const VAR_ENABLE_GOOGLE_ANALYTICS = 'ENABLE_GOOGLE_ANALYTICS';
 }

@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
+use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
 
 /**
  * @inheritdoc
@@ -33,26 +33,26 @@ class DisableGoogleAnalytics implements ProcessInterface
     private $environment;
 
     /**
-     * @var GlobalConfig
+     * @var DeployConfig
      */
-    private $globalConfig;
+    private $deployConfig;
 
     /**
      * @param ConnectionInterface $connection
      * @param LoggerInterface $logger
      * @param Environment $environment
-     * @param GlobalConfig $globalConfig
+     * @param DeployConfig $globalConfig
      */
     public function __construct(
         ConnectionInterface $connection,
         LoggerInterface $logger,
         Environment $environment,
-        GlobalConfig $globalConfig
+        DeployConfig $deployConfig
     ) {
         $this->connection = $connection;
         $this->logger = $logger;
         $this->environment = $environment;
-        $this->globalConfig = $globalConfig;
+        $this->deployConfig = $deployConfig;
     }
 
     /**
@@ -60,8 +60,8 @@ class DisableGoogleAnalytics implements ProcessInterface
      */
     public function execute()
     {
-        if (!$this->environment->isMasterBranch() ||
-            $this->globalConfig->get(DeployInterface::VAR_ENABLE_GOOLGE_ANALYTICS)
+        if (!$this->environment->isMasterBranch() &&
+            !$this->deployConfig->get(DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS)
         ) {
             $this->logger->info('Disabling Google Analytics');
             $this->connection->affectingQuery(

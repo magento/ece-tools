@@ -321,7 +321,7 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
             ],
-            DeployInterface::VAR_ENABLE_GOOLGE_ANALYTICS => [
+            DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL,
