@@ -123,7 +123,6 @@ class ResetPasswordTest extends TestCase
             ->method('filePutContents');
 
         $this->resetPassword->execute();
-
     }
 
     /**
