@@ -66,6 +66,7 @@ class AdminDataTest extends TestCase
      * @param InvokedCountMatcher $expectedError
      * @param InvokedCountMatcher $expectedSuccess
      * @dataProvider validateDataProvider
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function testValidate(
         string $email,
