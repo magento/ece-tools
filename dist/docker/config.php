@@ -18,6 +18,12 @@ return [
                     'port' => '6379'
                 ]
             ],
+            'elasticsearch' => [
+                [
+                    'host' => 'elasticsearch',
+                    'port' => '9200',
+                ],
+            ],
         ]
     )),
     'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
