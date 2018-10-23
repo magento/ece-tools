@@ -14,6 +14,7 @@ class ServiceFactory
 {
     const SERVICE_VARNISH = 'varnish';
     const SERVICE_REDIS = 'redis';
+    const SERVICE_RABBITMQ = 'rabbitmq';
 
     /**
      * @var array
@@ -21,6 +22,7 @@ class ServiceFactory
     private static $map = [
         self::SERVICE_VARNISH => VarnishService::class,
         self::SERVICE_REDIS => RedisService::class,
+        self::SERVICE_RABBITMQ => RabbitMqService::class,
     ];
 
     /**
