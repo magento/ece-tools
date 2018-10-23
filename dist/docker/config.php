@@ -24,6 +24,14 @@ return [
                     'port' => '9200',
                 ],
             ],
+            'rabbitmq' => [
+                [
+                    'host' => 'rabbitmq',
+                    'port' => '5672',
+                    'username' => 'guest',
+                    'password' => 'guest',
+                ]
+            ],
         ]
     )),
     'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
