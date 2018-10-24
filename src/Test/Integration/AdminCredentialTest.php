@@ -11,7 +11,9 @@ use Magento\MagentoCloud\Command\Deploy;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * @inheritdoc
+ * {@inheritdoc}
+ *
+ * @group php71
  */
 class AdminCredentialTest extends AbstractTest
 {
@@ -19,6 +21,16 @@ class AdminCredentialTest extends AbstractTest
      * @var array
      */
     protected $env = [];
+
+    /**
+     * {@inheritdoc}
+     *
+     * @throws \Exception
+     */
+    public static function setUpBeforeClass()
+    {
+        Bootstrap::getInstance()->run('2.2.*');
+    }
 
     /**
      * @inheritdoc
@@ -57,25 +69,57 @@ class AdminCredentialTest extends AbstractTest
     }
 
     /**
+     * @param array $variables
+     * @param string $installMessage
+     * @param string $upgradeMessage
      * @return void
+     * @dataProvider installWithoutAdminEmailDataProvider
      */
-    public function testInstallWithoutAdminEmail()
+    public function testInstallWithoutAdminEmail(
+        array $variables,
+        string $installMessage,
+        string $upgradeMessage
+    ) {
+        $application = $this->bootstrap->createApplication(['variables' => $variables]);
+
+        $this->executeAndAssert(Build::NAME, $application);
+
+        // Install Magento
+        $this->executeAndAssert(Deploy::NAME, $application);
+
+        $log = $this->getCloudLog();
+        $this->assertContains($installMessage, $log);
+        $this->assertNotContains('--admin-user', $log);
+        $this->assertNotContains('--admin-firstname', $log);
+        $this->assertNotContains('--admin-lastname', $log);
+        $this->assertNotContains('--admin-email', $log);
+        $this->assertNotContains('--admin-password', $log);
+
+        // Upgrade Magento
+        $this->executeAndAssert(Deploy::NAME, $application);
+
+        $this->assertContains($upgradeMessage, $this->getCloudLog());
+    }
+
+    /**
+     * @return array
+     */
+    public function installWithoutAdminEmailDataProvider()
     {
-        $application = $this->bootstrap->createApplication(['variables' => []]);
-
-        $commandTester = new CommandTester(
-            $application->get(Build::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
-
-        $commandTester = new CommandTester(
-            $application->get(Deploy::NAME)
-        );
-        $commandTester->execute([]);
-
-        $this->assertSame(0, $commandTester->getStatusCode());
+        return [
+            [
+                'variables' => [],
+                'installMessage' => '',
+                'upgradeMessage' => '',
+            ],
+            [
+                'variables' => ['ADMIN_USERNAME' => 'MyLogin'],
+                'installMessage' => 'The following admin data was ignored and an admin was not created because'
+                    . ' admin email is not set: admin login',
+                'upgradeMessage' => 'The following admin data is required to create an admin user during initial'
+                    . ' installation only and is ignored during upgrade process: admin login',
+            ],
+        ];
     }
 
     /**
@@ -100,6 +144,24 @@ class AdminCredentialTest extends AbstractTest
         $this->assertContains($expectedAdminEmail, $credentialsEmail);
         $this->assertContains($expectedAdminUsername, $credentialsEmail);
         $this->assertContains($expectedAdminUrl, $credentialsEmail);
+
+        $log = $this->getCloudLog();
+        $this->assertContains('--admin-user', $log);
+        $this->assertContains('--admin-firstname', $log);
+        $this->assertContains('--admin-lastname', $log);
+        $this->assertContains('--admin-email', $log);
+        $this->assertContains('--admin-password', $log);
+        $this->assertNotContains(
+            'The following admin data was ignored and an admin was not created because admin email is not set',
+            $log
+        );
+
+        $this->executeAndAssert(Deploy::NAME, $application);
+        $this->assertNotContains(
+            'The following admin data is required to create an admin user during initial installation only'
+                . ' and is ignored during upgrade process: admin login',
+            $this->getCloudLog()
+        );
     }
 
     /**
@@ -127,66 +189,6 @@ class AdminCredentialTest extends AbstractTest
                 'expectedAdminUrl' => 'myusername',
             ]
         ];
-    }
-
-    public function testCheckDuplicates()
-    {
-        $application = $this->bootstrap->createApplication([]);
-
-        $this->executeAndAssert(Build::NAME, $application);
-
-        $application = $this->bootstrap->createApplication([
-            'variables' => [
-                'ADMIN_EMAIL' => 'admin@example.com',
-                'ADMIN_USERNAME' => 'admin'
-            ]
-        ]);
-        // Install Magento
-        $this->executeAndAssert(Deploy::NAME, $application);
-
-        // Upgrade Magento with the same environment variables
-        $this->executeAndAssert(Deploy::NAME, $application);
-
-        $this->assertContains('Updating admin credentials: nothing to update.', $this->getCloudLog());
-    }
-
-    /**
-     * Test that admin email/username won't be changed if admin with such email/username exist in database.
-     */
-    public function testUpdateAdminExists()
-    {
-        $application = $this->bootstrap->createApplication([]);
-
-        $this->executeAndAssert(Build::NAME, $application);
-
-        $application = $this->bootstrap->createApplication([
-            'variables' => [
-                'ADMIN_EMAIL' => 'admin@example.com',
-                'ADMIN_USERNAME' => 'admin'
-            ]
-        ]);
-        // Install Magento
-        $this->executeAndAssert(Deploy::NAME, $application);
-
-        $this->bootstrap->execute(sprintf(
-            'cd %s && php bin/magento admin:user:create --admin-user=%s --admin-email=%s ' .
-            '--admin-password=123123Qq --admin-firstname=admin --admin-lastname=admin',
-            $this->bootstrap->getSandboxDir(),
-            'admin2',
-            'admin2@example.com'
-        ));
-
-        $application = $this->bootstrap->createApplication([
-            'variables' => [
-                'ADMIN_EMAIL' => 'admin2@example.com',
-                'ADMIN_USERNAME' => 'admin2'
-            ]
-        ]);
-
-        // Upgrade Magento with admin email and name that already exist
-        $this->executeAndAssert(Deploy::NAME, $application);
-
-        $this->assertContains('Skipping updating admin credentials', $this->getCloudLog());
     }
 
     private function getCloudLog()
