@@ -256,7 +256,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
-                        $this->container->make(DeployProcess\EnableCron::class),
 
                         /**
                          * This process runs processes if only post_deploy hook is not configured.
@@ -270,6 +269,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(PostDeployProcess\EnableCron::class),
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
@@ -375,6 +375,7 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
+                        $this->container->make(PostDeployProcess\EnableCron::class),
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                         $this->container->make(PostDeployProcess\WarmUp::class),
