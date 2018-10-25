@@ -13,12 +13,13 @@ namespace Magento\MagentoCloud\Test\Integration;
 class AdminCredential21Test extends AdminCredentialTest
 {
     /**
-     * {@inheritdoc}
-     *
-     * @throws \Exception
+     * @inheritdoc
      */
-    public static function setUpBeforeClass()
+    protected function setUp()
     {
         Bootstrap::getInstance()->run('2.1.*');
+        parent::setUp();
+
+        $this->env = $_ENV;
     }
 }

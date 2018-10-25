@@ -23,13 +23,19 @@ class AdminCredentialTest extends AbstractTest
     protected $env = [];
 
     /**
-     * {@inheritdoc}
-     *
-     * @throws \Exception
+     * @inheritdoc
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::getInstance()->run('2.2.*');
+        // Do nothing for this test...
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function tearDownAfterClass()
+    {
+        // Do nothing for this test...
     }
 
     /**
@@ -37,6 +43,7 @@ class AdminCredentialTest extends AbstractTest
      */
     protected function setUp()
     {
+        Bootstrap::getInstance()->run('2.2.*');
         parent::setUp();
 
         $this->env = $_ENV;
@@ -48,7 +55,7 @@ class AdminCredentialTest extends AbstractTest
     protected function tearDown()
     {
         parent::tearDown();
-
+        Bootstrap::getInstance()->destroy();
         $_ENV = $this->env;
     }
 
