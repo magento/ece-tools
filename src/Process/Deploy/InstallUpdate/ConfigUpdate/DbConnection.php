@@ -71,8 +71,7 @@ class DbConnection implements ProcessInterface
         ConfigMerger $configMerger,
         RelationshipConnectionFactory $connectionFactory,
         LoggerInterface $logger
-    )
-    {
+    ) {
         $this->stageConfig = $stageConfig;
         $this->mergedConfig = $mergedConfig;
         $this->configWriter = $configWriter;

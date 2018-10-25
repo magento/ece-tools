@@ -14,7 +14,6 @@ use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -25,11 +24,6 @@ class MergedConfigTest extends TestCase
      * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
-
-    /**
-     * @var LoggerInterface|MockObject
-     */
-    private $loggerMock;
 
     /**
      * @var SlaveConfig|MockObject
@@ -66,14 +60,12 @@ class MergedConfigTest extends TestCase
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->slaveConfigMock = $this->createMock(SlaveConfig::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->mergedConfig = new MergedConfig(
             $this->connectionFactoryMock,
             $this->configReaderMock,
             $this->slaveConfigMock,
             $this->stageConfigMock,
-            $this->loggerMock,
             new ConfigMerger()
         );
     }
@@ -99,14 +91,10 @@ class MergedConfigTest extends TestCase
             ->willReturn($slaveConfiguration);
         $this->stageConfigMock->expects($this->any())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_DATABASE_CONFIGURATION],
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION]
-            )
-            ->willReturnOnConsecutiveCalls(
-                $envDbConfig,
-                $setSlave
-            );
+            ->willReturnMap([
+                [DeployInterface::VAR_DATABASE_CONFIGURATION, $envDbConfig],
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, $setSlave],
+            ]);
 
         $this->assertEquals($expectedConfig, $this->mergedConfig->get());
     }
