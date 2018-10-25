@@ -10,7 +10,6 @@ use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
-use Psr\Log\LoggerInterface;
 
 /**
  * Returns merged final database configuration.
@@ -43,11 +42,6 @@ class MergedConfig implements ConfigInterface
     private $configReader;
 
     /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
-    /**
      * Final database configuration after merging.
      *
      * @var array
@@ -59,7 +53,6 @@ class MergedConfig implements ConfigInterface
      * @param ConfigReader $configReader
      * @param SlaveConfig $slaveConfig
      * @param DeployInterface $stageConfig
-     * @param LoggerInterface $logger
      * @param ConfigMerger $configMerger
      */
     public function __construct(
@@ -67,7 +60,6 @@ class MergedConfig implements ConfigInterface
         ConfigReader $configReader,
         SlaveConfig $slaveConfig,
         DeployInterface $stageConfig,
-        LoggerInterface $logger,
         ConfigMerger $configMerger
     ) {
         $this->connectionData = $connectionFactory->create(RelationshipConnectionFactory::CONNECTION_MAIN);
@@ -75,7 +67,6 @@ class MergedConfig implements ConfigInterface
         $this->slaveConfig = $slaveConfig;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
-        $this->logger = $logger;
     }
 
     /**
@@ -92,18 +83,16 @@ class MergedConfig implements ConfigInterface
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
 
         if (!$this->configMerger->isEmpty($envDbConfig) && !$this->configMerger->isMergeRequired($envDbConfig)) {
-            return $this->configMerger->clear($envDbConfig);
+            return $this->mergedConfig = $this->configMerger->clear($envDbConfig);
         }
 
         if (!empty($this->connectionData->getHost())) {
-            $dbConfig = $this->generateDbConfig($envDbConfig);
+            $dbConfig = $this->generateDbConfig();
         } else {
             $dbConfig = $this->getDbConfigFromEnvFile();
         }
 
-        $this->mergedConfig = $this->configMerger->mergeConfigs($dbConfig, $envDbConfig);
-
-        return $this->mergedConfig;
+        return $this->mergedConfig = $this->configMerger->mergeConfigs($dbConfig, $envDbConfig);
     }
 
     /**
@@ -112,7 +101,7 @@ class MergedConfig implements ConfigInterface
      * @param array envDbConfig
      * @return array
      */
-    private function generateDbConfig(array $envDbConfig): array
+    private function generateDbConfig(): array
     {
         $connectionData = [
             'username' => $this->connectionData->getUser(),
@@ -128,20 +117,13 @@ class MergedConfig implements ConfigInterface
             ],
         ];
 
-        if ($this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)) {
-            if (!$this->isDbConfigurationCompatible($envDbConfig)) {
-                $this->logger->warning(
-                    'You have changed db configuration that not compatible with default slave connection.'
-                );
-            } else {
-                $slaveConfiguration = $this->slaveConfig->get();
+        if ($this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
+            && $this->isDbConfigurationCompatibleWithSlaveConnection()
+        ) {
+            $slaveConfiguration = $this->slaveConfig->get();
 
-                if (!empty($slaveConfiguration)) {
-                    $this->logger->info('Set DB slave connection.');
-                    $dbConfig['slave_connection']['default'] = $slaveConfiguration;
-                } else {
-                    $this->logger->info('Slave connection is not configured.');
-                }
+            if (!empty($slaveConfiguration)) {
+                $dbConfig['slave_connection']['default'] = $slaveConfiguration;
             }
         }
 
@@ -156,11 +138,12 @@ class MergedConfig implements ConfigInterface
      * that doesn't match connection from relationships,
      * otherwise return false.
      *
-     * @param array $envDbConfig
      * @return boolean
      */
-    private function isDbConfigurationCompatible(array $envDbConfig)
+    public function isDbConfigurationCompatibleWithSlaveConnection(): bool
     {
+        $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
+
         if ((isset($envDbConfig['connection']['default']['host'])
                 && $envDbConfig['connection']['default']['host'] !== $this->connectionData->getHost())
             || (isset($envDbConfig['connection']['default']['dbname'])

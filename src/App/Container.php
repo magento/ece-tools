@@ -25,7 +25,6 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -383,16 +382,6 @@ class Container implements ContainerInterface
             ->give(DeployProcess\CronProcessKill::class);
 
         $this->container->singleton(ConfigInterface::class, MergedConfig::class);
-        $this->container->when(MergedConfig::class)
-            ->needs(LoggerInterface::class)
-            ->give(NullLogger::class);
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class)
-            ->needs(ConfigInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(MergedConfig::class, [
-                    'logger' => $this->container->make(Logger::class),
-                ]);
-            });
     }
 
     /**

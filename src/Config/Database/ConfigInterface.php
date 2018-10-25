@@ -5,7 +5,15 @@
  */
 namespace Magento\MagentoCloud\Config\Database;
 
+/**
+ * Interface for final database configuration.
+ */
 interface ConfigInterface
 {
-    public function get();
+    /**
+     * Returns database configuration.
+     *
+     * @return array
+     */
+    public function get(): array;
 }
