@@ -137,7 +137,7 @@
     },
     "Add the possibility to install Magento without admin creation" : {
       "2.1.4 - 2.2.1": "MAGECLOUD-2573__installation_without_admin_creation__2.1.4.patch",
-      "2.2.2 - 2.2.6": "MAGECLOUD-2573__installation_without_admin_creation__2.2.2.patch"
+      "2.2.2 - 2.2.7": "MAGECLOUD-2573__installation_without_admin_creation__2.2.2.patch"
     }
   }
 }
