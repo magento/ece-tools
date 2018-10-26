@@ -17,32 +17,42 @@ use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 class MergedConfig implements ConfigInterface
 {
     /**
+     * Final configuration for deploy phase
+     *
      * @var DeployInterface
      */
     private $stageConfig;
 
     /**
+     * Configuration for slave connection
+     *
      * @var SlaveConfig
      */
     private $slaveConfig;
 
     /**
+     * Class for configuration merging
+     *
      * @var ConfigMerger
      */
     private $configMerger;
 
     /**
+     * Connection data from relationship array
+     *
      * @var ConnectionInterface
      */
     private $connectionData;
 
     /**
+     * Reader for app/etc/env.php file
+     *
      * @var ConfigReader
      */
     private $configReader;
 
     /**
-     * Final database configuration after merging.
+     * Final database configuration after merging
      *
      * @var array
      */

@@ -105,9 +105,9 @@ class MergedConfigTest extends TestCase
      * Return data for 2 parameters:
      * 1 - relationship connection data
      * 2 - custom db configuration
-     * 2 - slave configuration
-     * 3 - value for VAR_MYSQL_USE_SLAVE_CONNECTION variable
-     * 4 - result of updated config data for configuration file
+     * 3 - slave configuration
+     * 4 - value for VAR_MYSQL_USE_SLAVE_CONNECTION variable
+     * 5 - result of updated config data for configuration file
      *
      * @return array
      *
@@ -366,6 +366,129 @@ class MergedConfigTest extends TestCase
                             'dbname' => 'magento',
                             'password' => 'password',
                             'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
+                        ],
+                    ],
+                ],
+            ],
+            'custom environment db configuration with custom slave connection and without merge' => [
+                $connectionData,
+                [
+                    'connection' => [
+                        'default' => [
+                            'host' => 'test',
+                            'dbname' => 'test',
+                            'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
+                        ],
+                    ],
+                    'slave_connection' => [
+                        'default' => [
+                            'host' => 'custom_slave.host:custom_slave.port',
+                            'username' => 'custom_slave.user',
+                            'dbname' => 'custom_slave.name',
+                            'password' => 'custom_slave.pswd',
+                        ],
+                    ],
+                ],
+                $slaveConfig,
+                true,
+                [
+                    'connection' => [
+                        'default' => [
+                            'host' => 'test',
+                            'dbname' => 'test',
+                            'driver_options'=> [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
+                        ],
+                    ],
+                    'slave_connection' => [
+                        'default' => [
+                            'host' => 'custom_slave.host:custom_slave.port',
+                            'username' => 'custom_slave.user',
+                            'dbname' => 'custom_slave.name',
+                            'password' => 'custom_slave.pswd',
+                        ],
+                    ],
+                ],
+            ],
+            'environment db configuration with custom slave connection and with merge and use slave connection' => [
+                $connectionData,
+                [
+                    'slave_connection' => [
+                        'default' => [
+                            'host' => 'custom_slave.host:custom_slave.port',
+                            'username' => 'custom_slave.user',
+                            'dbname' => 'custom_slave.name',
+                            'password' => 'custom_slave.pswd',
+                        ],
+                    ],
+                    '_merge' => true
+                ],
+                $slaveConfig,
+                true,
+                [
+                    'connection' => [
+                        'default' => [
+                            'username' => 'user',
+                            'host' => 'localhost',
+                            'dbname' => 'magento',
+                            'password' => 'password',
+                        ],
+                        'indexer' => [
+                            'username' => 'user',
+                            'host' => 'localhost',
+                            'dbname' => 'magento',
+                            'password' => 'password',
+                        ],
+                    ],
+                    'slave_connection' => [
+                        'default' => [
+                            'host' => 'custom_slave.host:custom_slave.port',
+                            'username' => 'custom_slave.user',
+                            'dbname' => 'custom_slave.name',
+                            'password' => 'custom_slave.pswd',
+                            'model' => 'mysql4',
+                            'engine' => 'innodb',
+                            'initStatements' => 'SET NAMES utf8;',
+                            'active' => '1',
+                        ],
+                    ],
+                ],
+            ],
+            'environment db config with custom slave connection and with merge and use without slave connection' => [
+                $connectionData,
+                [
+                    'slave_connection' => [
+                        'default' => [
+                            'host' => 'custom_slave.host:custom_slave.port',
+                            'username' => 'custom_slave.user',
+                            'dbname' => 'custom_slave.name',
+                            'password' => 'custom_slave.pswd',
+                        ],
+                    ],
+                    '_merge' => true
+                ],
+                $slaveConfig,
+                false,
+                [
+                    'connection' => [
+                        'default' => [
+                            'username' => 'user',
+                            'host' => 'localhost',
+                            'dbname' => 'magento',
+                            'password' => 'password',
+                        ],
+                        'indexer' => [
+                            'username' => 'user',
+                            'host' => 'localhost',
+                            'dbname' => 'magento',
+                            'password' => 'password',
+                        ],
+                    ],
+                    'slave_connection' => [
+                        'default' => [
+                            'host' => 'custom_slave.host:custom_slave.port',
+                            'username' => 'custom_slave.user',
+                            'dbname' => 'custom_slave.name',
+                            'password' => 'custom_slave.pswd',
                         ],
                     ],
                 ],
