@@ -34,9 +34,13 @@ class PostDeployTest extends AbstractTest
         return $commandTester->getStatusCode();
     }
 
-    public function testPostDeploy()
+    /**
+     * @param array $variables
+     * @dataProvider postDeployDataProvider
+     */
+    public function testPostDeploy(array $variables)
     {
-        $application = $this->bootstrap->createApplication(['variables' => ['ADMIN_EMAIL' => 'admin@example.com']]);
+        $application = $this->bootstrap->createApplication(['variables' => $variables]);
 
         /** @var File $file */
         $file = $application->getContainer()->get(File::class);
@@ -58,14 +62,25 @@ class PostDeployTest extends AbstractTest
         $this->assertContains('NOTICE: Post-deploy is complete.', $cloudLog);
     }
 
+    /**
+     * @return array
+     */
+    public function postDeployDataProvider(): array
+    {
+        return [
+            ['variables' => ['ADMIN_EMAIL' => 'admin@example.com']],
+            ['variables' => []],
+        ];
+    }
+
     public function testPostDeployIsNotRun()
     {
-        $application = $this->bootstrap->createApplication(['variables' => []]);
+        $application = $this->bootstrap->createApplication(['variables' => ['FAKE_VARIABLE' => 'fake_value']]);
 
         /** @var File $file */
         $file = $application->getContainer()->get(File::class);
         $file->copy(
-            sprintf('%s/_files/.magento.env.yaml.scdondemand', __DIR__),
+            sprintf('%s/_files/.magento.env.yaml.wrong_db_configuration', __DIR__),
             sprintf('%s/.magento.env.yaml', $this->bootstrap->getSandboxDir())
         );
 
