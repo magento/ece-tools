@@ -30,7 +30,10 @@ class AdminEmail implements ValidatorInterface
      * @var State
      */
     private $state;
+
     /**
+     * Validates if database configured properly.
+     *
      * @var DatabaseConfiguration
      */
     private $databaseConfiguration;
