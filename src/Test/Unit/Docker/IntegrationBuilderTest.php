@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Docker;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 use Magento\MagentoCloud\Docker\Service\ServiceInterface;
 use Magento\MagentoCloud\Docker\IntegrationBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -28,6 +29,11 @@ class IntegrationBuilderTest extends TestCase
     private $repositoryFactoryMock;
 
     /**
+     * @var ServiceFactory|MockObject
+     */
+    private $serviceFactoryMock;
+
+    /**
      * @var Repository|MockObject
      */
     private $configMock;
@@ -39,13 +45,15 @@ class IntegrationBuilderTest extends TestCase
     {
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
         $this->configMock = $this->getMockForAbstractClass(Repository::class);
+        $this->serviceFactoryMock = $this->createMock(ServiceFactory::class);
 
-        $this->repositoryFactoryMock->expects($this->once())
+        $this->repositoryFactoryMock->expects($this->exactly(2))
             ->method('create')
             ->willReturn($this->configMock);
 
         $this->builder = new IntegrationBuilder(
-            $this->repositoryFactoryMock
+            $this->repositoryFactoryMock,
+            $this->serviceFactoryMock
         );
     }
 
@@ -162,8 +170,7 @@ class IntegrationBuilderTest extends TestCase
     public function testBuild()
     {
         $serviceMock = $this->getMockForAbstractClass(ServiceInterface::class);
-        $serviceMock->expects($this->any())
-            ->method('get')
+        $serviceMock->method('get')
             ->willReturn([]);
 
         $config = $this->builder->build();

@@ -7,11 +7,12 @@ namespace Magento\MagentoCloud\Docker;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 
 /**
  * @inheritdoc
  */
-class IntegrationBuilder implements BuilderInterface
+class IntegrationBuilder extends DevBuilder
 {
     /**
      * @var Repository
@@ -20,61 +21,13 @@ class IntegrationBuilder implements BuilderInterface
 
     /**
      * @param RepositoryFactory $repositoryFactory
+     * @param ServiceFactory $serviceFactory
      */
-    public function __construct(RepositoryFactory $repositoryFactory)
+    public function __construct(RepositoryFactory $repositoryFactory, ServiceFactory $serviceFactory)
     {
+        parent::__construct($repositoryFactory, $serviceFactory);
+
         $this->config = $repositoryFactory->create();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setPhpVersion(string $version)
-    {
-        $this->setVersion(self::PHP_VERSION, $version, self::PHP_VERSIONS);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setNginxVersion(string $version)
-    {
-        $this->setVersion(self::NGINX_VERSION, $version, [
-            '1.9',
-            self::DEFAULT_NGINX_VERSION,
-        ]);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setDbVersion(string $version)
-    {
-        $this->setVersion(self::DB_VERSION, $version, [
-            self::DEFAULT_DB_VERSION,
-        ]);
-    }
-
-    /**
-     * @param string $key
-     * @param string $version
-     * @param array $supportedVersions
-     * @throws ConfigurationMismatchException
-     */
-    private function setVersion(string $key, string $version, array $supportedVersions)
-    {
-        $parts = explode('.', $key);
-        $name = reset($parts);
-
-        if (!\in_array($version, $supportedVersions, true)) {
-            throw new ConfigurationMismatchException(sprintf(
-                'Service %s:%s is not supported',
-                $name,
-                $version
-            ));
-        }
-
-        $this->config->set($key, $version);
     }
 
     /**
@@ -94,12 +47,6 @@ class IntegrationBuilder implements BuilderInterface
                     'volumes' => [
                         '.:/var/www/ece-tools',
                         '/var/www/magento',
-                    ],
-                ],
-                'dbdata' => [
-                    'image' => 'tianon/true',
-                    'volumes' => [
-                        '/var/lib/mysql',
                     ],
                 ],
             ],
@@ -171,8 +118,8 @@ class IntegrationBuilder implements BuilderInterface
             'ports' => [
                 3306,
             ],
-            'volumes_from' => [
-                'dbdata',
+            'volumes' => [
+                '/var/lib/mysql',
             ],
             'environment' => [
                 'MYSQL_ROOT_PASSWORD=magento2',

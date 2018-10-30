@@ -64,6 +64,14 @@ class DevBuilder implements BuilderInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function setESVersion(string $version)
+    {
+        $this->setVersion(self::ES_VERSION, $version, self::ES_VERSIONS);
+    }
+
+    /**
      * @param string $key
      * @param string $version
      * @param array $supportedVersions
@@ -95,7 +103,7 @@ class DevBuilder implements BuilderInterface
             'services' => [
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
                 'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
-                'elasticsearch' => $this->serviceFactory->create(ServiceFactory::SERVICE_ELASTICSEARCH)->get(),
+                'elasticsearch' => $this->getElasticSearchService(),
                 'rabbitmq' => $this->serviceFactory->create(ServiceFactory::SERVICE_RABBITMQ)->get(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
@@ -116,14 +124,19 @@ class DevBuilder implements BuilderInterface
                         '/var/www/magento/app/etc',
                     ],
                 ],
-                'dbdata' => [
-                    'image' => 'tianon/true',
-                    'volumes' => [
-                        '/var/lib/mysql',
-                        './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
-                    ],
-                ],
             ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getElasticSearchService(): array
+    {
+        $version = $this->config->get(self::ES_VERSION, self::DEFAULT_ES_VERSION);
+
+        return [
+            'image' => sprintf('%s:%s', 'magento/magento-cloud-docker-elasticsearch', $version),
         ];
     }
 
@@ -153,7 +166,7 @@ class DevBuilder implements BuilderInterface
             'ports' => [
                 9000,
             ],
-            'links' => [
+            'depends_on' => [
                 'db',
             ],
             'volumes_from' => [
@@ -186,9 +199,10 @@ class DevBuilder implements BuilderInterface
                 'magento/magento-cloud-docker-php:%s-cli',
                 $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
             ),
-            'links' => [
+            'depends_on' => [
                 'db',
                 'redis',
+                'elasticsearch'
             ],
             'volumes' => [
                 $composeCacheDirectory . ':/root/.composer/cache',
@@ -217,8 +231,9 @@ class DevBuilder implements BuilderInterface
             'ports' => [
                 3306,
             ],
-            'volumes_from' => [
-                'dbdata',
+            'volumes' => [
+                '/var/lib/mysql',
+                './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
             ],
             'environment' => [
                 'MYSQL_ROOT_PASSWORD=magento2',
@@ -243,7 +258,7 @@ class DevBuilder implements BuilderInterface
                 '8080:80',
                 '443:443',
             ],
-            'links' => [
+            'depends_on' => [
                 'fpm',
                 'db',
             ],

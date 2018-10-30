@@ -139,6 +139,7 @@ class BuildTest extends TestCase
                 [Build::OPTION_PHP, '7.1'],
                 [Build::OPTION_DB, '10'],
                 [Build::OPTION_NGINX, '1.9'],
+                [Build::OPTION_ES, '2.4'],
                 [Build::OPTION_IS_TEST, false],
             ]);
         $this->builderMock->expects($this->once())
@@ -150,6 +151,9 @@ class BuildTest extends TestCase
         $this->builderMock->expects($this->once())
             ->method('setDbVersion')
             ->with('10');
+        $this->builderMock->expects($this->once())
+            ->method('setESVersion')
+            ->with('2.4');
 
         $this->command->execute($inputMock, $outputMock);
     }
