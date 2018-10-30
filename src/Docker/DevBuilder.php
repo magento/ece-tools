@@ -72,6 +72,14 @@ class DevBuilder implements BuilderInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function setRabbitMQVersion(string $version)
+    {
+        $this->setVersion(self::RABBIT_MQ_VERSION, $version, self::RABBIT_MQ_VERSIONS);
+    }
+
+    /**
      * @param string $key
      * @param string $version
      * @param array $supportedVersions
@@ -104,7 +112,7 @@ class DevBuilder implements BuilderInterface
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
                 'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
                 'elasticsearch' => $this->getElasticSearchService(),
-                'rabbitmq' => $this->serviceFactory->create(ServiceFactory::SERVICE_RABBITMQ)->get(),
+                'rabbitmq' => $this->getRabbitMQService(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
                 'cli' => $this->getCliService(false),
@@ -137,6 +145,18 @@ class DevBuilder implements BuilderInterface
 
         return [
             'image' => sprintf('%s:%s', 'magento/magento-cloud-docker-elasticsearch', $version),
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getRabbitMQService(): array
+    {
+        $version = $this->config->get(self::RABBIT_MQ_VERSION, self::DEFAULT_RABBIT_MQ_VERSION);
+
+        return [
+            'image' => sprintf('rabbitmq:%s', $version)
         ];
     }
 
