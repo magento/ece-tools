@@ -124,7 +124,6 @@ class AdminEmailTest extends TestCase
         $this->assertInstanceOf(Success::class, $result);
     }
 
-
     public function testValidateAdminEmailNotExist()
     {
         $this->stateMock->expects($this->once())
