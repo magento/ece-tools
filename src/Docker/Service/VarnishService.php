@@ -25,7 +25,7 @@ class VarnishService implements ServiceInterface
             'ports' => [
                 '80:80',
             ],
-            'links' => [
+            'depends_on' => [
                 'web',
             ],
         ];

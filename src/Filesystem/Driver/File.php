@@ -262,6 +262,7 @@ class File
      *
      * @param string $path
      * @return bool
+     * @codeCoverageIgnore
      */
     public function deleteDirectory(string $path): bool
     {
@@ -284,6 +285,7 @@ class File
      *
      * @param string $path
      * @return bool
+     * @codeCoverageIgnore
      */
     public function clearDirectory(string $path): bool
     {
@@ -311,6 +313,7 @@ class File
      * @param string $path Path to flush
      * @param array $excludes
      * @return void
+     * @codeCoverageIgnore
      */
     public function backgroundClearDirectory(string $path, array $excludes = [])
     {
