@@ -10,21 +10,21 @@ use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Config\Database\ConfigInterface;
+use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
-use Magento\MagentoCloud\DB\Data\ReadConnection;
+use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\SystemList;
-use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
+use Magento\MagentoCloud\Process\ProcessComposite;
+use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**
  * @inheritdoc
@@ -235,8 +235,8 @@ class Container implements ContainerInterface
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
-                                    $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
@@ -316,9 +316,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Db\SlaveConfig::class)
-            ->needs(ConnectionInterface::class)
-            ->give(ReadConnection::class);
         $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -361,9 +358,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(\Magento\MagentoCloud\DB\Dump::class)
-            ->needs(ConnectionInterface::class)
-            ->give(ReadConnection::class);
         $this->container->when(PostDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -387,6 +381,8 @@ class Container implements ContainerInterface
         $this->container->when(CronKill::class)
             ->needs(ProcessInterface::class)
             ->give(DeployProcess\CronProcessKill::class);
+
+        $this->container->singleton(ConfigInterface::class, MergedConfig::class);
     }
 
     /**
