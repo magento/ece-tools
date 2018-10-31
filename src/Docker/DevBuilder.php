@@ -64,6 +64,14 @@ class DevBuilder implements BuilderInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function setRedisVersion(string $version)
+    {
+        $this->setVersion(self::REDIS_VERSION, $version, self::REDIS_VERSIONS);
+    }
+
+    /**
      * @param string $key
      * @param string $version
      * @param array $supportedVersions
@@ -94,7 +102,7 @@ class DevBuilder implements BuilderInterface
             'version' => '2',
             'services' => [
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
-                'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
+                'redis' => $this->getRedisService(),
                 'elasticsearch' => $this->serviceFactory->create(ServiceFactory::SERVICE_ELASTICSEARCH)->get(),
                 'rabbitmq' => $this->serviceFactory->create(ServiceFactory::SERVICE_RABBITMQ)->get(),
                 'fpm' => $this->getFpmService(),
@@ -123,6 +131,24 @@ class DevBuilder implements BuilderInterface
                         './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
                     ],
                 ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getRedisService(): array
+    {
+        $version = $this->config->get(self::REDIS_VERSION, self::DEFAULT_REDIS_VERSION);
+
+        return [
+            'image' => 'redis:' . $version,
+            'volumes' => [
+                '/data',
+            ],
+            'ports' => [
+                6379,
             ],
         ];
     }
