@@ -156,38 +156,6 @@ class Environment
     }
 
     /**
-     * @return string|float
-     */
-    public function getDbHost()
-    {
-        return $this->getRelationship('database')[0]['host'] ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getDbName(): string
-    {
-        return $this->getRelationship('database')[0]['path'] ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getDbUser(): string
-    {
-        return $this->getRelationship('database')[0]['username'] ?? '';
-    }
-
-    /**
-     * @return string
-     */
-    public function getDbPassword(): string
-    {
-        return $this->getRelationship('database')[0]['password'] ?? '';
-    }
-
-    /**
      * @return string
      */
     public function getAdminUsername(): string

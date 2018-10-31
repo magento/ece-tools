@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface as DatabaseConnectionInterface;
 
 /**
@@ -20,12 +21,12 @@ class Dump implements DumpInterface
     private $connectionData;
 
     /**
-     * @param DatabaseConnectionInterface $connectionData
+     * @param ConnectionFactory $connectionFactory
      */
     public function __construct(
-        DatabaseConnectionInterface $connectionData
+        ConnectionFactory $connectionFactory
     ) {
-        $this->connectionData = $connectionData;
+        $this->connectionData = $connectionFactory->create(ConnectionFactory::CONNECTION_SLAVE);
     }
 
     /**
@@ -36,8 +37,13 @@ class Dump implements DumpInterface
     public function getCommand(): string
     {
         $command = 'mysqldump -h ' . escapeshellarg($this->connectionData->getHost())
-            . ' -P ' . escapeshellarg($this->connectionData->getPort())
             . ' -u ' . escapeshellarg($this->connectionData->getUser());
+
+        $port = $this->connectionData->getPort();
+        if (!empty($port)) {
+            $command .= ' -P ' . escapeshellarg($port);
+        }
+
         $password = $this->connectionData->getPassword();
         if ($password) {
             $command .= ' -p' . escapeshellarg($password);

@@ -5,10 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\DB;
 
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Dump;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -21,19 +22,27 @@ class DumpTest extends TestCase
     private $model;
 
     /**
-     * @var ConnectionInterface|Mock
+     * @var ConnectionInterface|MockObject
      */
     private $connectionDataMock;
+
+    /**
+     * @var ConnectionFactory|MockObject
+     */
+    private $connectionFactoryMock;
 
     /**
      * Setup the test environment.
      */
     protected function setUp()
     {
-        $this->connectionDataMock = $this->getMockBuilder(ConnectionInterface::class)
-            ->getMockForAbstractClass();
+        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->connectionFactoryMock = $this->createMock(ConnectionFactory::class);
+        $this->connectionFactoryMock->expects($this->any())
+            ->method('create')
+            ->willReturn($this->connectionDataMock);
 
-        $this->model = new Dump($this->connectionDataMock);
+        $this->model = new Dump($this->connectionFactoryMock);
     }
 
     /**
@@ -80,7 +89,7 @@ class DumpTest extends TestCase
                 'main',
                 'user',
                 null,
-                sprintf($command, "-h 'localhost' -P '3306' -u 'user' 'main'")
+                sprintf($command, "-h 'localhost' -u 'user' -P '3306' 'main'")
             ],
             [
                 'localhost',
@@ -88,7 +97,7 @@ class DumpTest extends TestCase
                 'main',
                 'user',
                 'pswd',
-                sprintf($command, "-h 'localhost' -P '3306' -u 'user' -p'pswd' 'main'")
+                sprintf($command, "-h 'localhost' -u 'user' -P '3306' -p'pswd' 'main'")
             ]
         ];
     }
