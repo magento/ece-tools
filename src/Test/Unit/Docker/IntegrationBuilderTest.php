@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Test\Unit\Docker;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\BuilderInterface;
+use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\ServiceInterface;
 use Magento\MagentoCloud\Docker\IntegrationBuilder;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -157,6 +159,30 @@ class IntegrationBuilderTest extends TestCase
             ->method('set');
 
         $this->builder->setDbVersion('2');
+    }
+
+    /**
+     * @throws ConfigurationMismatchException
+     */
+    public function testSetRabbitMQVersion()
+    {
+        $this->configMock->expects($this->once())
+            ->method('set')
+            ->with(BuilderInterface::RABBIT_MQ_VERSION, '3.5');
+
+        $this->builder->setRabbitMQVersion('3.5');
+    }
+
+    /**
+     * @throws ConfigurationMismatchException
+     */
+    public function testSetESVersion()
+    {
+        $this->configMock->expects($this->once())
+            ->method('set')
+            ->with(BuilderInterface::ES_VERSION, '2.4');
+
+        $this->builder->setESVersion('2.4');
     }
 
     public function testBuild()

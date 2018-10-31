@@ -169,6 +169,18 @@ class DirectoryListTest extends TestCase
     }
 
     /**
+     * @param DirectoryList $directoryList
+     * @dataProvider getDirectoryLists
+     */
+    public function testGetViews(DirectoryList $directoryList)
+    {
+        $this->assertSame(
+            __DIR__ . '/_files/bp/views',
+            $directoryList->getViews()
+        );
+    }
+
+    /**
      * Data Provider returning both directory lists
      *
      * @return array
