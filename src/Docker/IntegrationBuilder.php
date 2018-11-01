@@ -61,6 +61,17 @@ class IntegrationBuilder implements BuilderInterface
     }
 
     /**
+     * @param string $version
+     * @throws ConfigurationMismatchException
+     */
+    public function setRedisVersion(string $version)
+    {
+        $this->setVersion(self::REDIS_VERSION, $version, [
+            self::DEFAULT_REDIS_VERSION,
+        ]);
+    }
+
+    /**
      * @inheritdoc
      */
     public function setNginxVersion(string $version)

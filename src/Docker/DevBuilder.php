@@ -66,6 +66,14 @@ class DevBuilder implements BuilderInterface
     /**
      * @inheritdoc
      */
+    public function setRedisVersion(string $version)
+    {
+        $this->setVersion(self::REDIS_VERSION, $version, self::REDIS_VERSIONS);
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function setESVersion(string $version)
     {
         $this->setVersion(self::ES_VERSION, $version, self::ES_VERSIONS);
@@ -110,7 +118,7 @@ class DevBuilder implements BuilderInterface
             'version' => '2',
             'services' => [
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
-                'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
+                'redis' => $this->getRedisService(),
                 'elasticsearch' => $this->getElasticSearchService(),
                 'rabbitmq' => $this->getRabbitMQService(),
                 'fpm' => $this->getFpmService(),
@@ -157,6 +165,24 @@ class DevBuilder implements BuilderInterface
 
         return [
             'image' => sprintf('rabbitmq:%s', $version)
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getRedisService(): array
+    {
+        $version = $this->config->get(self::REDIS_VERSION, self::DEFAULT_REDIS_VERSION);
+
+        return [
+            'image' => 'redis:' . $version,
+            'volumes' => [
+                '/data',
+            ],
+            'ports' => [
+                6379,
+            ],
         ];
     }
 

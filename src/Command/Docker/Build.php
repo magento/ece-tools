@@ -27,6 +27,7 @@ class Build extends Command
     const OPTION_PHP = 'php';
     const OPTION_NGINX = 'nginx';
     const OPTION_DB = 'db';
+    const OPTION_REDIS = 'redis';
     const OPTION_ES = 'es';
     const OPTION_RABBIT_MQ = 'rmq';
 
@@ -98,6 +99,12 @@ class Build extends Command
                 'DB version',
                 BuilderInterface::DEFAULT_DB_VERSION
             )->addOption(
+                self::OPTION_REDIS,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Redis version',
+                BuilderInterface::DEFAULT_REDIS_VERSION
+            )->addOption(
                 self::OPTION_ES,
                 null,
                 InputOption::VALUE_OPTIONAL,
@@ -149,6 +156,10 @@ class Build extends Command
 
         if ($dbVersion = $input->getOption(self::OPTION_DB)) {
             $builder->setDbVersion($dbVersion);
+        }
+
+        if ($redisVersion = $input->getOption(self::OPTION_REDIS)) {
+            $builder->setRedisVersion($redisVersion);
         }
 
         if ($esVersion = $input->getOption(self::OPTION_ES)) {

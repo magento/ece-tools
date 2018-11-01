@@ -139,6 +139,7 @@ class BuildTest extends TestCase
                 [Build::OPTION_PHP, '7.1'],
                 [Build::OPTION_DB, '10'],
                 [Build::OPTION_NGINX, '1.9'],
+                [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
                 [Build::OPTION_RABBIT_MQ, '3.5'],
                 [Build::OPTION_IS_TEST, false],
@@ -149,6 +150,9 @@ class BuildTest extends TestCase
         $this->builderMock->expects($this->once())
             ->method('setNginxVersion')
             ->with('1.9');
+        $this->builderMock->expects($this->once())
+            ->method('setRedisVersion')
+            ->with('3.2');
         $this->builderMock->expects($this->once())
             ->method('setDbVersion')
             ->with('10');
