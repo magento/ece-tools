@@ -13,7 +13,6 @@ use Magento\MagentoCloud\App\ContainerInterface;
 class ServiceFactory
 {
     const SERVICE_VARNISH = 'varnish';
-    const SERVICE_ELASTICSEARCH = 'elasticsearch';
     const SERVICE_RABBITMQ = 'rabbitmq';
 
     /**
@@ -21,7 +20,6 @@ class ServiceFactory
      */
     private static $map = [
         self::SERVICE_VARNISH => VarnishService::class,
-        self::SERVICE_ELASTICSEARCH => ElasticSearchService::class,
         self::SERVICE_RABBITMQ => RabbitMqService::class,
     ];
 

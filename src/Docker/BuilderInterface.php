@@ -10,12 +10,14 @@ namespace Magento\MagentoCloud\Docker;
  */
 interface BuilderInterface
 {
+    const PHP_VERSIONS = ['7.0', '7.1', '7.2',];
     const DEFAULT_PHP_VERSION = '7.1';
-    const PHP_VERSIONS = [
-        '7.0',
-        '7.1',
-        '7.2',
-    ];
+
+    const ES_VERSIONS = ['1.7', '2.4', '5.2'];
+    const DEFAULT_ES_VERSION = '2.4';
+
+    const RABBIT_MQ_VERSIONS = ['3.5', '3.7'];
+    const DEFAULT_RABBIT_MQ_VERSION = '3.5';
     const REDIS_VERSIONS = ['3.2', '4.0'];
 
     const DEFAULT_NGINX_VERSION = 'latest';
@@ -26,6 +28,8 @@ interface BuilderInterface
     const NGINX_VERSION = 'nginx.version';
     const DB_VERSION = 'db.version';
     const REDIS_VERSION = 'redis.version';
+    const ES_VERSION = 'es.version';
+    const RABBIT_MQ_VERSION = 'rmq.version';
 
     /**
      * @return array
@@ -55,4 +59,16 @@ interface BuilderInterface
      * @throws ConfigurationMismatchException
      */
     public function setRedisVersion(string $version);
+
+    /**
+     * @param string $version
+     * @throws ConfigurationMismatchException
+     */
+    public function setESVersion(string $version);
+
+    /**
+     * @param string $version
+     * @throws ConfigurationMismatchException
+     */
+    public function setRabbitMQVersion(string $version);
 }

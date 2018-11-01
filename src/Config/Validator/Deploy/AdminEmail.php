@@ -32,15 +32,25 @@ class AdminEmail implements ValidatorInterface
     private $state;
 
     /**
+     * Validates if database configured properly.
+     *
+     * @var DatabaseConfiguration
+     */
+    private $databaseConfiguration;
+
+    /**
+     * @param DatabaseConfiguration $databaseConfiguration
      * @param Environment $environment
      * @param ResultFactory $resultFactory
      * @param State $deploy
      */
     public function __construct(
+        DatabaseConfiguration $databaseConfiguration,
         Environment $environment,
         ResultFactory $resultFactory,
         State $deploy
     ) {
+        $this->databaseConfiguration = $databaseConfiguration;
         $this->environment = $environment;
         $this->resultFactory = $resultFactory;
         $this->state = $deploy;
@@ -53,7 +63,10 @@ class AdminEmail implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        if (!$this->state->isInstalled() && !$this->environment->getAdminEmail()) {
+        if (!$this->environment->getAdminEmail()
+            && $this->databaseConfiguration->validate() instanceof Validator\Result\Success
+            && !$this->state->isInstalled()
+        ) {
             return $this->resultFactory->create(
                 Validator\ResultInterface::ERROR,
                 [

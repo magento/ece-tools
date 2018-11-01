@@ -37,12 +37,17 @@ class IntegrationBuilder implements BuilderInterface
     /**
      * @inheritdoc
      */
-    public function setNginxVersion(string $version)
+    public function setRabbitMQVersion(string $version)
     {
-        $this->setVersion(self::NGINX_VERSION, $version, [
-            '1.9',
-            self::DEFAULT_NGINX_VERSION,
-        ]);
+        $this->setVersion(self::RABBIT_MQ_VERSION, $version, self::RABBIT_MQ_VERSIONS);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setESVersion(string $version)
+    {
+        $this->setVersion(self::ES_VERSION, $version, self::ES_VERSIONS);
     }
 
     /**
@@ -63,6 +68,17 @@ class IntegrationBuilder implements BuilderInterface
     {
         $this->setVersion(self::REDIS_VERSION, $version, [
             self::DEFAULT_REDIS_VERSION,
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setNginxVersion(string $version)
+    {
+        $this->setVersion(self::NGINX_VERSION, $version, [
+            '1.9',
+            self::DEFAULT_NGINX_VERSION,
         ]);
     }
 
@@ -105,12 +121,6 @@ class IntegrationBuilder implements BuilderInterface
                     'volumes' => [
                         '.:/var/www/ece-tools',
                         '/var/www/magento',
-                    ],
-                ],
-                'dbdata' => [
-                    'image' => 'tianon/true',
-                    'volumes' => [
-                        '/var/lib/mysql',
                     ],
                 ],
             ],
@@ -182,8 +192,8 @@ class IntegrationBuilder implements BuilderInterface
             'ports' => [
                 3306,
             ],
-            'volumes_from' => [
-                'dbdata',
+            'volumes' => [
+                '/var/lib/mysql',
             ],
             'environment' => [
                 'MYSQL_ROOT_PASSWORD=magento2',
