@@ -123,9 +123,9 @@ class DevBuilder implements BuilderInterface
                 'rabbitmq' => $this->getRabbitMQService(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
-                'cli' => $this->getCliService(false),
-                'build' => $this->getCliService(false),
-                'deploy' => $this->getCliService(true),
+                'cli' => $this->getCliService(false, 'cli.magento2.docker'),
+                'build' => $this->getCliService(false, 'build.magento2.docker'),
+                'deploy' => $this->getCliService(true, 'deploy.magento2.docker'),
                 'db' => $this->getDbService(),
                 'web' => $this->getWebService(),
                 'cron' => $this->getCronService(),
@@ -230,9 +230,10 @@ class DevBuilder implements BuilderInterface
 
     /**
      * @param bool $isReadOnly
+     * @param string $hostname
      * @return array
      */
-    private function getCliService(bool $isReadOnly): array
+    private function getCliService(bool $isReadOnly, string $hostname): array
     {
         if (file_exists(getenv('HOME') . '/.cache/composer')) {
             $composeCacheDirectory = '~/.cache/composer';
@@ -241,6 +242,7 @@ class DevBuilder implements BuilderInterface
         }
 
         return [
+            'hostname' => $hostname,
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-cli',
                 $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
@@ -326,7 +328,7 @@ class DevBuilder implements BuilderInterface
      */
     private function getCronService(): array
     {
-        $cliService = $this->getCliService(true);
+        $cliService = $this->getCliService(true, 'cron.magento2.docker');
         $cliService['command'] = 'run-cron';
 
         return $cliService;
