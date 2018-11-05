@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -20,11 +19,6 @@ use Psr\Log\LoggerInterface;
  */
 class FixCacheConfig implements ProcessInterface
 {
-    /**
-     * @var Environment
-     */
-    private $environment;
-
     /**
      * @var ConfigReader
      */
@@ -41,18 +35,12 @@ class FixCacheConfig implements ProcessInterface
     private $logger;
 
     /**
-     * @param Environment $environment
      * @param ConfigReader $reader
      * @param ConfigWriter $writer
      * @param LoggerInterface $logger
      */
-    public function __construct(
-        Environment $environment,
-        ConfigReader $reader,
-        ConfigWriter $writer,
-        LoggerInterface $logger
-    ) {
-        $this->environment = $environment;
+    public function __construct(ConfigReader $reader, ConfigWriter $writer, LoggerInterface $logger)
+    {
         $this->reader = $reader;
         $this->writer = $writer;
         $this->logger = $logger;
@@ -63,33 +51,51 @@ class FixCacheConfig implements ProcessInterface
      */
     public function execute()
     {
-        foreach ($this->environment->getRelationships() as $relationship) {
-            if ($relationship[0]['service'] == 'redis') {
-                return;
-            }
-        }
-
         $env = $this->reader->read();
 
         if (!isset($env['cache']['frontend'])) {
             return;
         }
 
-        $redisCacheEnabled = false;
+        $configurationValid = true;
         foreach ($env['cache']['frontend'] as $cacheConfig) {
-            if ($cacheConfig['backend'] == 'Cm_Cache_Backend_Redis') {
-                $redisCacheEnabled = true;
+            if ($cacheConfig['backend'] == 'Cm_Cache_Backend_Redis' &&
+                !$this->testRedisConnection($cacheConfig['backend_options'])
+            ) {
+                $configurationValid = false;
                 break;
             }
         }
 
-        if ($redisCacheEnabled) {
+        if (!$configurationValid) {
             $this->logger->notice(
-                'Cache is configured for Redis but no Redis service is available. Temporarily disabling cache.'
+                'Cache is configured for a Redis service that is not available. Temporarily disabling cache.'
             );
 
             unset($env['cache']);
             $this->writer->create($env);
         }
+    }
+
+    /**
+     * Test if a socket connection can be opened to defined backend.
+     *
+     * @param array $backendOptions
+     *
+     * @return bool
+     */
+    private function testRedisConnection(array $backendOptions): bool
+    {
+        extract($backendOptions);
+
+        if (!isset($server) || !isset($port)) {
+            throw new ProcessException('Missing required Redis configuration!');
+        }
+
+        $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+        $connected = @socket_connect($sock, $server, $port);
+        socket_close($sock);
+
+        return $connected;
     }
 }
