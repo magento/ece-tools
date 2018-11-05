@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\Deploy\AdminEmail;
+use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
@@ -36,6 +37,11 @@ class AdminEmailTest extends TestCase
     private $resultFactoryMock;
 
     /**
+     * @var DatabaseConfiguration|Mock
+     */
+    private $databaseConfigurationMock;
+
+    /**
      * @var State|Mock
      */
     private $stateMock;
@@ -45,11 +51,13 @@ class AdminEmailTest extends TestCase
      */
     protected function setUp()
     {
+        $this->databaseConfigurationMock = $this->createMock(DatabaseConfiguration::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->stateMock = $this->createMock(State::class);
 
         $this->adminEmailValidator = new AdminEmail(
+            $this->databaseConfigurationMock,
             $this->environmentMock,
             $this->resultFactoryMock,
             $this->stateMock
@@ -58,9 +66,10 @@ class AdminEmailTest extends TestCase
 
     public function testValidate()
     {
-        $this->stateMock->expects($this->once())
-            ->method('isInstalled')
-            ->willReturn(false);
+        $this->stateMock->expects($this->never())
+            ->method('isInstalled');
+        $this->databaseConfigurationMock->expects($this->never())
+            ->method('validate');
         $this->environmentMock->expects($this->once())
             ->method('getAdminEmail')
             ->willReturn('admin@example.com');
@@ -76,11 +85,35 @@ class AdminEmailTest extends TestCase
 
     public function testValidateMagentoInstalled()
     {
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminEmail')
+            ->willReturn('');
         $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->environmentMock->expects($this->never())
-            ->method('getAdminEmail');
+        $this->databaseConfigurationMock->expects($this->once())
+            ->method('validate')
+            ->willReturn($this->createMock(Success::class));
+        $this->resultFactoryMock->expects($this->once())
+            ->method('create')
+            ->with(ResultInterface::SUCCESS)
+            ->willReturn($this->createMock(Success::class));
+
+        $result = $this->adminEmailValidator->validate();
+
+        $this->assertInstanceOf(Success::class, $result);
+    }
+
+    public function testValidateWrongDatabaseConnection()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getAdminEmail')
+            ->willReturn('');
+        $this->databaseConfigurationMock->expects($this->once())
+            ->method('validate')
+            ->willReturn($this->createMock(Error::class));
+        $this->stateMock->expects($this->never())
+            ->method('isInstalled');
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with(ResultInterface::SUCCESS)
@@ -96,6 +129,9 @@ class AdminEmailTest extends TestCase
         $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(false);
+        $this->databaseConfigurationMock->expects($this->once())
+            ->method('validate')
+            ->willReturn($this->createMock(Success::class));
         $this->environmentMock->expects($this->once())
             ->method('getAdminEmail')
             ->willReturn('');

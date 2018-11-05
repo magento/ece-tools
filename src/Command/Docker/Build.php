@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Command\Docker;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Docker\BuilderInterface;
-use Magento\MagentoCloud\Docker\Exception;
+use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -27,6 +27,10 @@ class Build extends Command
     const OPTION_PHP = 'php';
     const OPTION_NGINX = 'nginx';
     const OPTION_DB = 'db';
+    const OPTION_REDIS = 'redis';
+    const OPTION_ES = 'es';
+    const OPTION_RABBIT_MQ = 'rmq';
+
     const OPTION_IS_TEST = 'test';
 
     /**
@@ -95,11 +99,31 @@ class Build extends Command
                 'DB version',
                 BuilderInterface::DEFAULT_DB_VERSION
             )->addOption(
-                self::OPTION_IS_TEST,
+                self::OPTION_REDIS,
                 null,
-                InputOption::VALUE_NONE,
-                'Generates ECE-Tools testing configuration (internal usage only)'
+                InputOption::VALUE_OPTIONAL,
+                'Redis version',
+                BuilderInterface::DEFAULT_REDIS_VERSION
+            )->addOption(
+                self::OPTION_ES,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'ElasticSearch version',
+                BuilderInterface::DEFAULT_ES_VERSION
+            )->addOption(
+                self::OPTION_RABBIT_MQ,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'RabbitMQ version',
+                BuilderInterface::DEFAULT_RABBIT_MQ_VERSION
             );
+
+        $this->addOption(
+            self::OPTION_IS_TEST,
+            null,
+            InputOption::VALUE_NONE,
+            'Generates ECE-Tools testing configuration (internal usage only)'
+        );
 
         parent::configure();
     }
@@ -108,7 +132,7 @@ class Build extends Command
      * {@inheritdoc}
      *
      * @throws FileSystemException
-     * @throws Exception
+     * @throws ConfigurationMismatchException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -132,6 +156,18 @@ class Build extends Command
 
         if ($dbVersion = $input->getOption(self::OPTION_DB)) {
             $builder->setDbVersion($dbVersion);
+        }
+
+        if ($redisVersion = $input->getOption(self::OPTION_REDIS)) {
+            $builder->setRedisVersion($redisVersion);
+        }
+
+        if ($esVersion = $input->getOption(self::OPTION_ES)) {
+            $builder->setESVersion($esVersion);
+        }
+
+        if ($rabbitMQVersion = $input->getOption(self::OPTION_RABBIT_MQ)) {
+            $builder->setRabbitMQVersion($rabbitMQVersion);
         }
 
         $config = Yaml::dump($builder->build(), 4, 2);

@@ -82,7 +82,7 @@ class DbDump implements ProcessInterface
      * as well as serves a log with the name of created dump file.
      * If any error happened during dumping, dump file is removed.
      *
-     * @return void
+     * {@inheritdoc}
      */
     public function execute()
     {

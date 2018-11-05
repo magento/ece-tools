@@ -211,7 +211,9 @@ class File
     public function isEmptyDirectory(string $path): bool
     {
         if ($this->isDirectory($path)) {
-            if (count(scandir($path)) > 2) {
+            $dirs = scandir($path, SCANDIR_SORT_NONE);
+
+            if ($dirs && count($dirs) > 2) {
                 return false;
             }
         }
@@ -260,6 +262,7 @@ class File
      *
      * @param string $path
      * @return bool
+     * @codeCoverageIgnore
      */
     public function deleteDirectory(string $path): bool
     {
@@ -282,6 +285,7 @@ class File
      *
      * @param string $path
      * @return bool
+     * @codeCoverageIgnore
      */
     public function clearDirectory(string $path): bool
     {
@@ -309,6 +313,7 @@ class File
      * @param string $path Path to flush
      * @param array $excludes
      * @return void
+     * @codeCoverageIgnore
      */
     public function backgroundClearDirectory(string $path, array $excludes = [])
     {
@@ -358,20 +363,10 @@ class File
      * @param string $path
      * @param int|null $time
      * @return bool
-     * @throws FileSystemException
      */
     public function touch($path, $time = null): bool
     {
-        $result = @touch($path, $time);
-
-        if (!$result) {
-            $this->fileSystemException(
-                'The file or directory "%1" cannot be touched %2',
-                [$path, $this->getWarningMessage()]
-            );
-        }
-
-        return $result;
+        return @touch($path, $time);
     }
 
     /**

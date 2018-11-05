@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**
@@ -65,8 +67,12 @@ class MarshallFiles implements ProcessInterface
             $this->file->deleteDirectory($varCache);
         }
 
-        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
-            return;
+        try {
+            if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+                return;
+            }
+        } catch (UndefinedPackageException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         $this->file->copy(

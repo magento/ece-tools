@@ -281,10 +281,10 @@ class ManagerTest extends TestCase
             ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
             ->method('touch')
-            ->willThrowException(new FileSystemException('Error occurred during execution'));
+            ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('Error occurred during execution');
+            ->with('Cannot create flag some_key');
 
         $this->assertFalse($this->manager->set('some_key'));
     }

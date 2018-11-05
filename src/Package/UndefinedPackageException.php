@@ -5,9 +5,11 @@
  */
 namespace Magento\MagentoCloud\Package;
 
+use Magento\MagentoCloud\App\GenericException;
+
 /**
  * @inheritdoc
  */
-class UndefinedPackageException extends \Exception
+class UndefinedPackageException extends GenericException
 {
 }

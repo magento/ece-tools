@@ -15,7 +15,7 @@ class ErrorHandler
      *
      * @var array
      */
-    private $errorPhrases = [
+    private static $errorPhrases = [
         E_ERROR => 'Error',
         E_WARNING => 'Warning',
         E_PARSE => 'Parse Error',
@@ -41,9 +41,9 @@ class ErrorHandler
      * @param string $errorFile
      * @param int $errorLine
      * @return bool
-     * @throws \Exception
+     * @throws \RuntimeException
      */
-    public function handle($errorNo, $errorStr, $errorFile, $errorLine)
+    public function handle(int $errorNo, string $errorStr, string $errorFile, int $errorLine): bool
     {
         if (strpos($errorStr, 'DateTimeZone::__construct') !== false) {
             /**
@@ -52,15 +52,15 @@ class ErrorHandler
             return false;
         }
 
-        $errorNo = $errorNo & error_reporting();
+        $errorNo &= error_reporting();
 
-        if ($errorNo == 0) {
+        if ($errorNo === 0) {
             return false;
         }
 
-        $msg = isset($this->errorPhrases[$errorNo]) ? $this->errorPhrases[$errorNo] : "Unknown error ({$errorNo})";
+        $msg = self::$errorPhrases[$errorNo] ?? "Unknown error ({$errorNo})";
         $msg .= ": {$errorStr} in {$errorFile} on line {$errorLine}";
 
-        throw new \Exception($msg);
+        throw new \RuntimeException($msg);
     }
 }

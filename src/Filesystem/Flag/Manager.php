@@ -94,21 +94,22 @@ class Manager
      *
      * @param string $flagKey
      * @return bool Returns false if file for required flag was not created, otherwise returns true
-     * @throws \RuntimeException If flag with given key is not registered
      */
     public function set(string $flagKey): bool
     {
         $flagPath = $this->getFlagPath($flagKey);
         $path = $this->directoryList->getMagentoRoot() . '/' . $flagPath;
 
-        try {
-            if ($this->file->touch($path)) {
-                $this->logger->info('Set flag: ' . $flagPath);
-                return true;
-            }
-        } catch (FileSystemException $e) {
-            $this->logger->notice($e->getMessage());
+        if ($this->file->touch($path)) {
+            $this->logger->info('Set flag: ' . $flagPath);
+
+            return true;
         }
+
+        $this->logger->notice(sprintf(
+            'Cannot create flag %s',
+            $flagKey
+        ));
 
         return false;
     }

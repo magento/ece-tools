@@ -7,7 +7,9 @@ namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
@@ -42,9 +44,13 @@ class CleanCache implements ProcessInterface
      */
     public function execute()
     {
-        $this->shell->execute(sprintf(
-            'php ./bin/magento cache:flush --ansi --no-interaction %s',
-            $this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)
-        ));
+        try {
+            $this->shell->execute(sprintf(
+                'php ./bin/magento cache:flush --ansi --no-interaction %s',
+                $this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)
+            ));
+        } catch (ShellException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

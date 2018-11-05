@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Shell\ShellException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -70,7 +71,7 @@ class Manager
     /**
      * Applies all needed patches.
      *
-     * @throws \RuntimeException
+     * @throws ShellException
      * @throws FileSystemException
      */
     public function applyAll()
@@ -85,7 +86,6 @@ class Manager
      * This resolves issue MAGECLOUD-314
      *
      * @return void
-     * @throws FileSystemException
      */
     private function copyStaticFile()
     {
@@ -119,7 +119,7 @@ class Manager
      * - ^1.6
      *
      * @return void
-     * @throws \RuntimeException
+     * @throws ShellException
      * @throws FileSystemException
      */
     private function applyComposerPatches()
@@ -152,8 +152,6 @@ class Manager
      * Applies patches from root directory m2-hotfixes.
      *
      * @return void
-     * @throws \RuntimeException
-     * @throws FileSystemException
      */
     private function applyHotFixes()
     {

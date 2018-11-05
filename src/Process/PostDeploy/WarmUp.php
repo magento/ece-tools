@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\RequestException;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
@@ -65,9 +66,7 @@ class WarmUp implements ProcessInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @throws \GuzzleHttp\Exception\GuzzleException
+     * @inheritdoc
      */
     public function execute()
     {
@@ -75,24 +74,30 @@ class WarmUp implements ProcessInterface
         $client = $this->clientFactory->create();
         $promises = [];
 
-        foreach ($pages as $page) {
-            $url = rtrim($this->urlManager->getBaseUrl(), '/') . '/' . $page;
-            $request = $this->requestFactory->create('GET', $url);
+        try {
+            $baseUrl = rtrim($this->urlManager->getBaseUrl(), '/');
 
-            $promises[] = $client->sendAsync($request)->then(function () use ($url) {
-                $this->logger->info('Warmed up page: ' . $url);
-            }, function (RequestException $exception) use ($url) {
-                $context = $exception->getResponse()
-                    ? [
-                        'error' => $exception->getResponse()->getReasonPhrase(),
-                        'code' => $exception->getResponse()->getStatusCode(),
-                    ]
-                    : [];
+            foreach ($pages as $page) {
+                $url = $baseUrl . '/' . $page;
+                $request = $this->requestFactory->create('GET', $url);
 
-                $this->logger->error('Warming up failed: ' . $url, $context);
-            });
+                $promises[] = $client->sendAsync($request)->then(function () use ($url) {
+                    $this->logger->info('Warmed up page: ' . $url);
+                }, function (RequestException $exception) use ($url) {
+                    $context = $exception->getResponse()
+                        ? [
+                            'error' => $exception->getResponse()->getReasonPhrase(),
+                            'code' => $exception->getResponse()->getStatusCode(),
+                        ]
+                        : [];
+
+                    $this->logger->error('Warming up failed: ' . $url, $context);
+                });
+            }
+
+            \GuzzleHttp\Promise\unwrap($promises);
+        } catch (\Throwable $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
-
-        \GuzzleHttp\Promise\unwrap($promises);
     }
 }

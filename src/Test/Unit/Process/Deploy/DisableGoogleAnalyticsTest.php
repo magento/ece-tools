@@ -11,6 +11,8 @@ use Magento\MagentoCloud\Process\Deploy\DisableGoogleAnalytics;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Config\Stage\Deploy as DeployConfig;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
  * @inheritdoc
@@ -37,6 +39,11 @@ class DisableGoogleAnalyticsTest extends TestCase
      */
     private $connectionMock;
 
+    /**
+     * @var DeployConfig
+     */
+    private $deployConfigMock;
+
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
@@ -44,18 +51,24 @@ class DisableGoogleAnalyticsTest extends TestCase
             ->getMockForAbstractClass();
         $this->connectionMock = $this->getMockBuilder(ConnectionInterface::class)
             ->getMockForAbstractClass();
+        $this->deployConfigMock = $this->createMock(DeployConfig::class);
 
         $this->process = new DisableGoogleAnalytics(
             $this->connectionMock,
             $this->loggerMock,
-            $this->environmentMock
+            $this->environmentMock,
+            $this->deployConfigMock
         );
     }
 
-    public function testExecute()
+    public function testExecuteDisable()
     {
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
+            ->willReturn(false);
+        $this->deployConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -67,10 +80,30 @@ class DisableGoogleAnalyticsTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecuteMasterBranch()
+    public function testExecuteMaster()
     {
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
+            ->willReturn(true);
+        $this->deployConfigMock->expects($this->never())
+            ->method('get')
+            ->with(DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS);
+        $this->connectionMock->expects($this->never())
+            ->method('affectingQuery');
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+
+        $this->process->execute();
+    }
+
+    public function testExecuteEnabled()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('isMasterBranch')
+            ->willReturn(false);
+        $this->deployConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS)
             ->willReturn(true);
         $this->connectionMock->expects($this->never())
             ->method('affectingQuery');

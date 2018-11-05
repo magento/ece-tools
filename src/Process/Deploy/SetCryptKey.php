@@ -8,6 +8,8 @@ namespace Magento\MagentoCloud\Process\Deploy;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -57,6 +59,8 @@ class SetCryptKey implements ProcessInterface
     /**
      * Update crypt/key in app/etc/env.php with CRYPT_KEY value from environment.
      * Will not change anything if the value is already set.
+     *
+     * {@inheritdoc}
      */
     public function execute()
     {
@@ -66,12 +70,18 @@ class SetCryptKey implements ProcessInterface
 
         $key = $this->environment->getCryptKey();
 
-        if (!empty($key)) {
-            $this->logger->info('Setting encryption key');
+        if (empty($key)) {
+            return;
+        }
 
-            $config['crypt']['key'] = $key;
+        $this->logger->info('Setting encryption key');
 
+        $config['crypt']['key'] = $key;
+
+        try {
             $this->configWriter->update($config);
+        } catch (FileSystemException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

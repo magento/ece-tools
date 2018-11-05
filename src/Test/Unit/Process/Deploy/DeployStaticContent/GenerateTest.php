@@ -9,11 +9,12 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,37 +28,37 @@ class GenerateTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var CommandFactory|Mock
+     * @var CommandFactory|MockObject
      */
     private $commandFactoryMock;
 
     /**
-     * @var Option|Mock
+     * @var Option|MockObject
      */
     private $deployOption;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
@@ -85,13 +86,17 @@ class GenerateTest extends TestCase
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecute()
     {
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
             ->method('touch')
-            ->with('magento_root/pub/static/deployed_version.txt');
+            ->with('magento_root/pub/static/deployed_version.txt')
+            ->willReturn(true);
         $this->loggerMock->method('notice')
             ->withConsecutive(
                 ['Extracting locales'],
@@ -110,6 +115,23 @@ class GenerateTest extends TestCase
                 [DeployInterface::VAR_VERBOSE_COMMANDS, '-vvv'],
                 [DeployInterface::VAR_SCD_MATRIX, []],
             ]);
+
+        $this->process->execute();
+    }
+
+    /**
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedExceptionMessage Cannot update deployed version.
+     * @throws ProcessException
+     */
+    public function testExecuteWithFlagSetError()
+    {
+        $this->directoryListMock->method('getMagentoRoot')
+            ->willReturn('magento_root');
+        $this->fileMock->expects($this->once())
+            ->method('touch')
+            ->with('magento_root/pub/static/deployed_version.txt')
+            ->willReturn(false);
 
         $this->process->execute();
     }

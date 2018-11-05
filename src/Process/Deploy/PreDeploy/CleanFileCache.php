@@ -53,6 +53,7 @@ class CleanFileCache implements ProcessInterface
     public function execute()
     {
         $fileCacheDir = $this->directoryList->getMagentoRoot() . '/var/cache';
+
         if ($this->file->isExists($fileCacheDir)) {
             $this->logger->info('Clearing var/cache directory');
             $this->file->deleteDirectory($fileCacheDir);

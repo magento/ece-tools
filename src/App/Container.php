@@ -9,24 +9,22 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
-use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Command\PostDeploy;
-use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Config\Database\ConfigInterface;
+use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
-use Magento\MagentoCloud\DB\Data\ReadConnection;
+use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\SystemList;
-use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
-use Magento\MagentoCloud\Process\ConfigDump as ConfigDumpProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
+use Magento\MagentoCloud\Process\ProcessComposite;
+use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**
  * @inheritdoc
@@ -139,6 +137,10 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Stage\PostDeploy::class
         );
         $this->container->singleton(\Magento\MagentoCloud\Shell\UtilityManager::class);
+        $this->container->singleton(
+            \Magento\MagentoCloud\View\RendererInterface::class,
+            \Magento\MagentoCloud\View\TwigRenderer::class
+        );
         /**
          * Contextual binding.
          */
@@ -233,8 +235,8 @@ class Container implements ContainerInterface
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
-                                    $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
@@ -254,7 +256,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\DeployStaticContent::class),
                         $this->container->make(DeployProcess\CompressStaticContent::class),
                         $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
-                        $this->container->make(DeployProcess\EnableCron::class),
 
                         /**
                          * This process runs processes if only post_deploy hook is not configured.
@@ -268,6 +269,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(PostDeployProcess\EnableCron::class),
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                     ],
@@ -314,9 +316,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Db\SlaveConfig::class)
-            ->needs(ConnectionInterface::class)
-            ->give(ReadConnection::class);
         $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -324,26 +323,6 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Database::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Environment::class),
-                    ],
-                ]);
-            });
-        $this->container->when(ConfigDump::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->make(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(ConfigDumpProcess\Export::class),
-                        $this->container->make(ConfigDumpProcess\Generate::class),
-                        $this->container->make(ConfigDumpProcess\Import::class),
-                    ],
-                ]);
-            });
-        $this->container->when(ConfigDumpProcess\Export::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->make(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(ConfigDumpProcess\Generate::class),
                     ],
                 ]);
             });
@@ -379,9 +358,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(\Magento\MagentoCloud\DB\Dump::class)
-            ->needs(ConnectionInterface::class)
-            ->give(ReadConnection::class);
         $this->container->when(PostDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -394,6 +370,7 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
+                        $this->container->make(PostDeployProcess\EnableCron::class),
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
                         $this->container->make(PostDeployProcess\WarmUp::class),
@@ -404,6 +381,8 @@ class Container implements ContainerInterface
         $this->container->when(CronKill::class)
             ->needs(ProcessInterface::class)
             ->give(DeployProcess\CronProcessKill::class);
+
+        $this->container->singleton(ConfigInterface::class, MergedConfig::class);
     }
 
     /**

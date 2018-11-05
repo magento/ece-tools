@@ -17,6 +17,7 @@ interface ProcessInterface
      * Executes the process.
      *
      * @return void
+     * @throws ProcessException
      */
     public function execute();
 }

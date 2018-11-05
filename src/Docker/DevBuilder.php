@@ -39,10 +39,7 @@ class DevBuilder implements BuilderInterface
      */
     public function setPhpVersion(string $version)
     {
-        $this->setVersion(self::PHP_VERSION, $version, [
-            '7.0',
-            self::DEFAULT_PHP_VERSION,
-        ]);
+        $this->setVersion(self::PHP_VERSION, $version, self::PHP_VERSIONS);
     }
 
     /**
@@ -67,10 +64,34 @@ class DevBuilder implements BuilderInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function setRedisVersion(string $version)
+    {
+        $this->setVersion(self::REDIS_VERSION, $version, self::REDIS_VERSIONS);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setESVersion(string $version)
+    {
+        $this->setVersion(self::ES_VERSION, $version, self::ES_VERSIONS);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setRabbitMQVersion(string $version)
+    {
+        $this->setVersion(self::RABBIT_MQ_VERSION, $version, self::RABBIT_MQ_VERSIONS);
+    }
+
+    /**
      * @param string $key
      * @param string $version
      * @param array $supportedVersions
-     * @throws Exception
+     * @throws ConfigurationMismatchException
      */
     private function setVersion(string $key, string $version, array $supportedVersions)
     {
@@ -78,7 +99,7 @@ class DevBuilder implements BuilderInterface
         $name = reset($parts);
 
         if (!\in_array($version, $supportedVersions, true)) {
-            throw new Exception(sprintf(
+            throw new ConfigurationMismatchException(sprintf(
                 'Service %s:%s is not supported',
                 $name,
                 $version
@@ -97,7 +118,9 @@ class DevBuilder implements BuilderInterface
             'version' => '2',
             'services' => [
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
-                'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
+                'redis' => $this->getRedisService(),
+                'elasticsearch' => $this->getElasticSearchService(),
+                'rabbitmq' => $this->getRabbitMQService(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
                 'cli' => $this->getCliService(false),
@@ -109,6 +132,7 @@ class DevBuilder implements BuilderInterface
                 'appdata' => [
                     'image' => 'tianon/true',
                     'volumes' => [
+                        './docker/mnt:/mnt',
                         '/var/www/magento/vendor',
                         '/var/www/magento/generated',
                         '/var/www/magento/pub',
@@ -116,12 +140,48 @@ class DevBuilder implements BuilderInterface
                         '/var/www/magento/app/etc',
                     ],
                 ],
-                'dbdata' => [
-                    'image' => 'tianon/true',
-                    'volumes' => [
-                        '/var/lib/mysql',
-                    ],
-                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getElasticSearchService(): array
+    {
+        $version = $this->config->get(self::ES_VERSION, self::DEFAULT_ES_VERSION);
+
+        return [
+            'image' => sprintf('%s:%s', 'magento/magento-cloud-docker-elasticsearch', $version),
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getRabbitMQService(): array
+    {
+        $version = $this->config->get(self::RABBIT_MQ_VERSION, self::DEFAULT_RABBIT_MQ_VERSION);
+
+        return [
+            'image' => sprintf('rabbitmq:%s', $version)
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getRedisService(): array
+    {
+        $version = $this->config->get(self::REDIS_VERSION, self::DEFAULT_REDIS_VERSION);
+
+        return [
+            'image' => 'redis:' . $version,
+            'volumes' => [
+                '/data',
+            ],
+            'ports' => [
+                6379,
             ],
         ];
     }
@@ -152,7 +212,7 @@ class DevBuilder implements BuilderInterface
             'ports' => [
                 9000,
             ],
-            'links' => [
+            'depends_on' => [
                 'db',
             ],
             'volumes_from' => [
@@ -179,14 +239,16 @@ class DevBuilder implements BuilderInterface
         } else {
             $composeCacheDirectory = '~/.composer/cache';
         }
+
         return [
             'image' => sprintf(
                 'magento/magento-cloud-docker-php:%s-cli',
                 $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
             ),
-            'links' => [
+            'depends_on' => [
                 'db',
                 'redis',
+                'elasticsearch'
             ],
             'volumes' => [
                 $composeCacheDirectory . ':/root/.composer/cache',
@@ -215,8 +277,9 @@ class DevBuilder implements BuilderInterface
             'ports' => [
                 3306,
             ],
-            'volumes_from' => [
-                'dbdata',
+            'volumes' => [
+                '/var/lib/mysql',
+                './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
             ],
             'environment' => [
                 'MYSQL_ROOT_PASSWORD=magento2',
@@ -241,7 +304,7 @@ class DevBuilder implements BuilderInterface
                 '8080:80',
                 '443:443',
             ],
-            'links' => [
+            'depends_on' => [
                 'fpm',
                 'db',
             ],

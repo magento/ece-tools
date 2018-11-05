@@ -20,9 +20,8 @@ class Install implements ProcessInterface
     /**
      * @param ProcessInterface $process
      */
-    public function __construct(
-        ProcessInterface $process
-    ) {
+    public function __construct(ProcessInterface $process)
+    {
         $this->process = $process;
     }
 

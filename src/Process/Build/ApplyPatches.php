@@ -5,7 +5,9 @@
  */
 namespace Magento\MagentoCloud\Process\Build;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Patch\Manager;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -42,6 +44,11 @@ class ApplyPatches implements ProcessInterface
     public function execute()
     {
         $this->logger->info('Applying patches.');
-        $this->manager->applyAll();
+
+        try {
+            $this->manager->applyAll();
+        } catch (GenericException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

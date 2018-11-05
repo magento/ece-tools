@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
 /**
- * {@inheritdoc}
+ * Verifies if SKIP_HTML_MINIFICATION variable is enabled.
  */
 class SkipHtmlMinification implements ValidatorInterface
 {
@@ -22,10 +22,14 @@ class SkipHtmlMinification implements ValidatorInterface
     private $globalConfig;
 
     /**
-     * @var ResultFactory $resultFactory
+     * @var Validator\ResultFactory $resultFactory
      */
     private $resultFactory;
 
+    /**
+     * @param GlobalSection $globalConfig
+     * @param Validator\ResultFactory $resultFactory
+     */
     public function __construct(GlobalSection $globalConfig, Validator\ResultFactory $resultFactory)
     {
         $this->globalConfig = $globalConfig;

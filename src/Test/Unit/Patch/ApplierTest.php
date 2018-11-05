@@ -12,10 +12,11 @@ use Composer\Repository\WritableRepositoryInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Patch\Applier;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Config\GlobalSection;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -29,37 +30,37 @@ class ApplierTest extends TestCase
     private $applier;
 
     /**
-     * @var Composer|Mock
+     * @var Composer|MockObject
      */
     private $composerMock;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var WritableRepositoryInterface|Mock
+     * @var WritableRepositoryInterface|MockObject
      */
     private $localRepositoryMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var GlobalSection|Mock
+     * @var GlobalSection|MockObject
      */
     private $globalSection;
 
@@ -212,7 +213,7 @@ class ApplierTest extends TestCase
             ->with('Applying patch patchName (path/to/patch) 1.0.');
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with("Patch patchName (path/to/patch) was already applied.");
+            ->with('Patch patchName (path/to/patch) was already applied.');
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
@@ -220,9 +221,9 @@ class ApplierTest extends TestCase
     /**
      * @param string $command
      * @return array
-     * @throws \RuntimeException when the command isn't a reverse
+     * @throws ShellException when the command isn't a reverse
      */
-    public function shellMockReverseCallback(string $command)
+    public function shellMockReverseCallback(string $command): array
     {
         if (strpos($command, '--reverse') !== false && strpos($command, '--check') !== false) {
             // Command was the reverse check, it's all good.
@@ -230,12 +231,12 @@ class ApplierTest extends TestCase
         }
 
         // Not a reverse, better throw an exception.
-        throw new \RuntimeException('Applying the patch has failed for some reason');
+        throw new ShellException('Applying the patch has failed for some reason');
     }
 
     /**
-     * @expectedException RuntimeException
-     * @expectedExceptionMessage Applying the patch has failed for some reason
+     * @expectedException \Magento\MagentoCloud\Shell\ShellException
+     * @expectedExceptionMessage Checking the reverse of the patch has also failed for some reason
      */
     public function testApplyPatchError()
     {
@@ -296,23 +297,25 @@ class ApplierTest extends TestCase
             ->with('Applying patch patchName (path/to/patch) 1.0.');
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('Patch patchName (path/to/patch) wasn\'t applied.');
+            ->with(
+                'Patch patchName (path/to/patch) was not applied. (Applying the patch has failed for some reason)'
+            );
 
         $this->applier->apply($path, $name, $packageName, $constraint);
     }
 
     /**
      * @param string $command
-     * @throws RuntimeException
+     * @throws ShellException
      */
     public function shellMockErrorCallback(string $command)
     {
         if (strpos($command, '--reverse') !== false && strpos($command, '--check') !== false) {
             // Command was the reverse check, still throw an error.
-            throw new \RuntimeException('Checking the reverse of the patch has also failed for some reason');
+            throw new ShellException('Checking the reverse of the patch has also failed for some reason');
         }
 
         // Not a reverse, better throw an exception.
-        throw new \RuntimeException('Applying the patch has failed for some reason');
+        throw new ShellException('Applying the patch has failed for some reason');
     }
 }
