@@ -65,5 +65,6 @@ class PreDeploy implements ProcessInterface
         } catch (ShellException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
+        $this->logger->notice('End of pre-deploy.');
     }
 }
