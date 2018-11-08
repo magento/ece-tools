@@ -31,7 +31,7 @@ class BackupData implements ProcessInterface
      */
     public function __construct(LoggerInterface $logger, ProcessInterface $processes)
     {
-        $this->loggerr = $logger;
+        $this->logger = $logger;
         $this->processes = $processes;
     }
 
