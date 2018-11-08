@@ -99,5 +99,6 @@ class DeployStaticContent implements ProcessInterface
 
         $this->logger->notice('Generating fresh static content');
         $this->process->execute();
+        $this->logger->notice('End of generating fresh static content');
     }
 }
