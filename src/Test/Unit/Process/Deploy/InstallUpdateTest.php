@@ -62,7 +62,7 @@ class InstallUpdateTest extends TestCase
             ->method('isInstalled')
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('Starting install.');
         $this->installProcessMock->expects($this->once())
             ->method('execute');
@@ -78,7 +78,7 @@ class InstallUpdateTest extends TestCase
             ->method('isInstalled')
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('Starting update.');
         $this->installProcessMock->expects($this->never())
             ->method('execute');

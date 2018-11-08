@@ -59,10 +59,10 @@ class InstallUpdate implements ProcessInterface
     {
         try {
             if (!$this->deployConfig->isInstalled()) {
-                $this->logger->info('Starting install.');
+                $this->logger->notice('Starting install.');
                 $this->installProcess->execute();
             } else {
-                $this->logger->info('Starting update.');
+                $this->logger->notice('Starting update.');
                 $this->updateProcess->execute();
             }
         } catch (GenericException $exception) {

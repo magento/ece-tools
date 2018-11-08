@@ -57,7 +57,7 @@ class PreDeploy implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Starting pre-deploy.');
+        $this->logger->notice('Starting pre-deploy.');
         $this->process->execute();
 
         try {

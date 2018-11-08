@@ -97,7 +97,7 @@ class DeployStaticContent implements ProcessInterface
             $this->staticContentCleaner->clean();
         }
 
-        $this->logger->info('Generating fresh static content');
+        $this->logger->notice('Generating fresh static content');
         $this->process->execute();
     }
 }
