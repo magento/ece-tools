@@ -94,9 +94,12 @@ class DeployStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
-            ->with('Generating fresh static content');
+            ->withConsecutive(
+                ['Generating fresh static content'],
+                ['End of generating fresh static content']
+            );
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
@@ -121,10 +124,11 @@ class DeployStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
             ->withConsecutive(
-                ['Generating fresh static content']
+                ['Generating fresh static content'],
+                ['End of generating fresh static content']
             );
         $this->stageConfigMock->expects($this->any())
             ->method('get')
