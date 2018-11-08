@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Docker\Config;
 
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
@@ -23,11 +24,18 @@ class Reader implements ReaderInterface
     private $fileList;
 
     /**
-     * @param FileList $fileList
+     * @var File
      */
-    public function __construct(FileList $fileList)
+    private $file;
+
+    /**
+     * @param FileList $fileList
+     * @param File $file
+     */
+    public function __construct(FileList $fileList, File $file)
     {
         $this->fileList = $fileList;
+        $this->file = $file;
     }
 
     /**
@@ -36,11 +44,11 @@ class Reader implements ReaderInterface
     public function read(): array
     {
         try {
-            $appConfig = Yaml::parseFile(
-                $this->fileList->getAppConfig()
+            $appConfig = Yaml::parse(
+                $this->file->fileGetContents($this->fileList->getAppConfig())
             );
-            $servicesConfig = Yaml::parseFile(
-                $this->fileList->getServicesConfig()
+            $servicesConfig = Yaml::parse(
+                $this->file->fileGetContents($this->fileList->getServicesConfig())
             );
         } catch (\Exception $exception) {
             throw new FileSystemException($exception->getMessage(), $exception->getCode(), $exception);

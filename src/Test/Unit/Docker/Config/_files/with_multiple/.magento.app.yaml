@@ -1,6 +1,0 @@
-type: php:7.1
-
-relationships:
-  database: "mysql:mysql"
-  elasticsearch: "elasticsearch:elasticsearch"
-  elasticsearch5: "elasticsearch5:elasticsearch"

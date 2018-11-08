@@ -1,7 +1,0 @@
-type: php:7.1
-
-relationships:
-  database: "mysql:mysql"
-  redis: "redis:redis"
-  elasticsearch: "elasticsearch:elasticsearch"
-  mq: "myrabbitmq:rabbitmq"
