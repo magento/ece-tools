@@ -38,7 +38,7 @@ class VarnishServiceTest extends TestCase
             'ports' => [
                 '80:80',
             ],
-            'links' => [
+            'depends_on' => [
                 'web',
             ],
         ], $this->service->get());

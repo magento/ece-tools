@@ -64,6 +64,30 @@ class DevBuilder implements BuilderInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function setRedisVersion(string $version)
+    {
+        $this->setVersion(self::REDIS_VERSION, $version, self::REDIS_VERSIONS);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setESVersion(string $version)
+    {
+        $this->setVersion(self::ES_VERSION, $version, self::ES_VERSIONS);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setRabbitMQVersion(string $version)
+    {
+        $this->setVersion(self::RABBIT_MQ_VERSION, $version, self::RABBIT_MQ_VERSIONS);
+    }
+
+    /**
      * @param string $key
      * @param string $version
      * @param array $supportedVersions
@@ -94,9 +118,9 @@ class DevBuilder implements BuilderInterface
             'version' => '2',
             'services' => [
                 'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
-                'redis' => $this->serviceFactory->create(ServiceFactory::SERVICE_REDIS)->get(),
-                'elasticsearch' => $this->serviceFactory->create(ServiceFactory::SERVICE_ELASTICSEARCH)->get(),
-                'rabbitmq' => $this->serviceFactory->create(ServiceFactory::SERVICE_RABBITMQ)->get(),
+                'redis' => $this->getRedisService(),
+                'elasticsearch' => $this->getElasticSearchService(),
+                'rabbitmq' => $this->getRabbitMQService(),
                 'fpm' => $this->getFpmService(),
                 /** For backward compatibility. */
                 'cli' => $this->getCliService(false),
@@ -116,13 +140,48 @@ class DevBuilder implements BuilderInterface
                         '/var/www/magento/app/etc',
                     ],
                 ],
-                'dbdata' => [
-                    'image' => 'tianon/true',
-                    'volumes' => [
-                        '/var/lib/mysql',
-                        './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
-                    ],
-                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getElasticSearchService(): array
+    {
+        $version = $this->config->get(self::ES_VERSION, self::DEFAULT_ES_VERSION);
+
+        return [
+            'image' => sprintf('%s:%s', 'magento/magento-cloud-docker-elasticsearch', $version),
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getRabbitMQService(): array
+    {
+        $version = $this->config->get(self::RABBIT_MQ_VERSION, self::DEFAULT_RABBIT_MQ_VERSION);
+
+        return [
+            'image' => sprintf('rabbitmq:%s', $version)
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getRedisService(): array
+    {
+        $version = $this->config->get(self::REDIS_VERSION, self::DEFAULT_REDIS_VERSION);
+
+        return [
+            'image' => 'redis:' . $version,
+            'volumes' => [
+                '/data',
+            ],
+            'ports' => [
+                6379,
             ],
         ];
     }
@@ -153,7 +212,7 @@ class DevBuilder implements BuilderInterface
             'ports' => [
                 9000,
             ],
-            'links' => [
+            'depends_on' => [
                 'db',
             ],
             'volumes_from' => [
@@ -186,9 +245,10 @@ class DevBuilder implements BuilderInterface
                 'magento/magento-cloud-docker-php:%s-cli',
                 $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
             ),
-            'links' => [
+            'depends_on' => [
                 'db',
                 'redis',
+                'elasticsearch'
             ],
             'volumes' => [
                 $composeCacheDirectory . ':/root/.composer/cache',
@@ -217,8 +277,9 @@ class DevBuilder implements BuilderInterface
             'ports' => [
                 3306,
             ],
-            'volumes_from' => [
-                'dbdata',
+            'volumes' => [
+                '/var/lib/mysql',
+                './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
             ],
             'environment' => [
                 'MYSQL_ROOT_PASSWORD=magento2',
@@ -243,7 +304,7 @@ class DevBuilder implements BuilderInterface
                 '8080:80',
                 '443:443',
             ],
-            'links' => [
+            'depends_on' => [
                 'fpm',
                 'db',
             ],

@@ -7,13 +7,15 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 use Magento\MagentoCloud\Filesystem\FileList;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,39 +29,44 @@ class SetupTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var UrlManager|Mock
+     * @var UrlManager|MockObject
      */
     private $urlManagerMock;
 
     /**
-     * @var PasswordGenerator|Mock
+     * @var PasswordGenerator|MockObject
      */
     private $passwordGeneratorMock;
 
     /**
-     * @var FileList|Mock
+     * @var FileList|MockObject
      */
     private $fileListMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
+
+    /**
+     * @var ConnectionInterface|MockObject
+     */
+    private $connectionDataMock;
 
     /**
      * @inheritdoc
@@ -78,11 +85,18 @@ class SetupTest extends TestCase
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
         $this->fileListMock = $this->createMock(FileList::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        /** @var ConnectionFactory|MockObject $connectionFactoryMock */
+        $connectionFactoryMock = $this->createMock(ConnectionFactory::class);
+        $connectionFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($this->connectionDataMock);
 
         $this->process = new Setup(
             $this->loggerMock,
             $this->urlManagerMock,
             $this->environmentMock,
+            $connectionFactoryMock,
             $this->shellMock,
             $this->passwordGeneratorMock,
             $this->fileListMock,
@@ -133,19 +147,18 @@ class SetupTest extends TestCase
             ->method('get')
             ->willReturn(DeployInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn('-v');
-        $this->environmentMock->expects($this->any())
-            ->method('getRelationships')
-            ->willReturn([
-                'database' => [
-                    0 => [
-                        'host' => 'localhost',
-                        'port' => '3306',
-                        'path' => 'magento',
-                        'username' => 'user',
-                        'password' => 'password',
-                    ],
-                ],
-            ]);
+        $this->connectionDataMock->expects($this->once())
+            ->method('getPassword')
+            ->willReturn('password');
+        $this->connectionDataMock->expects($this->once())
+            ->method('getHost')
+            ->willReturn('localhost');
+        $this->connectionDataMock->expects($this->once())
+            ->method('getDbName')
+            ->willReturn('magento');
+        $this->connectionDataMock->expects($this->once())
+            ->method('getUser')
+            ->willReturn('user');
         $this->environmentMock->expects($this->any())
             ->method('getVariables')
             ->willReturn([

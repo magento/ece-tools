@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionFactory;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -57,9 +59,15 @@ class Setup implements ProcessInterface
     private $stageConfig;
 
     /**
+     * @var ConnectionInterface
+     */
+    private $connectionData;
+
+    /**
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
      * @param Environment $environment
+     * @param ConnectionFactory $connectionFactory
      * @param ShellInterface $shell
      * @param PasswordGenerator $passwordGenerator
      * @param FileList $fileList
@@ -69,6 +77,7 @@ class Setup implements ProcessInterface
         LoggerInterface $logger,
         UrlManager $urlManager,
         Environment $environment,
+        ConnectionFactory $connectionFactory,
         ShellInterface $shell,
         PasswordGenerator $passwordGenerator,
         FileList $fileList,
@@ -77,6 +86,7 @@ class Setup implements ProcessInterface
         $this->logger = $logger;
         $this->urlManager = $urlManager;
         $this->environment = $environment;
+        $this->connectionData = $connectionFactory->create(ConnectionFactory::CONNECTION_MAIN);
         $this->shell = $shell;
         $this->passwordGenerator = $passwordGenerator;
         $this->fileList = $fileList;
@@ -92,7 +102,7 @@ class Setup implements ProcessInterface
 
         $command = $this->getBaseCommand();
 
-        $dbPassword = $this->environment->getDbPassword();
+        $dbPassword = $this->connectionData->getPassword();
         if (strlen($dbPassword)) {
             $command .= ' --db-password=' . escapeshellarg($dbPassword);
         }
@@ -127,9 +137,9 @@ class Setup implements ProcessInterface
             . ' --base-url-secure=' . escapeshellarg($urlSecure)
             . ' --language=' . escapeshellarg($this->environment->getAdminLocale())
             . ' --timezone=America/Los_Angeles'
-            . ' --db-host=' . escapeshellarg($this->environment->getDbHost())
-            . ' --db-name=' . escapeshellarg($this->environment->getDbName())
-            . ' --db-user=' . escapeshellarg($this->environment->getDbUser())
+            . ' --db-host=' . escapeshellarg($this->connectionData->getHost())
+            . ' --db-name=' . escapeshellarg($this->connectionData->getDbName())
+            . ' --db-user=' . escapeshellarg($this->connectionData->getUser())
             . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
                 ? $this->environment->getAdminUrl() : Environment::DEFAULT_ADMIN_URL)
             . ($this->environment->getAdminEmail() ? $this->getAdminCredentials() : '')
