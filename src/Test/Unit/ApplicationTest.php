@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit;
 
 use Composer\Composer;
@@ -73,6 +75,7 @@ class ApplicationTest extends TestCase
         Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
         Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
         Command\Docker\Build::NAME => Command\Docker\Build::class,
+        Command\Docker\BuildIntegration::NAME => Command\Docker\BuildIntegration::class,
         Command\Docker\ConfigConvert::NAME => Command\Docker\ConfigConvert::class,
         Command\CronKill::NAME => Command\CronKill::class,
     ];

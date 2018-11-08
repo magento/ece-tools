@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Filesystem\Reader;
 
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+
 /**
  * Read content of file.
  */
@@ -12,6 +14,7 @@ interface ReaderInterface
 {
     /**
      * @return array
+     * @throws FileSystemException
      */
     public function read(): array;
 }

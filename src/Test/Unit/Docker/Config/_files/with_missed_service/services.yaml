@@ -1,0 +1,10 @@
+mysql:
+  type: mysql:10.0
+  disk: 2048
+
+redis:
+  type: redis:3.0
+
+elasticsearch:
+  type: 'elasticsearch:1.4'
+  disk: 1024
