@@ -47,9 +47,12 @@ class BackupDataTest extends TestCase
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Copying data to the ./init directory');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Copying data to the ./init directory'],
+                ['End of copying data to the ./init directory']
+            );
 
         $this->processesMock->expects($this->once())
             ->method('execute');
