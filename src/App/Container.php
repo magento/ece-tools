@@ -236,7 +236,6 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
-                                    $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
