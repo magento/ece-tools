@@ -51,7 +51,7 @@ class TransferTest extends TestCase
     public function testExecute()
     {
         $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['Starting transfer files.'],
                 ['Transfer completed.']
@@ -74,7 +74,7 @@ class TransferTest extends TestCase
     public function testExecuteWithException()
     {
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('Starting transfer files.');
         $this->loggerMock->expects($this->once())
             ->method('critical')

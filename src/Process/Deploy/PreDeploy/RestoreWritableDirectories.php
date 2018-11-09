@@ -78,7 +78,7 @@ class RestoreWritableDirectories implements ProcessInterface
         }
 
         // Restore mounted directories.
-        $this->logger->info('Recoverable directories were copied back.');
+        $this->logger->notice('Recoverable directories were copied back.');
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
 }
