@@ -75,7 +75,7 @@ class PostDeployTest extends AbstractTest
 
     public function testPostDeployIsNotRun()
     {
-        $application = $this->bootstrap->createApplication(['variables' => ['FAKE_VARIABLE' => 'fake_value']]);
+        $application = $this->bootstrap->createApplication(['variables' => []]);
 
         /** @var File $file */
         $file = $application->getContainer()->get(File::class);

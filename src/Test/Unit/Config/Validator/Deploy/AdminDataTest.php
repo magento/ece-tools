@@ -114,7 +114,7 @@ class AdminDataTest extends TestCase
     public function validateDataProvider(): array
     {
         return [
-            [
+            'Checks when Magento is installed without any admin data' => [
                 'email' => '',
                 'login' => '',
                 'password' => '',
@@ -126,7 +126,7 @@ class AdminDataTest extends TestCase
                 'expectedError' => $this->never(),
                 'expectedSuccess' => $this->once()
             ],
-            [
+            'Checks when Magento is not installed without any admin data' => [
                 'email' => '',
                 'login' => '',
                 'password' => '',
@@ -138,7 +138,7 @@ class AdminDataTest extends TestCase
                 'expectedError' => $this->never(),
                 'expectedSuccess' => $this->once()
             ],
-            [
+            'Checks when Magento is not installed with only admin email' => [
                 'email' => 'admin@example.com',
                 'login' => '',
                 'password' => '',
@@ -150,7 +150,7 @@ class AdminDataTest extends TestCase
                 'expectedError' => $this->never(),
                 'expectedSuccess' => $this->once()
             ],
-            [
+            'Checks when Magento is installed with only admin email' => [
                 'email' => 'admin@example.com',
                 'login' => '',
                 'password' => '',
@@ -163,7 +163,7 @@ class AdminDataTest extends TestCase
                 'expectedError' => $this->once(),
                 'expectedSuccess' => $this->never()
             ],
-            [
+            'Checks when Magento is not installed with some admin data except email' => [
                 'email' => '',
                 'login' => 'mylogin',
                 'password' => '',
