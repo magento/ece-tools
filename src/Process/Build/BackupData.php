@@ -40,7 +40,7 @@ class BackupData implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Copying data to the ./init directory');
+         $this->logger->notice('Copying data to the ./init directory');
         $this->processes->execute();
         $this->logger->notice('End of copying data to the ./init directory');
     }
