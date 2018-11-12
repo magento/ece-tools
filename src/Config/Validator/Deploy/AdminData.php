@@ -66,8 +66,7 @@ class AdminData implements ValidatorInterface
     {
         $data = $this->getAdminData();
 
-        if ($this->databaseConfiguration->validate() instanceof Success)
-        {
+        if ($this->databaseConfiguration->validate() instanceof Success) {
             if ($this->state->isInstalled() && $data) {
                 return $this->resultFactory->error(
                     'The following admin data is required to create an admin user during initial installation'
