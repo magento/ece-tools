@@ -6,6 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator\Deploy\AdminData;
+use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -34,6 +36,11 @@ class AdminDataTest extends TestCase
     private $resultFactoryMock;
 
     /**
+     * @var DatabaseConfiguration|MockObject
+     */
+    private $databaseConfigurationMock;
+
+    /**
      * @var AdminData
      */
     private $adminData;
@@ -46,10 +53,12 @@ class AdminDataTest extends TestCase
         $this->stateMock = $this->createMock(State::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
+        $this->databaseConfigurationMock = $this->createMock(DatabaseConfiguration::class);
 
         $this->adminData = new AdminData(
             $this->stateMock,
             $this->environmentMock,
+            $this->databaseConfigurationMock,
             $this->resultFactoryMock
         );
     }
@@ -80,6 +89,9 @@ class AdminDataTest extends TestCase
         InvokedCountMatcher $expectedError,
         InvokedCountMatcher $expectedSuccess
     ) {
+        $this->databaseConfigurationMock->expects($this->once())
+            ->method('validate')
+            ->willReturn($this->createMock(Success::class));
         $this->environmentMock->expects($this->atLeastOnce())
             ->method('getAdminEmail')
             ->willReturn($email);
