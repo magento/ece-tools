@@ -7,13 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Command\Docker;
 
-use Illuminate\Config\Repository;
-use Magento\MagentoCloud\Command\Docker\Build;
+use Illuminate\Contracts\Config\Repository;
+use Magento\MagentoCloud\Command\Docker\BuildIntegration;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
+use Magento\MagentoCloud\Docker\BuilderInterface;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
-use Magento\MagentoCloud\Docker\DevBuilder;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -24,10 +24,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @inheritdoc
  */
-class BuildTest extends TestCase
+class BuildIntegrationTest extends TestCase
 {
     /**
-     * @var Build
+     * @var BuildIntegration
      */
     private $command;
 
@@ -37,24 +37,19 @@ class BuildTest extends TestCase
     private $builderFactoryMock;
 
     /**
-     * @var DevBuilder|MockObject
-     */
-    private $builderMock;
-
-    /**
      * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var Environment|MockObject
-     */
-    private $environmentMock;
-
-    /**
      * @var RepositoryFactory|MockObject
      */
-    private $repositoryFactoryMock;
+    private $configFactoryMock;
+
+    /**
+     * @var BuilderInterface|MockObject
+     */
+    private $builderMock;
 
     /**
      * @var Repository|MockObject
@@ -62,25 +57,30 @@ class BuildTest extends TestCase
     private $configMock;
 
     /**
+     * @var Environment|MockObject
+     */
+    private $environmentMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->builderFactoryMock = $this->createMock(BuilderFactory::class);
-        $this->builderMock = $this->createMock(DevBuilder::class);
         $this->fileMock = $this->createMock(File::class);
+        $this->configFactoryMock = $this->createMock(RepositoryFactory::class);
+        $this->builderMock = $this->getMockForAbstractClass(BuilderInterface::class);
+        $this->configMock = $this->getMockForAbstractClass(Repository::class);
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
-        $this->configMock = $this->createMock(Repository::class);
 
-        $this->repositoryFactoryMock->method('create')
+        $this->configFactoryMock->method('create')
             ->willReturn($this->configMock);
 
-        $this->command = new Build(
+        $this->command = new BuildIntegration(
             $this->builderFactoryMock,
             $this->fileMock,
-            $this->environmentMock,
-            $this->repositoryFactoryMock
+            $this->configFactoryMock,
+            $this->environmentMock
         );
     }
 
@@ -89,33 +89,6 @@ class BuildTest extends TestCase
      * @throws FileSystemException
      */
     public function testExecute()
-    {
-        /** @var InputInterface $inputMock */
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        /** @var OutputInterface $outputMock */
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
-
-        $this->builderFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn($this->builderMock);
-        $this->builderMock->expects($this->once())
-            ->method('build')
-            ->willReturn(['version' => '2']);
-        $this->builderMock->expects($this->once())
-            ->method('getConfigPath')
-            ->willReturn('magento_root/docker-compose.yml');
-        $this->fileMock->expects($this->once())
-            ->method('filePutContents')
-            ->with('magento_root/docker-compose.yml', "version: '2'\n");
-
-        $this->command->execute($inputMock, $outputMock);
-    }
-
-    /**
-     * @throws ConfigurationMismatchException
-     * @throws FileSystemException
-     */
-    public function testExecuteWithParams()
     {
         /** @var InputInterface|MockObject $inputMock */
         $inputMock = $this->getMockForAbstractClass(InputInterface::class);
@@ -131,20 +104,22 @@ class BuildTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
             ->with('magento_root/docker-compose.yml', "version: '2'\n");
-        $inputMock->method('getOption')
+        $inputMock->method('getArgument')
             ->willReturnMap([
-                [Build::OPTION_PHP, '7.1'],
-                [Build::OPTION_DB, '10'],
-                [Build::OPTION_NGINX, '1.9'],
-                [Build::OPTION_REDIS, '3.2'],
-                [Build::OPTION_ES, '2.4'],
-                [Build::OPTION_RABBIT_MQ, '3.5']
+                [BuildIntegration::ARGUMENT_PHP, '7.1'],
+                [BuildIntegration::ARGUMENT_DB, '10.0'],
+                [BuildIntegration::ARGUMENT_NGINX, '1.9'],
             ]);
         $this->builderMock->expects($this->once())
             ->method('getConfigPath')
             ->willReturn('magento_root/docker-compose.yml');
-        $this->configMock->expects($this->exactly(6))
-            ->method('set');
+        $this->configMock->expects($this->exactly(3))
+            ->method('set')
+            ->withConsecutive(
+                [BuilderInterface::PHP_VERSION, '7.1'],
+                [BuilderInterface::DB_VERSION, '10.0'],
+                [BuilderInterface::NGINX_VERSION, '1.9']
+            );
 
         $this->command->execute($inputMock, $outputMock);
     }

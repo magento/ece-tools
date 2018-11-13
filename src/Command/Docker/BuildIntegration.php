@@ -15,23 +15,20 @@ use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * Builds Docker configuration for Magento project.
+ * Docker build for internal integration testing.
  */
-class Build extends Command
+class BuildIntegration extends Command
 {
-    const NAME = 'docker:build';
-    const OPTION_PHP = 'php';
-    const OPTION_NGINX = 'nginx';
-    const OPTION_DB = 'db';
-    const OPTION_REDIS = 'redis';
-    const OPTION_ES = 'es';
-    const OPTION_RABBIT_MQ = 'rmq';
+    const NAME = 'docker:build:integration';
+    const ARGUMENT_PHP = 'php';
+    const ARGUMENT_NGINX = 'nginx';
+    const ARGUMENT_DB = 'db';
 
     /**
      * @var BuilderFactory
@@ -44,31 +41,31 @@ class Build extends Command
     private $file;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var RepositoryFactory
      */
     private $configFactory;
 
     /**
+     * @var Environment
+     */
+    private $environment;
+
+    /**
      * @param BuilderFactory $builderFactory
      * @param File $file
-     * @param Environment $environment
      * @param RepositoryFactory $configFactory
+     * @param Environment $environment
      */
     public function __construct(
         BuilderFactory $builderFactory,
         File $file,
-        Environment $environment,
-        RepositoryFactory $configFactory
+        RepositoryFactory $configFactory,
+        Environment $environment
     ) {
         $this->builderFactory = $builderFactory;
         $this->file = $file;
-        $this->environment = $environment;
         $this->configFactory = $configFactory;
+        $this->environment = $environment;
 
         parent::__construct();
     }
@@ -79,37 +76,19 @@ class Build extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Build docker configuration')
-            ->addOption(
-                self::OPTION_PHP,
-                null,
-                InputOption::VALUE_OPTIONAL,
+            ->setDescription('Build test docker configuration')
+            ->addArgument(
+                self::ARGUMENT_PHP,
+                InputArgument::REQUIRED,
                 'PHP version'
-            )->addOption(
-                self::OPTION_NGINX,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Nginx version'
-            )->addOption(
-                self::OPTION_DB,
-                null,
-                InputOption::VALUE_OPTIONAL,
+            )->addArgument(
+                self::ARGUMENT_DB,
+                InputArgument::REQUIRED,
                 'DB version'
-            )->addOption(
-                self::OPTION_REDIS,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Redis version'
-            )->addOption(
-                self::OPTION_ES,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'Elasticsearch version'
-            )->addOption(
-                self::OPTION_RABBIT_MQ,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                'RabbitMQ version'
+            )->addArgument(
+                self::ARGUMENT_NGINX,
+                InputArgument::REQUIRED,
+                'Nginx version'
             );
 
         parent::configure();
@@ -123,22 +102,17 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $builder = $this->builderFactory->create(BuilderFactory::BUILDER_DEV);
+        $builder = $this->builderFactory->create(BuilderFactory::BUILDER_TEST);
         $config = $this->configFactory->create();
 
         $map = [
-            self::OPTION_PHP => BuilderInterface::PHP_VERSION,
-            self::OPTION_DB => BuilderInterface::DB_VERSION,
-            self::OPTION_NGINX => BuilderInterface::NGINX_VERSION,
-            self::OPTION_REDIS => BuilderInterface::REDIS_VERSION,
-            self::OPTION_ES => BuilderInterface::ES_VERSION,
-            self::OPTION_RABBIT_MQ => BuilderInterface::RABBIT_MQ_VERSION,
+            self::ARGUMENT_PHP => BuilderInterface::PHP_VERSION,
+            self::ARGUMENT_DB => BuilderInterface::DB_VERSION,
+            self::ARGUMENT_NGINX => BuilderInterface::NGINX_VERSION,
         ];
 
         array_walk($map, function ($key, $option) use ($config, $input) {
-            if ($value = $input->getOption($option)) {
-                $config->set($key, $value);
-            }
+            $config->set($key, $input->getArgument($option));
         });
 
         $this->file->filePutContents(
