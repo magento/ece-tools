@@ -69,7 +69,9 @@ class DeployStaticContent implements ProcessInterface
             return;
         }
 
+        $this->logger->notice('Generating fresh static content');
         $this->process->execute();
         $this->flagManager->set(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
+        $this->logger->notice('End of generating fresh static content');
     }
 }

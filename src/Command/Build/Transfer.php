@@ -61,9 +61,9 @@ class Transfer extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->info('Starting transfer files.');
+            $this->logger->notice('Starting transfer files.');
             $this->process->execute();
-            $this->logger->info('Transfer completed.');
+            $this->logger->notice('Transfer completed.');
         } catch (\Throwable $e) {
             $this->logger->critical($e->getMessage());
 

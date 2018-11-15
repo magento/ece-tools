@@ -71,9 +71,9 @@ class Generate extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->info('Starting generate command. ' . $this->packageManager->getPrettyInfo());
+            $this->logger->notice('Starting generate command. ' . $this->packageManager->getPrettyInfo());
             $this->process->execute();
-            $this->logger->info('Generate command completed.');
+            $this->logger->notice('Generate command completed.');
         } catch (\Throwable $e) {
             $this->logger->critical($e->getMessage());
 

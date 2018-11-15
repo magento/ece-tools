@@ -43,12 +43,13 @@ class ApplyPatches implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Applying patches.');
+        $this->logger->notice('Applying patches.');
 
         try {
             $this->manager->applyAll();
         } catch (GenericException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
+        $this->logger->notice('End of applying patches.');
     }
 }

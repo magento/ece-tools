@@ -55,8 +55,8 @@ class EnableCronTest extends TestCase
 
     public function testExecute()
     {
-        $config = ['cron' => ['enabled' => 0], 'other_conf' => 'value'];
-        $configResult = ['other_conf' => 'value'];
+        $config = ['cron' => ['enabled' => 0, 'other_cron_config' => 1], 'other_conf' => 'value'];
+        $configResult = ['cron' => ['other_cron_config' => 1], 'other_conf' => 'value'];
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Enable cron');
