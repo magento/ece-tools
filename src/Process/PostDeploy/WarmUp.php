@@ -45,6 +45,13 @@ class WarmUp implements ProcessInterface
     private $logger;
 
     /**
+     * Variable for caching base urls hosts from config table
+     *
+     * @var string
+     */
+    private $baseHosts;
+
+    /**
      * @param PostDeployInterface $postDeploy
      * @param ClientFactory $clientFactory
      * @param RequestFactory $requestFactory
@@ -70,15 +77,11 @@ class WarmUp implements ProcessInterface
      */
     public function execute()
     {
-        $pages = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES);
         $client = $this->clientFactory->create();
         $promises = [];
 
         try {
-            $baseUrl = rtrim($this->urlManager->getBaseUrl(), '/');
-
-            foreach ($pages as $page) {
-                $url = $baseUrl . '/' . $page;
+            foreach ($this->getUrlsForWarmUp() as $url) {
                 $request = $this->requestFactory->create('GET', $url);
 
                 $promises[] = $client->sendAsync($request)->then(function () use ($url) {
@@ -99,5 +102,57 @@ class WarmUp implements ProcessInterface
         } catch (\Throwable $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
+    }
+
+    /**
+     * Returns list of URLs which should be warm up.
+     *
+     * @return array
+     */
+    private function getUrlsForWarmUp(): array
+    {
+        $pages = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES);
+        $baseUrl = rtrim($this->urlManager->getBaseUrl(), '/');
+        $urls = [];
+
+        foreach ($pages as $page) {
+            if (strpos($page, 'http') === 0) {
+                if (!$this->isRelatedDomain($page)) {
+                    $this->logger->error(
+                        sprintf(
+                            'Page "%s" can\'t be warmed-up because such domain ' .
+                            'is not registered in current Magento installation',
+                            $page
+                        )
+                    );
+                } else {
+                    $urls[] = $page;
+                }
+            } else {
+                $urls[] = $baseUrl . '/' . $page;
+            }
+        }
+
+        return $urls;
+    }
+
+    /**
+     * Checks that host from $url is using in current Magento installation
+     *
+     * @param string $url
+     * @return bool
+     */
+    private function isRelatedDomain(string $url): bool
+    {
+        if ($this->baseHosts === null) {
+            $this->baseHosts = array_map(
+                function ($url) {
+                    return parse_url($url, PHP_URL_HOST);
+                },
+                $this->urlManager->getBaseUrls()
+            );
+        }
+
+        return in_array(parse_url($url, PHP_URL_HOST), $this->baseHosts);
     }
 }
