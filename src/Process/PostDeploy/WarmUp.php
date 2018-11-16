@@ -66,7 +66,9 @@ class WarmUp implements ProcessInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @codeCoverageIgnore
      */
     public function execute()
     {

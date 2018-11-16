@@ -92,4 +92,14 @@ class FileListTest extends TestCase
     {
         $this->assertSame('root/docker-compose.yml', $this->fileList->getToolsDockerCompose());
     }
+
+    public function testGetAppConfig()
+    {
+        $this->assertSame('root/.magento.app.yaml', $this->fileList->getAppConfig());
+    }
+
+    public function testGetServicesConfig()
+    {
+        $this->assertSame('root/.magento/services.yaml', $this->fileList->getServicesConfig());
+    }
 }

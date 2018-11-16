@@ -103,8 +103,10 @@ class StaticContentCompressorTest extends TestCase
                 [UtilityManager::UTILITY_TIMEOUT, $timeout],
                 [UtilityManager::UTILITY_BASH, $bash],
             ]);
+        $this->loggerMock->expects($this->once())
+            ->method('info');
 
-        $this->staticContentCompressor->process($compressionLevel);
+        $this->staticContentCompressor->process($compressionLevel, '-v');
     }
 
     /**

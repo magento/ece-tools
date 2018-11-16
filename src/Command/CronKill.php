@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -30,23 +29,15 @@ class CronKill extends Command
     private $logger;
 
     /**
-     * @var PackageManager
-     */
-    private $packageManager;
-
-    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
-     * @param PackageManager $packageManager
      */
     public function __construct(
         ProcessInterface $process,
-        LoggerInterface $logger,
-        PackageManager $packageManager
+        LoggerInterface $logger
     ) {
         $this->process = $process;
         $this->logger = $logger;
-        $this->packageManager = $packageManager;
 
         parent::__construct();
     }
@@ -66,6 +57,8 @@ class CronKill extends Command
      * Runs process which finds all running Magento cron processes and kills them
      *
      * {@inheritdoc}
+     *
+     * @throws \Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

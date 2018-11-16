@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\DB;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\DB\PDOException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -43,7 +44,9 @@ class ConnectionTest extends TestCase
     private $connectionDataMock;
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws \ReflectionException
      */
     protected function setUp()
     {
@@ -51,14 +54,14 @@ class ConnectionTest extends TestCase
         $this->statementMock = $this->createMock(\PDOStatement::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+
         /** @var ConnectionFactory|MockObject $connectionFactoryMock */
         $connectionFactoryMock = $this->createMock(ConnectionFactory::class);
         $connectionFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($this->connectionDataMock);
 
-        $this->pdoMock->expects($this->any())
-            ->method('prepare')
+        $this->pdoMock->method('prepare')
             ->willReturn($this->statementMock);
 
         $this->connection = new Connection(
@@ -119,6 +122,9 @@ class ConnectionTest extends TestCase
         );
     }
 
+    /**
+     * @throws PDOException
+     */
     public function testGetPdo()
     {
         $this->assertSame($this->pdoMock, $this->connection->getPdo());
@@ -131,7 +137,7 @@ class ConnectionTest extends TestCase
     public function testGetPdoWithException()
     {
         $this->pdoMock->expects($this->once())
-            ->method('query')
+            ->method('exec')
             ->with('SELECT 1')
             ->willThrowException(new \Exception('Some exception'));
         $this->pdoMock->expects($this->once())
@@ -148,5 +154,54 @@ class ConnectionTest extends TestCase
     public function testClose()
     {
         $this->connection->close();
+    }
+
+    public function testCount()
+    {
+        $this->statementMock->expects($this->once())
+            ->method('rowCount')
+            ->willReturn(1);
+
+        $this->assertSame(1, $this->connection->count('SELECT 1'));
+    }
+
+    public function testAffectingQuery()
+    {
+        $bindings = [
+            ':name' => 'John',
+            ':age' => 2
+        ];
+
+        $this->statementMock->expects($this->exactly(2))
+            ->method('bindValue')
+            ->withConsecutive(
+                [':name', 'John', \PDO::PARAM_STR],
+                [':age', 2, \PDO::PARAM_INT]
+            );
+        $this->statementMock->expects($this->once())
+            ->method('rowCount')
+            ->willReturn(1);
+
+        $this->assertSame(1, $this->connection->affectingQuery('SELECT 1', $bindings));
+    }
+
+    public function testQuery()
+    {
+        $bindings = [
+            ':name' => 'John',
+            ':age' => 2
+        ];
+
+        $this->statementMock->expects($this->exactly(2))
+            ->method('bindValue')
+            ->withConsecutive(
+                [':name', 'John', \PDO::PARAM_STR],
+                [':age', 2, \PDO::PARAM_INT]
+            );
+        $this->statementMock->expects($this->once())
+            ->method('execute')
+            ->willReturn(true);
+
+        $this->connection->query('SELECT 1', $bindings);
     }
 }
