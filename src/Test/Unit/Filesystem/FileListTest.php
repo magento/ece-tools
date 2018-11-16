@@ -95,11 +95,11 @@ class FileListTest extends TestCase
 
     public function testGetAppConfig()
     {
-        $this->assertSame('root/.magento.app.yaml', $this->fileList->getAppConfig());
+        $this->assertSame('magento_root/.magento.app.yaml', $this->fileList->getAppConfig());
     }
 
     public function testGetServicesConfig()
     {
-        $this->assertSame('root/.magento/services.yaml', $this->fileList->getServicesConfig());
+        $this->assertSame('magento_root/.magento/services.yaml', $this->fileList->getServicesConfig());
     }
 }
