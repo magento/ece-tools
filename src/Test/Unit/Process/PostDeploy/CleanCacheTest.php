@@ -7,6 +7,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\PostDeploy\CleanCache;
+use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -45,6 +47,9 @@ class CleanCacheTest extends TestCase
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecute()
     {
         $this->stageConfig->expects($this->once())
@@ -58,6 +63,28 @@ class CleanCacheTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedExceptionMessage Some error
+     *
+     * @throws ProcessException
+     */
+    public function testExecuteWithException()
+    {
+        $this->stageConfig->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-vvv');
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new ShellException('Some error'));
+
+        $this->process->execute();
+    }
+
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteWithPostDeployHook()
     {
         $this->stageConfig->expects($this->once())
@@ -71,6 +98,9 @@ class CleanCacheTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteNoVerbosity()
     {
         $this->stageConfig->expects($this->once())

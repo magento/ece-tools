@@ -21,6 +21,9 @@ class TransportFactoryTest extends TestCase
      */
     private $transportFactory;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->transportFactory = new TransportFactory();
@@ -30,12 +33,14 @@ class TransportFactoryTest extends TestCase
      * @param string $type
      * @param string $expectedClass
      * @dataProvider createDataProvider
+     * @throws \Exception
      */
     public function testCreate(string $type, string $expectedClass)
     {
         $transport = $this->transportFactory->create($type, [
             'host' => 'localhost',
-            'port' => 3306
+            'port' => 3306,
+            'connection_timeout' => 10
         ]);
 
         $this->assertInstanceOf(
@@ -44,7 +49,7 @@ class TransportFactoryTest extends TestCase
         );
     }
 
-    public function createDataProvider()
+    public function createDataProvider(): array
     {
         return [
             [

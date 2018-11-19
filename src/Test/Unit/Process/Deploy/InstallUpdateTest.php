@@ -5,8 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate;
+use Magento\MagentoCloud\Process\ProcessException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -56,6 +58,9 @@ class InstallUpdateTest extends TestCase
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteInstall()
     {
         $this->stateMock->expects($this->once())
@@ -75,6 +80,9 @@ class InstallUpdateTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteUpdate()
     {
         $this->stateMock->expects($this->once())
@@ -90,6 +98,21 @@ class InstallUpdateTest extends TestCase
             ->method('execute');
         $this->updateProcessMock->expects($this->once())
             ->method('execute');
+
+        $this->process->execute();
+    }
+
+    /**
+     * @expectedExceptionMessage Some error
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     *
+     * @throws ProcessException
+     */
+    public function testExecuteWithException()
+    {
+        $this->stateMock->expects($this->once())
+            ->method('isInstalled')
+            ->willThrowException(new GenericException('Some error'));
 
         $this->process->execute();
     }
