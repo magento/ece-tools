@@ -242,6 +242,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
+                                    $this->container->make(ConfigValidator\Deploy\PhpVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
