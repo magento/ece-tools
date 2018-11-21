@@ -59,7 +59,7 @@ class GenerateTest extends TestCase
     public function testExecute()
     {
         $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['Starting generate command. Some info.'],
                 ['Generate command completed.']
@@ -88,7 +88,7 @@ class GenerateTest extends TestCase
             ->method('getPrettyInfo')
             ->willReturn('Some info.');
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('Starting generate command. Some info.');
         $this->loggerMock->expects($this->once())
             ->method('critical')

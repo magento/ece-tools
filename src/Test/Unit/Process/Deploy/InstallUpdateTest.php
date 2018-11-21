@@ -5,8 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate;
+use Magento\MagentoCloud\Process\ProcessException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -56,14 +58,20 @@ class InstallUpdateTest extends TestCase
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteInstall()
     {
         $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(false);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Starting install.');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Starting install.'],
+                ['End of install.']
+            );
         $this->installProcessMock->expects($this->once())
             ->method('execute');
         $this->updateProcessMock->expects($this->never())
@@ -72,18 +80,39 @@ class InstallUpdateTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteUpdate()
     {
         $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Starting update.');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Starting update.'],
+                ['End of update.']
+            );
         $this->installProcessMock->expects($this->never())
             ->method('execute');
         $this->updateProcessMock->expects($this->once())
             ->method('execute');
+
+        $this->process->execute();
+    }
+
+    /**
+     * @expectedExceptionMessage Some error
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     *
+     * @throws ProcessException
+     */
+    public function testExecuteWithException()
+    {
+        $this->stateMock->expects($this->once())
+            ->method('isInstalled')
+            ->willThrowException(new GenericException('Some error'));
 
         $this->process->execute();
     }

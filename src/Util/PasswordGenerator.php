@@ -37,6 +37,7 @@ class PasswordGenerator
      *
      * @param int $length the length of the random string
      * @return string
+     * @codeCoverageIgnore
      */
     public function generateRandomPassword(int $length = 20): string
     {

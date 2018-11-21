@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Config\Application;
 
 use Magento\MagentoCloud\Config\Application\HookChecker;
-use Magento\MagentoCloud\Config\Application\Reader;
 use Magento\MagentoCloud\Config\Environment;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

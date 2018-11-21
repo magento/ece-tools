@@ -55,9 +55,12 @@ class PreDeployTest extends TestCase
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Starting pre-deploy.');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Starting pre-deploy.'],
+                ['End of pre-deploy.']
+            );
         $this->maintenanceModeSwitcher->expects($this->once())
             ->method('enable');
         $this->processMock->expects($this->once())

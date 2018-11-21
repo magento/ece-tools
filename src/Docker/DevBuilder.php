@@ -3,21 +3,23 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Docker;
 
 use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
+use Magento\MagentoCloud\Filesystem\FileList;
 
 /**
  * Docker configuration builder.
+ *
+ * @codeCoverageIgnore
  */
 class DevBuilder implements BuilderInterface
 {
-    /**
-     * @var Repository
-     */
-    private $config;
+    const DEFAULT_NGINX_VERSION = 'latest';
+    const DEFAULT_VARNISH_VERSION = 'latest';
 
     /**
      * @var ServiceFactory
@@ -25,165 +27,161 @@ class DevBuilder implements BuilderInterface
     private $serviceFactory;
 
     /**
-     * @param RepositoryFactory $repositoryFactory
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
+     * @var Config
+     */
+    private $config;
+
+    /**
      * @param ServiceFactory $serviceFactory
+     * @param FileList $fileList
+     * @param Config $config
      */
-    public function __construct(RepositoryFactory $repositoryFactory, ServiceFactory $serviceFactory)
+    public function __construct(ServiceFactory $serviceFactory, FileList $fileList, Config $config)
     {
-        $this->config = $repositoryFactory->create();
         $this->serviceFactory = $serviceFactory;
+        $this->fileList = $fileList;
+        $this->config = $config;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    public function setPhpVersion(string $version)
+    public function build(Repository $config): array
     {
-        $this->setVersion(self::PHP_VERSION, $version, self::PHP_VERSIONS);
-    }
+        $phpVersion = $config->get(self::PHP_VERSION, '') ?: $this->config->getPhpVersion();
+        $dbVersion = $config->get(self::DB_VERSION, '') ?: $this->config->getServiceVersion(Config::KEY_DB);
 
-    /**
-     * @inheritdoc
-     */
-    public function setNginxVersion(string $version)
-    {
-        $this->setVersion(self::NGINX_VERSION, $version, [
-            '1.9',
-            self::DEFAULT_NGINX_VERSION,
-        ]);
-    }
+        $services = [
+            'db' => $this->serviceFactory->create(
+                ServiceFactory::SERVICE_DB,
+                $dbVersion,
+                [
+                    'ports' => [3306],
+                    'volumes' => [
+                        '/var/lib/mysql',
+                        './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
+                    ],
+                    'environment' => [
+                        'MYSQL_ROOT_PASSWORD=magento2',
+                        'MYSQL_DATABASE=magento2',
+                        'MYSQL_USER=magento2',
+                        'MYSQL_PASSWORD=magento2',
+                    ],
+                ]
+            )
+        ];
 
-    /**
-     * @inheritdoc
-     */
-    public function setDbVersion(string $version)
-    {
-        $this->setVersion(self::DB_VERSION, $version, [
-            self::DEFAULT_DB_VERSION,
-        ]);
-    }
+        $redisVersion = $config->get(self::REDIS_VERSION) ?: $this->config->getServiceVersion(Config::KEY_REDIS);
 
-    /**
-     * @inheritdoc
-     */
-    public function setRedisVersion(string $version)
-    {
-        $this->setVersion(self::REDIS_VERSION, $version, self::REDIS_VERSIONS);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setESVersion(string $version)
-    {
-        $this->setVersion(self::ES_VERSION, $version, self::ES_VERSIONS);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setRabbitMQVersion(string $version)
-    {
-        $this->setVersion(self::RABBIT_MQ_VERSION, $version, self::RABBIT_MQ_VERSIONS);
-    }
-
-    /**
-     * @param string $key
-     * @param string $version
-     * @param array $supportedVersions
-     * @throws ConfigurationMismatchException
-     */
-    private function setVersion(string $key, string $version, array $supportedVersions)
-    {
-        $parts = explode('.', $key);
-        $name = reset($parts);
-
-        if (!\in_array($version, $supportedVersions, true)) {
-            throw new ConfigurationMismatchException(sprintf(
-                'Service %s:%s is not supported',
-                $name,
-                $version
-            ));
+        if ($redisVersion) {
+            $services['redis'] = $this->serviceFactory->create(
+                ServiceFactory::SERVICE_REDIS,
+                $redisVersion
+            );
         }
 
-        $this->config->set($key, $version);
-    }
+        $esVersion = $config->get(self::ES_VERSION) ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
 
-    /**
-     * @return array
-     */
-    public function build(): array
-    {
+        if ($esVersion) {
+            $services['elasticsearch'] = $this->serviceFactory->create(
+                ServiceFactory::SERVICE_ELASTICSEARCH,
+                $esVersion
+            );
+        }
+
+        $rabbitMQVersion = $config->get(self::RABBIT_MQ_VERSION)
+            ?: $this->config->getServiceVersion(Config::KEY_RABBIT_MQ);
+
+        if ($rabbitMQVersion) {
+            $services['rabbitmq'] = $this->serviceFactory->create(
+                ServiceFactory::SERVICE_RABBIT_MQ,
+                $rabbitMQVersion
+            );
+        }
+
+        $cliDepends = array_keys($services);
+
+        $services['varnish'] = $this->serviceFactory->create(
+            ServiceFactory::SERVICE_VARNISH,
+            self::DEFAULT_VARNISH_VERSION,
+            ['depends_on' => ['web']]
+        );
+        $services['fpm'] = $this->serviceFactory->create(
+            ServiceFactory::SERVICE_FPM,
+            $phpVersion,
+            [
+                'ports' => [9000],
+                'depends_on' => ['db'],
+                'volumes_from' => ['appdata'],
+                'volumes' => [$this->getMagentoVolume(false)],
+                'env_file' => [
+                    './docker/global.env',
+                    './docker/config.env',
+                ],
+            ]
+        );
+        /** For backward compatibility. */
+        $services['cli'] = $this->getCliService($phpVersion, false, $cliDepends);
+        $services['build'] = $this->getCliService($phpVersion, false, $cliDepends);
+        $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends);
+        $services['web'] = $this->serviceFactory->create(
+            ServiceFactory::SERVICE_NGINX,
+            $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
+            [
+                'ports' => [
+                    '8080:80',
+                    '443:443',
+                ],
+                'depends_on' => [
+                    'fpm',
+                    'db',
+                ],
+                'volumes_from' => [
+                    'appdata',
+                ],
+                'volumes' => [
+                    $this->getMagentoVolume(false),
+                ],
+                'env_file' => [
+                    './docker/global.env',
+                    './docker/config.env',
+                ],
+            ]
+        );
+        $services['cron'] = $this->getCliService($phpVersion, true, $cliDepends, true);
+        $services['appdata'] = [
+            'image' => 'tianon/true',
+            'volumes' => [
+                './docker/mnt:/mnt',
+                '/var/www/magento/vendor',
+                '/var/www/magento/generated',
+                '/var/www/magento/pub',
+                '/var/www/magento/var',
+                '/var/www/magento/app/etc',
+            ],
+        ];
+
         return [
             'version' => '2',
-            'services' => [
-                'varnish' => $this->serviceFactory->create(ServiceFactory::SERVICE_VARNISH)->get(),
-                'redis' => $this->getRedisService(),
-                'elasticsearch' => $this->getElasticSearchService(),
-                'rabbitmq' => $this->getRabbitMQService(),
-                'fpm' => $this->getFpmService(),
-                /** For backward compatibility. */
-                'cli' => $this->getCliService(false),
-                'build' => $this->getCliService(false),
-                'deploy' => $this->getCliService(true),
-                'db' => $this->getDbService(),
-                'web' => $this->getWebService(),
-                'cron' => $this->getCronService(),
-                'appdata' => [
-                    'image' => 'tianon/true',
-                    'volumes' => [
-                        './docker/mnt:/mnt',
-                        '/var/www/magento/vendor',
-                        '/var/www/magento/generated',
-                        '/var/www/magento/pub',
-                        '/var/www/magento/var',
-                        '/var/www/magento/app/etc',
-                    ],
-                ],
-            ],
+            'services' => $services,
         ];
     }
 
     /**
-     * @return array
+     * @return string
      */
-    private function getElasticSearchService(): array
+    public function getConfigPath(): string
     {
-        $version = $this->config->get(self::ES_VERSION, self::DEFAULT_ES_VERSION);
-
-        return [
-            'image' => sprintf('%s:%s', 'magento/magento-cloud-docker-elasticsearch', $version),
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    private function getRabbitMQService(): array
-    {
-        $version = $this->config->get(self::RABBIT_MQ_VERSION, self::DEFAULT_RABBIT_MQ_VERSION);
-
-        return [
-            'image' => sprintf('rabbitmq:%s', $version)
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    private function getRedisService(): array
-    {
-        $version = $this->config->get(self::REDIS_VERSION, self::DEFAULT_REDIS_VERSION);
-
-        return [
-            'image' => 'redis:' . $version,
-            'volumes' => [
-                '/data',
-            ],
-            'ports' => [
-                6379,
-            ],
-        ];
+        return $this->fileList->getMagentoDockerCompose();
     }
 
     /**
@@ -200,135 +198,42 @@ class DevBuilder implements BuilderInterface
     }
 
     /**
-     * @return array
-     */
-    private function getFpmService(): array
-    {
-        return [
-            'image' => sprintf(
-                'magento/magento-cloud-docker-php:%s-fpm',
-                $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
-            ),
-            'ports' => [
-                9000,
-            ],
-            'depends_on' => [
-                'db',
-            ],
-            'volumes_from' => [
-                'appdata',
-            ],
-            'volumes' => [
-                $this->getMagentoVolume(false),
-            ],
-            'env_file' => [
-                './docker/global.env',
-                './docker/config.env',
-            ],
-        ];
-    }
-
-    /**
+     * @param string $version
      * @param bool $isReadOnly
+     * @param array $depends
+     * @param bool $cron
      * @return array
+     * @throws ConfigurationMismatchException
      */
-    private function getCliService(bool $isReadOnly): array
+    private function getCliService(string $version, bool $isReadOnly, array $depends, bool $cron = false): array
     {
-        if (file_exists(getenv('HOME') . '/.cache/composer')) {
-            $composeCacheDirectory = '~/.cache/composer';
-        } else {
-            $composeCacheDirectory = '~/.composer/cache';
+        $composeCacheDirectory = file_exists(getenv('HOME') . '/.cache/composer')
+            ? '~/.cache/composer'
+            : '~/.composer/cache';
+
+        $config = $this->serviceFactory->create(
+            ServiceFactory::SERVICE_CLI,
+            $version,
+            [
+                'depends_on' => $depends,
+                'volumes' => [
+                    $composeCacheDirectory . ':/root/.composer/cache',
+                    $this->getMagentoVolume($isReadOnly),
+                ],
+                'volumes_from' => [
+                    'appdata',
+                ],
+                'env_file' => [
+                    './docker/global.env',
+                    './docker/config.env',
+                ],
+            ]
+        );
+
+        if ($cron) {
+            $config['command'] = 'run-cron';
         }
 
-        return [
-            'image' => sprintf(
-                'magento/magento-cloud-docker-php:%s-cli',
-                $this->config->get(self::PHP_VERSION, self::DEFAULT_PHP_VERSION)
-            ),
-            'depends_on' => [
-                'db',
-                'redis',
-                'elasticsearch'
-            ],
-            'volumes' => [
-                $composeCacheDirectory . ':/root/.composer/cache',
-                $this->getMagentoVolume($isReadOnly),
-            ],
-            'volumes_from' => [
-                'appdata',
-            ],
-            'env_file' => [
-                './docker/global.env',
-                './docker/config.env',
-            ],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    private function getDbService(): array
-    {
-        return [
-            'image' => sprintf(
-                'mariadb:%s',
-                $this->config->get(self::DB_VERSION, self::DEFAULT_DB_VERSION)
-            ),
-            'ports' => [
-                3306,
-            ],
-            'volumes' => [
-                '/var/lib/mysql',
-                './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
-            ],
-            'environment' => [
-                'MYSQL_ROOT_PASSWORD=magento2',
-                'MYSQL_DATABASE=magento2',
-                'MYSQL_USER=magento2',
-                'MYSQL_PASSWORD=magento2',
-            ],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    private function getWebService(): array
-    {
-        return [
-            'image' => sprintf(
-                'magento/magento-cloud-docker-nginx:%s',
-                $this->config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION)
-            ),
-            'ports' => [
-                '8080:80',
-                '443:443',
-            ],
-            'depends_on' => [
-                'fpm',
-                'db',
-            ],
-            'volumes_from' => [
-                'appdata',
-            ],
-            'volumes' => [
-                $this->getMagentoVolume(false),
-            ],
-            'env_file' => [
-                './docker/global.env',
-                './docker/config.env',
-            ],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    private function getCronService(): array
-    {
-        $cliService = $this->getCliService(true);
-        $cliService['command'] = 'run-cron';
-
-        return $cliService;
+        return $config;
     }
 }

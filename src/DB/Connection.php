@@ -149,7 +149,10 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws PDOException
+     * @codeCoverageIgnore
      */
     public function getPdo(): \PDO
     {
@@ -157,9 +160,9 @@ class Connection implements ConnectionInterface
 
         try {
             $this->pdo->query('SELECT 1');
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             if ($this->pdo->errorInfo()[1] !== self::MYSQL_ERROR_CODE_SERVER_GONE_AWAY) {
-                throw $e;
+                throw new PDOException($exception->getMessage(), $exception->getCode(), $exception);
             }
 
             $this->logger->notice('Lost connection to Mysql server. Reconnecting.');
@@ -172,6 +175,8 @@ class Connection implements ConnectionInterface
 
     /**
      * Create PDO connection.
+     *
+     * @codeCoverageIgnore
      */
     private function connect()
     {

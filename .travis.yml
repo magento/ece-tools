@@ -35,7 +35,7 @@ before_install:
 
 install:
   - composer update -n --no-suggest
-  - ./bin/ece-tools docker:build --test --php ${TRAVIS_PHP_VERSION}
+  - ./bin/ece-tools docker:build:integration ${TRAVIS_PHP_VERSION} 10.0 latest
 
 before_script: docker-compose up -d
 

@@ -150,6 +150,8 @@ class UrlManagerTest extends TestCase
             ->willReturn($routes);
 
         $this->assertEquals($expectedResult, $this->manager->getUrls());
+        // Lazy load.
+        $this->assertEquals($expectedResult, $this->manager->getUrls());
     }
 
     /**
@@ -405,6 +407,7 @@ class UrlManagerTest extends TestCase
             [
                 'routes' => [
                     'http://example.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream'],
+                    'https://example.com/' => ['original_url' => 'https://{default}', 'type' => 'none'],
                 ],
             ],
         ];

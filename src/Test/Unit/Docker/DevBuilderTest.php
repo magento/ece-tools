@@ -3,15 +3,17 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Docker;
 
-use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\Config\RepositoryFactory;
+use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Docker\BuilderInterface;
+use Magento\MagentoCloud\Docker\Config;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\DevBuilder;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
-use Magento\MagentoCloud\Docker\Service\ServiceInterface;
+use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -26,17 +28,17 @@ class DevBuilderTest extends TestCase
     private $builder;
 
     /**
-     * @var RepositoryFactory|MockObject
-     */
-    private $repositoryFactoryMock;
-
-    /**
      * @var ServiceFactory|MockObject
      */
     private $serviceFactoryMock;
 
     /**
-     * @var Repository|MockObject
+     * @var FileList|MockObject
+     */
+    private $fileListMock;
+
+    /**
+     * @var Config|MockObject
      */
     private $configMock;
 
@@ -45,168 +47,62 @@ class DevBuilderTest extends TestCase
      */
     protected function setUp()
     {
-        $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
-        $this->configMock = $this->getMockForAbstractClass(Repository::class);
-        $this->serviceFactoryMock = $this->createMock(ServiceFactory::class);
-
-        $this->repositoryFactoryMock->expects($this->any())
-            ->method('create')
-            ->willReturn($this->configMock);
+        $this->serviceFactoryMock = $this->createTestProxy(ServiceFactory::class);
+        $this->fileListMock = $this->createMock(FileList::class);
+        $this->configMock = $this->createMock(Config::class);
 
         $this->builder = new DevBuilder(
-            $this->repositoryFactoryMock,
-            $this->serviceFactoryMock
+            $this->serviceFactoryMock,
+            $this->fileListMock,
+            $this->configMock
         );
     }
 
-    /**
-     * @param string $version
-     * @dataProvider setNginxVersionDataProvider
-     * @throws \Magento\MagentoCloud\Docker\ConfigurationMismatchException
-     */
-    public function testSetNginxVersion(string $version)
+    public function testGetConfigPath()
     {
-        $this->configMock->expects($this->once())
-            ->method('set')
-            ->with('nginx.version', $version);
+        $this->fileListMock->expects($this->once())
+            ->method('getMagentoDockerCompose')
+            ->willReturn('/ece/docker-compose.yaml');
 
-        $this->builder->setNginxVersion($version);
-    }
-
-    /**
-     * @return array
-     */
-    public function setNginxVersionDataProvider(): array
-    {
-        return [
-            ['1.9'],
-            [DevBuilder::DEFAULT_NGINX_VERSION,],
-        ];
-    }
-
-    /**
-     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
-     * @expectedExceptionMessage Service nginx:2 is not supported
-     */
-    public function testSetNginxWithError()
-    {
-        $this->configMock->expects($this->never())
-            ->method('set');
-
-        $this->builder->setNginxVersion('2');
-    }
-
-    /**
-     * @param string $version
-     * @dataProvider setPhpVersionDataProvider
-     * @throws \Magento\MagentoCloud\Docker\ConfigurationMismatchException
-     */
-    public function testSetPhpVersion(string $version)
-    {
-        $this->configMock->expects($this->once())
-            ->method('set')
-            ->with('php.version', $version);
-
-        $this->builder->setPhpVersion($version);
-    }
-
-    /**
-     * @return array
-     */
-    public function setPhpVersionDataProvider(): array
-    {
-        return [
-            ['7.0'],
-            [DevBuilder::DEFAULT_PHP_VERSION,],
-        ];
-    }
-
-    /**
-     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
-     * @expectedExceptionMessage Service php:2 is not supported
-     */
-    public function testSetPhpWithError()
-    {
-        $this->configMock->expects($this->never())
-            ->method('set');
-
-        $this->builder->setPhpVersion('2');
-    }
-
-    /**
-     * @param string $version
-     * @dataProvider setDbVersionDataProvider
-     * @throws \Magento\MagentoCloud\Docker\ConfigurationMismatchException
-     */
-    public function testSetDbVersion(string $version)
-    {
-        $this->configMock->expects($this->once())
-            ->method('set')
-            ->with('db.version', $version);
-
-        $this->builder->setDbVersion($version);
-    }
-
-    /**
-     * @return array
-     */
-    public function setDbVersionDataProvider(): array
-    {
-        return [
-            [DevBuilder::DEFAULT_DB_VERSION],
-        ];
-    }
-
-    /**
-     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
-     * @expectedExceptionMessage Service db:2 is not supported
-     */
-    public function testSetDbWithError()
-    {
-        $this->configMock->expects($this->never())
-            ->method('set');
-
-        $this->builder->setDbVersion('2');
+        $this->assertSame('/ece/docker-compose.yaml', $this->builder->getConfigPath());
     }
 
     /**
      * @throws ConfigurationMismatchException
      */
-    public function testSetRabbitMQVersion()
-    {
-        $this->configMock->expects($this->once())
-            ->method('set')
-            ->with(BuilderInterface::RABBIT_MQ_VERSION, '3.5');
-
-        $this->builder->setRabbitMQVersion('3.5');
-    }
-
-    /**
-     * @throws ConfigurationMismatchException
-     */
-    public function testSetESVersion()
-    {
-        $this->configMock->expects($this->once())
-            ->method('set')
-            ->with(BuilderInterface::ES_VERSION, '2.4');
-
-        $this->builder->setESVersion('2.4');
-    }
-
     public function testBuild()
     {
-        $serviceMock = $this->getMockForAbstractClass(ServiceInterface::class);
-        $serviceMock->expects($this->any())
-            ->method('get')
-            ->willReturn([]);
+        $config = new Repository([
+            BuilderInterface::NGINX_VERSION => 'latest',
+            BuilderInterface::PHP_VERSION => '7.0',
+            BuilderInterface::DB_VERSION => '10.0'
+        ]);
 
-        $this->serviceFactoryMock->expects($this->any())
-            ->method('create')
-            ->willReturn($serviceMock);
+        $this->builder->build($config);
+    }
 
-        $config = $this->builder->build();
+    /**
+     * @throws ConfigurationMismatchException
+     */
+    public function testBuildFromConfig()
+    {
+        $config = new Repository();
 
-        $this->assertArrayHasKey('version', $config);
-        $this->assertArrayHasKey('services', $config);
+        $this->configMock->method('getServiceVersion')
+            ->willReturnMap([
+                [Config::KEY_DB, '10.0'],
+            ]);
+        $this->configMock->method('getPhpVersion')
+            ->willReturn('7.0');
+
+        $build = $this->builder->build($config);
+
+        $this->assertArrayNotHasKey('redis', $build['services']);
+        $this->assertArrayNotHasKey('rabbitmq', $build['services']);
+        $this->assertArrayNotHasKey('elasticsearch', $build['services']);
+        $this->assertArrayHasKey('cli', $build['services']);
+        $this->assertArrayHasKey('build', $build['services']);
+        $this->assertArrayHasKey('deploy', $build['services']);
+        $this->assertArrayHasKey('db', $build['services']);
     }
 }

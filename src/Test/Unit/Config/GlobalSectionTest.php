@@ -171,4 +171,17 @@ class GlobalSectionTest extends TestCase
 
         $this->config->get('NOT_EXISTS_VALUE');
     }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Some error
+     */
+    public function testGetWithException()
+    {
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new \Exception('Some error'));
+
+        $this->config->get(GlobalSection::VAR_SCD_ON_DEMAND);
+    }
 }

@@ -84,7 +84,7 @@ class RestoreWritableDirectoriesTest extends TestCase
                 ['pub/media', 'copy']
             );
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('notice')
             ->with('Recoverable directories were copied back.');
         $this->flagManagerMock->expects($this->once())
             ->method('delete')

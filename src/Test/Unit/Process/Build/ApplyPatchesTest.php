@@ -50,9 +50,12 @@ class ApplyPatchesTest extends TestCase
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Applying patches.');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Applying patches.'],
+                ['End of applying patches.']
+            );
         $this->managerMock->expects($this->once())
             ->method('applyAll');
 
