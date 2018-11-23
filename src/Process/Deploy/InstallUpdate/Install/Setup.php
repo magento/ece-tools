@@ -141,16 +141,24 @@ class Setup implements ProcessInterface
             . ' --db-name=' . escapeshellarg($this->connectionData->getDbName())
             . ' --db-user=' . escapeshellarg($this->connectionData->getUser())
             . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
-                ? $this->environment->getAdminUrl() : Environment::DEFAULT_ADMIN_URL)
-            . ' --admin-user=' . escapeshellarg($this->environment->getAdminUsername()
-                ? $this->environment->getAdminUsername() : Environment::DEFAULT_ADMIN_NAME)
+                ?: Environment::DEFAULT_ADMIN_URL)
+            . ($this->environment->getAdminEmail() ? $this->getAdminCredentials() : '')
+            . ' --use-secure-admin=1 --ansi --no-interaction';
+    }
+
+    /**
+     * @return string
+     */
+    private function getAdminCredentials(): string
+    {
+        return ' --admin-user=' . escapeshellarg($this->environment->getAdminUsername()
+                ?: Environment::DEFAULT_ADMIN_NAME)
             . ' --admin-firstname=' . escapeshellarg($this->environment->getAdminFirstname()
-                ? $this->environment->getAdminFirstname() : Environment::DEFAULT_ADMIN_FIRSTNAME)
+                ?: Environment::DEFAULT_ADMIN_FIRSTNAME)
             . ' --admin-lastname=' . escapeshellarg($this->environment->getAdminLastname()
-                ? $this->environment->getAdminLastname() : Environment::DEFAULT_ADMIN_LASTNAME)
+                ?: Environment::DEFAULT_ADMIN_LASTNAME)
             . ' --admin-email=' . escapeshellarg($this->environment->getAdminEmail())
             . ' --admin-password=' . escapeshellarg($this->environment->getAdminPassword()
-                ? $this->environment->getAdminPassword() : $this->passwordGenerator->generateRandomPassword())
-            . ' --use-secure-admin=1 --ansi --no-interaction';
+                ?: $this->passwordGenerator->generateRandomPassword());
     }
 }
