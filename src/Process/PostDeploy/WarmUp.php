@@ -146,8 +146,8 @@ class WarmUp implements ProcessInterface
     {
         if ($this->baseHosts === null) {
             $this->baseHosts = array_map(
-                function ($url) {
-                    return parse_url($url, PHP_URL_HOST);
+                function ($baseHostUrl) {
+                    return parse_url($baseHostUrl, PHP_URL_HOST);
                 },
                 $this->urlManager->getBaseUrls()
             );

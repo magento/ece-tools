@@ -431,4 +431,18 @@ class UrlManagerTest extends TestCase
             $this->manager->getBaseUrls()
         );
     }
+
+    public function testGetBaseUrlsEmpty()
+    {
+        $this->connection->expects($this->once())
+            ->method('select')
+            ->with(
+                'SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)'
+            )->willReturn([]);
+
+        $this->assertEquals(
+            [],
+            $this->manager->getBaseUrls()
+        );
+    }
 }
