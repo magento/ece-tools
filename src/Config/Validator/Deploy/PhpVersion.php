@@ -84,7 +84,6 @@ class PhpVersion implements ValidatorInterface
         try {
             $currentPhpConstraint = $this->constraintFactory->getCurrentPhpConstraint();
             $recommendedPhpConstraint = $this->findLatestPhpConstraint();
-
             if (!$recommendedPhpConstraint->matches($currentPhpConstraint)) {
                 return $this->resultFactory->error(
                     sprintf(

@@ -15,6 +15,6 @@ You can submit issues and pull requests to extend functionality or fix potential
 - [Cloud Slack Channel](https://tinyurl.com/engcom-signup) (join #cloud)
 
 ## License
-Subject to your payment of fees and compliance with all associated terms and conditions, the materials included in this distribution are licensed to you under Magento's commercial agreement terms, available at: https://magento.com/legal/terms
+Each Magento source file included in this distribution is licensed under OSL-3.0 license.
 
-By using or accessing these materials, you agree to such terms and conditions which supersede all prior licenses and agreements.
+Please see [LICENSE.txt](https://github.com/magento/ece-tools/blob/develop/LICENSE.txt) for the full text of the [Open Software License v. 3.0 (OSL-3.0)](http://opensource.org/licenses/osl-3.0.php).

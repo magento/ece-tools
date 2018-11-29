@@ -3,7 +3,7 @@
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
   "type": "magento2-component",
   "version": "2002.0.15",
-  "license": "proprietary",
+  "license": "OSL-3.0",
   "require": {
     "php": "^7.0",
     "ext-PDO": "*",

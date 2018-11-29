@@ -67,6 +67,6 @@ class ConstraintFactory
      */
     public function getCurrentPhpConstraint(): Constraint
     {
-        return $this->constraint('==', $this->versionParser->normalize(PHP_VERSION));
+        return $this->constraint('==', PHP_VERSION);
     }
 }

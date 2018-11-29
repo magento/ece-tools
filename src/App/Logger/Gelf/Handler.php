@@ -17,6 +17,7 @@ class Handler extends GelfHandler
      * losing connection to graylog server.
      *
      * @param array $record
+     * @codeCoverageIgnore
      */
     protected function write(array $record)
     {
