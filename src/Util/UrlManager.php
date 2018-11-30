@@ -152,4 +152,19 @@ class UrlManager
 
         return $this->getSecureUrls()[''];
     }
+
+    /**
+     * Returns all base urls from core_config_data table.
+     *
+     * @return string[]
+     */
+    public function getBaseUrls(): array
+    {
+        $urls = $this->connection->select(
+            'SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)',
+            ['web/unsecure/base_url', 'web/secure/base_url']
+        );
+
+        return array_column($urls, 'value');
+    }
 }
