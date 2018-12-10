@@ -15,7 +15,7 @@ use Symfony\Component\Console\Tester\CommandTester;
  *
  * @group php71
  */
-class UpgradeTest extends AbstractTest
+class Upgrade22Test extends AbstractTest
 {
     /**
      * @inheritdoc
@@ -72,7 +72,7 @@ class UpgradeTest extends AbstractTest
     public function defaultDataProvider(): array
     {
         return [
-            ['2.2.0', '2.3.*'],
+            ['2.2.0', '2.2.*'],
         ];
     }
 
