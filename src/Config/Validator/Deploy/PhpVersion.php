@@ -83,7 +83,7 @@ class PhpVersion implements ValidatorInterface
     {
         try {
             $currentPhpConstraint = $this->constraintFactory->getCurrentPhpConstraint();
-            $recommendedPhpConstraint = $this->findLatestPhpConstraint();
+            $recommendedPhpConstraint = $this->getRecommendedPhpConstraint();
             if (!$recommendedPhpConstraint->matches($currentPhpConstraint)) {
                 return $this->resultFactory->error(
                     sprintf(
@@ -109,19 +109,43 @@ class PhpVersion implements ValidatorInterface
      * @return ConstraintInterface
      * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
-    private function findLatestPhpConstraint(): ConstraintInterface
+    private function getRecommendedPhpConstraint(): ConstraintInterface
     {
         $requirePackages = $this->packageManager->get('magento/magento2-base')->getRequires();
-        $phpPackage = $requirePackages['php'];
-        $phpPackageConstraint = $phpPackage->getConstraint();
-        if (!$phpPackageConstraint instanceof MultiConstraint) {
-            return $phpPackageConstraint;
+        $phpConstraint = $requirePackages['php']->getConstraint();
+        if (!$phpConstraint instanceof MultiConstraint) {
+            return $phpConstraint;
         }
+
         $phpConstraintList = [];
-        $this->getAllConstraints($phpPackageConstraint, $phpConstraintList);
+        $this->getAllConstraints($phpConstraint, $phpConstraintList);
         ksort($phpConstraintList);
-        $recommendedPhpConstraints = array_slice($phpConstraintList, -2);
-        return $this->constraintFactory->multiconstraint($recommendedPhpConstraints);
+        /** @var ConstraintInterface $higherPhpConstraint */
+        $higherPhpConstraint = array_pop($phpConstraintList);
+        preg_match('/(\d*)\.(\d*)\.(\d*)/', $higherPhpConstraint->getPrettyString(), $higherConstraintParts);
+        unset($higherConstraintParts[0]);
+        $phpConstraint = $this->versionParser->parseConstraints(implode('.', $higherConstraintParts));
+        if ($higherPhpConstraint->matches($phpConstraint)) {
+            return $phpConstraint;
+        }
+        /** @var ConstraintInterface $lowerPhpConstraint */
+        $lowerPhpConstraint = array_pop($phpConstraintList);
+        preg_match('/(\d*)\.(\d*)\.(\d*)/', $lowerPhpConstraint->getPrettyString(), $lowerConstraintParts);
+        $newLowerConstraintParts = $higherConstraintParts;
+        for ($i = 3; $i > 0; $i--) {
+            if ((int)$higherConstraintParts[$i] - (int)$lowerConstraintParts[$i] > 0) {
+                $newLowerConstraintParts[$i]--;
+                $phpConstraint = $this->versionParser->parseConstraints(implode('.', $newLowerConstraintParts));
+                if ($higherPhpConstraint->matches($phpConstraint)) {
+                    break;
+                }
+                $newLowerConstraintParts[$i] = 0;
+            }
+        }
+        return $this->constraintFactory->multiconstraint([
+            $this->constraintFactory->constraint('>=', $phpConstraint->getPrettyString()),
+            $higherPhpConstraint
+        ]);
     }
 
     /**
@@ -138,7 +162,7 @@ class PhpVersion implements ValidatorInterface
                 $this->getAllConstraints($item, $constraintList);
             }
         } else {
-            preg_match('/\d\.\d\.\d/', $constraint->getPrettyString(), $constraintParts);
+            preg_match('/\d*\.\d*\.\d*/', $constraint->getPrettyString(), $constraintParts);
             $constraintList[$constraintParts[0]] = $constraint;
         }
     }
