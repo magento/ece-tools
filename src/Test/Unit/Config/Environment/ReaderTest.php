@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * @inheritdoc
@@ -111,6 +112,10 @@ class ReaderTest extends TestCase
 
     public function testReadWithConstants()
     {
+        if (!defined(Yaml::class . '::PARSE_CONSTANT')) {
+            $this->markTestSkipped();
+        }
+
         $baseDir = __DIR__ . '/_file/';
 
         $this->configFileListMock->expects($this->once())
