@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
@@ -169,6 +171,7 @@ class Container implements ContainerInterface
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
+                                    $this->container->make(ConfigValidator\Build\ComposerFile::class),
                                     $this->container->make(ConfigValidator\Build\StageConfig::class),
                                     $this->container->make(ConfigValidator\Build\BuildOptionsIni::class),
                                 ],
@@ -236,10 +239,10 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
-                                    $this->container->make(ConfigValidator\Deploy\AdminEmail::class),
                                     $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
+                                    $this->container->make(ConfigValidator\Deploy\AdminData::class),
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
@@ -295,7 +298,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\SetAdminUrl::class),
                         $this->container->make(DeployProcess\InstallUpdate\Update\Setup::class),
-                        $this->container->make(DeployProcess\InstallUpdate\Update\AdminCredentials::class),
                     ],
                 ]);
             });

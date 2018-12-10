@@ -81,7 +81,7 @@ class ResetPassword implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->environment->getAdminPassword()) {
+        if ($this->environment->getAdminPassword() || !$this->environment->getAdminEmail()) {
             return;
         }
 

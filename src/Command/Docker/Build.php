@@ -3,14 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command\Docker;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Docker\BuilderInterface;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,8 +33,6 @@ class Build extends Command
     const OPTION_ES = 'es';
     const OPTION_RABBIT_MQ = 'rmq';
 
-    const OPTION_IS_TEST = 'test';
-
     /**
      * @var BuilderFactory
      */
@@ -44,31 +44,31 @@ class Build extends Command
     private $file;
 
     /**
-     * @var FileList
-     */
-    private $fileList;
-
-    /**
      * @var Environment
      */
     private $environment;
 
     /**
+     * @var RepositoryFactory
+     */
+    private $configFactory;
+
+    /**
      * @param BuilderFactory $builderFactory
      * @param File $file
-     * @param FileList $fileList
      * @param Environment $environment
+     * @param RepositoryFactory $configFactory
      */
     public function __construct(
         BuilderFactory $builderFactory,
         File $file,
-        FileList $fileList,
-        Environment $environment
+        Environment $environment,
+        RepositoryFactory $configFactory
     ) {
         $this->builderFactory = $builderFactory;
         $this->file = $file;
-        $this->fileList = $fileList;
         $this->environment = $environment;
+        $this->configFactory = $configFactory;
 
         parent::__construct();
     }
@@ -84,46 +84,33 @@ class Build extends Command
                 self::OPTION_PHP,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'PHP version',
-                BuilderInterface::DEFAULT_PHP_VERSION
+                'PHP version'
             )->addOption(
                 self::OPTION_NGINX,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Nginx version',
-                BuilderInterface::DEFAULT_NGINX_VERSION
+                'Nginx version'
             )->addOption(
                 self::OPTION_DB,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'DB version',
-                BuilderInterface::DEFAULT_DB_VERSION
+                'DB version'
             )->addOption(
                 self::OPTION_REDIS,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'Redis version',
-                BuilderInterface::DEFAULT_REDIS_VERSION
+                'Redis version'
             )->addOption(
                 self::OPTION_ES,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'ElasticSearch version',
-                BuilderInterface::DEFAULT_ES_VERSION
+                'Elasticsearch version'
             )->addOption(
                 self::OPTION_RABBIT_MQ,
                 null,
                 InputOption::VALUE_OPTIONAL,
-                'RabbitMQ version',
-                BuilderInterface::DEFAULT_RABBIT_MQ_VERSION
+                'RabbitMQ version'
             );
-
-        $this->addOption(
-            self::OPTION_IS_TEST,
-            null,
-            InputOption::VALUE_NONE,
-            'Generates ECE-Tools testing configuration (internal usage only)'
-        );
 
         parent::configure();
     }
@@ -136,43 +123,28 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($input->getOption(self::OPTION_IS_TEST)) {
-            $strategy = BuilderFactory::BUILDER_TEST;
-            $path = $this->fileList->getToolsDockerCompose();
-        } else {
-            $strategy = BuilderFactory::BUILDER_DEV;
-            $path = $this->fileList->getMagentoDockerCompose();
-        }
+        $builder = $this->builderFactory->create(BuilderFactory::BUILDER_DEV);
+        $config = $this->configFactory->create();
 
-        $builder = $this->builderFactory->create($strategy);
+        $map = [
+            self::OPTION_PHP => BuilderInterface::PHP_VERSION,
+            self::OPTION_DB => BuilderInterface::DB_VERSION,
+            self::OPTION_NGINX => BuilderInterface::NGINX_VERSION,
+            self::OPTION_REDIS => BuilderInterface::REDIS_VERSION,
+            self::OPTION_ES => BuilderInterface::ES_VERSION,
+            self::OPTION_RABBIT_MQ => BuilderInterface::RABBIT_MQ_VERSION,
+        ];
 
-        if ($phpVersion = $input->getOption(self::OPTION_PHP)) {
-            $builder->setPhpVersion($phpVersion);
-        }
+        array_walk($map, function ($key, $option) use ($config, $input) {
+            if ($value = $input->getOption($option)) {
+                $config->set($key, $value);
+            }
+        });
 
-        if ($nginxVersion = $input->getOption(self::OPTION_NGINX)) {
-            $builder->setNginxVersion($nginxVersion);
-        }
-
-        if ($dbVersion = $input->getOption(self::OPTION_DB)) {
-            $builder->setDbVersion($dbVersion);
-        }
-
-        if ($redisVersion = $input->getOption(self::OPTION_REDIS)) {
-            $builder->setRedisVersion($redisVersion);
-        }
-
-        if ($esVersion = $input->getOption(self::OPTION_ES)) {
-            $builder->setESVersion($esVersion);
-        }
-
-        if ($rabbitMQVersion = $input->getOption(self::OPTION_RABBIT_MQ)) {
-            $builder->setRabbitMQVersion($rabbitMQVersion);
-        }
-
-        $config = Yaml::dump($builder->build(), 4, 2);
-
-        $this->file->filePutContents($path, $config);
+        $this->file->filePutContents(
+            $builder->getConfigPath(),
+            Yaml::dump($builder->build($config), 4, 2)
+        );
 
         $output->writeln('<info>Configuration was built</info>');
     }

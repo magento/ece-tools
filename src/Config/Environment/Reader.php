@@ -54,8 +54,12 @@ class Reader implements ReaderInterface
         if ($this->config === null) {
             $path = $this->configFileList->getEnvConfig();
 
-            $this->config = !$this->file->isExists($path) ?
-                [] : (array)Yaml::parse($this->file->fileGetContents($path), Yaml::PARSE_CONSTANT);
+            if (!$this->file->isExists($path)) {
+                $this->config = [];
+            } else {
+                $parseFlag = defined(Yaml::class . '::PARSE_CONSTANT') ? Yaml::PARSE_CONSTANT : 0;
+                $this->config = (array)Yaml::parse($this->file->fileGetContents($path), $parseFlag);
+            }
         }
 
         return $this->config;

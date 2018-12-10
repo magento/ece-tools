@@ -11,8 +11,8 @@ use Monolog\Formatter\LineFormatter;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 use Monolog\Handler\HandlerInterface;
 use Magento\MagentoCloud\Config\Log as LogConfig;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -20,17 +20,17 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class PoolTest extends TestCase
 {
     /**
-     * @var LogConfig|Mock
+     * @var LogConfig|MockObject
      */
     private $logConfigMock;
 
     /**
-     * @var LineFormatterFactory|Mock
+     * @var LineFormatterFactory|MockObject
      */
     private $lineFormatterFactoryMock;
 
     /**
-     * @var HandlerFactory|Mock
+     * @var HandlerFactory|MockObject
      */
     private $handlerFactoryMock;
 
@@ -51,6 +51,9 @@ class PoolTest extends TestCase
         $this->pool = new Pool($this->logConfigMock, $this->lineFormatterFactoryMock, $this->handlerFactoryMock);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function testGetHandlers()
     {
         $this->logConfigMock->expects($this->once())
@@ -85,6 +88,8 @@ class PoolTest extends TestCase
             ->withConsecutive(['slack'], ['email'], ['syslog'])
             ->willReturnOnConsecutiveCalls($slackHandlerMock, $emailHandlerMock, $syslogHandler);
 
+        $this->pool->getHandlers();
+        // Lazy load.
         $this->pool->getHandlers();
     }
 }

@@ -49,6 +49,7 @@ class ComposerGenerator
      *
      * @param array $repoOptions
      * @return array
+     * @codeCoverageIgnore
      */
     public function generate(array $repoOptions): array
     {
@@ -188,6 +189,7 @@ class ComposerGenerator
      * @param array $repoOptions
      * @param array $composer
      * @return array
+     * @codeCoverageIgnore
      */
     private function addModules(array $repoOptions, array $composer): array
     {

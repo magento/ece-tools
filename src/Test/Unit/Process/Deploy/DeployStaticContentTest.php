@@ -94,9 +94,12 @@ class DeployStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Generating fresh static content');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Generating fresh static content'],
+                ['End of generating fresh static content']
+            );
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
@@ -121,10 +124,11 @@ class DeployStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(false);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
             ->withConsecutive(
-                ['Generating fresh static content']
+                ['Generating fresh static content'],
+                ['End of generating fresh static content']
             );
         $this->stageConfigMock->expects($this->any())
             ->method('get')
@@ -164,9 +168,9 @@ class DeployStaticContentTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('Skipping static content deploy. SCD on demand is enabled.');
-        $this->loggerMock->expects($this->never())
-            ->method('info');
+            ->withConsecutive(
+                ['Skipping static content deploy. SCD on demand is enabled.']
+            );
         $this->flagManagerMock->expects($this->never())
             ->method('exists');
         $this->staticContentCleanerMock->expects($this->once())

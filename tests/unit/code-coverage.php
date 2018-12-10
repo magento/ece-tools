@@ -3,7 +3,7 @@
  * @author Marco Pivetta
  * @link https://ocramius.github.io/blog/automated-code-coverage-check-for-github-pull-requests-with-travis/
  */
-const MIN_COVERAGE = 92;
+const MIN_COVERAGE = 96;
 
 $inputFile = $argv[1];
 $percentage = min(100, max(0, MIN_COVERAGE));
