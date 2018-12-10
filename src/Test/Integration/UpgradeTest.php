@@ -22,7 +22,7 @@ class UpgradeTest extends AbstractTest
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::getInstance()->run('2.2.0');
+        Bootstrap::getInstance()->run('2.2.*');
     }
 
     /**
@@ -72,7 +72,7 @@ class UpgradeTest extends AbstractTest
     public function defaultDataProvider(): array
     {
         return [
-            ['2.2.0', '2.3.*'],
+            ['2.2.*', '2.3.0'],
         ];
     }
 
