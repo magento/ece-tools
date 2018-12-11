@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion\ConstraintFactory;
 use Psr\Log\LoggerInterface;
+use Composer\Semver\Semver;
 
 /**
  * Validates PHP version
@@ -107,43 +108,43 @@ class PhpVersion implements ValidatorInterface
      * Returns the latest PHP constraint
      *
      * @return ConstraintInterface
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException|\Exception
      */
     private function getRecommendedPhpConstraint(): ConstraintInterface
     {
         $requirePackages = $this->packageManager->get('magento/magento2-base')->getRequires();
         $phpConstraint = $requirePackages['php']->getConstraint();
-        if (!$phpConstraint instanceof MultiConstraint) {
-            return $phpConstraint;
-        }
-
         $phpConstraintList = [];
         $this->getAllConstraints($phpConstraint, $phpConstraintList);
-        ksort($phpConstraintList);
+        $versionList = Semver::rsort(array_keys($phpConstraintList));
+        $higherPhpVersion = $versionList[0];
         /** @var ConstraintInterface $higherPhpConstraint */
-        $higherPhpConstraint = array_pop($phpConstraintList);
-        preg_match('/(\d*)\.(\d*)\.(\d*)/', $higherPhpConstraint->getPrettyString(), $higherConstraintParts);
-        unset($higherConstraintParts[0]);
-        $phpConstraint = $this->versionParser->parseConstraints(implode('.', $higherConstraintParts));
-        if ($higherPhpConstraint->matches($phpConstraint)) {
-            return $phpConstraint;
-        }
-        /** @var ConstraintInterface $lowerPhpConstraint */
-        $lowerPhpConstraint = array_pop($phpConstraintList);
-        preg_match('/(\d*)\.(\d*)\.(\d*)/', $lowerPhpConstraint->getPrettyString(), $lowerConstraintParts);
-        $newLowerConstraintParts = $higherConstraintParts;
-        for ($i = 3; $i > 0; $i--) {
-            if ((int)$higherConstraintParts[$i] - (int)$lowerConstraintParts[$i] > 0) {
-                $newLowerConstraintParts[$i]--;
-                $phpConstraint = $this->versionParser->parseConstraints(implode('.', $newLowerConstraintParts));
-                if ($higherPhpConstraint->matches($phpConstraint)) {
-                    break;
-                }
-                $newLowerConstraintParts[$i] = 0;
+        $higherPhpConstraint = $phpConstraintList[$higherPhpVersion];
+        $higherConstraintParts = $this->getConstraintParts($higherPhpVersion);
+        $i = 3;
+        $newConstraintParts = $higherConstraintParts;
+        while ($i >= 0) {
+            $newConstraint = $this->versionParser->parseConstraints(implode('.', $newConstraintParts));
+            if ($higherPhpConstraint->matches($newConstraint)) {
+                break;
+            }
+            if ($newConstraintParts[$i]) {
+                $newConstraintParts[$i] = 0;
+            }
+            $i--;
+            if ($newConstraintParts[$i] >= 1) {
+                $newConstraintParts[$i]--;
             }
         }
+
+        if (!isset($newConstraint)) {
+            throw new \Exception('Failed to get the maximum available constraint');
+        }
+        if ($newConstraintParts === $higherConstraintParts) {
+            return $newConstraint;
+        }
         return $this->constraintFactory->multiconstraint([
-            $this->constraintFactory->constraint('>=', $phpConstraint->getPrettyString()),
+            $this->constraintFactory->constraint('>=', $newConstraint->getPrettyString()),
             $higherPhpConstraint
         ]);
     }
@@ -165,5 +166,25 @@ class PhpVersion implements ValidatorInterface
             preg_match('/\d*\.\d*\.\d*/', $constraint->getPrettyString(), $constraintParts);
             $constraintList[$constraintParts[0]] = $constraint;
         }
+    }
+
+    /**
+     * Returns an array, each element of which contains part of the version number
+     *
+     * For example:
+     * ```
+     * [
+     *  0 => some major number
+     *  1 => some minor number
+     *  2 => some patch number
+     * ]
+     *
+     * @param string $version
+     * @return array
+     */
+    private function getConstraintParts(string $version): array
+    {
+        preg_match('/(\d*)\.(\d*)\.(\d*)/', $version, $constraintParts);
+        return array_slice($constraintParts, 1, 3);
     }
 }

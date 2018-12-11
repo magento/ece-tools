@@ -3,11 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Composer\Package\Link;
 use Composer\Package\PackageInterface;
 use Composer\Semver\Constraint\Constraint;
+use Composer\Semver\Semver;
 use JsonSchema\Constraints\ConstraintInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion;
 use PHPUnit\Framework\TestCase;
@@ -117,21 +119,19 @@ class PhpValidatorTest extends TestCase
      */
     public function testValidatePhpPackageOfComposerHasManyConstraints()
     {
-        $recommendedPhpConstraints = [
-            '7.1.0' => $this->createConfiguredMock(Constraint::class, ['getPrettyString' => '>= 7.1.0.0-dev']),
-            '7.2.0' => $this->createConfiguredMock(Constraint::class, ['getPrettyString' => '< 7.2.0.0-dev'])
-        ];
-        /** @var ConstraintInterface|MockObject $recommendedPhpConstraint */
+        $lowerPhpConstraintMock = $this->createConfiguredMock(Constraint::class, [
+            'getPrettyString' => '>= 7.0.13.0-dev',
+        ]);
+        $higherPhpConstraintMock = $this->createConfiguredMock(Constraint::class, [
+            'getPrettyString' => '< 7.2.0.0-dev',
+        ]);
+        $somePhpConstrainMock = $this->createConfiguredMock(Constraint::class, [
+            'getPrettyString' => '7.1.0'
+        ]);
         $recommendedPhpConstraint = $this->createMock(MultiConstraint::class);
         /** @var ConstraintInterface|MockObject $composerPhpConstraint */
-        $composerPhpConstraint = $this->createMock(MultiConstraint::class);
-        $this->linkMock->expects($this->once())
-            ->method('getConstraint')
-            ->willReturn($composerPhpConstraint);
-
-        $composerPhpConstraint->expects($this->once())
-            ->method('getConstraints')
-            ->willReturn([
+        $composerPhpConstraint = $this->createConfiguredMock(MultiConstraint::class, [
+            'getConstraints' => [
                 $this->createConfiguredMock(MultiConstraint::class, [
                     'getConstraints' => [
                         $this->createConfiguredMock(Constraint::class, [
@@ -145,28 +145,34 @@ class PhpValidatorTest extends TestCase
                 $this->createConfiguredMock(Constraint::class, ['getPrettyString' => '== 7.0.2.0']),
                 $this->createConfiguredMock(Constraint::class, ['getPrettyString' => '== 7.0.4.0']),
                 $this->createConfiguredMock(MultiConstraint::class, [
-                    'getConstraints' => [
-                        $this->createConfiguredMock(Constraint::class, [
-                            'getPrettyString' => '>= 7.0.6.0-dev'
-                        ]),
-                        $this->createConfiguredMock(Constraint::class, [
-                            'getPrettyString' => '< 7.1.0.0-dev'
-                        ]),
-                    ]
-                ]),
-                $this->createConfiguredMock(MultiConstraint::class, [
-                    'getConstraints' => array_values($recommendedPhpConstraints)
+                    'getConstraints' => [$lowerPhpConstraintMock, $higherPhpConstraintMock]
                 ])
-            ]);
+            ]
+        ]);
+        $this->linkMock->expects($this->once())
+            ->method('getConstraint')
+            ->willReturn($composerPhpConstraint);
+        $this->versionParserMock->expects($this->exactly(2))
+            ->method('parseConstraints')
+            ->withConsecutive(['7.2.0'], ['7.1.0'])
+            ->willReturn($somePhpConstrainMock);
+        $higherPhpConstraintMock->expects($this->exactly(2))
+            ->method('matches')
+            ->with($somePhpConstrainMock)
+            ->willReturnOnConsecutiveCalls(false, true);
+        $this->constraintFactoryMock->expects($this->once())
+            ->method('constraint')
+            ->with('>=', '7.1.0')
+            ->willReturn($somePhpConstrainMock);
 
         $this->constraintFactoryMock->expects($this->once())
             ->method('multiconstraint')
-            ->with($recommendedPhpConstraints)
+            ->with([$somePhpConstrainMock, $higherPhpConstraintMock])
             ->willReturn($recommendedPhpConstraint);
         $recommendedPhpConstraint->expects($this->once())
             ->method('matches')
-            ->with($this->currentPhpConstraint)
             ->willReturn(true);
+
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
@@ -199,10 +205,10 @@ class PhpValidatorTest extends TestCase
         $composerPhpConstraint = $this->createMock(Constraint::class);
         $composerPhpConstraint->expects($this->once())
             ->method('getPrettyString')
-            ->willReturn('== 7.1.0.0');
+            ->willReturn('7.1.0.0');
         $this->currentPhpConstraint->expects($this->once())
             ->method('getPrettyString')
-            ->willReturn('== 7.0.2.0');
+            ->willReturn('7.0.2.0');
         $this->linkMock->expects($this->once())
             ->method('getConstraint')
             ->willReturn($composerPhpConstraint);
@@ -213,8 +219,8 @@ class PhpValidatorTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'For Magento 2.x.x.x recommended PHP version satisfying the constraint == 7.1.0.0. '
-                . 'Currently installed PHP version == 7.0.2.0',
+                'For Magento 2.x.x.x recommended PHP version satisfying the constraint 7.1.0.0. '
+                . 'Currently installed PHP version 7.0.2.0',
                 "Change the version of PHP to the version that satisfies the restriction conditions.\n"
                 . 'Change the PHP version in the .magento.app.yaml file or create a support ticket'
             );

@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy\PhpVersion;
 
 use Composer\Semver\Constraint\Constraint;
@@ -52,9 +53,9 @@ class ConstraintFactoryTest extends TestCase
         $operator = '==';
         $version = '4.5.6.0';
         $this->containerMock->expects($this->once())
-        ->method('create')
-        ->with(Constraint::class, ['operator' => $operator, 'version' => $version])
-        ->willReturn(new Constraint($operator, $version));
+            ->method('create')
+            ->with(Constraint::class, ['operator' => $operator, 'version' => $version])
+            ->willReturn(new Constraint($operator, $version));
         $this->constraintFactory->constraint($operator, $version);
     }
 
@@ -73,11 +74,10 @@ class ConstraintFactoryTest extends TestCase
 
     public function testGetCurrentPhpConstraint()
     {
-        $operator = '==';
-        $this->containerMock->expects($this->once())
-            ->method('create')
-            ->with(Constraint::class, ['operator' => $operator, 'version' => PHP_VERSION])
-            ->willReturn(new Constraint($operator, PHP_VERSION));
-        $this->constraintFactory->constraint($operator, PHP_VERSION);
+        $this->versionParserMock->expects($this->once())
+            ->method('parseConstraints')
+            ->with(PHP_VERSION)
+            ->willReturn(new Constraint('==', PHP_VERSION));
+        $this->constraintFactory->getCurrentPhpConstraint();
     }
 }
