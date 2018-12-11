@@ -44,7 +44,7 @@ class ValidateConfiguration implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Validating configuration');
+        $this->logger->notice('Validating configuration');
 
         $maxLevel = 0;
         $messages = [];
@@ -70,7 +70,7 @@ class ValidateConfiguration implements ProcessInterface
             }
         }
 
-        $this->logger->info('End of validation');
+        $this->logger->notice('End of validation');
 
         if (!$messages || !$maxLevel) {
             return;
