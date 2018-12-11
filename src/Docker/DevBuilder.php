@@ -130,17 +130,14 @@ class DevBuilder implements BuilderInterface
             ]
         );
         /** For backward compatibility. */
-        $services['cli'] = $this->getCliService($phpVersion, false, $cliDepends);
-        $services['build'] = $this->getCliService($phpVersion, false, $cliDepends);
-        $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends);
+        $services['cli'] = $this->getCliService($phpVersion, false, $cliDepends, 'cli.magento2.docker');
+        $services['build'] = $this->getCliService($phpVersion, false, $cliDepends, 'build.magento2.docker');
+        $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends, 'deploy.magento2.docker');
         $services['web'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_NGINX,
             $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
             [
-                'ports' => [
-                    '8080:80',
-                    '443:443',
-                ],
+                'ports' => ['443:443'],
                 'depends_on' => [
                     'fpm',
                     'db',
@@ -157,7 +154,7 @@ class DevBuilder implements BuilderInterface
                 ],
             ]
         );
-        $services['cron'] = $this->getCliService($phpVersion, true, $cliDepends, true);
+        $services['cron'] = $this->getCliService($phpVersion, true, $cliDepends, 'cron.magento2.docker', true);
         $services['appdata'] = [
             'image' => 'tianon/true',
             'volumes' => [
@@ -201,12 +198,18 @@ class DevBuilder implements BuilderInterface
      * @param string $version
      * @param bool $isReadOnly
      * @param array $depends
+     * @param string $hostname
      * @param bool $cron
      * @return array
      * @throws ConfigurationMismatchException
      */
-    private function getCliService(string $version, bool $isReadOnly, array $depends, bool $cron = false): array
-    {
+    private function getCliService(
+        string $version,
+        bool $isReadOnly,
+        array $depends,
+        string $hostname,
+        bool $cron = false
+    ): array {
         $composeCacheDirectory = file_exists(getenv('HOME') . '/.cache/composer')
             ? '~/.cache/composer'
             : '~/.composer/cache';
@@ -215,6 +218,7 @@ class DevBuilder implements BuilderInterface
             ServiceFactory::SERVICE_CLI,
             $version,
             [
+                'hostname' => $hostname,
                 'depends_on' => $depends,
                 'volumes' => [
                     $composeCacheDirectory . ':/root/.composer/cache',
