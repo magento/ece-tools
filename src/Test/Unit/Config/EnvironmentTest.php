@@ -25,6 +25,9 @@ class EnvironmentTest extends TestCase
      * @var array
      */
     private $environmentData;
+    /**
+     * @var Variables
+     */
     private $variableMock;
 
     /**
