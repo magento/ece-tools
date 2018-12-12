@@ -77,13 +77,23 @@ class Environment
      */
     public function get(string $key, $default = null)
     {
-        $envVarName = $this->getEnvironmentVariableName($key);
-        $value = $this->getEnv($envVarName);
+        $value = $this->getEnv($key);
         if (false === $value) {
             return $default;
         }
 
         return json_decode(base64_decode($value), true);
+    }
+
+    /**
+     * Get environment variable and get the name from .magento.env.yaml configuration file
+     * @param string $name
+     * @param string|int|null $default
+     * @return array|string|int|null
+     */
+    protected function getEnvVar(string $name, $default = null)
+    {
+        return $this->get($this->systemConfig->get($name), $default);
     }
 
     /**
@@ -97,7 +107,7 @@ class Environment
             return $this->data['routes'];
         }
 
-        return $this->data['routes'] = $this->get(SystemConfigInterface::VAR_ENV_ROUTES, []);
+        return $this->data['routes'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_ROUTES, []);
     }
 
     /**
@@ -111,7 +121,7 @@ class Environment
             return $this->data['relationships'];
         }
 
-        return $this->data['relationships'] = $this->get(SystemConfigInterface::VAR_ENV_RELATIONSHIPS, []);
+        return $this->data['relationships'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_RELATIONSHIPS, []);
     }
 
     /**
@@ -138,7 +148,7 @@ class Environment
             return $this->data['variables'];
         }
 
-        return $this->data['variables'] = $this->get(SystemConfigInterface::VAR_ENV_VARIABLES, []);
+        return $this->data['variables'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_VARIABLES, []);
     }
 
     /**
@@ -150,17 +160,7 @@ class Environment
             return $this->data['application'];
         }
 
-        return $this->data['application'] = $this->get(SystemConfigInterface::VAR_ENV_APPLICATION, []);
-    }
-
-    /**
-     * Get environment variable name from .magento.env.yaml configuration file
-     * @param string $name
-     * @return string
-     */
-    protected function getEnvironmentVariableName(string $name): string
-    {
-        return $this->systemConfig->get($name);
+        return $this->data['application'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_APPLICATION, []);
     }
 
     /**
