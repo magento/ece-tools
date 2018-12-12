@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Config\System\VariablesInterface;
+
 /**
  * Contains logic for interacting with the server environment
  */
