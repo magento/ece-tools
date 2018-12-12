@@ -5,15 +5,16 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Config\System\VariablesInterface;
 /**
  * Contains logic for interacting with the server environment
  */
 class Environment
 {
     /**
-     * @var GlobalSection
+     * @var VariablesInterface
      */
-    private $stageConfig;
+    private $systemConfig;
 
     /**
      * Regex pattern for detecting main branch.
@@ -38,12 +39,12 @@ class Environment
 
     /**
      * Environment constructor.
-     * @param GlobalSection $stageConfig
+     * @param VariablesInterface $systemConfig
      */
     public function __construct(
-        GlobalSection $stageConfig
+        VariablesInterface $systemConfig
     ) {
-        $this->stageConfig = $stageConfig;
+        $this->systemConfig = $systemConfig;
     }
 
     /**
@@ -95,7 +96,7 @@ class Environment
             return $this->data['routes'];
         }
 
-        return $this->data['routes'] = $this->get(StageConfigInterface::VAR_ENV_ROUTES, []);
+        return $this->data['routes'] = $this->get(SystemConfigInterface::VAR_ENV_ROUTES, []);
     }
 
     /**
@@ -109,7 +110,7 @@ class Environment
             return $this->data['relationships'];
         }
 
-        return $this->data['relationships'] = $this->get(StageConfigInterface::VAR_ENV_RELATIONSHIPS, []);
+        return $this->data['relationships'] = $this->get(SystemConfigInterface::VAR_ENV_RELATIONSHIPS, []);
     }
 
     /**
@@ -136,7 +137,7 @@ class Environment
             return $this->data['variables'];
         }
 
-        return $this->data['variables'] = $this->get(StageConfigInterface::VAR_ENV_VARIABLES, []);
+        return $this->data['variables'] = $this->get(SystemConfigInterface::VAR_ENV_VARIABLES, []);
     }
 
     /**
@@ -148,7 +149,7 @@ class Environment
             return $this->data['application'];
         }
 
-        return $this->data['application'] = $this->get(StageConfigInterface::VAR_ENV_APPLICATION, []);
+        return $this->data['application'] = $this->get(SystemConfigInterface::VAR_ENV_APPLICATION, []);
     }
 
     /**
@@ -158,7 +159,7 @@ class Environment
      */
     protected function getEnvironmentVariableName(string $name): string
     {
-        return $this->stageConfig->get($name);
+        return $this->systemConfig->get($name);
     }
 
     /**

@@ -34,7 +34,7 @@ class Deploy implements DeployInterface
     private $mergedConfig;
 
     /**
-     * @var Environment
+     * @var Variables
      */
     private $environment;
 
@@ -44,7 +44,7 @@ class Deploy implements DeployInterface
     private $schema;
 
     /**
-     * @param Environment $environment
+     * @param Variables $environment
      * @param EnvironmentReader $environmentReader
      * @param EnvironmentConfig $environmentConfig
      * @param Schema $schema
