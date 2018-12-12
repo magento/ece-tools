@@ -43,12 +43,13 @@ class RefreshModules implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Reconciling installed modules with shared config.');
+        $this->logger->notice('Reconciling installed modules with shared config.');
 
         try {
             $this->config->refresh();
         } catch (ShellException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
+        $this->logger->notice('End of reconciling modules.');
     }
 }

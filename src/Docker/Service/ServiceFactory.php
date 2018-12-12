@@ -45,12 +45,12 @@ class ServiceFactory
             'versions' => ['latest'],
             'config' => [
                 'environment' => [
-                    'VIRTUAL_HOST' => 'magento2.docker',
-                    'VIRTUAL_PORT' => 80,
-                    'HTTPS_METHOD' => 'noredirect',
+                    'VIRTUAL_HOST=magento2.docker',
+                    'VIRTUAL_PORT=80',
+                    'HTTPS_METHOD=noredirect',
                 ],
                 'ports' => [
-                    '80:80',
+                    '80:80'
                 ],
             ]
         ],
@@ -61,9 +61,7 @@ class ServiceFactory
                 'volumes' => [
                     '/data',
                 ],
-                'ports' => [
-                    6379,
-                ],
+                'ports' => [6379],
             ]
         ],
         self::SERVICE_ELASTICSEARCH => [

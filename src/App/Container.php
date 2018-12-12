@@ -171,6 +171,7 @@ class Container implements ContainerInterface
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
+                                    $this->container->make(ConfigValidator\Build\ComposerFile::class),
                                     $this->container->make(ConfigValidator\Build\StageConfig::class),
                                     $this->container->make(ConfigValidator\Build\BuildOptionsIni::class),
                                 ],

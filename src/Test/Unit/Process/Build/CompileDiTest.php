@@ -61,9 +61,12 @@ class CompileDiTest extends TestCase
             ->method('get')
             ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn('-vvv');
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Running DI compilation');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Running DI compilation'],
+                ['End of running DI compilation']
+            );
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./bin/magento setup:di:compile -vvv --ansi --no-interaction');
