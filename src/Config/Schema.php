@@ -155,6 +155,42 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => false,
                 ],
             ],
+            StageConfigInterface::VAR_ENV_RELATIONSHIPS => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'MAGENTO_CLOUD_RELATIONSHIPS',
+                ],
+            ],
+            StageConfigInterface::VAR_ENV_ROUTES => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'MAGENTO_CLOUD_ROUTES',
+                ],
+            ],
+            StageConfigInterface::VAR_ENV_VARIABLES => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'MAGENTO_CLOUD_VARIABLES',
+                ],
+            ],
+            StageConfigInterface::VAR_ENV_APPLICATION => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'MAGENTO_CLOUD_APPLICATION',
+                ],
+            ],
             StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [

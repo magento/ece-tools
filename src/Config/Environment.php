@@ -11,6 +11,11 @@ namespace Magento\MagentoCloud\Config;
 class Environment
 {
     /**
+     * @var GlobalSection
+     */
+    private $stageConfig;
+
+    /**
      * Regex pattern for detecting main branch.
      * The name of the main branch must be started from one of three prefixes:
      *   master - is for integration environment;
@@ -30,6 +35,16 @@ class Environment
     const DEFAULT_ADMIN_NAME = 'admin';
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
+
+    /**
+     * Environment constructor.
+     * @param GlobalSection $stageConfig
+     */
+    public function __construct(
+        GlobalSection $stageConfig
+    ) {
+        $this->stageConfig = $stageConfig;
+    }
 
     /**
      * @var array
@@ -60,7 +75,8 @@ class Environment
      */
     public function get(string $key, $default = null)
     {
-        $value = $this->getEnv($key);
+        $envVarName = $this->getEnvironmentVariableName($key);
+        $value = $this->getEnv($envVarName);
         if (false === $value) {
             return $default;
         }
@@ -79,7 +95,7 @@ class Environment
             return $this->data['routes'];
         }
 
-        return $this->data['routes'] = $this->get('MAGENTO_CLOUD_ROUTES', []);
+        return $this->data['routes'] = $this->get(StageConfigInterface::VAR_ENV_ROUTES, []);
     }
 
     /**
@@ -93,7 +109,7 @@ class Environment
             return $this->data['relationships'];
         }
 
-        return $this->data['relationships'] = $this->get('MAGENTO_CLOUD_RELATIONSHIPS', []);
+        return $this->data['relationships'] = $this->get(StageConfigInterface::VAR_ENV_RELATIONSHIPS, []);
     }
 
     /**
@@ -120,7 +136,7 @@ class Environment
             return $this->data['variables'];
         }
 
-        return $this->data['variables'] = $this->get('MAGENTO_CLOUD_VARIABLES', []);
+        return $this->data['variables'] = $this->get(StageConfigInterface::VAR_ENV_VARIABLES, []);
     }
 
     /**
@@ -132,7 +148,17 @@ class Environment
             return $this->data['application'];
         }
 
-        return $this->data['application'] = $this->get('MAGENTO_CLOUD_APPLICATION', []);
+        return $this->data['application'] = $this->get(StageConfigInterface::VAR_ENV_APPLICATION, []);
+    }
+
+    /**
+     * Get environment variable name from .magento.env.yaml configuration file
+     * @param string $name
+     * @return string
+     */
+    protected function getEnvironmentVariableName(string $name): string
+    {
+        return $this->stageConfig->get($name);
     }
 
     /**
