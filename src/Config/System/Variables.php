@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\SystemConfigInterface;
 /**
  * @inheritdoc
  */
-class Variables implements VariablesInterface
+class Variables implements SystemConfigInterface
 {
     /**
      * @var EnvironmentReader

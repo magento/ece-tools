@@ -138,10 +138,6 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Stage\PostDeployInterface::class,
             \Magento\MagentoCloud\Config\Stage\PostDeploy::class
         );
-        $this->container->singleton(
-            \Magento\MagentoCloud\Config\System\VariablesInterface::class,
-            \Magento\MagentoCloud\Config\System\Variables::class
-        );
 
         $this->container->singleton(\Magento\MagentoCloud\Shell\UtilityManager::class);
         $this->container->singleton(

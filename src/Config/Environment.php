@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\Config\System\VariablesInterface;
+use Magento\MagentoCloud\Config\System\Variables;
 
 /**
  * Contains logic for interacting with the server environment
@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Config\System\VariablesInterface;
 class Environment
 {
     /**
-     * @var VariablesInterface
+     * @var Variables
      */
     private $systemConfig;
 
@@ -40,10 +40,10 @@ class Environment
 
     /**
      * Environment constructor.
-     * @param VariablesInterface $systemConfig
+     * @param Variables $systemConfig
      */
     public function __construct(
-        VariablesInterface $systemConfig
+        Variables $systemConfig
     ) {
         $this->systemConfig = $systemConfig;
     }
