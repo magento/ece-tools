@@ -13,7 +13,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * {@inheritdoc}
  *
- * @group php71
+ * @group php72
  */
 class UpgradeTest extends AbstractTest
 {
@@ -22,7 +22,7 @@ class UpgradeTest extends AbstractTest
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::getInstance()->run('2.2.7');
+        Bootstrap::getInstance()->run('2.3.0');
     }
 
     /**
@@ -72,7 +72,7 @@ class UpgradeTest extends AbstractTest
     public function defaultDataProvider(): array
     {
         return [
-            ['2.2.7', '2.3.0'],
+            ['2.3.0', '2.3.0'],
         ];
     }
 
