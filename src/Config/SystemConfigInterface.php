@@ -29,11 +29,6 @@ interface SystemConfigInterface
     const VAR_ENV_APPLICATION = 'ENV_APPLICATION';
 
     /**
-     * Option for enabling merging given configuration with default configuration
-     */
-    const OPTION_MERGE = '_merge';
-
-    /**
      * Retrieves environment configuration per stage.
      *
      * @param string $name The config name
