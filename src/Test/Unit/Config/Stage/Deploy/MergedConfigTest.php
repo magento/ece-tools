@@ -225,7 +225,6 @@ class MergedConfigTest extends TestCase
                 ]
             ]);
 
-
         $this->assertEquals(
             [
                 Deploy::VAR_SCD_THREADS => 5,

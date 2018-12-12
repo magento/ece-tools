@@ -24,7 +24,6 @@ class JsonFormatVariableTest extends TestCase
      */
     private $resultFactoryMock;
 
-
     /**
      * @var MergedConfig|MockObject
      */
