@@ -124,7 +124,7 @@ class Container implements ContainerInterface
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment\Reader::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Variables::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\PostDeploy::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\RepositoryFactory::class);
         $this->container->singleton(
             \Magento\MagentoCloud\Config\Stage\BuildInterface::class,
