@@ -72,7 +72,7 @@ class UpgradeTest extends AbstractTest
     public function defaultDataProvider(): array
     {
         return [
-            ['2.3.0', '2.3.0'],
+            ['2.3.0', '2.3.*'],
         ];
     }
 
