@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\System\Variables;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -24,6 +25,7 @@ class EnvironmentTest extends TestCase
      * @var array
      */
     private $environmentData;
+    private $variableMock;
 
     /**
      * @inheritdoc
@@ -32,7 +34,9 @@ class EnvironmentTest extends TestCase
     {
         $this->environmentData = $_ENV;
 
-        $this->environment = new Environment();
+        $this->variableMock = $this->createMock(Variables::class);
+
+        $this->environment = new Environment($this->variableMock);
     }
 
     /**
