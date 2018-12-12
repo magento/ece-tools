@@ -5,13 +5,9 @@
  */
 namespace Magento\MagentoCloud\Config\Stage;
 
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
-use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
+use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @inheritdoc
@@ -19,24 +15,9 @@ use Symfony\Component\Yaml\Exception\ParseException;
 class Deploy implements DeployInterface
 {
     /**
-     * @var EnvironmentReader
-     */
-    private $environmentReader;
-
-    /**
-     * @var EnvironmentConfig
-     */
-    private $environmentConfig;
-
-    /**
      * @var array
      */
     private $mergedConfig;
-
-    /**
-     * @var Environment
-     */
-    private $environment;
 
     /**
      * @var Schema
@@ -44,20 +25,14 @@ class Deploy implements DeployInterface
     private $schema;
 
     /**
-     * @param Environment $environment
-     * @param EnvironmentReader $environmentReader
-     * @param EnvironmentConfig $environmentConfig
+     * @param MergedConfig $mergedConfig
      * @param Schema $schema
      */
     public function __construct(
-        Environment $environment,
-        EnvironmentReader $environmentReader,
-        EnvironmentConfig $environmentConfig,
+        MergedConfig $mergedConfig,
         Schema $schema
     ) {
-        $this->environment = $environment;
-        $this->environmentReader = $environmentReader;
-        $this->environmentConfig = $environmentConfig;
+        $this->mergedConfig = $mergedConfig;
         $this->schema = $schema;
     }
 
@@ -66,15 +41,14 @@ class Deploy implements DeployInterface
      */
     public function get(string $name)
     {
-        if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY))) {
-            throw new \RuntimeException(sprintf(
-                'Config %s was not defined.',
-                $name
-            ));
-        }
-
         try {
-            $value = $this->mergeConfig()[$name];
+            $mergedConfig = $this->mergedConfig->get();
+
+            if (!isset($mergedConfig[$name])) {
+                throw new \Exception(sprintf('Config %s was not defined.', $name));
+            }
+
+            $value = $mergedConfig[$name];
 
             if (!is_string($value)) {
                 return $value;
@@ -85,7 +59,15 @@ class Deploy implements DeployInterface
              */
             $decodedValue = json_decode($value, true);
 
-            return $decodedValue !== null && json_last_error() === JSON_ERROR_NONE ? $decodedValue : $value;
+            $value = $decodedValue !== null && json_last_error() === JSON_ERROR_NONE ? $decodedValue : $value;
+
+            $schemaDetails = $this->schema->getSchema()[$name];
+
+            if ($schemaDetails[Schema::SCHEMA_TYPE] === ['array'] && !is_array($value)) {
+                $value = $schemaDetails[Schema::SCHEMA_DEFAULT_VALUE][StageConfigInterface::STAGE_DEPLOY];
+            }
+
+            return $value;
         } catch (\Exception $exception) {
             throw new \RuntimeException(
                 $exception->getMessage(),
@@ -93,45 +75,5 @@ class Deploy implements DeployInterface
                 $exception
             );
         }
-    }
-
-    /**
-     * @return array
-     * @throws ParseException;
-     * @throws FileSystemException;
-     */
-    private function mergeConfig(): array
-    {
-        if (null === $this->mergedConfig) {
-            $envConfig = $this->environmentReader->read()[self::SECTION_STAGE] ?? [];
-
-            $this->mergedConfig = array_replace(
-                $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY),
-                $this->getDeployConfiguration(),
-                $envConfig[self::STAGE_GLOBAL] ?? [],
-                $envConfig[self::STAGE_DEPLOY] ?? [],
-                $this->environmentConfig->getAll()
-            );
-        }
-
-        return $this->mergedConfig;
-    }
-
-    /**
-     * Resolves default configuration value for deploy stage.
-     *
-     * SCD_THREADS = 3 for production environment.
-     *
-     * @return array
-     */
-    private function getDeployConfiguration(): array
-    {
-        $config = [];
-
-        if ($this->environment->getEnv('MAGENTO_CLOUD_MODE')  === Environment::CLOUD_MODE_ENTERPRISE) {
-            $config[self::VAR_SCD_THREADS] = 3;
-        }
-
-        return $config;
     }
 }
