@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy\PhpVersion;
 
 use Composer\Semver\Constraint\Constraint;
@@ -12,18 +11,12 @@ use Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion\ConstraintFactory;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\App\ContainerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
-use Composer\Package\Version\VersionParser;
 
 /**
  * @inheritdoc
  */
 class ConstraintFactoryTest extends TestCase
 {
-    /**
-     * @var VersionParser|MockObject
-     */
-    private $versionParserMock;
-
     /**
      * @var ContainerInterface|MockObject
      */
@@ -40,12 +33,7 @@ class ConstraintFactoryTest extends TestCase
     public function setUp()
     {
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
-        $this->versionParserMock = $this->createMock(VersionParser::class);
-
-        $this->constraintFactory = new ConstraintFactory(
-            $this->containerMock,
-            $this->versionParserMock
-        );
+        $this->constraintFactory = new ConstraintFactory($this->containerMock);
     }
 
     public function testConstraint()
@@ -54,7 +42,7 @@ class ConstraintFactoryTest extends TestCase
         $version = '4.5.6.0';
         $this->containerMock->expects($this->once())
             ->method('create')
-            ->with(Constraint::class, ['operator' => $operator, 'version' => $version])
+            ->with(Constraint::class, [$operator,$version])
             ->willReturn(new Constraint($operator, $version));
         $this->constraintFactory->constraint($operator, $version);
     }
@@ -67,17 +55,8 @@ class ConstraintFactoryTest extends TestCase
         ];
         $this->containerMock->expects($this->once())
             ->method('create')
-            ->with(MultiConstraint::class, ['constraints' => $constraints])
+            ->with(MultiConstraint::class, [$constraints])
             ->willReturn(new MultiConstraint($constraints));
         $this->constraintFactory->multiconstraint($constraints);
-    }
-
-    public function testGetCurrentPhpConstraint()
-    {
-        $this->versionParserMock->expects($this->once())
-            ->method('parseConstraints')
-            ->with(PHP_VERSION)
-            ->willReturn(new Constraint('==', PHP_VERSION));
-        $this->constraintFactory->getCurrentPhpConstraint();
     }
 }

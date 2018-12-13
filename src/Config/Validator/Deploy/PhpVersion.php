@@ -83,7 +83,7 @@ class PhpVersion implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
-            $currentPhpConstraint = $this->constraintFactory->getCurrentPhpConstraint();
+            $currentPhpConstraint = $this->getCurrentPhpConstraint();
             $recommendedPhpConstraint = $this->getRecommendedPhpConstraint();
             if (!$recommendedPhpConstraint->matches($currentPhpConstraint)) {
                 return $this->resultFactory->error(
@@ -108,43 +108,46 @@ class PhpVersion implements ValidatorInterface
      * Returns the latest PHP constraint
      *
      * @return ConstraintInterface
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException|\Exception
+     * @throws \Exception
      */
     private function getRecommendedPhpConstraint(): ConstraintInterface
     {
         $requirePackages = $this->packageManager->get('magento/magento2-base')->getRequires();
         $phpConstraint = $requirePackages['php']->getConstraint();
-        $phpConstraintList = [];
-        $this->getAllConstraints($phpConstraint, $phpConstraintList);
-        $versionList = Semver::rsort(array_keys($phpConstraintList));
-        $higherPhpVersion = $versionList[0];
+        if (!$phpConstraint instanceof MultiConstraint) {
+            return $phpConstraint;
+        }
+        $phpConstraints = [];
+        $this->getAllConstraints($phpConstraint, $phpConstraints);
+        $phpVersions = Semver::rsort(array_keys($phpConstraints));
+        $higherPhpVersion = $phpVersions[0];
         /** @var ConstraintInterface $higherPhpConstraint */
-        $higherPhpConstraint = $phpConstraintList[$higherPhpVersion];
-        $higherConstraintParts = $this->getConstraintParts($higherPhpVersion);
-        $i = 3;
-        $newConstraintParts = $higherConstraintParts;
-        while ($i >= 0) {
-            $newConstraint = $this->versionParser->parseConstraints(implode('.', $newConstraintParts));
-            if ($higherPhpConstraint->matches($newConstraint)) {
+        $higherPhpConstraint = $phpConstraints[$higherPhpVersion];
+        $bestCandidatePhpConstraint = $this->versionParser->parseConstraints($higherPhpVersion);
+        if ($higherPhpConstraint->matches($bestCandidatePhpConstraint)) {
+            return $bestCandidatePhpConstraint;
+        }
+        preg_match('/(\d*)\.(\d*)\.(\d*)/', $higherPhpVersion, $phpVersionParts);
+        unset($phpVersionParts[0]);
+        for ($i = 3; $i > 0; $i--) {
+            if ($phpVersionParts[$i] < 1) {
+                continue;
+            }
+            $phpVersionParts[$i]--;
+            $bestCandidatePhpVersion = implode('.', $phpVersionParts);
+            $bestCandidatePhpConstraint = $this->versionParser->parseConstraints($bestCandidatePhpVersion);
+            if ($higherPhpConstraint->matches($bestCandidatePhpConstraint)) {
                 break;
             }
-            if ($newConstraintParts[$i]) {
-                $newConstraintParts[$i] = 0;
-            }
-            $i--;
-            if ($newConstraintParts[$i] >= 1) {
-                $newConstraintParts[$i]--;
-            }
+            $phpVersionParts[$i] = 0;
         }
-
-        if (!isset($newConstraint)) {
-            throw new \Exception('Failed to get the maximum available constraint');
-        }
-        if ($newConstraintParts === $higherConstraintParts) {
-            return $newConstraint;
+        /** @var ConstraintInterface $phpLowerConstraint */
+        $phpLowerConstraint = $phpConstraints[$phpVersions[1]];
+        if (!$phpLowerConstraint->matches($bestCandidatePhpConstraint)) {
+            return $this->constraintFactory->multiconstraint([$phpLowerConstraint, $higherPhpConstraint]);
         }
         return $this->constraintFactory->multiconstraint([
-            $this->constraintFactory->constraint('>=', $newConstraint->getPrettyString()),
+            $this->constraintFactory->constraint('>=', $bestCandidatePhpConstraint->getPrettyString()),
             $higherPhpConstraint
         ]);
     }
@@ -169,22 +172,12 @@ class PhpVersion implements ValidatorInterface
     }
 
     /**
-     * Returns an array, each element of which contains part of the version number
+     * Returns the current PHP constraint
      *
-     * For example:
-     * ```
-     * [
-     *  0 => some major number
-     *  1 => some minor number
-     *  2 => some patch number
-     * ]
-     *
-     * @param string $version
-     * @return array
+     * @return ConstraintInterface
      */
-    private function getConstraintParts(string $version): array
+    private function getCurrentPhpConstraint(): ConstraintInterface
     {
-        preg_match('/(\d*)\.(\d*)\.(\d*)/', $version, $constraintParts);
-        return array_slice($constraintParts, 1, 3);
+        return $this->versionParser->parseConstraints(PHP_VERSION);
     }
 }

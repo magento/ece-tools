@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion;
 use Composer\Semver\Constraint\Constraint;
 use Composer\Semver\Constraint\ConstraintInterface;
 use Composer\Semver\Constraint\MultiConstraint;
-use Composer\Semver\VersionParser;
 use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
@@ -22,18 +21,11 @@ class ConstraintFactory
     private $container;
 
     /**
-     * @var VersionParser
-     */
-    private $versionParser;
-
-    /**
      * @param ContainerInterface $container
-     * @param VersionParser $versionParser
      */
-    public function __construct(ContainerInterface $container, VersionParser $versionParser)
+    public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
-        $this->versionParser = $versionParser;
     }
 
     /**
@@ -43,10 +35,7 @@ class ConstraintFactory
      */
     public function constraint(string $operator, string $version): Constraint
     {
-        return $this->container->create(Constraint::class, [
-            'operator' => $operator,
-            'version' => $version
-        ]);
+        return $this->container->create(Constraint::class, [$operator, $version]);
     }
 
     /**
@@ -55,18 +44,6 @@ class ConstraintFactory
      */
     public function multiconstraint(array $constraints): MultiConstraint
     {
-        return $this->container->create(MultiConstraint::class, [
-            'constraints' => $constraints
-        ]);
-    }
-
-    /**
-     * Returns the current PHP constraint
-     *
-     * @return Constraint
-     */
-    public function getCurrentPhpConstraint(): ConstraintInterface
-    {
-        return $this->versionParser->parseConstraints(PHP_VERSION);
+        return $this->container->create(MultiConstraint::class, [$constraints]);
     }
 }
