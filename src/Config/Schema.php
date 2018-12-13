@@ -192,6 +192,24 @@ class Schema
                     SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_APPLICATION',
                 ],
             ],
+            SystemConfigInterface::VAR_ENV_MODE => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_MODE',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_ENVIRONMENT => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ENVIRONMENT',
+                ],
+            ],
             StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [

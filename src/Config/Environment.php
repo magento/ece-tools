@@ -40,11 +40,11 @@ class Environment
 
     /**
      * Environment constructor.
+     *
      * @param Variables $systemConfig
      */
-    public function __construct(
-        Variables $systemConfig
-    ) {
+    public function __construct(Variables $systemConfig)
+    {
         $this->systemConfig = $systemConfig;
     }
 
@@ -86,14 +86,26 @@ class Environment
     }
 
     /**
-     * Get environment variable and get the name from .magento.env.yaml configuration file
+     * Get environment variable and get the name from .magento.env.yaml configuration file.
+     *
      * @param string $name
      * @param string|int|null $default
      * @return array|string|int|null
      */
-    protected function getEnvVar(string $name, $default = null)
+    public function getEnvVar(string $name, $default = null)
     {
-        return $this->get($this->systemConfig->get($name), $default);
+        return $this->get($this->getEnvVarName($name), $default);
+    }
+
+    /**
+     * Get Environment Variable name from .magento.env.yaml.
+     *
+     * @param string $name
+     * @return string
+     */
+    public function getEnvVarName(string $name): string
+    {
+        return $this->systemConfig->get($name);
     }
 
     /**
@@ -255,7 +267,8 @@ class Environment
      */
     public function isMasterBranch(): bool
     {
-        return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
-            && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
+        $envVar = $this->systemConfig->get(SystemConfigInterface::VAR_ENV_ENVIRONMENT);
+        return isset($_ENV[$envVar])
+            && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV[$envVar]);
     }
 }

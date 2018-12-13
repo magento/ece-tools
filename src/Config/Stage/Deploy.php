@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -127,8 +128,9 @@ class Deploy implements DeployInterface
     private function getDeployConfiguration(): array
     {
         $config = [];
+        $envVar = $this->environment->getEnvVarName(SystemConfigInterface::VAR_ENV_MODE);
 
-        if ($this->environment->getEnv('MAGENTO_CLOUD_MODE')  === Environment::CLOUD_MODE_ENTERPRISE) {
+        if ($this->environment->getEnv($envVar)  === Environment::CLOUD_MODE_ENTERPRISE) {
             $config[self::VAR_SCD_THREADS] = 3;
         }
 
