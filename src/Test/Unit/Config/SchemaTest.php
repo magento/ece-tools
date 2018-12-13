@@ -88,7 +88,6 @@ class SchemaTest extends TestCase
         );
     }
 
-
     public function testGetDefaultsForSystemVariables()
     {
         $this->assertEquals(
