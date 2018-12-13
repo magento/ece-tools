@@ -35,7 +35,7 @@ class Deploy implements DeployInterface
     private $mergedConfig;
 
     /**
-     * @var Variables
+     * @var Environment
      */
     private $environment;
 
@@ -45,7 +45,7 @@ class Deploy implements DeployInterface
     private $schema;
 
     /**
-     * @param Variables $environment
+     * @param Environment $environment
      * @param EnvironmentReader $environmentReader
      * @param EnvironmentConfig $environmentConfig
      * @param Schema $schema
@@ -130,7 +130,7 @@ class Deploy implements DeployInterface
         $config = [];
         $envVar = $this->environment->getEnvVarName(SystemConfigInterface::VAR_ENV_MODE);
 
-        if ($this->environment->getEnv($envVar)  === Environment::CLOUD_MODE_ENTERPRISE) {
+        if ($this->environment->getEnv($envVar) === Environment::CLOUD_MODE_ENTERPRISE) {
             $config[self::VAR_SCD_THREADS] = 3;
         }
 
