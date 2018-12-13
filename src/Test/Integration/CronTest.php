@@ -140,7 +140,7 @@ class CronTest extends AbstractTest
     public function cronDataProvider(): array
     {
         return [
-            ['version' => '~2.3.0', 'locale' => 'fr_FR', 'stability' => 'beta'],
+            ['version' => '2.3.0', 'locale' => 'fr_FR'],
         ];
     }
 
