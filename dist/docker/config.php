@@ -36,11 +36,11 @@ return [
     )),
     'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
         [
-            'http://localhost/' => [
+            'http://magento2.docker/' => [
                 'type' => 'upstream',
                 'original_url' => 'http://{default}',
             ],
-            'https://localhost/' => [
+            'https://magento2.docker/' => [
                 'type' => 'upstream',
                 'original_url' => 'https://{default}',
             ],

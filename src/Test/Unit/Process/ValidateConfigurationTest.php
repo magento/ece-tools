@@ -36,7 +36,7 @@ class ValidateConfigurationTest extends TestCase
         );
 
         $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['Validating configuration'],
                 ['End of validation']
@@ -70,7 +70,7 @@ class ValidateConfigurationTest extends TestCase
             ->method('validate');
 
         $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['Validating configuration'],
                 ['End of validation']
@@ -108,7 +108,7 @@ class ValidateConfigurationTest extends TestCase
             ->willReturn($warningResultMock);
 
         $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['Validating configuration'],
                 ['End of validation']
@@ -163,7 +163,7 @@ class ValidateConfigurationTest extends TestCase
             ->willReturn($this->createMock(Result\Success::class));
 
         $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
+            ->method('notice')
             ->withConsecutive(
                 ['Validating configuration'],
                 ['End of validation']
