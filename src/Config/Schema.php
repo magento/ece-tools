@@ -16,6 +16,7 @@ class Schema
     const SCHEMA_TYPE = 'type';
     const SCHEMA_VALUE_VALIDATION = 'value_validation';
     const SCHEMA_STAGE = 'stage';
+    const SCHEMA_SYSTEM = 'system';
     const SCHEMA_DEFAULT_VALUE = 'default_values';
 
     /**
@@ -153,6 +154,60 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_BUILD => false,
                     StageConfigInterface::STAGE_DEPLOY => false,
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_RELATIONSHIPS => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_RELATIONSHIPS',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_ROUTES => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ROUTES',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_VARIABLES => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_VARIABLES',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_APPLICATION => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_APPLICATION',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_MODE => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_MODE',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_ENVIRONMENT => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ENVIRONMENT',
                 ],
             ],
             StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => [

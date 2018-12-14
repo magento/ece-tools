@@ -37,6 +37,14 @@ interface StageConfigInterface
     const VAR_SCD_MATRIX = 'SCD_MATRIX';
 
     /**
+     * Environment variables.
+     */
+    const VAR_ENV_RELATIONSHIPS = 'ENV_RELATIONSHIPS';
+    const VAR_ENV_ROUTES = 'ENV_ROUTES';
+    const VAR_ENV_VARIABLES = 'ENV_VARIABLES';
+    const VAR_ENV_APPLICATION = 'ENV_APPLICATION';
+
+    /**
      * Settings for deployment from git.
      */
     const VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT = 'DEPLOYED_MAGENTO_VERSION_FROM_GIT';

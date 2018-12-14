@@ -5,11 +5,18 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Config\System\Variables;
+
 /**
  * Contains logic for interacting with the server environment
  */
 class Environment
 {
+    /**
+     * @var Variables
+     */
+    private $systemConfig;
+
     /**
      * Regex pattern for detecting main branch.
      * The name of the main branch must be started from one of three prefixes:
@@ -30,6 +37,16 @@ class Environment
     const DEFAULT_ADMIN_NAME = 'admin';
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
+
+    /**
+     * Environment constructor.
+     *
+     * @param Variables $systemConfig
+     */
+    public function __construct(Variables $systemConfig)
+    {
+        $this->systemConfig = $systemConfig;
+    }
 
     /**
      * @var array
@@ -69,6 +86,29 @@ class Environment
     }
 
     /**
+     * Get environment variable and get the name from .magento.env.yaml configuration file.
+     *
+     * @param string $name
+     * @param string|int|null $default
+     * @return array|string|int|null
+     */
+    public function getEnvVar(string $name, $default = null)
+    {
+        return $this->get($this->getEnvVarName($name), $default);
+    }
+
+    /**
+     * Get Environment Variable name from .magento.env.yaml.
+     *
+     * @param string $name
+     * @return string
+     */
+    public function getEnvVarName(string $name): string
+    {
+        return $this->systemConfig->get($name);
+    }
+
+    /**
      * Get routes information from MagentoCloud environment variable.
      *
      * @return mixed
@@ -79,7 +119,7 @@ class Environment
             return $this->data['routes'];
         }
 
-        return $this->data['routes'] = $this->get('MAGENTO_CLOUD_ROUTES', []);
+        return $this->data['routes'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_ROUTES, []);
     }
 
     /**
@@ -93,7 +133,7 @@ class Environment
             return $this->data['relationships'];
         }
 
-        return $this->data['relationships'] = $this->get('MAGENTO_CLOUD_RELATIONSHIPS', []);
+        return $this->data['relationships'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_RELATIONSHIPS, []);
     }
 
     /**
@@ -120,7 +160,7 @@ class Environment
             return $this->data['variables'];
         }
 
-        return $this->data['variables'] = $this->get('MAGENTO_CLOUD_VARIABLES', []);
+        return $this->data['variables'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_VARIABLES, []);
     }
 
     /**
@@ -132,7 +172,7 @@ class Environment
             return $this->data['application'];
         }
 
-        return $this->data['application'] = $this->get('MAGENTO_CLOUD_APPLICATION', []);
+        return $this->data['application'] = $this->getEnvVar(SystemConfigInterface::VAR_ENV_APPLICATION, []);
     }
 
     /**
@@ -227,7 +267,8 @@ class Environment
      */
     public function isMasterBranch(): bool
     {
-        return isset($_ENV['MAGENTO_CLOUD_ENVIRONMENT'])
-            && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV['MAGENTO_CLOUD_ENVIRONMENT']);
+        $envVar = $this->systemConfig->get(SystemConfigInterface::VAR_ENV_ENVIRONMENT);
+        return isset($_ENV[$envVar])
+            && preg_match(self::GIT_MASTER_BRANCH_RE, $_ENV[$envVar]);
     }
 }

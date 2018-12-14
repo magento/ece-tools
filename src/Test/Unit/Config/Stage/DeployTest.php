@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -52,8 +53,15 @@ class DeployTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
+        $this->environmentMock->expects($this->any())
+            ->method('getEnvVarName')
+            ->with(SystemConfigInterface::VAR_ENV_MODE)
+            ->willReturn('MAGENTO_CLOUD_MODE');
+
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
+
         $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);
+
         $this->schemaMock = $this->createMock(Schema::class);
         $this->schemaMock->expects($this->any())
             ->method('getDefaults')
