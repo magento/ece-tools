@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\StaticContent;
 
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\StaticContent\ThemeResolver
+use Magento\MagentoCloud\StaticContent\ThemeResolver;
 
 /**
  * Creates static deploy command
@@ -58,7 +58,7 @@ class CommandFactory
             $option->getExcludedThemes(),
             $excludedThemes
         ));
-        array_map(array($this->themeResolver, 'resolve'), $excludedThemes);
+        array_map([$this->themeResolver, 'resolve'], $excludedThemes);
 
         if ($excludedThemes) {
             $command .= ' --exclude-theme ' . implode(' --exclude-theme ', $excludedThemes);
