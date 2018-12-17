@@ -75,14 +75,14 @@ class MergedConfigTest extends TestCase
      */
     public function testGet(array $defaults, array $envConfig, array $envVarConfig, array $expectedConfig)
     {
-        $this->schemaMock->expects($this->any())
+        $this->schemaMock->expects($this->once())
             ->method('getDefaults')
             ->with(StageConfigInterface::STAGE_DEPLOY)
             ->willReturn($defaults);
-        $this->environmentReaderMock->expects($this->any())
+        $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([StageConfigInterface::SECTION_STAGE => $envConfig]);
-        $this->environmentConfigMock->expects($this->any())
+        $this->environmentConfigMock->expects($this->once())
             ->method('getAll')
             ->willReturn($envVarConfig);
 
@@ -182,7 +182,7 @@ class MergedConfigTest extends TestCase
 
     public function testGetEnterpriseEnv()
     {
-        $this->schemaMock->expects($this->any())
+        $this->schemaMock->expects($this->once())
             ->method('getDefaults')
             ->with(StageConfigInterface::STAGE_DEPLOY)
             ->willReturn([
@@ -207,7 +207,7 @@ class MergedConfigTest extends TestCase
 
     public function testGetEnterpriseEnvOverwrittenByEnvYaml()
     {
-        $this->schemaMock->expects($this->any())
+        $this->schemaMock->expects($this->once())
             ->method('getDefaults')
             ->with(StageConfigInterface::STAGE_DEPLOY)
             ->willReturn([
@@ -221,7 +221,7 @@ class MergedConfigTest extends TestCase
             ->method('getEnv')
             ->with('MAGENTO_CLOUD_MODE')
             ->willReturn(Environment::CLOUD_MODE_ENTERPRISE);
-        $this->environmentReaderMock->expects($this->any())
+        $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([
                 DeployInterface::SECTION_STAGE => [

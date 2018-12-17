@@ -49,47 +49,35 @@ class JsonFormatVariable implements ValidatorInterface
     /**
      * Checks that array-type variables given as json string can be decoded into array.
      *
-     * @return Validator\ResultInterface
+     * {@inheritdoc}
      */
     public function validate(): Validator\ResultInterface
     {
-        $errors = [];
+        try {
+            $errors = [];
 
-        foreach ($this->schema->getSchema() as $optionName => $optionConfig) {
-            if ($optionConfig[Schema::SCHEMA_TYPE] !== ['array'] ||
-                 !in_array(StageConfigInterface::STAGE_DEPLOY, $optionConfig[Schema::SCHEMA_STAGE]) ||
-                 !is_string($this->mergedConfig->get()[$optionName])
-            ) {
-                continue;
+            foreach ($this->schema->getSchema() as $optionName => $optionConfig) {
+                if ($optionConfig[Schema::SCHEMA_TYPE] !== ['array'] ||
+                    !in_array(StageConfigInterface::STAGE_DEPLOY, $optionConfig[Schema::SCHEMA_STAGE]) ||
+                    !is_string($this->mergedConfig->get()[$optionName])
+                ) {
+                    continue;
+                }
+
+                json_decode($this->mergedConfig->get()[$optionName], true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    $errors[] = sprintf('%s (%s)', $optionName, json_last_error_msg());
+                }
             }
 
-            if (!$this->isConfigCanBeDecoded($optionName)) {
-                $errors[] = sprintf('%s (%s)', $optionName, json_last_error_msg());
+            if ($errors) {
+                return $this->resultFactory->error('Next variables can\'t be decoded: ' . implode(', ', $errors));
             }
-        }
-
-        if ($errors) {
-            return $this->resultFactory->error('Next variables can\'t be decoded: ' . implode(', ', $errors));
+        } catch (\Exception $e) {
+            return $this->resultFactory->error('Can\'t read merged configuration: ' . $e->getMessage());
         }
 
         return $this->resultFactory->success();
-    }
-
-    /**
-     * Checks that variable can be decoded.
-     *
-     * @param string $optionName
-     * @return bool
-     */
-    private function isConfigCanBeDecoded(string $optionName)
-    {
-        try {
-            json_decode($this->mergedConfig->get()[$optionName], true);
-
-            return json_last_error() === JSON_ERROR_NONE;
-        } catch (\Exception $e) {
-        }
-
-        return false;
     }
 }

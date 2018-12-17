@@ -92,7 +92,8 @@ class MergedConfig
      * SCD_THREADS = 3 for production environment.
      *
      * @return array
-     * @deprecated Threads environment variables must be used.
+     * @deprecated Threads count shouldn't depend on ENV_MODE variable as this variable doesn't set anymore.
+     *             Threads environment variables or .magento.env.yaml must be used instead.
      */
     private function getDeployConfiguration(): array
     {

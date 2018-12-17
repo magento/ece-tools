@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\JsonFormatVariable;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -143,6 +144,29 @@ class JsonFormatVariableTest extends TestCase
                 'Next variables can\'t be decoded: CACHE_CONFIGURATION (Syntax error), ' .
                 'CRON_CONSUMERS_RUNNER (Syntax error)'
             );
+
+        $this->validator->validate();
+    }
+
+    public function testValidateErrorsWithException()
+    {
+        $this->schemaMock->expects($this->once())
+            ->method('getSchema')
+            ->willReturn([
+                DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [
+                    Schema::SCHEMA_TYPE => ['array'],
+                    Schema::SCHEMA_STAGE => [
+                        StageConfigInterface::STAGE_GLOBAL,
+                        StageConfigInterface::STAGE_DEPLOY
+                    ],
+                ],
+            ]);
+        $this->mergedConfigMock->expects($this->any())
+            ->method('get')
+            ->willThrowException(new FileSystemException('Read file error'));
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with('Can\'t read merged configuration: Read file error');
 
         $this->validator->validate();
     }
