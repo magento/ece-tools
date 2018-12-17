@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Exception\ParseException;
 
@@ -97,7 +98,9 @@ class MergedConfig
     {
         $config = [];
 
-        if ($this->environment->getEnv('MAGENTO_CLOUD_MODE') === Environment::CLOUD_MODE_ENTERPRISE) {
+        $envVar = $this->environment->getEnvVarName(SystemConfigInterface::VAR_ENV_MODE);
+
+        if ($this->environment->getEnv($envVar) === Environment::CLOUD_MODE_ENTERPRISE) {
             $config[DeployInterface::VAR_SCD_THREADS] = 3;
         }
 

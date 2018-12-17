@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -188,6 +189,10 @@ class MergedConfigTest extends TestCase
                 Deploy::VAR_SCD_THREADS => 1,
             ]);
         $this->environmentMock->expects($this->once())
+            ->method('getEnvVarName')
+            ->with(SystemConfigInterface::VAR_ENV_MODE)
+            ->willReturn('MAGENTO_CLOUD_MODE');
+        $this->environmentMock->expects($this->once())
             ->method('getEnv')
             ->with('MAGENTO_CLOUD_MODE')
             ->willReturn(Environment::CLOUD_MODE_ENTERPRISE);
@@ -208,6 +213,10 @@ class MergedConfigTest extends TestCase
             ->willReturn([
                 Deploy::VAR_SCD_THREADS => 1,
             ]);
+        $this->environmentMock->expects($this->once())
+            ->method('getEnvVarName')
+            ->with(SystemConfigInterface::VAR_ENV_MODE)
+            ->willReturn('MAGENTO_CLOUD_MODE');
         $this->environmentMock->expects($this->once())
             ->method('getEnv')
             ->with('MAGENTO_CLOUD_MODE')
