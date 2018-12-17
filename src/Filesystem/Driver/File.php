@@ -477,4 +477,9 @@ class File
     {
         return require $path;
     }
+
+    public function glob(string $path): array
+    {
+        return glob($path);
+    }
 }
