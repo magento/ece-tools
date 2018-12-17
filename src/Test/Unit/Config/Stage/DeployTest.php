@@ -9,10 +9,8 @@ use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * @inheritdoc
@@ -171,27 +169,14 @@ class DeployTest extends TestCase
     }
 
     /**
-     * @expectedExceptionMessage Parse error
+     * @expectedExceptionMessage Some error
      * @expectedException \RuntimeException
      */
-    public function testGetWithParseException()
+    public function testGetWithMergedConfigException()
     {
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
-            ->willThrowException(new ParseException('Parse error'));
-
-        $this->deployConfig->get(Deploy::VAR_SCD_STRATEGY);
-    }
-
-    /**
-     * @expectedExceptionMessage File system error
-     * @expectedException \RuntimeException
-     */
-    public function testGetWithFileSystemException()
-    {
-        $this->mergedConfigMock->expects($this->once())
-            ->method('get')
-            ->willThrowException(new FileSystemException('File system error'));
+            ->willThrowException(new \RuntimeException('Some error'));
 
         $this->deployConfig->get(Deploy::VAR_SCD_STRATEGY);
     }

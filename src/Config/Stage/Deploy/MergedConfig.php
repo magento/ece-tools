@@ -11,8 +11,6 @@ use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
  * Returns all merged configuration for deploy phase
@@ -66,24 +64,31 @@ class MergedConfig
      * Returns all merged configuration for deploy stage.
      *
      * @return mixed
-     * @throws ParseException;
-     * @throws FileSystemException;
+     * @throws \RuntimeException If the configuration file can't be read or can't be parsed
      */
     public function get(): array
     {
-        if (null === $this->mergedConfig) {
-            $envConfig = $this->environmentReader->read()[DeployInterface::SECTION_STAGE] ?? [];
+        try {
+            if (null === $this->mergedConfig) {
+                $envConfig = $this->environmentReader->read()[DeployInterface::SECTION_STAGE] ?? [];
 
-            $this->mergedConfig = array_replace(
-                $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY),
-                $this->getDeployConfiguration(),
-                $envConfig[DeployInterface::STAGE_GLOBAL] ?? [],
-                $envConfig[DeployInterface::STAGE_DEPLOY] ?? [],
-                $this->environmentConfig->getAll()
+                $this->mergedConfig = array_replace(
+                    $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY),
+                    $this->getDeployConfiguration(),
+                    $envConfig[DeployInterface::STAGE_GLOBAL] ?? [],
+                    $envConfig[DeployInterface::STAGE_DEPLOY] ?? [],
+                    $this->environmentConfig->getAll()
+                );
+            }
+
+            return $this->mergedConfig;
+        } catch (\Exception $exception) {
+            throw new \RuntimeException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
             );
         }
-
-        return $this->mergedConfig;
     }
 
     /**

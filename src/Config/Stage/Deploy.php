@@ -46,39 +46,31 @@ class Deploy implements DeployInterface
      */
     public function get(string $name)
     {
-        try {
-            $mergedConfig = $this->mergedConfig->get();
+        $mergedConfig = $this->mergedConfig->get();
 
-            if (!isset($mergedConfig[$name])) {
-                throw new \Exception(sprintf('Config %s was not defined.', $name));
-            }
-
-            $value = $mergedConfig[$name];
-
-            if (!is_string($value)) {
-                return $value;
-            }
-
-            /**
-             * Trying to determine json object in string.
-             */
-            $decodedValue = json_decode($value, true);
-
-            $value = $decodedValue !== null && json_last_error() === JSON_ERROR_NONE ? $decodedValue : $value;
-
-            $schemaDetails = $this->schema->getSchema()[$name];
-
-            if ($schemaDetails[Schema::SCHEMA_TYPE] === ['array'] && !is_array($value)) {
-                $value = $schemaDetails[Schema::SCHEMA_DEFAULT_VALUE][StageConfigInterface::STAGE_DEPLOY];
-            }
-
-            return $value;
-        } catch (\Exception $exception) {
-            throw new \RuntimeException(
-                $exception->getMessage(),
-                $exception->getCode(),
-                $exception
-            );
+        if (!isset($mergedConfig[$name])) {
+            throw new \RuntimeException(sprintf('Config %s was not defined.', $name));
         }
+
+        $value = $mergedConfig[$name];
+
+        if (!is_string($value)) {
+            return $value;
+        }
+
+        /**
+         * Trying to determine json object in string.
+         */
+        $decodedValue = json_decode($value, true);
+
+        $value = $decodedValue !== null && json_last_error() === JSON_ERROR_NONE ? $decodedValue : $value;
+
+        $schemaDetails = $this->schema->getSchema()[$name];
+
+        if ($schemaDetails[Schema::SCHEMA_TYPE] === ['array'] && !is_array($value)) {
+            $value = $schemaDetails[Schema::SCHEMA_DEFAULT_VALUE][StageConfigInterface::STAGE_DEPLOY];
+        }
+
+        return $value;
     }
 }
