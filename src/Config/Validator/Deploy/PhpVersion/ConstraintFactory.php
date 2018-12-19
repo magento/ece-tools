@@ -35,7 +35,10 @@ class ConstraintFactory
      */
     public function constraint(string $operator, string $version): Constraint
     {
-        return $this->container->create(Constraint::class, [$operator, $version]);
+        return $this->container->create(Constraint::class, [
+            'operator' => $operator,
+            'version' => $version,
+        ]);
     }
 
     /**
@@ -44,6 +47,8 @@ class ConstraintFactory
      */
     public function multiconstraint(array $constraints): MultiConstraint
     {
-        return $this->container->create(MultiConstraint::class, [$constraints]);
+        return $this->container->create(MultiConstraint::class, [
+            'constraints' => $constraints
+        ]);
     }
 }

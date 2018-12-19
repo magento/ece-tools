@@ -42,7 +42,7 @@ class ConstraintFactoryTest extends TestCase
         $version = '4.5.6.0';
         $this->containerMock->expects($this->once())
             ->method('create')
-            ->with(Constraint::class, [$operator,$version])
+            ->with(Constraint::class, ['operator' => $operator, 'version' => $version])
             ->willReturn(new Constraint($operator, $version));
         $this->constraintFactory->constraint($operator, $version);
     }
@@ -55,7 +55,7 @@ class ConstraintFactoryTest extends TestCase
         ];
         $this->containerMock->expects($this->once())
             ->method('create')
-            ->with(MultiConstraint::class, [$constraints])
+            ->with(MultiConstraint::class, ['constraints' => $constraints])
             ->willReturn(new MultiConstraint($constraints));
         $this->constraintFactory->multiconstraint($constraints);
     }
