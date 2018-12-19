@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
@@ -48,6 +49,11 @@ class DbConnectionTest extends TestCase
     private $mergedConfigMock;
 
     /**
+     * @var ResourceConfig|MockObject
+     */
+    private $resourceConfigMock;
+
+    /**
      * @var RelationshipConnectionFactory|MockObject
      */
     private $connectionFactoryMock;
@@ -69,6 +75,7 @@ class DbConnectionTest extends TestCase
     {
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->mergedConfigMock = $this->createMock(MergedConfig::class);
+        $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
@@ -81,6 +88,7 @@ class DbConnectionTest extends TestCase
         $this->process = new DbConnection(
             $this->stageConfigMock,
             $this->mergedConfigMock,
+            $this->resourceConfigMock,
             $this->configWriterMock,
             $this->configReaderMock,
             new ConfigMerger(),
@@ -95,6 +103,11 @@ class DbConnectionTest extends TestCase
             ->method('get')
             ->willReturn(['connection' => [
                 'default' => ['host' => 'some.host']
+            ]]);
+        $this->resourceConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn(['default_setup' => [
+                'connection' => 'default'
             ]]);
         $this->loggerMock->expects($this->once())
             ->method('info')

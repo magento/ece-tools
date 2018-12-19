@@ -71,6 +71,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => false,
                 DeployInterface::VAR_SCD_MATRIX => [],
+                DeployInterface::VAR_RESOURCE_CONFIGURATION => [],
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
