@@ -17,7 +17,8 @@ use Psr\Log\LoggerInterface;
 use Composer\Semver\Semver;
 
 /**
- * Validates PHP version
+ * Checks the current PHP version in accordance with
+ * the maximum allowed constraint of  PHP of the magento/magento2-base package
  */
 class PhpVersion implements ValidatorInterface
 {
