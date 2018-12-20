@@ -32,6 +32,11 @@ class ThemeResolver
     private $directoryList;
 
     /**
+     * @var string[]
+     */
+    private $themes;
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
@@ -61,7 +66,7 @@ class ThemeResolver
             );
             if (false !== $themeNamePosition) {
                 $this->logger->warning(
-                    'Theme found as ' . $availableThemes[$themeNamePosition] . '  Using corrected name instead'
+                    'Theme found as ' . $availableThemes[$themeNamePosition] . '.  Using corrected name instead.'
                 );
                 return $availableThemes[$themeNamePosition];
             }
@@ -75,27 +80,28 @@ class ThemeResolver
      */
     public function getThemes(): array
     {
-        $themes = array_merge(
-            $this->file->glob($this->directoryList->getPath(DirectoryList::DIR_DESIGN, true) . '/*/*/*/theme.xml'),
-            $this->file->glob($this->directoryList->getPath(DirectoryList::DIR_VENDOR, true) . '/*/*/theme.xml')
-        );
-        array_walk($themes, function (string &$themePath) {
-            $themePath = $this->getThemeName($themePath);
-        });
+        if (empty($this->themes)) {
+            $this->themes = array_merge(
+                $this->file->glob($this->directoryList->getPath(DirectoryList::DIR_DESIGN, true) . '/*/*/*/theme.xml'),
+                $this->file->glob($this->directoryList->getPath(DirectoryList::DIR_VENDOR, true) . '/*/*/theme.xml')
+            );
+            foreach ($this->themes as &$themePath) {
+                $themePath = $this->getThemeName(substr($themePath, 0, strrpos($themePath, 'theme.xml')));
+            }
+        }
 
-        return $themes;
+        return $this->themes;
     }
 
     /**
+     * Parses the registration file of the theme to get the name of the theme as registered.
      * @param string $themePath
      * @return string
      */
     public function getThemeName(string $themePath): string
     {
         try {
-            $registrationFile = $this->file->fileGetContents(
-                substr($themePath, 0, strrpos($themePath, '/')) . '/registration.php'
-            );
+            $registrationFile = $this->file->fileGetContents($themePath . 'registration.php');
             $registrationParts = explode(PHP_EOL, $registrationFile);
             $themeName = $registrationParts[
                 array_search(
@@ -103,10 +109,11 @@ class ThemeResolver
                     array_map('trim', $registrationParts)
                 ) + 1
             ];
+
             return preg_replace(
                 '/[^a-zA-Z\/]/',
                 '',
-                substr($themeName, strpos($themeName, '/')+1)
+                substr($themeName, strpos($themeName, '/') + 1)
             );
         } catch (FileSystemException $exception) {
             $this->logger->warning('Unable to find registration.php for theme '. $themePath);

@@ -186,7 +186,7 @@ class ThemeResolverTest extends TestCase
 
         $this->assertEquals(
             'SomeVendor/sometheme',
-            $this->themeResolver->getThemeName('app/design/frontend/SomeVendor/sometheme/theme.xml')
+            $this->themeResolver->getThemeName('app/design/frontend/SomeVendor/sometheme/')
         );
     }
 
