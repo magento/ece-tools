@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
-
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Database\ResourceConfig;
