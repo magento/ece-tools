@@ -81,6 +81,7 @@ class ThemeResolver
     public function getThemes(): array
     {
         if (empty($this->themes)) {
+            $this->logger->debug('Finding themes from disk.');
             $this->themes = array_merge(
                 $this->file->glob($this->directoryList->getPath(DirectoryList::DIR_DESIGN, true) . '/*/*/*/theme.xml'),
                 $this->file->glob($this->directoryList->getPath(DirectoryList::DIR_VENDOR, true) . '/*/*/theme.xml')
@@ -88,6 +89,7 @@ class ThemeResolver
             foreach ($this->themes as &$themePath) {
                 $themePath = $this->getThemeName(substr($themePath, 0, strrpos($themePath, 'theme.xml')));
             }
+            $this->logger->debug('End of finding themes from disk.');
         }
 
         return $this->themes;
