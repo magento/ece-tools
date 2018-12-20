@@ -35,6 +35,17 @@ class ResourceConfig implements ConfigInterface
     private $mergedConfig;
 
     /**
+     * Default resource configuration
+     *
+     * @var array
+     */
+    private $rsConfig = [
+        'default_setup' => [
+            'connection' => 'default',
+        ],
+    ];
+
+    /**
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
      */
@@ -51,12 +62,6 @@ class ResourceConfig implements ConfigInterface
      */
     public function get(): array
     {
-        $rsConfig = [
-            'default_setup' => [
-                'connection' => 'default',
-            ],
-        ];
-
         if ($this->mergedConfig !== null) {
             return $this->mergedConfig;
         }
@@ -67,6 +72,6 @@ class ResourceConfig implements ConfigInterface
             return $this->mergedConfig = $this->configMerger->clear($envRsConfig);
         }
 
-        return $this->mergedConfig = $this->configMerger->mergeConfigs($rsConfig, $envRsConfig);
+        return $this->mergedConfig = $this->configMerger->mergeConfigs($this->rsConfig, $envRsConfig);
     }
 }
