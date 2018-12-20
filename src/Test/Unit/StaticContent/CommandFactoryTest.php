@@ -77,7 +77,7 @@ class CommandFactoryTest extends TestCase
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['excluded_themes'])))
             ->method('resolve')
-            ->withConsecutive(...array_chunk($optionConfig['excluded_themes'],1))
+            ->withConsecutive(...array_chunk($optionConfig['excluded_themes'], 1))
             ->willReturnOnConsecutiveCalls(...$optionConfig['resolve_return']);
 
         $this->assertEquals(
@@ -219,6 +219,7 @@ class CommandFactoryTest extends TestCase
      * @param array $matrix
      * @param array $expected
      * @dataProvider matrixDataProvider
+     * @dataProvider matrixResolveDataProvider
      */
     public function testMatrix(array $optionConfig, array $matrix, array $expected)
     {
@@ -239,8 +240,6 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->any())
             ->method('getVerbosityLevel')
             ->willReturn($optionConfig['verbosity_level']);
-
-
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['resolve_pass'])))
             ->method('resolve')
@@ -339,6 +338,12 @@ class CommandFactoryTest extends TestCase
                     . '-v --theme Magento/backend en_US fr_FR af_ZA',
                 ],
             ],
+        ];
+    }
+
+    public function matrixResolveDataProvider()
+    {
+        return [
             [
                 [
                     'thread_count' => 1,
@@ -433,7 +438,7 @@ class CommandFactoryTest extends TestCase
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['excluded_themes'])))
             ->method('resolve')
-            ->withConsecutive(...array_chunk($optionConfig['excluded_themes'],1))
+            ->withConsecutive(...array_chunk($optionConfig['excluded_themes'], 1))
             ->willReturnOnConsecutiveCalls(...$optionConfig['resolve_return']);
 
         $this->assertEquals(
@@ -469,8 +474,6 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->any())
             ->method('getVerbosityLevel')
             ->willReturn('-v');
-
-
         $this->themeResolverMock
             ->expects($this->exactly(3))
             ->method('resolve')
