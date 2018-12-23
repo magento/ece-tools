@@ -122,7 +122,7 @@ class DevBuilder implements BuilderInterface
                 'ports' => [9000],
                 'depends_on' => ['db'],
                 'volumes_from' => ['appdata'],
-                'volumes' => [$this->getMagentoVolume(false)],
+                'volumes' => [$this->getMagentoVolume(true)],
                 'env_file' => [
                     './docker/global.env',
                     './docker/config.env',
@@ -146,7 +146,7 @@ class DevBuilder implements BuilderInterface
                     'appdata',
                 ],
                 'volumes' => [
-                    $this->getMagentoVolume(false),
+                    $this->getMagentoVolume(true),
                 ],
                 'env_file' => [
                     './docker/global.env',
