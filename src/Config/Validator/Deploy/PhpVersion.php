@@ -179,6 +179,8 @@ class PhpVersion implements ValidatorInterface
      */
     private function getCurrentPhpConstraint(): ConstraintInterface
     {
-        return $this->versionParser->parseConstraints(PHP_VERSION);
+        $constraint = $this->constraintFactory->constraint('==', PHP_VERSION);
+        $constraint->setPrettyString(PHP_VERSION);
+        return $constraint;
     }
 }

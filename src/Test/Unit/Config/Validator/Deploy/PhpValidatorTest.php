@@ -144,12 +144,20 @@ class PhpValidatorTest extends TestCase
                 ])
             ]
         ]);
+
+        $this->constraintFactoryMock->expects($this->exactly(2))
+            ->method('constraint')
+            ->withConsecutive(['==', PHP_VERSION], ['>=', '7.1.0'])
+            ->willReturnOnConsecutiveCalls($this->currentPhpConstraint, $phpConstrainMock);
+        $this->currentPhpConstraint->expects($this->once())
+            ->method('setPrettyString')
+            ->with(PHP_VERSION);
         $this->linkMock->expects($this->once())
             ->method('getConstraint')
             ->willReturn($composerPhpConstraint);
-        $this->versionParserMock->expects($this->exactly(3))
+        $this->versionParserMock->expects($this->exactly(2))
             ->method('parseConstraints')
-            ->withConsecutive([PHP_VERSION], ['7.2.0'], ['7.1.0'])
+            ->withConsecutive(['7.2.0'], ['7.1.0'])
             ->willReturn($phpConstrainMock);
         $higherPhpConstraintMock->expects($this->exactly(2))
             ->method('matches')
@@ -159,10 +167,6 @@ class PhpValidatorTest extends TestCase
             ->method('matches')
             ->with($phpConstrainMock)
             ->willReturn(true);
-        $this->constraintFactoryMock->expects($this->once())
-            ->method('constraint')
-            ->with('>=', '7.1.0')
-            ->willReturn($phpConstrainMock);
         $this->constraintFactoryMock->expects($this->once())
             ->method('multiconstraint')
             ->with([$phpConstrainMock, $higherPhpConstraintMock])
@@ -178,12 +182,16 @@ class PhpValidatorTest extends TestCase
      */
     public function testValidatePhpPackageOfComposerHasOneConstraint()
     {
+        $this->constraintFactoryMock->expects($this->once())
+            ->method('constraint')
+            ->with('==', PHP_VERSION)
+            ->willReturn($this->currentPhpConstraint);
+        $this->currentPhpConstraint->expects($this->once())
+            ->method('setPrettyString')
+            ->with(PHP_VERSION);
+
         /** @var Constraint|MockObject $composerPhpConstraint */
         $composerPhpConstraint = $this->createMock(Constraint::class);
-        $this->versionParserMock->expects($this->once())
-            ->method('parseConstraints')
-            ->with(PHP_VERSION)
-            ->willReturn($this->currentPhpConstraint);
         $this->linkMock->expects($this->once())
             ->method('getConstraint')
             ->willReturn($composerPhpConstraint);
@@ -199,12 +207,16 @@ class PhpValidatorTest extends TestCase
      */
     public function testValidateCurrentAndRecommendedPhpConstraintsDoNotMatch()
     {
+        $this->constraintFactoryMock->expects($this->once())
+            ->method('constraint')
+            ->with('==', PHP_VERSION)
+            ->willReturn($this->currentPhpConstraint);
+        $this->currentPhpConstraint->expects($this->once())
+            ->method('setPrettyString')
+            ->with(PHP_VERSION);
+
         /** @var Constraint|MockObject $composerPhpConstraint */
         $composerPhpConstraint = $this->createMock(Constraint::class);
-        $this->versionParserMock->expects($this->once())
-            ->method('parseConstraints')
-            ->with(PHP_VERSION)
-            ->willReturn($this->currentPhpConstraint);
         $this->magentoVersionMock->expects($this->once())
             ->method('getVersion')
             ->willReturn('2.x.x.x');
@@ -237,12 +249,16 @@ class PhpValidatorTest extends TestCase
      */
     public function testValidateWithException()
     {
+        $this->constraintFactoryMock->expects($this->once())
+            ->method('constraint')
+            ->with('==', PHP_VERSION)
+            ->willReturn($this->currentPhpConstraint);
+        $this->currentPhpConstraint->expects($this->once())
+            ->method('setPrettyString')
+            ->with(PHP_VERSION);
+
         /** @var Constraint|MockObject $composerPhpConstraint */
         $composerPhpConstraint = $this->createMock(Constraint::class);
-        $this->versionParserMock->expects($this->once())
-            ->method('parseConstraints')
-            ->with(PHP_VERSION)
-            ->willReturn($this->currentPhpConstraint);
         $this->linkMock->expects($this->once())
             ->method('getConstraint')
             ->willReturn($composerPhpConstraint);
