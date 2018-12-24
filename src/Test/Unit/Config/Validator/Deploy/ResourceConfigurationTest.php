@@ -51,7 +51,7 @@ class ResourceConfigurationTest extends TestCase
      * @dataProvider validateDataProvider
      */
     public function testValidate(
-        array $resourcesConfig = [],
+        array $resourcesConfig,
         InvokedCountMatcher $successExpects,
         InvokedCountMatcher $errorExpects,
         string $expectedResultClass
