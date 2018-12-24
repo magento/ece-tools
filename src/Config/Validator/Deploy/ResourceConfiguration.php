@@ -11,6 +11,9 @@ use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
+/**
+ * Validates RESOURCE_CONFIGURATION variable
+ */
 class ResourceConfiguration implements ValidatorInterface
 {
     /**
@@ -41,8 +44,7 @@ class ResourceConfiguration implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         $wrongResources = [];
-        foreach ($this->resourceConfig->get() as $resourceName => $resourceData)
-        {
+        foreach ($this->resourceConfig->get() as $resourceName => $resourceData) {
             if (!isset($resourceData['connection'])) {
                 $wrongResources[] = $resourceName;
             }
