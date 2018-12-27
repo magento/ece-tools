@@ -18,12 +18,18 @@ case $TEST_SUITE in
     integration)
         case $TRAVIS_PHP_VERSION in
             7.0)
+                docker-compose run build cloud-build
+                docker-compose run deploy cloud-deploy
                 $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php70 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 ;;
             7.1)
+                docker-compose run build cloud-build
+                docker-compose run deploy cloud-deploy
                 $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php71 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 ;;
             7.2)
+                docker-compose run build cloud-build
+                docker-compose run deploy cloud-deploy
                 $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php72 --verbose --configuration ${DIR_TOOLS}/tests/integration"
                 ;;
         esac
