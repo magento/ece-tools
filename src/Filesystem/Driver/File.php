@@ -478,8 +478,13 @@ class File
         return require $path;
     }
 
-    public function glob(string $path): array
+    /**
+     * @param string $path
+     * @param int $flags
+     * @return array
+     */
+    public function glob(string $path, int $flags = GLOB_NOSORT): array
     {
-        return glob($path);
+        return glob($path, $flags);
     }
 }

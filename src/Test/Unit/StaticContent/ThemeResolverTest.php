@@ -52,7 +52,10 @@ class ThemeResolverTest extends TestCase
         );
     }
 
-    public function testResolve()
+    /**
+     * @dataProvider testResolveDataProvider
+     */
+    public function testResolve(string $expectedReturn, string $passedTheme)
     {
         $testRegistration=$this->getTestRegistration();
 
@@ -91,9 +94,23 @@ class ThemeResolverTest extends TestCase
             );
 
         $this->assertEquals(
-            'SomeVendor/sometheme',
-            $this->themeResolver->resolve('SomeVendor/Sometheme')
+            $expectedReturn,
+            $this->themeResolver->resolve($passedTheme)
         );
+    }
+
+    public function testResolveDataProvider()
+    {
+        return [
+            'Incorrect Theme' => [
+                'expectedReturn' => 'SomeVendor/sometheme',
+                'passedTheme' => 'SomeVendor/Sometheme',
+            ],
+            'Incorrect Vendor' => [
+                'expectedReturn' => 'SomeVendor/sometheme',
+                'passedTheme' => 'somevendor/sometheme',
+            ],
+        ];
     }
 
     public function testNoResolve()
