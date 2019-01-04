@@ -12,9 +12,13 @@ pull: ## Pull latest images
 down: ## Destroy containers
 	docker-compose down -v
 
-up: ## Re-create and start containers
+up: ## Destroy, re-create and start containers
 	docker-compose down -v
 	docker-compose up -d
+	docker-compose run build cloud-build
+	docker-compose run deploy cloud-deploy
+
+redeploy: ## Re-build and re-deploy application
 	docker-compose run build cloud-build
 	docker-compose run deploy cloud-deploy
 
@@ -25,4 +29,4 @@ start: ## Resume containers
 	docker-compose start
 
 bash: ## Connect to bash
-	docker-compose run cli bash
+	docker-compose run deploy bash
