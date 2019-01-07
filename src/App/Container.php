@@ -138,6 +138,7 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Stage\PostDeployInterface::class,
             \Magento\MagentoCloud\Config\Stage\PostDeploy::class
         );
+
         $this->container->singleton(\Magento\MagentoCloud\Shell\UtilityManager::class);
         $this->container->singleton(
             \Magento\MagentoCloud\View\RendererInterface::class,
@@ -234,7 +235,6 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(DeployProcess\PreDeploy::class),
                         $this->container->make(DeployProcess\DisableCron::class),
-                        $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -251,9 +251,11 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
+                                    $this->container->make(ConfigValidator\Deploy\JsonFormatVariable::class),
                                 ],
                             ],
                         ]),
+                        $this->container->make(DeployProcess\UnlockCronJobs::class),
                         $this->container->make(DeployProcess\SetCryptKey::class),
                         $this->container->make(DeployProcess\InstallUpdate::class),
                         $this->container->make(DeployProcess\DeployStaticContent::class),
