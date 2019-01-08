@@ -77,49 +77,29 @@ class ThemeResolver
     /**
      * @return array
      * @throws UndefinedPackageException
+     * @codeCoverageIgnore
      */
-    public function getThemes(): array
+    protected function getThemes(): array
     {
         if (empty($this->themes)) {
-            $this->logger->debug('Finding themes from disk.');
-            $this->themes = array_merge(
-                $this->file->glob($this->directoryList->getPath(DirectoryList::DIR_DESIGN, true) . '/*/*/*/theme.xml'),
-                $this->file->glob($this->directoryList->getPath(DirectoryList::DIR_VENDOR, true) . '/*/*/theme.xml')
-            );
-            foreach ($this->themes as &$themePath) {
-                $themePath = $this->getThemeName(substr($themePath, 0, strrpos($themePath, 'theme.xml')));
+            if (class_exists(\Magento\Framework\Component\ComponentRegistrar::class)) {
+                $reflectionClass = new \ReflectionClass(\Magento\Framework\Component\ComponentRegistrar::class);
+                $property = $reflectionClass->getProperty('paths');
+                $property->setAccessible(true);
+
+                $this->themes = array_keys(
+                    $property->getValue($reflectionClass)[\Magento\Framework\Component\ComponentRegistrar::THEME]
+                );
+
+                foreach ($this->themes as &$aTheme) {
+                    $aTheme = substr(
+                        $aTheme,
+                        strpos($aTheme, '/') + 1
+                    );
+                }
             }
-            $this->logger->debug('End of finding themes from disk.');
-        }
 
-        return $this->themes;
-    }
-
-    /**
-     * Parses the registration file of the theme to get the name of the theme as registered.
-     * @param string $themePath
-     * @return string
-     */
-    public function getThemeName(string $themePath): string
-    {
-        try {
-            $registrationFile = $this->file->fileGetContents($themePath . 'registration.php');
-            $registrationParts = explode(PHP_EOL, $registrationFile);
-            $themeName = $registrationParts[
-                array_search(
-                    '\Magento\Framework\Component\ComponentRegistrar::THEME,',
-                    array_map('trim', $registrationParts)
-                ) + 1
-            ];
-
-            return preg_replace(
-                '/[^a-zA-Z\/]/',
-                '',
-                substr($themeName, strpos($themeName, '/') + 1)
-            );
-        } catch (FileSystemException $exception) {
-            $this->logger->warning('Unable to find registration.php for theme '. $themePath);
-            return '';
+            return $this->themes;
         }
     }
 }

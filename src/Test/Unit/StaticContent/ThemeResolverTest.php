@@ -13,12 +13,14 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
+use phpmock\phpunit\PHPMock;
 
 /**
  * @inheritdoc
  */
 class ThemeResolverTest extends TestCase
 {
+    use PHPMock;
     /**
      * @var ThemeResolver
      */
@@ -45,11 +47,14 @@ class ThemeResolverTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
 
-        $this->themeResolver = new ThemeResolver(
-            $this->loggerMock,
-            $this->fileMock,
-            $this->directoryListMock
-        );
+        $this->themeResolver = $this->getMockBuilder(ThemeResolver::class)
+            ->setMethods(array('getThemes'))
+            ->setConstructorArgs([
+                $this->loggerMock,
+                $this->fileMock,
+                $this->directoryListMock,
+                ])
+            ->getMock();
     }
 
     /**
@@ -57,35 +62,10 @@ class ThemeResolverTest extends TestCase
      */
     public function testResolve(string $expectedReturn, string $passedTheme)
     {
-        $testRegistration=$this->getTestRegistration();
+        $this->themeResolver->expects($this->once())
+            ->method('getThemes')
+            ->willReturn(['SomeVendor/sometheme']);
 
-        $this->directoryListMock->expects($this->exactly(2))
-            ->method('getPath')
-            ->withConsecutive(
-                [DirectoryList::DIR_DESIGN, true],
-                [DirectoryList::DIR_VENDOR, true]
-            )
-            ->willReturnOnConsecutiveCalls(
-                'app/design',
-                'vendor'
-            );
-        $this->fileMock->expects($this->exactly(2))
-            ->method('glob')
-            ->withConsecutive(
-                ['app/design/*/*/*/theme.xml'],
-                ['vendor/*/*/theme.xml']
-            )
-            ->willReturnOnConsecutiveCalls(
-                ['app/design/frontend/SomeVendor/sometheme/theme.xml'],
-                ['vendor/SomeVendor/theme-frontend-sometheme/theme.xml']
-            );
-        $this->fileMock->expects($this->exactly(2))
-            ->method('fileGetContents')
-            ->withConsecutive(
-                ['app/design/frontend/SomeVendor/sometheme/registration.php'],
-                ['vendor/SomeVendor/theme-frontend-sometheme/registration.php']
-            )
-            ->willReturn($testRegistration);
         $this->loggerMock->expects($this->exactly(2))
             ->method('warning')
             ->willReturnOnConsecutiveCalls(
@@ -115,35 +95,10 @@ class ThemeResolverTest extends TestCase
 
     public function testNoResolve()
     {
-        $testRegistration=$this->getTestRegistration();
+        $this->themeResolver->expects($this->once())
+            ->method('getThemes')
+            ->willReturn(['SomeVendor/sometheme']);
 
-        $this->directoryListMock->expects($this->exactly(2))
-            ->method('getPath')
-            ->withConsecutive(
-                [DirectoryList::DIR_DESIGN, true],
-                [DirectoryList::DIR_VENDOR, true]
-            )
-            ->willReturnOnConsecutiveCalls(
-                'app/design',
-                'vendor'
-            );
-        $this->fileMock->expects($this->exactly(2))
-            ->method('glob')
-            ->withConsecutive(
-                ['app/design/*/*/*/theme.xml'],
-                ['vendor/*/*/theme.xml']
-            )
-            ->willReturnOnConsecutiveCalls(
-                ['app/design/frontend/SomeVendor/sometheme/theme.xml'],
-                ['vendor/SomeVendor/theme-frontend-sometheme/theme.xml']
-            );
-        $this->fileMock->expects($this->exactly(2))
-            ->method('fileGetContents')
-            ->withConsecutive(
-                ['app/design/frontend/SomeVendor/sometheme/registration.php'],
-                ['vendor/SomeVendor/theme-frontend-sometheme/registration.php']
-            )
-            ->willReturn($testRegistration);
         $this->loggerMock->expects($this->once())
             ->method('warning')
             ->willReturn('Theme SomeVendor/doesntExist does not exist.');
@@ -152,87 +107,5 @@ class ThemeResolverTest extends TestCase
             '',
             $this->themeResolver->resolve('SomeVendor/doesntExist')
         );
-    }
-
-    public function testGetThemes()
-    {
-        $testRegistration=$this->getTestRegistration();
-
-        $this->directoryListMock->expects($this->exactly(2))
-            ->method('getPath')
-            ->withConsecutive(
-                [DirectoryList::DIR_DESIGN, true],
-                [DirectoryList::DIR_VENDOR, true]
-            )
-            ->willReturnOnConsecutiveCalls(
-                'app/design',
-                'vendor'
-            );
-        $this->fileMock->expects($this->exactly(2))
-            ->method('glob')
-            ->withConsecutive(
-                ['app/design/*/*/*/theme.xml'],
-                ['vendor/*/*/theme.xml']
-            )
-            ->willReturnOnConsecutiveCalls(
-                ['app/design/frontend/SomeVendor/sometheme/theme.xml'],
-                ['vendor/SomeVendor/theme-frontend-sometheme/theme.xml']
-            );
-        $this->fileMock->expects($this->exactly(2))
-            ->method('fileGetContents')
-            ->withConsecutive(
-                ['app/design/frontend/SomeVendor/sometheme/registration.php'],
-                ['vendor/SomeVendor/theme-frontend-sometheme/registration.php']
-            )
-            ->willReturn($testRegistration);
-
-        $this->assertEquals(
-            ['SomeVendor/sometheme','SomeVendor/sometheme'],
-            $this->themeResolver->getThemes()
-        );
-    }
-
-    public function testGetThemeName()
-    {
-        $testRegistration=$this->getTestRegistration();
-
-        $this->fileMock->expects($this->once())
-            ->method('fileGetContents')
-            ->with('app/design/frontend/SomeVendor/sometheme/registration.php')
-            ->willReturn($testRegistration);
-
-        $this->assertEquals(
-            'SomeVendor/sometheme',
-            $this->themeResolver->getThemeName('app/design/frontend/SomeVendor/sometheme/')
-        );
-    }
-
-    public function testGetThemeNameException()
-    {
-        $this->fileMock->expects($this->once())
-            ->method('fileGetContents')
-            ->willThrowException(new FileSystemException);
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('Unable to find registration.php for theme app/design/frontend/SomeVendor/sometheme/theme.xml');
-
-        $this->themeResolver->getThemeName('app/design/frontend/SomeVendor/sometheme/theme.xml');
-    }
-
-    private function getTestRegistration() : string
-    {
-        return <<<REGISTRATION
-<?php
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
-
-\Magento\Framework\Component\ComponentRegistrar::register(
-    \Magento\Framework\Component\ComponentRegistrar::THEME,
-    'frontend/SomeVendor/sometheme',
-    __DIR__
-);
-REGISTRATION;
     }
 }
