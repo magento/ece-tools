@@ -129,8 +129,6 @@ class DevBuilder implements BuilderInterface
                 ],
             ]
         );
-        /** For backward compatibility. */
-        $services['cli'] = $this->getCliService($phpVersion, false, $cliDepends, 'cli.magento2.docker');
         $services['build'] = $this->getCliService($phpVersion, false, $cliDepends, 'build.magento2.docker');
         $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends, 'deploy.magento2.docker');
         $services['web'] = $this->serviceFactory->create(
