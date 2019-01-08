@@ -271,16 +271,4 @@ class FileTest extends TestCase
 
         $this->driver->fileGetContents('test');
     }
-
-    public function testGlob()
-    {
-        $globMock = $this->getFunctionMock(
-            'Magento\MagentoCloud\Filesystem\Driver',
-            'glob'
-        );
-        $globMock->expects($this->once())
-            ->willReturn([]);
-
-        $this->driver->glob('test');
-    }
 }

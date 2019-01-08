@@ -477,14 +477,4 @@ class File
     {
         return require $path;
     }
-
-    /**
-     * @param string $path
-     * @param int $flags
-     * @return array
-     */
-    public function glob(string $path, int $flags = GLOB_NOSORT): array
-    {
-        return glob($path, $flags);
-    }
 }
