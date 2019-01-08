@@ -7,20 +7,16 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
 use Magento\MagentoCloud\StaticContent\ThemeResolver;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use phpmock\phpunit\PHPMock;
 
 /**
  * @inheritdoc
  */
 class ThemeResolverTest extends TestCase
 {
-    use PHPMock;
     /**
      * @var ThemeResolver
      */
@@ -69,7 +65,7 @@ class ThemeResolverTest extends TestCase
         $this->loggerMock->expects($this->exactly(2))
             ->method('warning')
             ->willReturnOnConsecutiveCalls(
-                'Theme SomeVendor/Sometheme does not exist.',
+                'Theme SomeVendor/Sometheme does not exist, attempting to resolve.',
                 'Theme found as SomeVendor/sometheme Using corrected name instead'
             );
 
@@ -93,6 +89,24 @@ class ThemeResolverTest extends TestCase
         ];
     }
 
+    public function testCorrect()
+    {
+        $this->themeResolver->expects($this->once())
+            ->method('getThemes')
+            ->willReturn(['SomeVendor/sometheme']);
+
+        $this->loggerMock->expects($this->never())
+            ->method('warning');
+
+        $this->loggerMock->expects($this->never())
+            ->method('error');
+
+        $this->assertEquals(
+            'SomeVendor/sometheme',
+            $this->themeResolver->resolve('SomeVendor/sometheme')
+        );
+    }
+
     public function testNoResolve()
     {
         $this->themeResolver->expects($this->once())
@@ -101,7 +115,11 @@ class ThemeResolverTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->willReturn('Theme SomeVendor/doesntExist does not exist.');
+            ->willReturn('Theme SomeVendor/doesntExist does not exist, attempting to resolve.');
+
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->willReturn('Unable to resolve theme.');
 
         $this->assertEquals(
             '',

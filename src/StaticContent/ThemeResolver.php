@@ -6,8 +6,6 @@
 namespace Magento\MagentoCloud\StaticContent;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 
@@ -53,13 +51,12 @@ class ThemeResolver
      *
      * @param string $themeName
      * @return string
-     * @throws UndefinedPackageException
      */
     public function resolve(string $themeName): string
     {
         $availableThemes = $this->getThemes();
         if (!in_array($themeName, $availableThemes)) {
-            $this->logger->warning('Theme ' . $themeName . ' does not exist.');
+            $this->logger->warning('Theme ' . $themeName . ' does not exist, attempting to resolve.');
             $themeNamePosition = array_search(
                 strtolower($themeName),
                 array_map('strtolower', $availableThemes)
@@ -69,18 +66,22 @@ class ThemeResolver
                     'Theme found as ' . $availableThemes[$themeNamePosition] . '.  Using corrected name instead.'
                 );
                 return $availableThemes[$themeNamePosition];
+            } else {
+                $this->logger->error('Unable to resolve theme.');
+                return '';
             }
         }
-        return '';
+        return $themeName;
     }
 
     /**
      * @return array
-     * @throws UndefinedPackageException
      * @codeCoverageIgnore
+     * @throws \ReflectionException
      */
     protected function getThemes(): array
     {
+        $this->logger->debug('Finding available themes.');
         if (empty($this->themes)) {
             if (class_exists(\Magento\Framework\Component\ComponentRegistrar::class)) {
                 $reflectionClass = new \ReflectionClass(\Magento\Framework\Component\ComponentRegistrar::class);
@@ -97,9 +98,11 @@ class ThemeResolver
                         strpos($aTheme, '/') + 1
                     );
                 }
+            } else {
+                $this->logger->warning('Unable to find themes, cannot find Magento class.');
             }
-
-            return $this->themes;
         }
+        $this->logger->debug('End of finding available themes.');
+        return $this->themes;
     }
 }
