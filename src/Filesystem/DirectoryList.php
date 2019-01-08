@@ -27,11 +27,9 @@ class DirectoryList
     const DIR_GENERATED_CODE = 'code';
     const DIR_GENERATED_METADATA = 'metadata';
     const DIR_ETC = 'etc';
-    const DIR_DESIGN = 'design';
     const DIR_MEDIA = 'media';
     const DIR_VIEW_PREPROCESSED = 'view-preprocessed';
     const DIR_STATIC = 'static';
-    const DIR_VENDOR = 'vendor';
 
     /**
      * @var string
@@ -187,11 +185,9 @@ class DirectoryList
             static::DIR_VAR => [static::PATH => 'var'],
             static::DIR_LOG => [static::PATH => 'var/log'],
             static::DIR_ETC => [static::PATH => 'app/etc'],
-            static::DIR_DESIGN => [static::PATH => 'app/design'],
             static::DIR_MEDIA => [static::PATH => 'pub/media'],
             static::DIR_STATIC => [static::PATH => 'pub/static'],
             static::DIR_VIEW_PREPROCESSED => [static::PATH => 'var/view_preprocessed'],
-            static::DIR_VENDOR => [static::PATH => 'vendor'],
         ];
 
         return $config;
