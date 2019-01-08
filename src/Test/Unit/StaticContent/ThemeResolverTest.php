@@ -27,28 +27,14 @@ class ThemeResolverTest extends TestCase
      */
     private $loggerMock;
 
-    /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
-
-    /**
-     * @var FileList|Mock
-     */
-    private $fileMock;
-
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
 
         $this->themeResolver = $this->getMockBuilder(ThemeResolver::class)
             ->setMethods(array('getThemes'))
             ->setConstructorArgs([
                 $this->loggerMock,
-                $this->fileMock,
-                $this->directoryListMock,
                 ])
             ->getMock();
     }

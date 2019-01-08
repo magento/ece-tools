@@ -20,30 +20,16 @@ class ThemeResolver
     private $logger;
 
     /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
      * @var string[]
      */
     private $themes;
 
     /**
      * @param LoggerInterface $logger
-     * @param File $file
-     * @param DirectoryList $directoryList
      */
-    public function __construct(LoggerInterface $logger, File $file, DirectoryList $directoryList)
+    public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
-        $this->file = $file;
-        $this->directoryList = $directoryList;
     }
 
     /**
