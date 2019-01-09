@@ -3,39 +3,39 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Cache;
+namespace Magento\MagentoCloud\Test\Unit\Config\Factory;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Config\Factory\Cache;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Cache\Config;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
  */
-class ConfigTest extends TestCase
+class CacheTest extends TestCase
 {
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var Config
+     * @var Cache
      */
     private $config;
 
@@ -46,7 +46,7 @@ class ConfigTest extends TestCase
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
 
-        $this->config = new Config(
+        $this->config = new Cache(
             $this->environmentMock,
             $this->stageConfigMock,
             $this->loggerMock,
