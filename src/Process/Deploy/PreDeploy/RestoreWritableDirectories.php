@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Filesystem\RecoverableDirectoryList;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -28,11 +27,6 @@ class RestoreWritableDirectories implements ProcessInterface
     private $buildDirCopier;
 
     /**
-     * @var DirectoryList
-     */
-    private $directoryList;
-
-    /**
      * @var RecoverableDirectoryList
      */
     private $recoverableDirectoryList;
@@ -46,20 +40,17 @@ class RestoreWritableDirectories implements ProcessInterface
      * @param LoggerInterface $logger
      * @param BuildDirCopier $buildDirCopier
      * @param RecoverableDirectoryList $recoverableDirectoryList
-     * @param DirectoryList $directoryList
      * @param FlagManager $flagManager
      */
     public function __construct(
         LoggerInterface $logger,
         BuildDirCopier $buildDirCopier,
         RecoverableDirectoryList $recoverableDirectoryList,
-        DirectoryList $directoryList,
         FlagManager $flagManager
     ) {
         $this->logger = $logger;
         $this->buildDirCopier = $buildDirCopier;
         $this->recoverableDirectoryList = $recoverableDirectoryList;
-        $this->directoryList = $directoryList;
         $this->flagManager = $flagManager;
     }
 

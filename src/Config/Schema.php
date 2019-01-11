@@ -406,6 +406,15 @@ class Schema
                     StageConfigInterface::STAGE_POST_DEPLOY => [''],
                 ],
             ],
+            StageConfigInterface::VAR_X_FRAME_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => ''
+                ]
+            ]
         ];
     }
 }

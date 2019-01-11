@@ -35,6 +35,7 @@ interface StageConfigInterface
     const VAR_SCD_ON_DEMAND = 'SCD_ON_DEMAND';
     const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
     const VAR_SCD_MATRIX = 'SCD_MATRIX';
+    const VAR_X_FRAME_CONFIGURATION = 'X_FRAME_CONFIGURATION';
 
     /**
      * Environment variables.
