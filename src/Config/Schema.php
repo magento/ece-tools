@@ -30,7 +30,7 @@ class Schema
      * @param string $stage
      * @return array
      */
-    public function getDefaults(string $stage)
+    public function getDefaults(string $stage): array
     {
         if (isset($this->defaults[$stage])) {
             return $this->defaults[$stage];
