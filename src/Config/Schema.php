@@ -412,7 +412,7 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => ''
+                    StageConfigInterface::STAGE_GLOBAL => 'SAMEORIGIN'
                 ]
             ]
         ];
