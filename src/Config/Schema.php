@@ -30,7 +30,7 @@ class Schema
      * @param string $stage
      * @return array
      */
-    public function getDefaults(string $stage)
+    public function getDefaults(string $stage): array
     {
         if (isset($this->defaults[$stage])) {
             return $this->defaults[$stage];
@@ -416,6 +416,15 @@ class Schema
                     StageConfigInterface::STAGE_POST_DEPLOY => [''],
                 ],
             ],
+            StageConfigInterface::VAR_X_FRAME_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'SAMEORIGIN'
+                ]
+            ]
         ];
     }
 }
