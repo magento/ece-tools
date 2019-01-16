@@ -85,7 +85,7 @@ class MaintenanceModeSwitcher
             ));
         } catch (ShellException $e) {
             $this->logger->warning(
-                'Command maintenance:enable finished with an error. Creating maintenance flag flag manually.'
+                'Command maintenance:enable finished with an error. Creating maintenance flag file manually.'
             );
             $this->file->touch($this->getMaintenanceFlagPath());
         }
@@ -106,7 +106,7 @@ class MaintenanceModeSwitcher
             ));
         } catch (ShellException $e) {
             $this->logger->warning(
-                'Command maintenance:disable finished with an error. Deleting maintenance flag flag manually.'
+                'Command maintenance:disable finished with an error. Deleting maintenance flag file manually.'
             );
             $this->file->deleteFile($this->getMaintenanceFlagPath());
         }

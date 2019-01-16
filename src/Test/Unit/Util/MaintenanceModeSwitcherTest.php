@@ -107,7 +107,7 @@ class MaintenanceModeSwitcherTest extends TestCase
             ->willThrowException(new ShellException('command error'));
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Command maintenance:enable finished with an error. Creating maintenance flag flag manually.');
+            ->with('Command maintenance:enable finished with an error. Creating maintenance flag file manually.');
         $this->directoryListMock->expects($this->once())
             ->method('getVar')
             ->willReturn('/var');
@@ -155,7 +155,7 @@ class MaintenanceModeSwitcherTest extends TestCase
             ->willThrowException(new ShellException('command error'));
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Command maintenance:disable finished with an error. Deleting maintenance flag flag manually.');
+            ->with('Command maintenance:disable finished with an error. Deleting maintenance flag file manually.');
         $this->directoryListMock->expects($this->once())
             ->method('getVar')
             ->willReturn('/var');
