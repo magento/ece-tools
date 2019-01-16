@@ -6,6 +6,9 @@
 namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -15,6 +18,11 @@ use Psr\Log\LoggerInterface;
  */
 class MaintenanceModeSwitcher
 {
+    /**
+     * Maintenance flag file name
+     */
+    const FLAG_FILENAME = '.maintenance.flag';
+
     /**
      * @var ShellInterface
      */
@@ -31,47 +39,90 @@ class MaintenanceModeSwitcher
     private $stageConfig;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
      * @param ShellInterface $shell
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
+     * @param File $file
+     * @param DirectoryList $directoryList
      */
     public function __construct(
         ShellInterface $shell,
         LoggerInterface $logger,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        File $file,
+        DirectoryList $directoryList
     ) {
         $this->shell = $shell;
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
+        $this->file = $file;
+        $this->directoryList = $directoryList;
     }
 
     /**
      * Enables maintenance mode
      *
      * @return void
-     * @throws ShellException If shell command was executed with error
+     * @throws \RuntimeException
      */
     public function enable()
     {
         $this->logger->notice('Enabling Maintenance mode');
-        $this->shell->execute(sprintf(
-            'php ./bin/magento maintenance:enable --ansi --no-interaction %s',
-            $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
-        ));
+        try {
+            $this->shell->execute(sprintf(
+                'php ./bin/magento maintenance:enable --ansi --no-interaction %s',
+                $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ));
+        } catch (ShellException $e) {
+            $this->logger->warning('Command maintenance:enable finished with an error: ' . $e->getMessage());
+            $this->logger->notice('Setting maintenance flag manually.');
+            $this->file->touch($this->getMaintenanceFlagPath());
+        }
     }
 
     /**
      * Disable maintenance mode
      *
      * @return void
-     * @throws ShellException If shell command was executed with error
+     * @throws \RuntimeException
      */
     public function disable()
     {
-        $this->shell->execute(sprintf(
-            'php ./bin/magento maintenance:disable --ansi --no-interaction %s',
-            $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
-        ));
+        try {
+            $this->shell->execute(sprintf(
+                'php ./bin/magento maintenance:disable --ansi --no-interaction %s',
+                $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ));
+        } catch (ShellException $e) {
+            $this->logger->warning('Command maintenance:disable finished with an error: ' . $e->getMessage());
+            $this->logger->notice('Deleting maintenance flag manually.');
+            $this->file->deleteFile($this->getMaintenanceFlagPath());
+        }
         $this->logger->notice('Maintenance mode is disabled.');
+    }
+
+    /**
+     * Returns path to maintenance flag file
+     *
+     * @return string
+     * @throws \RuntimeException if DirectoryList class can't get magento package version
+     */
+    private function getMaintenanceFlagPath()
+    {
+        try {
+            return $this->directoryList->getVar() . '/' . self::FLAG_FILENAME;
+        } catch (UndefinedPackageException $e) {
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }
