@@ -100,7 +100,6 @@ class DevBuilderTest extends TestCase
         $this->assertArrayNotHasKey('redis', $build['services']);
         $this->assertArrayNotHasKey('rabbitmq', $build['services']);
         $this->assertArrayNotHasKey('elasticsearch', $build['services']);
-        $this->assertArrayHasKey('cli', $build['services']);
         $this->assertArrayHasKey('build', $build['services']);
         $this->assertArrayHasKey('deploy', $build['services']);
         $this->assertArrayHasKey('db', $build['services']);

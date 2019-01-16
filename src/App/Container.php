@@ -313,7 +313,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\CronConsumersRunner::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Cache::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Session::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
@@ -336,6 +335,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(DeployProcess\PreDeploy\ConfigUpdate\Cache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanViewPreprocessed::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
