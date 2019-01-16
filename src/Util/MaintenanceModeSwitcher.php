@@ -84,8 +84,9 @@ class MaintenanceModeSwitcher
                 $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
             ));
         } catch (ShellException $e) {
-            $this->logger->warning('Command maintenance:enable finished with an error: ' . $e->getMessage());
-            $this->logger->notice('Setting maintenance flag manually.');
+            $this->logger->warning(
+                'Command maintenance:enable finished with an error. Creating maintenance flag flag manually.'
+            );
             $this->file->touch($this->getMaintenanceFlagPath());
         }
     }
@@ -104,8 +105,9 @@ class MaintenanceModeSwitcher
                 $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
             ));
         } catch (ShellException $e) {
-            $this->logger->warning('Command maintenance:disable finished with an error: ' . $e->getMessage());
-            $this->logger->notice('Deleting maintenance flag manually.');
+            $this->logger->warning(
+                'Command maintenance:disable finished with an error. Deleting maintenance flag flag manually.'
+            );
             $this->file->deleteFile($this->getMaintenanceFlagPath());
         }
         $this->logger->notice('Maintenance mode is disabled.');
