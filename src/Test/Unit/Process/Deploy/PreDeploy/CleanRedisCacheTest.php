@@ -91,4 +91,3 @@ class CleanRedisCacheTest extends TestCase
         $this->process->execute();
     }
 }
-
