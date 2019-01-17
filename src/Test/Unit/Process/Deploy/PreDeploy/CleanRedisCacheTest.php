@@ -20,7 +20,7 @@ class CleanRedisCacheTest extends TestCase
     /**
      * @var ShellInterface|Mock
      */
-    private $shellMock;
+    private $redisMock;
 
     /**
      * @var Environment|Mock
@@ -39,7 +39,7 @@ class CleanRedisCacheTest extends TestCase
 
     protected function setUp()
     {
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
+        $this->redisMock = $this->getMockBuilder(\Redis::class)
             ->getMockForAbstractClass();
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
@@ -47,7 +47,7 @@ class CleanRedisCacheTest extends TestCase
 
         $this->process = new CleanRedisCache(
             $this->loggerMock,
-            $this->shellMock,
+            $this->redisMock,
             $this->environmentMock
         );
     }
@@ -68,9 +68,11 @@ class CleanRedisCacheTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Clearing redis cache');
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->with('redis-cli -h localhost -p 1234 -n 1 flushdb');
+        $this->redisMock->expects($this->once())
+            ->method('connect')
+            ->with('localhost', 1234);
+        $this->redisMock->expects($this->once())
+            ->method('flushDB');
 
         $this->process->execute();
     }
@@ -83,9 +85,10 @@ class CleanRedisCacheTest extends TestCase
             ->willReturn([]);
         $this->loggerMock->expects($this->never())
             ->method('info');
-        $this->shellMock->expects($this->never())
-            ->method('execute');
+        $this->redisMock->expects($this->never())
+            ->method('connect');
 
         $this->process->execute();
     }
 }
+

@@ -57,9 +57,12 @@ class CleanRedisCache implements ProcessInterface
         if (count($redis) > 0) {
             $redisHost = $redis[0]['host'];
             $redisPort = $redis[0]['port'];
-            $redisCacheDb = '1';
+            $redisCacheDb = 1;
             $this->logger->info('Clearing redis cache');
-            $this->shell->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushdb");
+            $redisClient = new \Redis();
+            $redisClient->connect($redisHost, $redisPort);
+            $redisClient->select($redisCacheDb);
+            $redisClient->flushDB();
         }
     }
 }
