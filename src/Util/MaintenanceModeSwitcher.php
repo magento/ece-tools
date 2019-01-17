@@ -95,7 +95,7 @@ class MaintenanceModeSwitcher
      * Disable maintenance mode
      *
      * @return void
-     * @throws \RuntimeException
+     * @throws \RuntimeException In case when maintenance:disable finished with an error
      */
     public function disable()
     {
@@ -105,10 +105,7 @@ class MaintenanceModeSwitcher
                 $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
             ));
         } catch (ShellException $e) {
-            $this->logger->warning(
-                'Command maintenance:disable finished with an error. Deleting a maintenance flag file manually.'
-            );
-            $this->file->deleteFile($this->getMaintenanceFlagPath());
+            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
         $this->logger->notice('Maintenance mode is disabled.');
     }

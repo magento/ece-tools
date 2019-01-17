@@ -130,38 +130,26 @@ class MaintenanceModeSwitcherTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./bin/magento maintenance:disable --ansi --no-interaction -v');
-        $this->loggerMock->expects($this->never())
-            ->method('warning');
-        $this->fileMock->expects($this->never())
-            ->method('deleteFile');
-        $this->directoryListMock->expects($this->never())
-            ->method('getVar');
 
         $this->maintenanceModeSwitcher->disable();
     }
 
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage command error
+     */
     public function testDisableCommandException()
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn('-v');
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Maintenance mode is disabled.');
+        $this->loggerMock->expects($this->never())
+            ->method('notice');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./bin/magento maintenance:disable --ansi --no-interaction -v')
             ->willThrowException(new ShellException('command error'));
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('Command maintenance:disable finished with an error. Deleting a maintenance flag file manually.');
-        $this->directoryListMock->expects($this->once())
-            ->method('getVar')
-            ->willReturn('/var');
-        $this->fileMock->expects($this->once())
-            ->method('deleteFile')
-            ->with('/var/.maintenance.flag');
 
         $this->maintenanceModeSwitcher->disable();
     }
