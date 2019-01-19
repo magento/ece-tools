@@ -193,7 +193,6 @@ class Container implements ContainerInterface
                         $this->container->make(BuildProcess\CompileDi::class),
                         $this->container->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->container->make(BuildProcess\DeployStaticContent::class),
-                        $this->container->make(BuildProcess\CompressStaticContent::class),
                     ],
                 ]);
             }
@@ -203,6 +202,7 @@ class Container implements ContainerInterface
             function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(BuildProcess\CompressStaticContent::class),
                         $this->container->make(BuildProcess\ClearInitDirectory::class),
                         $this->container->make(BuildProcess\BackupData::class),
                     ],
