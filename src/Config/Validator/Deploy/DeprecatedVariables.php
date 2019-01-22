@@ -60,6 +60,14 @@ class DeprecatedVariables implements ValidatorInterface
             );
         }
 
+        if (isset($variables[DeployInterface::VAR_SCD_EXCLUDE_THEMES])) {
+            $errors[] = sprintf(
+                'The %s variable is deprecated. Use %s instead.',
+                DeployInterface::VAR_SCD_EXCLUDE_THEMES,
+                DeployInterface::VAR_SCD_MATRIX
+            );
+        }
+
         if ($this->environment->getEnv(DeployInterface::VAR_STATIC_CONTENT_THREADS)
             || isset($variables[DeployInterface::VAR_STATIC_CONTENT_THREADS])
         ) {
