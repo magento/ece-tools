@@ -57,11 +57,11 @@ class StageConfigDeprecatedVariables implements ValidatorInterface
         $deprecatedSchema = $this->schema->getDeprecatedSchema();
         $errors = [];
 
-        foreach ($config as $stage => $stageConfig) {
+        foreach ($config as $stageConfig) {
             if (!is_array($stageConfig)) {
                 continue;
             }
-            foreach ($stageConfig as $key => $value) {
+            foreach (array_keys($stageConfig) as $key) {
                 if (!isset($deprecatedSchema[$key]) || isset($errors[$key])) {
                     continue;
                 }
