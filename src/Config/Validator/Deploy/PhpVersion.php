@@ -5,20 +5,17 @@
  */
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Composer\Composer;
 use Composer\Package\Version\VersionParser;
 use Composer\Semver\Constraint\ConstraintInterface;
-use Composer\Semver\Constraint\MultiConstraint;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Package\Manager as PackageManager;
-use Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion\ConstraintFactory;
 use Psr\Log\LoggerInterface;
-use Composer\Semver\Semver;
 
 /**
  * Checks the current PHP version in accordance with
- * the maximum allowed constraint of  PHP of the magento/magento2-base package
+ * the maximum allowed constraint of PHP of the magento/magento2-base package
  */
 class PhpVersion implements ValidatorInterface
 {
@@ -28,9 +25,9 @@ class PhpVersion implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var PackageManager
+     * @var Composer
      */
-    private $packageManager;
+    private $composer;
 
     /**
      * @var VersionParser
@@ -43,36 +40,28 @@ class PhpVersion implements ValidatorInterface
     private $magentoVersion;
 
     /**
-     * @var ConstraintFactory
-     */
-    private $constraintFactory;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
+     * @param Composer $composer
      * @param Validator\ResultFactory $resultFactory
-     * @param PackageManager $packageManager
      * @param VersionParser $versionParser
      * @param MagentoVersion $magentoVersion
-     * @param ConstraintFactory $constraintFactory
      * @param LoggerInterface $logger
      */
     public function __construct(
+        Composer $composer,
         Validator\ResultFactory $resultFactory,
-        PackageManager $packageManager,
         VersionParser $versionParser,
         MagentoVersion $magentoVersion,
-        ConstraintFactory $constraintFactory,
         LoggerInterface $logger
     ) {
+        $this->composer = $composer;
         $this->resultFactory = $resultFactory;
-        $this->packageManager = $packageManager;
         $this->versionParser = $versionParser;
         $this->magentoVersion = $magentoVersion;
-        $this->constraintFactory = $constraintFactory;
         $this->logger = $logger;
     }
 
@@ -84,8 +73,9 @@ class PhpVersion implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
-            $currentPhpConstraint = $this->getCurrentPhpConstraint();
             $recommendedPhpConstraint = $this->getRecommendedPhpConstraint();
+            $currentPhpConstraint = $this->getCurrentPhpConstraint();
+
             if (!$recommendedPhpConstraint->matches($currentPhpConstraint)) {
                 return $this->resultFactory->error(
                     sprintf(
@@ -113,74 +103,28 @@ class PhpVersion implements ValidatorInterface
      */
     private function getRecommendedPhpConstraint(): ConstraintInterface
     {
-        $requirePackages = $this->packageManager->get('magento/magento2-base')->getRequires();
-        $phpConstraint = $requirePackages['php']->getConstraint();
-        if (!$phpConstraint instanceof MultiConstraint) {
-            return $phpConstraint;
-        }
-        $phpConstraints = [];
-        $this->getAllConstraints($phpConstraint, $phpConstraints);
-        $phpVersions = Semver::rsort(array_keys($phpConstraints));
-        $higherPhpVersion = $phpVersions[0];
-        /** @var ConstraintInterface $higherPhpConstraint */
-        $higherPhpConstraint = $phpConstraints[$higherPhpVersion];
-        $bestCandidatePhpConstraint = $this->versionParser->parseConstraints($higherPhpVersion);
-        if ($higherPhpConstraint->matches($bestCandidatePhpConstraint)) {
-            return $bestCandidatePhpConstraint;
-        }
-        preg_match('/(\d*)\.(\d*)\.(\d*)/', $higherPhpVersion, $phpVersionParts);
-        unset($phpVersionParts[0]);
-        for ($i = 3; $i > 0; $i--) {
-            if ($phpVersionParts[$i] < 1) {
-                continue;
-            }
-            $phpVersionParts[$i]--;
-            $bestCandidatePhpVersion = implode('.', $phpVersionParts);
-            $bestCandidatePhpConstraint = $this->versionParser->parseConstraints($bestCandidatePhpVersion);
-            if ($higherPhpConstraint->matches($bestCandidatePhpConstraint)) {
-                break;
-            }
-            $phpVersionParts[$i] = 0;
-        }
-        /** @var ConstraintInterface $phpLowerConstraint */
-        $phpLowerConstraint = $phpConstraints[$phpVersions[1]];
-        if (!$phpLowerConstraint->matches($bestCandidatePhpConstraint)) {
-            return $this->constraintFactory->multiconstraint([$phpLowerConstraint, $higherPhpConstraint]);
-        }
-        return $this->constraintFactory->multiconstraint([
-            $this->constraintFactory->constraint('>=', $bestCandidatePhpConstraint->getPrettyString()),
-            $higherPhpConstraint
-        ]);
-    }
+        $constraintString = $this->composer
+            ->getLocker()
+            ->getLockedRepository()
+            ->findPackage('magento/magento2-base', '*')
+            ->getRequires()['php']
+            ->getConstraint()
+            ->getPrettyString();
 
-    /**
-     * Fills the variable $constraintList with an array consisting of Constraint objects
-     *
-     * @param ConstraintInterface $constraint
-     * @param array $constraintList
-     * @return void
-     */
-    private function getAllConstraints(ConstraintInterface $constraint, array &$constraintList)
-    {
-        if ($constraint instanceof MultiConstraint) {
-            foreach ($constraint->getConstraints() as $item) {
-                $this->getAllConstraints($item, $constraintList);
-            }
-        } else {
-            preg_match('/\d*\.\d*\.\d*/', $constraint->getPrettyString(), $constraintParts);
-            $constraintList[$constraintParts[0]] = $constraint;
-        }
+        $listOfConstraint = explode('|', $constraintString);
+        $lastConstraint = end($listOfConstraint);
+
+        return $this->versionParser->parseConstraints($lastConstraint);
     }
 
     /**
      * Returns the current PHP constraint
      *
      * @return ConstraintInterface
+     * @throws \Exception
      */
     private function getCurrentPhpConstraint(): ConstraintInterface
     {
-        $constraint = $this->constraintFactory->constraint('==', PHP_VERSION);
-        $constraint->setPrettyString(PHP_VERSION);
-        return $constraint;
+        return $this->versionParser->parseConstraints(preg_replace('#^([^~+-]+).*$#', '$1', PHP_VERSION));
     }
 }
