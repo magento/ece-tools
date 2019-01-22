@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use Psr\Log\LoggerInterface;
 
@@ -62,7 +61,7 @@ class PreDeploy implements ProcessInterface
 
         try {
             $this->maintenanceModeSwitcher->enable();
-        } catch (ShellException $exception) {
+        } catch (\RuntimeException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
         $this->logger->notice('End of pre-deploy.');
