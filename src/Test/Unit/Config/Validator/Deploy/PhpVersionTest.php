@@ -22,6 +22,9 @@ use Composer\Package\Link;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class PhpVersionTest extends TestCase
 {
     /**
