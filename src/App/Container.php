@@ -244,6 +244,7 @@ class Container implements ContainerInterface
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\AdminData::class),
+                                    $this->container->make(ConfigValidator\Deploy\PhpVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
