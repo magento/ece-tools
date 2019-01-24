@@ -78,7 +78,7 @@ class StageConfigDeprecatedVariables implements ValidatorInterface
 
         if ($errors) {
             return $this->resultFactory->create(Validator\ResultInterface::ERROR, [
-                'error' => 'Some configuration in your .magento.env.yaml file is deprecated.',
+                'error' => 'Some configurations in your .magento.env.yaml file is deprecated.',
                 'suggestion' => implode(PHP_EOL, $errors),
             ]);
         }

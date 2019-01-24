@@ -77,7 +77,7 @@ class StageConfigDeprecatedVariablesTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('create')
             ->with('error', [
-                'error' => 'Some configuration in your .magento.env.yaml file is deprecated.',
+                'error' => 'Some configurations in your .magento.env.yaml file is deprecated.',
                 'suggestion' => 'The SCD_EXCLUDE_THEMES variable is deprecated. Use SCD_MATRIX instead.'
             ])
             ->willReturn($this->createMock(Error::class));
