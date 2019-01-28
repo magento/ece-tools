@@ -18,6 +18,7 @@ class Schema
     const SCHEMA_STAGE = 'stage';
     const SCHEMA_SYSTEM = 'system';
     const SCHEMA_DEFAULT_VALUE = 'default_values';
+    const SCHEMA_REPLACEMENT = 'replacement';
 
     /**
      * @var array
@@ -425,6 +426,20 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL => 'SAMEORIGIN'
                 ]
             ]
+        ];
+    }
+
+    /**
+     * Returns array of deprecated variables.
+     *
+     * @return array
+     */
+    public function getDeprecatedSchema()
+    {
+        return [
+            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
+                self::SCHEMA_REPLACEMENT => StageConfigInterface::VAR_SCD_MATRIX,
+            ],
         ];
     }
 }

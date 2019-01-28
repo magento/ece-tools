@@ -179,6 +179,7 @@ class Container implements ContainerInterface
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
                                     $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
+                                    $this->container->make(ConfigValidator\Build\StageConfigDeprecatedVariables::class),
                                     $this->container->make(ConfigValidator\Build\ModulesExists::class),
                                     $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Build\ScdOptionsIgnorance::class),

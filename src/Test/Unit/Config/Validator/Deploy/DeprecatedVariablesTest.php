@@ -116,6 +116,11 @@ class DeprecatedVariablesTest extends TestCase
                 [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 1],
                 Error::class,
             ],
+            [
+                [DeployInterface::VAR_SCD_EXCLUDE_THEMES => 'theme'],
+                [],
+                Error::class,
+            ],
         ];
     }
 
