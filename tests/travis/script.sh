@@ -37,6 +37,6 @@ case $TEST_SUITE in
         docker-compose down -v
         ;;
     docker-integration)
-        ./vendor/bin/phpunit --verbose --configuration ./dev/tests/docker-integration
+        ./vendor/bin/phpunit --verbose --configuration ./tests/docker-integration
         ;;
 esac
