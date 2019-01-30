@@ -28,7 +28,7 @@
     "phpunit/php-code-coverage": "^5.2",
     "phpunit/phpunit": "^6.2",
     "squizlabs/php_codesniffer": " ^3.0",
-    "symfony/process": "^4.2"
+    "symfony/process": "^3.4"
   },
   "replace": {
     "magento/ece-patches": "*",

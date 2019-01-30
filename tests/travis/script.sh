@@ -37,6 +37,6 @@ case $TEST_SUITE in
         docker-compose down -v
         ;;
     docker-integration)
-        $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --verbose --configuration ${DIR_TOOLS}/tests/docker-integration"
+        ./vendor/bin/phpunit --verbose --configuration ./dev/tests/docker-integration
         ;;
 esac

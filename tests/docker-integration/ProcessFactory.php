@@ -16,7 +16,7 @@ class ProcessFactory
      */
     public function create(string $command, $cwd = __DIR__ . '/../..'): Process
     {
-        return Process::fromShellCommandline($command, $cwd);
+        return new Process($command, $cwd);
     }
 
     public function createCompose(string $command, string $container, array $variables = []): Process
