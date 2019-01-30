@@ -22,6 +22,14 @@ env:
   matrix:
     - TEST_SUITE=static-unit XDEBUG=true
     - TEST_SUITE=integration
+    - TEST_SUITE=docker-integration
+
+matrix:
+  exclude:
+    - php: 7.0
+      env: TEST_SUITE=docker-integration
+    - php: 7.1
+      env: TEST_SUITE=docker-integration
 
 cache:
   apt: true
@@ -36,8 +44,6 @@ before_install:
 install:
   - composer update -n --no-suggest
   - ./bin/ece-tools docker:build:integration ${TRAVIS_PHP_VERSION} 10.0 latest
-
-before_script: docker-compose up -d
 
 script: ./tests/travis/script.sh
 
