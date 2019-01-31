@@ -7,6 +7,9 @@ namespace Magento\MagentoCloud\Test\DockerIntegration;
 
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class AcceptanceTest extends TestCase
 {
     /**
@@ -37,7 +40,7 @@ class AcceptanceTest extends TestCase
             'docker-compose run cli bash -c "git clone %s -b %s %s"',
             'https://github.com/magento/magento-cloud',
             'master',
-            '/var/www/magento'
+            $_ENV['MAGENTO_ROOT'] ?? '/var/www/magento'
         ))->setTimeout(null)
             ->mustRun($callback);
         $processFactory->create('docker-compose run cli bash -c "composer install -d /var/www/magento" --no-dev')

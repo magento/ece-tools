@@ -26,9 +26,9 @@ env:
 
 matrix:
   exclude:
-    - php: 7.0
+    - php: '7.0'
       env: TEST_SUITE=docker-integration
-    - php: 7.1
+    - php: '7.1'
       env: TEST_SUITE=docker-integration
 
 cache:
