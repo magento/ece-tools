@@ -20,6 +20,7 @@ class DevBuilder implements BuilderInterface
 {
     const DEFAULT_NGINX_VERSION = 'latest';
     const DEFAULT_VARNISH_VERSION = 'latest';
+    const DEFAULT_HITCH_VERSION = 'latest';
 
     /**
      * @var ServiceFactory
@@ -115,6 +116,12 @@ class DevBuilder implements BuilderInterface
             self::DEFAULT_VARNISH_VERSION,
             ['depends_on' => ['web']]
         );
+        $services['hitch'] = $this->serviceFactory->create(
+            ServiceFactory::SERVICE_HITCH,
+            self::DEFAULT_HITCH_VERSION,
+            ['depends_on' => ['varnish']]
+        );
+
         $services['fpm'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_FPM,
             $phpVersion,
@@ -135,7 +142,7 @@ class DevBuilder implements BuilderInterface
             ServiceFactory::SERVICE_NGINX,
             $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
             [
-                'ports' => ['443:443'],
+                'ports' => ['8080:8080'],
                 'depends_on' => [
                     'fpm',
                     'db',
