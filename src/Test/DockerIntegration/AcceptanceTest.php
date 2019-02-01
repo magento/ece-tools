@@ -19,7 +19,7 @@ class AcceptanceTest extends TestCase
     {
         $processFactory = new ProcessFactory();
         $callback = function ($type, $buffer) {
-            echo $buffer;
+            echo $type . ': ' . $buffer;
         };
 
         $processFactory->create('docker-compose up -d')
@@ -33,18 +33,21 @@ class AcceptanceTest extends TestCase
     {
         $processFactory = new ProcessFactory();
         $callback = function ($type, $buffer) {
-            echo $buffer;
+            echo $type . ': ' . $buffer;
         };
+        $magentoRoot = $_ENV['MAGENTO_ROOT'] ?? '/var/www/magento';
 
         $processFactory->create(sprintf(
             'docker-compose run cli bash -c "git clone %s -b %s %s"',
             'https://github.com/magento/magento-cloud',
             'master',
-            $_ENV['MAGENTO_ROOT'] ?? '/var/www/magento'
+            $magentoRoot
         ))->setTimeout(null)
             ->mustRun($callback);
-        $processFactory->create('docker-compose run cli bash -c "composer install -d /var/www/magento" --no-dev')
-            ->setTimeout(null)
+        $processFactory->create(sprintf(
+            'docker-compose run cli bash -c "composer install -d %s" --no-dev',
+            $magentoRoot
+        ))->setTimeout(null)
             ->mustRun($callback);
 
         parent::setUp();
@@ -54,11 +57,14 @@ class AcceptanceTest extends TestCase
     {
         $processFactory = new ProcessFactory();
         $callback = function ($type, $buffer) {
-            echo $buffer;
+            echo $type . ': ' . $buffer;
         };
+        $magentoRoot = $_ENV['MAGENTO_ROOT'] ?? '/var/www/magento';
 
-        $processFactory->create('docker-compose run cli bash -c "rm -rf /var/www/magento/*"')
-            ->mustRun($callback);
+        $processFactory->create(sprintf(
+            'docker-compose run cli bash -c "rm -rf %s/*"',
+            $magentoRoot
+        ))->mustRun($callback);
 
         parent::tearDown();
     }
@@ -70,7 +76,7 @@ class AcceptanceTest extends TestCase
     {
         $processFactory = new ProcessFactory();
         $callback = function ($type, $buffer) {
-            echo $buffer;
+            echo $type . ': ' . $buffer;
         };
 
         $processFactory->create('docker-compose down -v')
@@ -84,7 +90,7 @@ class AcceptanceTest extends TestCase
     {
         $processFactory = new ProcessFactory();
         $callback = function ($type, $buffer) {
-            echo $buffer;
+            echo $type . ': ' . $buffer;
         };
 
         $code = $processFactory->createCompose('/var/www/ece-tools/bin/ece-tools build', 'cli')
