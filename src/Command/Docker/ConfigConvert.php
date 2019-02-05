@@ -87,7 +87,8 @@ class ConfigConvert extends Command
             $content = '';
 
             foreach ($this->file->requireFile($sourcePath) as $variable => $value) {
-                $content .= $variable . '=' . $value . PHP_EOL;
+                $formattedValue = is_bool($value) ? var_export($value, true) : $value;
+                $content .= $variable . '=' . $formattedValue . PHP_EOL;
             }
 
             $this->file->filePutContents($envPath, $content);
