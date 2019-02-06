@@ -96,6 +96,7 @@ class Setup implements ProcessInterface
 
             $this->logger->info('Running setup upgrade.');
 
+            $this->shell->execute("echo 'Upgrading time: '$(date)");
             $this->shell->execute(sprintf(
                 '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
                 'php ./bin/magento setup:upgrade --keep-generated --ansi --no-interaction ' . $verbosityLevel,

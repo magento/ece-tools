@@ -112,6 +112,7 @@ class Setup implements ProcessInterface
         }
 
         try {
+            $this->shell->execute("echo 'Installation time: '$(date)");
             $this->shell->execute(sprintf(
                 '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
                 escapeshellcmd($command),

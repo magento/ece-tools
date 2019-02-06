@@ -184,10 +184,11 @@ class SetupTest extends TestCase
                 . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
                 . '\' --admin-email=\'' . $adminEmail . '\' --admin-password=\'' . $adminPasswordExpected . '\''
             : '';
-        $this->shellMock->expects($this->once())
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->with(
-                '/bin/bash -c "set -o pipefail;'
+            ->withConsecutive(
+                ["echo 'Installation time: '$(date)"],
+                ['/bin/bash -c "set -o pipefail;'
                 . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
                 . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\' --language=\'fr_FR\''
                 . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
@@ -195,7 +196,7 @@ class SetupTest extends TestCase
                 . $adminCredential
                 . ' --use-secure-admin=1 --ansi --no-interaction'
                 . ' --db-password=\'password\' -v'
-                . ' | tee -a ' . $installUpgradeLog . '"'
+                . ' | tee -a ' . $installUpgradeLog . '"']
             );
 
         $this->process->execute();
