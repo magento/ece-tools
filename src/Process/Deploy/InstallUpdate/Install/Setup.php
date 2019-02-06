@@ -112,11 +112,13 @@ class Setup implements ProcessInterface
         }
 
         try {
-            $this->shell->execute("echo 'Installation time: '$(date)");
+            $installUpgradeLog = $this->fileList->getInstallUpgradeLog();
+
+            $this->shell->execute('echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog);
             $this->shell->execute(sprintf(
                 '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
                 escapeshellcmd($command),
-                $this->fileList->getInstallUpgradeLog()
+                $installUpgradeLog
             ));
         } catch (ShellException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);

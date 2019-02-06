@@ -108,7 +108,7 @@ class SetupTest extends TestCase
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
-                ["echo 'Upgrading time: '$(date)"],
+                ['echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog],
                 ['/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
                 . '--keep-generated --ansi --no-interaction -v | tee -a '
                 . $installUpgradeLog . '"']

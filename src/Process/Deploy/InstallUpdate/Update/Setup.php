@@ -93,14 +93,15 @@ class Setup implements ProcessInterface
 
         try {
             $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+            $installUpgradeLog = $this->fileList->getInstallUpgradeLog();
 
             $this->logger->info('Running setup upgrade.');
 
-            $this->shell->execute("echo 'Upgrading time: '$(date)");
+            $this->shell->execute('echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog);
             $this->shell->execute(sprintf(
                 '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
                 'php ./bin/magento setup:upgrade --keep-generated --ansi --no-interaction ' . $verbosityLevel,
-                $this->fileList->getInstallUpgradeLog()
+                $installUpgradeLog
             ));
         } catch (\RuntimeException $exception) {
             //Rollback required by database

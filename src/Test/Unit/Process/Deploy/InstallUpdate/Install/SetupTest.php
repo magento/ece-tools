@@ -187,7 +187,7 @@ class SetupTest extends TestCase
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
-                ["echo 'Installation time: '$(date)"],
+                ['echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog],
                 ['/bin/bash -c "set -o pipefail;'
                 . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
                 . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\' --language=\'fr_FR\''
