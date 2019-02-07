@@ -8,5 +8,5 @@ return [
     'MAGENTO_ROOT' => '/var/www/magento',
     'PHP_ENABLE_XDEBUG' => 'false',
     'PHP_IDE_CONFIG' => 'serverName=magento_cloud_docker', #name of your server in IDE
-    'XDEBUG_CONFIG' => 'remote_host=host.docker.internal', #docker host for developer environments
+    'XDEBUG_CONFIG' => 'remote_host=host.docker.internal', #docker host for developer environments, can be different for your OS
 ];
