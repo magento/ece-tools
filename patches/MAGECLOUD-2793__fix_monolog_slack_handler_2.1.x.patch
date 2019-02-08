@@ -142,3 +142,23 @@ index 643b003..ac2af02 100644
       * @return string
       */
      protected function stringify($fields)
+diff -Nuar a/vendor/monolog/monolog/src/Monolog/Handler/SocketHandler.php b/vendor/monolog/monolog/src/Monolog/Handler/SocketHandler.php
+index a3e7252e..e4c3c37f 100644
+--- a/vendor/monolog/monolog/src/Monolog/Handler/SocketHandler.php
++++ b/vendor/monolog/monolog/src/Monolog/Handler/SocketHandler.php
+@@ -41,6 +41,15 @@ class SocketHandler extends AbstractProcessingHandler
+         $this->connectionTimeout = (float) ini_get('default_socket_timeout');
+     }
+
++    /**
++     * @return resource|null
++     */
++    protected function getResource()
++    {
++        return $this->resource;
++    }
++
++
+     /**
+      * Connect (if necessary) and write to the socket
+      *
