@@ -1,7 +1,7 @@
 diff -Nuar a/vendor/monolog/monolog/src/Monolog/Handler/SlackHandler.php b/vendor/monolog/monolog/src/Monolog/Handler/SlackHandler.php
 index 643b003..ac2af02 100644
---- a/src/Monolog/Handler/SlackHandler.php
-+++ b/src/Monolog/Handler/SlackHandler.php
+--- a/vendor/monolog/monolog/src/Monolog/Handler/SlackHandler.php
++++ b/vendor/monolog/monolog/src/Monolog/Handler/SlackHandler.php
 @@ -70,15 +70,16 @@ class SlackHandler extends SocketHandler
      private $lineFormatter;
 
