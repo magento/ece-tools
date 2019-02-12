@@ -138,6 +138,12 @@
     "Add the possibility to install Magento without admin creation" : {
       "2.1.4 - 2.2.1": "MAGECLOUD-2573__installation_without_admin_creation__2.1.4.patch",
       "2.2.2 - 2.2.7": "MAGECLOUD-2573__installation_without_admin_creation__2.2.2.patch"
+    },
+    "Suppress PDO warnings to work around PHP bugs #63812, #74401": {
+      "2.1.4": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.4.patch",
+      "2.1.5 - 2.1.12": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.5.patch",
+      "2.1.13 - 2.1.17": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.5.patch",
+      "2.2.0 - 2.3.0": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.5.patch"
     }
   }
 }
