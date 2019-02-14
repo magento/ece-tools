@@ -38,7 +38,7 @@ class Schema
         }
 
         foreach ($this->getSchema() as $itemName => $itemOptions) {
-            if (isset($itemOptions[self::SCHEMA_DEFAULT_VALUE][$stage])) {
+            if (array_key_exists($stage, $itemOptions[self::SCHEMA_DEFAULT_VALUE])) {
                 $this->defaults[$stage][$itemName] = $itemOptions[self::SCHEMA_DEFAULT_VALUE][$stage];
             }
         }
@@ -131,6 +131,18 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_BUILD => '',
                     StageConfigInterface::STAGE_DEPLOY => '',
+                ],
+            ],
+            StageConfigInterface::VAR_SCD_MAX_EXEC_TIME => [
+                self::SCHEMA_TYPE => ['integer'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_BUILD,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_BUILD => null,
+                    StageConfigInterface::STAGE_DEPLOY => null,
                 ],
             ],
             StageConfigInterface::VAR_SCD_MATRIX => [

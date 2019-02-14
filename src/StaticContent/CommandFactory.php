@@ -157,6 +157,11 @@ class CommandFactory
             $command .= ' --no-html-minify';
         }
 
+        $maxExecTime = $option->getMaxExecutionTime();
+        if ($maxExecTime !== null) {
+            $command .= ' --max-execution-time ' . (int)$maxExecTime;
+        }
+
         return $command;
     }
 }

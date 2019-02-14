@@ -42,6 +42,7 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
+                BuildInterface::VAR_SCD_MAX_EXEC_TIME => null
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD)
         );
@@ -53,6 +54,7 @@ class SchemaTest extends TestCase
             [
                 DeployInterface::VAR_SCD_STRATEGY => '',
                 DeployInterface::VAR_SCD_COMPRESSION_LEVEL => 4,
+                DeployInterface::VAR_SCD_MAX_EXEC_TIME => null,
                 DeployInterface::VAR_SEARCH_CONFIGURATION => [],
                 DeployInterface::VAR_QUEUE_CONFIGURATION => [],
                 DeployInterface::VAR_CACHE_CONFIGURATION => [],

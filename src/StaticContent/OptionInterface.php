@@ -44,4 +44,9 @@ interface OptionInterface
      * @return string
      */
     public function getVerbosityLevel(): string;
+
+    /**
+     * @return int|null
+     */
+    public function getMaxExecutionTime();
 }
