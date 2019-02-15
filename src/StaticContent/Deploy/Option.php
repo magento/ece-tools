@@ -141,6 +141,6 @@ class Option implements OptionInterface
      */
     public function getMaxExecutionTime()
     {
-        return $this->stageConfig->get(BuildInterface::VAR_SCD_MAX_EXEC_TIME);
+        return $this->stageConfig->get(DeployInterface::VAR_SCD_MAX_EXEC_TIME);
     }
 }
