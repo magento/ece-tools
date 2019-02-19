@@ -150,6 +150,8 @@ class UrlManagerTest extends TestCase
             ->willReturn($routes);
 
         $this->assertEquals($expectedResult, $this->manager->getUrls());
+        // Lazy load.
+        $this->assertEquals($expectedResult, $this->manager->getUrls());
     }
 
     /**
@@ -405,8 +407,45 @@ class UrlManagerTest extends TestCase
             [
                 'routes' => [
                     'http://example.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream'],
+                    'https://example.com/' => ['original_url' => 'https://{default}', 'type' => 'none'],
                 ],
             ],
         ];
+    }
+
+    public function testGetBaseUrls()
+    {
+        $this->connection->expects($this->once())
+            ->method('select')
+            ->with(
+                'SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)'
+            )->willReturn([
+                ['value' => 'https://example.com/'],
+                ['value' => 'https://example2.com/'],
+                ['value' => 'https://example3.com/'],
+            ]);
+
+        $this->assertEquals(
+            [
+                'https://example.com/',
+                'https://example2.com/',
+                'https://example3.com/',
+            ],
+            $this->manager->getBaseUrls()
+        );
+    }
+
+    public function testGetBaseUrlsEmpty()
+    {
+        $this->connection->expects($this->once())
+            ->method('select')
+            ->with(
+                'SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)'
+            )->willReturn([]);
+
+        $this->assertEquals(
+            [],
+            $this->manager->getBaseUrls()
+        );
     }
 }

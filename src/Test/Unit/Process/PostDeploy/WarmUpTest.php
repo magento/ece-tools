@@ -106,14 +106,67 @@ class WarmUpTest extends TestCase
                 'index.php',
                 'index.php/customer/account/create',
             ]);
+        $this->requestFactoryMock->expects($this->exactly(2))
+            ->method('create')
+            ->withConsecutive(
+                ['GET', 'http://base-url.com/index.php'],
+                ['GET', 'http://base-url.com/index.php/customer/account/create']
+            );
         $this->urlManagerMock->expects($this->any())
             ->method('getBaseUrl')
-            ->willReturn('site_url/');
+            ->willReturn('http://base-url.com/');
+        $this->urlManagerMock->expects($this->never())
+            ->method('getBaseUrls');
         $this->clientMock->expects($this->exactly(2))
             ->method('sendAsync')
             ->with($this->requestMock)
             ->willReturn($this->promiseMock);
         $this->promiseMock->expects($this->exactly(2))
+            ->method('then')
+            ->willReturn($this->promiseMock);
+
+        $this->process->execute();
+    }
+
+    public function testExecuteWithHttpUrls()
+    {
+        $this->postDeployMock->expects($this->once())
+            ->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_PAGES)
+            ->willReturn([
+                'index.php',
+                'http://example.com/products/',
+                'http://example2.com/products/',
+                'http://example3.com/products/',
+                'http://example4.com/products/',
+            ]);
+        $this->requestFactoryMock->expects($this->exactly(3))
+            ->method('create')
+            ->withConsecutive(
+                ['GET', 'http://base-url.com/index.php'],
+                ['GET', 'http://example.com/products/'],
+                ['GET', 'http://example3.com/products/']
+            );
+        $this->urlManagerMock->expects($this->any())
+            ->method('getBaseUrl')
+            ->willReturn('http://base-url.com/');
+        $this->urlManagerMock->expects($this->once())
+            ->method('getBaseUrls')
+            ->willReturn([
+                'http://example.com/',
+                'http://example3.com/'
+            ]);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('error')
+            ->withConsecutive(
+                [$this->stringStartsWith('Page "http://example2.com/products/" can\'t be warmed-up')],
+                [$this->stringStartsWith('Page "http://example4.com/products/" can\'t be warmed-up')]
+            );
+        $this->clientMock->expects($this->exactly(3))
+            ->method('sendAsync')
+            ->with($this->requestMock)
+            ->willReturn($this->promiseMock);
+        $this->promiseMock->expects($this->exactly(3))
             ->method('then')
             ->willReturn($this->promiseMock);
 

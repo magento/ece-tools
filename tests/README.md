@@ -60,8 +60,9 @@ To run integration tests on Docker, instead of local, proceed with next steps:
 COMPOSER_MAGENTO_USERNAME={YOUR_MAGENTO_USERNAME}
 COMPOSER_MAGENTO_PASSWORD={YOUR_MAGENTO_PASSWORD}
 ```
-3. Run `docker-compose -f ./docker-compose-7.1.yml run -d --build`
-4. Run `docker-compose -f ./docker-compose-7.1.yml run cli bash -c "/var/www/ece-tools/vendor/bin/phpunit --exclude-group php70 --verbose --configuration /var/www/ece-tools/tests/integration"`
+3. Generate appropriate config `./bin/ece-tools docker:build:integration 7.1 10.0 latest`
+4. Run `docker-compose run -d`
+5. Run `docker-compose run cli bash -c "/var/www/ece-tools/vendor/bin/phpunit --group php71 --verbose --configuration /var/www/ece-tools/tests/integration"`
 
 ## Code coverage check
 

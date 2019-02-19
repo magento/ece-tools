@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\SystemConfigInterface;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -70,6 +71,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => false,
                 DeployInterface::VAR_SCD_MATRIX => [],
+                DeployInterface::VAR_RESOURCE_CONFIGURATION => [],
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
@@ -87,6 +89,21 @@ class SchemaTest extends TestCase
         );
     }
 
+    public function testGetDefaultsForSystemVariables()
+    {
+        $this->assertEquals(
+            [
+                SystemConfigInterface::VAR_ENV_RELATIONSHIPS => 'MAGENTO_CLOUD_RELATIONSHIPS',
+                SystemConfigInterface::VAR_ENV_ROUTES => 'MAGENTO_CLOUD_ROUTES',
+                SystemConfigInterface::VAR_ENV_VARIABLES => 'MAGENTO_CLOUD_VARIABLES',
+                SystemConfigInterface::VAR_ENV_APPLICATION => 'MAGENTO_CLOUD_APPLICATION',
+                SystemConfigInterface::VAR_ENV_MODE => 'MAGENTO_CLOUD_MODE',
+                SystemConfigInterface::VAR_ENV_ENVIRONMENT => 'MAGENTO_CLOUD_ENVIRONMENT',
+            ],
+            $this->schema->getDefaults(SystemConfigInterface::SYSTEM_VARIABLES)
+        );
+    }
+
     public function testGetDefaultsForGlobalSection()
     {
         $this->assertEquals(
@@ -96,6 +113,7 @@ class SchemaTest extends TestCase
                 StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => false,
                 StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [],
                 StageConfigInterface::VAR_MIN_LOGGING_LEVEL => '',
+                StageConfigInterface::VAR_X_FRAME_CONFIGURATION => 'SAMEORIGIN',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_GLOBAL)
         );
@@ -128,6 +146,12 @@ class SchemaTest extends TestCase
             DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
             PostDeployInterface::VAR_WARM_UP_PAGES,
+            SystemConfigInterface::VAR_ENV_RELATIONSHIPS,
+            SystemConfigInterface::VAR_ENV_ROUTES,
+            SystemConfigInterface::VAR_ENV_VARIABLES,
+            SystemConfigInterface::VAR_ENV_APPLICATION,
+            SystemConfigInterface::VAR_ENV_MODE,
+            SystemConfigInterface::VAR_ENV_ENVIRONMENT
         ];
 
         foreach ($requiredItems as $item) {

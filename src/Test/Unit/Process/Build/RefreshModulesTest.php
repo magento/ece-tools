@@ -48,9 +48,12 @@ class RefreshModulesTest extends TestCase
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Reconciling installed modules with shared config.');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('notice')
+            ->withConsecutive(
+                ['Reconciling installed modules with shared config.'],
+                ['End of reconciling modules.']
+            );
         $this->configMock->expects($this->once())
             ->method('refresh');
 

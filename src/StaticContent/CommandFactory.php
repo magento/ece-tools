@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\StaticContent;
 
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Psr\Log\LoggerInterface;
 
 /**
  * Creates static deploy command
@@ -29,13 +30,29 @@ class CommandFactory
     private $globalConfig;
 
     /**
+     * @var ThemeResolver
+     */
+    private $themeResolver;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param MagentoVersion $magentoVersion
      * @param GlobalSection $globalConfig
      */
-    public function __construct(MagentoVersion $magentoVersion, GlobalSection $globalConfig)
-    {
+    public function __construct(
+        MagentoVersion $magentoVersion,
+        GlobalSection $globalConfig,
+        ThemeResolver $themeResolver,
+        LoggerInterface $logger
+    ) {
         $this->magentoVersion = $magentoVersion;
         $this->globalConfig = $globalConfig;
+        $this->themeResolver = $themeResolver;
+        $this->logger = $logger;
     }
 
     /**
@@ -52,11 +69,15 @@ class CommandFactory
             $option->getExcludedThemes(),
             $excludedThemes
         ));
-
+        foreach ($excludedThemes as $key => $aTheme) {
+            $excludedThemes[$key] = $this->themeResolver->resolve($aTheme);
+            if ('' === $excludedThemes[$key]) {
+                unset($excludedThemes[$key]);
+            }
+        }
         if ($excludedThemes) {
             $command .= ' --exclude-theme ' . implode(' --exclude-theme ', $excludedThemes);
         }
-
         if ($locales = $option->getLocales()) {
             $command .= ' ' . implode(' ', $locales);
         }
@@ -82,8 +103,14 @@ class CommandFactory
                 continue;
             }
 
+            $resolvedTheme = $this->themeResolver->resolve($theme);
+            if ('' === $resolvedTheme) {
+                $this->logger->warning('Unable to resolve ' . $theme . ' to an available theme.');
+                continue;
+            }
+
             $command = $this->build($option);
-            $command .= ' --theme ' . $theme;
+            $command .= ' --theme ' . $resolvedTheme;
             $command .= ' ' . implode(' ', $config['language']);
 
             $commands[] = $command;

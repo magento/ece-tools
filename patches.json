@@ -134,6 +134,21 @@
     },
     "Fix for DI compilation with Amazon_Payment module": {
       "2.2.6": "MAGECLOUD-2850_fix_amazon_payment_module__2.2.6.patch"
+    },
+    "Add the possibility to install Magento without admin creation" : {
+      "2.1.4 - 2.2.1": "MAGECLOUD-2573__installation_without_admin_creation__2.1.4.patch",
+      "2.2.2 - 2.2.7": "MAGECLOUD-2573__installation_without_admin_creation__2.2.2.patch"
+    },
+    "Suppress PDO warnings to work around PHP bugs #63812, #74401": {
+      "2.1.4": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.4.patch",
+      "2.1.5 - 2.1.12": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.5.patch",
+      "2.1.13 - 2.1.17": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.13.patch",
+      "2.2.0 - 2.2.8 || 2.3.0 - 2.3.1": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.2.0.patch"
+    }
+  },
+  "monolog/monolog": {
+    "Fix monolog Slack Handler bug for magento 2.1.x": {
+      "1.16.0": "MAGECLOUD-2793__fix_monolog_slack_handler_2.1.x.patch"
     }
   }
 }

@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Cache;
+namespace Magento\MagentoCloud\Config\Factory;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
@@ -13,7 +13,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Returns cache configuration.
  */
-class Config
+class Cache
 {
     /**
      * @var Environment
@@ -129,7 +129,7 @@ class Config
      */
     private function isCacheConfigurationValid(array $cacheConfiguration): bool
     {
-        return !$this->configMerger->isEmpty($cacheConfiguration) && isset($cacheConfiguration['frontend']);
+        return !$this->configMerger->isEmpty($cacheConfiguration) && !empty($cacheConfiguration['frontend']);
     }
 
     /**

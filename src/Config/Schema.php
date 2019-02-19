@@ -16,7 +16,9 @@ class Schema
     const SCHEMA_TYPE = 'type';
     const SCHEMA_VALUE_VALIDATION = 'value_validation';
     const SCHEMA_STAGE = 'stage';
+    const SCHEMA_SYSTEM = 'system';
     const SCHEMA_DEFAULT_VALUE = 'default_values';
+    const SCHEMA_REPLACEMENT = 'replacement';
 
     /**
      * @var array
@@ -29,7 +31,7 @@ class Schema
      * @param string $stage
      * @return array
      */
-    public function getDefaults(string $stage)
+    public function getDefaults(string $stage): array
     {
         if (isset($this->defaults[$stage])) {
             return $this->defaults[$stage];
@@ -153,6 +155,60 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_BUILD => false,
                     StageConfigInterface::STAGE_DEPLOY => false,
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_RELATIONSHIPS => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_RELATIONSHIPS',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_ROUTES => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ROUTES',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_VARIABLES => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_VARIABLES',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_APPLICATION => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_APPLICATION',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_MODE => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_MODE',
+                ],
+            ],
+            SystemConfigInterface::VAR_ENV_ENVIRONMENT => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_SYSTEM => [
+                    SystemConfigInterface::SYSTEM_VARIABLES
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ENVIRONMENT',
                 ],
             ],
             StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => [
@@ -311,6 +367,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
             ],
+            DeployInterface::VAR_RESOURCE_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+            ],
             DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [
@@ -350,6 +416,29 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_POST_DEPLOY => [''],
                 ],
+            ],
+            StageConfigInterface::VAR_X_FRAME_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'SAMEORIGIN'
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Returns array of deprecated variables.
+     *
+     * @return array
+     */
+    public function getDeprecatedSchema()
+    {
+        return [
+            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
+                self::SCHEMA_REPLACEMENT => StageConfigInterface::VAR_SCD_MATRIX,
             ],
         ];
     }

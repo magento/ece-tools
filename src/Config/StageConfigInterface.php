@@ -29,12 +29,25 @@ interface StageConfigInterface
     const VAR_SCD_COMPRESSION_LEVEL = 'SCD_COMPRESSION_LEVEL';
     const VAR_SCD_STRATEGY = 'SCD_STRATEGY';
     const VAR_SCD_THREADS = 'SCD_THREADS';
-    const VAR_SCD_EXCLUDE_THEMES = 'SCD_EXCLUDE_THEMES';
     const VAR_SKIP_SCD = 'SKIP_SCD';
     const VAR_VERBOSE_COMMANDS = 'VERBOSE_COMMANDS';
     const VAR_SCD_ON_DEMAND = 'SCD_ON_DEMAND';
     const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
     const VAR_SCD_MATRIX = 'SCD_MATRIX';
+    const VAR_X_FRAME_CONFIGURATION = 'X_FRAME_CONFIGURATION';
+
+    /**
+     * @deprecated use SCD_MATRIX instead.
+     */
+    const VAR_SCD_EXCLUDE_THEMES = 'SCD_EXCLUDE_THEMES';
+
+    /**
+     * Environment variables.
+     */
+    const VAR_ENV_RELATIONSHIPS = 'ENV_RELATIONSHIPS';
+    const VAR_ENV_ROUTES = 'ENV_ROUTES';
+    const VAR_ENV_VARIABLES = 'ENV_VARIABLES';
+    const VAR_ENV_APPLICATION = 'ENV_APPLICATION';
 
     /**
      * Settings for deployment from git.
