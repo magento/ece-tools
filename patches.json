@@ -139,5 +139,10 @@
       "2.1.4 - 2.2.1": "MAGECLOUD-2573__installation_without_admin_creation__2.1.4.patch",
       "2.2.2 - 2.2.7": "MAGECLOUD-2573__installation_without_admin_creation__2.2.2.patch"
     }
+  },
+  "monolog/monolog": {
+    "Fix monolog Slack Handler bug for magento 2.1.x": {
+      "1.16.0": "MAGECLOUD-2793__fix_monolog_slack_handler_2.1.x.patch"
+    }
   }
 }
