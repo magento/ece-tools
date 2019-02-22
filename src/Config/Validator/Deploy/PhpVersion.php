@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 use Composer\Composer;
 use Composer\Package\Version\VersionParser;
 use Composer\Semver\Constraint\ConstraintInterface;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -45,24 +46,32 @@ class PhpVersion implements ValidatorInterface
     private $logger;
 
     /**
+     * @var GlobalSection
+     */
+    private $globalSection;
+
+    /**
      * @param Composer $composer
      * @param Validator\ResultFactory $resultFactory
      * @param VersionParser $versionParser
      * @param MagentoVersion $magentoVersion
      * @param LoggerInterface $logger
+     * @param GlobalSection $globalSection
      */
     public function __construct(
         Composer $composer,
         Validator\ResultFactory $resultFactory,
         VersionParser $versionParser,
         MagentoVersion $magentoVersion,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        GlobalSection $globalSection
     ) {
         $this->composer = $composer;
         $this->resultFactory = $resultFactory;
         $this->versionParser = $versionParser;
         $this->magentoVersion = $magentoVersion;
         $this->logger = $logger;
+        $this->globalSection = $globalSection;
     }
 
     /**
@@ -73,6 +82,10 @@ class PhpVersion implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
+            if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+                return $this->resultFactory->success();
+            }
+
             $recommendedPhpConstraint = $this->getRecommendedPhpConstraint();
             $currentPhpConstraint = $this->getCurrentPhpConstraint();
 
