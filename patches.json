@@ -20,7 +20,8 @@
       "~2.1.4": "MAGETWO-57413__move_vendor_path_autoloader__2.1.4.patch"
     },
     "Allow static assets to be loaded without URL rewrites": {
-      "~2.1.4": "MAGETWO-57414__load_static_assets_without_rewrites__2.1.4.patch"
+      "2.1.4 - 2.1.16": "MAGETWO-57414__load_static_assets_without_rewrites__2.1.4.patch",
+      "~2.1.17": "MAGETWO-57414__load_static_assets_without_rewrites__2.1.17.patch"
     },
     "Don't attempt to use non-existent setup areas": {
       "~2.1.4": "MAGETWO-45357__avoid_nonexistent_setup_area__2.1.4.patch"
