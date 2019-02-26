@@ -5,113 +5,44 @@
  */
 namespace Magento\MagentoCloud\Test\DockerIntegration;
 
-use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\Test\DockerIntegration\Process;
 
 /**
  * @inheritdoc
+ *
+ * @php 7.2
  */
-class AcceptanceTest extends TestCase
+class AcceptanceTest extends AbstractTest
 {
-    /**
-     * @inheritdoc
-     */
-    public static function setUpBeforeClass()
-    {
-        $processFactory = new ProcessFactory();
-        $callback = function ($type, $buffer) {
-            echo $type . ': ' . $buffer;
-        };
-
-        $processFactory->create('docker-compose up -d')
-            ->setTimeout(null)
-            ->mustRun($callback);
-
-        parent::setUpBeforeClass();
-    }
-
-    protected function setUp()
-    {
-        $processFactory = new ProcessFactory();
-        $callback = function ($type, $buffer) {
-            echo $type . ': ' . $buffer;
-        };
-        $magentoRoot = $_ENV['MAGENTO_ROOT'] ?? '/var/www/magento';
-
-        $processFactory->create(sprintf(
-            'docker-compose run cli bash -c "git clone %s -b %s %s"',
-            'https://github.com/magento/magento-cloud',
-            'master',
-            $magentoRoot
-        ))->setTimeout(null)
-            ->mustRun($callback);
-        $processFactory->create(sprintf(
-            'docker-compose run cli bash -c "composer install -d %s" --no-dev',
-            $magentoRoot
-        ))->setTimeout(null)
-            ->mustRun($callback);
-
-        parent::setUp();
-    }
-
-    protected function tearDown()
-    {
-        $processFactory = new ProcessFactory();
-        $callback = function ($type, $buffer) {
-            echo $type . ': ' . $buffer;
-        };
-        $magentoRoot = $_ENV['MAGENTO_ROOT'] ?? '/var/www/magento';
-
-        $processFactory->create(sprintf(
-            'docker-compose run cli bash -c "rm -rf %s/*"',
-            $magentoRoot
-        ))->mustRun($callback);
-
-        parent::tearDown();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function tearDownAfterClass()
-    {
-        $processFactory = new ProcessFactory();
-        $callback = function ($type, $buffer) {
-            echo $type . ': ' . $buffer;
-        };
-
-        $processFactory->create('docker-compose down -v')
-            ->setTimeout(null)
-            ->mustRun($callback);
-
-        parent::tearDownAfterClass();
-    }
-
     public function testDefault()
     {
-        $processFactory = new ProcessFactory();
-        $callback = function ($type, $buffer) {
-            echo $type . ': ' . $buffer;
-        };
-
-        $code = $processFactory->createCompose('/var/www/ece-tools/bin/ece-tools build', 'cli')
+        (new Process\GitClone('master'))
             ->setTimeout(null)
-            ->run($callback);
+            ->mustRun();
+        (new Process\ComposerInstall())
+            ->setTimeout(null)
+            ->mustRun();
+
+        $code = (new Process\Ece('build', Config::DEFAULT_CONTAINER))
+            ->setTimeout(null)
+            ->run();
 
         $this->assertSame(0, $code);
 
-        $code = $processFactory->createCompose('/var/www/ece-tools/bin/ece-tools deploy', 'cli')
+        $code = (new Process\Ece('deploy', Config::CONTAINER_DEPLOY))
             ->setTimeout(null)
-            ->run($callback);
+            ->run();
 
         $this->assertSame(0, $code);
 
-        $code = $processFactory->createCompose('/var/www/ece-tools/bin/ece-tools post-deploy', 'cli')
+        $code = (new Process\Ece('post-deploy', Config::CONTAINER_DEPLOY))
             ->setTimeout(null)
-            ->run($callback);
+            ->run();
 
         $this->assertSame(0, $code);
 
-        $process = $processFactory->create('curl http://localhost:8080');
+        $config = new Config();
+        $process = new Process\Process(sprintf('curl %s | grep Home', $config->get('env.url.base')));
         $process->run();
 
         $this->assertSame(0, $process->getExitCode());

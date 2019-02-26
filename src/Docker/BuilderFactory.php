@@ -14,6 +14,7 @@ class BuilderFactory
 {
     const BUILDER_DEV = 'dev';
     const BUILDER_TEST = 'test';
+    const DOCKER_TEST = 'docker-test';
 
     /**
      * @var array
@@ -21,6 +22,7 @@ class BuilderFactory
     private static $map = [
         self::BUILDER_DEV => DevBuilder::class,
         self::BUILDER_TEST => IntegrationBuilder::class,
+        self::DOCKER_TEST => DockerIntegrationBuilder::class
     ];
 
     /**

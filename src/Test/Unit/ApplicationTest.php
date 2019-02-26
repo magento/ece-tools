@@ -76,6 +76,7 @@ class ApplicationTest extends TestCase
         Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
         Command\Docker\Build::NAME => Command\Docker\Build::class,
         Command\Docker\BuildIntegration::NAME => Command\Docker\BuildIntegration::class,
+        Command\Docker\BuildDockerIntegration::NAME => Command\Docker\BuildDockerIntegration::class,
         Command\Docker\ConfigConvert::NAME => Command\Docker\ConfigConvert::class,
         Command\CronKill::NAME => Command\CronKill::class,
     ];
