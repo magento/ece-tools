@@ -56,7 +56,7 @@ class DbConnection implements ProcessInterface
     private $configMerger;
 
     /**
-     * @var $connectionFactory
+     * @var RelationshipConnectionFactory
      */
     private $connectionFactory;
 
