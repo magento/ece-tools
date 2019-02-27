@@ -78,10 +78,11 @@ class CompressStaticContentTest extends TestCase
             ->method('get')
             ->with(GlobalConfig::VAR_SCD_ON_DEMAND)
             ->willReturn(false);
-        $this->stageConfigMock->expects($this->exactly(3))
+        $this->stageConfigMock->expects($this->exactly(4))
             ->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL, 4],
+                [DeployInterface::VAR_SCD_COMPRESSION_TIMEOUT, 500],
                 [DeployInterface::VAR_SKIP_SCD, false],
                 [DeployInterface::VAR_VERBOSE_COMMANDS, ''],
             ]);
@@ -93,7 +94,7 @@ class CompressStaticContentTest extends TestCase
         $this->compressorMock
             ->expects($this->once())
             ->method('process')
-            ->with(4);
+            ->with(4, 500);
 
         $this->process->execute();
     }

@@ -73,16 +73,17 @@ class CompressStaticContentTest extends TestCase
             ->method('exists')
             ->with(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)
             ->willReturn(true);
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->exactly(3))
             ->method('get')
             ->willReturnMap([
                 [BuildInterface::VAR_SCD_COMPRESSION_LEVEL, 6],
+                [BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT, 500],
                 [BuildInterface::VAR_VERBOSE_COMMANDS, ''],
             ]);
         $this->compressorMock
             ->expects($this->once())
             ->method('process')
-            ->with(6);
+            ->with(6, 500);
 
         $this->process->execute();
     }
