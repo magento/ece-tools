@@ -131,7 +131,7 @@ class ConfigTest extends TestCase
      */
     public function testGetWithElasticSearchDataProvider(): array
     {
-        $generateDataForVersionChecking = function ($version, $engine = 'elasticsearch') {
+        $generateDataForVersionChecking = function ($version, $engine) {
             return [
                 'customSearchConfig' => [],
                 'version' => $version,
