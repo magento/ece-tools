@@ -66,7 +66,7 @@ class ServiceFactory
         ],
         self::SERVICE_ELASTICSEARCH => [
             'image' => 'magento/magento-cloud-docker-elasticsearch:%s',
-            'versions' => ['1.7', '2.4', '5.2']
+            'versions' => ['1.7', '2.4', '5.2', '6.5']
         ],
         self::SERVICE_RABBIT_MQ => [
             'image' => 'rabbitmq:%s',
