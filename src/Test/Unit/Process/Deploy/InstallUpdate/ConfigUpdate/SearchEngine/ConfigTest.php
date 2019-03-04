@@ -131,6 +131,22 @@ class ConfigTest extends TestCase
      */
     public function testGetWithElasticSearchDataProvider(): array
     {
+        $generateDataForVersionChecking = function ($version, $engine = 'elasticsearch') {
+            return [
+                'customSearchConfig' => [],
+                'version' => $version,
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => $engine,
+                    $engine . '_server_hostname' => 'localhost',
+                    $engine . '_server_port' => 1234,
+                ],
+            ];
+        };
+
         return [
             [
                 'customSearchConfig' => ['some_key' => 'some_value'],
@@ -233,32 +249,13 @@ class ConfigTest extends TestCase
                     'elasticsearch5_index_prefix' => 'prefix',
                 ],
             ],
-            [
-                'customSearchConfig' => [],
-                'version' => '6.2',
-                'relationships' => [
-                    'host' => 'localhost',
-                    'port' => 1234,
-                ],
-                'expected' => [
-                    'engine' => 'elasticsearch6',
-                    'elasticsearch6_server_hostname' => 'localhost',
-                    'elasticsearch6_server_port' => 1234,
-                ],
-            ],
-            [
-                'customSearchConfig' => [],
-                'version' => '7.2',
-                'relationships' => [
-                    'host' => 'localhost',
-                    'port' => 1234,
-                ],
-                'expected' => [
-                    'engine' => 'elasticsearch6',
-                    'elasticsearch6_server_hostname' => 'localhost',
-                    'elasticsearch6_server_port' => 1234,
-                ],
-            ],
+            $generateDataForVersionChecking('1.7', 'elasticsearch'),
+            $generateDataForVersionChecking('2.4', 'elasticsearch'),
+            $generateDataForVersionChecking('5.0', 'elasticsearch5'),
+            $generateDataForVersionChecking('5.2', 'elasticsearch5'),
+            $generateDataForVersionChecking('6.0', 'elasticsearch6'),
+            $generateDataForVersionChecking('6.2', 'elasticsearch6'),
+            $generateDataForVersionChecking('7.2', 'elasticsearch6'),
         ];
     }
 
