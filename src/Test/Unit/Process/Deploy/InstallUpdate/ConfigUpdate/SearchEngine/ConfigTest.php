@@ -5,19 +5,14 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
-use Psr\Http\Message\StreamInterface;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -246,9 +241,22 @@ class ConfigTest extends TestCase
                     'port' => 1234,
                 ],
                 'expected' => [
-                    'engine' => 'elasticsearch5',
-                    'elasticsearch5_server_hostname' => 'localhost',
-                    'elasticsearch5_server_port' => 1234,
+                    'engine' => 'elasticsearch6',
+                    'elasticsearch6_server_hostname' => 'localhost',
+                    'elasticsearch6_server_port' => 1234,
+                ],
+            ],
+            [
+                'customSearchConfig' => [],
+                'version' => '7.2',
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => 'elasticsearch6',
+                    'elasticsearch6_server_hostname' => 'localhost',
+                    'elasticsearch6_server_port' => 1234,
                 ],
             ],
         ];
