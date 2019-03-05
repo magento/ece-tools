@@ -56,7 +56,7 @@ class ServiceFactory
         ],
         self::SERVICE_REDIS => [
             'image' => 'redis:%s',
-            'versions' => ['3.0', '3.2', '4.0'],
+            'versions' => ['3.0', '3.2', '4.0', '5.0'],
             'config' => [
                 'volumes' => [
                     '/data',
