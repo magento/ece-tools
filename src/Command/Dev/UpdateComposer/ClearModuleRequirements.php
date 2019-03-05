@@ -62,7 +62,7 @@ foreach ({$reposArrayToString} as \$repoName) {
         \$composerJson = json_decode(file_get_contents(\$moduleDir . '/composer.json'), true);
 
         foreach (\$composerJson['require'] as \$requireName => \$requireVersion) {
-            if (preg_match('|^magento\/|elasticsearch\/|i', \$requireName)) {
+            if (preg_match('{^(magento\/|elasticsearch\/)}i', \$requireName)) {
                 unset(\$composerJson['require'][\$requireName]);
             }
         }
