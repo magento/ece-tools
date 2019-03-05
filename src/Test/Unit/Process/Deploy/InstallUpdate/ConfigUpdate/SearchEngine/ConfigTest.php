@@ -255,7 +255,7 @@ class ConfigTest extends TestCase
             $generateDataForVersionChecking('5.2', 'elasticsearch5'),
             $generateDataForVersionChecking('6.0', 'elasticsearch6'),
             $generateDataForVersionChecking('6.2', 'elasticsearch6'),
-            $generateDataForVersionChecking('7.2', 'elasticsearch6'),
+            $generateDataForVersionChecking('7.2', 'elasticsearch7'),
         ];
     }
 
