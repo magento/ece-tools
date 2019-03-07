@@ -15,6 +15,7 @@ case $TEST_SUITE in
         ;;
     integration)
        BASH="docker-compose run cli bash"
+       DIR_TOOLS="/var/www/ece-tools"
 
         ./bin/ece-tools docker:build:integration ${TRAVIS_PHP_VERSION} 10.0 latest
         docker-compose up -d

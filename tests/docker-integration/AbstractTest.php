@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @inheritdoc
  */
-class AbstractTest extends TestCase
+abstract class AbstractTest extends TestCase
 {
     /**
      * @inheritdoc
@@ -21,8 +21,6 @@ class AbstractTest extends TestCase
         (new Process('docker-compose down -v && docker-compose up -d'))
             ->setTimeout(null)
             ->mustRun();
-
-        parent::setUp();
     }
 
     /**
@@ -33,7 +31,5 @@ class AbstractTest extends TestCase
         (new Process('docker-compose down -v'))
             ->setTimeout(null)
             ->mustRun();
-
-        parent::tearDown();
     }
 }
