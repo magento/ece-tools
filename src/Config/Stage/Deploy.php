@@ -48,7 +48,7 @@ class Deploy implements DeployInterface
     {
         $mergedConfig = $this->mergedConfig->get();
 
-        if (!isset($mergedConfig[$name])) {
+        if (!array_key_exists($name, $mergedConfig)) {
             throw new \RuntimeException(sprintf('Config %s was not defined.', $name));
         }
 
