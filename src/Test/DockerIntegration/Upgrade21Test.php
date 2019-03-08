@@ -18,7 +18,7 @@ class Upgrade21Test extends UpgradeTest
     public function defaultDataProvider(): array
     {
         return [
-            ['2.1.0', '2.1.*']
+            ['2.1.4', '2.1.*']
         ];
     }
 }

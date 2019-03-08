@@ -5,8 +5,6 @@
  */
 namespace Magento\MagentoCloud\Test\DockerIntegration\Process;
 
-use Illuminate\Config\Repository;
-
 /**
  * @inheritdoc
  */
@@ -27,9 +25,11 @@ class Process extends \Symfony\Component\Process\Process
      */
     public function run($callback = null): int
     {
-        $callback = $callback ?? function ($type, $buffer) {
-                echo $buffer;
+        if (null === $callback) {
+            $callback = function ($type, $buffer) {
+                fwrite(STDOUT, $buffer);
             };
+        }
 
         return parent::run($callback);
     }

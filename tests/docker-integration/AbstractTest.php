@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\DockerIntegration;
 
-use Magento\MagentoCloud\Test\DockerIntegration\Process\Process;
+use Magento\MagentoCloud\Test\DockerIntegration\Process;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -18,7 +18,7 @@ abstract class AbstractTest extends TestCase
      */
     protected function setUp()
     {
-        (new Process('docker-compose down -v && docker-compose up -d'))
+        (new Process\EnvUp())
             ->setTimeout(null)
             ->mustRun();
     }
@@ -28,7 +28,7 @@ abstract class AbstractTest extends TestCase
      */
     protected function tearDown()
     {
-        (new Process('docker-compose down -v'))
+        (new Process\EnvDown())
             ->setTimeout(null)
             ->mustRun();
     }
