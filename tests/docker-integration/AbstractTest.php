@@ -19,7 +19,7 @@ abstract class AbstractTest extends TestCase
     protected function setUp()
     {
         (new Process\EnvUp())
-            ->setTimeout(null)
+            ->setTimeout(60)
             ->mustRun();
     }
 
@@ -29,7 +29,7 @@ abstract class AbstractTest extends TestCase
     protected function tearDown()
     {
         (new Process\EnvDown())
-            ->setTimeout(null)
+            ->setTimeout(60)
             ->mustRun();
     }
 }

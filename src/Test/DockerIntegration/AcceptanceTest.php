@@ -41,9 +41,9 @@ class AcceptanceTest extends AbstractTest
 
         $this->assertSame(0, $code);
 
-        $config = new Config();
-        $process = new Process\Process(sprintf('curl %s | grep Home', $config->get('env.url.base')));
-        $process->run();
+        $process = new Process\Curl();
+        $process->setTimeout(null)
+            ->run();
 
         $this->assertSame(0, $process->getExitCode());
         $this->assertContains('Home page', $process->getOutput());

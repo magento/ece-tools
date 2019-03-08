@@ -12,6 +12,6 @@ class EnvUp extends Process
 {
     public function __construct()
     {
-        parent::__construct('docker-compose down -v && docker-compose down -v');
+        parent::__construct('docker-compose down -v && docker-compose up -d');
     }
 }
