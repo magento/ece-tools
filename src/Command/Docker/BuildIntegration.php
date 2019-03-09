@@ -23,6 +23,8 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Docker build for internal integration testing.
+ *
+ * @codeCoverageIgnore
  */
 class BuildIntegration extends Command
 {
