@@ -106,9 +106,9 @@ class BuildIntegrationTest extends TestCase
             ->with('magento_root/docker-compose.yml', "version: '2'\n");
         $inputMock->method('getArgument')
             ->willReturnMap([
-                [BuildIntegration::ARGUMENT_PHP, '7.1'],
-                [BuildIntegration::ARGUMENT_DB, '10.0'],
-                [BuildIntegration::ARGUMENT_NGINX, '1.9'],
+                [BuildIntegration::OPTION_PHP, '7.1'],
+                [BuildIntegration::OPTION_DB, '10.0'],
+                [BuildIntegration::OPTION_NGINX, '1.9'],
             ]);
         $this->builderMock->expects($this->once())
             ->method('getConfigPath')

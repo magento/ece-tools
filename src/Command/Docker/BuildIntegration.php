@@ -17,6 +17,7 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -26,9 +27,10 @@ use Symfony\Component\Yaml\Yaml;
 class BuildIntegration extends Command
 {
     const NAME = 'docker:build:integration';
-    const ARGUMENT_PHP = 'php';
-    const ARGUMENT_NGINX = 'nginx';
-    const ARGUMENT_DB = 'db';
+    const ARGUMENT_MODE = 'mode';
+    const OPTION_PHP = 'php';
+    const OPTION_NGINX = 'nginx';
+    const OPTION_DB = 'db';
 
     /**
      * @var BuilderFactory
@@ -78,17 +80,27 @@ class BuildIntegration extends Command
         $this->setName(self::NAME)
             ->setDescription('Build test docker configuration')
             ->addArgument(
-                self::ARGUMENT_PHP,
+                self::ARGUMENT_MODE,
                 InputArgument::REQUIRED,
-                'PHP version'
-            )->addArgument(
-                self::ARGUMENT_DB,
-                InputArgument::REQUIRED,
-                'DB version'
-            )->addArgument(
-                self::ARGUMENT_NGINX,
-                InputArgument::REQUIRED,
-                'Nginx version'
+                'Mode'
+            )->addOption(
+                self::OPTION_PHP,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'PHP version',
+                '7.2'
+            )->addOption(
+                self::OPTION_DB,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'DB version',
+                '10.2'
+            )->addOption(
+                self::OPTION_NGINX,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Nginx version',
+                'latest'
             );
 
         parent::configure();
@@ -102,17 +114,23 @@ class BuildIntegration extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $builder = $this->builderFactory->create(BuilderFactory::BUILDER_TEST);
+        $strategy = $input->getArgument(self::ARGUMENT_MODE);
+
+        if (!in_array($strategy, [BuilderFactory::BUILDER_TEST_SIMPLE, BuilderFactory::BUILDER_TEST_ADVANCED], true)) {
+            throw new ConfigurationMismatchException('Wrong mode');
+        }
+
+        $builder = $this->builderFactory->create($strategy);
         $config = $this->configFactory->create();
 
         $map = [
-            self::ARGUMENT_PHP => BuilderInterface::PHP_VERSION,
-            self::ARGUMENT_DB => BuilderInterface::DB_VERSION,
-            self::ARGUMENT_NGINX => BuilderInterface::NGINX_VERSION,
+            self::OPTION_PHP => BuilderInterface::PHP_VERSION,
+            self::OPTION_DB => BuilderInterface::DB_VERSION,
+            self::OPTION_NGINX => BuilderInterface::NGINX_VERSION,
         ];
 
         array_walk($map, function ($key, $option) use ($config, $input) {
-            $config->set($key, $input->getArgument($option));
+            $config->set($key, $input->getOption($option));
         });
 
         $this->file->filePutContents(
