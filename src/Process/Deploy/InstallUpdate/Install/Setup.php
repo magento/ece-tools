@@ -146,7 +146,7 @@ class Setup implements ProcessInterface
             . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
                 ?: Environment::DEFAULT_ADMIN_URL)
             . ($this->environment->getAdminEmail() ? $this->getAdminCredentials() : '')
-            . ' --use-secure-admin=1 --ansi --no-interaction';
+            . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction';
     }
 
     /**

@@ -194,7 +194,7 @@ class SetupTest extends TestCase
                 . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
                 . ' --backend-frontname=\'' . $adminUrlExpected . '\''
                 . $adminCredential
-                . ' --use-secure-admin=1 --ansi --no-interaction'
+                . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction'
                 . ' --db-password=\'password\' -v'
                 . ' | tee -a ' . $installUpgradeLog . '"']
             );
