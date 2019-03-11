@@ -124,8 +124,9 @@ class Config
     {
         $engine = 'elasticsearch';
 
-        if (Semver::satisfies($this->elasticSearch->getVersion(), '>= 5')) {
-            $engine = 'elasticsearch5';
+        $esVersion = $this->elasticSearch->getVersion();
+        if (Semver::satisfies($esVersion, '>= 5')) {
+            $engine = 'elasticsearch' . intval($esVersion);
         }
 
         $elasticSearchConfig = [
