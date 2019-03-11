@@ -61,7 +61,7 @@ class DockerIntegrationBuilder implements BuilderInterface
                             'db',
                         ],
                         'volumes' => [
-                            $this->getMagentoVolume(false)
+                            $this->getMagentoVolume(true)
                         ],
                         'volumes_from' => [
                             'appdata',
@@ -100,7 +100,7 @@ class DockerIntegrationBuilder implements BuilderInterface
                             'db',
                         ],
                         'volumes' => [
-                            $this->getMagentoVolume(false)
+                            $this->getMagentoVolume(true)
                         ],
                         'volumes_from' => [
                             'appdata',
@@ -125,7 +125,7 @@ class DockerIntegrationBuilder implements BuilderInterface
         );
         $services['services']['deploy'] = $this->getCliService(
             $phpVersion,
-            false,
+            true,
             ['db'],
             'deploy.magento2.docker'
         );
