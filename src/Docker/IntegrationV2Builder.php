@@ -129,6 +129,13 @@ class IntegrationV2Builder implements BuilderInterface
             ['db'],
             'deploy.magento2.docker'
         );
+        $services['services']['cron'] = $this->getCliService(
+            $phpVersion,
+            false,
+            ['db'],
+            'cron.magento2.docker',
+            true
+        );
         $services ['services']['appdata'] = [
             'image' => 'tianon/true',
             'volumes' => [
