@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
  *
  * @codeCoverageIgnore
  */
-class IntegrationBuilder implements BuilderInterface
+class IntegrationV1Builder implements BuilderInterface
 {
     /**
      * @var FileList
