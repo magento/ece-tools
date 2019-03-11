@@ -17,7 +17,7 @@ case $TEST_SUITE in
        BASH="docker-compose run cli bash"
        DIR_TOOLS="/var/www/ece-tools"
 
-        ./bin/ece-tools docker:build:integration test-simple --php ${TRAVIS_PHP_VERSION}
+        ./bin/ece-tools docker:build:integration test-v1 --php ${TRAVIS_PHP_VERSION}
         docker-compose up -d
 
         case $TRAVIS_PHP_VERSION in
@@ -35,7 +35,7 @@ case $TEST_SUITE in
         docker-compose down -v
         ;;
     docker-integration)
-        ./bin/ece-tools docker:build:integration test-advanced --php ${TRAVIS_PHP_VERSION}
+        ./bin/ece-tools docker:build:integration test-v2 --php ${TRAVIS_PHP_VERSION}
 
         case $TRAVIS_PHP_VERSION in
             7.0)

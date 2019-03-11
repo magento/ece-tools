@@ -13,16 +13,17 @@ use Magento\MagentoCloud\App\ContainerInterface;
 class BuilderFactory
 {
     const BUILDER_DEV = 'dev';
-    const BUILDER_TEST_SIMPLE = 'test-simple';
-    const BUILDER_TEST_ADVANCED = 'test-advanced';
+    const BUILDER_TEST_V1 = 'test-v1';
+    const BUILDER_TEST_V2 = 'test-v2';
 
     /**
      * @var array
      */
     private static $map = [
         self::BUILDER_DEV => DevBuilder::class,
-        self::BUILDER_TEST_SIMPLE => IntegrationBuilder::class,
-        self::BUILDER_TEST_ADVANCED => DockerIntegrationBuilder::class
+        /** Internal CI configurations. */
+        self::BUILDER_TEST_V1 => IntegrationV1Builder::class,
+        self::BUILDER_TEST_V2 => IntegrationV2Builder::class
     ];
 
     /**

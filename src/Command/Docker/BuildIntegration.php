@@ -29,7 +29,7 @@ use Symfony\Component\Yaml\Yaml;
 class BuildIntegration extends Command
 {
     const NAME = 'docker:build:integration';
-    const ARGUMENT_MODE = 'mode';
+    const ARGUMENT_VERSION = 'version';
     const OPTION_PHP = 'php';
     const OPTION_NGINX = 'nginx';
     const OPTION_DB = 'db';
@@ -82,9 +82,13 @@ class BuildIntegration extends Command
         $this->setName(self::NAME)
             ->setDescription('Build test docker configuration')
             ->addArgument(
-                self::ARGUMENT_MODE,
+                self::ARGUMENT_VERSION,
                 InputArgument::REQUIRED,
-                'Mode'
+                sprintf(
+                    'Version of integration framework configuration (%s/%s)',
+                    BuilderFactory::BUILDER_TEST_V1,
+                    BuilderFactory::BUILDER_TEST_V2
+                )
             )->addOption(
                 self::OPTION_PHP,
                 null,
@@ -116,10 +120,10 @@ class BuildIntegration extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $strategy = $input->getArgument(self::ARGUMENT_MODE);
+        $strategy = $input->getArgument(self::ARGUMENT_VERSION);
 
-        if (!in_array($strategy, [BuilderFactory::BUILDER_TEST_SIMPLE, BuilderFactory::BUILDER_TEST_ADVANCED], true)) {
-            throw new ConfigurationMismatchException('Wrong mode');
+        if (!in_array($strategy, [BuilderFactory::BUILDER_TEST_V1, BuilderFactory::BUILDER_TEST_V2], true)) {
+            throw new ConfigurationMismatchException('Wrong framework version');
         }
 
         $builder = $this->builderFactory->create($strategy);
