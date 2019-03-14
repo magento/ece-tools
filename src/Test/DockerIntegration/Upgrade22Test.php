@@ -15,7 +15,7 @@ class Upgrade22Test extends UpgradeTest
     /**
      * @return array
      */
-    public function defaultDataProvider(): array
+    public function testDataProvider(): array
     {
         return [
             ['2.2.0', '2.2.*']

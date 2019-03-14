@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Test\DockerIntegration\Process;
  */
 class AcceptanceTest extends AbstractTest
 {
-    public function testDefault()
+    public function test()
     {
         (new Process\GitClone('master'))
             ->setTimeout(null)
