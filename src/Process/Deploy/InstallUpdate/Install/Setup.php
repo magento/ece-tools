@@ -112,10 +112,13 @@ class Setup implements ProcessInterface
         }
 
         try {
+            $installUpgradeLog = $this->fileList->getInstallUpgradeLog();
+
+            $this->shell->execute('echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog);
             $this->shell->execute(sprintf(
                 '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
                 escapeshellcmd($command),
-                $this->fileList->getInstallUpgradeLog()
+                $installUpgradeLog
             ));
         } catch (ShellException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
@@ -143,7 +146,7 @@ class Setup implements ProcessInterface
             . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
                 ?: Environment::DEFAULT_ADMIN_URL)
             . ($this->environment->getAdminEmail() ? $this->getAdminCredentials() : '')
-            . ' --use-secure-admin=1 --ansi --no-interaction';
+            . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction';
     }
 
     /**
