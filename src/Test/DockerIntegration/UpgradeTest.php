@@ -17,9 +17,9 @@ class UpgradeTest extends AbstractTest
     /**
      * @param string $updateFrom
      * @param string $updateTo
-     * @dataProvider defaultDataProvider
+     * @dataProvider testDataProvider
      */
-    public function testDefault(string $updateFrom, string $updateTo)
+    public function test(string $updateFrom, string $updateTo)
     {
         $assert = function () {
             $code = (new Process\Ece('build', Config::DEFAULT_CONTAINER))
@@ -40,9 +40,9 @@ class UpgradeTest extends AbstractTest
 
             $this->assertSame(0, $code);
 
-            $config = new Config();
-            $process = new Process\Process(sprintf('curl %s | grep Home', $config->get('env.url.base')));
-            $process->run();
+            $process = new Process\Curl();
+            $process->setTimeout(null)
+                ->run();
 
             $this->assertSame(0, $process->getExitCode());
             $this->assertContains('Home page', $process->getOutput());
@@ -67,7 +67,7 @@ class UpgradeTest extends AbstractTest
     /**
      * @return array
      */
-    public function defaultDataProvider(): array
+    public function testDataProvider(): array
     {
         return [
             ['2.3.0', '2.3.*']

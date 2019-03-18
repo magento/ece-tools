@@ -61,7 +61,7 @@ class IntegrationV2Builder implements BuilderInterface
                             'db',
                         ],
                         'volumes' => [
-                            $this->getMagentoVolume(false)
+                            $this->getMagentoVolume(true)
                         ],
                         'volumes_from' => [
                             'appdata',
@@ -100,7 +100,7 @@ class IntegrationV2Builder implements BuilderInterface
                             'db',
                         ],
                         'volumes' => [
-                            $this->getMagentoVolume(false)
+                            $this->getMagentoVolume(true)
                         ],
                         'volumes_from' => [
                             'appdata',
@@ -119,18 +119,21 @@ class IntegrationV2Builder implements BuilderInterface
 
         $services['services']['build'] = $this->getCliService(
             $phpVersion,
+            'build',
             false,
             ['db'],
             'build.magento2.docker'
         );
         $services['services']['deploy'] = $this->getCliService(
             $phpVersion,
+            'deploy',
             false,
             ['db'],
             'deploy.magento2.docker'
         );
         $services['services']['cron'] = $this->getCliService(
             $phpVersion,
+            'cron',
             false,
             ['db'],
             'cron.magento2.docker',
@@ -152,6 +155,7 @@ class IntegrationV2Builder implements BuilderInterface
 
     /**
      * @param string $version
+     * @param string $name
      * @param bool $isReadOnly
      * @param array $depends
      * @param string $hostname
@@ -161,6 +165,7 @@ class IntegrationV2Builder implements BuilderInterface
      */
     private function getCliService(
         string $version,
+        string $name,
         bool $isReadOnly,
         array $depends,
         string $hostname,
@@ -175,6 +180,7 @@ class IntegrationV2Builder implements BuilderInterface
             $version,
             [
                 'hostname' => $hostname,
+                'container_name' => $name,
                 'depends_on' => $depends,
                 'volumes' => [
                     $composeCacheDirectory . ':/root/.composer/cache',
@@ -205,9 +211,7 @@ class IntegrationV2Builder implements BuilderInterface
     {
         $volume = 'magento:/var/www/magento';
 
-        return $isReadOnly
-            ? $volume . ':ro'
-            : $volume . ':rw';
+        return $isReadOnly ? $volume . ':ro' : $volume . ':rw';
     }
 
     /**
