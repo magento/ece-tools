@@ -57,7 +57,7 @@ class ConnectionTest extends TestCase
 
         /** @var ConnectionFactory|MockObject $connectionFactoryMock */
         $connectionFactoryMock = $this->createMock(ConnectionFactory::class);
-        $connectionFactoryMock->expects($this->once())
+        $connectionFactoryMock->expects($this->any())
             ->method('create')
             ->willReturn($this->connectionDataMock);
 

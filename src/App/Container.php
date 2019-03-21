@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\Database\ConfigInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
@@ -64,6 +65,7 @@ class Container implements ContainerInterface
         /**
          * Binding.
          */
+        $this->container->singleton(Schema::class);
         $this->container->singleton(DirectoryList::class);
         $this->container->singleton(FileList::class);
         $this->container->singleton(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class);

@@ -64,6 +64,11 @@ class Setup implements ProcessInterface
     private $connectionData;
 
     /**
+     * @var ConnectionFactory
+     */
+    private $connectionFactory;
+
+    /**
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
      * @param Environment $environment
@@ -86,7 +91,7 @@ class Setup implements ProcessInterface
         $this->logger = $logger;
         $this->urlManager = $urlManager;
         $this->environment = $environment;
-        $this->connectionData = $connectionFactory->create(ConnectionFactory::CONNECTION_MAIN);
+        $this->connectionFactory = $connectionFactory;
         $this->shell = $shell;
         $this->passwordGenerator = $passwordGenerator;
         $this->fileList = $fileList;
@@ -102,7 +107,7 @@ class Setup implements ProcessInterface
 
         $command = $this->getBaseCommand();
 
-        $dbPassword = $this->connectionData->getPassword();
+        $dbPassword = $this->getConnectionData()->getPassword();
         if (strlen($dbPassword)) {
             $command .= ' --db-password=' . escapeshellarg($dbPassword);
         }
@@ -140,9 +145,9 @@ class Setup implements ProcessInterface
             . ' --base-url-secure=' . escapeshellarg($urlSecure)
             . ' --language=' . escapeshellarg($this->environment->getAdminLocale())
             . ' --timezone=America/Los_Angeles'
-            . ' --db-host=' . escapeshellarg($this->connectionData->getHost())
-            . ' --db-name=' . escapeshellarg($this->connectionData->getDbName())
-            . ' --db-user=' . escapeshellarg($this->connectionData->getUser())
+            . ' --db-host=' . escapeshellarg($this->getConnectionData()->getHost())
+            . ' --db-name=' . escapeshellarg($this->getConnectionData()->getDbName())
+            . ' --db-user=' . escapeshellarg($this->getConnectionData()->getUser())
             . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
                 ?: Environment::DEFAULT_ADMIN_URL)
             . ($this->environment->getAdminEmail() ? $this->getAdminCredentials() : '')
@@ -163,5 +168,17 @@ class Setup implements ProcessInterface
             . ' --admin-email=' . escapeshellarg($this->environment->getAdminEmail())
             . ' --admin-password=' . escapeshellarg($this->environment->getAdminPassword()
                 ?: $this->passwordGenerator->generateRandomPassword());
+    }
+
+    /**
+     * @return ConnectionInterface
+     */
+    private function getConnectionData(): ConnectionInterface
+    {
+        if (!$this->connectionData instanceof ConnectionInterface) {
+            $this->connectionData = $this->connectionFactory->create(ConnectionFactory::CONNECTION_MAIN);
+        }
+
+        return $this->connectionData;
     }
 }

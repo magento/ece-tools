@@ -81,6 +81,7 @@ class CompressStaticContent implements ProcessInterface
         ) {
             $this->staticContentCompressor->process(
                 $this->stageConfig->get(DeployInterface::VAR_SCD_COMPRESSION_LEVEL),
+                $this->stageConfig->get(DeployInterface::VAR_SCD_COMPRESSION_TIMEOUT),
                 $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
             );
         } else {
