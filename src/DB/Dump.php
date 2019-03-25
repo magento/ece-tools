@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\DB;
 
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
-use Magento\MagentoCloud\DB\Data\ConnectionInterface as DatabaseConnectionInterface;
 
 /**
  * Class Dump generate mysqldump command with read only connection
@@ -14,11 +13,11 @@ use Magento\MagentoCloud\DB\Data\ConnectionInterface as DatabaseConnectionInterf
 class Dump implements DumpInterface
 {
     /**
-     * Database connection data for read operations
+     * Factory for creation database data connection classes
      *
-     * @var DatabaseConnectionInterface
+     * @var ConnectionFactory
      */
-    private $connectionData;
+    private $connectionFactory;
 
     /**
      * @param ConnectionFactory $connectionFactory
@@ -26,7 +25,7 @@ class Dump implements DumpInterface
     public function __construct(
         ConnectionFactory $connectionFactory
     ) {
-        $this->connectionData = $connectionFactory->create(ConnectionFactory::CONNECTION_SLAVE);
+        $this->connectionFactory = $connectionFactory;
     }
 
     /**
@@ -36,19 +35,20 @@ class Dump implements DumpInterface
      */
     public function getCommand(): string
     {
-        $command = 'mysqldump -h ' . escapeshellarg($this->connectionData->getHost())
-            . ' -u ' . escapeshellarg($this->connectionData->getUser());
+        $connectionData = $this->connectionFactory->create(ConnectionFactory::CONNECTION_SLAVE);
+        $command = 'mysqldump -h ' . escapeshellarg($connectionData->getHost())
+            . ' -u ' . escapeshellarg($connectionData->getUser());
 
-        $port = $this->connectionData->getPort();
+        $port = $connectionData->getPort();
         if (!empty($port)) {
             $command .= ' -P ' . escapeshellarg($port);
         }
 
-        $password = $this->connectionData->getPassword();
+        $password = $connectionData->getPassword();
         if ($password) {
             $command .= ' -p' . escapeshellarg($password);
         }
-        $command .= ' ' . escapeshellarg($this->connectionData->getDbName())
+        $command .= ' ' . escapeshellarg($connectionData->getDbName())
             . ' --single-transaction --no-autocommit --quick';
 
         return $command;

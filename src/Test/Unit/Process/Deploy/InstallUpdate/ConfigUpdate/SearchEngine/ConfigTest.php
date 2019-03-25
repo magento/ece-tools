@@ -5,19 +5,14 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Response;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
-use Psr\Http\Message\StreamInterface;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -136,6 +131,22 @@ class ConfigTest extends TestCase
      */
     public function testGetWithElasticSearchDataProvider(): array
     {
+        $generateDataForVersionChecking = function ($version, $engine) {
+            return [
+                'customSearchConfig' => [],
+                'version' => $version,
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                ],
+                'expected' => [
+                    'engine' => $engine,
+                    $engine . '_server_hostname' => 'localhost',
+                    $engine . '_server_port' => 1234,
+                ],
+            ];
+        };
+
         return [
             [
                 'customSearchConfig' => ['some_key' => 'some_value'],
@@ -238,19 +249,13 @@ class ConfigTest extends TestCase
                     'elasticsearch5_index_prefix' => 'prefix',
                 ],
             ],
-            [
-                'customSearchConfig' => [],
-                'version' => '6.2',
-                'relationships' => [
-                    'host' => 'localhost',
-                    'port' => 1234,
-                ],
-                'expected' => [
-                    'engine' => 'elasticsearch5',
-                    'elasticsearch5_server_hostname' => 'localhost',
-                    'elasticsearch5_server_port' => 1234,
-                ],
-            ],
+            $generateDataForVersionChecking('1.7', 'elasticsearch'),
+            $generateDataForVersionChecking('2.4', 'elasticsearch'),
+            $generateDataForVersionChecking('5.0', 'elasticsearch5'),
+            $generateDataForVersionChecking('5.2', 'elasticsearch5'),
+            $generateDataForVersionChecking('6.0', 'elasticsearch6'),
+            $generateDataForVersionChecking('6.2', 'elasticsearch6'),
+            $generateDataForVersionChecking('7.2', 'elasticsearch7'),
         ];
     }
 

@@ -105,12 +105,13 @@ class SetupTest extends TestCase
         $this->flagManagerMock->expects($this->exactly(2))
             ->method('delete')
             ->with(FlagManager::FLAG_REGENERATE);
-        $this->shellMock->expects($this->once())
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->with(
-                '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
+            ->withConsecutive(
+                ['echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog],
+                ['/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
                 . '--keep-generated --ansi --no-interaction -v | tee -a '
-                . $installUpgradeLog . '"'
+                . $installUpgradeLog . '"']
             );
         $this->loggerMock->expects($this->once())
             ->method('info')

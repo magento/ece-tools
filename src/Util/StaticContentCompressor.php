@@ -16,7 +16,6 @@ use Psr\Log\LoggerInterface;
  */
 class StaticContentCompressor
 {
-
     /**
      * Default gzip compression level if not otherwise specified.
      *
@@ -28,6 +27,11 @@ class StaticContentCompressor
      * result.
      */
     const DEFAULT_COMPRESSION_LEVEL = 4;
+
+    /**
+     * Default timeout time in seconds for process static content compression.
+     */
+    const DEFAULT_COMPRESSION_TIMEOUT = 600;
 
     /**
      * @var LoggerInterface
@@ -71,18 +75,22 @@ class StaticContentCompressor
      * Compress select files in the static content directory.
      *
      * @param int $compressionLevel
+     * @param int $timeout
      * @param string $verbose
      * @return void
      */
-    public function process(int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL, string $verbose = '')
-    {
+    public function process(
+        int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL,
+        int $timeout = self::DEFAULT_COMPRESSION_TIMEOUT,
+        string $verbose = ''
+    ) {
         if ($compressionLevel === 0) {
             $this->logger->info('Static content compression was disabled.');
 
             return;
         }
 
-        $compressionCommand = $this->getCompressionCommand($compressionLevel);
+        $compressionCommand = $this->getCompressionCommand($compressionLevel, $timeout);
 
         $startTime = microtime(true);
         $this->shell->execute($compressionCommand);
@@ -103,6 +111,7 @@ class StaticContentCompressor
      * Return the inner find/xargs/gzip command that compresses the content.
      * Ignores any of the directories that are deleting in the background.
      *
+     * @param int $compressionLevel
      * @return string
      */
     private function innerCompressionCommand(int $compressionLevel): string
@@ -122,10 +131,12 @@ class StaticContentCompressor
      * Get the string containing the full shell command for compression.
      *
      * @param int $compressionLevel
+     * @param int $timeout
      * @return string
      */
     private function getCompressionCommand(
-        int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL
+        int $compressionLevel = self::DEFAULT_COMPRESSION_LEVEL,
+        int $timeout = self::DEFAULT_COMPRESSION_TIMEOUT
     ): string {
         $compressionLevel = (int)$compressionLevel;
         $compressionLevel = $compressionLevel > 0 && $compressionLevel <= 9
@@ -133,8 +144,9 @@ class StaticContentCompressor
             : static::DEFAULT_COMPRESSION_LEVEL;
 
         return sprintf(
-            '%s -k 30 600 %s -c %s',
+            '%s -k 30 %s %s -c %s',
             $this->utilityManager->get(UtilityManager::UTILITY_TIMEOUT),
+            $timeout,
             $this->utilityManager->get(UtilityManager::UTILITY_BASH),
             escapeshellarg($this->innerCompressionCommand($compressionLevel))
         );

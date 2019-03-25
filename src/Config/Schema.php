@@ -96,6 +96,18 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => 4,
                 ],
             ],
+            StageConfigInterface::VAR_SCD_COMPRESSION_TIMEOUT => [
+                self::SCHEMA_TYPE => ['integer'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_BUILD,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_BUILD => 600,
+                    StageConfigInterface::STAGE_DEPLOY => 600,
+                ],
+            ],
             StageConfigInterface::VAR_SCD_STRATEGY => [
                 self::SCHEMA_TYPE => ['string'],
                 self::SCHEMA_VALUE_VALIDATION => ['compact', 'quick', 'standard'],

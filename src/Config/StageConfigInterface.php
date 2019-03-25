@@ -27,6 +27,7 @@ interface StageConfigInterface
      * Deployment variables.
      */
     const VAR_SCD_COMPRESSION_LEVEL = 'SCD_COMPRESSION_LEVEL';
+    const VAR_SCD_COMPRESSION_TIMEOUT = 'SCD_COMPRESSION_TIMEOUT';
     const VAR_SCD_STRATEGY = 'SCD_STRATEGY';
     const VAR_SCD_THREADS = 'SCD_THREADS';
     const VAR_SCD_MAX_EXEC_TIME = 'SCD_MAX_EXECUTION_TIME';
