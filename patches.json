@@ -138,6 +138,9 @@
     "Add the possibility to install Magento without admin creation" : {
       "2.1.4 - 2.2.1": "MAGECLOUD-2573__installation_without_admin_creation__2.1.4.patch",
       "2.2.2 - 2.2.7": "MAGECLOUD-2573__installation_without_admin_creation__2.2.2.patch"
+    },
+    "Add the possibility to configure max execution time during static content deployment": {
+      "2.2.0 - 2.2.8 || 2.3.0 - 2.3.1": "MAGECLOUD-2822__configure_max_execution_time.patch"
     }
   }
 }
