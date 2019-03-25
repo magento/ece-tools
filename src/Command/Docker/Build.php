@@ -143,7 +143,7 @@ class Build extends Command
 
         $this->file->filePutContents(
             $builder->getConfigPath(),
-            Yaml::dump($builder->build($config), 4, 2)
+            Yaml::dump($builder->build($config), 4, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)
         );
 
         $output->writeln('<info>Configuration was built</info>');
