@@ -147,7 +147,7 @@
       "2.2.0 - 2.2.8 || 2.3.0 - 2.3.1": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.2.0.patch"
     },
     "Pre-auth SQL": {
-      "2.1.4 - 2.1.8": "MC-5964__preauth_sql__2.1.4.patch",
+      "2.1.4 - 2.1.17": "MC-5964__preauth_sql__2.1.4.patch",
       "2.2.0 - 2.2.7": "MC-5964__preauth_sql__2.2.0.patch",
       "2.3.0": "MC-5964__preauth_sql__2.3.0.patch"
     }
