@@ -46,7 +46,7 @@ diff -Nuar a/vendor/magento/module-deploy/Console/DeployStaticOptions.php b/vend
 diff -Nuar a/vendor/magento/module-deploy/Service/DeployStaticContent.php b/vendor/magento/module-deploy/Service/DeployStaticContent.php
 --- a/vendor/magento/module-deploy/Service/DeployStaticContent.php
 +++ b/vendor/magento/module-deploy/Service/DeployStaticContent.php
-@@ -85,24 +85,26 @@ public function deploy(array $options)
+@@ -88,24 +88,26 @@ class DeployStaticContent
              return;
          }
 
@@ -87,21 +87,3 @@ diff -Nuar a/vendor/magento/module-deploy/Service/DeployStaticContent.php b/vend
              ]
          );
 
-@@ -133,6 +135,8 @@ public function deploy(array $options)
-     }
-
-     /**
-+     * Returns amount of parallel processes, returns zero if option wasn't set.
-+     *
-      * @param array $options
-      * @return int
-      */
-@@ -142,6 +146,8 @@ private function getProcessesAmount(array $options)
-     }
-
-     /**
-+     * Checks if need to refresh only version.
-+     *
-      * @param array $options
-      * @return bool
-      */
