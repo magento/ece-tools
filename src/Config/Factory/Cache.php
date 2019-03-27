@@ -100,7 +100,9 @@ class Cache
         $slaveConnectionData = $this->getSlaveConnection();
         if ($slaveConnectionData) {
             if ($this->isConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $redisConfig)) {
+                $redisCache['frontend_options']['write_control'] = false;
                 $redisCache['backend_options']['load_from_slave'] = $slaveConnectionData;
+                $redisCache['backend_options']['retry_reads_on_master'] = '1';
                 $this->logger->info('Set Redis slave connection');
             } else {
                 $this->logger->notice(
