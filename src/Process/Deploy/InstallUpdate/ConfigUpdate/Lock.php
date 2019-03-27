@@ -78,7 +78,7 @@ class Lock implements ProcessInterface
             $config = $this->configReader->read();
             $config['lock'] = $lockConfig;
             $this->configWriter->create($config);
-            $this->logger->info(sprintf('The lock provider "%s" was set', $lockConfig['provider']));
+            $this->logger->info(sprintf('The lock provider "%s" was set.', $lockConfig['provider']));
         }
     }
 }
