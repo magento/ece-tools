@@ -64,12 +64,13 @@ class StaticContentCompressorTest extends TestCase
 
     /**
      * @param int $compressionLevel
+     * @param int $compressionTimeout
      * @dataProvider compressionDataProvider
      */
-    public function testCompression(int $compressionLevel)
+    public function testCompression(int $compressionLevel, int $compressionTimeout)
     {
         $directoryListDirStatic = 'this/is/a/test/static/directory';
-        $timeout = '/usr/bin/timeout';
+        $timeoutCommand = '/usr/bin/timeout';
         $bash = '/bin/bash';
 
         $this->directoryListMock
@@ -78,8 +79,9 @@ class StaticContentCompressorTest extends TestCase
             ->willReturn($directoryListDirStatic);
 
         $expectedCommand = sprintf(
-            '%s -k 30 600 %s -c %s',
-            $timeout,
+            '%s -k 30 %s %s -c %s',
+            $timeoutCommand,
+            $compressionTimeout,
             $bash,
             escapeshellarg(
                 sprintf(
@@ -100,13 +102,13 @@ class StaticContentCompressorTest extends TestCase
             ->with($expectedCommand);
         $this->utilityManagerMock->method('get')
             ->willReturnMap([
-                [UtilityManager::UTILITY_TIMEOUT, $timeout],
+                [UtilityManager::UTILITY_TIMEOUT, $timeoutCommand],
                 [UtilityManager::UTILITY_BASH, $bash],
             ]);
         $this->loggerMock->expects($this->once())
             ->method('info');
 
-        $this->staticContentCompressor->process($compressionLevel, '-v');
+        $this->staticContentCompressor->process($compressionLevel, $compressionTimeout, '-v');
     }
 
     /**
@@ -115,7 +117,8 @@ class StaticContentCompressorTest extends TestCase
     public function compressionDataProvider(): array
     {
         return [
-            [4],
+            [4, 500],
+            [9, 100000],
         ];
     }
 

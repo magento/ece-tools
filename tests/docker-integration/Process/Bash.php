@@ -3,25 +3,23 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\DockerIntegration;
+namespace Magento\MagentoCloud\Test\DockerIntegration\Process;
 
-use Symfony\Component\Process\Process;
+use Magento\MagentoCloud\Test\DockerIntegration\Config;
 
-class ProcessFactory
+/**
+ * @inheritdoc
+ */
+class Bash extends Process
 {
     /**
      * @param string $command
-     * @param mixed|string $cwd
-     * @return Process
+     * @param array $variables
+     * @param string $container
      */
-    public function create(string $command, $cwd = __DIR__ . '/../..'): Process
+    public function __construct(string $command, string $container, array $variables = [])
     {
-        return new Process($command, $cwd);
-    }
-
-    public function createCompose(string $command, string $container, array $variables = []): Process
-    {
-        $variables = array_replace_recursive($this->getDefaultEnvironmentVariables(), $variables);
+        $variables = array_replace_recursive($this->getDefaultVariables(), $variables);
         $options = '';
 
         foreach ($variables as $varName => $varValue) {
@@ -35,11 +33,16 @@ class ProcessFactory
             $command
         );
 
-        return $this->create($command);
+        parent::__construct($command);
     }
 
-    private function getDefaultEnvironmentVariables(): array
+    /**
+     * @return array
+     */
+    private function getDefaultVariables(): array
     {
+        $config = new Config();
+
         return [
             'MAGENTO_CLOUD_RELATIONSHIPS' => [
                 'database' => [
@@ -53,11 +56,11 @@ class ProcessFactory
                 ],
             ],
             'MAGENTO_CLOUD_ROUTES' => [
-                "http://localhost:8090/" => [
+                $config->get('env.url.base') => [
                     'type' => 'upstream',
                     'original_url' => 'http://{default}',
                 ],
-                "https://localhost:8090/" => [
+                $config->get('env.url.base') => [
                     'type' => 'upstream',
                     'original_url' => 'https://{default}',
                 ]

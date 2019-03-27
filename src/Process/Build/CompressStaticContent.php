@@ -77,6 +77,7 @@ class CompressStaticContent implements ProcessInterface
         if ($this->flagManager->exists(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD)) {
             $this->compressor->process(
                 $this->stageConfig->get(BuildInterface::VAR_SCD_COMPRESSION_LEVEL),
+                $this->stageConfig->get(BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT),
                 $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS)
             );
         } else {
