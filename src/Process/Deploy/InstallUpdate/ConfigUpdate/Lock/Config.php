@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Lock;
 use Magento\MagentoCloud\Config\Environment;
 
 /**
- * Returns search configuration.
+ * Returns lock configuration.
  */
 class Config
 {
@@ -26,7 +26,7 @@ class Config
     }
 
     /**
-     * Returns search configuration.
+     * Returns lock configuration.
      *
      * If there is MAGENTO_CLOUD_LOCKS_DIR the file lock provider will be used,
      * otherwise the db lock provider will be used.
