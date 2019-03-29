@@ -16,6 +16,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class AcceptanceTest extends AbstractTest
 {

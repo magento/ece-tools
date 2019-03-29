@@ -57,6 +57,20 @@ class UpgradeTest extends AbstractTest
 
         $assert();
 
+        $magentoRoot = (new Config())->get('system.magento_dir');
+        $pathsToCleanup = implode(
+            ' ',
+            [
+                $magentoRoot . '/vendor/*',
+                $magentoRoot . '/app/etc/*',
+                $magentoRoot . '/setup/*'
+            ]
+        );
+
+        (new Process\Bash('rm -rf ' . $pathsToCleanup, Config::DEFAULT_CONTAINER))
+            ->setTimeout(null)
+            ->run();
+
         (new Process\ComposerRequire($updateTo))
             ->setTimeout(null)
             ->mustRun();
