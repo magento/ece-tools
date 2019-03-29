@@ -86,3 +86,4 @@ diff -Nuar a/vendor/magento/module-deploy/Service/DeployStaticContent.php b/vend
 +                'queue' => $this->queueFactory->create($queueOptions)
              ]
          );
+

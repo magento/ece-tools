@@ -74,7 +74,7 @@ class CommandFactoryTest extends TestCase
         $this->magentoVersionMock
             ->expects($this->exactly(2))
             ->method('satisfies')
-            ->willReturn(!$useScdStrategy);
+            ->willReturn($useScdStrategy);
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['excluded_themes'])))
             ->method('resolve')
@@ -150,7 +150,7 @@ class CommandFactoryTest extends TestCase
                 ],
                 false,
                 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -v --jobs 1 '
-                . '--max-execution-time 1000 --exclude-theme theme1 en_US de_DE',
+                . '--exclude-theme theme1 en_US de_DE',
             ],
             [
                 [
@@ -214,7 +214,7 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->once())
             ->method('getVerbosityLevel')
             ->willReturn($optionConfig['verbosity_level']);
-        $optionMock->expects($this->once())
+        $optionMock->expects($this->exactly($getStrategyTimes))
             ->method('getMaxExecutionTime')
             ->willReturn($optionConfig['max_execution_time'] ?? null);
 
@@ -248,6 +248,10 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->any())
             ->method('getVerbosityLevel')
             ->willReturn($optionConfig['verbosity_level']);
+        $this->magentoVersionMock
+            ->expects($this->any())
+            ->method('satisfies')
+            ->willReturn(true);
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['resolve_pass'])))
             ->method('resolve')
@@ -442,7 +446,7 @@ class CommandFactoryTest extends TestCase
         $this->magentoVersionMock
             ->expects($this->exactly(2))
             ->method('satisfies')
-            ->willReturn(!$useScdStrategy);
+            ->willReturn($useScdStrategy);
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['excluded_themes'])))
             ->method('resolve')
@@ -483,6 +487,10 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->any())
             ->method('getVerbosityLevel')
             ->willReturn('-v');
+        $this->magentoVersionMock
+            ->expects($this->exactly(2))
+            ->method('satisfies')
+            ->willReturn(true);
         $this->themeResolverMock
             ->expects($this->exactly(3))
             ->method('resolve')
