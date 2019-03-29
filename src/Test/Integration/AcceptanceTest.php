@@ -121,83 +121,83 @@ class AcceptanceTest extends AbstractTest
                     ],
                 ],
             ],
-//            'test cron_consumers_runner with wrong array' => [
-//                'environment' => [
-//                    'variables' => [
-//                        'ADMIN_EMAIL' => 'admin@example.com',
-//                        'CRON_CONSUMERS_RUNNER' => [
-//                            'cron_run' => 'true',
-//                            'max_messages' => 5000,
-//                            'consumers' => ['test'],
-//                        ],
-//                    ],
-//                ],
-//                'expectedConfig' => [
-//                    'cron_consumers_runner' => [
-//                        'cron_run' => false,
-//                        'max_messages' => 5000,
-//                        'consumers' => ['test'],
-//                    ],
-//                    'directories' => [
-//                        'document_root_is_pub' => true,
-//                    ],
-//                ],
-//            ],
-//            'test cron_consumers_runner with string' => [
-//                'environment' => [
-//                    'variables' => [
-//                        'ADMIN_EMAIL' => 'admin@example.com',
-//                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
-//                    ],
-//                ],
-//                'expectedConfig' => [
-//                    'cron_consumers_runner' => [
-//                        'cron_run' => true,
-//                        'max_messages' => 100,
-//                        'consumers' => ['test2'],
-//                    ],
-//                    'directories' => [
-//                        'document_root_is_pub' => true,
-//                    ],
-//                ],
-//            ],
-//            'test cron_consumers_runner with wrong string' => [
-//                'environment' => [
-//                    'variables' => [
-//                        'ADMIN_EMAIL' => 'admin@example.com',
-//                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
-//                    ],
-//                ],
-//                'expectedConfig' => [
-//                    'cron_consumers_runner' => [
-//                        'cron_run' => false,
-//                        'max_messages' => 100,
-//                        'consumers' => ['test2'],
-//                    ],
-//                    'directories' => [
-//                        'document_root_is_pub' => true,
-//                    ],
-//                ],
-//            ],
-//            'disabled static content symlinks 3 jobs' => [
-//                'environment' => [
-//                    'variables' => [
-//                        'ADMIN_EMAIL' => 'admin@example.com',
-//                        'STATIC_CONTENT_SYMLINK' => Environment::VAL_DISABLED,
-//                        'STATIC_CONTENT_THREADS' => 3,
-//                    ],
-//                ],
-//                'expectedConfig' => [
-//                    'cron_consumers_runner' => [
-//                        'cron_run' => false,
-//                        'max_messages' => 10000,
-//                        'consumers' => [],
-//                    ],
-//                    'directories' => [
-//                        'document_root_is_pub' => true,
-//                    ],
-//                ],
-//            ],
+            'test cron_consumers_runner with wrong array' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => [
+                            'cron_run' => 'true',
+                            'max_messages' => 5000,
+                            'consumers' => ['test'],
+                        ],
+                    ],
+                ],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 5000,
+                        'consumers' => ['test'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
+            'test cron_consumers_runner with string' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
+                    ],
+                ],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 100,
+                        'consumers' => ['test2'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
+            'test cron_consumers_runner with wrong string' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
+                    ],
+                ],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 100,
+                        'consumers' => ['test2'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
+            'disabled static content symlinks 3 jobs' => [
+                'environment' => [
+                    'variables' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'STATIC_CONTENT_SYMLINK' => Environment::VAL_DISABLED,
+                        'STATIC_CONTENT_THREADS' => 3,
+                    ],
+                ],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 10000,
+                        'consumers' => [],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
         ];
     }
 
