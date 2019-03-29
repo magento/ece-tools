@@ -20,7 +20,7 @@ class DevBuilder implements BuilderInterface
 {
     const DEFAULT_NGINX_VERSION = 'latest';
     const DEFAULT_VARNISH_VERSION = 'latest';
-    const DEFAULT_HITCH_VERSION = 'latest';
+    const DEFAULT_TLS_VERSION = 'latest';
 
     /**
      * @var ServiceFactory
@@ -116,9 +116,9 @@ class DevBuilder implements BuilderInterface
             self::DEFAULT_VARNISH_VERSION,
             ['depends_on' => ['web']]
         );
-        $services['hitch'] = $this->serviceFactory->create(
-            ServiceFactory::SERVICE_HITCH,
-            self::DEFAULT_HITCH_VERSION,
+        $services['tls'] = $this->serviceFactory->create(
+            ServiceFactory::SERVICE_TLS,
+            self::DEFAULT_TLS_VERSION,
             ['depends_on' => ['varnish']]
         );
 

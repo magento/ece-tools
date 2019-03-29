@@ -22,7 +22,7 @@ class ServiceFactory
     const SERVICE_VARNISH = 'varnish';
     const SERVICE_ELASTICSEARCH = 'elasticsearch';
     const SERVICE_RABBIT_MQ = 'rabbitmq';
-    const SERVICE_HITCH = 'hitch';
+    const SERVICE_TLS = 'tls';
 
     const CONFIG = [
         self::SERVICE_CLI => [
@@ -55,13 +55,16 @@ class ServiceFactory
                 ],
             ]
         ],
-        self::SERVICE_HITCH => [
-            'image' => 'magento/magento-cloud-docker-hitch:%s',
+        self::SERVICE_TLS => [
+            'image' => 'magento/magento-cloud-docker-tls:%s',
             'versions' => ['latest'],
             'config' => [
                 'ports' => [
                     '443:443'
                 ],
+                'external_links' => [
+                    'varnish:varnish'
+                ]
             ]
         ],
         self::SERVICE_REDIS => [
