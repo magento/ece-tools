@@ -64,6 +64,10 @@
       "2.2.2 - 2.2.3": "MAGECLOUD-1607__overhaul_cron_implementation__2.2.2.patch",
       "2.2.4": "MAGECLOUD-1607__overhaul_cron_implementation__2.2.4.patch"
     },
+    "Add Zookeeper and flock locks": {
+      "2.2.5 - 2.2.8": "MAGECLOUD-3054__add_zookeeper_and_flock_locks__2.2.5.patch",
+      "2.3.0 - 2.3.1": "MAGECLOUD-3054__add_zookeeper_and_flock_locks__2.3.0.patch"
+    },
     "Reduce memory usage when importing customers and addresses": {
       "2.1.4 - 2.1.10": "SET-36__fix_oom_during_customer_import__2.1.4.patch",
       "2.1.11 - 2.1.12": "SET-36__fix_oom_during_customer_import__2.1.11.patch",
