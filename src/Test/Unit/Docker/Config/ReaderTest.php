@@ -134,6 +134,7 @@ class ReaderTest extends TestCase
 
         $this->assertSame([
             'type' => 'php:7.1',
+            'crons' => [],
             'services' => [
                 'mysql' => [
                     'service' => 'mysql',
@@ -262,6 +263,7 @@ class ReaderTest extends TestCase
 
         $this->assertSame([
             'type' => 'php:7.1',
+            'crons' => [],
             'services' => [
                 'mysql' => [
                     'service' => 'mysql',

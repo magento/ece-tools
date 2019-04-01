@@ -3,18 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-define('ECE_BP', __DIR__);
+$magentoRoot = $_ENV['MAGENTO_ROOT'] ?? __DIR__ . '/../../../';
 
-/**
- * This hack is to prevent Composer crash when 'NonComposerComponentRegistration.php'
- * was moved from app/etc during writable directories mounting.
- */
-$magentoRoot = __DIR__ . '/../../../';
+define('ECE_BP', __DIR__);
 
 if (!defined('BP')) {
     define('BP', realpath($magentoRoot));
 }
 
+/**
+ * This hack is to prevent Composer crash when 'NonComposerComponentRegistration.php'
+ * was moved from app/etc during writable directories mounting.
+ */
 $files = [
     '/app/etc/registration_globlist.php',
     '/app/etc/NonComposerComponentRegistration.php',

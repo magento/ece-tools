@@ -17,11 +17,10 @@ addons:
     update: true
 
 env:
-  global:
-    - DIR_TOOLS="/var/www/ece-tools"
   matrix:
     - TEST_SUITE=static-unit XDEBUG=true
     - TEST_SUITE=integration
+    - TEST_SUITE=docker-integration
 
 cache:
   apt: true
@@ -33,11 +32,7 @@ before_install:
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
 
-install:
-  - composer update -n --no-suggest
-  - ./bin/ece-tools docker:build:integration ${TRAVIS_PHP_VERSION} 10.0 latest
-
-before_script: docker-compose up -d
+install: composer update -n --no-suggest
 
 script: ./tests/travis/script.sh
 

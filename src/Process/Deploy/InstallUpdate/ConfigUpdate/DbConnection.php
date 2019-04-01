@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -57,9 +56,9 @@ class DbConnection implements ProcessInterface
     private $configMerger;
 
     /**
-     * @var ConnectionInterface
+     * @var RelationshipConnectionFactory
      */
-    private $connectionData;
+    private $connectionFactory;
 
     /**
      * @param DeployInterface $stageConfig
@@ -88,7 +87,7 @@ class DbConnection implements ProcessInterface
         $this->configReader = $configReader;
         $this->configMerger = $configMerger;
         $this->logger = $logger;
-        $this->connectionData = $connectionFactory->create(RelationshipConnectionFactory::CONNECTION_MAIN);
+        $this->connectionFactory = $connectionFactory;
     }
 
     /**
@@ -112,8 +111,9 @@ class DbConnection implements ProcessInterface
     private function addLoggingAboutSlaveConnection()
     {
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
+        $connectionData = $this->connectionFactory->create(RelationshipConnectionFactory::CONNECTION_MAIN);
 
-        if (!$this->connectionData->getHost()
+        if (!$connectionData->getHost()
             || !$this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
             || (!$this->configMerger->isEmpty($envDbConfig) && !$this->configMerger->isMergeRequired($envDbConfig))
         ) {

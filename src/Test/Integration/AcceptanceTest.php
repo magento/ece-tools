@@ -16,6 +16,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class AcceptanceTest extends AbstractTest
 {
@@ -37,11 +38,13 @@ class AcceptanceTest extends AbstractTest
 
     /**
      * @param array $environment
-     * @param array $expectedConsumersRunnerConfig
+     * @param array $expectedConfig
      * @dataProvider defaultDataProvider
      */
-    public function testDefault(array $environment, array $expectedConsumersRunnerConfig)
-    {
+    public function testDefault(
+        array $environment,
+        array $expectedConfig
+    ) {
         $application = $this->bootstrap->createApplication($environment);
 
         $this->executeAndAssert(Build::NAME, $application);
@@ -55,7 +58,7 @@ class AcceptanceTest extends AbstractTest
         $configReader = $application->getContainer()->get(ConfigReader::class);
         $config = $configReader->read();
 
-        $this->assertArraySubset($expectedConsumersRunnerConfig, $config);
+        $this->assertArraySubset($expectedConfig, $config);
     }
 
     /**
@@ -71,7 +74,7 @@ class AcceptanceTest extends AbstractTest
                         'ADMIN_EMAIL' => 'admin@example.com',
                     ],
                 ],
-                'expectedConsumersRunnerConfig' => [
+                'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
                         'max_messages' => 10000,
@@ -80,9 +83,15 @@ class AcceptanceTest extends AbstractTest
                     'directories' => [
                         'document_root_is_pub' => true,
                     ],
+                    'lock' => [
+                        'provider' => 'db',
+                        'config' => [
+                            'prefix' => null,
+                        ],
+                    ],
                 ],
             ],
-            'test cron_consumers_runner with array' => [
+            'test cron_consumers_runner with array and there is MAGENTO_CLOUD_LOCKS_DIR' => [
                 'environment' => [
                     'variables' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
@@ -92,8 +101,11 @@ class AcceptanceTest extends AbstractTest
                             'consumers' => ['test'],
                         ],
                     ],
+                    'env' => [
+                        'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks'
+                    ],
                 ],
-                'expectedConsumersRunnerConfig' => [
+                'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => true,
                         'max_messages' => 5000,
@@ -101,6 +113,12 @@ class AcceptanceTest extends AbstractTest
                     ],
                     'directories' => [
                         'document_root_is_pub' => true,
+                    ],
+                    'lock' => [
+                        'provider' => 'file',
+                        'config' => [
+                            'path' => '/tmp/locks',
+                        ],
                     ],
                 ],
             ],
@@ -115,7 +133,7 @@ class AcceptanceTest extends AbstractTest
                         ],
                     ],
                 ],
-                'expectedConsumersRunnerConfig' => [
+                'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
                         'max_messages' => 5000,
@@ -133,7 +151,7 @@ class AcceptanceTest extends AbstractTest
                         'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
                     ],
                 ],
-                'expectedConsumersRunnerConfig' => [
+                'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => true,
                         'max_messages' => 100,
@@ -151,7 +169,7 @@ class AcceptanceTest extends AbstractTest
                         'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
                     ],
                 ],
-                'expectedConsumersRunnerConfig' => [
+                'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
                         'max_messages' => 100,
@@ -170,7 +188,7 @@ class AcceptanceTest extends AbstractTest
                         'STATIC_CONTENT_THREADS' => 3,
                     ],
                 ],
-                'expectedConsumersRunnerConfig' => [
+                'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
                         'max_messages' => 10000,
@@ -284,5 +302,17 @@ class AcceptanceTest extends AbstractTest
         if (strpos($logContent, '--db-password') !== false) {
             $this->assertContains('--db-password=\'******\'', $logContent);
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function tearDown()
+    {
+        parent::tearDown();
+        Bootstrap::getInstance()->execute(sprintf(
+            'cd %s && rm -rf setup/* app/etc/*',
+            Bootstrap::getInstance()->getSandboxDir()
+        ));
     }
 }

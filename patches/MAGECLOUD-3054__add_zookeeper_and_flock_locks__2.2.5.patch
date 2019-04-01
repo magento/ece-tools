@@ -1,0 +1,1068 @@
+diff -Naur a/app/etc/di.xml b/app/etc/di.xml
+--- a/app/etc/di.xml
++++ b/app/etc/di.xml
+@@ -37,7 +37,7 @@
+     <preference for="Magento\Framework\Locale\ListsInterface" type="Magento\Framework\Locale\TranslatedLists" />
+     <preference for="Magento\Framework\Locale\AvailableLocalesInterface" type="Magento\Framework\Locale\Deployed\Codes" />
+     <preference for="Magento\Framework\Locale\OptionInterface" type="Magento\Framework\Locale\Deployed\Options" />
+-    <preference for="Magento\Framework\Lock\LockManagerInterface" type="Magento\Framework\Lock\Backend\Database" />
++    <preference for="Magento\Framework\Lock\LockManagerInterface" type="Magento\Framework\Lock\Proxy" />
+     <preference for="Magento\Framework\Api\AttributeTypeResolverInterface" type="Magento\Framework\Reflection\AttributeTypeResolver" />
+     <preference for="Magento\Framework\Api\Search\SearchResultInterface" type="Magento\Framework\Api\Search\SearchResult" />
+     <preference for="Magento\Framework\Api\Search\SearchCriteriaInterface" type="Magento\Framework\Api\Search\SearchCriteria"/>
+diff -Naur a/vendor/magento/framework/Lock/Backend/FileLock.php b/vendor/magento/framework/Lock/Backend/FileLock.php
+--- /dev/null
++++ b/vendor/magento/framework/Lock/Backend/FileLock.php
+@@ -0,0 +1,194 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\Framework\Lock\Backend;
++
++use Magento\Framework\Lock\LockManagerInterface;
++use Magento\Framework\Filesystem\Driver\File as FileDriver;
++use Magento\Framework\Exception\RuntimeException;
++use Magento\Framework\Exception\FileSystemException;
++use Magento\Framework\Phrase;
++
++/**
++ * LockManager using the file system for locks
++ */
++class FileLock implements LockManagerInterface
++{
++    /**
++     * The file driver instance
++     *
++     * @var FileDriver
++     */
++    private $fileDriver;
++
++    /**
++     * The path to the locks storage folder
++     *
++     * @var string
++     */
++    private $path;
++
++    /**
++     * How many microseconds to wait before re-try to acquire a lock
++     *
++     * @var int
++     */
++    private $sleepCycle = 100000;
++
++    /**
++     * The mapping list of the path lock with the file resource
++     *
++     * @var array
++     */
++    private $locks = [];
++
++    /**
++     * @param FileDriver $fileDriver The file driver
++     * @param string $path The path to the locks storage folder
++     * @throws RuntimeException Throws RuntimeException if $path is empty
++     *         or cannot create the directory for locks
++     */
++    public function __construct(FileDriver $fileDriver, string $path)
++    {
++        if (!$path) {
++            throw new RuntimeException(new Phrase('The path needs to be a non-empty string.'));
++        }
++
++        $this->fileDriver = $fileDriver;
++        $this->path = rtrim($path, '/') . '/';
++
++        try {
++            if (!$this->fileDriver->isExists($this->path)) {
++                $this->fileDriver->createDirectory($this->path);
++            }
++        } catch (FileSystemException $exception) {
++            throw new RuntimeException(
++                new Phrase('Cannot create the directory for locks: %1', [$this->path]),
++                $exception
++            );
++        }
++    }
++
++    /**
++     * Acquires a lock by name
++     *
++     * @param string $name The lock name
++     * @param int $timeout Timeout in seconds. A negative timeout value means infinite timeout
++     * @return bool Returns true if the lock is acquired, otherwise returns false
++     * @throws RuntimeException Throws RuntimeException if cannot acquires the lock because FS problems
++     */
++    public function lock(string $name, int $timeout = -1): bool
++    {
++        try {
++            $lockFile = $this->getLockPath($name);
++            $fileResource = $this->fileDriver->fileOpen($lockFile, 'w+');
++            $skipDeadline = $timeout < 0;
++            $deadline = microtime(true) + $timeout;
++
++            while (!$this->tryToLock($fileResource)) {
++                if (!$skipDeadline && $deadline <= microtime(true)) {
++                    $this->fileDriver->fileClose($fileResource);
++                    return false;
++                }
++                usleep($this->sleepCycle);
++            }
++        } catch (FileSystemException $exception) {
++            throw new RuntimeException(new Phrase('Cannot acquire a lock.'), $exception);
++        }
++
++        $this->locks[$lockFile] = $fileResource;
++        return true;
++    }
++
++    /**
++     * Checks if a lock exists by name
++     *
++     * @param string $name The lock name
++     * @return bool Returns true if the lock exists, otherwise returns false
++     * @throws RuntimeException Throws RuntimeException if cannot check that the lock exists
++     */
++    public function isLocked(string $name): bool
++    {
++        $lockFile = $this->getLockPath($name);
++        $result = false;
++
++        try {
++            if ($this->fileDriver->isExists($lockFile)) {
++                $fileResource = $this->fileDriver->fileOpen($lockFile, 'w+');
++                if ($this->tryToLock($fileResource)) {
++                    $result = false;
++                } else {
++                    $result = true;
++                }
++                $this->fileDriver->fileClose($fileResource);
++            }
++        } catch (FileSystemException $exception) {
++            throw new RuntimeException(new Phrase('Cannot verify that the lock exists.'), $exception);
++        }
++
++        return $result;
++    }
++
++    /**
++     * Remove the lock by name
++     *
++     * @param string $name The lock name
++     * @return bool If the lock is removed returns true, otherwise returns false
++     */
++    public function unlock(string $name): bool
++    {
++        $lockFile = $this->getLockPath($name);
++
++        if (isset($this->locks[$lockFile]) && $this->tryToUnlock($this->locks[$lockFile])) {
++            unset($this->locks[$lockFile]);
++            return true;
++        }
++
++        return false;
++    }
++
++    /**
++     * Returns the full path to the lock file by name
++     *
++     * @param string $name The lock name
++     * @return string The path to the lock file
++     */
++    private function getLockPath(string $name): string
++    {
++        return $this->path . $name;
++    }
++
++    /**
++     * Tries to lock a file resource
++     *
++     * @param resource $resource The file resource
++     * @return bool If the lock is acquired returns true, otherwise returns false
++     */
++    private function tryToLock($resource): bool
++    {
++        try {
++            return $this->fileDriver->fileLock($resource, LOCK_EX | LOCK_NB);
++        } catch (FileSystemException $exception) {
++            return false;
++        }
++    }
++
++    /**
++     * Tries to unlock a file resource
++     *
++     * @param resource $resource The file resource
++     * @return bool If the lock is removed returns true, otherwise returns false
++     */
++    private function tryToUnlock($resource): bool
++    {
++        try {
++            return $this->fileDriver->fileLock($resource, LOCK_UN | LOCK_NB);
++        } catch (FileSystemException $exception) {
++            return false;
++        }
++    }
++}
+diff -Naur a/vendor/magento/framework/Lock/Backend/Zookeeper.php b/vendor/magento/framework/Lock/Backend/Zookeeper.php
+--- /dev/null
++++ b/vendor/magento/framework/Lock/Backend/Zookeeper.php
+@@ -0,0 +1,280 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\Framework\Lock\Backend;
++
++use Magento\Framework\Lock\LockManagerInterface;
++use Magento\Framework\Exception\RuntimeException;
++use Magento\Framework\Phrase;
++
++/**
++ * LockManager using the Zookeeper for locks
++ */
++class Zookeeper implements LockManagerInterface
++{
++    /**
++     * Zookeeper provider
++     *
++     * @var \Zookeeper
++     */
++    private $zookeeper;
++
++    /**
++     * The base path to locks in Zookeeper
++     *
++     * @var string
++     */
++    private $path;
++
++    /**
++     * The name of sequence nodes
++     *
++     * @var string
++     */
++    private $lockName = 'lock-';
++
++    /**
++     * The host to connect to Zookeeper
++     *
++     * @var string
++     */
++    private $host;
++
++    /**
++     * How many seconds to wait before timing out on connections
++     *
++     * @var int
++     */
++    private $connectionTimeout = 2;
++
++    /**
++     * How many microseconds to wait before recheck connections or nodes
++     *
++     * @var int
++     */
++    private $sleepCycle = 100000;
++
++    /**
++     * The default permissions for Zookeeper nodes
++     *
++     * @var array
++     */
++    private $acl = [['perms'=>\Zookeeper::PERM_ALL, 'scheme' => 'world', 'id' => 'anyone']];
++
++    /**
++     * The mapping list of the lock name with the full lock path
++     *
++     * @var array
++     */
++    private $locks = [];
++
++    /**
++     * The default path to storage locks
++     */
++    const DEFAULT_PATH = '/magento/locks';
++
++    /**
++     * @param string $host The host to connect to Zookeeper
++     * @param string $path The base path to locks in Zookeeper
++     * @throws RuntimeException
++     */
++    public function __construct(string $host, string $path = self::DEFAULT_PATH)
++    {
++        if (!$path) {
++            throw new RuntimeException(
++                new Phrase('The path needs to be a non-empty string.')
++            );
++        }
++
++        if (!$host) {
++            throw new RuntimeException(
++                new Phrase('The host needs to be a non-empty string.')
++            );
++        }
++
++        $this->host = $host;
++        $this->path = rtrim($path, '/') . '/';
++    }
++
++    /**
++     * @inheritdoc
++     *
++     * You can see the lock algorithm by the link
++     * @link https://zookeeper.apache.org/doc/r3.1.2/recipes.html#sc_recipes_Locks
++     *
++     * @throws RuntimeException
++     */
++    public function lock(string $name, int $timeout = -1): bool
++    {
++        $skipDeadline = $timeout < 0;
++        $lockPath = $this->getFullPathToLock($name);
++        $deadline = microtime(true) + $timeout;
++
++        if (!$this->checkAndCreateParentNode($lockPath)) {
++            throw new RuntimeException(new Phrase('Failed creating the path %1', [$lockPath]));
++        }
++
++        $lockKey = $this->getProvider()
++            ->create($lockPath, '1', $this->acl, \Zookeeper::EPHEMERAL | \Zookeeper::SEQUENCE);
++
++        if (!$lockKey) {
++            throw new RuntimeException(new Phrase('Failed creating lock %1', [$lockPath]));
++        }
++
++        while ($this->isAnyLock($lockKey, $this->getIndex($lockKey))) {
++            if (!$skipDeadline && $deadline <= microtime(true)) {
++                $this->getProvider()->delete($lockKey);
++                return false;
++            }
++
++            usleep($this->sleepCycle);
++        }
++
++        $this->locks[$name] = $lockKey;
++
++        return true;
++    }
++
++    /**
++     * @inheritdoc
++     *
++     * @throws RuntimeException
++     */
++    public function unlock(string $name): bool
++    {
++        if (!isset($this->locks[$name])) {
++            return false;
++        }
++
++        return $this->getProvider()->delete($this->locks[$name]);
++    }
++
++    /**
++     * @inheritdoc
++     *
++     * @throws RuntimeException
++     */
++    public function isLocked(string $name): bool
++    {
++        return $this->isAnyLock($this->getFullPathToLock($name));
++    }
++
++    /**
++     * Gets full path to lock by its name
++     *
++     * @param string $name
++     * @return string
++     */
++    private function getFullPathToLock(string $name): string
++    {
++        return $this->path . $name . '/' . $this->lockName;
++    }
++
++    /**
++     * Initiolizes and returns Zookeeper provider
++     *
++     * @return \Zookeeper
++     * @throws RuntimeException
++     */
++    private function getProvider(): \Zookeeper
++    {
++        if (!$this->zookeeper) {
++            $this->zookeeper = new \Zookeeper($this->host);
++        }
++
++        $deadline = microtime(true) + $this->connectionTimeout;
++        while ($this->zookeeper->getState() != \Zookeeper::CONNECTED_STATE) {
++            if ($deadline <= microtime(true)) {
++                throw new RuntimeException(new Phrase('Zookeeper connection timed out!'));
++            }
++            usleep($this->sleepCycle);
++        }
++
++        return $this->zookeeper;
++    }
++
++    /**
++     * Checks and creates base path recursively
++     *
++     * @param string $path
++     * @return bool
++     * @throws RuntimeException
++     */
++    private function checkAndCreateParentNode(string $path): bool
++    {
++        $path = dirname($path);
++        if ($this->getProvider()->exists($path)) {
++            return true;
++        }
++
++        if (!$this->checkAndCreateParentNode($path)) {
++            return false;
++        }
++
++        if ($this->getProvider()->create($path, '1', $this->acl)) {
++            return true;
++        }
++
++        return $this->getProvider()->exists($path);
++    }
++
++    /**
++     * Gets int increment of lock key
++     *
++     * @param string $key
++     * @return int|null
++     */
++    private function getIndex(string $key)
++    {
++        if (!preg_match('/' . $this->lockName . '([0-9]+)$/', $key, $matches)) {
++            return null;
++        }
++
++        return intval($matches[1]);
++    }
++
++    /**
++     * Checks if there is any sequence node under parent of $fullKey.
++     *
++     * At first checks that the $fullKey node is present, if not - returns false.
++     * If $indexKey is non-null and there is a smaller index than $indexKey then returns true,
++     * otherwise returns false.
++     *
++     * @param string $fullKey The full path without any sequence info
++     * @param int|null $indexKey The index to compare
++     * @return bool
++     * @throws RuntimeException
++     */
++    private function isAnyLock(string $fullKey, int $indexKey = null): bool
++    {
++        $parent = dirname($fullKey);
++
++        if (!$this->getProvider()->exists($parent)) {
++            return false;
++        }
++
++        $children = $this->getProvider()->getChildren($parent);
++
++        if (null === $indexKey && !empty($children)) {
++            return true;
++        }
++
++        foreach ($children as $childKey) {
++            $childIndex = $this->getIndex($childKey);
++
++            if (null === $childIndex) {
++                continue;
++            }
++
++            if ($childIndex < $indexKey) {
++                return true;
++            }
++        }
++
++        return false;
++    }
++}
+diff -Naur a/vendor/magento/framework/Lock/LockBackendFactory.php b/vendor/magento/framework/Lock/LockBackendFactory.php
+--- /dev/null
++++ b/vendor/magento/framework/Lock/LockBackendFactory.php
+@@ -0,0 +1,111 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\Framework\Lock;
++
++use Magento\Framework\Phrase;
++use Magento\Framework\Exception\RuntimeException;
++use Magento\Framework\ObjectManagerInterface;
++use Magento\Framework\App\DeploymentConfig;
++use Magento\Framework\Lock\Backend\Database as DatabaseLock;
++use Magento\Framework\Lock\Backend\Zookeeper as ZookeeperLock;
++use Magento\Framework\Lock\Backend\Cache as CacheLock;
++use Magento\Framework\Lock\Backend\FileLock;
++
++/**
++ * The factory to create object that implements LockManagerInterface
++ */
++class LockBackendFactory
++{
++    /**
++     * The Object Manager instance
++     *
++     * @var ObjectManagerInterface
++     */
++    private $objectManager;
++
++    /**
++     * The Application deployment configuration
++     *
++     * @var DeploymentConfig
++     */
++    private $deploymentConfig;
++
++    /**
++     * DB lock provider name
++     *
++     * @const string
++     */
++    const LOCK_DB = 'db';
++
++    /**
++     * Zookeeper lock provider name
++     *
++     * @const string
++     */
++    const LOCK_ZOOKEEPER = 'zookeeper';
++
++    /**
++     * Cache lock provider name
++     *
++     * @const string
++     */
++    const LOCK_CACHE = 'cache';
++
++    /**
++     * File lock provider name
++     *
++     * @const string
++     */
++    const LOCK_FILE = 'file';
++
++    /**
++     * The list of lock providers with mapping on classes
++     *
++     * @var array
++     */
++    private $lockers = [
++        self::LOCK_DB => DatabaseLock::class,
++        self::LOCK_ZOOKEEPER => ZookeeperLock::class,
++        self::LOCK_CACHE => CacheLock::class,
++        self::LOCK_FILE => FileLock::class,
++    ];
++
++    /**
++     * @param ObjectManagerInterface $objectManager The Object Manager instance
++     * @param DeploymentConfig $deploymentConfig The Application deployment configuration
++     */
++    public function __construct(
++        ObjectManagerInterface $objectManager,
++        DeploymentConfig $deploymentConfig
++    ) {
++        $this->objectManager = $objectManager;
++        $this->deploymentConfig = $deploymentConfig;
++    }
++
++    /**
++     * Creates an instance of LockManagerInterface using information from deployment config
++     *
++     * @return LockManagerInterface
++     * @throws RuntimeException
++     */
++    public function create(): LockManagerInterface
++    {
++        $provider = $this->deploymentConfig->get('lock/provider', self::LOCK_DB);
++        $config = $this->deploymentConfig->get('lock/config', []);
++
++        if (!isset($this->lockers[$provider])) {
++            throw new RuntimeException(new Phrase('Unknown locks provider: %1', [$provider]));
++        }
++
++        if (self::LOCK_ZOOKEEPER === $provider && !extension_loaded(self::LOCK_ZOOKEEPER)) {
++            throw new RuntimeException(new Phrase('php extension Zookeeper is not installed.'));
++        }
++
++        return $this->objectManager->create($this->lockers[$provider], $config);
++    }
++}
+diff -Naur a/vendor/magento/framework/Lock/LockManagerInterface.php b/vendor/magento/framework/Lock/LockManagerInterface.php
+--- a/vendor/magento/framework/Lock/LockManagerInterface.php
++++ b/vendor/magento/framework/Lock/LockManagerInterface.php
+@@ -3,8 +3,8 @@
+  * Copyright © Magento, Inc. All rights reserved.
+  * See COPYING.txt for license details.
+  */
+-
+ declare(strict_types=1);
++
+ namespace Magento\Framework\Lock;
+ 
+ /**
+diff -Naur a/vendor/magento/framework/Lock/Proxy.php b/vendor/magento/framework/Lock/Proxy.php
+--- /dev/null
++++ b/vendor/magento/framework/Lock/Proxy.php
+@@ -0,0 +1,83 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\Framework\Lock;
++
++use Magento\Framework\Exception\RuntimeException;
++
++/**
++ * Proxy for LockManagers
++ */
++class Proxy implements LockManagerInterface
++{
++    /**
++     * The factory to create LockManagerInterface implementation
++     *
++     * @var LockBackendFactory
++     */
++    private $factory;
++
++    /**
++     * A LockManagerInterface implementation
++     *
++     * @var LockManagerInterface
++     */
++    private $locker;
++
++    /**
++     * @param LockBackendFactory $factory The factory to create LockManagerInterface implementation
++     */
++    public function __construct(LockBackendFactory $factory)
++    {
++        $this->factory = $factory;
++    }
++
++    /**
++     * @inheritdoc
++     *
++     * @throws RuntimeException
++     */
++    public function isLocked(string $name): bool
++    {
++        return $this->getLocker()->isLocked($name);
++    }
++
++    /**
++     * @inheritdoc
++     *
++     * @throws RuntimeException
++     */
++    public function lock(string $name, int $timeout = -1): bool
++    {
++        return $this->getLocker()->lock($name, $timeout);
++    }
++
++    /**
++     * @inheritdoc
++     *
++     * @throws RuntimeException
++     */
++    public function unlock(string $name): bool
++    {
++        return $this->getLocker()->unlock($name);
++    }
++
++    /**
++     * Gets LockManagerInterface implementation using Factory
++     *
++     * @return LockManagerInterface
++     * @throws RuntimeException
++     */
++    private function getLocker(): LockManagerInterface
++    {
++        if (!$this->locker) {
++            $this->locker = $this->factory->create();
++        }
++
++        return $this->locker;
++    }
++}
+diff -Naur a/setup/src/Magento/Setup/Model/ConfigOptionsList.php b/setup/src/Magento/Setup/Model/ConfigOptionsList.php
+--- a/setup/src/Magento/Setup/Model/ConfigOptionsList.php
++++ b/setup/src/Magento/Setup/Model/ConfigOptionsList.php
+@@ -44,7 +44,8 @@ class ConfigOptionsList implements ConfigOptionsListInterface
+     private $configOptionsListClasses = [
+         \Magento\Setup\Model\ConfigOptionsList\Session::class,
+         \Magento\Setup\Model\ConfigOptionsList\Cache::class,
+-        \Magento\Setup\Model\ConfigOptionsList\PageCache::class
++        \Magento\Setup\Model\ConfigOptionsList\PageCache::class,
++        \Magento\Setup\Model\ConfigOptionsList\Lock::class,
+     ];
+ 
+     /**
+diff -Naur a/setup/src/Magento/Setup/Model/ConfigOptionsList/Lock.php b/setup/src/Magento/Setup/Model/ConfigOptionsList/Lock.php
+--- /dev/null
++++ b/setup/src/Magento/Setup/Model/ConfigOptionsList/Lock.php
+@@ -0,0 +1,342 @@
++<?php
++/**
++ * Copyright © Magento, Inc. All rights reserved.
++ * See COPYING.txt for license details.
++ */
++declare(strict_types=1);
++
++namespace Magento\Setup\Model\ConfigOptionsList;
++
++use Magento\Framework\Lock\Backend\Zookeeper as ZookeeperLock;
++use Magento\Framework\Lock\LockBackendFactory;
++use Magento\Framework\App\DeploymentConfig;
++use Magento\Framework\Config\Data\ConfigData;
++use Magento\Framework\Config\File\ConfigFilePool;
++use Magento\Framework\Setup\ConfigOptionsListInterface;
++use Magento\Framework\Setup\Option\SelectConfigOption;
++use Magento\Framework\Setup\Option\TextConfigOption;
++
++/**
++ * Deployment configuration options for locks
++ */
++class Lock implements ConfigOptionsListInterface
++{
++    /**
++     * The name of an option to set lock provider
++     *
++     * @const string
++     */
++    const INPUT_KEY_LOCK_PROVIDER = 'lock-provider';
++
++    /**
++     * The name of an option to set DB prefix
++     *
++     * @const string
++     */
++    const INPUT_KEY_LOCK_DB_PREFIX = 'lock-db-prefix';
++
++    /**
++     * The name of an option to set Zookeeper host
++     *
++     * @const string
++     */
++    const INPUT_KEY_LOCK_ZOOKEEPER_HOST = 'lock-zookeeper-host';
++
++    /**
++     * The name of an option to set Zookeeper path
++     *
++     * @const string
++     */
++    const INPUT_KEY_LOCK_ZOOKEEPER_PATH = 'lock-zookeeper-path';
++
++    /**
++     * The name of an option to set File path
++     *
++     * @const string
++     */
++    const INPUT_KEY_LOCK_FILE_PATH = 'lock-file-path';
++
++    /**
++     * The configuration path to save lock provider
++     *
++     * @const string
++     */
++    const CONFIG_PATH_LOCK_PROVIDER = 'lock/provider';
++
++    /**
++     * The configuration path to save DB prefix
++     *
++     * @const string
++     */
++    const CONFIG_PATH_LOCK_DB_PREFIX = 'lock/config/prefix';
++
++    /**
++     * The configuration path to save Zookeeper host
++     *
++     * @const string
++     */
++    const CONFIG_PATH_LOCK_ZOOKEEPER_HOST = 'lock/config/host';
++
++    /**
++     * The configuration path to save Zookeeper path
++     *
++     * @const string
++     */
++    const CONFIG_PATH_LOCK_ZOOKEEPER_PATH = 'lock/config/path';
++
++    /**
++     * The configuration path to save locks directory path
++     *
++     * @const string
++     */
++    const CONFIG_PATH_LOCK_FILE_PATH = 'lock/config/path';
++
++    /**
++     * The list of lock providers
++     *
++     * @var array
++     */
++    private $validLockProviders = [
++        LockBackendFactory::LOCK_DB,
++        LockBackendFactory::LOCK_ZOOKEEPER,
++        LockBackendFactory::LOCK_CACHE,
++        LockBackendFactory::LOCK_FILE,
++    ];
++
++    /**
++     * The mapping input keys with their configuration paths
++     *
++     * @var array
++     */
++    private $mappingInputKeyToConfigPath = [
++        LockBackendFactory::LOCK_DB => [
++            self::INPUT_KEY_LOCK_PROVIDER => self::CONFIG_PATH_LOCK_PROVIDER,
++            self::INPUT_KEY_LOCK_DB_PREFIX => self::CONFIG_PATH_LOCK_DB_PREFIX,
++        ],
++        LockBackendFactory::LOCK_ZOOKEEPER => [
++            self::INPUT_KEY_LOCK_PROVIDER => self::CONFIG_PATH_LOCK_PROVIDER,
++            self::INPUT_KEY_LOCK_ZOOKEEPER_HOST => self::CONFIG_PATH_LOCK_ZOOKEEPER_HOST,
++            self::INPUT_KEY_LOCK_ZOOKEEPER_PATH => self::CONFIG_PATH_LOCK_ZOOKEEPER_PATH,
++        ],
++        LockBackendFactory::LOCK_CACHE => [
++            self::INPUT_KEY_LOCK_PROVIDER => self::CONFIG_PATH_LOCK_PROVIDER,
++        ],
++        LockBackendFactory::LOCK_FILE => [
++            self::INPUT_KEY_LOCK_PROVIDER => self::CONFIG_PATH_LOCK_PROVIDER,
++            self::INPUT_KEY_LOCK_FILE_PATH => self::CONFIG_PATH_LOCK_FILE_PATH,
++        ],
++    ];
++
++    /**
++     * The list of default values
++     *
++     * @var array
++     */
++    private $defaultConfigValues = [
++        self::INPUT_KEY_LOCK_PROVIDER => LockBackendFactory::LOCK_DB,
++        self::INPUT_KEY_LOCK_DB_PREFIX => null,
++        self::INPUT_KEY_LOCK_ZOOKEEPER_PATH => ZookeeperLock::DEFAULT_PATH,
++    ];
++
++    /**
++     * @inheritdoc
++     */
++    public function getOptions()
++    {
++        return [
++            new SelectConfigOption(
++                self::INPUT_KEY_LOCK_PROVIDER,
++                SelectConfigOption::FRONTEND_WIZARD_SELECT,
++                $this->validLockProviders,
++                self::CONFIG_PATH_LOCK_PROVIDER,
++                'Lock provider name',
++                LockBackendFactory::LOCK_DB
++            ),
++            new TextConfigOption(
++                self::INPUT_KEY_LOCK_DB_PREFIX,
++                TextConfigOption::FRONTEND_WIZARD_TEXT,
++                self::CONFIG_PATH_LOCK_DB_PREFIX,
++                'Installation specific lock prefix to avoid lock conflicts'
++            ),
++            new TextConfigOption(
++                self::INPUT_KEY_LOCK_ZOOKEEPER_HOST,
++                TextConfigOption::FRONTEND_WIZARD_TEXT,
++                self::CONFIG_PATH_LOCK_ZOOKEEPER_HOST,
++                'Host and port to connect to Zookeeper cluster. For example: 127.0.0.1:2181'
++            ),
++            new TextConfigOption(
++                self::INPUT_KEY_LOCK_ZOOKEEPER_PATH,
++                TextConfigOption::FRONTEND_WIZARD_TEXT,
++                self::CONFIG_PATH_LOCK_ZOOKEEPER_PATH,
++                'The path where Zookeeper will save locks. The default path is: ' . ZookeeperLock::DEFAULT_PATH
++            ),
++            new TextConfigOption(
++                self::INPUT_KEY_LOCK_FILE_PATH,
++                TextConfigOption::FRONTEND_WIZARD_TEXT,
++                self::CONFIG_PATH_LOCK_FILE_PATH,
++                'The path where file locks will be saved.'
++            ),
++        ];
++    }
++
++    /**
++     * @inheritdoc
++     */
++    public function createConfig(array $options, DeploymentConfig $deploymentConfig)
++    {
++        $configData = new ConfigData(ConfigFilePool::APP_ENV);
++        $configData->setOverrideWhenSave(true);
++        $lockProvider = $this->getLockProvider($options, $deploymentConfig);
++
++        $this->setDefaultConfiguration($configData, $deploymentConfig, $lockProvider);
++
++        foreach ($this->mappingInputKeyToConfigPath[$lockProvider] as $input => $path) {
++            if (isset($options[$input])) {
++                $configData->set($path, $options[$input]);
++            }
++        }
++
++        return $configData;
++    }
++
++    /**
++     * @inheritdoc
++     */
++    public function validate(array $options, DeploymentConfig $deploymentConfig)
++    {
++        $lockProvider = $this->getLockProvider($options, $deploymentConfig);
++        switch ($lockProvider) {
++            case LockBackendFactory::LOCK_ZOOKEEPER:
++                $errors = $this->validateZookeeperConfig($options, $deploymentConfig);
++                break;
++            case LockBackendFactory::LOCK_FILE:
++                $errors = $this->validateFileConfig($options, $deploymentConfig);
++                break;
++            case LockBackendFactory::LOCK_CACHE:
++            case LockBackendFactory::LOCK_DB:
++                $errors = [];
++                break;
++            default:
++                $errors[] = 'The lock provider ' . $lockProvider . ' does not exist.';
++        }
++
++        return $errors;
++    }
++
++    /**
++     * Validates File locks configuration
++     *
++     * @param array $options
++     * @param DeploymentConfig $deploymentConfig
++     * @return array
++     */
++    private function validateFileConfig(array $options, DeploymentConfig $deploymentConfig): array
++    {
++        $errors = [];
++
++        $path = $options[self::INPUT_KEY_LOCK_FILE_PATH]
++            ?? $deploymentConfig->get(
++                self::CONFIG_PATH_LOCK_FILE_PATH,
++                $this->getDefaultValue(self::INPUT_KEY_LOCK_FILE_PATH)
++            );
++
++        if (!$path) {
++            $errors[] = 'The path needs to be a non-empty string.';
++        }
++
++        return $errors;
++    }
++
++    /**
++     * Validates Zookeeper configuration
++     *
++     * @param array $options
++     * @param DeploymentConfig $deploymentConfig
++     * @return array
++     */
++    private function validateZookeeperConfig(array $options, DeploymentConfig $deploymentConfig): array
++    {
++        $errors = [];
++
++        if (!extension_loaded(LockBackendFactory::LOCK_ZOOKEEPER)) {
++            $errors[] = 'php extension Zookeeper is not installed.';
++        }
++
++        $host = $options[self::INPUT_KEY_LOCK_ZOOKEEPER_HOST]
++            ?? $deploymentConfig->get(
++                self::CONFIG_PATH_LOCK_ZOOKEEPER_HOST,
++                $this->getDefaultValue(self::INPUT_KEY_LOCK_ZOOKEEPER_HOST)
++            );
++        $path = $options[self::INPUT_KEY_LOCK_ZOOKEEPER_PATH]
++            ?? $deploymentConfig->get(
++                self::CONFIG_PATH_LOCK_ZOOKEEPER_PATH,
++                $this->getDefaultValue(self::INPUT_KEY_LOCK_ZOOKEEPER_PATH)
++            );
++
++        if (!$path) {
++            $errors[] = 'Zookeeper path needs to be a non-empty string.';
++        }
++
++        if (!$host) {
++            $errors[] = 'Zookeeper host is should be set.';
++        }
++
++        return $errors;
++    }
++
++    /**
++     * Returns the name of lock provider
++     *
++     * @param array $options
++     * @param DeploymentConfig $deploymentConfig
++     * @return string
++     */
++    private function getLockProvider(array $options, DeploymentConfig $deploymentConfig): string
++    {
++        if (!isset($options[self::INPUT_KEY_LOCK_PROVIDER])) {
++            return (string) $deploymentConfig->get(
++                self::CONFIG_PATH_LOCK_PROVIDER,
++                $this->getDefaultValue(self::INPUT_KEY_LOCK_PROVIDER)
++            );
++        }
++
++        return (string) $options[self::INPUT_KEY_LOCK_PROVIDER];
++    }
++
++    /**
++     * Sets default configuration for locks
++     *
++     * @param ConfigData $configData
++     * @param DeploymentConfig $deploymentConfig
++     * @param string $lockProvider
++     * @return ConfigData
++     */
++    private function setDefaultConfiguration(
++        ConfigData $configData,
++        DeploymentConfig $deploymentConfig,
++        string $lockProvider
++    ) {
++        foreach ($this->mappingInputKeyToConfigPath[$lockProvider] as $input => $path) {
++            $configData->set($path, $deploymentConfig->get($path, $this->getDefaultValue($input)));
++        }
++
++        return $configData;
++    }
++
++    /**
++     * Returns default value by input key
++     *
++     * If default value is not set returns null
++     *
++     * @param string $inputKey
++     * @return mixed|null
++     */
++    private function getDefaultValue(string $inputKey)
++    {
++        if (isset($this->defaultConfigValues[$inputKey])) {
++            return $this->defaultConfigValues[$inputKey];
++        } else {
++            return null;
++        }
++    }
++}

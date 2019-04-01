@@ -69,7 +69,7 @@ class ServiceFactory
         ],
         self::SERVICE_REDIS => [
             'image' => 'redis:%s',
-            'versions' => ['3.0', '3.2', '4.0'],
+            'versions' => ['3.0', '3.2', '4.0', '5.0'],
             'config' => [
                 'volumes' => [
                     '/data',
@@ -79,7 +79,7 @@ class ServiceFactory
         ],
         self::SERVICE_ELASTICSEARCH => [
             'image' => 'magento/magento-cloud-docker-elasticsearch:%s',
-            'versions' => ['1.7', '2.4', '5.2']
+            'versions' => ['1.7', '2.4', '5.2', '6.5']
         ],
         self::SERVICE_RABBIT_MQ => [
             'image' => 'rabbitmq:%s',

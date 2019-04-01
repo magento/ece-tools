@@ -1,0 +1,58 @@
+Ticket MAGETWO-57414
+diff -Naur a/vendor/magento/framework/App/StaticResource.php b/vendor/magento/framework/App/StaticResource.php
+index d591deb..6344322 100644
+--- a/vendor/magento/framework/App/StaticResource.php
++++ b/vendor/magento/framework/App/StaticResource.php
+@@ -94,24 +94,40 @@ class StaticResource implements \Magento\Framework\AppInterface
+     {
+         // disabling profiling when retrieving static resource
+         \Magento\Framework\Profiler::reset();
+-        $appMode = $this->state->getMode();
+-        if ($appMode == \Magento\Framework\App\State::MODE_PRODUCTION) {
++        $path = $this->getResourcePath();
++        if (!isset($path)) {
+             $this->response->setHttpResponseCode(404);
+-        } else {
+-            $path = $this->request->get('resource');
+-            $params = $this->parsePath($path);
+-            $this->state->setAreaCode($params['area']);
+-            $this->objectManager->configure($this->configLoader->load($params['area']));
+-            $file = $params['file'];
+-            unset($params['file']);
+-            $asset = $this->assetRepo->createAsset($file, $params);
+-            $this->response->setFilePath($asset->getSourceFile());
+-            $this->publisher->publish($asset);
++            return $this->response;
+         }
++
++        $params = $this->parsePath($path);
++        $this->state->setAreaCode($params['area']);
++        $this->objectManager->configure($this->configLoader->load($params['area']));
++        $file = $params['file'];
++        unset($params['file']);
++        $asset = $this->assetRepo->createAsset($file, $params);
++        $this->response->setFilePath($asset->getSourceFile());
++        $this->publisher->publish($asset);
+         return $this->response;
+     }
+
+     /**
++     * Retrieve the path from either the GET parameter or the request
++     * URI, depending on whether webserver rewrites are in use.
++     */
++    protected function getResourcePath() {
++        $path = $this->request->get('resource');
++        if (isset($path)) {
++            return $path;
++        }
++
++        $path = $this->request->getUri()->getPath();
++        if (preg_match("~^/static/(?:version\d*/)?(.*)$~", $path, $matches)) {
++            return $matches[1];
++        }
++    }
++
++    /**
+      * @inheritdoc
+      */
+     public function catchException(Bootstrap $bootstrap, \Exception $exception)

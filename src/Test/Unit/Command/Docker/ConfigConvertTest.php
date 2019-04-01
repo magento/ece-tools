@@ -82,25 +82,32 @@ class ConfigConvertTest extends TestCase
                     ],
                 ],
                 [
-
                     'magento_root/docker/global.php',
                     [
                         'MAGENTO_RUN_MODE' => 'production',
+                        'DEBUG' => false,
+                        'ENABLE_SENDMAIL' => true,
+                        'PHP_ENABLE_XDEBUG' => true,
                     ],
                 ],
             ]);
         $this->fileMock->expects($this->exactly(2))
             ->method('filePutContents')
-            ->willReturnMap([
+            ->withConsecutive(
                 [
                     'magento_root/docker/config.env',
-                    $this->contains('MAGENTO_CLOUD_VARIABLES=eyJBRE1JTl9FTUFJT'),
+                    $this->stringStartsWith('MAGENTO_CLOUD_VARIABLES=eyJBRE1JTl9FTUFJTCI6InRlc3Qy'),
                 ],
                 [
                     'magento_root/docker/global.env',
-                    'MAGENTO_RUN_MODE=InByb2R1Y3Rpb24i',
-                ],
-            ]);
+                    implode(PHP_EOL, [
+                        'MAGENTO_RUN_MODE=production',
+                        'DEBUG=false',
+                        'ENABLE_SENDMAIL=true',
+                        'PHP_ENABLE_XDEBUG=true',
+                    ]) . PHP_EOL,
+                ]
+            );
 
         $this->command->execute($inputMock, $outputMock);
     }
@@ -144,21 +151,27 @@ class ConfigConvertTest extends TestCase
                     'magento_root/docker/global.php.dist',
                     [
                         'MAGENTO_RUN_MODE' => 'production',
+                        'DEBUG' => false,
+                        'PHP_ENABLE_XDEBUG' => true,
                     ],
                 ],
             ]);
         $this->fileMock->expects($this->exactly(2))
             ->method('filePutContents')
-            ->willReturnMap([
+            ->withConsecutive(
                 [
                     'magento_root/docker/config.env',
-                    $this->contains('MAGENTO_CLOUD_VARIABLES=eyJBRE1JTl9FTUFJT'),
+                    $this->stringStartsWith('MAGENTO_CLOUD_VARIABLES=eyJBRE1JTl9FTUFJT'),
                 ],
                 [
                     'magento_root/docker/global.env',
-                    'MAGENTO_RUN_MODE=InByb2R1Y3Rpb24i',
-                ],
-            ]);
+                    implode(PHP_EOL, [
+                        'MAGENTO_RUN_MODE=production',
+                        'DEBUG=false',
+                        'PHP_ENABLE_XDEBUG=true',
+                    ]) . PHP_EOL,
+                ]
+            );
 
         $this->command->execute($inputMock, $outputMock);
     }
@@ -202,21 +215,27 @@ class ConfigConvertTest extends TestCase
                     'magento_root/docker/global.php.dist',
                     [
                         'MAGENTO_RUN_MODE' => 'production',
+                        'DEBUG' => false,
+                        'PHP_ENABLE_XDEBUG' => true,
                     ],
                 ],
             ]);
         $this->fileMock->expects($this->exactly(2))
             ->method('filePutContents')
-            ->willReturnMap([
+            ->withConsecutive(
                 [
                     'magento_root/docker/config.env',
-                    $this->contains('MAGENTO_CLOUD_VARIABLES=eyJBRE1JTl9FTUFJT'),
+                    $this->stringStartsWith('MAGENTO_CLOUD_VARIABLES=eyJBRE1JTl9FTUFJT'),
                 ],
                 [
                     'magento_root/docker/global.env',
-                    'MAGENTO_RUN_MODE=InByb2R1Y3Rpb24i',
-                ],
-            ]);
+                    implode(PHP_EOL, [
+                        'MAGENTO_RUN_MODE=production',
+                        'DEBUG=false',
+                        'PHP_ENABLE_XDEBUG=true',
+                    ]) . PHP_EOL,
+                ]
+            );
         $this->fileMock->expects($this->exactly(2))
             ->method('deleteFile')
             ->withConsecutive(
