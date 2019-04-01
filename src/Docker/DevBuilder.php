@@ -142,7 +142,6 @@ class DevBuilder implements BuilderInterface
             ServiceFactory::SERVICE_NGINX,
             $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
             [
-                'ports' => ['8080:8080'],
                 'depends_on' => [
                     'fpm',
                     'db',
