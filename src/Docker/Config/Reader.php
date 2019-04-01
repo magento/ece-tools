@@ -64,6 +64,7 @@ class Reader implements ReaderInterface
 
         $config = [
             'type' => $appConfig['type'],
+            'crons' => $appConfig['crons'] ?? [],
             'services' => []
         ];
 

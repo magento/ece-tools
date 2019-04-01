@@ -7,8 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Command\Docker;
 
+use Composer\Console\Application;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Command\Docker\Build;
+use Magento\MagentoCloud\Command\Docker\ConfigConvert;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
@@ -18,11 +20,12 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console;
 
 /**
  * @inheritdoc
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class BuildTest extends TestCase
 {
@@ -90,10 +93,10 @@ class BuildTest extends TestCase
      */
     public function testExecute()
     {
-        /** @var InputInterface $inputMock */
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        /** @var OutputInterface $outputMock */
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        /** @var Console\Input\InputInterface $inputMock */
+        $inputMock = $this->getMockForAbstractClass(Console\Input\InputInterface::class);
+        /** @var Console\Output\OutputInterface $outputMock */
+        $outputMock = $this->getMockForAbstractClass(Console\Output\OutputInterface::class);
 
         $this->builderFactoryMock->expects($this->once())
             ->method('create')
@@ -108,6 +111,17 @@ class BuildTest extends TestCase
             ->method('filePutContents')
             ->with('magento_root/docker-compose.yml', "version: '2'\n");
 
+        /** @var Console\Application|MockObject $applicationMock */
+        $applicationMock = $this->createMock(Console\Application::class);
+        $applicationMock->method('getHelperSet')
+            ->willReturn($this->createMock(Console\Helper\HelperSet::class));
+        $applicationMock->expects($this->once())
+            ->method('find')
+            ->willReturnMap([
+                [ConfigConvert::NAME, $this->createMock(ConfigConvert::class)],
+            ]);
+
+        $this->command->setApplication($applicationMock);
         $this->command->execute($inputMock, $outputMock);
     }
 
@@ -117,10 +131,10 @@ class BuildTest extends TestCase
      */
     public function testExecuteWithParams()
     {
-        /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
-        /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
+        /** @var Console\Input\InputInterface|MockObject $inputMock */
+        $inputMock = $this->getMockForAbstractClass(Console\Input\InputInterface::class);
+        /** @var Console\Output\OutputInterface|MockObject $outputMock */
+        $outputMock = $this->getMockForAbstractClass(Console\Output\OutputInterface::class);
 
         $this->builderFactoryMock->expects($this->once())
             ->method('create')
@@ -146,6 +160,17 @@ class BuildTest extends TestCase
         $this->configMock->expects($this->exactly(6))
             ->method('set');
 
+        /** @var Console\Application|MockObject $applicationMock */
+        $applicationMock = $this->createMock(Application::class);
+        $applicationMock->method('getHelperSet')
+            ->willReturn($this->createMock(Console\Helper\HelperSet::class));
+        $applicationMock->expects($this->once())
+            ->method('find')
+            ->willReturnMap([
+                [ConfigConvert::NAME, $this->createMock(ConfigConvert::class)],
+            ]);
+
+        $this->command->setApplication($applicationMock);
         $this->command->execute($inputMock, $outputMock);
     }
 

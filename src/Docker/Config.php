@@ -72,4 +72,17 @@ class Config
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
+
+    /**
+     * @return array
+     * @throws ConfigurationMismatchException
+     */
+    public function getCron(): array
+    {
+        try {
+            return $this->reader->read()['crons'] ?? [];
+        } catch (FileSystemException $exception) {
+            throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
 }

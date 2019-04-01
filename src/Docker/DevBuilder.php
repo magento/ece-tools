@@ -21,6 +21,8 @@ class DevBuilder implements BuilderInterface
     const DEFAULT_NGINX_VERSION = 'latest';
     const DEFAULT_VARNISH_VERSION = 'latest';
 
+    const DIR_MAGENTO = '/var/www/magento';
+
     /**
      * @var ServiceFactory
      */
@@ -136,13 +138,8 @@ class DevBuilder implements BuilderInterface
             $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
             [
                 'ports' => ['443:443'],
-                'depends_on' => [
-                    'fpm',
-                    'db',
-                ],
-                'volumes_from' => [
-                    'appdata',
-                ],
+                'depends_on' => ['fpm', 'db'],
+                'volumes_from' => ['appdata'],
                 'volumes' => [
                     $this->getMagentoVolume(true),
                 ],
@@ -152,16 +149,17 @@ class DevBuilder implements BuilderInterface
                 ],
             ]
         );
-        $services['cron'] = $this->getCliService($phpVersion, true, $cliDepends, 'cron.magento2.docker', true);
+        $services['cron'] = $this->getCronCliService($phpVersion, true, $cliDepends, 'cron.magento2.docker');
         $services['appdata'] = [
             'image' => 'tianon/true',
             'volumes' => [
                 './docker/mnt:/mnt',
-                '/var/www/magento/vendor',
-                '/var/www/magento/generated',
-                '/var/www/magento/pub',
-                '/var/www/magento/var',
-                '/var/www/magento/app/etc',
+                self::DIR_MAGENTO . '/var',
+                self::DIR_MAGENTO . '/app/etc',
+                self::DIR_MAGENTO . '/pub/static',
+                self::DIR_MAGENTO . '/pub/media',
+                self::DIR_MAGENTO . '/vendor',
+                self::DIR_MAGENTO . '/generated'
             ],
         ];
 
@@ -185,11 +183,9 @@ class DevBuilder implements BuilderInterface
      */
     private function getMagentoVolume(bool $isReadOnly): string
     {
-        $volume = '.:/var/www/magento';
+        $volume = '.:' . self::DIR_MAGENTO;
 
-        return $isReadOnly
-            ? $volume . ':ro'
-            : $volume . ':rw';
+        return $isReadOnly ? $volume . ':ro' : $volume . ':rw';
     }
 
     /**
@@ -197,7 +193,42 @@ class DevBuilder implements BuilderInterface
      * @param bool $isReadOnly
      * @param array $depends
      * @param string $hostname
-     * @param bool $cron
+     * @return array
+     * @throws ConfigurationMismatchException
+     */
+    private function getCronCliService(string $version, bool $isReadOnly, array $depends, string $hostname): array
+    {
+        $config = $this->getCliService($version, $isReadOnly, $depends, $hostname);
+
+        if ($cronConfig = $this->config->getCron()) {
+            $preparedCronConfig = [];
+
+            foreach ($cronConfig as $job) {
+                $preparedCronConfig[] = sprintf(
+                    '%s root cd %s && %s >> %s/var/log/cron.log',
+                    $job['spec'],
+                    self::DIR_MAGENTO,
+                    str_replace('php ', '/usr/local/bin/php ', $job['cmd']),
+                    self::DIR_MAGENTO
+                );
+            }
+
+            $config['environment']['CRONTAB'] = implode(
+                PHP_EOL,
+                $preparedCronConfig
+            );
+        }
+
+        $config['command'] = 'run-cron';
+
+        return $config;
+    }
+
+    /**
+     * @param string $version
+     * @param bool $isReadOnly
+     * @param array $depends
+     * @param string $hostname
      * @return array
      * @throws ConfigurationMismatchException
      */
@@ -205,8 +236,7 @@ class DevBuilder implements BuilderInterface
         string $version,
         bool $isReadOnly,
         array $depends,
-        string $hostname,
-        bool $cron = false
+        string $hostname
     ): array {
         $composeCacheDirectory = file_exists(getenv('HOME') . '/.cache/composer')
             ? '~/.cache/composer'
@@ -222,19 +252,13 @@ class DevBuilder implements BuilderInterface
                     $composeCacheDirectory . ':/root/.composer/cache',
                     $this->getMagentoVolume($isReadOnly),
                 ],
-                'volumes_from' => [
-                    'appdata',
-                ],
+                'volumes_from' => ['appdata'],
                 'env_file' => [
                     './docker/global.env',
                     './docker/config.env',
                 ],
             ]
         );
-
-        if ($cron) {
-            $config['command'] = 'run-cron';
-        }
 
         return $config;
     }
