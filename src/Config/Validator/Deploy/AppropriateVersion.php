@@ -56,6 +56,7 @@ class AppropriateVersion implements ValidatorInterface
             $variables = [
                 DeployInterface::VAR_CRON_CONSUMERS_RUNNER,
                 DeployInterface::VAR_SCD_STRATEGY,
+                DeployInterface::VAR_SCD_MAX_EXEC_TIME,
             ];
 
             foreach ($variables as $variableName) {

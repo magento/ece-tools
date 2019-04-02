@@ -53,13 +53,15 @@ class AppropriateVersion implements ValidatorInterface
     {
         $errors = [];
 
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')
-            && !empty($this->stageConfig->get(StageConfigInterface::VAR_SCD_STRATEGY))
-        ) {
+        foreach ([StageConfigInterface::VAR_SCD_STRATEGY, StageConfigInterface::VAR_SCD_MAX_EXEC_TIME] as $variable) {
+            if (!$this->magentoVersion->isGreaterOrEqual('2.2')
+                && !empty($this->stageConfig->get($variable))
+            ) {
                 $errors[] = sprintf(
                     '%s is available for Magento 2.2.0 and later.',
-                    StageConfigInterface::VAR_SCD_STRATEGY
+                    $variable
                 );
+            }
         }
 
         if ($errors) {

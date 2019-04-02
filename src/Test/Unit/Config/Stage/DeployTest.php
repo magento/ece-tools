@@ -92,6 +92,11 @@ class DeployTest extends TestCase
                     Deploy::VAR_SESSION_CONFIGURATION => ['save' => 'redis']
                 ],
             ],
+            'null config value' => [
+                Deploy::VAR_SCD_MAX_EXEC_TIME,
+                null,
+                [Deploy::VAR_SCD_MAX_EXEC_TIME => null],
+            ],
             'string value not a json' => [
                 Deploy::VAR_SCD_STRATEGY,
                 'compact',

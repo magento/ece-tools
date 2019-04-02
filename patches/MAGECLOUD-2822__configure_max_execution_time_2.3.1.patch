@@ -1,0 +1,89 @@
+diff -Nuar a/vendor/magento/module-deploy/Console/DeployStaticOptions.php b/vendor/magento/module-deploy/Console/DeployStaticOptions.php
+--- a/vendor/magento/module-deploy/Console/DeployStaticOptions.php
++++ b/vendor/magento/module-deploy/Console/DeployStaticOptions.php
+@@ -6,6 +6,7 @@
+
+ namespace Magento\Deploy\Console;
+
++use Magento\Deploy\Process\Queue;
+ use Symfony\Component\Console\Input\InputOption;
+ use Symfony\Component\Console\Input\InputArgument;
+
+@@ -57,6 +58,11 @@ class DeployStaticOptions
+      */
+     const JOBS_AMOUNT = 'jobs';
+
++    /**
++     * Key for max execution time option
++     */
++    const MAX_EXECUTION_TIME = 'max-execution-time';
++
+     /**
+      * Force run of static deploy
+      */
+@@ -150,6 +156,7 @@ public function getOptionsList()
+      * Basic options
+      *
+      * @return array
++     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+      */
+     private function getBasicOptions()
+     {
+@@ -216,6 +223,13 @@ private function getBasicOptions()
+                 'Enable parallel processing using the specified number of jobs.',
+                 self::DEFAULT_JOBS_AMOUNT
+             ),
++            new InputOption(
++                self::MAX_EXECUTION_TIME,
++                null,
++                InputOption::VALUE_OPTIONAL,
++                'The maximum expected execution time of deployment static process (in seconds).',
++                Queue::DEFAULT_MAX_EXEC_TIME
++            ),
+             new InputOption(
+                 self::SYMLINK_LOCALE,
+                 null,
+diff -Nuar a/vendor/magento/module-deploy/Service/DeployStaticContent.php b/vendor/magento/module-deploy/Service/DeployStaticContent.php
+--- a/vendor/magento/module-deploy/Service/DeployStaticContent.php
++++ b/vendor/magento/module-deploy/Service/DeployStaticContent.php
+@@ -88,24 +88,26 @@ class DeployStaticContent
+             return;
+         }
+
+-        $queue = $this->queueFactory->create(
+-            [
+-                'logger' => $this->logger,
+-                'options' => $options,
+-                'maxProcesses' => $this->getProcessesAmount($options),
+-                'deployPackageService' => $this->objectManager->create(
+-                    \Magento\Deploy\Service\DeployPackage::class,
+-                    [
+-                        'logger' => $this->logger
+-                    ]
+-                )
+-            ]
+-        );
++        $queueOptions = [
++            'logger' => $this->logger,
++            'options' => $options,
++            'maxProcesses' => $this->getProcessesAmount($options),
++            'deployPackageService' => $this->objectManager->create(
++                \Magento\Deploy\Service\DeployPackage::class,
++                [
++                    'logger' => $this->logger
++                ]
++            )
++        ];
++
++        if (isset($options[Options::MAX_EXECUTION_TIME])) {
++            $queueOptions['maxExecTime'] = (int)$options[Options::MAX_EXECUTION_TIME];
++        }
+
+         $deployStrategy = $this->deployStrategyFactory->create(
+             $options[Options::STRATEGY],
+             [
+-                'queue' => $queue
++                'queue' => $this->queueFactory->create($queueOptions)
+             ]
+         );
+
