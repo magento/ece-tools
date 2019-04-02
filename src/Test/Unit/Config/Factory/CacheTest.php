@@ -202,7 +202,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
-                        'database' => 1
+                        'database' => Cache::REDIS_DATABASE_DEFAULT
                     ],
                 ],
                 'page_cache' => [
@@ -210,7 +210,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
-                        'database' => 1
+                        'database' => Cache::REDIS_DATABASE_PAGE_CACHE
                     ],
                 ],
             ]
@@ -354,7 +354,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
-                        'database' => 1
+                        'database' => Cache::REDIS_DATABASE_DEFAULT
                     ],
                 ],
                 'page_cache' => [
@@ -362,7 +362,7 @@ class CacheTest extends TestCase
                     'backend_options' => [
                         'server' => 'master.host',
                         'port' => 'master.port',
-                        'database' => 1
+                        'database' => Cache::REDIS_DATABASE_PAGE_CACHE
                     ],
                 ],
             ]
