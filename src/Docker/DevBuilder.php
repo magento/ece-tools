@@ -20,6 +20,7 @@ class DevBuilder implements BuilderInterface
 {
     const DEFAULT_NGINX_VERSION = 'latest';
     const DEFAULT_VARNISH_VERSION = 'latest';
+    const DEFAULT_TLS_VERSION = 'latest';
 
     const DIR_MAGENTO = '/var/www/magento';
 
@@ -117,6 +118,12 @@ class DevBuilder implements BuilderInterface
             self::DEFAULT_VARNISH_VERSION,
             ['depends_on' => ['web']]
         );
+        $services['tls'] = $this->serviceFactory->create(
+            ServiceFactory::SERVICE_TLS,
+            self::DEFAULT_TLS_VERSION,
+            ['depends_on' => ['varnish']]
+        );
+
         $services['fpm'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_FPM,
             $phpVersion,
@@ -137,7 +144,6 @@ class DevBuilder implements BuilderInterface
             ServiceFactory::SERVICE_NGINX,
             $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
             [
-                'ports' => ['443:443'],
                 'depends_on' => ['fpm', 'db'],
                 'volumes_from' => ['appdata'],
                 'volumes' => [
