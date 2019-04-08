@@ -6,15 +6,15 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
-use Magento\MagentoCloud\Config\Deploy\Reader as EnvReader;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
-use Magento\MagentoCloud\Config\Shared\Reader as SharedReader;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
+use Magento\MagentoCloud\Process\ProcessException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -28,39 +28,34 @@ class SearchEngineTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var EnvWriter|Mock
+     * @var EnvWriter|MockObject
      */
     private $envWriterMock;
 
     /**
-     * @var EnvReader|Mock
-     */
-    private $envReaderMock;
-
-    /**
-     * @var SharedWriter|Mock
+     * @var SharedWriter|MockObject
      */
     private $sharedWriterMock;
 
     /**
-     * @var SharedReader|Mock
-     */
-    private $sharedReaderMock;
-
-    /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var SearchEngineConfig|Mock
+     * @var SearchEngineConfig|MockObject
      */
     private $configMock;
+
+    /**
+     * @var SearchEngine\ElasticSuite|MockObject
+     */
+    private $elasticSuiteMock;
 
     /**
      * @inheritdoc
@@ -68,40 +63,27 @@ class SearchEngineTest extends TestCase
     protected function setUp()
     {
         $this->envWriterMock = $this->createMock(EnvWriter::class);
-        $this->envReaderMock = $this->createMock(EnvReader::class);
         $this->sharedWriterMock = $this->createMock(SharedWriter::class);
-        $this->sharedReaderMock = $this->createMock(SharedReader::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->configMock = $this->createMock(SearchEngineConfig::class);
+        $this->elasticSuiteMock = $this->createMock(SearchEngine\ElasticSuite::class);
 
         $this->process = new SearchEngine(
             $this->loggerMock,
             $this->envWriterMock,
-            $this->envReaderMock,
             $this->sharedWriterMock,
-            $this->sharedReaderMock,
             $this->magentoVersionMock,
-            $this->configMock
+            $this->configMock,
+            $this->elasticSuiteMock
         );
     }
 
     /**
-     * @param bool $newVersion
-     * @param InvokedCount $useSharerReader
-     * @param InvokedCount $useSharerWriter
-     * @param InvokedCount $useEnvReader
-     * @param InvokedCount $useEnvWriter
-     * @dataProvider executeDataProvider()
-     * @return void
+     * @throws ProcessException
      */
-    public function testExecute(
-        bool $newVersion,
-        InvokedCount $useSharerReader,
-        InvokedCount $useSharerWriter,
-        InvokedCount $useEnvReader,
-        InvokedCount $useEnvWriter
-    ) {
+    public function testExecute()
+    {
         $searchConfig = ['engine' => 'mysql'];
         $config['system']['default']['catalog']['search'] = $searchConfig;
 
@@ -115,41 +97,167 @@ class SearchEngineTest extends TestCase
                 ['Set search engine to: mysql']
             );
         $this->magentoVersionMock->expects($this->once())
-            ->method('isGreaterOrEqual')
-            ->willReturn($newVersion);
-        $this->sharedReaderMock->expects($useSharerReader)
-            ->method('read')
-            ->willReturn([]);
-        $this->sharedWriterMock->expects($useSharerWriter)
-            ->method('create')
+            ->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(false);
+        $this->sharedWriterMock->expects($this->never())
+            ->method('update')
             ->with($config);
-        $this->envReaderMock->expects($useEnvReader)
-            ->method('read')
-            ->willReturn([]);
-        $this->envWriterMock->expects($useEnvWriter)
-            ->method('create')
+        $this->envWriterMock->expects($this->once())
+            ->method('update')
             ->with($config);
 
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
+    public function testExecute21()
+    {
+        $searchConfig = ['engine' => 'mysql'];
+        $config['system']['default']['catalog']['search'] = $searchConfig;
+
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->willReturn($searchConfig);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Updating search engine configuration.'],
+                ['Set search engine to: mysql']
+            );
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(true);
+        $this->sharedWriterMock->expects($this->once())
+            ->method('update')
+            ->with($config);
+        $this->envWriterMock->expects($this->never())
+            ->method('update')
+            ->with($config);
+
+        $this->process->execute();
+    }
+
+    /**
+     * @throws ProcessException
+     */
+    public function testExecuteWithElasticSuite()
+    {
+        $searchConfig = ['engine' => 'mysql'];
+        $config['system']['default']['catalog']['search'] = $searchConfig;
+        $config['system']['default' ]['smile_elasticsuite_core_base_settings'] = ['elastic' => 'suite'];
+
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->willReturn($searchConfig);
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('info')
+            ->withConsecutive(
+                ['Updating search engine configuration.'],
+                ['Set search engine to: mysql'],
+                ['Configuring ElasticSuite']
+            );
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(false);
+        $this->sharedWriterMock->expects($this->never())
+            ->method('update')
+            ->with($config);
+        $this->envWriterMock->expects($this->once())
+            ->method('update')
+            ->with($config);
+        $this->elasticSuiteMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->elasticSuiteMock->expects($this->once())
+            ->method('get')
+            ->willReturn(['elastic' => 'suite']);
+
+        $this->process->execute();
+    }
+
+    /**
+     * @return array
+     */
     public function executeDataProvider(): array
     {
         return [
             [
-                'newVersion' => true,
-                'useSharerReader' => $this->never(),
-                'useSharerWriter' => $this->never(),
-                'useEnvReader' => $this->once(),
+                'is21' => false,
+                'useSharedWriter' => $this->never(),
                 'useEnvWriter' => $this->once(),
             ],
             [
-                'newVersion' => false,
-                'useSharerReader' => $this->once(),
-                'useSharerWriter' => $this->once(),
-                'useEnvReader' => $this->never(),
+                'is21' => true,
+                'useSharedWriter' => $this->once(),
                 'useEnvWriter' => $this->never(),
             ],
         ];
+    }
+
+    /**
+     * @throws ProcessException
+     *
+     * @expectedExceptionMessage Some error
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     */
+    public function testExecuteWithException()
+    {
+        $searchConfig = ['engine' => 'mysql'];
+        $config['system']['default']['catalog']['search'] = $searchConfig;
+
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->willReturn($searchConfig);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Updating search engine configuration.'],
+                ['Set search engine to: mysql']
+            );
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(false);
+        $this->sharedWriterMock->expects($this->never())
+            ->method('update')
+            ->with($config);
+        $this->envWriterMock->expects($this->once())
+            ->method('update')
+            ->with($config)
+            ->willThrowException(new FileSystemException('Some error'));
+
+        $this->process->execute();
+    }
+
+    /**
+     * @throws ProcessException
+     *
+     * @expectedExceptionMessage Some error
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     */
+    public function testExecuteWithPackageException()
+    {
+        $searchConfig = ['engine' => 'mysql'];
+
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->willReturn($searchConfig);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Updating search engine configuration.'],
+                ['Set search engine to: mysql']
+            );
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('2.1.*')
+            ->willThrowException(new UndefinedPackageException('Some error'));
+
+        $this->process->execute();
     }
 }

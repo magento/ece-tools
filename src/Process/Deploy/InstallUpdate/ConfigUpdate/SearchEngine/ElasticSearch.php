@@ -85,4 +85,34 @@ class ElasticSearch
 
         return $this->version;
     }
+
+    /**
+     * @return array
+     */
+    public function getTemplate(): array
+    {
+        $relationship = $this->environment->getRelationship('elasticsearch');
+
+        if (!$relationship) {
+            return [];
+        }
+
+        $esConfig = $relationship[0];
+
+        try {
+            $response = $this->clientFactory->create()->get(sprintf(
+                '%s:%s/_template',
+                $esConfig['host'],
+                $esConfig['port']
+            ));
+            $templates = $response->getBody()->getContents();
+            $templates = json_decode($templates, true);
+
+            return $templates ? reset($templates)['settings'] : [];
+        } catch (\Exception $exception) {
+            $this->logger->warning('Can\'t get configuration of elasticsearch: ' . $exception->getMessage());
+
+            return [];
+        }
+    }
 }

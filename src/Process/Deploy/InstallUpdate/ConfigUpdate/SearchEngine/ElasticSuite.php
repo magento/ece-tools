@@ -15,9 +15,6 @@ use Magento\MagentoCloud\Package\Manager;
  */
 class ElasticSuite
 {
-    const NUMBER_OF_SHARDS = 3;
-    const NUMBER_OF_REPLICAS = 2;
-
     /**
      * @var Manager
      */
@@ -39,21 +36,29 @@ class ElasticSuite
     private $environment;
 
     /**
+     * @var ElasticSearch
+     */
+    private $elasticSearch;
+
+    /**
      * @param Manager $manager
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
      * @param Environment $environment
+     * @param ElasticSearch $elasticSearch
      */
     public function __construct(
         Manager $manager,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
-        Environment $environment
+        Environment $environment,
+        ElasticSearch $elasticSearch
     ) {
         $this->manager = $manager;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
         $this->environment = $environment;
+        $this->elasticSearch = $elasticSearch;
     }
 
     /**
@@ -65,12 +70,6 @@ class ElasticSuite
     {
         $envConfig = (array)$this->stageConfig->get(DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION);
 
-        if ($this->isSearchConfigValid($envConfig)
-            && !$this->configMerger->isMergeRequired($envConfig)
-        ) {
-            return $this->configMerger->clear($envConfig);
-        }
-
         return $this->configMerger->mergeConfigs($this->getSearchConfig(), $envConfig);
     }
 
@@ -80,15 +79,6 @@ class ElasticSuite
     public function isInstalled(): bool
     {
         return $this->manager->has('smile/elasticsuite');
-    }
-
-    /**
-     * @param array $config
-     * @return bool
-     */
-    private function isSearchConfigValid(array $config): bool
-    {
-        return array_key_exists('es_client', $config);
     }
 
     /**
@@ -105,12 +95,18 @@ class ElasticSuite
         $config = [
             'es_client' => [
                 'servers' => $esConfig['host'] . ':' . $esConfig['port']
-            ],
-            'indices_settings' => [
-                'number_of_shards' => self::NUMBER_OF_SHARDS,
-                'number_of_replicas' => self::NUMBER_OF_REPLICAS
             ]
         ];
+
+        $template = $this->elasticSearch->getTemplate();
+
+        if (isset($template['index']['number_of_shards'])) {
+            $config['indices_settings']['number_of_shards'] = (int)$template['index']['number_of_shards'];
+        }
+
+        if (isset($template['index']['number_of_replicas'])) {
+            $config['indices_settings']['number_of_replicas'] = (int)$template['index']['number_of_replicas'];
+        }
 
         if (isset($esConfig['query']['index'])) {
             $config['es_client']['indices_alias'] = $esConfig['query']['index'];
