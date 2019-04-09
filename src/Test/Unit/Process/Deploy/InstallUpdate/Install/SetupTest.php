@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -69,6 +70,11 @@ class SetupTest extends TestCase
     private $connectionDataMock;
 
     /**
+     * @var ElasticSuite|MockObject
+     */
+    private $elasticSuiteMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -91,6 +97,7 @@ class SetupTest extends TestCase
         $connectionFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($this->connectionDataMock);
+        $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
 
         $this->process = new Setup(
             $this->loggerMock,
@@ -100,7 +107,8 @@ class SetupTest extends TestCase
             $this->shellMock,
             $this->passwordGeneratorMock,
             $this->fileListMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->elasticSuiteMock
         );
     }
 

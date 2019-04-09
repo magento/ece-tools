@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -69,6 +70,11 @@ class Setup implements ProcessInterface
     private $connectionFactory;
 
     /**
+     * @var ElasticSuite
+     */
+    private $elasticSuite;
+
+    /**
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
      * @param Environment $environment
@@ -77,6 +83,7 @@ class Setup implements ProcessInterface
      * @param PasswordGenerator $passwordGenerator
      * @param FileList $fileList
      * @param DeployInterface $stageConfig
+     * @param ElasticSuite $elasticSuite
      */
     public function __construct(
         LoggerInterface $logger,
@@ -86,7 +93,8 @@ class Setup implements ProcessInterface
         ShellInterface $shell,
         PasswordGenerator $passwordGenerator,
         FileList $fileList,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        ElasticSuite $elasticSuite
     ) {
         $this->logger = $logger;
         $this->urlManager = $urlManager;
@@ -96,6 +104,7 @@ class Setup implements ProcessInterface
         $this->passwordGenerator = $passwordGenerator;
         $this->fileList = $fileList;
         $this->stageConfig = $stageConfig;
+        $this->elasticSuite = $elasticSuite;
     }
 
     /**
@@ -114,6 +123,17 @@ class Setup implements ProcessInterface
 
         if ($this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)) {
             $command .= ' ' . $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+        }
+
+        /**
+         * Hack to prevent ElasticSuite from throwing exception.
+         */
+        if ($this->elasticSuite->isAvailable()) {
+            $host = $this->elasticSuite->get()['es_client']['servers'] ?? null;
+
+            if ($host) {
+                $command .= ' --es-hosts=' . $host;
+            }
         }
 
         try {
