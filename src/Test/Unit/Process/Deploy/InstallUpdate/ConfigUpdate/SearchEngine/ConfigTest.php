@@ -11,8 +11,9 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,24 +25,29 @@ class ConfigTest extends TestCase
      */
     private $config;
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var ElasticSearch|Mock
+     * @var ElasticSearch|MockObject
      */
     private $elasticSearchMock;
+
+    /**
+     * @var ElasticSuite|MockObject
+     */
+    private $elasticSuiteMock;
 
     /**
      * @inheritdoc
@@ -52,11 +58,13 @@ class ConfigTest extends TestCase
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
+        $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
 
         $this->config = new Config(
             $this->environmentMock,
             $this->stageConfigMock,
             $this->elasticSearchMock,
+            $this->elasticSuiteMock,
             $this->magentoVersionMock,
             new ConfigMerger()
         );

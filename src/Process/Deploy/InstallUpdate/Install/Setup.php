@@ -132,7 +132,7 @@ class Setup implements ProcessInterface
             $host = $this->elasticSuite->get()['es_client']['servers'] ?? null;
 
             if ($host) {
-                $command .= ' --es-hosts=' . $host;
+                $command .= ' --es-hosts=' . escapeshellarg($host);
             }
         }
 

@@ -42,9 +42,15 @@ class Config
     private $configMerger;
 
     /**
+     * @var ElasticSuite
+     */
+    private $elasticSuite;
+
+    /**
      * @param Environment $environment
      * @param DeployInterface $stageConfig
      * @param ElasticSearch $elasticSearch
+     * @param ElasticSuite $elasticSuite
      * @param MagentoVersion $version
      * @param ConfigMerger $configMerger
      */
@@ -52,12 +58,14 @@ class Config
         Environment $environment,
         DeployInterface $stageConfig,
         ElasticSearch $elasticSearch,
+        ElasticSuite $elasticSuite,
         MagentoVersion $version,
         ConfigMerger $configMerger
     ) {
         $this->environment = $environment;
         $this->stageConfig = $stageConfig;
         $this->elasticSearch = $elasticSearch;
+        $this->elasticSuite = $elasticSuite;
         $this->magentoVersion = $version;
         $this->configMerger = $configMerger;
     }
@@ -127,6 +135,10 @@ class Config
         $esVersion = $this->elasticSearch->getVersion();
         if (Semver::satisfies($esVersion, '>= 5')) {
             $engine = 'elasticsearch' . intval($esVersion);
+        }
+
+        if ($this->elasticSuite->isInstalled()) {
+            $engine = 'elasticsuite';
         }
 
         $elasticSearchConfig = [
