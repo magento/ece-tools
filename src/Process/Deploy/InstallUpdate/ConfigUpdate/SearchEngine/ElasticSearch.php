@@ -14,6 +14,8 @@ use Psr\Log\LoggerInterface;
  */
 class ElasticSearch
 {
+    const RELATIONSHIP_KEY = 'elasticsearch';
+
     /**
      * @var ClientFactory
      */
@@ -47,6 +49,22 @@ class ElasticSearch
         $this->environment = $environment;
         $this->clientFactory = $clientFactory;
         $this->logger = $logger;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isInstalled(): bool
+    {
+        return (bool)$this->environment->getRelationship(self::RELATIONSHIP_KEY);
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->environment->getRelationship(self::RELATIONSHIP_KEY)[0] ?? [];
     }
 
     /**
@@ -91,19 +109,17 @@ class ElasticSearch
      */
     public function getTemplate(): array
     {
-        $relationship = $this->environment->getRelationship('elasticsearch');
+        $config = $this->getConfig();
 
-        if (!$relationship) {
+        if (!$config) {
             return [];
         }
-
-        $esConfig = $relationship[0];
 
         try {
             $response = $this->clientFactory->create()->get(sprintf(
                 '%s:%s/_template',
-                $esConfig['host'],
-                $esConfig['port']
+                $config['host'],
+                $config['port']
             ));
             $templates = $response->getBody()->getContents();
             $templates = json_decode($templates, true);

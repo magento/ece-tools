@@ -307,4 +307,23 @@ class ElasticSearchTest extends TestCase
 
         $this->assertSame([], $this->elasticSearch->getTemplate());
     }
+
+    public function testIsInstalled()
+    {
+        $this->environmentMock->expects($this->exactly(2))
+            ->method('getRelationship')
+            ->with('elasticsearch')
+            ->willReturnOnConsecutiveCalls(
+                [
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                    ],
+                ],
+                []
+            );
+
+        $this->assertTrue($this->elasticSearch->isInstalled());
+        $this->assertFalse($this->elasticSearch->isInstalled());
+    }
 }

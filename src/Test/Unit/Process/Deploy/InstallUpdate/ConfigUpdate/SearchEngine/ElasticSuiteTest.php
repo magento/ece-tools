@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
@@ -22,7 +21,7 @@ class ElasticSuiteTest extends TestCase
     /**
      * @var ElasticSuite
      */
-    private $model;
+    private $elasticSuite;
 
     /**
      * @var Manager|MockObject
@@ -40,11 +39,6 @@ class ElasticSuiteTest extends TestCase
     private $configMergerMock;
 
     /**
-     * @var Environment|MockObject
-     */
-    private $environmentMock;
-
-    /**
      * @var ElasticSearch|MockObject
      */
     private $elasticSearchMock;
@@ -57,14 +51,12 @@ class ElasticSuiteTest extends TestCase
         $this->managerMock = $this->createMock(Manager::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->configMergerMock = $this->createMock(ConfigMerger::class);
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
 
-        $this->model = new ElasticSuite(
+        $this->elasticSuite = new ElasticSuite(
             $this->managerMock,
             $this->stageConfigMock,
             $this->configMergerMock,
-            $this->environmentMock,
             $this->elasticSearchMock
         );
     }
@@ -79,14 +71,13 @@ class ElasticSuiteTest extends TestCase
             ->method('mergeConfigs')
             ->with([], ['some' => 'value'])
             ->willReturn(['some' => 'value']);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('elasticsearch')
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getConfig')
             ->willReturn([]);
 
         $this->assertSame(
             ['some' => 'value'],
-            $this->model->get()
+            $this->elasticSuite->get()
         );
     }
 
@@ -112,17 +103,15 @@ class ElasticSuiteTest extends TestCase
                 ['some' => 'value']
             )
             ->willReturn(['some' => 'value']);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('elasticsearch')
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getConfig')
             ->willReturn([
-                [
-                    'host' => '127.0.0.1',
-                    'port' => '1234',
-                    'query' => [
-                        'index' => 'magento2'
-                    ]
-                ],
+                'host' => '127.0.0.1',
+                'port' => '1234',
+                'query' => [
+                    'index' => 'magento2'
+
+                ]
             ]);
         $this->elasticSearchMock->expects($this->once())
             ->method('getTemplate')
@@ -135,7 +124,7 @@ class ElasticSuiteTest extends TestCase
 
         $this->assertSame(
             ['some' => 'value'],
-            $this->model->get()
+            $this->elasticSuite->get()
         );
     }
 
@@ -160,17 +149,14 @@ class ElasticSuiteTest extends TestCase
                 ['some' => 'value']
             )
             ->willReturn(['some' => 'value']);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('elasticsearch')
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getConfig')
             ->willReturn([
-                [
-                    'host' => '127.0.0.1',
-                    'port' => '1234',
-                    'query' => [
-                        'index' => 'magento2'
-                    ]
-                ],
+                'host' => '127.0.0.1',
+                'port' => '1234',
+                'query' => [
+                    'index' => 'magento2'
+                ]
             ]);
         $this->elasticSearchMock->expects($this->once())
             ->method('getTemplate')
@@ -182,7 +168,7 @@ class ElasticSuiteTest extends TestCase
 
         $this->assertSame(
             ['some' => 'value'],
-            $this->model->get()
+            $this->elasticSuite->get()
         );
     }
 
@@ -207,17 +193,14 @@ class ElasticSuiteTest extends TestCase
                 ['some' => 'value']
             )
             ->willReturn(['some' => 'value']);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('elasticsearch')
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getConfig')
             ->willReturn([
-                [
-                    'host' => '127.0.0.1',
-                    'port' => '1234',
-                    'query' => [
-                        'index' => 'magento2'
-                    ]
-                ],
+                'host' => '127.0.0.1',
+                'port' => '1234',
+                'query' => [
+                    'index' => 'magento2'
+                ]
             ]);
         $this->elasticSearchMock->expects($this->once())
             ->method('getTemplate')
@@ -229,7 +212,7 @@ class ElasticSuiteTest extends TestCase
 
         $this->assertSame(
             ['some' => 'value'],
-            $this->model->get()
+            $this->elasticSuite->get()
         );
     }
 
@@ -243,7 +226,30 @@ class ElasticSuiteTest extends TestCase
                 false
             );
 
-        $this->assertTrue($this->model->isInstalled());
-        $this->assertFalse($this->model->isInstalled());
+        $this->assertTrue($this->elasticSuite->isInstalled());
+        $this->assertFalse($this->elasticSuite->isInstalled());
+    }
+
+    public function testIsAvailable()
+    {
+        $this->elasticSearchMock->expects($this->exactly(3))
+            ->method('isInstalled')
+            ->willReturnOnConsecutiveCalls(
+                true,
+                false,
+                true
+            );
+        $this->managerMock->expects($this->exactly(2))
+            ->method('has')
+            ->with('smile/elasticsuite')
+            ->willReturnOnConsecutiveCalls(
+                true,
+                false,
+                false
+            );
+
+        $this->assertTrue($this->elasticSuite->isAvailable());
+        $this->assertFalse($this->elasticSuite->isAvailable());
+        $this->assertFalse($this->elasticSuite->isAvailable());
     }
 }

@@ -83,7 +83,7 @@ class Config
     /**
      * @return array
      */
-    private function getSearchConfig()
+    private function getSearchConfig(): array
     {
         $relationships = $this->environment->getRelationships();
         $searchConfig = ['engine' => 'mysql'];
@@ -103,7 +103,7 @@ class Config
      * @param array $config Solr connection configuration
      * @return array
      */
-    private function getSolrConfiguration(array $config)
+    private function getSolrConfiguration(array $config): array
     {
         return [
             'engine' => 'solr',
@@ -120,7 +120,7 @@ class Config
      * @param array $config Elasticsearch connection configuration
      * @return array
      */
-    private function getElasticSearchConfiguration(array $config)
+    private function getElasticSearchConfiguration(array $config): array
     {
         $engine = 'elasticsearch';
 

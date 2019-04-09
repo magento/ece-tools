@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
 
@@ -31,11 +30,6 @@ class ElasticSuite
     private $configMerger;
 
     /**
-     * @var Environment
-     */
-    private $environment;
-
-    /**
      * @var ElasticSearch
      */
     private $elasticSearch;
@@ -44,25 +38,22 @@ class ElasticSuite
      * @param Manager $manager
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
-     * @param Environment $environment
      * @param ElasticSearch $elasticSearch
      */
     public function __construct(
         Manager $manager,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
-        Environment $environment,
         ElasticSearch $elasticSearch
     ) {
         $this->manager = $manager;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
-        $this->environment = $environment;
         $this->elasticSearch = $elasticSearch;
     }
 
     /**
-     * Returns search engine configuration. At least contains 'engine' option.
+     * Returns search engine configuration.
      *
      * @return array
      */
@@ -70,10 +61,22 @@ class ElasticSuite
     {
         $envConfig = (array)$this->stageConfig->get(DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION);
 
-        return $this->configMerger->mergeConfigs($this->getSearchConfig(), $envConfig);
+        return $this->configMerger->mergeConfigs($this->getConfig(), $envConfig);
     }
 
     /**
+     * Checks if both ElasticSearch and ElasticSuite are installed.
+     *
+     * @return bool
+     */
+    public function isAvailable(): bool
+    {
+        return $this->elasticSearch->isInstalled() && $this->isInstalled();
+    }
+
+    /**
+     * Checks if module is installed.
+     *
      * @return bool
      */
     public function isInstalled(): bool
@@ -82,11 +85,13 @@ class ElasticSuite
     }
 
     /**
+     * Retrieves config.
+     *
      * @return array
      */
-    private function getSearchConfig(): array
+    private function getConfig(): array
     {
-        $esConfig = $this->environment->getRelationship('elasticsearch')[0] ?? [];
+        $esConfig = $this->elasticSearch->getConfig();
 
         if (!isset($esConfig['host'], $esConfig['port'])) {
             return [];

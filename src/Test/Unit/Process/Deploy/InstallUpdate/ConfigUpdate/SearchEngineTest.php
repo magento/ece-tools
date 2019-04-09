@@ -148,7 +148,7 @@ class SearchEngineTest extends TestCase
     {
         $searchConfig = ['engine' => 'mysql'];
         $config['system']['default']['catalog']['search'] = $searchConfig;
-        $config['system']['default' ]['smile_elasticsuite_core_base_settings'] = ['elastic' => 'suite'];
+        $config['system']['default']['smile_elasticsuite_core_base_settings'] = ['elastic' => 'suite'];
 
         $this->configMock->expects($this->once())
             ->method('get')
@@ -171,12 +171,55 @@ class SearchEngineTest extends TestCase
             ->method('update')
             ->with($config);
         $this->elasticSuiteMock->expects($this->once())
-            ->method('isInstalled')
+            ->method('isAvailable')
             ->willReturn(true);
         $this->elasticSuiteMock->expects($this->once())
             ->method('get')
             ->willReturn(['elastic' => 'suite']);
 
+        $this->process->execute();
+    }
+
+    /**
+     * @throws ProcessException
+     */
+    public function testExecuteWithElasticSuiteWithoutElasticSearch()
+    {
+        $searchConfig = ['engine' => 'mysql'];
+        $config['system']['default']['catalog']['search'] = $searchConfig;
+
+        $this->configMock->expects($this->once())
+            ->method('get')
+            ->willReturn($searchConfig);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Updating search engine configuration.'],
+                ['Set search engine to: mysql']
+            );
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('2.1.*')
+            ->willReturn(false);
+        $this->sharedWriterMock->expects($this->never())
+            ->method('update')
+            ->with($config);
+        $this->envWriterMock->expects($this->once())
+            ->method('update')
+            ->with($config);
+        $this->elasticSuiteMock->expects($this->once())
+            ->method('isAvailable')
+            ->willReturn(false);
+        $this->elasticSuiteMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+        $this->elasticSuiteMock->expects($this->never())
+            ->method('get');
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->withConsecutive(
+                ['ElasticSuite is installed without ElasticSearch']
+            );
         $this->process->execute();
     }
 
