@@ -137,10 +137,6 @@ class Config
             $engine = 'elasticsearch' . intval($esVersion);
         }
 
-        if ($this->elasticSuite->isInstalled()) {
-            $engine = 'elasticsuite';
-        }
-
         $elasticSearchConfig = [
             'engine' => $engine,
             "{$engine}_server_hostname" => $config['host'],
@@ -149,6 +145,10 @@ class Config
 
         if (isset($config['query']['index'])) {
             $elasticSearchConfig["{$engine}_index_prefix"] = $config['query']['index'];
+        }
+
+        if ($this->elasticSuite->isInstalled()) {
+            $elasticSearchConfig['engine'] = 'elasticsuite';
         }
 
         return $elasticSearchConfig;
