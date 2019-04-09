@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Http\ClientFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * Returns version of elasticsearch
+ * Returns configurations from ElasticSearch.
  */
 class ElasticSearch
 {
@@ -87,13 +87,11 @@ class ElasticSearch
             $esConfig = $relationships['elasticsearch'][0];
 
             try {
-                $response = $this->clientFactory->create()->get(sprintf(
+                $esConfiguration = $this->call(sprintf(
                     '%s:%s',
                     $esConfig['host'],
                     $esConfig['port']
                 ));
-                $esConfiguration = $response->getBody()->getContents();
-                $esConfiguration = json_decode($esConfiguration, true);
 
                 $this->version = $esConfiguration['version']['number'];
             } catch (\Exception $exception) {
@@ -116,13 +114,11 @@ class ElasticSearch
         }
 
         try {
-            $response = $this->clientFactory->create()->get(sprintf(
+            $templates = $this->call(sprintf(
                 '%s:%s/_template',
                 $config['host'],
                 $config['port']
             ));
-            $templates = $response->getBody()->getContents();
-            $templates = json_decode($templates, true);
 
             return $templates ? reset($templates)['settings'] : [];
         } catch (\Exception $exception) {
@@ -130,5 +126,19 @@ class ElasticSearch
 
             return [];
         }
+    }
+
+    /**
+     * Call endpoint and return response.
+     *
+     * @param string $endpoint
+     * @return array
+     */
+    private function call(string $endpoint): array
+    {
+        $response = $this->clientFactory->create()->get($endpoint);
+        $templates = $response->getBody()->getContents();
+
+        return json_decode($templates, true);
     }
 }
