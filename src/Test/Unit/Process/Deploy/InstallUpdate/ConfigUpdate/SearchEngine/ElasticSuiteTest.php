@@ -65,7 +65,7 @@ class ElasticSuiteTest extends TestCase
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION)
+            ->with(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION)
             ->willReturn(['some' => 'value']);
         $this->configMergerMock->expects($this->once())
             ->method('mergeConfigs')
@@ -85,7 +85,7 @@ class ElasticSuiteTest extends TestCase
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION)
+            ->with(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION)
             ->willReturn(['some' => 'value']);
         $this->configMergerMock->expects($this->once())
             ->method('mergeConfigs')
@@ -132,7 +132,7 @@ class ElasticSuiteTest extends TestCase
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION)
+            ->with(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION)
             ->willReturn(['some' => 'value']);
         $this->configMergerMock->expects($this->once())
             ->method('mergeConfigs')
@@ -176,7 +176,7 @@ class ElasticSuiteTest extends TestCase
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION)
+            ->with(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION)
             ->willReturn(['some' => 'value']);
         $this->configMergerMock->expects($this->once())
             ->method('mergeConfigs')

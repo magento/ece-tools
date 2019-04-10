@@ -351,7 +351,7 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
             ],
-            DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION => [
+            DeployInterface::VAR_ELASTICSUITE_CONFIGURATION => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL,

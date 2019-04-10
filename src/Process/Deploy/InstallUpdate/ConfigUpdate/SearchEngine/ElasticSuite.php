@@ -59,7 +59,7 @@ class ElasticSuite
      */
     public function get(): array
     {
-        $envConfig = (array)$this->stageConfig->get(DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION);
+        $envConfig = (array)$this->stageConfig->get(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION);
 
         return $this->configMerger->mergeConfigs($this->getConfig(), $envConfig);
     }

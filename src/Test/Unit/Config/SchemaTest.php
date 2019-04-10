@@ -58,7 +58,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_SCD_MAX_EXEC_TIME => null,
                 DeployInterface::VAR_SCD_COMPRESSION_TIMEOUT => 600,
                 DeployInterface::VAR_SEARCH_CONFIGURATION => [],
-                DeployInterface::VAR_ELASTIC_SUITE_CONFIGURATION => [],
+                DeployInterface::VAR_ELASTICSUITE_CONFIGURATION => [],
                 DeployInterface::VAR_QUEUE_CONFIGURATION => [],
                 DeployInterface::VAR_CACHE_CONFIGURATION => [],
                 DeployInterface::VAR_SESSION_CONFIGURATION => [],
