@@ -131,7 +131,7 @@ class AdminCredentialTest extends AbstractTest
 
         $this->assertSame(0, $code);
 
-        $tmpFile = tempnam(sys_get_temp_dir(), 'credentials_email');
+        $tmpFile = tempnam(sys_get_temp_dir(), 'credentials_email.txt');
         (new Process\Copy('/var/credentials_email.txt', $tmpFile))
             ->setTimeout(null)
             ->run();
@@ -200,7 +200,7 @@ class AdminCredentialTest extends AbstractTest
      */
     private function getCloudLog(): string
     {
-        $tmpFile = tempnam(sys_get_temp_dir(), '/cloud.log');
+        $tmpFile = tempnam(sys_get_temp_dir(), 'cloud.log');
         (new Process\Copy('/var/log/cloud.log', $tmpFile))
             ->setTimeout(null)
             ->run();
