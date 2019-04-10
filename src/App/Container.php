@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Magento\MagentoCloud\App\Container\Config;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\DbDump;
@@ -40,6 +41,7 @@ class Container implements ContainerInterface
     /**
      * @param string $toolsBasePath
      * @param string $magentoBasePath
+     * @throws BindingResolutionException
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
@@ -78,10 +80,6 @@ class Container implements ContainerInterface
                 $systemList->getMagentoRoot()
             );
         });
-
-
-        $this->container->make(Config::class, ['container' => $this->container])
-            ->configure();
 
         $this->container->singleton(
             Flag\Pool::class,
@@ -298,24 +296,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-        $this->container->when(DeployProcess\DeployStaticContent::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(DeployProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
-        $this->container->when(DbDump::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DbDumpProcess\DbDump::class),
-                    ],
-                ]);
-            });
         $this->container->when(PostDeploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -335,6 +315,12 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
+
+        /**
+         * Merge configuration.
+         */
+        $this->container->make(Config::class, ['container' => $this->container])
+            ->configure();
     }
 
     /**
@@ -366,6 +352,8 @@ class Container implements ContainerInterface
 
     /**
      * @inheritdoc
+     *
+     * @throws BindingResolutionException
      */
     public function create(string $abstract, array $params = [])
     {

@@ -10,6 +10,8 @@ use Illuminate\Contracts\Container\Container;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Process\ProcessComposite;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 
 class Config
@@ -50,6 +52,7 @@ class Config
 
     /**
      * @throws FileSystemException
+     * @throws BindingResolutionException
      */
     public function configure()
     {
@@ -59,12 +62,14 @@ class Config
             [XmlEncoder::AS_COLLECTION => true]
         );
 
-        $this->configureTypes($data);
         $this->configurePreferences($data);
+        $this->configureTypes($data);
     }
 
     /**
      * @param array $data
+     *
+     * @throws BindingResolutionException
      */
     private function configureTypes(array $data)
     {
@@ -75,6 +80,20 @@ class Config
                         ->needs($argument['@name'])
                         ->give($argument['#']);
                 }
+            } elseif (isset($type['composite'][0]['item'])) {
+                $processedItems = [];
+
+                foreach ($type['composite'][0]['item'] as $item) {
+                    $processedItems[] = $this->container->make($item);
+                }
+
+                $this->container->when($type['@name'])
+                    ->needs(ProcessInterface::class)
+                    ->give(function () use ($processedItems) {
+                        return $this->container->make(ProcessComposite::class, [
+                            'processes' => $processedItems
+                        ]);
+                    });
             } else {
                 $this->container->singleton($type['@name']);
             }

@@ -12,21 +12,15 @@
         <xs:attribute name="name" use="required"/>
     </xs:complexType>
 
+    <xs:complexType name="itemType" abstract="true" mixed="true">
+        <xs:attribute name="sortOrder" use="required"/>
+    </xs:complexType>
+
     <xs:element name="config">
         <xs:complexType>
             <xs:choice maxOccurs="unbounded">
                 <xs:element name="preference" type="preferenceType" minOccurs="0" maxOccurs="unbounded" />
-                <xs:element name="type" type="typeType" minOccurs="0" maxOccurs="unbounded">
-                    <xs:unique name="uniqueTypeParam">
-                        <xs:annotation>
-                            <xs:documentation>
-                                Param name should be unique in scope of type
-                            </xs:documentation>
-                        </xs:annotation>
-                        <xs:selector xpath="param" />
-                        <xs:field xpath="@name" />
-                    </xs:unique>
-                </xs:element>
+                <xs:element name="type" type="typeType" minOccurs="0" maxOccurs="unbounded" />
             </xs:choice>
         </xs:complexType>
     </xs:element>
@@ -54,6 +48,7 @@
                     <xs:field xpath="@name"></xs:field>
                 </xs:key>
             </xs:element>
+            <xs:element name="composite" type="compositesType" minOccurs="0" maxOccurs="1" />
         </xs:choice>
         <xs:attribute name="name" type="phpClassName" use="required" />
         <xs:attribute name="shared" type="xs:boolean" use="optional" />
@@ -77,6 +72,17 @@
         <xs:sequence>
             <xs:element name="argument" type="argumentType" minOccurs="1" maxOccurs="unbounded">
                 <xs:key name="argumentItemName">
+                    <xs:selector xpath="item"></xs:selector>
+                    <xs:field xpath="@name"></xs:field>
+                </xs:key>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="compositesType">
+        <xs:sequence>
+            <xs:element name="item" type="itemType" minOccurs="1" maxOccurs="unbounded">
+                <xs:key name="itemItemName">
                     <xs:selector xpath="item"></xs:selector>
                     <xs:field xpath="@name"></xs:field>
                 </xs:key>

@@ -23,6 +23,22 @@
             <argument name="Magento\MagentoCloud\Process\ProcessInterface" xsi:type="string">Magento\MagentoCloud\Process\Deploy\CronProcessKill</argument>
         </arguments>
     </type>
+    <type name="Magento\MagentoCloud\Command\DbDump">
+        <composite>
+            <item sortOrder="10">Magento\MagentoCloud\Process\DbDump\DbDump</item>
+        </composite>
+    </type>
+    <type name="Magento\MagentoCloud\Process\Deploy\DeployStaticContent">
+        <composite>
+            <item sortOrder="10">Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate</item>
+        </composite>
+    </type>
+    <type name="Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls">
+        <composite>
+            <item sortOrder="10">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Database</item>
+            <item sortOrder="20">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment</item>
+        </composite>
+    </type>
     <preference for="Magento\MagentoCloud\Config\ConfigInterface" type="Magento\MagentoCloud\Config\Shared" />
     <preference for="Magento\MagentoCloud\Shell\ShellInterface" type="Magento\MagentoCloud\Shell\Shell" />
     <preference for="Magento\MagentoCloud\DB\DumpInterface" type="Magento\MagentoCloud\DB\Dump" />
