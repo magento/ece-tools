@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
 
 /**
- * Returns version of elasticsearch
+ * Provides an access to ElasticSuite configuration.
  */
 class ElasticSuite
 {
