@@ -131,11 +131,12 @@ class AdminCredentialTest extends AbstractTest
 
         $this->assertSame(0, $code);
 
-        (new Process\Copy('/var/credentials_email.txt', '/tmp/credentials_email.txt'))
+        $tmpFile = sys_get_temp_dir() . '/credentials_email.txt';
+        (new Process\Copy('/var/credentials_email.txt', $tmpFile))
             ->setTimeout(null)
             ->run();
 
-        $credentialsEmail = file_get_contents('/tmp/credentials_email.txt');
+        $credentialsEmail = file_get_contents($tmpFile);
         $this->assertContains($expectedAdminEmail, $credentialsEmail);
         $this->assertContains($expectedAdminUsername, $credentialsEmail);
         $this->assertContains($expectedAdminUrl, $credentialsEmail);
@@ -199,9 +200,10 @@ class AdminCredentialTest extends AbstractTest
      */
     private function getCloudLog(): string
     {
-        (new Process\Copy('/var/log/cloud.log', '/tmp/cloud.log'))
+        $tmpFile = sys_get_temp_dir() . '/cloud.log';
+        (new Process\Copy('/var/log/cloud.log', $tmpFile))
             ->setTimeout(null)
             ->run();
-        return file_get_contents('/tmp/cloud.log');
+        return file_get_contents($tmpFile);
     }
 }
