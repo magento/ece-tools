@@ -11,6 +11,7 @@ use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
@@ -124,8 +125,12 @@ class SetupTest extends TestCase
      * @param string $adminUrlExpected
      * @param string $adminFirstnameExpected
      * @param string $adminLastnameExpected
+     * @param bool $elasticSuite
      * @dataProvider executeDataProvider
+     * @throws ProcessException
+     *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function testExecute(
         $adminEmail,
@@ -138,7 +143,8 @@ class SetupTest extends TestCase
         $adminPasswordExpected,
         $adminUrlExpected,
         $adminFirstnameExpected,
-        $adminLastnameExpected
+        $adminLastnameExpected,
+        bool $elasticSuite = false
     ) {
         $installUpgradeLog = '/tmp/log.log';
 
@@ -187,6 +193,22 @@ class SetupTest extends TestCase
             ->method('getInstallUpgradeLog')
             ->willReturn($installUpgradeLog);
 
+        $elasticSuiteOption = '';
+
+        if ($elasticSuite) {
+            $this->elasticSuiteMock->expects($this->once())
+                ->method('isAvailable')
+                ->willReturn(true);
+            $this->elasticSuiteMock->expects($this->once())
+                ->method('get')
+                ->willReturn([
+                    'es_client' => [
+                        'servers' => 'localhost:9200'
+                    ]
+                ]);
+            $elasticSuiteOption = ' --es-hosts=\'localhost:9200\'';
+        }
+
         $adminCredential = $adminEmail
             ? ' --admin-user=\'' . $adminNameExpected . '\''
                 . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
@@ -204,6 +226,7 @@ class SetupTest extends TestCase
                 . $adminCredential
                 . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction'
                 . ' --db-password=\'password\' -v'
+                . $elasticSuiteOption
                 . ' | tee -a ' . $installUpgradeLog . '"']
             );
 
@@ -228,6 +251,7 @@ class SetupTest extends TestCase
                 'adminUrlExpected' => 'admino4ka',
                 'adminFirstnameExpected' => 'Firstname',
                 'adminLastnameExpected' => 'Lastname',
+                true
             ],
             [
                 'adminEmail' => 'admin@example.com',
