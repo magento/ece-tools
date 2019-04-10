@@ -19,7 +19,7 @@ class Bash extends Process
      */
     public function __construct(string $command, string $container, array $variables = [])
     {
-        $variables = array_replace_recursive($this->getDefaultVariables(), $variables);
+        $variables = array_replace($this->getDefaultVariables(), $variables);
         $options = '';
 
         foreach ($variables as $varName => $varValue) {
