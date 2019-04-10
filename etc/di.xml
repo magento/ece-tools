@@ -1,0 +1,36 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="di.xsd">
+    <type name="Magento\MagentoCloud\Config\Schema" />
+    <type name="Magento\MagentoCloud\Config\Environment" />
+    <type name="Magento\MagentoCloud\Config\State" />
+    <type name="Magento\MagentoCloud\App\Logger\Pool" />
+    <type name="Magento\MagentoCloud\Package\Manager" />
+    <type name="Magento\MagentoCloud\Package\MagentoVersion" />
+    <type name="Magento\MagentoCloud\Util\UrlManager" />
+    <type name="Magento\MagentoCloud\Filesystem\DirectoryCopier\CopyStrategy" />
+    <type name="Magento\MagentoCloud\Filesystem\DirectoryCopier\CopySubFolderStrategy" />
+    <type name="Magento\MagentoCloud\Filesystem\DirectoryCopier\SymlinkStrategy" />
+    <type name="Magento\MagentoCloud\Filesystem\DirectoryCopier\StrategyFactory" />
+    <type name="Magento\MagentoCloud\Config\Build\Reader" />
+    <type name="Magento\MagentoCloud\Config\Environment\Reader" />
+    <type name="Magento\MagentoCloud\Config\Stage\Build" />
+    <type name="Magento\MagentoCloud\Config\Stage\Deploy" />
+    <type name="Magento\MagentoCloud\Config\Stage\PostDeploy" />
+    <type name="Magento\MagentoCloud\Config\RepositoryFactory" />
+    <type name="Magento\MagentoCloud\Shell\UtilityManager"/>
+    <type name="Magento\MagentoCloud\Config\Schema" />
+    <type name="Magento\MagentoCloud\Command\CronKill">
+        <arguments>
+            <argument name="Magento\MagentoCloud\Process\ProcessInterface" xsi:type="string">Magento\MagentoCloud\Process\Deploy\CronProcessKill</argument>
+        </arguments>
+    </type>
+    <preference for="Magento\MagentoCloud\Config\ConfigInterface" type="Magento\MagentoCloud\Config\Shared" />
+    <preference for="Magento\MagentoCloud\Shell\ShellInterface" type="Magento\MagentoCloud\Shell\Shell" />
+    <preference for="Magento\MagentoCloud\DB\DumpInterface" type="Magento\MagentoCloud\DB\Dump" />
+    <preference for="Psr\Log\LoggerInterface" type="Magento\MagentoCloud\App\Logger" />
+    <preference for="Magento\MagentoCloud\DB\ConnectionInterface" type="Magento\MagentoCloud\DB\Connection" />
+    <preference for="Magento\MagentoCloud\Config\Stage\BuildInterface" type="Magento\MagentoCloud\Config\Stage\Build" />
+    <preference for="Magento\MagentoCloud\Config\Stage\DeployInterface" type="Magento\MagentoCloud\Config\Stage\Deploy"/>
+    <preference for="Magento\MagentoCloud\Config\Stage\PostDeployInterface" type="Magento\MagentoCloud\Config\Stage\PostDeploy" />
+    <preference for="Magento\MagentoCloud\View\RendererInterface" type="Magento\MagentoCloud\View\TwigRenderer" />
+    <preference for="Magento\MagentoCloud\Config\Database\ConfigInterface" type="Magento\MagentoCloud\Config\Database\MergedConfig" />
+</config>

@@ -97,4 +97,9 @@ class FileList extends ConfigFileList
     {
         return $this->directoryList->getMagentoRoot() . '/.magento/services.yaml';
     }
+
+    public function getDIConfig(): string
+    {
+        return $this->directoryList->getRoot() . '/etc/di.xml';
+    }
 }
