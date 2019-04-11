@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
@@ -87,7 +89,7 @@ class ElasticSuite
     }
 
     /**
-     * Retrieves config.
+     * Retrieves configuration including servers, shards and replicas.
      *
      * @return array
      */

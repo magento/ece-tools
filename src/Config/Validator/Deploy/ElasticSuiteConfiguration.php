@@ -3,11 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
 
 /**
@@ -21,6 +24,11 @@ class ElasticSuiteConfiguration implements ValidatorInterface
     private $elasticSuite;
 
     /**
+     * @var ElasticSearch
+     */
+    private $elasticSearch;
+
+    /**
      * @var Validator\ResultFactory
      */
     private $resultFactory;
@@ -32,15 +40,18 @@ class ElasticSuiteConfiguration implements ValidatorInterface
 
     /**
      * @param ElasticSuite $elasticSuite
+     * @param ElasticSearch $elasticSearch
      * @param Validator\ResultFactory $resultFactory
      * @param DeployInterface $config
      */
     public function __construct(
         ElasticSuite $elasticSuite,
+        ElasticSearch $elasticSearch,
         Validator\ResultFactory $resultFactory,
         DeployInterface $config
     ) {
         $this->elasticSuite = $elasticSuite;
+        $this->elasticSearch = $elasticSearch;
         $this->resultFactory = $resultFactory;
         $this->config = $config;
     }
@@ -54,7 +65,7 @@ class ElasticSuiteConfiguration implements ValidatorInterface
             return $this->resultFactory->success();
         }
 
-        if (!$this->elasticSuite->isAvailable()) {
+        if (!$this->elasticSearch->isInstalled()) {
             return $this->resultFactory->error('ElasticSuite is installed without available ElasticSearch service.');
         }
 

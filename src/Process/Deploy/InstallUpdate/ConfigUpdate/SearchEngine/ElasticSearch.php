@@ -52,6 +52,8 @@ class ElasticSearch
     }
 
     /**
+     * Checks if ES relationship is present.
+     *
      * @return bool
      */
     public function isInstalled(): bool
@@ -60,6 +62,8 @@ class ElasticSearch
     }
 
     /**
+     * Retrieves configuration from relationship.
+     *
      * @return array
      */
     public function getConfig(): array
@@ -103,6 +107,9 @@ class ElasticSearch
     }
 
     /**
+     * Retrieves default template configuration.
+     * May contain configuration for replicas and shards.
+     *
      * @return array
      */
     public function getTemplate(): array

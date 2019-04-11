@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -10,6 +12,7 @@ use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -30,6 +33,11 @@ class ElasticSuiteConfigurationTest extends TestCase
     private $elasticSuiteMock;
 
     /**
+     * @var ElasticSearch|MockObject
+     */
+    private $elasticSearchMock;
+
+    /**
      * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
@@ -45,11 +53,13 @@ class ElasticSuiteConfigurationTest extends TestCase
     protected function setUp()
     {
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
+        $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->configMock = $this->createMock(DeployInterface::class);
 
         $this->validator = new ElasticSuiteConfiguration(
             $this->elasticSuiteMock,
+            $this->elasticSearchMock,
             $this->resultFactoryMock,
             $this->configMock
         );
@@ -72,8 +82,8 @@ class ElasticSuiteConfigurationTest extends TestCase
         $this->elasticSuiteMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->elasticSuiteMock->expects($this->once())
-            ->method('isAvailable')
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
             ->willReturn(false);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
@@ -88,8 +98,8 @@ class ElasticSuiteConfigurationTest extends TestCase
         $this->elasticSuiteMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->elasticSuiteMock->expects($this->once())
-            ->method('isAvailable')
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
             ->willReturn(true);
         $this->configMock->expects($this->once())
             ->method('get')
@@ -110,8 +120,8 @@ class ElasticSuiteConfigurationTest extends TestCase
         $this->elasticSuiteMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->elasticSuiteMock->expects($this->once())
-            ->method('isAvailable')
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
             ->willReturn(true);
         $this->configMock->expects($this->once())
             ->method('get')
