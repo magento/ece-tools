@@ -374,7 +374,10 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->make(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
+
+                        $this->container->make(PostDeployProcess\WarmUp::class),
+
+                      /* $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\DebugLogging::class),
@@ -384,7 +387,7 @@ class Container implements ContainerInterface
                         $this->container->make(PostDeployProcess\EnableCron::class),
                         $this->container->make(PostDeployProcess\Backup::class),
                         $this->container->make(PostDeployProcess\CleanCache::class),
-                        $this->container->make(PostDeployProcess\WarmUp::class),
+                        $this->container->make(PostDeployProcess\WarmUp::class),*/
                     ],
                 ]);
             });

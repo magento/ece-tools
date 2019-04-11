@@ -61,34 +61,21 @@ class UrlRewriteTable
 
         $urlRewrites = $this->connection->select($query, $bindings);
 
-        $groupedBaseUrls = $this->urlManager->getGroupedBaseUrls();
-
-        return $this->combineUrls($urlRewrites, $groupedBaseUrls);
+        return $this->appendBaseUrls($urlRewrites);
     }
 
     /**
      * Matches and combines urls with site base urls.
-     * Base url priority site > website > default.
      *
      * @param array $urlRewrites
-     * @param array $groupedBaseUrls
      * @return array
      */
-    private function combineUrls(array $urlRewrites, array $groupedBaseUrls): array
+    private function appendBaseUrls(array $urlRewrites): array
     {
         $urls = [];
-        $defaultBaseUrl = $this->urlManager->getBaseUrl();
 
         foreach ($urlRewrites as $urlInfo) {
-            if (isset($groupedBaseUrls[UrlManager::SCOPE_STORE][$urlInfo['store_id']])) {
-                $baseUrlInfo = $groupedBaseUrls[UrlManager::SCOPE_STORE][$urlInfo['scope_id']];
-            } elseif (isset($groupedBaseUrls[UrlManager::SCOPE_WEBSITE][$urlInfo['website_id']])) {
-                $baseUrlInfo = $groupedBaseUrls[UrlManager::SCOPE_WEBSITE][$urlInfo['website_id']];
-            } else {
-                $baseUrlInfo = $groupedBaseUrls[UrlManager::SCOPE_DEFAULT] ?? ['value' => $defaultBaseUrl];
-            }
-
-            $urls[] = $baseUrlInfo['value'] . $urlInfo['request_path'];
+            $urls[] = $this->urlManager->getStoreBaseUrl($urlInfo['store_id'])  . $urlInfo['request_path'];
         }
 
         return $urls;

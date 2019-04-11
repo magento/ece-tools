@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\DB\ConnectionInterface;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -40,18 +41,31 @@ class UrlManager
     private $connection;
 
     /**
+     * @var array
+     */
+    private $storeBaseUrls = [];
+
+    /**
+     * @var ShellInterface
+     */
+    private $shell;
+
+    /**
      * @param Environment $environment
      * @param LoggerInterface $logger
      * @param ConnectionInterface $connection
+     * @param ShellInterface $shell
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        ConnectionInterface $connection
+        ConnectionInterface $connection,
+        ShellInterface $shell
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
         $this->connection = $connection;
+        $this->shell = $shell;
     }
 
     /**
@@ -160,11 +174,33 @@ class UrlManager
      */
     public function getBaseUrls(): array
     {
-        $urls = $this->connection->select(
-            'SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)',
-            ['web/unsecure/base_url', 'web/secure/base_url']
-        );
+        $this->loadStoreBaseUrls();
 
-        return array_column($urls, 'value');
+        return $this->storeBaseUrls;
+    }
+
+    /**
+     * @param $storeId
+     * @return string
+     */
+    public function getStoreBaseUrl($storeId): string
+    {
+        $this->loadStoreBaseUrls();
+
+        return $this->storeBaseUrls[$storeId] ?? $this->storeBaseUrls[0] ?? $this->getBaseUrl();
+    }
+
+    /**
+     * Retrieves base urls for each store and save them into $storeBaseUrls
+     */
+    private function loadStoreBaseUrls()
+    {
+        if (!$this->storeBaseUrls) {
+            $output = $this->shell->execute('php bin/magento config:show:store-url -all');
+
+            if (isset($output[0])) {
+                $this->storeBaseUrls = json_decode($output[0], true);
+            }
+        }
     }
 }

@@ -6,9 +6,12 @@
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Pool;
+use GuzzleHttp\Psr7\Request;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
+use Magento\MagentoCloud\Process\PostDeploy\WarmUp\UrlRewriteTable;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -52,24 +55,32 @@ class WarmUp implements ProcessInterface
     private $baseHosts;
 
     /**
+     * @var UrlRewriteTable
+     */
+    private $urlRewriteTable;
+
+    /**
      * @param PostDeployInterface $postDeploy
      * @param ClientFactory $clientFactory
      * @param RequestFactory $requestFactory
      * @param UrlManager $urlManager
      * @param LoggerInterface $logger
+     * @param UrlRewriteTable $urlRewriteTable
      */
     public function __construct(
         PostDeployInterface $postDeploy,
         ClientFactory $clientFactory,
         RequestFactory $requestFactory,
         UrlManager $urlManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        UrlRewriteTable $urlRewriteTable
     ) {
         $this->postDeploy = $postDeploy;
         $this->clientFactory = $clientFactory;
         $this->requestFactory = $requestFactory;
         $this->urlManager = $urlManager;
         $this->logger = $logger;
+        $this->urlRewriteTable = $urlRewriteTable;
     }
 
     /**
@@ -83,18 +94,27 @@ class WarmUp implements ProcessInterface
         $promises = [];
 
         try {
+            $this->logger->info('Starting page warming up');
+
             foreach ($this->getUrlsForWarmUp() as $url) {
                 $request = $this->requestFactory->create('GET', $url);
 
                 $promises[] = $client->sendAsync($request)->then(function () use ($url) {
                     $this->logger->info('Warmed up page: ' . $url);
                 }, function (RequestException $exception) use ($url) {
-                    $context = $exception->getResponse()
-                        ? [
+                    $context = [];
+                    if ($exception->getResponse()) {
+                        $context = [
                             'error' => $exception->getResponse()->getReasonPhrase(),
                             'code' => $exception->getResponse()->getStatusCode(),
-                        ]
-                        : [];
+                        ];
+                    } else if ($exception->getHandlerContext()) {
+                        $context = [
+                            'error' => $exception->getHandlerContext()['error'] ?? '',
+                            'errno' => $exception->getHandlerContext()['errno'] ?? '',
+                            'total_time' => $exception->getHandlerContext()['total_time'] ?? ''
+                        ];
+                    }
 
                     $this->logger->error('Warming up failed: ' . $url, $context);
                 });
@@ -117,8 +137,18 @@ class WarmUp implements ProcessInterface
         $baseUrl = rtrim($this->urlManager->getBaseUrl(), '/');
         $urls = [];
 
+        $urlPattern = sprintf(
+            '/^(%s|%s):(\d+|\*):.{1,}/',
+            UrlRewriteTable::ENTITY_CATEGORY,
+            UrlRewriteTable::ENTITY_CMS_PAGE
+        );
+
         foreach ($pages as $page) {
-            if (strpos($page, 'http') === 0) {
+            if (preg_match($urlPattern, $page)) {
+                $patternUrls = $this->getUrlsByPattern($page);
+                $this->logger->info(sprintf('Found %d urls for pattern "%s"', count($patternUrls), $page));
+                $urls = array_merge($urls, $patternUrls);
+            } else if (strpos($page, 'http') === 0) {
                 if (!$this->isRelatedDomain($page)) {
                     $this->logger->error(
                         sprintf(
@@ -156,5 +186,17 @@ class WarmUp implements ProcessInterface
         }
 
         return in_array(parse_url($url, PHP_URL_HOST), $this->baseHosts);
+    }
+
+    private function getUrlsByPattern($pattern)
+    {
+        list($entity, $storeId, $pattern) = explode(':', $pattern);
+        $patternUrls = $this->urlRewriteTable->getUrls(
+            $entity,
+            $pattern,
+            $storeId == '*' ? null : (int)$storeId
+        );
+
+        return $patternUrls;
     }
 }
