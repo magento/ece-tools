@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\App;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Magento\MagentoCloud\App\Container\Config;
 use Magento\MagentoCloud\Command\Build;
-use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
@@ -20,7 +19,6 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
-use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Magento\MagentoCloud\Process\ProcessComposite;
@@ -158,25 +156,6 @@ class Container implements ContainerInterface
                 ]);
             }
         );
-        $this->container->when(BuildProcess\DeployStaticContent::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
-        $this->container->when(BuildProcess\BackupData::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(BuildProcess\BackupData\StaticContent::class),
-                        $this->get(BuildProcess\BackupData\WritableDirectories::class),
-                    ],
-                ]);
-            });
         $this->container->when(Deploy::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -268,16 +247,6 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DocumentRoot::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Lock::class),
-                    ],
-                ]);
-            });
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Database::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Environment::class),
                     ],
                 ]);
             });

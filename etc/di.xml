@@ -39,6 +39,28 @@
             <item name="environment" sortOrder="20">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment</item>
         </composite>
     </type>
+    <type name="Magento\MagentoCloud\Process\Build\DeployStaticContent">
+        <composite>
+            <item name="generate" sortOrder="10">Magento\MagentoCloud\Process\Build\DeployStaticContent\Generate</item>
+        </composite>
+    </type>
+    <type name="Magento\MagentoCloud\Process\Build\BackupData">
+        <composite>
+            <item name="static" sortOrder="10">Magento\MagentoCloud\Process\Build\BackupData\StaticContent</item>
+            <item name="static" sortOrder="20">Magento\MagentoCloud\Process\Build\BackupData\WritableDirectories</item>
+        </composite>
+    </type>
+    <type name="Magento\MagentoCloud\Process\Deploy\PreDeploy">
+        <composite>
+            <item name="cache" sortOrder="10">Magento\MagentoCloud\Process\Deploy\PreDeploy\ConfigUpdate\Cache</item>
+            <item name="clean-static-content" sortOrder="20">Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanStaticContent</item>
+            <item name="clean-view-preprocessed" sortOrder="30">Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanViewPreprocessed</item>
+            <item name="clean-redis-cache" sortOrder="40">Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanRedisCache</item>
+            <item name="clean-file-cache" sortOrder="50">Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanFileCache</item>
+            <item name="restore-writable-dirs" sortOrder="60">Magento\MagentoCloud\Process\Deploy\PreDeploy\RestoreWritableDirectories</item>
+            <item name="set-production-mode" sortOrder="70">Magento\MagentoCloud\Process\Deploy\PreDeploy\SetProductionMode</item>
+        </composite>
+    </type>
     <preference for="Magento\MagentoCloud\Config\ConfigInterface" type="Magento\MagentoCloud\Config\Shared" />
     <preference for="Magento\MagentoCloud\Shell\ShellInterface" type="Magento\MagentoCloud\Shell\Shell" />
     <preference for="Magento\MagentoCloud\DB\DumpInterface" type="Magento\MagentoCloud\DB\Dump" />

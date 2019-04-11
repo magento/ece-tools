@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\App\Container;
 
 use Illuminate\Contracts\Container\BindingResolutionException;
@@ -84,8 +86,14 @@ class Config
                 $processedItems = [];
 
                 foreach ($type['composite'][0]['item'] as $item) {
-                    $processedItems[] = $this->container->make($item);
+                    if (array_key_exists($item['@sortOrder'], $processedItems)) {
+                        throw new BindingResolutionException('sortOrder is unique field');
+                    }
+
+                    $processedItems[$item['@sortOrder']] = $this->container->make($item['#']);
                 }
+
+                ksort($processedItems);
 
                 $this->container->when($type['@name'])
                     ->needs(ProcessInterface::class)

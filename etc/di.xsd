@@ -45,8 +45,8 @@
         <xs:choice maxOccurs="unbounded">
             <xs:element name="arguments" type="argumentsType" minOccurs="0" maxOccurs="1">
                 <xs:key name="argumentName">
-                    <xs:selector xpath="argument"></xs:selector>
-                    <xs:field xpath="@name"></xs:field>
+                    <xs:selector xpath="argument" />
+                    <xs:field xpath="@name" />
                 </xs:key>
             </xs:element>
             <xs:element name="composite" type="compositesType" minOccurs="0" maxOccurs="1" />
@@ -73,8 +73,8 @@
         <xs:sequence>
             <xs:element name="argument" type="argumentType" minOccurs="1" maxOccurs="unbounded">
                 <xs:key name="argumentItemName">
-                    <xs:selector xpath="item"></xs:selector>
-                    <xs:field xpath="@name"></xs:field>
+                    <xs:selector xpath="item" />
+                    <xs:field xpath="@name" />
                 </xs:key>
             </xs:element>
         </xs:sequence>
@@ -84,8 +84,8 @@
         <xs:sequence>
             <xs:element name="item" type="itemType" minOccurs="1" maxOccurs="unbounded">
                 <xs:key name="itemItemName">
-                    <xs:selector xpath="item"></xs:selector>
-                    <xs:field xpath="@name"></xs:field>
+                    <xs:selector xpath="item" />
+                    <xs:field xpath="@name" />
                 </xs:key>
             </xs:element>
         </xs:sequence>
