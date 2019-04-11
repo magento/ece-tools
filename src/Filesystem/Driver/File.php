@@ -189,6 +189,15 @@ class File
      */
     public function copyDirectory($source, $destination)
     {
+        echo sprintf(
+            '/bin/bash -c %s',
+            escapeshellarg(sprintf(
+                'shopt -s dotglob; cp -R %s/* %s/',
+                escapeshellarg(rtrim($source, '/')),
+                escapeshellarg(rtrim($destination, '/'))
+            ))
+        );
+
         /**
          * Use shell for best performance.
          */
