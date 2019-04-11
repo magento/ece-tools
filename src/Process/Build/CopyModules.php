@@ -51,9 +51,15 @@ class CopyModules implements ProcessInterface
     public function execute()
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
+        $magentoModulesDirectory = $magentoRoot . '/app/code/Magento';
         $eceToolRoot = $this->directoryList->getRoot();
 
         $this->logger->info('Copying ece-tool modules');
-        $this->file->copyDirectory($eceToolRoot . '/modules/Magento', $magentoRoot . '/app/code/Magento');
+
+        if (!$this->file->isDirectory($magentoModulesDirectory)) {
+            $this->file->createDirectory($magentoModulesDirectory);
+        }
+
+        $this->file->copyDirectory($eceToolRoot . '/modules/Magento', $magentoModulesDirectory);
     }
 }
