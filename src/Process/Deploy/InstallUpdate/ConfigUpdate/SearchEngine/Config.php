@@ -148,7 +148,7 @@ class Config
         }
 
         if ($this->elasticSuite->isInstalled()) {
-            $elasticSearchConfig['engine'] = 'elasticsuite';
+            $elasticSearchConfig['engine'] = ElasticSuite::ENGINE_NAME;
         }
 
         return $elasticSearchConfig;

@@ -14,6 +14,8 @@ use Magento\MagentoCloud\Package\Manager;
  */
 class ElasticSuite
 {
+    const ENGINE_NAME = 'elasticsuite';
+
     /**
      * @var Manager
      */
