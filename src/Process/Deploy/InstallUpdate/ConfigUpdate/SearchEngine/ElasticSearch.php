@@ -15,6 +15,7 @@ use Psr\Log\LoggerInterface;
 class ElasticSearch
 {
     const RELATIONSHIP_KEY = 'elasticsearch';
+    const ENGINE_NAME = 'elasticsearch';
 
     /**
      * @var ClientFactory

@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -106,6 +107,11 @@ class ElasticSearchUsageTest extends TestCase
                 ['elasticsearch' => []],
                 ['engine' => 'mysql'],
                 Error::class,
+            ],
+            'elasticsuite service is installed and elasticsearch used as search engine' => [
+                ['elasticsearch' => ['some_config']],
+                ['engine' => ElasticSuite::ENGINE_NAME],
+                Success::class,
             ],
         ];
     }
