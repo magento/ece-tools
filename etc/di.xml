@@ -25,18 +25,18 @@
     </type>
     <type name="Magento\MagentoCloud\Command\DbDump">
         <composite>
-            <item sortOrder="10">Magento\MagentoCloud\Process\DbDump\DbDump</item>
+            <item name="dbdump" sortOrder="10">Magento\MagentoCloud\Process\DbDump\DbDump</item>
         </composite>
     </type>
     <type name="Magento\MagentoCloud\Process\Deploy\DeployStaticContent">
         <composite>
-            <item sortOrder="10">Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate</item>
+            <item name="generate" sortOrder="10">Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate</item>
         </composite>
     </type>
     <type name="Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls">
         <composite>
-            <item sortOrder="10">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Database</item>
-            <item sortOrder="20">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment</item>
+            <item name="database" sortOrder="10">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Database</item>
+            <item name="environment" sortOrder="20">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment</item>
         </composite>
     </type>
     <preference for="Magento\MagentoCloud\Config\ConfigInterface" type="Magento\MagentoCloud\Config\Shared" />
