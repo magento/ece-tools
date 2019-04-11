@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\
 /**
  * Validates different aspects of ElasticSuite's configuration.
  */
-class ElasticSuiteConfiguration implements ValidatorInterface
+class ElasticSuiteIntegrity implements ValidatorInterface
 {
     /**
      * @var ElasticSuite
@@ -57,6 +57,12 @@ class ElasticSuiteConfiguration implements ValidatorInterface
     }
 
     /**
+     * If ElasticSuite is absent - skip validation.
+     * If ElasticSuite is present and no ElasticSearch connection - fail validation.
+     * If search engine is manually set to non-ElasticSuite it will fail after deploy - fail validation.
+     *
+     * Otherwise - validation is successful.
+     *
      * @return Validator\ResultInterface
      */
     public function validate(): Validator\ResultInterface

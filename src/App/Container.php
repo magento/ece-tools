@@ -244,7 +244,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
                                     $this->container->make(ConfigValidator\Deploy\ResourceConfiguration::class),
                                     $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
-                                    $this->container->make(ConfigValidator\Deploy\ElasticSuiteConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\ElasticSuiteIntegrity::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\AdminData::class),

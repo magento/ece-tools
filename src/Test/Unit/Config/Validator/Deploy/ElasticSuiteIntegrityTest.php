@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteConfiguration;
+use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -20,10 +20,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @inheritDoc
  */
-class ElasticSuiteConfigurationTest extends TestCase
+class ElasticSuiteIntegrityTest extends TestCase
 {
     /**
-     * @var ElasticSuiteConfiguration
+     * @var ElasticSuiteIntegrity
      */
     private $validator;
 
@@ -57,7 +57,7 @@ class ElasticSuiteConfigurationTest extends TestCase
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->configMock = $this->createMock(DeployInterface::class);
 
-        $this->validator = new ElasticSuiteConfiguration(
+        $this->validator = new ElasticSuiteIntegrity(
             $this->elasticSuiteMock,
             $this->elasticSearchMock,
             $this->resultFactoryMock,
