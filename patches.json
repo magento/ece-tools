@@ -1,9 +1,5 @@
 {
   "magento/magento2-base": {
-    "Fix credis pipeline issue": {
-      "2.1.4 - 2.1.10": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch",
-      "2.2.0": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
-    },
     "Fix asset locker race condition when using Redis": {
       "2.1.4 - 2.1.14": "MDVA-2470__fix_asset_locking_race_condition__2.1.4.patch",
       "2.2.0 - 2.2.5": "MDVA-2470__fix_asset_locking_race_condition__2.2.0.patch"
@@ -158,10 +154,15 @@
     }
   },
   "colinmollenhour/cache-backend-redis": {
-    "Porting 'retry_reads_on_master' option to older versions: '1.10.2', '1.10.4', '1.10.5'": {
+    "The ability to read from the master Redis instance if the slave Redis is unavailable:": {
       "1.10.2": "MAGECLOUD-2899__fix_redis_slave_configuration__2.1.16.patch",
       "1.10.4": "MAGECLOUD-2899__fix_redis_slave_configuration__2.2.3.patch",
       "1.10.5": "MAGECLOUD-2899__fix_redis_slave_configuration__2.3.0.patch"
+    }
+  },
+  "colinmollenhour/credis": {
+    "Fix credis pipeline issue": {
+      "1.6": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
     }
   }
 }
