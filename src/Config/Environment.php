@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Config\System\Variables;
+use Magento\MagentoCloud\Util\CloudVariableEncoder;
 
 /**
  * Contains logic for interacting with the server environment
@@ -37,15 +38,21 @@ class Environment
     const DEFAULT_ADMIN_NAME = 'admin';
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
+    /**
+     * @var CloudVariableEncoder
+     */
+    private $encoder;
 
     /**
      * Environment constructor.
      *
      * @param Variables $systemConfig
+     * @param CloudVariableEncoder $encoder
      */
-    public function __construct(Variables $systemConfig)
+    public function __construct(Variables $systemConfig, CloudVariableEncoder $encoder)
     {
         $this->systemConfig = $systemConfig;
+        $this->encoder = $encoder;
     }
 
     /**
@@ -82,7 +89,7 @@ class Environment
             return $default;
         }
 
-        return json_decode(base64_decode($value), true);
+        return $this->encoder->decode($value);
     }
 
     /**

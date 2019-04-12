@@ -10,8 +10,8 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
+use Magento\MagentoCloud\Util\CloudVariableEncoder;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -41,9 +41,9 @@ class EnvironmentTest extends TestCase
     {
         $this->environmentData = $_ENV;
 
-        $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
-        $this->schemaMock = $this->createMock(Schema::class);
-        $this->schemaMock->expects($this->any())
+        $environmentReaderMock = $this->createMock(EnvironmentReader::class);
+        $schemaMock = $this->createMock(Schema::class);
+        $schemaMock->expects($this->any())
             ->method('getDefaults')
             ->with(SystemConfigInterface::SYSTEM_VARIABLES)
             ->willReturn([
@@ -56,11 +56,11 @@ class EnvironmentTest extends TestCase
             ]);
 
         $this->variable = new Variables(
-            $this->environmentReaderMock,
-            $this->schemaMock
+            $environmentReaderMock,
+            $schemaMock
         );
 
-        $this->environment = new Environment($this->variable);
+        $this->environment = new Environment($this->variable, new CloudVariableEncoder());
     }
 
     /**

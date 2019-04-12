@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Command\Docker\ConfigConvert;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
+use Magento\MagentoCloud\Docker\Config\RelationshipUpdater;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\DevBuilder;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -65,6 +66,11 @@ class BuildTest extends TestCase
     private $configMock;
 
     /**
+     * @var RelationshipUpdater|MockObject
+     */
+    private $relationshipUpdaterMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -75,6 +81,7 @@ class BuildTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
         $this->configMock = $this->createMock(Repository::class);
+        $this->relationshipUpdaterMock = $this->createMock(RelationshipUpdater::class);
 
         $this->repositoryFactoryMock->method('create')
             ->willReturn($this->configMock);
@@ -83,7 +90,8 @@ class BuildTest extends TestCase
             $this->builderFactoryMock,
             $this->fileMock,
             $this->environmentMock,
-            $this->repositoryFactoryMock
+            $this->repositoryFactoryMock,
+            $this->relationshipUpdaterMock
         );
     }
 
@@ -110,6 +118,8 @@ class BuildTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
             ->with('magento_root/docker-compose.yml', "version: '2'\n");
+        $this->relationshipUpdaterMock->expects($this->once())
+            ->method('update');
 
         /** @var Console\Application|MockObject $applicationMock */
         $applicationMock = $this->createMock(Console\Application::class);
@@ -159,6 +169,8 @@ class BuildTest extends TestCase
             ->willReturn('magento_root/docker-compose.yml');
         $this->configMock->expects($this->exactly(6))
             ->method('set');
+        $this->relationshipUpdaterMock->expects($this->once())
+            ->method('update');
 
         /** @var Console\Application|MockObject $applicationMock */
         $applicationMock = $this->createMock(Application::class);
