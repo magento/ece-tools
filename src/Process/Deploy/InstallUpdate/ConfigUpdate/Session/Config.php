@@ -19,7 +19,7 @@ class Config
     /**
      * Redis database to store session data
      */
-    const REDIS_DATABASE_SESSION = 2;
+    const REDIS_DATABASE_SESSION = 0;
     /**
      * @var Environment
      */

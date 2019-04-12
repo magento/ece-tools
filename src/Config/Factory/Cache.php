@@ -18,12 +18,12 @@ class Cache
     /**
      * Redis database to store default cache data
      */
-    const REDIS_DATABASE_DEFAULT = 0;
+    const REDIS_DATABASE_DEFAULT = 1;
 
     /**
      * Redis database to store page cache data
      */
-    const REDIS_DATABASE_PAGE_CACHE = 1;
+    const REDIS_DATABASE_PAGE_CACHE = 2;
 
     /**
      * @var Environment
