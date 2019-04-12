@@ -17,9 +17,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Command for getting store ulr by store id.
- *
- * @api
- * @since 101.0.0
  */
 class ConfigShowStoreUrlCommand extends Command
 {
