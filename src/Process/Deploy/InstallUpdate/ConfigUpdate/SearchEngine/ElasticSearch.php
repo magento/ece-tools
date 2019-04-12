@@ -10,10 +10,13 @@ use Magento\MagentoCloud\Http\ClientFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * Returns version of elasticsearch
+ * Returns configurations from ElasticSearch.
  */
 class ElasticSearch
 {
+    const RELATIONSHIP_KEY = 'elasticsearch';
+    const ENGINE_NAME = 'elasticsearch';
+
     /**
      * @var ClientFactory
      */
@@ -50,6 +53,26 @@ class ElasticSearch
     }
 
     /**
+     * Checks if ES relationship is present.
+     *
+     * @return bool
+     */
+    public function isInstalled(): bool
+    {
+        return (bool)$this->environment->getRelationship(self::RELATIONSHIP_KEY);
+    }
+
+    /**
+     * Retrieves configuration from relationship.
+     *
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->environment->getRelationship(self::RELATIONSHIP_KEY)[0] ?? [];
+    }
+
+    /**
      * Returns version of elasticsearch service.
      * Returns 0 if response from elasticsearch doesn't contain version number or
      *   elasticsearch doesn't exist in relationships.
@@ -69,13 +92,11 @@ class ElasticSearch
             $esConfig = $relationships['elasticsearch'][0];
 
             try {
-                $response = $this->clientFactory->create()->get(sprintf(
+                $esConfiguration = $this->call(sprintf(
                     '%s:%s',
                     $esConfig['host'],
                     $esConfig['port']
                 ));
-                $esConfiguration = $response->getBody()->getContents();
-                $esConfiguration = json_decode($esConfiguration, true);
 
                 $this->version = $esConfiguration['version']['number'];
             } catch (\Exception $exception) {
@@ -84,5 +105,48 @@ class ElasticSearch
         }
 
         return $this->version;
+    }
+
+    /**
+     * Retrieves default template configuration.
+     * May contain configuration for replicas and shards.
+     *
+     * @return array
+     */
+    public function getTemplate(): array
+    {
+        $config = $this->getConfig();
+
+        if (!$config) {
+            return [];
+        }
+
+        try {
+            $templates = $this->call(sprintf(
+                '%s:%s/_template',
+                $config['host'],
+                $config['port']
+            ));
+
+            return $templates ? reset($templates)['settings'] : [];
+        } catch (\Exception $exception) {
+            $this->logger->warning('Can\'t get configuration of elasticsearch: ' . $exception->getMessage());
+
+            return [];
+        }
+    }
+
+    /**
+     * Call endpoint and return response.
+     *
+     * @param string $endpoint
+     * @return array
+     */
+    private function call(string $endpoint): array
+    {
+        $response = $this->clientFactory->create()->get($endpoint);
+        $templates = $response->getBody()->getContents();
+
+        return json_decode($templates, true);
     }
 }

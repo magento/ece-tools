@@ -11,8 +11,9 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,24 +25,29 @@ class ConfigTest extends TestCase
      */
     private $config;
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var ElasticSearch|Mock
+     * @var ElasticSearch|MockObject
      */
     private $elasticSearchMock;
+
+    /**
+     * @var ElasticSuite|MockObject
+     */
+    private $elasticSuiteMock;
 
     /**
      * @inheritdoc
@@ -52,11 +58,13 @@ class ConfigTest extends TestCase
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
+        $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
 
         $this->config = new Config(
             $this->environmentMock,
             $this->stageConfigMock,
             $this->elasticSearchMock,
+            $this->elasticSuiteMock,
             $this->magentoVersionMock,
             new ConfigMerger()
         );
@@ -256,6 +264,62 @@ class ConfigTest extends TestCase
             $generateDataForVersionChecking('6.0', 'elasticsearch6'),
             $generateDataForVersionChecking('6.2', 'elasticsearch6'),
             $generateDataForVersionChecking('7.2', 'elasticsearch7'),
+        ];
+    }
+
+    /**
+     * @param string $version
+     * @param array $relationships
+     * @param array $expected
+     * @param array $customSearchConfig
+     * @dataProvider testGetWithElasticSuiteDataProvider
+     */
+    public function testGetWithElasticSuite(
+        array $customSearchConfig,
+        string $version,
+        array $relationships,
+        array $expected
+    ) {
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn($customSearchConfig);
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationships')
+            ->willReturn(['elasticsearch' => [$relationships]]);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('getVersion')
+            ->willReturn($version);
+        $this->elasticSuiteMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn(true);
+
+        $this->assertEquals($expected, $this->config->get());
+    }
+
+    /**
+     * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     */
+    public function testGetWithElasticSuiteDataProvider(): array
+    {
+        return [
+            [
+                'customSearchConfig' => ['some_key' => 'some_value'],
+                'version' => '2.4',
+                'relationships' => [
+                    'host' => 'localhost',
+                    'port' => 1234,
+                    'query' => ['index' => 'stg'],
+                ],
+                'expected' => [
+                    'engine' => 'elasticsuite',
+                    'elasticsearch_server_hostname' => 'localhost',
+                    'elasticsearch_server_port' => 1234,
+                    'elasticsearch_index_prefix' => 'stg',
+                ],
+            ],
         ];
     }
 

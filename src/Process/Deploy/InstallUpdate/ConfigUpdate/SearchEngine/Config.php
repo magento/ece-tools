@@ -42,9 +42,15 @@ class Config
     private $configMerger;
 
     /**
+     * @var ElasticSuite
+     */
+    private $elasticSuite;
+
+    /**
      * @param Environment $environment
      * @param DeployInterface $stageConfig
      * @param ElasticSearch $elasticSearch
+     * @param ElasticSuite $elasticSuite
      * @param MagentoVersion $version
      * @param ConfigMerger $configMerger
      */
@@ -52,12 +58,14 @@ class Config
         Environment $environment,
         DeployInterface $stageConfig,
         ElasticSearch $elasticSearch,
+        ElasticSuite $elasticSuite,
         MagentoVersion $version,
         ConfigMerger $configMerger
     ) {
         $this->environment = $environment;
         $this->stageConfig = $stageConfig;
         $this->elasticSearch = $elasticSearch;
+        $this->elasticSuite = $elasticSuite;
         $this->magentoVersion = $version;
         $this->configMerger = $configMerger;
     }
@@ -83,7 +91,7 @@ class Config
     /**
      * @return array
      */
-    private function getSearchConfig()
+    private function getSearchConfig(): array
     {
         $relationships = $this->environment->getRelationships();
         $searchConfig = ['engine' => 'mysql'];
@@ -103,7 +111,7 @@ class Config
      * @param array $config Solr connection configuration
      * @return array
      */
-    private function getSolrConfiguration(array $config)
+    private function getSolrConfiguration(array $config): array
     {
         return [
             'engine' => 'solr',
@@ -120,7 +128,7 @@ class Config
      * @param array $config Elasticsearch connection configuration
      * @return array
      */
-    private function getElasticSearchConfiguration(array $config)
+    private function getElasticSearchConfiguration(array $config): array
     {
         $engine = 'elasticsearch';
 
@@ -137,6 +145,10 @@ class Config
 
         if (isset($config['query']['index'])) {
             $elasticSearchConfig["{$engine}_index_prefix"] = $config['query']['index'];
+        }
+
+        if ($this->elasticSuite->isInstalled()) {
+            $elasticSearchConfig['engine'] = ElasticSuite::ENGINE_NAME;
         }
 
         return $elasticSearchConfig;

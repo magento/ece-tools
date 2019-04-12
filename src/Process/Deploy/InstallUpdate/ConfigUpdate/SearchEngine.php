@@ -5,12 +5,13 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
-use Magento\MagentoCloud\Config\Deploy\Reader as EnvReader;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
-use Magento\MagentoCloud\Config\Shared\Reader as SharedReader;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
@@ -30,19 +31,9 @@ class SearchEngine implements ProcessInterface
     private $envWriter;
 
     /**
-     * @var EnvReader;
-     */
-    private $envReader;
-
-    /**
      * @var SharedWriter
      */
     private $sharedWriter;
-
-    /**
-     * @var SharedReader
-     */
-    private $sharedReader;
 
     /**
      * @var MagentoVersion
@@ -57,56 +48,68 @@ class SearchEngine implements ProcessInterface
     private $searchEngineConfig;
 
     /**
+     * @var ElasticSuite
+     */
+    private $elasticSuite;
+
+    /**
      * @param LoggerInterface $logger
      * @param EnvWriter $envWriter
-     * @param EnvReader $envReader
      * @param SharedWriter $sharedWriter
-     * @param SharedReader $sharedReader
      * @param MagentoVersion $version
      * @param SearchEngineConfig $searchEngineConfig
+     * @param ElasticSuite $elasticSuite
      */
     public function __construct(
         LoggerInterface $logger,
         EnvWriter $envWriter,
-        EnvReader $envReader,
         SharedWriter $sharedWriter,
-        SharedReader $sharedReader,
         MagentoVersion $version,
-        SearchEngineConfig $searchEngineConfig
+        SearchEngineConfig $searchEngineConfig,
+        ElasticSuite $elasticSuite
     ) {
         $this->logger = $logger;
         $this->envWriter = $envWriter;
-        $this->envReader = $envReader;
         $this->sharedWriter = $sharedWriter;
-        $this->sharedReader = $sharedReader;
         $this->magentoVersion = $version;
         $this->searchEngineConfig = $searchEngineConfig;
+        $this->elasticSuite = $elasticSuite;
     }
 
     /**
      * Executes the process.
      *
      * @return void
+     * @throws ProcessException
      */
     public function execute()
     {
-        $this->logger->info('Updating search engine configuration.');
-
         $searchConfig = $this->searchEngineConfig->get();
 
+        $this->logger->info('Updating search engine configuration.');
         $this->logger->info('Set search engine to: ' . $searchConfig['engine']);
 
-        // 2.1.x requires search config to be written to the shared config file: MAGECLOUD-1317
-        if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
-            $config = $this->sharedReader->read();
-            $config['system']['default']['catalog']['search'] = $searchConfig;
-            $this->sharedWriter->create($config);
+        $config['system']['default']['catalog']['search'] = $searchConfig;
 
-            return;
+        if ($this->elasticSuite->isAvailable()) {
+            $this->logger->info('Configuring ElasticSuite');
+
+            $config['system']['default']['smile_elasticsuite_core_base_settings'] = $this->elasticSuite->get();
+        } elseif ($this->elasticSuite->isInstalled()) {
+            $this->logger->warning('ElasticSuite is installed without ElasticSearch');
         }
 
-        $config = $this->envReader->read();
-        $config['system']['default']['catalog']['search'] = $searchConfig;
-        $this->envWriter->create($config);
+        try {
+            $isMagento21 = $this->magentoVersion->satisfies('2.1.*');
+
+            // 2.1.x requires search config to be written to the shared config file: MAGECLOUD-1317
+            if ($isMagento21) {
+                $this->sharedWriter->update($config);
+            } else {
+                $this->envWriter->update($config);
+            }
+        } catch (GenericException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

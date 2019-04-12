@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
+use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
 
 /**
  * Validates that different search engine configured when elasticsearch service is installed.
@@ -47,7 +48,8 @@ class ElasticSearchUsage implements ValidatorInterface
 
     /**
      * Returns success when elasticsearch service not exist.
-     * Returns success when elasticsearch service exist and search engine configured as elasticsearch.
+     * Returns success when elasticsearch service exist and search engine
+     * configured as elasticsearch or elasticsuite.
      * Otherwise returns error.
      *
      * @return Validator\ResultInterface
@@ -60,7 +62,10 @@ class ElasticSearchUsage implements ValidatorInterface
         }
 
         $searchEngine = $this->searchEngineConfig->get()['engine'];
-        if (strpos($searchEngine, 'elasticsearch') === 0) {
+        $isElasticSearchInstalled = strpos($searchEngine, 'elasticsearch') === 0
+            || $searchEngine === ElasticSuite::ENGINE_NAME;
+
+        if ($isElasticSearchInstalled) {
             return $this->resultFactory->success();
         }
 

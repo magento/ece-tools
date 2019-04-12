@@ -273,7 +273,7 @@ class StaticContentTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('rename')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath)
-            ->will($this->throwException(new FileSystemException()));
+            ->willThrowException(new FileSystemException('Some error'));
         $this->fileMock->expects($this->once())
             ->method('copyDirectory')
             ->with($this->originalPubStaticPath, $this->initPubStaticPath);

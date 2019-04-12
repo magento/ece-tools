@@ -351,6 +351,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
             ],
+            DeployInterface::VAR_ELASTICSUITE_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+            ],
             DeployInterface::VAR_QUEUE_CONFIGURATION => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [

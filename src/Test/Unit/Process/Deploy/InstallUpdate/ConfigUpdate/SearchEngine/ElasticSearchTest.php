@@ -178,4 +178,152 @@ class ElasticSearchTest extends TestCase
 
         $this->assertEquals(0, $this->elasticSearch->getVersion());
     }
+
+    public function testGetTemplate()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with('elasticsearch')
+            ->willReturn(
+                [
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                    ],
+                ]
+            );
+        $clientMock = $this->createPartialMock(Client::class, ['get']);
+        $responseMock = $this->createMock(Response::class);
+        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
+
+        $esConfiguration = json_encode(
+            [
+                'default' => [
+                    'settings' => [
+                        'index' => [
+                            'number_of_shards' => 1,
+                            'number_of_replicas' => 2
+                        ]
+                    ]
+                ]
+            ]
+        );
+        $clientMock->expects($this->once())
+            ->method('get')
+            ->with('127.0.0.1:1234/_template')
+            ->willReturn($responseMock);
+        $responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($streamMock);
+        $streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($esConfiguration);
+        $this->clientFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($clientMock);
+        $this->loggerMock->expects($this->never())
+            ->method('warning');
+
+        $this->assertSame(
+            [
+                'index' => [
+                    'number_of_shards' => 1,
+                    'number_of_replicas' => 2,
+                ]
+            ],
+            $this->elasticSearch->getTemplate()
+        );
+    }
+
+    public function testGetTemplateNoConfig()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with('elasticsearch')
+            ->willReturn(
+                [
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                    ],
+                ]
+            );
+        $clientMock = $this->createPartialMock(Client::class, ['get']);
+        $responseMock = $this->createMock(Response::class);
+        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
+
+        $esConfiguration = json_encode(
+            []
+        );
+        $clientMock->expects($this->once())
+            ->method('get')
+            ->with('127.0.0.1:1234/_template')
+            ->willReturn($responseMock);
+        $responseMock->expects($this->once())
+            ->method('getBody')
+            ->willReturn($streamMock);
+        $streamMock->expects($this->once())
+            ->method('getContents')
+            ->willReturn($esConfiguration);
+        $this->clientFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($clientMock);
+        $this->loggerMock->expects($this->never())
+            ->method('warning');
+
+        $this->assertSame([], $this->elasticSearch->getTemplate());
+    }
+
+    public function testGetTemplateWithException()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with('elasticsearch')
+            ->willReturn(
+                [
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                    ],
+                ]
+            );
+        $clientMock = $this->createPartialMock(Client::class, ['get']);
+        $responseMock = $this->createMock(Response::class);
+
+        $clientMock->expects($this->once())
+            ->method('get')
+            ->with('127.0.0.1:1234/_template')
+            ->willThrowException(new \Exception('Some error'));
+        $clientMock->expects($this->once())
+            ->method('get')
+            ->with('127.0.0.1:1234/_template')
+            ->willReturn($responseMock);
+        $this->clientFactoryMock->expects($this->once())
+            ->method('create')
+            ->willReturn($clientMock);
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Can\'t get configuration of elasticsearch: Some error');
+
+        $this->assertSame([], $this->elasticSearch->getTemplate());
+    }
+
+    public function testIsInstalled()
+    {
+        $this->environmentMock->expects($this->exactly(2))
+            ->method('getRelationship')
+            ->with('elasticsearch')
+            ->willReturnOnConsecutiveCalls(
+                [
+                    [
+                        'host' => '127.0.0.1',
+                        'port' => '1234',
+                    ],
+                ],
+                []
+            );
+
+        $this->assertTrue($this->elasticSearch->isInstalled());
+        $this->assertFalse($this->elasticSearch->isInstalled());
+    }
 }
