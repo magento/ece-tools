@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Docker\Config;
 
 use Magento\MagentoCloud\Docker\Config;
+use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 
 /**
  * Generates relationship data for current configuration
@@ -66,6 +67,8 @@ class Relationship
 
     /**
      * Generates relationship data for current configuration
+     *
+     * @throws ConfigurationMismatchException
      */
     public function get(): array
     {

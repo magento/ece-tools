@@ -14,6 +14,9 @@ use Magento\MagentoCloud\Util\PhpFormatter;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @inheritdoc
+ */
 class RelationshipUpdaterTest extends TestCase
 {
     /**
@@ -46,6 +49,9 @@ class RelationshipUpdaterTest extends TestCase
      */
     private $updater;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -64,10 +70,9 @@ class RelationshipUpdaterTest extends TestCase
     }
 
     /**
-     * @param array $configFileData
-     * @dataProvider updateDataProvider
+     * @inheritdoc
      */
-    public function testUpdate(array $configFileData)
+    public function testUpdate()
     {
         $rootDir = '/path/to';
         $this->directoryListMock->expects($this->once())
@@ -75,25 +80,69 @@ class RelationshipUpdaterTest extends TestCase
             ->willReturn($rootDir);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
+            ->withConsecutive(
+                [$rootDir . '/docker/config.php'],
+                [$rootDir . '/docker/config.php.dist']
+            )
             ->willReturn(true);
         $this->fileMock->expects($this->exactly(2))
             ->method('requireFile')
-            ->willReturn($configFileData);
-        $this->cloudVariableEncoderMock->expects($this->exactly(count($configFileData) * 2))
-            ->method('decode');
+            ->willReturn([
+                'MAGENTO_CLOUD_RELATIONSHIPS' => 'encoded_relationships_value',
+                'MAGENTO_CLOUD_ROUTES' => 'encoded_routes_value',
+            ]);
+        $this->cloudVariableEncoderMock->expects($this->exactly(4))
+            ->method('decode')
+            ->willReturnMap([
+                ['encoded_relationships_value', 'decoded_relationships_value'],
+                ['encoded_routes_value', 'decoded_routes_value'],
+            ]);
+        $this->relationshipMock->expects($this->exactly(2))
+            ->method('get')
+            ->willReturn([
+                'database' => ['config'],
+                'redis' => ['config'],
+            ]);
+        $this->phpFormatterMock->expects($this->exactly(4))
+            ->method('varExportShort')
+            ->willReturnMap([
+                [
+                    [
+                        'database' => ['config'],
+                        'redis' => ['config'],
+                    ],
+                    2,
+                    'exported_relationship_value',
+                ],
+                [
+                    'decoded_routes_value',
+                    2,
+                    'exported_routes_value',
+                ],
+            ]);
+        $this->fileMock->expects($this->exactly(2))
+            ->method('filePutContents')
+            ->withConsecutive(
+                [$rootDir . '/docker/config.php', $this->getConfigForUpdate()],
+                [$rootDir . '/docker/config.php.dist', $this->getConfigForUpdate()]
+            );
 
         $this->updater->update();
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function updateDataProvider(): array
+    private function getConfigForUpdate(): string
     {
-        return [
-            [
-                []
-            ]
-        ];
+        return <<<TEXT
+<?php
+
+return [
+    'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode(exported_relationship_value)),
+    'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(exported_routes_value)),
+];
+
+TEXT;
     }
 }
