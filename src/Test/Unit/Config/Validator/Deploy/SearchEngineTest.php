@@ -3,10 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Validator\Deploy\SearchEngine;
+use Magento\MagentoCloud\Config\Validator\Deploy\SolrIntegrity;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -21,7 +23,7 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 class SearchEngineTest extends TestCase
 {
     /**
-     * @var SearchEngine
+     * @var SolrIntegrity
      */
     private $searchEngineValidator;
 
@@ -49,7 +51,7 @@ class SearchEngineTest extends TestCase
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
-        $this->searchEngineValidator = new SearchEngine(
+        $this->searchEngineValidator = new SolrIntegrity(
             $this->environmentMock,
             $this->magentoVersionMock,
             $this->resultFactoryMock
