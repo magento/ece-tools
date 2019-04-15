@@ -38,6 +38,7 @@ class Environment
     const DEFAULT_ADMIN_NAME = 'admin';
     const DEFAULT_ADMIN_FIRSTNAME = 'Admin';
     const DEFAULT_ADMIN_LASTNAME = 'Username';
+
     /**
      * @var CloudVariableEncoder
      */
