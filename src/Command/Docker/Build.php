@@ -23,6 +23,8 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Builds Docker configuration for Magento project.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Build extends Command
 {
