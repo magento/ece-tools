@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine;
+use Magento\MagentoCloud\Config\SearchEngine;
 
 /**
  * Validates that different search engine configured when elasticsearch service is installed.

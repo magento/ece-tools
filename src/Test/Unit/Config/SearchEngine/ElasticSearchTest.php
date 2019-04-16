@@ -5,13 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy\SearchEngine;
+namespace Magento\MagentoCloud\Test\Unit\Config\SearchEngine;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;

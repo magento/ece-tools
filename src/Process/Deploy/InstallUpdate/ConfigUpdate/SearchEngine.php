@@ -11,7 +11,7 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine as SearchEngineConfig;
+use Magento\MagentoCloud\Config\SearchEngine as SearchEngineConfig;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;

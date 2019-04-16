@@ -5,15 +5,15 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
+namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Config\SearchEngine;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

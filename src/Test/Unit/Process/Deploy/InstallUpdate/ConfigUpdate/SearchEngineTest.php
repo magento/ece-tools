@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine as SearchEngineConfig;
+use Magento\MagentoCloud\Config\SearchEngine as SearchEngineConfig;
 use Magento\MagentoCloud\Process\ProcessException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

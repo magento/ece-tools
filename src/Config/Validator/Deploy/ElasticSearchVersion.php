@@ -8,13 +8,13 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Composer\Semver\Semver;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine;
+use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
 use Psr\Log\LoggerInterface;
 
 /**

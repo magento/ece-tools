@@ -7,13 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine;
+use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Config\Stage\Deploy\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
