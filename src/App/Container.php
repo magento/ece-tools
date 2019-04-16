@@ -250,7 +250,6 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\AdminData::class),
                                     $this->container->make(ConfigValidator\Deploy\PhpVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\SolrIntegrity::class),
-                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
