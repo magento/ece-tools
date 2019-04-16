@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
-use Magento\MagentoCloud\Variable\Decoder;
+use Magento\MagentoCloud\PlatformVariable\Decoder;
 use PHPUnit\Framework\TestCase;
 
 /**

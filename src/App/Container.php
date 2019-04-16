@@ -147,8 +147,8 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\View\TwigRenderer::class
         );
         $this->container->singleton(
-            \Magento\MagentoCloud\Variable\DecoderInterface::class,
-            \Magento\MagentoCloud\Variable\Decoder::class
+            \Magento\MagentoCloud\PlatformVariable\DecoderInterface::class,
+            \Magento\MagentoCloud\PlatformVariable\Decoder::class
         );
         /**
          * Contextual binding.
