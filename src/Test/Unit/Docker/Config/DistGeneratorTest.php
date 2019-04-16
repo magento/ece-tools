@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Docker\Config;
 
+use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\Config\Relationship;
-use Magento\MagentoCloud\Docker\Config\RelationshipUpdater;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Util\CloudVariableEncoder;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Util\PhpFormatter;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +17,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @inheritdoc
  */
-class RelationshipUpdaterTest extends TestCase
+class DistGeneratorTest extends TestCase
 {
     /**
      * @var DirectoryList|MockObject
@@ -30,11 +30,6 @@ class RelationshipUpdaterTest extends TestCase
     private $fileMock;
 
     /**
-     * @var CloudVariableEncoder|MockObject
-     */
-    private $cloudVariableEncoderMock;
-
-    /**
      * @var Relationship|MockObject
      */
     private $relationshipMock;
@@ -45,9 +40,9 @@ class RelationshipUpdaterTest extends TestCase
     private $phpFormatterMock;
 
     /**
-     * @var RelationshipUpdater
+     * @var DistGenerator
      */
-    private $updater;
+    private $distGenerator;
 
     /**
      * @inheritdoc
@@ -56,14 +51,12 @@ class RelationshipUpdaterTest extends TestCase
     {
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->fileMock = $this->createMock(File::class);
-        $this->cloudVariableEncoderMock = $this->createMock(CloudVariableEncoder::class);
         $this->relationshipMock = $this->createMock(Relationship::class);
         $this->phpFormatterMock = $this->createMock(PhpFormatter::class);
 
-        $this->updater = new RelationshipUpdater(
+        $this->distGenerator = new DistGenerator(
             $this->directoryListMock,
             $this->fileMock,
-            $this->cloudVariableEncoderMock,
             $this->relationshipMock,
             $this->phpFormatterMock
         );
@@ -72,38 +65,19 @@ class RelationshipUpdaterTest extends TestCase
     /**
      * @inheritdoc
      */
-    public function testUpdate()
+    public function testGenerate()
     {
         $rootDir = '/path/to';
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($rootDir);
-        $this->fileMock->expects($this->exactly(2))
-            ->method('isExists')
-            ->withConsecutive(
-                [$rootDir . '/docker/config.php'],
-                [$rootDir . '/docker/config.php.dist']
-            )
-            ->willReturn(true);
-        $this->fileMock->expects($this->exactly(2))
-            ->method('requireFile')
-            ->willReturn([
-                'MAGENTO_CLOUD_RELATIONSHIPS' => 'encoded_relationships_value',
-                'MAGENTO_CLOUD_ROUTES' => 'encoded_routes_value',
-            ]);
-        $this->cloudVariableEncoderMock->expects($this->exactly(4))
-            ->method('decode')
-            ->willReturnMap([
-                ['encoded_relationships_value', 'decoded_relationships_value'],
-                ['encoded_routes_value', 'decoded_routes_value'],
-            ]);
-        $this->relationshipMock->expects($this->exactly(2))
+        $this->relationshipMock->expects($this->once())
             ->method('get')
             ->willReturn([
                 'database' => ['config'],
                 'redis' => ['config'],
             ]);
-        $this->phpFormatterMock->expects($this->exactly(4))
+        $this->phpFormatterMock->expects($this->exactly(3))
             ->method('varExportShort')
             ->willReturnMap([
                 [
@@ -115,19 +89,34 @@ class RelationshipUpdaterTest extends TestCase
                     'exported_relationship_value',
                 ],
                 [
-                    'decoded_routes_value',
+                    [
+                        'http://magento2.docker/' => [
+                            'type' => 'upstream',
+                            'original_url' => 'http://{default}'
+                        ],
+                        'https://magento2.docker/' => [
+                            'type' => 'upstream',
+                            'original_url' => 'https://{default}'
+                        ],
+                    ],
                     2,
                     'exported_routes_value',
                 ],
+                [
+                    [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'ADMIN_PASSWORD' => '123123q',
+                        'ADMIN_URL' => 'admin'
+                    ],
+                    2,
+                    'exported_variables_value'
+                ]
             ]);
-        $this->fileMock->expects($this->exactly(2))
+        $this->fileMock->expects($this->once())
             ->method('filePutContents')
-            ->withConsecutive(
-                [$rootDir . '/docker/config.php', $this->getConfigForUpdate()],
-                [$rootDir . '/docker/config.php.dist', $this->getConfigForUpdate()]
-            );
+            ->with($rootDir . '/docker/config.php.dist', $this->getConfigForUpdate());
 
-        $this->updater->update();
+        $this->distGenerator->generate();
     }
 
     /**
@@ -141,8 +130,22 @@ class RelationshipUpdaterTest extends TestCase
 return [
     'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode(exported_relationship_value)),
     'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(exported_routes_value)),
+    'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(exported_variables_value)),
 ];
 
 TEXT;
+    }
+
+    /**
+     * @expectedExceptionMessage file system error
+     * @expectedException \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    public function testGenerateFileSystemException()
+    {
+        $this->fileMock->expects($this->once())
+            ->method('filePutContents')
+            ->willThrowException(new FileSystemException('file system error'));
+
+        $this->distGenerator->generate();
     }
 }
