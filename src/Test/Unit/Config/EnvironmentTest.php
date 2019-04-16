@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
-use Magento\MagentoCloud\CloudVariable\Decoder;
+use Magento\MagentoCloud\Variable\Decoder;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Schema;

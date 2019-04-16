@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\CloudVariable\DecoderInterface;
+use Magento\MagentoCloud\Variable\DecoderInterface;
 use Magento\MagentoCloud\Config\System\Variables;
 
 /**
