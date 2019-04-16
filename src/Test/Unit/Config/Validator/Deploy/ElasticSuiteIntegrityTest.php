@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\SearchEngine;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
@@ -43,9 +44,9 @@ class ElasticSuiteIntegrityTest extends TestCase
     private $resultFactoryMock;
 
     /**
-     * @var SearchEngine|MockObject
+     * @var DeployInterface|MockObject
      */
-    private $searchEngineMock;
+    private $stageConfigMock;
 
     /**
      * @inheritDoc
@@ -55,13 +56,13 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
-        $this->searchEngineMock = $this->createMock(SearchEngine::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->validator = new ElasticSuiteIntegrity(
             $this->elasticSuiteMock,
             $this->elasticSearchMock,
             $this->resultFactoryMock,
-            $this->searchEngineMock
+            $this->stageConfigMock
         );
     }
 
@@ -101,9 +102,10 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->searchEngineMock->expects($this->once())
-            ->method('getName')
-            ->willReturn('mysql');
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn(['engine' => 'mysql']);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with('ElasticSuite is installed but mysql set as search engine.')
@@ -120,9 +122,10 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->searchEngineMock->expects($this->once())
-            ->method('getName')
-            ->willReturn(ElasticSuite::ENGINE_NAME);
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
+            ->willReturn(['engine' => ElasticSuite::ENGINE_NAME]);
         $this->resultFactoryMock->expects($this->once())
             ->method('success')
             ->willReturn(new Success());

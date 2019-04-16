@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\SearchEngine;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
@@ -34,26 +35,26 @@ class ElasticSuiteIntegrity implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var SearchEngine
+     * @var DeployInterface
      */
-    private $searchEngine;
+    private $config;
 
     /**
      * @param ElasticSuite $elasticSuite
      * @param ElasticSearch $elasticSearch
      * @param Validator\ResultFactory $resultFactory
-     * @param SearchEngine $searchEngine
+     * @param DeployInterface $config
      */
     public function __construct(
         ElasticSuite $elasticSuite,
         ElasticSearch $elasticSearch,
         Validator\ResultFactory $resultFactory,
-        SearchEngine $searchEngine
+        DeployInterface $config
     ) {
         $this->elasticSuite = $elasticSuite;
         $this->elasticSearch = $elasticSearch;
         $this->resultFactory = $resultFactory;
-        $this->searchEngine = $searchEngine;
+        $this->config = $config;
     }
 
     /**
@@ -75,7 +76,7 @@ class ElasticSuiteIntegrity implements ValidatorInterface
             return $this->resultFactory->error('ElasticSuite is installed without available ElasticSearch service.');
         }
 
-        $engine = $this->searchEngine->getName();
+        $engine = $this->config->get(DeployInterface::VAR_SEARCH_CONFIGURATION)['engine'] ?? null;
 
         if ($engine && strtolower($engine) !== ElasticSuite::ENGINE_NAME) {
             return $this->resultFactory->error(sprintf(
