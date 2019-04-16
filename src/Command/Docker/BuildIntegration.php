@@ -25,6 +25,7 @@ use Symfony\Component\Yaml\Yaml;
 /**
  * Docker build for internal integration testing.
  *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @codeCoverageIgnore
  */
 class BuildIntegration extends Command
