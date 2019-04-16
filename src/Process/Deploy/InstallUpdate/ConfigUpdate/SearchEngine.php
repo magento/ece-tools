@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
 use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Config\SearchEngine as SearchEngineConfig;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -77,8 +78,12 @@ class SearchEngine implements ProcessInterface
      */
     public function execute()
     {
-        $config = $this->searchEngineConfig->getConfig();
-        $engine = $this->searchEngineConfig->getName();
+        try {
+            $config = $this->searchEngineConfig->getConfig();
+            $engine = $this->searchEngineConfig->getName();
+        } catch (UndefinedPackageException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
 
         $this->logger->info('Updating search engine configuration.');
         $this->logger->info('Set search engine to: ' . $engine);

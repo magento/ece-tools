@@ -225,4 +225,19 @@ class SearchEngineTest extends TestCase
 
         $this->process->execute();
     }
+
+    /**
+     * @throws ProcessException
+     *
+     * @expectedExceptionMessage Some error
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     */
+    public function testExecuteWithConfigException()
+    {
+        $this->configMock->expects($this->once())
+            ->method('getConfig')
+            ->willThrowException(new UndefinedPackageException('Some error'));
+
+        $this->process->execute();
+    }
 }
