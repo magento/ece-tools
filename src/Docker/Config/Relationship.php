@@ -72,14 +72,14 @@ class Relationship
      */
     public function get(): array
     {
-        $magentoCloudRelationships = [];
+        $relationships = [];
         foreach ($this->defaultConfiguration as $serviceName => $serviceConfig) {
             if ($this->config->getServiceVersion($this->convertServiceName($serviceName))) {
-                $magentoCloudRelationships[$serviceName] = $serviceConfig;
+                $relationships[$serviceName] = $serviceConfig;
             }
         }
 
-        return $magentoCloudRelationships;
+        return $relationships;
     }
 
     /**
