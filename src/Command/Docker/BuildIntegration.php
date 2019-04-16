@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Docker\BuilderInterface;
+use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -55,21 +56,29 @@ class BuildIntegration extends Command
     private $environment;
 
     /**
+     * @var DistGenerator
+     */
+    private $distGenerator;
+
+    /**
      * @param BuilderFactory $builderFactory
      * @param File $file
      * @param RepositoryFactory $configFactory
      * @param Environment $environment
+     * @param DistGenerator $distGenerator
      */
     public function __construct(
         BuilderFactory $builderFactory,
         File $file,
         RepositoryFactory $configFactory,
-        Environment $environment
+        Environment $environment,
+        DistGenerator $distGenerator
     ) {
         $this->builderFactory = $builderFactory;
         $this->file = $file;
         $this->configFactory = $configFactory;
         $this->environment = $environment;
+        $this->distGenerator = $distGenerator;
 
         parent::__construct();
     }
@@ -143,6 +152,8 @@ class BuildIntegration extends Command
             $builder->getConfigPath(),
             Yaml::dump($builder->build($config), 4, 2)
         );
+
+        $this->distGenerator->generate();
 
         $output->writeln('<info>Configuration was built</info>');
     }
