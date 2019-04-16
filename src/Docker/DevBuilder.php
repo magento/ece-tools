@@ -160,12 +160,14 @@ class DevBuilder implements BuilderInterface
             'image' => 'tianon/true',
             'volumes' => [
                 './docker/mnt:/mnt',
+                './docker/tmp:/tmp',
                 self::DIR_MAGENTO . '/var',
                 self::DIR_MAGENTO . '/app/etc',
                 self::DIR_MAGENTO . '/pub/static',
                 self::DIR_MAGENTO . '/pub/media',
                 self::DIR_MAGENTO . '/vendor',
-                self::DIR_MAGENTO . '/generated'
+                self::DIR_MAGENTO . '/generated',
+                self::DIR_MAGENTO . '/setup',
             ],
         ];
 
