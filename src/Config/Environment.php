@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\CloudVariable\DecoderInterface;
 use Magento\MagentoCloud\Config\System\Variables;
-use Magento\MagentoCloud\Util\CloudVariableEncoder;
 
 /**
  * Contains logic for interacting with the server environment
@@ -40,20 +40,20 @@ class Environment
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
-     * @var CloudVariableEncoder
+     * @var DecoderInterface
      */
-    private $encoder;
+    private $decoder;
 
     /**
      * Environment constructor.
      *
      * @param Variables $systemConfig
-     * @param CloudVariableEncoder $encoder
+     * @param DecoderInterface $decoder
      */
-    public function __construct(Variables $systemConfig, CloudVariableEncoder $encoder)
+    public function __construct(Variables $systemConfig, DecoderInterface $decoder)
     {
         $this->systemConfig = $systemConfig;
-        $this->encoder = $encoder;
+        $this->decoder = $decoder;
     }
 
     /**
@@ -90,7 +90,7 @@ class Environment
             return $default;
         }
 
-        return $this->encoder->decode($value);
+        return $this->decoder->decode($value);
     }
 
     /**

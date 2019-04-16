@@ -146,6 +146,14 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\View\RendererInterface::class,
             \Magento\MagentoCloud\View\TwigRenderer::class
         );
+        $this->container->singleton(
+            \Magento\MagentoCloud\CloudVariable\EncoderInterface::class,
+            \Magento\MagentoCloud\CloudVariable\Encoder::class
+        );
+        $this->container->singleton(
+            \Magento\MagentoCloud\CloudVariable\DecoderInterface::class,
+            \Magento\MagentoCloud\CloudVariable\Decoder::class
+        );
         /**
          * Contextual binding.
          */

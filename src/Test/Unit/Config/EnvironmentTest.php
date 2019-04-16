@@ -5,12 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\CloudVariable\Decoder;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
-use Magento\MagentoCloud\Util\CloudVariableEncoder;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -60,7 +60,7 @@ class EnvironmentTest extends TestCase
             $schemaMock
         );
 
-        $this->environment = new Environment($this->variable, new CloudVariableEncoder());
+        $this->environment = new Environment($this->variable, new Decoder());
     }
 
     /**

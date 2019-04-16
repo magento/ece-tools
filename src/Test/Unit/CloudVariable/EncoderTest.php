@@ -5,16 +5,16 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
-use Magento\MagentoCloud\Util\CloudVariableEncoder;
+use Magento\MagentoCloud\CloudVariable\Encoder;
 use PHPUnit\Framework\TestCase;
 
 /**
  * @inheritdoc
  */
-class CloudVariableEncoderTest extends TestCase
+class EncoderTest extends TestCase
 {
     /**
-     * @var CloudVariableEncoder
+     * @var Encoder
      */
     private $encoder;
 
@@ -23,7 +23,7 @@ class CloudVariableEncoderTest extends TestCase
      */
     protected function setUp()
     {
-        $this->encoder = new CloudVariableEncoder();
+        $this->encoder = new Encoder();
     }
 
     public function testEncode()
@@ -35,16 +35,6 @@ class CloudVariableEncoderTest extends TestCase
         $this->assertSame(
             'eyJzb21lS2V5Ijoic29tZVZhbHVlIn0=',
             $this->encoder->encode($data)
-        );
-    }
-
-    public function testDecode()
-    {
-        $this->assertSame(
-            [
-                'someKey' => 'someValue'
-            ],
-            $this->encoder->decode('eyJzb21lS2V5Ijoic29tZVZhbHVlIn0')
         );
     }
 }
