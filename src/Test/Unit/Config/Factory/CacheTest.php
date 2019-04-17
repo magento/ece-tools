@@ -215,15 +215,30 @@ class CacheTest extends TestCase
                 ],
             ]
         ];
+
+        $slaveConfiguration = [
+            'backend_options' => [
+                'load_from_slave' => [
+                    'server' => 'slave.host',
+                    'port' => 'slave.port',
+                ],
+                'read_timeout' => 1,
+                'retry_reads_on_master' => 1,
+            ],
+            'frontend_options' => [
+                'write_control' => false,
+            ]
+        ];
+
         $resultMasterSlaveConnection = $resultMasterOnlyConnection;
-        $resultMasterSlaveConnection['frontend']['default']['backend_options']['load_from_slave'] = [
-            'server' => 'slave.host',
-            'port' => 'slave.port',
-        ];
-        $resultMasterSlaveConnection['frontend']['page_cache']['backend_options']['load_from_slave'] = [
-            'server' => 'slave.host',
-            'port' => 'slave.port',
-        ];
+        $resultMasterSlaveConnection['frontend']['default'] = array_merge_recursive(
+            $resultMasterSlaveConnection['frontend']['default'],
+            $slaveConfiguration
+        );
+        $resultMasterSlaveConnection['frontend']['page_cache'] = array_merge_recursive(
+            $resultMasterSlaveConnection['frontend']['page_cache'],
+            $slaveConfiguration
+        );
 
         $resultMasterSlaveConnectionWithMergedValue = $resultMasterSlaveConnection;
         $resultMasterSlaveConnectionWithMergedValue['frontend']['default']['backend_options']['value'] = 'key';
