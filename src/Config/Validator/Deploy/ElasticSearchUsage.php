@@ -3,13 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Config\SearchEngine;
 
 /**
  * Validates that different search engine configured when elasticsearch service is installed.
@@ -17,9 +17,9 @@ use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\
 class ElasticSearchUsage implements ValidatorInterface
 {
     /**
-     * @var SearchEngineConfig
+     * @var SearchEngine
      */
-    private $searchEngineConfig;
+    private $searchEngine;
 
     /**
      * @var Validator\ResultFactory
@@ -27,23 +27,23 @@ class ElasticSearchUsage implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var Environment
+     * @var SearchEngine\ElasticSearch
      */
-    private $environment;
+    private $elasticSearch;
 
     /**
-     * @param Environment $environment
-     * @param SearchEngineConfig $searchEngineConfig
+     * @param SearchEngine $searchEngine
      * @param Validator\ResultFactory $resultFactory
+     * @param SearchEngine\ElasticSearch $elasticSearch
      */
     public function __construct(
-        Environment $environment,
-        SearchEngineConfig $searchEngineConfig,
-        Validator\ResultFactory $resultFactory
+        SearchEngine $searchEngine,
+        Validator\ResultFactory $resultFactory,
+        SearchEngine\ElasticSearch $elasticSearch
     ) {
-        $this->searchEngineConfig = $searchEngineConfig;
+        $this->searchEngine = $searchEngine;
         $this->resultFactory = $resultFactory;
-        $this->environment = $environment;
+        $this->elasticSearch = $elasticSearch;
     }
 
     /**
@@ -56,16 +56,11 @@ class ElasticSearchUsage implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $relationships = $this->environment->getRelationships();
-        if (!isset($relationships['elasticsearch'])) {
+        if (!$this->elasticSearch->isInstalled()) {
             return $this->resultFactory->success();
         }
 
-        $searchEngine = $this->searchEngineConfig->get()['engine'];
-        $isElasticSearchInstalled = strpos($searchEngine, 'elasticsearch') === 0
-            || $searchEngine === ElasticSuite::ENGINE_NAME;
-
-        if ($isElasticSearchInstalled) {
+        if ($this->searchEngine->isESFamily()) {
             return $this->resultFactory->success();
         }
 

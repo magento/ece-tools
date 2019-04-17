@@ -5,13 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
+namespace Magento\MagentoCloud\Test\Unit\Config\SearchEngine;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -74,7 +74,7 @@ class ElasticSuiteTest extends TestCase
             ->with([], ['some' => 'value'])
             ->willReturn(['some' => 'value']);
         $this->elasticSearchMock->expects($this->once())
-            ->method('getConfig')
+            ->method('getRelationship')
             ->willReturn([]);
 
         $this->assertSame(
@@ -106,7 +106,7 @@ class ElasticSuiteTest extends TestCase
             )
             ->willReturn(['some' => 'value']);
         $this->elasticSearchMock->expects($this->once())
-            ->method('getConfig')
+            ->method('getRelationship')
             ->willReturn([
                 'host' => '127.0.0.1',
                 'port' => '1234',
@@ -152,7 +152,7 @@ class ElasticSuiteTest extends TestCase
             )
             ->willReturn(['some' => 'value']);
         $this->elasticSearchMock->expects($this->once())
-            ->method('getConfig')
+            ->method('getRelationship')
             ->willReturn([
                 'host' => '127.0.0.1',
                 'port' => '1234',
@@ -196,7 +196,7 @@ class ElasticSuiteTest extends TestCase
             )
             ->willReturn(['some' => 'value']);
         $this->elasticSearchMock->expects($this->once())
-            ->method('getConfig')
+            ->method('getRelationship')
             ->willReturn([
                 'host' => '127.0.0.1',
                 'port' => '1234',

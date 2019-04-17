@@ -3,14 +3,17 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\PlatformVariable\Decoder;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -18,16 +21,12 @@ use PHPUnit\Framework\TestCase;
  */
 class EnvironmentTest extends TestCase
 {
-    use \phpmock\phpunit\PHPMock;
+    use PHPMock;
+
     /**
      * @var Environment
      */
     private $environment;
-
-    /**
-     * @var array
-     */
-    private $environmentData;
 
     /**
      * @var Variables
@@ -35,13 +34,16 @@ class EnvironmentTest extends TestCase
     private $variable;
 
     /**
+     * @var boolean
+     */
+    protected $backupGlobals = true;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->environmentData = $_ENV;
-
-        $environmentReaderMock = $this->createMock(EnvironmentReader::class);
+        $environmentReaderMock = $this->createMock(Reader::class);
         $schemaMock = $this->createMock(Schema::class);
         $schemaMock->expects($this->any())
             ->method('getDefaults')
@@ -61,14 +63,6 @@ class EnvironmentTest extends TestCase
         );
 
         $this->environment = new Environment($this->variable, new Decoder());
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function tearDown()
-    {
-        $_ENV = $this->environmentData;
     }
 
     /**

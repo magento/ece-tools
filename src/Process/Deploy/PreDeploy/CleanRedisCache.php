@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -31,35 +32,52 @@ class CleanRedisCache implements ProcessInterface
     private $shell;
 
     /**
+     * @var CacheConfig
+     */
+    private $cacheConfig;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param Environment $env
+     * @param CacheConfig $cacheConfig
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
-        Environment $env
+        Environment $env,
+        CacheConfig $cacheConfig
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->env = $env;
+        $this->cacheConfig = $cacheConfig;
     }
 
     /**
-     * Clears redis cache if redis enabled and configuration exists in MAGENTO_CLOUD_RELATIONSHIPS env variable.
+     * Clears redis cache
      *
      * @return void
      */
     public function execute()
     {
-        $redis = $this->env->getRelationship('redis');
+        $cacheConfigs = $this->cacheConfig->get();
 
-        if (count($redis) > 0) {
-            $redisHost = $redis[0]['host'];
-            $redisPort = $redis[0]['port'];
-            $redisCacheDb = '1';
-            $this->logger->info('Clearing redis cache');
-            $this->shell->execute("redis-cli -h $redisHost -p $redisPort -n $redisCacheDb flushdb");
+        if (!isset($cacheConfigs['frontend'])) {
+            return;
+        }
+        foreach ($cacheConfigs['frontend'] as $cacheType => $cacheConfig) {
+            if ($cacheConfig['backend'] != 'Cm_Cache_Backend_Redis') {
+                continue;
+            }
+            $redisConfig = $cacheConfig['backend_options'];
+            $this->logger->info("Clearing redis cache: $cacheType");
+            $cmd = 'redis-cli';
+            $cmd .= isset($redisConfig['server']) ? ' -h ' . $redisConfig['server'] : '';
+            $cmd .= isset($redisConfig['port']) ? ' -p ' . $redisConfig['port'] : '';
+            $cmd .= isset($redisConfig['database']) ? ' -n ' . $redisConfig['database'] : '';
+            $cmd .= ' flushdb';
+            $this->shell->execute($cmd);
         }
     }
 }

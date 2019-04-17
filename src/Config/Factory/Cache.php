@@ -16,6 +16,16 @@ use Psr\Log\LoggerInterface;
 class Cache
 {
     /**
+     * Redis database to store default cache data
+     */
+    const REDIS_DATABASE_DEFAULT = 1;
+
+    /**
+     * Redis database to store page cache data
+     */
+    const REDIS_DATABASE_PAGE_CACHE = 2;
+
+    /**
      * @var Environment
      */
     private $environment;
@@ -93,7 +103,6 @@ class Cache
             'backend_options' => [
                 'server' => $redisConfig[0]['host'],
                 'port' => $redisConfig[0]['port'],
-                'database' => 1,
             ],
         ];
 
@@ -115,8 +124,14 @@ class Cache
 
         return $this->configMerger->mergeConfigs([
             'frontend' => [
-                'default' => $redisCache,
-                'page_cache' => $redisCache,
+                'default' => array_replace_recursive(
+                    $redisCache,
+                    ['backend_options' => ['database' => self::REDIS_DATABASE_DEFAULT]]
+                ),
+                'page_cache' => array_replace_recursive(
+                    $redisCache,
+                    ['backend_options' => ['database' => self::REDIS_DATABASE_PAGE_CACHE]]
+                ),
             ],
         ], $envCacheConfiguration);
     }
