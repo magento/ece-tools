@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -10,11 +12,12 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
  * Validates Solr has not been configured for project.
  */
-class SearchEngine implements ValidatorInterface
+class SolrIntegrity implements ValidatorInterface
 {
     /**
      * @var Environment
@@ -44,9 +47,11 @@ class SearchEngine implements ValidatorInterface
     }
 
     /**
-     * Valdiate that search engine config is not set to Solr
+     * Validate that search engine config is not set to Solr
      *
      * @return ResultInterface
+     *
+     * @throws UndefinedPackageException
      */
     public function validate(): ResultInterface
     {

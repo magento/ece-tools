@@ -3,40 +3,43 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Validator\Deploy\SearchEngine;
+use Magento\MagentoCloud\Config\Validator\Deploy\SolrIntegrity;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
  */
-class SearchEngineTest extends TestCase
+class SolrIntegrityTest extends TestCase
 {
     /**
-     * @var SearchEngine
+     * @var SolrIntegrity
      */
-    private $searchEngineValidator;
+    private $validator;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
     /**
-     * @var ResultFactory|Mock
+     * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
 
@@ -49,13 +52,16 @@ class SearchEngineTest extends TestCase
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
-        $this->searchEngineValidator = new SearchEngine(
+        $this->validator = new SolrIntegrity(
             $this->environmentMock,
             $this->magentoVersionMock,
             $this->resultFactoryMock
         );
     }
 
+    /**
+     * @throws UndefinedPackageException
+     */
     public function testConfigValid()
     {
         $this->environmentMock->expects($this->once())
@@ -74,9 +80,12 @@ class SearchEngineTest extends TestCase
             ->with(ResultInterface::SUCCESS)
             ->willReturn($this->createMock(Success::class));
 
-        $this->searchEngineValidator->validate();
+        $this->validator->validate();
     }
 
+    /**
+     * @throws UndefinedPackageException
+     */
     public function testConfigSolr21()
     {
         $this->environmentMock->expects($this->once())
@@ -106,9 +115,12 @@ class SearchEngineTest extends TestCase
                 ]
             )->willReturn($this->createMock(Error::class));
 
-        $this->searchEngineValidator->validate();
+        $this->validator->validate();
     }
 
+    /**
+     * @throws UndefinedPackageException
+     */
     public function testConfigSolr22()
     {
         $this->environmentMock->expects($this->once())
@@ -140,6 +152,6 @@ class SearchEngineTest extends TestCase
                 ]
             )->willReturn($this->createMock(Error::class));
 
-        $this->searchEngineValidator->validate();
+        $this->validator->validate();
     }
 }

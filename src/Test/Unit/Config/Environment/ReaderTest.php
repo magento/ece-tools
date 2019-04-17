@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Environment;
 use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -47,7 +48,7 @@ class ReaderTest extends TestCase
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_exists');
 
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
-        $this->fileMock = $this->createPartialMock(File::class, []);
+        $this->fileMock = $this->createPartialMock(File::class, ['isExists']);
 
         $this->reader = new Reader(
             $this->configFileListMock,
@@ -55,6 +56,9 @@ class ReaderTest extends TestCase
         );
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public function testRead()
     {
         $baseDir = __DIR__ . '/_file/';
@@ -62,6 +66,9 @@ class ReaderTest extends TestCase
         $this->configFileListMock->expects($this->once())
             ->method('getEnvConfig')
             ->willReturn($baseDir . '/.magento.env.yaml');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
 
         $this->reader->read();
         $this->assertEquals(
@@ -88,6 +95,26 @@ class ReaderTest extends TestCase
         );
     }
 
+    /**
+     * @throws FileSystemException
+     */
+    public function testReadNotExist()
+    {
+        $baseDir = __DIR__ . '/_file/';
+
+        $this->configFileListMock->expects($this->once())
+            ->method('getEnvConfig')
+            ->willReturn($baseDir . '/.magento.env.yaml');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(false);
+
+        $this->assertEquals([], $this->reader->read());
+    }
+
+    /**
+     * @throws FileSystemException
+     */
     public function testReadMainConfigWithEmptySectionAndStage()
     {
         $baseDir = __DIR__ . '/_file/';
@@ -95,6 +122,9 @@ class ReaderTest extends TestCase
         $this->configFileListMock->expects($this->once())
             ->method('getEnvConfig')
             ->willReturn($baseDir . '/.magento-with-empty-sections.env.yaml');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
 
         $this->reader->read();
         $this->assertEquals(
@@ -110,6 +140,9 @@ class ReaderTest extends TestCase
         );
     }
 
+    /**
+     * @throws FileSystemException
+     */
     public function testReadWithConstants()
     {
         if (!defined(Yaml::class . '::PARSE_CONSTANT')) {
@@ -121,6 +154,9 @@ class ReaderTest extends TestCase
         $this->configFileListMock->expects($this->once())
             ->method('getEnvConfig')
             ->willReturn($baseDir . '/.magento-with-constants.env.yaml');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->willReturn(true);
 
         $this->assertEquals(
             [

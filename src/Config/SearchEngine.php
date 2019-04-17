@@ -3,18 +3,23 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
+declare(strict_types=1);
+
+namespace Magento\MagentoCloud\Config;
 
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
  * Returns search configuration.
  */
-class Config
+class SearchEngine
 {
     /**
      * @var Environment
@@ -47,6 +52,11 @@ class Config
     private $elasticSuite;
 
     /**
+     * @var array
+     */
+    private $config;
+
+    /**
      * @param Environment $environment
      * @param DeployInterface $stageConfig
      * @param ElasticSearch $elasticSearch
@@ -74,35 +84,78 @@ class Config
      * Returns search engine configuration. At least contains 'engine' option.
      *
      * @return array
+     *
+     * @throws UndefinedPackageException
      */
-    public function get(): array
+    public function getConfig(): array
     {
-        $envSearchConfig = (array)$this->stageConfig->get(DeployInterface::VAR_SEARCH_CONFIGURATION);
+        if ($this->config === null) {
+            $resolveMerge = function () {
+                $searchConfig = (array)$this->stageConfig->get(DeployInterface::VAR_SEARCH_CONFIGURATION);
 
-        if ($this->isSearchConfigValid($envSearchConfig)
-            && !$this->configMerger->isMergeRequired($envSearchConfig)
-        ) {
-            return $this->configMerger->clear($envSearchConfig);
+                if (isset($searchConfig['engine']) && !$this->configMerger->isMergeRequired($searchConfig)) {
+                    return $this->configMerger->clear($searchConfig);
+                }
+
+                return $this->configMerger->mergeConfigs(
+                    $this->getSearchConfig(),
+                    $searchConfig
+                );
+            };
+
+            $this->config['system']['default']['catalog']['search'] = $resolveMerge();
+
+            if ($this->elasticSuite->isInstalled()) {
+                $this->config['system']['default']['smile_elasticsuite_core_base_settings'] =
+                    $this->elasticSuite->get();
+                $this->config['system']['default']['catalog']['search']['engine'] = ElasticSuite::ENGINE_NAME;
+            }
         }
 
-        return $this->configMerger->mergeConfigs($this->getSearchConfig(), $envSearchConfig);
+        return $this->config;
+    }
+
+    /**
+     * @return string
+     *
+     * @throws UndefinedPackageException
+     */
+    public function getName(): string
+    {
+        return $this->getConfig()['system']['default']['catalog']['search']['engine'];
+    }
+
+    /**
+     * Checks if search engine is a prt of ElasticSearch family (i.e. ElasticSuite).
+     *
+     * @return bool
+     */
+    public function isESFamily(): bool
+    {
+        $searchEngine = $this->getName();
+
+        return (strpos($searchEngine, ElasticSearch::ENGINE_NAME) === 0)
+            || ($searchEngine === ElasticSuite::ENGINE_NAME);
     }
 
     /**
      * @return array
+     *
+     * @throws UndefinedPackageException
      */
     private function getSearchConfig(): array
     {
-        $relationships = $this->environment->getRelationships();
-        $searchConfig = ['engine' => 'mysql'];
-
-        if (isset($relationships['elasticsearch'])) {
-            $searchConfig = $this->getElasticSearchConfiguration($relationships['elasticsearch'][0]);
-        } elseif (isset($relationships['solr']) && $this->magentoVersion->satisfies('<2.2')) {
-            $searchConfig = $this->getSolrConfiguration($relationships['solr'][0]);
+        if ($esConfig = $this->elasticSearch->getRelationship()) {
+            return $this->getElasticSearchConfiguration($esConfig);
         }
 
-        return $searchConfig;
+        $solrConfig = $this->environment->getRelationship('solr');
+
+        if ($solrConfig && $this->magentoVersion->satisfies('<2.2')) {
+            return $this->getSolrConfiguration($solrConfig[0]);
+        }
+
+        return ['engine' => 'mysql'];
     }
 
     /**
@@ -130,11 +183,11 @@ class Config
      */
     private function getElasticSearchConfiguration(array $config): array
     {
-        $engine = 'elasticsearch';
+        $engine = ElasticSearch::ENGINE_NAME;
 
         $esVersion = $this->elasticSearch->getVersion();
         if (Semver::satisfies($esVersion, '>= 5')) {
-            $engine = 'elasticsearch' . intval($esVersion);
+            $engine .= (int)$esVersion;
         }
 
         $elasticSearchConfig = [
@@ -147,21 +200,6 @@ class Config
             $elasticSearchConfig["{$engine}_index_prefix"] = $config['query']['index'];
         }
 
-        if ($this->elasticSuite->isInstalled()) {
-            $elasticSearchConfig['engine'] = ElasticSuite::ENGINE_NAME;
-        }
-
         return $elasticSearchConfig;
-    }
-
-    /**
-     * Checks that given configuration is valid.
-     *
-     * @param array $searchConfiguration
-     * @return bool
-     */
-    private function isSearchConfigValid(array $searchConfiguration): bool
-    {
-        return isset($searchConfiguration['engine']);
     }
 }
