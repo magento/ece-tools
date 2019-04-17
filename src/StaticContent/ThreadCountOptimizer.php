@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\StaticContent;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Util\Cpu;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -36,13 +37,20 @@ class ThreadCountOptimizer
     private $magentoVersion;
 
     /**
+     * @var Cpu
+     */
+    private $cpu;
+
+    /**
      * @param LoggerInterface $logger
      * @param MagentoVersion $magentoVersion
+     * @param Cpu $cpu
      */
-    public function __construct(LoggerInterface $logger, MagentoVersion $magentoVersion)
+    public function __construct(LoggerInterface $logger, MagentoVersion $magentoVersion, Cpu $cpu)
     {
         $this->logger = $logger;
         $this->magentoVersion = $magentoVersion;
+        $this->cpu = $cpu;
     }
 
     /**
@@ -66,6 +74,10 @@ class ThreadCountOptimizer
             }
 
             return self::THREAD_COUNT_COMPACT_STRATEGY;
+        }
+
+        if ($strategy !== self::STRATEGY_COMPACT && $threads === -1) {
+            $threads = max(floor($this->cpu->getThreadCount() / 2), 1);
         }
 
         return $threads;

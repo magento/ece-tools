@@ -129,8 +129,8 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => 1,
-                    StageConfigInterface::STAGE_DEPLOY => 1,
+                    StageConfigInterface::STAGE_BUILD => -1,
+                    StageConfigInterface::STAGE_DEPLOY => -1,
                 ],
             ],
             StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [

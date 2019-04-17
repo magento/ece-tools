@@ -189,6 +189,7 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
+                        $this->container->make(DeployProcess\PreDeploy\SetProductionMode::class),
                         $this->container->make(BuildProcess\RefreshModules::class),
                         $this->container->make(BuildProcess\ApplyPatches::class),
                         $this->container->make(BuildProcess\MarshallFiles::class),
