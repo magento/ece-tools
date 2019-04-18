@@ -11,6 +11,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
+/**
+ * @inheritdoc
+ */
 class CpuTest extends TestCase
 {
     /**
@@ -28,6 +31,9 @@ class CpuTest extends TestCase
      */
     private $cpu;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->shellMock = $this->createMock(ShellInterface::class);

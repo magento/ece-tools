@@ -67,7 +67,6 @@ interface StageConfigInterface
      */
     const OPTION_MERGE = '_merge';
 
-
     /**
      * Default value of SCD_THREADS variable.
      */
