@@ -5,8 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
+use Magento\MagentoCloud\Util\Cpu;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -31,14 +33,21 @@ class ThreadCountOptimizerTest extends TestCase
      */
     private $magentoVersionMock;
 
+    /**
+     * @var Cpu|Mock
+     */
+    private $cpuMock;
+
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->cpuMock = $this->createMock(Cpu::class);
 
         $this->optimizer = new ThreadCountOptimizer(
             $this->loggerMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->cpuMock
         );
     }
 
@@ -109,6 +118,34 @@ class ThreadCountOptimizerTest extends TestCase
         $this->assertEquals(
             1,
             $this->optimizer->optimize(3, ThreadCountOptimizer::STRATEGY_COMPACT)
+        );
+    }
+
+    public function testOptimizeWithOptimalValue()
+    {
+        $this->magentoVersionMock->expects($this->never())
+            ->method('satisfies');
+        $this->cpuMock->expects($this->once())
+            ->method('getCoreCount')
+            ->willReturn(8);
+
+        $this->assertEquals(
+            4,
+            $this->optimizer->optimize(StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE, 'quick')
+        );
+    }
+
+    public function testOptimizeWithCoreCountLowerOptimalValue()
+    {
+        $this->magentoVersionMock->expects($this->never())
+            ->method('satisfies');
+        $this->cpuMock->expects($this->once())
+            ->method('getCoreCount')
+            ->willReturn(2);
+
+        $this->assertEquals(
+            2,
+            $this->optimizer->optimize(StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE, 'quick')
         );
     }
 }

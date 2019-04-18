@@ -67,6 +67,12 @@ interface StageConfigInterface
      */
     const OPTION_MERGE = '_merge';
 
+
+    /**
+     * Default value of SCD_THREADS variable.
+     */
+    const VAR_SCD_THREADS_DEFAULT_VALUE = -1;
+
     /**
      * Retrieves environment configuration per stage.
      *
