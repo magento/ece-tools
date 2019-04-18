@@ -36,7 +36,6 @@ class CpuTest extends TestCase
         $this->cpu = new Cpu($this->shellMock, $this->loggerMock);
     }
 
-
     public function testGetTreadsCount()
     {
         $this->shellMock->expects($this->once())

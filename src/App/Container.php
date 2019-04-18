@@ -171,6 +171,7 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(BuildProcess\PreBuild::class),
+                        $this->container->make(DeployProcess\PreDeploy\SetProductionMode::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -189,7 +190,6 @@ class Container implements ContainerInterface
                                 ],
                             ],
                         ]),
-                        $this->container->make(DeployProcess\PreDeploy\SetProductionMode::class),
                         $this->container->make(BuildProcess\RefreshModules::class),
                         $this->container->make(BuildProcess\ApplyPatches::class),
                         $this->container->make(BuildProcess\MarshallFiles::class),
