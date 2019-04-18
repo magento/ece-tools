@@ -7,13 +7,13 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\PlatformVariable\Decoder;
 use Magento\MagentoCloud\Config\Environment\Reader;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
 use phpmock\phpunit\PHPMock;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -34,16 +34,6 @@ class EnvironmentTest extends TestCase
     private $variable;
 
     /**
-     * @var Reader|MockObject
-     */
-    private $environmentReaderMock;
-
-    /**
-     * @var Schema|MockObject
-     */
-    private $schemaMock;
-
-    /**
      * @var boolean
      */
     protected $backupGlobals = true;
@@ -53,10 +43,10 @@ class EnvironmentTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentReaderMock = $this->createMock(Reader::class);
-        $this->schemaMock = $this->createMock(Schema::class);
-
-        $this->schemaMock->method('getDefaults')
+        $environmentReaderMock = $this->createMock(Reader::class);
+        $schemaMock = $this->createMock(Schema::class);
+        $schemaMock->expects($this->any())
+            ->method('getDefaults')
             ->with(SystemConfigInterface::SYSTEM_VARIABLES)
             ->willReturn([
                 SystemConfigInterface::VAR_ENV_RELATIONSHIPS => 'MAGENTO_CLOUD_RELATIONSHIPS',
@@ -68,11 +58,11 @@ class EnvironmentTest extends TestCase
             ]);
 
         $this->variable = new Variables(
-            $this->environmentReaderMock,
-            $this->schemaMock
+            $environmentReaderMock,
+            $schemaMock
         );
 
-        $this->environment = new Environment($this->variable);
+        $this->environment = new Environment($this->variable, new Decoder());
     }
 
     /**

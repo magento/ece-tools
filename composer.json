@@ -84,10 +84,6 @@
         "docker/mysql"
       ],
       [
-        "dist/docker/config.php",
-        "docker/config.php.dist"
-      ],
-      [
         "dist/docker/global.php",
         "docker/global.php.dist"
       ],
