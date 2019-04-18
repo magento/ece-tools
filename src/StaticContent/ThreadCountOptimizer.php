@@ -77,7 +77,7 @@ class ThreadCountOptimizer
         }
 
         if ($strategy !== self::STRATEGY_COMPACT && $threads === -1) {
-            $threads = max(floor($this->cpu->getThreadCount() / 2), 1);
+            $threads = max(floor($this->cpu->getThreadsCount() / 2), 1);
         }
 
         return $threads;
