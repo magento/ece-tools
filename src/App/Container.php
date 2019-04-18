@@ -28,6 +28,7 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Process\SetProductionMode;
 
 /**
  * @inheritdoc
@@ -171,7 +172,7 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(BuildProcess\PreBuild::class),
-                        $this->container->make(DeployProcess\PreDeploy\SetProductionMode::class),
+                        $this->container->make(SetProductionMode::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -348,7 +349,7 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
-                        $this->container->make(DeployProcess\PreDeploy\SetProductionMode::class),
+                        $this->container->make(SetProductionMode::class),
                     ],
                 ]);
             });

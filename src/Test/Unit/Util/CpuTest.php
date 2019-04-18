@@ -17,6 +17,11 @@ use Psr\Log\LoggerInterface;
 class CpuTest extends TestCase
 {
     /**
+     * @var Cpu
+     */
+    private $cpu;
+
+    /**
      * @var ShellInterface|MockObject
      */
     private $shellMock;
@@ -25,11 +30,6 @@ class CpuTest extends TestCase
      * @var LoggerInterface|MockObject
      */
     private $loggerMock;
-
-    /**
-     * @var Cpu
-     */
-    private $cpu;
 
     /**
      * @inheritdoc
