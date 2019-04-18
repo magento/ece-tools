@@ -130,8 +130,7 @@ class DevBuilder implements BuilderInterface
             [
                 'ports' => [9000],
                 'depends_on' => ['db'],
-                'volumes_from' => ['appdata'],
-                'volumes' => [$this->getMagentoVolume(true)],
+                'volumes' => $this->getMagentoVolumes(true),
                 'env_file' => [
                     './docker/global.env',
                     './docker/config.env',
@@ -145,10 +144,7 @@ class DevBuilder implements BuilderInterface
             $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
             [
                 'depends_on' => ['fpm', 'db'],
-                'volumes_from' => ['appdata'],
-                'volumes' => [
-                    $this->getMagentoVolume(true),
-                ],
+                'volumes' => $this->getMagentoVolumes(true),
                 'env_file' => [
                     './docker/global.env',
                     './docker/config.env',
@@ -156,24 +152,19 @@ class DevBuilder implements BuilderInterface
             ]
         );
         $services['cron'] = $this->getCronCliService($phpVersion, true, $cliDepends, 'cron.magento2.docker');
-        $services['appdata'] = [
-            'image' => 'tianon/true',
-            'volumes' => [
-                './docker/mnt:/mnt',
-                './docker/tmp:/tmp',
-                self::DIR_MAGENTO . '/var',
-                self::DIR_MAGENTO . '/app/etc',
-                self::DIR_MAGENTO . '/pub/static',
-                self::DIR_MAGENTO . '/pub/media',
-                self::DIR_MAGENTO . '/vendor',
-                self::DIR_MAGENTO . '/generated',
-                self::DIR_MAGENTO . '/setup',
-            ],
-        ];
 
         return [
-            'version' => '2',
+            'version' => '3',
             'services' => $services,
+            'volumes' => [
+                'magento-vendor' => [],
+                'magento-generated' => [],
+                'magento-setup' => [],
+                'magento-var' => [],
+                'magento-etc' => [],
+                'magento-static' => [],
+                'magento-media' => [],
+            ]
         ];
     }
 
@@ -187,13 +178,47 @@ class DevBuilder implements BuilderInterface
 
     /**
      * @param bool $isReadOnly
-     * @return string
+     * @return array
      */
-    private function getMagentoVolume(bool $isReadOnly): string
+    private function getMagentoVolumes(bool $isReadOnly): array
     {
-        $volume = '.:' . self::DIR_MAGENTO;
+        $flag = $isReadOnly ? ':ro' : ':rw';
 
-        return $isReadOnly ? $volume . ':ro' : $volume . ':rw';
+        return [
+            './:' . self::DIR_MAGENTO . $flag,
+            'magento-vendor:' . self::DIR_MAGENTO . '/vendor' . $flag,
+            'magento-generated:' . self::DIR_MAGENTO . '/generated' . $flag,
+            'magento-setup:' . self::DIR_MAGENTO . '/setup' . $flag,
+            'magento-var:' . self::DIR_MAGENTO . '/var:rw',
+            'magento-etc:' . self::DIR_MAGENTO . '/app/etc:rw',
+            'magento-static:' . self::DIR_MAGENTO . '/pub/static:rw',
+            'magento-media:' . self::DIR_MAGENTO . '/pub/media:rw',
+        ];
+    }
+
+    /***
+     * @return array
+     */
+    private function getComposerVolumes(): array
+    {
+        $composeCacheDirectory = file_exists(getenv('HOME') . '/.cache/composer')
+            ? '~/.cache/composer'
+            : '~/.composer/cache';
+
+        return [
+            $composeCacheDirectory . ':/root/.composer/cache',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getSharedVolumes(): array
+    {
+        return [
+            './docker/mnt:/mnt',
+            './docker/tmp:/tmp'
+        ];
     }
 
     /**
@@ -246,21 +271,17 @@ class DevBuilder implements BuilderInterface
         array $depends,
         string $hostname
     ): array {
-        $composeCacheDirectory = file_exists(getenv('HOME') . '/.cache/composer')
-            ? '~/.cache/composer'
-            : '~/.composer/cache';
-
         $config = $this->serviceFactory->create(
             ServiceFactory::SERVICE_CLI,
             $version,
             [
                 'hostname' => $hostname,
                 'depends_on' => $depends,
-                'volumes' => [
-                    $composeCacheDirectory . ':/root/.composer/cache',
-                    $this->getMagentoVolume($isReadOnly),
-                ],
-                'volumes_from' => ['appdata'],
+                'volumes' => array_merge(
+                    $this->getMagentoVolumes($isReadOnly),
+                    $this->getComposerVolumes(),
+                    $this->getSharedVolumes()
+                ),
                 'env_file' => [
                     './docker/global.env',
                     './docker/config.env',
