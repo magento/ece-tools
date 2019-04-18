@@ -26,6 +26,9 @@ class EnvironmentConfigTest extends TestCase
      */
     private $environmentMock;
 
+    /**
+     * @inheritDoc
+     */
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
@@ -40,8 +43,7 @@ class EnvironmentConfigTest extends TestCase
      */
     public function testGetAll(array $expectedVariables, array $envVariables)
     {
-        $this->environmentMock->expects($this->any())
-            ->method('getVariables')
+        $this->environmentMock->method('getVariables')
             ->willReturn($envVariables);
 
         $this->assertSame(
@@ -50,7 +52,10 @@ class EnvironmentConfigTest extends TestCase
         );
     }
 
-    public function getAllDataProvider()
+    /**
+     * @return array
+     */
+    public function getAllDataProvider(): array
     {
         return [
             [
@@ -121,6 +126,10 @@ class EnvironmentConfigTest extends TestCase
                 [DeployInterface::VAR_SKIP_SCD => false],
                 [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 0]
             ],
+            [
+                [],
+                [DeployInterface::VAR_VERBOSE_COMMANDS => 'wrong_value']
+            ]
         ];
     }
 

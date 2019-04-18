@@ -10,6 +10,8 @@ namespace Magento\MagentoCloud\Command\Docker;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
+use Magento\MagentoCloud\Docker\BuilderInterface;
+use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Version;
 use Magento\MagentoCloud\Docker\Service\Version\Validator as VersionValidator;
@@ -25,6 +27,8 @@ use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 
 /**
  * Builds Docker configuration for Magento project.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Build extends Command
 {
@@ -58,6 +62,11 @@ class Build extends Command
     private $configFactory;
 
     /**
+     * @var DistGenerator
+     */
+    private $distGenerator;
+
+    /**
      * @var Version
      */
     private $serviceVersion;
@@ -74,6 +83,7 @@ class Build extends Command
      * @param RepositoryFactory $configFactory
      * @param Version $serviceVersion
      * @param VersionValidator $versionValidator
+     * @param DistGenerator $distGenerator
      */
     public function __construct(
         BuilderFactory $builderFactory,
@@ -81,7 +91,8 @@ class Build extends Command
         Environment $environment,
         RepositoryFactory $configFactory,
         Version $serviceVersion,
-        VersionValidator $versionValidator
+        VersionValidator $versionValidator,
+        DistGenerator $distGenerator
     ) {
         $this->builderFactory = $builderFactory;
         $this->file = $file;
@@ -89,6 +100,7 @@ class Build extends Command
         $this->configFactory = $configFactory;
         $this->serviceVersion = $serviceVersion;
         $this->versionValidator = $versionValidator;
+        $this->distGenerator = $distGenerator;
 
         parent::__construct();
     }
@@ -180,6 +192,8 @@ class Build extends Command
             $builder->getConfigPath(),
             Yaml::dump($builder->build($config), 4, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)
         );
+
+        $this->distGenerator->generate();
 
         $this->getApplication()
             ->find(ConfigConvert::NAME)

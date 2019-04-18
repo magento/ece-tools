@@ -55,7 +55,7 @@ class PhpFormatter
      * @param int $depth
      * @return string
      */
-    private function varExportShort($var, int $depth = 1): string
+    public function varExportShort($var, int $depth = 1): string
     {
         if (!is_array($var)) {
             return var_export($var, true);

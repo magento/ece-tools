@@ -16,6 +16,16 @@ use Psr\Log\LoggerInterface;
 class Cache
 {
     /**
+     * Redis database to store default cache data
+     */
+    const REDIS_DATABASE_DEFAULT = 1;
+
+    /**
+     * Redis database to store page cache data
+     */
+    const REDIS_DATABASE_PAGE_CACHE = 2;
+
+    /**
      * @var Environment
      */
     private $environment;
@@ -93,7 +103,6 @@ class Cache
             'backend_options' => [
                 'server' => $redisConfig[0]['host'],
                 'port' => $redisConfig[0]['port'],
-                'database' => 1,
             ],
         ];
 
@@ -101,6 +110,9 @@ class Cache
         if ($slaveConnectionData) {
             if ($this->isConfigurationCompatibleWithSlaveConnection($envCacheConfiguration, $redisConfig)) {
                 $redisCache['backend_options']['load_from_slave'] = $slaveConnectionData;
+                $redisCache['backend_options']['read_timeout'] = 1;
+                $redisCache['backend_options']['retry_reads_on_master'] = 1;
+                $redisCache['frontend_options']['write_control'] = false;
                 $this->logger->info('Set Redis slave connection');
             } else {
                 $this->logger->notice(
@@ -115,8 +127,14 @@ class Cache
 
         return $this->configMerger->mergeConfigs([
             'frontend' => [
-                'default' => $redisCache,
-                'page_cache' => $redisCache,
+                'default' => array_replace_recursive(
+                    $redisCache,
+                    ['backend_options' => ['database' => self::REDIS_DATABASE_DEFAULT]]
+                ),
+                'page_cache' => array_replace_recursive(
+                    $redisCache,
+                    ['backend_options' => ['database' => self::REDIS_DATABASE_PAGE_CACHE]]
+                ),
             ],
         ], $envCacheConfiguration);
     }
