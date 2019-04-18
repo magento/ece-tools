@@ -130,7 +130,7 @@ class ThreadCountOptimizerTest extends TestCase
             ->willReturn(8);
 
         $this->assertEquals(
-            4,
+            ThreadCountOptimizer::THREAD_COUNT_OPTIMAL,
             $this->optimizer->optimize(StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE, 'quick')
         );
     }

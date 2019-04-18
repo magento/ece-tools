@@ -62,6 +62,8 @@ class Cpu
      */
     public function getCoreCount(): int
     {
-        return max(floor($this->getThreadsCount() / 2), 1);
+        $coreCount = $this->getThreadsCount() / 2;
+
+        return max((int)$coreCount, 1);
     }
 }
