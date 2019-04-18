@@ -126,7 +126,7 @@ class ThreadCountOptimizerTest extends TestCase
         $this->magentoVersionMock->expects($this->never())
             ->method('satisfies');
         $this->cpuMock->expects($this->once())
-            ->method('getCoreCount')
+            ->method('getThreadsCount')
             ->willReturn(8);
 
         $this->assertEquals(
@@ -135,12 +135,12 @@ class ThreadCountOptimizerTest extends TestCase
         );
     }
 
-    public function testOptimizeWithCoreCountLowerOptimalValue()
+    public function testOptimizeWithCpuThreadsCountLowerOptimalValue()
     {
         $this->magentoVersionMock->expects($this->never())
             ->method('satisfies');
         $this->cpuMock->expects($this->once())
-            ->method('getCoreCount')
+            ->method('getThreadsCount')
             ->willReturn(2);
 
         $this->assertEquals(

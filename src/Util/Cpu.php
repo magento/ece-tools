@@ -53,17 +53,4 @@ class Cpu
 
         return $threadCount;
     }
-
-    /**
-     * Returns count of CPU cores.
-     * Assuming that virtualization always enabled and physical core has two threads.
-     *
-     * @return int value always >= 1
-     */
-    public function getCoreCount(): int
-    {
-        $coreCount = $this->getThreadsCount() / 2;
-
-        return max((int)$coreCount, 1);
-    }
 }

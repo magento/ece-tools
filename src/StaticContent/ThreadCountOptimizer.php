@@ -81,7 +81,7 @@ class ThreadCountOptimizer
         }
 
         if ($threads === StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE) {
-            $threads = min($this->cpu->getCoreCount(), self::THREAD_COUNT_OPTIMAL);
+            $threads = min($this->cpu->getThreadsCount(), self::THREAD_COUNT_OPTIMAL);
         }
 
         return $threads;
