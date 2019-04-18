@@ -136,7 +136,7 @@ class ConfigTest extends TestCase
             'redis' => [
                 'host' => 'host',
                 'port' => 'port',
-                'database' => 0,
+                'database' => Config::REDIS_DATABASE_SESSION,
                 'disable_locking' => 1
             ],
         ];
@@ -233,7 +233,7 @@ class ConfigTest extends TestCase
             'redis' => [
                 'host' => 'host',
                 'port' => 'port',
-                'database' => 0,
+                'database' => Config::REDIS_DATABASE_SESSION,
                 'disable_locking' => 0
             ],
         ];

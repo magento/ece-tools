@@ -3,13 +3,15 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
+declare(strict_types=1);
+
+namespace Magento\MagentoCloud\Test\Unit\Config\SearchEngine;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
@@ -240,36 +242,7 @@ class ElasticSearchTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getRelationship')
             ->with('elasticsearch')
-            ->willReturn(
-                [
-                    [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
-                    ],
-                ]
-            );
-        $clientMock = $this->createPartialMock(Client::class, ['get']);
-        $responseMock = $this->createMock(Response::class);
-        $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
-
-        $esConfiguration = json_encode(
-            []
-        );
-        $clientMock->expects($this->once())
-            ->method('get')
-            ->with('127.0.0.1:1234/_template')
-            ->willReturn($responseMock);
-        $responseMock->expects($this->once())
-            ->method('getBody')
-            ->willReturn($streamMock);
-        $streamMock->expects($this->once())
-            ->method('getContents')
-            ->willReturn($esConfiguration);
-        $this->clientFactoryMock->expects($this->once())
-            ->method('create')
-            ->willReturn($clientMock);
-        $this->loggerMock->expects($this->never())
-            ->method('warning');
+            ->willReturn([]);
 
         $this->assertSame([], $this->elasticSearch->getTemplate());
     }

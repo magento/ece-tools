@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -10,8 +12,7 @@ use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSearchUsage;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Config\SearchEngine;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -36,9 +37,14 @@ class ElasticSearchUsageTest extends TestCase
     private $resultFactoryMock;
 
     /**
-     * @var SearchEngineConfig|MockObject
+     * @var SearchEngine|MockObject
      */
     private $searchEngineConfigMock;
+
+    /**
+     * @var SearchEngine\ElasticSearch|MockObject
+     */
+    private $elasticSearchMock;
 
     /**
      * @inheritdoc
@@ -46,33 +52,33 @@ class ElasticSearchUsageTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->searchEngineConfigMock = $this->createMock(SearchEngineConfig::class);
+        $this->searchEngineConfigMock = $this->createMock(SearchEngine::class);
         $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
         ]);
+        $this->elasticSearchMock = $this->createMock(SearchEngine\ElasticSearch::class);
 
         $this->validator = new ElasticSearchUsage(
-            $this->environmentMock,
             $this->searchEngineConfigMock,
-            $this->resultFactoryMock
+            $this->resultFactoryMock,
+            $this->elasticSearchMock
         );
     }
 
     /**
-     * @param array $relationships
-     * @param array $searchConfig
+     * @param bool $isInstalled
+     * @param bool $isESFamily
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
      */
-    public function testValidate(array $relationships, array $searchConfig, string $expectedResultClass)
+    public function testValidate(bool $isInstalled, bool $isESFamily, string $expectedResultClass)
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationships')
-            ->willReturn($relationships);
-        $this->searchEngineConfigMock->expects($this->any())
-            ->method('get')
-            ->willReturn($searchConfig);
+        $this->elasticSearchMock->expects($this->once())
+            ->method('isInstalled')
+            ->willReturn($isInstalled);
+        $this->searchEngineConfigMock->method('isESFamily')
+            ->willReturn($isESFamily);
 
         $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
     }
@@ -83,35 +89,20 @@ class ElasticSearchUsageTest extends TestCase
     public function validateDataProvider(): array
     {
         return [
-            'elasticsearch service is not installed' => [
-                [],
-                ['engine' => 'elasticsearch'],
+            'ES is not installed' => [
+                false,
+                false,
                 Success::class,
             ],
-            'elasticsearch5 service is not installed' => [
-                [],
-                ['engine' => 'elasticsearch5'],
+            'engine is not ES' => [
+                true,
+                true,
                 Success::class,
             ],
-            'elasticsearch service is installed and elasticsearch used as search engine' => [
-                ['elasticsearch' => ['some_config']],
-                ['engine' => 'elasticsearch'],
-                Success::class,
-            ],
-            'elasticsearch5 service is installed and elasticsearch used as search engine' => [
-                ['elasticsearch' => ['some_config']],
-                ['engine' => 'elasticsearch5'],
-                Success::class,
-            ],
-            'elasticsearch service is installed and elasticsearch don\'t used as search engine' => [
-                ['elasticsearch' => []],
-                ['engine' => 'mysql'],
+            'ES installed without usage' => [
+                true,
+                false,
                 Error::class,
-            ],
-            'elasticsuite service is installed and elasticsearch used as search engine' => [
-                ['elasticsearch' => ['some_config']],
-                ['engine' => ElasticSuite::ENGINE_NAME],
-                Success::class,
             ],
         ];
     }

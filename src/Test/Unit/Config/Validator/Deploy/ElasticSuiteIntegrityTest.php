@@ -7,13 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -45,7 +46,7 @@ class ElasticSuiteIntegrityTest extends TestCase
     /**
      * @var DeployInterface|MockObject
      */
-    private $configMock;
+    private $stageConfigMock;
 
     /**
      * @inheritDoc
@@ -55,13 +56,13 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
-        $this->configMock = $this->createMock(DeployInterface::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
 
         $this->validator = new ElasticSuiteIntegrity(
             $this->elasticSuiteMock,
             $this->elasticSearchMock,
             $this->resultFactoryMock,
-            $this->configMock
+            $this->stageConfigMock
         );
     }
 
@@ -101,12 +102,10 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->configMock->expects($this->once())
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
-            ->willReturn([
-                'engine' => 'mysql'
-            ]);
+            ->willReturn(['engine' => 'mysql']);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with('ElasticSuite is installed but mysql set as search engine.')
@@ -123,10 +122,10 @@ class ElasticSuiteIntegrityTest extends TestCase
         $this->elasticSearchMock->expects($this->once())
             ->method('isInstalled')
             ->willReturn(true);
-        $this->configMock->expects($this->once())
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
-            ->willReturn([]);
+            ->willReturn(['engine' => ElasticSuite::ENGINE_NAME]);
         $this->resultFactoryMock->expects($this->once())
             ->method('success')
             ->willReturn(new Success());
