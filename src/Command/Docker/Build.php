@@ -12,6 +12,8 @@ use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Docker\BuilderInterface;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
+use Magento\MagentoCloud\Docker\Service\Version;
+use Magento\MagentoCloud\Docker\Service\Version\Validator as VersionValidator;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Console\Command\Command;
@@ -26,6 +28,7 @@ use Symfony\Component\Yaml\Yaml;
 class Build extends Command
 {
     const NAME = 'docker:build';
+
     const OPTION_PHP = 'php';
     const OPTION_NGINX = 'nginx';
     const OPTION_DB = 'db';
@@ -54,21 +57,37 @@ class Build extends Command
     private $configFactory;
 
     /**
+     * @var Version
+     */
+    private $serviceVersion;
+
+    /**
+     * @var VersionValidator
+     */
+    private $versionValidator;
+
+    /**
      * @param BuilderFactory $builderFactory
      * @param File $file
      * @param Environment $environment
      * @param RepositoryFactory $configFactory
+     * @param Version $serviceVersion
+     * @param VersionValidator $versionValidator
      */
     public function __construct(
         BuilderFactory $builderFactory,
         File $file,
         Environment $environment,
-        RepositoryFactory $configFactory
+        RepositoryFactory $configFactory,
+        Version $serviceVersion,
+        VersionValidator $versionValidator
     ) {
         $this->builderFactory = $builderFactory;
         $this->file = $file;
         $this->environment = $environment;
         $this->configFactory = $configFactory;
+        $this->serviceVersion = $serviceVersion;
+        $this->versionValidator = $versionValidator;
 
         parent::__construct();
     }
@@ -118,8 +137,9 @@ class Build extends Command
     /**
      * {@inheritdoc}
      *
-     * @throws FileSystemException
      * @throws ConfigurationMismatchException
+     * @throws FileSystemException
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -140,6 +160,11 @@ class Build extends Command
                 $config->set($key, $value);
             }
         });
+
+        $versionList = $this->serviceVersion->getVersions($config);
+
+        $unsupportedErrorMsg = $this->versionValidator->validate($versionList);
+
 
         $this->file->filePutContents(
             $builder->getConfigPath(),
