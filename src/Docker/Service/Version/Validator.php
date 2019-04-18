@@ -86,15 +86,15 @@ class Validator
     }
 
     /**
-     * @param array $versionList
+     * @param array $serviceVersions
      * @return array
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
-    public function validate($versionList)
+    public function validate($serviceVersions)
     {
         $errors = [];
-        foreach ($versionList as $name => $version) {
+        foreach ($serviceVersions as $name => $version) {
             if ($errorMessage = $this->validateService($name, $version)) {
                 $errors[] = $errorMessage;
             }
@@ -109,7 +109,7 @@ class Validator
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
-    public function validateService($serviceName, $version)
+    private function validateService($serviceName, $version)
     {
         if (!isset($this->getSupportedVersions()[$serviceName])) {
             throw new ConfigurationMismatchException(sprintf(
@@ -131,13 +131,13 @@ class Validator
     }
 
     /**
-     * @return array|mixed
+     * @return array
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
     protected function getSupportedVersions()
     {
-        if (null !== $this->supportedVersionList) {
+        if (null === $this->supportedVersionList) {
             $magentoVersions = array_keys(self::MAGENTO_SUPPORTED_SERVICE_VERSIONS);
             foreach ($magentoVersions as $constraint) {
                 if (Semver::satisfies($this->magentoVersion->getVersion(), $constraint)) {

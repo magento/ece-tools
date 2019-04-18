@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Docker\Config\Reader;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\Docker\BuilderInterface;
 
 /**
  * Retrieve Service versions from Cloud configuration.
@@ -19,13 +18,13 @@ use Magento\MagentoCloud\Docker\BuilderInterface;
 class Version
 {
     private $configurableVersions = [
-        BuilderInterface::PHP_VERSION,// => '~7.1.3 || ~7.2.0',
-        BuilderInterface::NGINX_VERSION,// => '^1.0',
-        BuilderInterface::DB_VERSION,// => '>=10.0 <10.3',
-        BuilderInterface::REDIS_VERSION,// => '~3.2 || ~4.0 || ~5.0',
-        //BuilderInterface::SERVICE_VARNISH,// => '~4.0 || ~5.0',
-        BuilderInterface::ES_VERSION,// => '^2.0 || ^5.0 || ^6.0',
-        BuilderInterface::RABBIT_MQ_VERSION,// => '~3.7',
+        ServiceFactory::SERVICE_FPM,// => '~7.1.3 || ~7.2.0',
+        ServiceFactory::SERVICE_NGINX,// => '^1.0',
+        ServiceFactory::SERVICE_DB,// => '>=10.0 <10.3',
+        ServiceFactory::SERVICE_REDIS,// => '~3.2 || ~4.0 || ~5.0',
+        //ServiceFactory::SERVICE_VARNISH,// => '~4.0 || ~5.0',
+        ServiceFactory::SERVICE_ELASTICSEARCH,// => '^2.0 || ^5.0 || ^6.0',
+        ServiceFactory::SERVICE_RABBIT_MQ,// => '~3.7',
     ];
 
     /**
@@ -68,7 +67,10 @@ class Version
     public function getServiceVersionFromConfig(string $serviceName)
     {
         try {
-            return $this->reader->read()['services'][$serviceName]['version'] ?? null;
+            $version = $serviceName == ServiceFactory::SERVICE_FPM
+                ? $this->getPhpVersion()
+                : $this->reader->read()['services'][$serviceName]['version'] ?? null;
+            return $version;
         } catch (FileSystemException $exception) {
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
         }

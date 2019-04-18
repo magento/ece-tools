@@ -60,8 +60,8 @@ class DevBuilder implements BuilderInterface
      */
     public function build(Repository $config): array
     {
-        $phpVersion = $config->get(self::PHP_VERSION, '') ?: $this->config->getPhpVersion();
-        $dbVersion = $config->get(self::DB_VERSION, '') ?: $this->config->getServiceVersion(Config::KEY_DB);
+        $phpVersion = $config->get(ServiceFactory::SERVICE_FPM, '') ?: $this->config->getPhpVersion();
+        $dbVersion = $config->get(ServiceFactory::SERVICE_DB, '') ?: $this->config->getServiceVersion(Config::KEY_DB);
 
         $services = [
             'db' => $this->serviceFactory->create(
@@ -83,7 +83,7 @@ class DevBuilder implements BuilderInterface
             )
         ];
 
-        $redisVersion = $config->get(self::REDIS_VERSION) ?: $this->config->getServiceVersion(Config::KEY_REDIS);
+        $redisVersion = $config->get(ServiceFactory::SERVICE_REDIS) ?: $this->config->getServiceVersion(Config::KEY_REDIS);
 
         if ($redisVersion) {
             $services['redis'] = $this->serviceFactory->create(
@@ -92,7 +92,7 @@ class DevBuilder implements BuilderInterface
             );
         }
 
-        $esVersion = $config->get(self::ES_VERSION) ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
+        $esVersion = $config->get(ServiceFactory::SERVICE_ELASTICSEARCH) ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
 
         if ($esVersion) {
             $services['elasticsearch'] = $this->serviceFactory->create(
@@ -101,7 +101,7 @@ class DevBuilder implements BuilderInterface
             );
         }
 
-        $rabbitMQVersion = $config->get(self::RABBIT_MQ_VERSION)
+        $rabbitMQVersion = $config->get(ServiceFactory::SERVICE_RABBIT_MQ)
             ?: $this->config->getServiceVersion(Config::KEY_RABBIT_MQ);
 
         if ($rabbitMQVersion) {
@@ -142,7 +142,7 @@ class DevBuilder implements BuilderInterface
         $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends, 'deploy.magento2.docker');
         $services['web'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_NGINX,
-            $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
+            $config->get(ServiceFactory::SERVICE_NGINX, self::DEFAULT_NGINX_VERSION),
             [
                 'depends_on' => ['fpm', 'db'],
                 'volumes_from' => ['appdata'],

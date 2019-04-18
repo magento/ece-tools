@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Command\Docker;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
-use Magento\MagentoCloud\Docker\BuilderInterface;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Version;
 use Magento\MagentoCloud\Docker\Service\Version\Validator as VersionValidator;
@@ -20,7 +19,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Yaml\Yaml;
+use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -147,12 +148,12 @@ class Build extends Command
         $config = $this->configFactory->create();
 
         $map = [
-            self::OPTION_PHP => BuilderInterface::PHP_VERSION,
-            self::OPTION_DB => BuilderInterface::DB_VERSION,
-            self::OPTION_NGINX => BuilderInterface::NGINX_VERSION,
-            self::OPTION_REDIS => BuilderInterface::REDIS_VERSION,
-            self::OPTION_ES => BuilderInterface::ES_VERSION,
-            self::OPTION_RABBIT_MQ => BuilderInterface::RABBIT_MQ_VERSION,
+            self::OPTION_PHP => ServiceFactory::SERVICE_FPM,
+            self::OPTION_DB => ServiceFactory::SERVICE_DB,
+            self::OPTION_NGINX => ServiceFactory::SERVICE_NGINX,
+            self::OPTION_REDIS => ServiceFactory::SERVICE_REDIS,
+            self::OPTION_ES => ServiceFactory::SERVICE_ELASTICSEARCH,
+            self::OPTION_RABBIT_MQ => ServiceFactory::SERVICE_RABBIT_MQ,
         ];
 
         array_walk($map, function ($key, $option) use ($config, $input) {
@@ -165,6 +166,15 @@ class Build extends Command
 
         $unsupportedErrorMsg = $this->versionValidator->validate($versionList);
 
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion('There are some service versions which are not supported'
+            . ' by curremt Magento version:' . "\n" . implode("\n", $unsupportedErrorMsg) . "\n"
+            . 'Do you want to continue?[y/N]',
+            false);
+
+        if ($unsupportedErrorMsg && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
+            return null;
+        }
 
         $this->file->filePutContents(
             $builder->getConfigPath(),
