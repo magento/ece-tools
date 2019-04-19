@@ -40,8 +40,6 @@ class ThreadCountOptimizerTest extends TestCase
 
     protected function setUp()
     {
-        $this->markTestSkipped();
-
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->cpuMock = $this->createMock(Cpu::class);
