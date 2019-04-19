@@ -153,17 +153,23 @@ class DevBuilder implements BuilderInterface
         );
         $services['cron'] = $this->getCronCliService($phpVersion, true, $cliDepends, 'cron.magento2.docker');
 
+        $volumeConfig = [
+            'driver_opts' => [
+                'type' => 'tmpfs',
+                'device' => 'tmpfs'
+            ]
+        ];
+
         return [
             'version' => '3',
             'services' => $services,
             'volumes' => [
-                'magento-vendor' => [],
-                'magento-generated' => [],
-                'magento-setup' => [],
-                'magento-var' => [],
-                'magento-etc' => [],
-                'magento-static' => [],
-                'magento-media' => [],
+                'magento-vendor' => $volumeConfig,
+                'magento-generated' => $volumeConfig,
+                'magento-var' => $volumeConfig,
+                'magento-etc' => $volumeConfig,
+                'magento-static' => $volumeConfig,
+                'magento-media' => $volumeConfig,
             ]
         ];
     }
@@ -188,7 +194,6 @@ class DevBuilder implements BuilderInterface
             './:' . self::DIR_MAGENTO . $flag,
             'magento-vendor:' . self::DIR_MAGENTO . '/vendor' . $flag,
             'magento-generated:' . self::DIR_MAGENTO . '/generated' . $flag,
-            'magento-setup:' . self::DIR_MAGENTO . '/setup' . $flag,
             'magento-var:' . self::DIR_MAGENTO . '/var:rw',
             'magento-etc:' . self::DIR_MAGENTO . '/app/etc:rw',
             'magento-static:' . self::DIR_MAGENTO . '/pub/static:rw',
