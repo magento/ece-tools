@@ -131,6 +131,7 @@ class CommandFactory
     private function build(OptionInterface $option): string
     {
         $command = 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction';
+        $command .= ' -vvv'; #For testing on travis
 
         if ($option->isForce()) {
             $command .= ' -f';
