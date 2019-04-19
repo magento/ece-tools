@@ -84,6 +84,8 @@ class ThreadCountOptimizer
             $threads = min($this->cpu->getThreadsCount(), self::THREAD_COUNT_OPTIMAL);
         }
 
-        return $threads;
+        # Just for testing integration test
+        return 1;
+        #return $threads;
     }
 }
