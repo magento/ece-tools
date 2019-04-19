@@ -17,6 +17,10 @@ use Magento\MagentoCloud\Package\Manager;
 class Config
 {
     /**
+     * Redis database to store session data
+     */
+    const REDIS_DATABASE_SESSION = 0;
+    /**
      * @var Environment
      */
     private $environment;
@@ -93,7 +97,7 @@ class Config
             'redis' => [
                 'host' => $redisConfig[0]['host'],
                 'port' => $redisConfig[0]['port'],
-                'database' => 0,
+                'database' => self::REDIS_DATABASE_SESSION,
             ],
         ];
 

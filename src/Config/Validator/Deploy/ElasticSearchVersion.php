@@ -3,16 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Composer\Semver\Semver;
+use Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -41,9 +43,9 @@ class ElasticSearchVersion implements ValidatorInterface
     private $logger;
 
     /**
-     * @var SearchEngineConfig
+     * @var SearchEngine
      */
-    private $searchEngineConfig;
+    private $searchEngine;
 
     /**
      * @var MagentoVersion
@@ -53,7 +55,7 @@ class ElasticSearchVersion implements ValidatorInterface
     /**
      * @var array
      */
-    private $versionsMap = [
+    private static $versionsMap = [
         [
             'packageVersion' => '~6.0',
             'esVersion' => '~6.0',
@@ -76,7 +78,7 @@ class ElasticSearchVersion implements ValidatorInterface
      * @param Manager $manager
      * @param ElasticSearch $elasticSearch
      * @param LoggerInterface $logger
-     * @param SearchEngineConfig $searchEngineConfig
+     * @param SearchEngine $searchEngine
      * @param MagentoVersion $magentoVersion
      */
     public function __construct(
@@ -84,14 +86,14 @@ class ElasticSearchVersion implements ValidatorInterface
         Manager $manager,
         ElasticSearch $elasticSearch,
         LoggerInterface $logger,
-        SearchEngineConfig $searchEngineConfig,
+        SearchEngine $searchEngine,
         MagentoVersion $magentoVersion
     ) {
         $this->resultFactory = $resultFactory;
         $this->manager = $manager;
         $this->elasticSearch = $elasticSearch;
         $this->logger = $logger;
-        $this->searchEngineConfig = $searchEngineConfig;
+        $this->searchEngine = $searchEngine;
         $this->magentoVersion = $magentoVersion;
     }
 
@@ -105,19 +107,19 @@ class ElasticSearchVersion implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         $esServiceVersion = $this->elasticSearch->getVersion();
+
         if ($esServiceVersion === '0') {
             return $this->resultFactory->success();
         }
 
-        $searchEngine = $this->searchEngineConfig->get()['engine'];
-        if (strpos($searchEngine, 'elasticsearch') !== 0) {
+        if (!$this->searchEngine->isESFamily()) {
             return $this->resultFactory->success();
         }
 
         try {
             $esPackageVersion = $this->manager->get('elasticsearch/elasticsearch')->getVersion();
 
-            foreach ($this->versionsMap as $versionInfo) {
+            foreach (self::$versionsMap as $versionInfo) {
                 if (Semver::satisfies($esPackageVersion, $versionInfo['packageVersion'])
                     && !Semver::satisfies($esServiceVersion, $versionInfo['esVersion'])
                 ) {

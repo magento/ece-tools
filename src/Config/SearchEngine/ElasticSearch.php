@@ -3,7 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
+declare(strict_types=1);
+
+namespace Magento\MagentoCloud\Config\SearchEngine;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
@@ -67,7 +69,7 @@ class ElasticSearch
      *
      * @return array
      */
-    public function getConfig(): array
+    public function getRelationship(): array
     {
         return $this->environment->getRelationship(self::RELATIONSHIP_KEY)[0] ?? [];
     }
@@ -115,7 +117,7 @@ class ElasticSearch
      */
     public function getTemplate(): array
     {
-        $config = $this->getConfig();
+        $config = $this->getRelationship();
 
         if (!$config) {
             return [];

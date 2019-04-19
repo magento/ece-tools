@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Docker\BuilderInterface;
+use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -22,6 +23,8 @@ use Symfony\Component\Yaml\Yaml;
 
 /**
  * Builds Docker configuration for Magento project.
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Build extends Command
 {
@@ -54,21 +57,29 @@ class Build extends Command
     private $configFactory;
 
     /**
+     * @var DistGenerator
+     */
+    private $distGenerator;
+
+    /**
      * @param BuilderFactory $builderFactory
      * @param File $file
      * @param Environment $environment
      * @param RepositoryFactory $configFactory
+     * @param DistGenerator $distGenerator
      */
     public function __construct(
         BuilderFactory $builderFactory,
         File $file,
         Environment $environment,
-        RepositoryFactory $configFactory
+        RepositoryFactory $configFactory,
+        DistGenerator $distGenerator
     ) {
         $this->builderFactory = $builderFactory;
         $this->file = $file;
         $this->environment = $environment;
         $this->configFactory = $configFactory;
+        $this->distGenerator = $distGenerator;
 
         parent::__construct();
     }
@@ -145,6 +156,8 @@ class Build extends Command
             $builder->getConfigPath(),
             Yaml::dump($builder->build($config), 4, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)
         );
+
+        $this->distGenerator->generate();
 
         $this->getApplication()
             ->find(ConfigConvert::NAME)
