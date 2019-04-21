@@ -24,7 +24,7 @@ class Cron21Test extends CronTest
      */
     public static function setUpBeforeClass()
     {
-        Bootstrap::getInstance()->run('2.1.4');
+        Bootstrap::getInstance()->run('2.1.17');
     }
 
     /**
