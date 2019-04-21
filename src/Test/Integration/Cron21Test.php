@@ -33,6 +33,20 @@ class Cron21Test extends CronTest
     public function cronDataProvider(): array
     {
         return [
+            # Test
+            ['version' => '2.1.17', 'locale' => 'fr_FR'],
+            ['version' => '2.1.16', 'locale' => 'fr_FR'],
+            ['version' => '2.1.15', 'locale' => 'fr_FR'],
+            ['version' => '2.1.14', 'locale' => 'fr_FR'],
+            ['version' => '2.1.13', 'locale' => 'fr_FR'],
+            ['version' => '2.1.12', 'locale' => 'fr_FR'],
+            ['version' => '2.1.11', 'locale' => 'fr_FR'],
+            ['version' => '2.1.10', 'locale' => 'fr_FR'],
+            ['version' => '2.1.9', 'locale' => 'fr_FR'],
+
+
+
+
             ['version' => '2.1.4', 'locale' => 'fr_FR'],
             ['version' => '2.1.6', 'locale' => 'ar_KW'],
             ['version' => '2.1.11', 'locale' => 'fr_FR'],
