@@ -45,13 +45,15 @@ class Cron21Test extends CronTest
             ['version' => '2.1.9', 'locale' => 'fr_FR'],
 
 
-
+/*
 
             ['version' => '2.1.4', 'locale' => 'fr_FR'],
             ['version' => '2.1.6', 'locale' => 'ar_KW'],
             ['version' => '2.1.11', 'locale' => 'fr_FR'],
             ['version' => '2.1.14', 'locale' => 'ar_KW'],
             ['version' => '2.1.*', 'locale' => 'fr_FR'],
+
+*/
         ];
     }
 }
