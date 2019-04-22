@@ -27,7 +27,6 @@ interface SystemConfigInterface
     const VAR_ENV_ROUTES = 'ENV_ROUTES';
     const VAR_ENV_VARIABLES = 'ENV_VARIABLES';
     const VAR_ENV_APPLICATION = 'ENV_APPLICATION';
-    const VAR_ENV_MODE = 'ENV_MODE';
     const VAR_ENV_ENVIRONMENT = 'ENV_ENVIRONMENT';
 
     /**

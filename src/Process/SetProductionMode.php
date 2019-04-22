@@ -3,11 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Deploy\PreDeploy;
+namespace Magento\MagentoCloud\Process;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Process\ProcessException;
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Psr\Log\LoggerInterface;
 

@@ -10,7 +10,6 @@ use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Config\SystemConfigInterface;
 
 /**
  * Returns all merged configuration for deploy phase
@@ -74,7 +73,6 @@ class MergedConfig
 
                 $this->mergedConfig = array_replace(
                     $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY),
-                    $this->getDeployConfiguration(),
                     $envConfig[DeployInterface::STAGE_GLOBAL] ?? [],
                     $envConfig[DeployInterface::STAGE_DEPLOY] ?? [],
                     $this->environmentConfig->getAll()
@@ -89,27 +87,5 @@ class MergedConfig
                 $exception
             );
         }
-    }
-
-    /**
-     * Resolves default configuration value for deploy stage.
-     *
-     * SCD_THREADS = 3 for production environment.
-     *
-     * @return array
-     * @deprecated Threads count shouldn't depend on ENV_MODE variable as this variable doesn't set anymore.
-     *             Threads environment variables or .magento.env.yaml must be used instead.
-     */
-    private function getDeployConfiguration(): array
-    {
-        $config = [];
-
-        $envVar = $this->environment->getEnvVarName(SystemConfigInterface::VAR_ENV_MODE);
-
-        if ($this->environment->getEnv($envVar) === Environment::CLOUD_MODE_ENTERPRISE) {
-            $config[DeployInterface::VAR_SCD_THREADS] = 3;
-        }
-
-        return $config;
     }
 }
