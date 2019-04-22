@@ -101,6 +101,15 @@ class DevBuilder implements BuilderInterface
             );
         }
 
+        $nodeVersion = $config->get(self::NODE_VERSION);
+
+        if ($nodeVersion) {
+            $services['node'] = $this->serviceFactory->create(
+                ServiceFactory::SERVICE_NODE,
+                $nodeVersion
+            );
+        }
+
         $rabbitMQVersion = $config->get(self::RABBIT_MQ_VERSION)
             ?: $this->config->getServiceVersion(Config::KEY_RABBIT_MQ);
 

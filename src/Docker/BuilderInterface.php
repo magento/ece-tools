@@ -18,6 +18,7 @@ interface BuilderInterface
     const REDIS_VERSION = 'redis.version';
     const ES_VERSION = 'es.version';
     const RABBIT_MQ_VERSION = 'rmq.version';
+    const NODE_VERSION = 'node.version';
 
     /**
      * @param Repository $config

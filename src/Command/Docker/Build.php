@@ -35,6 +35,7 @@ class Build extends Command
     const OPTION_REDIS = 'redis';
     const OPTION_ES = 'es';
     const OPTION_RABBIT_MQ = 'rmq';
+    const OPTION_NODE = 'node';
 
     /**
      * @var BuilderFactory
@@ -121,6 +122,11 @@ class Build extends Command
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'RabbitMQ version'
+            )->addOption(
+                self::OPTION_NODE,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Node.js version'
             );
 
         parent::configure();
@@ -144,6 +150,7 @@ class Build extends Command
             self::OPTION_REDIS => BuilderInterface::REDIS_VERSION,
             self::OPTION_ES => BuilderInterface::ES_VERSION,
             self::OPTION_RABBIT_MQ => BuilderInterface::RABBIT_MQ_VERSION,
+            self::OPTION_NODE => BuilderInterface::NODE_VERSION,
         ];
 
         array_walk($map, function ($key, $option) use ($config, $input) {
