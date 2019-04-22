@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
 use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
-use Magento\MagentoCloud\Docker\DevBuilder;
+use Magento\MagentoCloud\Docker\ProductionBuilder;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -41,7 +41,7 @@ class BuildTest extends TestCase
     private $builderFactoryMock;
 
     /**
-     * @var DevBuilder|MockObject
+     * @var ProductionBuilder|MockObject
      */
     private $builderMock;
 
@@ -76,7 +76,7 @@ class BuildTest extends TestCase
     protected function setUp()
     {
         $this->builderFactoryMock = $this->createMock(BuilderFactory::class);
-        $this->builderMock = $this->createMock(DevBuilder::class);
+        $this->builderMock = $this->createMock(ProductionBuilder::class);
         $this->fileMock = $this->createMock(File::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
@@ -101,10 +101,21 @@ class BuildTest extends TestCase
      */
     public function testExecute()
     {
-        /** @var Console\Input\InputInterface $inputMock */
+        /** @var Console\Input\InputInterface|MockObject $inputMock */
         $inputMock = $this->getMockForAbstractClass(Console\Input\InputInterface::class);
-        /** @var Console\Output\OutputInterface $outputMock */
+        /** @var Console\Output\OutputInterface|MockObject $outputMock */
         $outputMock = $this->getMockForAbstractClass(Console\Output\OutputInterface::class);
+
+        $inputMock->method('getOption')
+            ->willReturnMap([
+                [Build::OPTION_PHP, '7.1'],
+                [Build::OPTION_DB, '10'],
+                [Build::OPTION_NGINX, '1.9'],
+                [Build::OPTION_REDIS, '3.2'],
+                [Build::OPTION_ES, '2.4'],
+                [Build::OPTION_RABBIT_MQ, '3.5'],
+                [Build::OPTION_TYPE, BuilderFactory::BUILDER_PROD]
+            ]);
 
         $this->builderFactoryMock->expects($this->once())
             ->method('create')
@@ -162,7 +173,8 @@ class BuildTest extends TestCase
                 [Build::OPTION_NGINX, '1.9'],
                 [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
-                [Build::OPTION_RABBIT_MQ, '3.5']
+                [Build::OPTION_RABBIT_MQ, '3.5'],
+                [Build::OPTION_TYPE, BuilderFactory::BUILDER_PROD]
             ]);
         $this->builderMock->expects($this->once())
             ->method('getConfigPath')

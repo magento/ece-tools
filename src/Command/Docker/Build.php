@@ -36,6 +36,7 @@ class Build extends Command
     const OPTION_REDIS = 'redis';
     const OPTION_ES = 'es';
     const OPTION_RABBIT_MQ = 'rmq';
+    const OPTION_TYPE = 'type';
 
     /**
      * @var BuilderFactory
@@ -122,6 +123,12 @@ class Build extends Command
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'RabbitMQ version'
+            )->addOption(
+                self::OPTION_TYPE,
+                't',
+                InputOption::VALUE_OPTIONAL,
+                'Type',
+                BuilderFactory::BUILDER_PROD
             );
 
         parent::configure();
@@ -135,7 +142,9 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $builder = $this->builderFactory->create(BuilderFactory::BUILDER_DEV);
+        $type = $input->getOption(self::OPTION_TYPE);
+
+        $builder = $this->builderFactory->create($type);
         $config = $this->configFactory->create();
 
         $map = [
@@ -147,7 +156,7 @@ class Build extends Command
             self::OPTION_RABBIT_MQ => BuilderInterface::RABBIT_MQ_VERSION,
         ];
 
-        array_walk($map, function ($key, $option) use ($config, $input) {
+        array_walk($map, static function ($key, $option) use ($config, $input) {
             if ($value = $input->getOption($option)) {
                 $config->set($key, $value);
             }

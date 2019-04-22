@@ -1,0 +1,5 @@
+version: 2
+syncs:
+  magento:
+    src: './'
+    sync_excludes: ['.git', 'setup', 'vendor', 'generated']

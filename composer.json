@@ -94,6 +94,10 @@
       [
         "dist/docker/README.md",
         "docker/README.md"
+      ],
+      [
+        "dist/docker-sync.yml",
+        "docker-sync.yml"
       ]
     ]
   }

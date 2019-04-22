@@ -12,6 +12,7 @@ use Magento\MagentoCloud\App\ContainerInterface;
  */
 class BuilderFactory
 {
+    const BUILDER_PROD = 'prod';
     const BUILDER_DEV = 'dev';
     const BUILDER_TEST_V1 = 'test-v1';
     const BUILDER_TEST_V2 = 'test-v2';
@@ -20,7 +21,8 @@ class BuilderFactory
      * @var array
      */
     private static $map = [
-        self::BUILDER_DEV => DevBuilder::class,
+        self::BUILDER_DEV => DevelopBuilder::class,
+        self::BUILDER_PROD => ProductionBuilder::class,
         /** Internal CI configurations. */
         self::BUILDER_TEST_V1 => IntegrationV1Builder::class,
         self::BUILDER_TEST_V2 => IntegrationV2Builder::class

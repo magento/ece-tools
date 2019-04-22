@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
  *
  * @codeCoverageIgnore
  */
-class DevBuilder implements BuilderInterface
+class ProductionBuilder implements BuilderInterface
 {
     const DEFAULT_NGINX_VERSION = 'latest';
     const DEFAULT_VARNISH_VERSION = 'latest';
@@ -186,7 +186,7 @@ class DevBuilder implements BuilderInterface
      * @param bool $isReadOnly
      * @return array
      */
-    private function getMagentoVolumes(bool $isReadOnly): array
+    public function getMagentoVolumes(bool $isReadOnly): array
     {
         $flag = $isReadOnly ? ':ro' : ':rw';
 
