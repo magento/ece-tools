@@ -81,7 +81,8 @@ class ThreadCountOptimizer
         }
 
         if ($threads === StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE) {
-            $threads = min($this->cpu->getThreadsCount(), self::THREAD_COUNT_OPTIMAL);
+            $threads = $this->magentoVersion->satisfies('>2.1.10') ?
+                min($this->cpu->getThreadsCount(), self::THREAD_COUNT_OPTIMAL) : 1;
         }
 
         return $threads;
