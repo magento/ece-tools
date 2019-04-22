@@ -11,7 +11,7 @@ use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Docker\BuilderInterface;
 use Magento\MagentoCloud\Docker\Config;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
-use Magento\MagentoCloud\Docker\ProdBuilder;
+use Magento\MagentoCloud\Docker\ProductionBuilder;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -23,7 +23,7 @@ use PHPUnit\Framework\TestCase;
 class DevBuilderTest extends TestCase
 {
     /**
-     * @var ProdBuilder
+     * @var ProductionBuilder
      */
     private $builder;
 
@@ -51,7 +51,7 @@ class DevBuilderTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
         $this->configMock = $this->createMock(Config::class);
 
-        $this->builder = new ProdBuilder(
+        $this->builder = new ProductionBuilder(
             $this->serviceFactoryMock,
             $this->fileListMock,
             $this->configMock
