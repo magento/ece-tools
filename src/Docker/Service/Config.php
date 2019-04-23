@@ -74,13 +74,11 @@ class Config
     public function getAllServiceVersions(Repository $customVersions): array
     {
         $configuredVersions = [];
-        foreach ($this->configurableVersions as $serviceName)
-        {
+        foreach ($this->configurableVersions as $serviceName) {
             $version = $customVersions->get($serviceName) ?: $this->getServiceVersion($serviceName);
             if ($version) {
                 $configuredVersions[$serviceName] = $version;
             }
-
         }
         return $configuredVersions;
     }

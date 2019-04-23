@@ -38,11 +38,6 @@ class ConfigTest extends TestCase
         $this->version = new Config($this->readerMock);
     }
 
-    public function testGetVersions()
-    {
-
-    }
-
     /**
      * @param array $config
      * @param string $serviceName

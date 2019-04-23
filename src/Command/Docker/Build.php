@@ -177,10 +177,12 @@ class Build extends Command
         $unsupportedErrorMsg = $this->versionValidator->validateVersions($versionList);
 
         $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion('There are some service versions which are not supported'
-            . ' by current Magento version:' . "\n" . implode("\n", $unsupportedErrorMsg) . "\n"
-            . 'Do you want to continue?[y/N]',
-            false);
+        $question = new ConfirmationQuestion(
+            'There are some service versions which are not supported'
+                . ' by current Magento version:' . "\n" . implode("\n", $unsupportedErrorMsg) . "\n"
+                . 'Do you want to continue?[y/N]',
+            false
+        );
 
         if ($unsupportedErrorMsg && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
             return null;

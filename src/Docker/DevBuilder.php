@@ -93,7 +93,8 @@ class DevBuilder implements BuilderInterface
             );
         }
 
-        $esVersion = $config->get(Config::KEY_ELASTICSEARCH) ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
+        $esVersion = $config->get(Config::KEY_ELASTICSEARCH)
+            ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
 
         if ($esVersion) {
             $services['elasticsearch'] = $this->serviceFactory->create(

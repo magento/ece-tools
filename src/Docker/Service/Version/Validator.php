@@ -125,14 +125,16 @@ class Validator
     private function validateService($serviceName, $version)
     {
         if (!isset($this->getSupportedVersions()[$serviceName])) {
-            return sprintf('Service "%s" is not supported for Magento "%s"',
+            return sprintf(
+                'Service "%s" is not supported for Magento "%s"',
                 $serviceName,
                 $this->magentoVersion->getVersion()
             );
         }
         $constraint = $this->getSupportedVersions()[$serviceName];
         if ($version != 'latest' && !Semver::satisfies($version, $this->getSupportedVersions()[$serviceName])) {
-            return sprintf('Magento %s does not support version "%s" for service "%s".'
+            return sprintf(
+                'Magento %s does not support version "%s" for service "%s".'
                     . 'Service version should satisfy "%s" constraint.',
                 $this->magentoVersion->getVersion(),
                 $version,
@@ -170,6 +172,5 @@ class Validator
             }
         }
         return $this->supportedVersionList;
-
     }
 }

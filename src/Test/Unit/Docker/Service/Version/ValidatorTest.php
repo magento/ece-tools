@@ -64,8 +64,9 @@ class ValidatorTest extends TestCase
     {
         $magentoVersion = '2.2.6';
         $version = '1.7';
-        $message = sprintf('Magento %s does not support version "%s" for service "%s".'
-            . 'Service version should satisfy "^2.0 || ^5.0" constraint.',
+        $message = sprintf(
+            'Magento %s does not support version "%s" for service "%s".'
+                . 'Service version should satisfy "^2.0 || ^5.0" constraint.',
             $magentoVersion,
             $version,
             Config::KEY_ELASTICSEARCH
@@ -77,7 +78,8 @@ class ValidatorTest extends TestCase
 
         $this->assertEquals(
             [$message],
-            $this->validator->validateVersions([Config::KEY_ELASTICSEARCH => $version]));
+            $this->validator->validateVersions([Config::KEY_ELASTICSEARCH => $version])
+        );
     }
 
     /**
@@ -88,16 +90,19 @@ class ValidatorTest extends TestCase
     {
         $magentoVersion = '2.2.2';
         $serviceName = 'nonexistent';
-        $message = sprintf('Service "%s" is not supported for Magento "%s"',
+        $message = sprintf(
+            'Service "%s" is not supported for Magento "%s"',
             $serviceName,
-            $magentoVersion);
+            $magentoVersion
+        );
         $this->magentoVersionMock->expects($this->any())
             ->method('getVersion')
             ->willReturn($magentoVersion);
 
         $this->assertEquals(
             [$message],
-            $this->validator->validateVersions([$serviceName => '1.1']));
+            $this->validator->validateVersions([$serviceName => '1.1'])
+        );
     }
 
     /**
