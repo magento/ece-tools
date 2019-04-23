@@ -20,5 +20,5 @@ interface ShellInterface
      * @return array The output of command.
      * @throws ShellException If command was executed with error
      */
-    public function execute(string $command, $args = []): array;
+    public function execute(string $command, $args = []);
 }
