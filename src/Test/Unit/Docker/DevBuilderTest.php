@@ -78,7 +78,15 @@ class DevBuilderTest extends TestCase
             BuilderInterface::DB_VERSION => '10.0'
         ]);
 
-        $this->builder->build($config);
+        $build = $this->builder->build($config);
+
+        $this->assertArrayNotHasKey('redis', $build['services']);
+        $this->assertArrayNotHasKey('rabbitmq', $build['services']);
+        $this->assertArrayNotHasKey('elasticsearch', $build['services']);
+        $this->assertArrayNotHasKey('node', $build['services']);
+        $this->assertArrayHasKey('build', $build['services']);
+        $this->assertArrayHasKey('deploy', $build['services']);
+        $this->assertArrayHasKey('db', $build['services']);
     }
 
     /**
@@ -86,7 +94,7 @@ class DevBuilderTest extends TestCase
      */
     public function testBuildFromConfig()
     {
-        $config = new Repository();
+        $config = new Repository([BuilderInterface::NODE_VERSION => '10']);
 
         $this->configMock->method('getServiceVersion')
             ->willReturnMap([
@@ -100,6 +108,7 @@ class DevBuilderTest extends TestCase
         $this->assertArrayNotHasKey('redis', $build['services']);
         $this->assertArrayNotHasKey('rabbitmq', $build['services']);
         $this->assertArrayNotHasKey('elasticsearch', $build['services']);
+        $this->assertArrayHasKey('node', $build['services']);
         $this->assertArrayHasKey('build', $build['services']);
         $this->assertArrayHasKey('deploy', $build['services']);
         $this->assertArrayHasKey('db', $build['services']);

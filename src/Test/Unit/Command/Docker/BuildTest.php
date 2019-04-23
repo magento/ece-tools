@@ -162,12 +162,13 @@ class BuildTest extends TestCase
                 [Build::OPTION_NGINX, '1.9'],
                 [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
-                [Build::OPTION_RABBIT_MQ, '3.5']
+                [Build::OPTION_RABBIT_MQ, '3.5'],
+                [Build::OPTION_NODE, '6.0']
             ]);
         $this->builderMock->expects($this->once())
             ->method('getConfigPath')
             ->willReturn('magento_root/docker-compose.yml');
-        $this->configMock->expects($this->exactly(6))
+        $this->configMock->expects($this->exactly(7))
             ->method('set');
         $this->distGenerator->expects($this->once())
             ->method('generate');
