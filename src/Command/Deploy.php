@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -48,32 +47,24 @@ class Deploy extends Command
     private $maintenanceModeSwitcher;
 
     /**
-     * @var Sanitizer
-     */
-    private $sanitizer;
-
-    /**
      * @param ProcessInterface $process
      * @param LoggerInterface $logger
      * @param FlagManager $flagManager
      * @param PackageManager $packageManager
      * @param MaintenanceModeSwitcher $maintenanceModeSwitcher
-     * @param Sanitizer $sanitizer
      */
     public function __construct(
         ProcessInterface $process,
         LoggerInterface $logger,
         FlagManager $flagManager,
         PackageManager $packageManager,
-        MaintenanceModeSwitcher $maintenanceModeSwitcher,
-        Sanitizer $sanitizer
+        MaintenanceModeSwitcher $maintenanceModeSwitcher
     ) {
         $this->process = $process;
         $this->logger = $logger;
         $this->flagManager = $flagManager;
         $this->packageManager = $packageManager;
         $this->maintenanceModeSwitcher = $maintenanceModeSwitcher;
-        $this->sanitizer = $sanitizer;
 
         parent::__construct();
     }
@@ -110,8 +101,7 @@ class Deploy extends Command
             $this->flagManager->set(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
             $this->logger->critical($e->getMessage());
 
-            $throwableClass = get_class($e);
-            throw new $throwableClass($this->sanitizer->sanitize($e->getMessage()), $e->getCode());
+            throw $e;
         }
     }
 }

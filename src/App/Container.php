@@ -242,7 +242,6 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
-                        $this->container->make(DeployProcess\InstallUpdate\Install\Setup::class),
                         $this->container->make(DeployProcess\PreDeploy::class),
                         $this->container->make(DeployProcess\DisableCron::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
