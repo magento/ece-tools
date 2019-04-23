@@ -10,10 +10,9 @@ namespace Magento\MagentoCloud\Command\Docker;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\BuilderFactory;
-use Magento\MagentoCloud\Docker\BuilderInterface;
 use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
-use Magento\MagentoCloud\Docker\Service\Version;
+use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\Service\Version\Validator as VersionValidator;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -23,7 +22,6 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Yaml\Yaml;
-use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -67,9 +65,9 @@ class Build extends Command
     private $distGenerator;
 
     /**
-     * @var Version
+     * @var Config
      */
-    private $serviceVersion;
+    private $serviceConfig;
 
     /**
      * @var VersionValidator
@@ -81,7 +79,7 @@ class Build extends Command
      * @param File $file
      * @param Environment $environment
      * @param RepositoryFactory $configFactory
-     * @param Version $serviceVersion
+     * @param Config $serviceConfig
      * @param VersionValidator $versionValidator
      * @param DistGenerator $distGenerator
      */
@@ -90,7 +88,7 @@ class Build extends Command
         File $file,
         Environment $environment,
         RepositoryFactory $configFactory,
-        Version $serviceVersion,
+        Config $serviceConfig,
         VersionValidator $versionValidator,
         DistGenerator $distGenerator
     ) {
@@ -98,7 +96,7 @@ class Build extends Command
         $this->file = $file;
         $this->environment = $environment;
         $this->configFactory = $configFactory;
-        $this->serviceVersion = $serviceVersion;
+        $this->serviceConfig = $serviceConfig;
         $this->versionValidator = $versionValidator;
         $this->distGenerator = $distGenerator;
 
@@ -160,12 +158,12 @@ class Build extends Command
         $config = $this->configFactory->create();
 
         $map = [
-            self::OPTION_PHP => ServiceFactory::SERVICE_FPM,
-            self::OPTION_DB => ServiceFactory::SERVICE_DB,
-            self::OPTION_NGINX => ServiceFactory::SERVICE_NGINX,
-            self::OPTION_REDIS => ServiceFactory::SERVICE_REDIS,
-            self::OPTION_ES => ServiceFactory::SERVICE_ELASTICSEARCH,
-            self::OPTION_RABBIT_MQ => ServiceFactory::SERVICE_RABBIT_MQ,
+            self::OPTION_PHP => Config::KEY_PHP,
+            self::OPTION_DB => Config::KEY_DB,
+            self::OPTION_NGINX => Config::KEY_NGINX,
+            self::OPTION_REDIS => Config::KEY_REDIS,
+            self::OPTION_ES => Config::KEY_ELASTICSEARCH,
+            self::OPTION_RABBIT_MQ => Config::KEY_RABBITMQ,
         ];
 
         array_walk($map, function ($key, $option) use ($config, $input) {
@@ -174,13 +172,13 @@ class Build extends Command
             }
         });
 
-        $versionList = $this->serviceVersion->getVersions($config);
+        $versionList = $this->serviceConfig->getAllServiceVersions($config);
 
-        $unsupportedErrorMsg = $this->versionValidator->validate($versionList);
+        $unsupportedErrorMsg = $this->versionValidator->validateVersions($versionList);
 
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion('There are some service versions which are not supported'
-            . ' by curremt Magento version:' . "\n" . implode("\n", $unsupportedErrorMsg) . "\n"
+            . ' by current Magento version:' . "\n" . implode("\n", $unsupportedErrorMsg) . "\n"
             . 'Do you want to continue?[y/N]',
             false);
 

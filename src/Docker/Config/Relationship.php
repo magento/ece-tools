@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Docker\Config;
 
-use Magento\MagentoCloud\Docker\Config;
+use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 
 /**

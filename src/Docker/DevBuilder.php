@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Docker;
 
 use Illuminate\Contracts\Config\Repository;
+use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 
@@ -60,8 +61,8 @@ class DevBuilder implements BuilderInterface
      */
     public function build(Repository $config): array
     {
-        $phpVersion = $config->get(ServiceFactory::SERVICE_FPM, '') ?: $this->config->getPhpVersion();
-        $dbVersion = $config->get(ServiceFactory::SERVICE_DB, '') ?: $this->config->getServiceVersion(Config::KEY_DB);
+        $phpVersion = $config->get(Config::KEY_PHP, '') ?: $this->config->getPhpVersion();
+        $dbVersion = $config->get(Config::KEY_DB, '') ?: $this->config->getServiceVersion(Config::KEY_DB);
 
         $services = [
             'db' => $this->serviceFactory->create(
@@ -83,7 +84,7 @@ class DevBuilder implements BuilderInterface
             )
         ];
 
-        $redisVersion = $config->get(ServiceFactory::SERVICE_REDIS) ?: $this->config->getServiceVersion(Config::KEY_REDIS);
+        $redisVersion = $config->get(Config::KEY_REDIS) ?: $this->config->getServiceVersion(Config::KEY_REDIS);
 
         if ($redisVersion) {
             $services['redis'] = $this->serviceFactory->create(
@@ -92,7 +93,7 @@ class DevBuilder implements BuilderInterface
             );
         }
 
-        $esVersion = $config->get(ServiceFactory::SERVICE_ELASTICSEARCH) ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
+        $esVersion = $config->get(Config::KEY_ELASTICSEARCH) ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
 
         if ($esVersion) {
             $services['elasticsearch'] = $this->serviceFactory->create(
@@ -101,8 +102,8 @@ class DevBuilder implements BuilderInterface
             );
         }
 
-        $rabbitMQVersion = $config->get(ServiceFactory::SERVICE_RABBIT_MQ)
-            ?: $this->config->getServiceVersion(Config::KEY_RABBIT_MQ);
+        $rabbitMQVersion = $config->get(Config::KEY_RABBITMQ)
+            ?: $this->config->getServiceVersion(Config::KEY_RABBITMQ);
 
         if ($rabbitMQVersion) {
             $services['rabbitmq'] = $this->serviceFactory->create(
@@ -142,7 +143,7 @@ class DevBuilder implements BuilderInterface
         $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends, 'deploy.magento2.docker');
         $services['web'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_NGINX,
-            $config->get(ServiceFactory::SERVICE_NGINX, self::DEFAULT_NGINX_VERSION),
+            $config->get(Config::KEY_NGINX, self::DEFAULT_NGINX_VERSION),
             [
                 'depends_on' => ['fpm', 'db'],
                 'volumes_from' => ['appdata'],

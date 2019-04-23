@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Docker\Service\Version;
 
 use Composer\Semver\Semver;
-use Magento\MagentoCloud\Docker\Service\ServiceFactory;
+use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
@@ -18,50 +18,45 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
  */
 class Validator
 {
+    /**
+     * Supported version constraints of services for every Magento version
+     */
     const MAGENTO_SUPPORTED_SERVICE_VERSIONS = [
         '<2.2.0' => [
-            //ServiceFactory::SERVICE_CLI => '~5.6.5 || 7.0.2 || 7.0.4 || ~7.0.6 || ~7.1.0',
-            ServiceFactory::SERVICE_FPM => '~5.6.5 || 7.0.2 || 7.0.4 || ~7.0.6 || ~7.1.0',
-            ServiceFactory::SERVICE_DB => '>=10.0 <10.3',
-            ServiceFactory::SERVICE_NGINX => '^1.0',
-            ServiceFactory::SERVICE_VARNISH => '~3.5 || ~4.0',
-            //ServiceFactory::SERVICE_TLS => '*',
-            ServiceFactory::SERVICE_REDIS => '~3.2 || ~4.0 || ~5.0',
-            ServiceFactory::SERVICE_ELASTICSEARCH => '^2.0 || ^5.0 || ^6.0',
-            ServiceFactory::SERVICE_RABBIT_MQ => '~3.5',
+            Config::KEY_PHP => '7.0.2 || 7.0.4 || ~7.0.6 || ~7.1.0',
+            Config::KEY_DB => '>=10.0 <10.3',
+            Config::KEY_NGINX => '^1.0',
+            Config::KEY_VARNISH => '~3.5 || ~4.0',
+            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
+            Config::KEY_ELASTICSEARCH => '1.7 || ^2.0',
+            Config::KEY_RABBITMQ => '~3.5',
         ],
         '>=2.2.0 <2.2.8' => [
-            //ServiceFactory::SERVICE_CLI => '~7.0.13 || ~7.1',
-            ServiceFactory::SERVICE_FPM => '~7.0.13 || ~7.1',
-            ServiceFactory::SERVICE_DB => '>=10.0 <10.3',
-            ServiceFactory::SERVICE_NGINX => '^1.0',
-            ServiceFactory::SERVICE_VARNISH => '~4.0 || ~5.0',
-            //ServiceFactory::SERVICE_TLS => '*',
-            ServiceFactory::SERVICE_REDIS => '~3.2 || ~4.0 || ~5.0',
-            ServiceFactory::SERVICE_ELASTICSEARCH => '^2.0 || ^5.0',
-            ServiceFactory::SERVICE_RABBIT_MQ => '~3.5',
+            Config::KEY_PHP => '~7.0.13 || ~7.1',
+            Config::KEY_DB => '>=10.0 <10.3',
+            Config::KEY_NGINX => '^1.0',
+            Config::KEY_VARNISH => '~4.0 || ~5.0',
+            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
+            Config::KEY_ELASTICSEARCH => '^2.0 || ^5.0',
+            Config::KEY_RABBITMQ => '~3.5',
         ],
         '>=2.2.8 <2.3.0' => [
-            //ServiceFactory::SERVICE_CLI => '~7.0.13 || ~7.1',
-            ServiceFactory::SERVICE_FPM => '~7.0.13 || ~7.1',
-            ServiceFactory::SERVICE_DB => '>=10.0 <10.3',
-            ServiceFactory::SERVICE_NGINX => '^1.0',
-            ServiceFactory::SERVICE_VARNISH => '~4.0 || ~5.0',
-            //ServiceFactory::SERVICE_TLS => '*',
-            ServiceFactory::SERVICE_REDIS => '~3.2 || ~4.0 || ~5.0',
-            ServiceFactory::SERVICE_ELASTICSEARCH => '^2.0 || ^5.0 || ^6.0',
-            ServiceFactory::SERVICE_RABBIT_MQ => '~3.5',
+            Config::KEY_PHP => '~7.0.13 || ~7.1',
+            Config::KEY_DB => '>=10.0 <10.3',
+            Config::KEY_NGINX => '^1.0',
+            Config::KEY_VARNISH => '~4.0 || ~5.0',
+            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
+            Config::KEY_ELASTICSEARCH => '^2.0 || ^5.0 || ^6.0',
+            Config::KEY_RABBITMQ => '~3.5',
         ],
         '>=2.3.0' => [
-            //ServiceFactory::SERVICE_CLI => '~7.1.3 || ~7.2.0',
-            ServiceFactory::SERVICE_FPM => '~7.1.3 || ~7.2.0',
-            ServiceFactory::SERVICE_DB => '>=10.0 <10.3',
-            ServiceFactory::SERVICE_NGINX => '^1.0',
-            ServiceFactory::SERVICE_VARNISH => '~4.0 || ~5.0',
-            //ServiceFactory::SERVICE_TLS => '*',
-            ServiceFactory::SERVICE_REDIS => '~3.2 || ~4.0 || ~5.0',
-            ServiceFactory::SERVICE_ELASTICSEARCH => '^2.0 || ^5.0 || ^6.0',
-            ServiceFactory::SERVICE_RABBIT_MQ => '~3.7',
+            Config::KEY_PHP => '~7.1.3 || ~7.2.0',
+            Config::KEY_DB => '>=10.0 <10.3',
+            Config::KEY_NGINX => '^1.0',
+            Config::KEY_VARNISH => '~4.0 || ~5.0',
+            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
+            Config::KEY_ELASTICSEARCH => '^2.0 || ^5.0 || ^6.0',
+            Config::KEY_RABBITMQ => '~3.7',
         ]
     ];
 
@@ -72,6 +67,7 @@ class Validator
 
     /**
      * List of allowed service versions for current Magento version
+     *
      * @var array
      */
     private $supportedVersionList;
@@ -86,12 +82,26 @@ class Validator
     }
 
     /**
-     * @param array $serviceVersions
-     * @return array
+     * Validates provided services version for current Magento.
+     * Returns empty array if all provided versions are supported. Otherwise, returns warning message for
+     * every unsupported service in separate array elements.
+     *
+     * Example of $serviceVersions argument:
+     *
+     * ```php
+     *  [
+     *      'elasticserach' => '5.6',
+     *      'db' => '10.0'
+     *  ];
+     * ```
+     *
+     * @param array $serviceVersions List of services and their names which should be validates.
+     * @return array List of warning messages. One message for one unsupported service.
+     *
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
-    public function validate($serviceVersions)
+    public function validateVersions($serviceVersions)
     {
         $errors = [];
         foreach ($serviceVersions as $name => $version) {
@@ -103,27 +113,31 @@ class Validator
     }
 
     /**
-     * @param string $serviceName
-     * @param string $version
-     * @return string
+     * Validates service version whether it is supported by current Magento version or not.
+     *
+     * @param string $serviceName Service name
+     * @param string $version Service version for validation
+     * @return string Failed validation message
+     *
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
     private function validateService($serviceName, $version)
     {
         if (!isset($this->getSupportedVersions()[$serviceName])) {
-            throw new ConfigurationMismatchException(sprintf(
-                'Service "%s" is not supported for Magento "%s"',
+            return sprintf('Service "%s" is not supported for Magento "%s"',
                 $serviceName,
                 $this->magentoVersion->getVersion()
-            ));
+            );
         }
-
+        $constraint = $this->getSupportedVersions()[$serviceName];
         if ($version != 'latest' && !Semver::satisfies($version, $this->getSupportedVersions()[$serviceName])) {
-            return sprintf('Magento %s does not support version "%s" for service "%s"',
+            return sprintf('Magento %s does not support version "%s" for service "%s".'
+                    . 'Service version should satisfy "%s" constraint.',
                 $this->magentoVersion->getVersion(),
                 $version,
-                $serviceName
+                $serviceName,
+                $constraint
             );
         }
 
@@ -131,11 +145,14 @@ class Validator
     }
 
     /**
+     * Retrieves supported version constraints of services for current Magento version
+     *
      * @return array
+     *
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
-    protected function getSupportedVersions()
+    private function getSupportedVersions()
     {
         if (null === $this->supportedVersionList) {
             $magentoVersions = array_keys(self::MAGENTO_SUPPORTED_SERVICE_VERSIONS);

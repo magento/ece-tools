@@ -13,18 +13,32 @@ use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Illuminate\Contracts\Config\Repository;
 
 /**
- * Retrieve Service versions from Cloud configuration.
+ * Retrieve Service versions/configs from Cloud configuration.
  */
-class Version
+class Config
 {
+    const KEY_PHP = 'php';
+    const KEY_DB = 'mysql';
+    const KEY_NGINX = 'nginx';
+    const KEY_REDIS = 'redis';
+    const KEY_ELASTICSEARCH = 'elasticsearch';
+    const KEY_RABBITMQ = 'rabbitmq';
+
+    const KEY_CRON = 'cron';
+    const KEY_VARNISH = 'varnish';
+
+    /**
+     * List of services which can be configured in Cloud docker
+     *
+     * @var array
+     */
     private $configurableVersions = [
-        ServiceFactory::SERVICE_FPM,// => '~7.1.3 || ~7.2.0',
-        ServiceFactory::SERVICE_NGINX,// => '^1.0',
-        ServiceFactory::SERVICE_DB,// => '>=10.0 <10.3',
-        ServiceFactory::SERVICE_REDIS,// => '~3.2 || ~4.0 || ~5.0',
-        //ServiceFactory::SERVICE_VARNISH,// => '~4.0 || ~5.0',
-        ServiceFactory::SERVICE_ELASTICSEARCH,// => '^2.0 || ^5.0 || ^6.0',
-        ServiceFactory::SERVICE_RABBIT_MQ,// => '~3.7',
+        self::KEY_PHP,
+        self::KEY_DB,
+        self::KEY_NGINX,
+        self::KEY_REDIS,
+        self::KEY_ELASTICSEARCH,
+        self::KEY_RABBITMQ,
     ];
 
     /**
@@ -41,16 +55,28 @@ class Version
     }
 
     /**
-     * @param Repository $customVersions
-     * @return array
+     * Retrieves service versions set in configuration files.
+     * Returns null if neither of services is configured or provided in $customVersions.
+     *
+     * Example of return:
+     *
+     * ```php
+     *  [
+     *      'elasticserach' => '5.6',
+     *      'db' => '10.0'
+     *  ];
+     * ```
+     *
+     * @param Repository $customVersions overwrite version from config files
+     * @return array List of services
      * @throws ConfigurationMismatchException
      */
-    public function getVersions(Repository $customVersions)
+    public function getAllServiceVersions(Repository $customVersions): array
     {
         $configuredVersions = [];
         foreach ($this->configurableVersions as $serviceName)
         {
-            $version = $customVersions->get($serviceName) ?: $this->getServiceVersionFromConfig($serviceName);
+            $version = $customVersions->get($serviceName) ?: $this->getServiceVersion($serviceName);
             if ($version) {
                 $configuredVersions[$serviceName] = $version;
             }
@@ -60,14 +86,17 @@ class Version
     }
 
     /**
-     * @param string $serviceName
+     * Retrieves service version set in configuration files.
+     * Returns null if service was not configured.
+     *
+     * @param string $serviceName Name of service version need to retrieve
      * @return string|null
      * @throws ConfigurationMismatchException
      */
-    public function getServiceVersionFromConfig(string $serviceName)
+    public function getServiceVersion(string $serviceName)
     {
         try {
-            $version = $serviceName == ServiceFactory::SERVICE_FPM
+            $version = $serviceName == self::KEY_PHP
                 ? $this->getPhpVersion()
                 : $this->reader->read()['services'][$serviceName]['version'] ?? null;
             return $version;
@@ -77,8 +106,10 @@ class Version
     }
 
     /**
+     * Retrieve version of PHP
+     *
      * @return string
-     * @throws ConfigurationMismatchException
+     * @throws ConfigurationMismatchException when PHP is not configured
      */
     public function getPhpVersion(): string
     {
@@ -89,7 +120,7 @@ class Version
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        if ($type !== 'php') {
+        if ($type !== self::KEY_PHP) {
             throw new ConfigurationMismatchException(sprintf(
                 'Type "%s" is not supported',
                 $type
@@ -100,5 +131,18 @@ class Version
          * We don't support release candidates.
          */
         return rtrim($version, '-rc');
+    }
+
+    /**
+     * @return array
+     * @throws ConfigurationMismatchException
+     */
+    public function getCron(): array
+    {
+        try {
+            return $this->reader->read()[self::KEY_CRON] ?? [];
+        } catch (FileSystemException $exception) {
+            throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }
