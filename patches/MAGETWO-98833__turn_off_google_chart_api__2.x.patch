@@ -139,15 +139,3 @@ index 8e238ccab44c..71a6cf4e938f 100644
       * @param \Magento\Backend\Helper\Dashboard\AbstractDashboard $dataHelper
       * @return void
       */
-diff --git a/dev/tests/integration/testsuite/Magento/Backend/Block/Dashboard/GraphTest.php b/dev/tests/integration/testsuite/Magento/Backend/Block/Dashboard/GraphTest.php
-index 17863cd70958..215fd85d3316 100644
---- a/dev/tests/integration/testsuite/Magento/Backend/Block/Dashboard/GraphTest.php
-+++ b/dev/tests/integration/testsuite/Magento/Backend/Block/Dashboard/GraphTest.php
-@@ -27,6 +27,6 @@ protected function setUp()
- 
-     public function testGetChartUrl()
-     {
--        $this->assertStringStartsWith('http://chart.apis.google.com/chart', $this->_block->getChartUrl());
-+        $this->assertStringStartsWith('https://image-charts.com/chart', $this->_block->getChartUrl());
-     }
- }
