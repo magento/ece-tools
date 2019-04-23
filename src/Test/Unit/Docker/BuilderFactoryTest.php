@@ -44,6 +44,6 @@ class BuilderFactoryTest extends TestCase
             ->method('create')
             ->willReturn($this->createMock(ProductionBuilder::class));
 
-        $this->builderFactory->create(BuilderFactory::BUILDER_PROD);
+        $this->builderFactory->create(BuilderFactory::BUILDER_DEFAULT);
     }
 }

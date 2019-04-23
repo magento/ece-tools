@@ -36,7 +36,7 @@ class Build extends Command
     const OPTION_REDIS = 'redis';
     const OPTION_ES = 'es';
     const OPTION_RABBIT_MQ = 'rmq';
-    const OPTION_TYPE = 'type';
+    const OPTION_MODE = 'mode';
 
     /**
      * @var BuilderFactory
@@ -124,11 +124,14 @@ class Build extends Command
                 InputOption::VALUE_OPTIONAL,
                 'RabbitMQ version'
             )->addOption(
-                self::OPTION_TYPE,
-                't',
+                self::OPTION_MODE,
+                'm',
                 InputOption::VALUE_OPTIONAL,
-                'Type',
-                BuilderFactory::BUILDER_PROD
+                sprintf(
+                    'Mode of environment (%s)',
+                    implode(', ', [BuilderFactory::BUILDER_DEVELOP, BuilderFactory::BUILDER_PRODUCTION])
+                ),
+                BuilderFactory::BUILDER_DEFAULT
             );
 
         parent::configure();
@@ -142,7 +145,7 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $type = $input->getOption(self::OPTION_TYPE);
+        $type = $input->getOption(self::OPTION_MODE);
 
         $builder = $this->builderFactory->create($type);
         $config = $this->configFactory->create();
@@ -169,9 +172,13 @@ class Build extends Command
 
         $this->distGenerator->generate();
 
-        $this->getApplication()
-            ->find(ConfigConvert::NAME)
-            ->run(new ArrayInput([]), $output);
+        try {
+            $this->getApplication()
+                ->find(ConfigConvert::NAME)
+                ->run(new ArrayInput([]), $output);
+        } catch (\Exception $exception) {
+            throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
+        }
 
         $output->writeln('<info>Configuration was built.</info>');
     }

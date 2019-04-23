@@ -164,6 +164,13 @@ class ProductionBuilder implements BuilderInterface
             'version' => '3',
             'services' => $services,
             'volumes' => [
+                'magento' => [
+                    'driver_opts' => [
+                        'type' => 'none',
+                        'device' => '${PWD}',
+                        'o' => 'bind'
+                    ]
+                ],
                 'magento-vendor' => $volumeConfig,
                 'magento-generated' => $volumeConfig,
                 'magento-var' => $volumeConfig,
@@ -191,7 +198,7 @@ class ProductionBuilder implements BuilderInterface
         $flag = $isReadOnly ? ':ro' : ':rw';
 
         return [
-            './:' . self::DIR_MAGENTO . $flag,
+            'magento:' . self::DIR_MAGENTO . $flag,
             'magento-vendor:' . self::DIR_MAGENTO . '/vendor' . $flag,
             'magento-generated:' . self::DIR_MAGENTO . '/generated' . $flag,
             'magento-var:' . self::DIR_MAGENTO . '/var:rw',
