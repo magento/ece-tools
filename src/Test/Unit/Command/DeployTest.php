@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
+use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Package\Manager as PackageManager;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -51,6 +52,11 @@ class DeployTest extends TestCase
     private $maintenanceModeSwitcher;
 
     /**
+     * @var Sanitizer|MockObject
+     */
+    private $sanitizerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -60,13 +66,15 @@ class DeployTest extends TestCase
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->packageManagerMock = $this->createMock(PackageManager::class);
         $this->maintenanceModeSwitcher = $this->createMock(MaintenanceModeSwitcher::class);
+        $this->sanitizerMock = $this->createMock(Sanitizer::class);
 
         $this->command = new Deploy(
             $this->processMock,
             $this->loggerMock,
             $this->flagManagerMock,
             $this->packageManagerMock,
-            $this->maintenanceModeSwitcher
+            $this->maintenanceModeSwitcher,
+            $this->sanitizerMock
         );
     }
 
@@ -95,7 +103,7 @@ class DeployTest extends TestCase
 
     /**
      * @expectedException \Exception
-     * @expectedExceptionMessage Some error
+     * @expectedExceptionMessage Sanitized error
      */
     public function testExecuteWithException()
     {
@@ -108,6 +116,10 @@ class DeployTest extends TestCase
         $this->flagManagerMock->expects($this->once())
             ->method('set')
             ->with(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
+        $this->sanitizerMock->expects($this->once())
+            ->method('sanitize')
+            ->with('Some error')
+            ->willReturn('Sanitized error');
 
         $tester = new CommandTester(
             $this->command
