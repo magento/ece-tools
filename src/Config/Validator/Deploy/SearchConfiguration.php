@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
@@ -60,7 +62,7 @@ class SearchConfiguration implements ValidatorInterface
 
         if (!isset($searchConfig['engine'])) {
             return $this->resultFactory->error(
-                sprintf('Variable %s is not configured properly', DeployInterface::VAR_SEARCH_CONFIGURATION),
+                sprintf('Variable "%s" is not configured properly', DeployInterface::VAR_SEARCH_CONFIGURATION),
                 'At least engine option must be configured'
             );
         }
