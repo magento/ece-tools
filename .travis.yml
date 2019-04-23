@@ -21,6 +21,7 @@ env:
     - TEST_SUITE=static-unit XDEBUG=true
     - TEST_SUITE=integration
     - TEST_SUITE=docker-integration
+    - TEST_SUITE=docker-functional
 
 cache:
   apt: true

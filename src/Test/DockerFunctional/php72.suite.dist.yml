@@ -1,0 +1,6 @@
+actor: CliTester
+modules:
+  enabled:
+    - Magento\MagentoCloud\Test\DockerFunctional\Codeception\Docker
+    - PhpBrowser
+    - Asserts
