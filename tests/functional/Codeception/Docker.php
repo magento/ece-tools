@@ -92,7 +92,6 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     {
         $gitTask = $this->taskGitStack()
             ->exec('git init')
-            ->exec('git remote -vvv')
             ->exec(sprintf('git remote add origin %s', $this->_getConfig('repo_url')))
             ->exec('git fetch')
             ->checkout($version ?: $this->_getConfig('repo_branch'));
