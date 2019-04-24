@@ -66,7 +66,7 @@ class ValidatorTest extends TestCase
         $version = '6.5';
         $message = sprintf(
             'Magento %s does not support version "%s" for service "%s".'
-                . 'Service version should satisfy "~1.7 || ~2.4 || ~5.2" constraint.',
+                . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
             $magentoVersion,
             $version,
             Config::KEY_ELASTICSEARCH
@@ -131,27 +131,28 @@ class ValidatorTest extends TestCase
                     Config::KEY_NGINX => '1.9',
                     Config::KEY_VARNISH => '4.5',
                     Config::KEY_REDIS => '5.0',
-                    Config::KEY_ELASTICSEARCH => '2.7',
+                    Config::KEY_ELASTICSEARCH => '2.4.2',
                     Config::KEY_RABBITMQ => '3.5'
                 ]
             ],
             [
                 '2.2.8',
                 [
-                    Config::KEY_ELASTICSEARCH => '6.7',
+                    Config::KEY_ELASTICSEARCH => '6.5.13',
                 ]
             ],
             [
                 '2.5.0',
                 [
                     Config::KEY_PHP => '7.2.13',
-                    Config::KEY_DB => '10.2',
+                    Config::KEY_DB => '10.2.1',
                     Config::KEY_NGINX => '1.9',
                     Config::KEY_VARNISH => '5.5',
                     Config::KEY_REDIS => 'latest',
-                    Config::KEY_ELASTICSEARCH => '6.7',
+                    Config::KEY_ELASTICSEARCH => '6.7', // wrong
                     Config::KEY_RABBITMQ => '3.7'
-                ]
+                ],
+                1
             ],
             [
                 '2.1.4',
@@ -164,7 +165,7 @@ class ValidatorTest extends TestCase
                     Config::KEY_PHP => '7.0.13',
                     Config::KEY_DB => '11.0', //wrong
                     Config::KEY_NGINX => '0.9', //wrong
-                    Config::KEY_VARNISH => '4.5',
+                    Config::KEY_VARNISH => '4.0.9',
                     Config::KEY_REDIS => '3.1',
                     Config::KEY_ELASTICSEARCH => '6.5', //wrong
                     Config::KEY_RABBITMQ => '3.5' //wrong

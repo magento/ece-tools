@@ -19,54 +19,38 @@ use Magento\MagentoCloud\Package\UndefinedPackageException;
 class Validator
 {
     /**
-     * Supported version constraints of services for every Magento version
+     * Supported version constraints of services for every Magento version.
+     * Magento version constraint is a key in every element of service array
+     * and value of its element is the service version constraint
      */
     const MAGENTO_SUPPORTED_SERVICE_VERSIONS = [
-        '<2.2.0' => [
-            Config::KEY_PHP => '7.0.2 || 7.0.4 || ~7.0.6 || ~7.1.0',
-            Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.9',
-            Config::KEY_VARNISH => '~3.5 || ~4.0',
-            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4',
-            Config::KEY_RABBITMQ => '~3.5',
+        Config::KEY_PHP => [
+            '<=2.2.4' => '7.0.2|7.0.4|~7.0.6|~7.1.0',
+            '>=2.2.5 <2.3.0' => '~7.0.13|~7.1.0',
+            '>=2.3.0' => '~7.1.3 || ~7.2.0',
         ],
-        '>=2.2.0 <2.2.8' => [
-            Config::KEY_PHP => '~7.0.13 || ~7.1',
-            Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.9',
-            Config::KEY_VARNISH => '~4.0 || ~5.0',
-            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2',
-            Config::KEY_RABBITMQ => '~3.5',
+        Config::KEY_DB => [
+            '*' => '>=10.0 <10.3',
         ],
-        '>=2.2.8 <2.3.0' => [
-            Config::KEY_PHP => '~7.0.13 || ~7.1',
-            Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.9',
-            Config::KEY_VARNISH => '~4.0 || ~5.0',
-            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2 || ~6.5',
-            Config::KEY_RABBITMQ => '~3.5',
+        Config::KEY_NGINX => [
+            '*' => '^1.9.0',
         ],
-        '2.3.0' => [
-            Config::KEY_PHP => '~7.1.3 || ~7.2.0',
-            Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.9',
-            Config::KEY_VARNISH => '~4.0 || ~5.0',
-            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2',
-            Config::KEY_RABBITMQ => '~3.7',
+        Config::KEY_VARNISH => [
+            '<2.2.0' => '~3.5.0 || ^4.0',
+            '>=2.2.0' => '^4.0 || ^5.0',
         ],
-        '>=2.3.1' => [
-            Config::KEY_PHP => '~7.1.3 || ~7.2.0',
-            Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.9',
-            Config::KEY_VARNISH => '~4.0 || ~5.0',
-            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2 || ~6.5',
-            Config::KEY_RABBITMQ => '~3.7',
-        ]
+        Config::KEY_REDIS => [
+            '*' => '~3.2 || ~4.0 || ~5.0',
+        ],
+        Config::KEY_ELASTICSEARCH => [
+            '<2.2.0' => '~1.7.0 || ~2.4.0',
+            '>=2.2.0 <2.2.8 || 2.3.0' => '~1.7.0 || ~2.4.0 || ~5.2.0',
+            '>=2.2.8 <2.3.0 || >=2.3.1' => '~1.7.0 || ~2.4.0 || ~5.2.0 || ~6.5.0',
+        ],
+        Config::KEY_RABBITMQ => [
+            '<2.3.0' => '~3.5.0',
+            '>=2.3.0' => '~3.5.0 || ~3.7.0',
+        ],
     ];
 
     /**
@@ -165,18 +149,20 @@ class Validator
     private function getSupportedVersions()
     {
         if (null === $this->supportedVersionList) {
-            $magentoVersions = array_keys(self::MAGENTO_SUPPORTED_SERVICE_VERSIONS);
-            foreach ($magentoVersions as $constraint) {
-                if (Semver::satisfies($this->magentoVersion->getVersion(), $constraint)) {
-                    $this->supportedVersionList = self::MAGENTO_SUPPORTED_SERVICE_VERSIONS[$constraint];
-                    break;
+            foreach (self::MAGENTO_SUPPORTED_SERVICE_VERSIONS as $serviceName => $magentoVersions) {
+                foreach ($magentoVersions as $magentoConstrain => $serviceConstraint) {
+                    if (Semver::satisfies($this->magentoVersion->getVersion(), $magentoConstrain)) {
+                        $this->supportedVersionList[$serviceName] = $serviceConstraint;
+                        break;
+                    }
                 }
-            }
-            if (!$this->supportedVersionList) {
-                throw new ConfigurationMismatchException(sprintf(
-                    'There are no defined configurations for "%s" Magento version',
-                    $this->magentoVersion->getVersion()
-                ));
+                if (!$this->supportedVersionList[$serviceName]) {
+                    throw new ConfigurationMismatchException(sprintf(
+                        'Service "%s" does not have defined configurations for "%s" Magento version',
+                        $serviceName,
+                        $this->magentoVersion->getVersion()
+                    ));
+                }
             }
         }
         return $this->supportedVersionList;
