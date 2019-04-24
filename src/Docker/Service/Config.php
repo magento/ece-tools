@@ -32,7 +32,7 @@ class Config
      *
      * @var array
      */
-    private $configurableVersions = [
+    private $configurableServices = [
         self::KEY_PHP,
         self::KEY_DB,
         self::KEY_NGINX,
@@ -62,19 +62,19 @@ class Config
      *
      * ```php
      *  [
-     *      'elasticserach' => '5.6',
+     *      'elasticsearch' => '5.6',
      *      'db' => '10.0'
      *  ];
      * ```
      *
-     * @param Repository $customVersions overwrite version from config files
+     * @param Repository $customVersions custom version which overwrite values from configuration files overwrite version from config files
      * @return array List of services
      * @throws ConfigurationMismatchException
      */
     public function getAllServiceVersions(Repository $customVersions): array
     {
         $configuredVersions = [];
-        foreach ($this->configurableVersions as $serviceName) {
+        foreach ($this->configurableServices as $serviceName) {
             $version = $customVersions->get($serviceName) ?: $this->getServiceVersion($serviceName);
             if ($version) {
                 $configuredVersions[$serviceName] = $version;
@@ -132,6 +132,8 @@ class Config
     }
 
     /**
+     * Retrieves cron configuration.
+     *
      * @return array
      * @throws ConfigurationMismatchException
      */

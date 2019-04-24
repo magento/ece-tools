@@ -66,7 +66,7 @@ class ValidatorTest extends TestCase
         $version = '1.7';
         $message = sprintf(
             'Magento %s does not support version "%s" for service "%s".'
-                . 'Service version should satisfy "^2.0 || ^5.0" constraint.',
+                . 'Service version should satisfy "~2.4 || ~5.2" constraint.',
             $magentoVersion,
             $version,
             Config::KEY_ELASTICSEARCH

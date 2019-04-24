@@ -25,37 +25,37 @@ class Validator
         '<2.2.0' => [
             Config::KEY_PHP => '7.0.2 || 7.0.4 || ~7.0.6 || ~7.1.0',
             Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.0',
+            Config::KEY_NGINX => '^1.9',
             Config::KEY_VARNISH => '~3.5 || ~4.0',
             Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '1.7 || ^2.0',
+            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4',
             Config::KEY_RABBITMQ => '~3.5',
         ],
         '>=2.2.0 <2.2.8' => [
             Config::KEY_PHP => '~7.0.13 || ~7.1',
             Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.0',
+            Config::KEY_NGINX => '^1.9',
             Config::KEY_VARNISH => '~4.0 || ~5.0',
             Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '^2.0 || ^5.0',
+            Config::KEY_ELASTICSEARCH => '~2.4 || ~5.2',
             Config::KEY_RABBITMQ => '~3.5',
         ],
         '>=2.2.8 <2.3.0' => [
             Config::KEY_PHP => '~7.0.13 || ~7.1',
             Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.0',
+            Config::KEY_NGINX => '^1.9',
             Config::KEY_VARNISH => '~4.0 || ~5.0',
             Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '^2.0 || ^5.0 || ^6.0',
+            Config::KEY_ELASTICSEARCH => '~2.4 || ~5.2 || ~6.5',
             Config::KEY_RABBITMQ => '~3.5',
         ],
         '>=2.3.0' => [
             Config::KEY_PHP => '~7.1.3 || ~7.2.0',
             Config::KEY_DB => '>=10.0 <10.3',
-            Config::KEY_NGINX => '^1.0',
+            Config::KEY_NGINX => '^1.9',
             Config::KEY_VARNISH => '~4.0 || ~5.0',
             Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '^2.0 || ^5.0 || ^6.0',
+            Config::KEY_ELASTICSEARCH => '~2.4 || ~5.2 || ~6.5',
             Config::KEY_RABBITMQ => '~3.7',
         ]
     ];
@@ -77,7 +77,6 @@ class Validator
      */
     public function __construct(MagentoVersion $magentoVersion)
     {
-
         $this->magentoVersion = $magentoVersion;
     }
 
@@ -90,7 +89,7 @@ class Validator
      *
      * ```php
      *  [
-     *      'elasticserach' => '5.6',
+     *      'elasticsearch' => '5.6',
      *      'db' => '10.0'
      *  ];
      * ```
