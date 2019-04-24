@@ -37,4 +37,3 @@ class Sanitizer
         return $message;
     }
 }
-
