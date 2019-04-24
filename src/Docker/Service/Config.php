@@ -67,7 +67,7 @@ class Config
      *  ];
      * ```
      *
-     * @param Repository $customVersions custom version which overwrite values from configuration files overwrite version from config files
+     * @param Repository $customVersions custom version which overwrite values from configuration files
      * @return array List of services
      * @throws ConfigurationMismatchException
      */
