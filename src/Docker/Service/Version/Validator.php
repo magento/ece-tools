@@ -49,7 +49,16 @@ class Validator
             Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2 || ~6.5',
             Config::KEY_RABBITMQ => '~3.5',
         ],
-        '>=2.3.0' => [
+        '2.3.0' => [
+            Config::KEY_PHP => '~7.1.3 || ~7.2.0',
+            Config::KEY_DB => '>=10.0 <10.3',
+            Config::KEY_NGINX => '^1.9',
+            Config::KEY_VARNISH => '~4.0 || ~5.0',
+            Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
+            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2',
+            Config::KEY_RABBITMQ => '~3.7',
+        ],
+        '>=2.3.1' => [
             Config::KEY_PHP => '~7.1.3 || ~7.2.0',
             Config::KEY_DB => '>=10.0 <10.3',
             Config::KEY_NGINX => '^1.9',
