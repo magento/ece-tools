@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\DockerFunctional\Robo\Tasks;
+namespace Magento\MagentoCloud\Test\Functional\Robo\Tasks;
 
 use Robo\Common\ExecOneCommand;
 use Robo\Contract\CommandInterface;

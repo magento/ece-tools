@@ -5,9 +5,9 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\DockerFunctional\Robo\Tasks;
+namespace Magento\MagentoCloud\Test\Functional\Robo\Tasks;
 
-use Magento\MagentoCloud\Test\DockerFunctional\Robo\Tasks\DockerCompose;
+use Magento\MagentoCloud\Test\Functional\Robo\Tasks\DockerCompose;
 
 class Bash extends DockerCompose\Run
 {

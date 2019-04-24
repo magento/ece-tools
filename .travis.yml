@@ -20,8 +20,7 @@ env:
   matrix:
     - TEST_SUITE=static-unit XDEBUG=true
     - TEST_SUITE=integration
-    - TEST_SUITE=docker-integration
-    - TEST_SUITE=docker-functional
+    - TEST_SUITE=functional
 
 cache:
   apt: true

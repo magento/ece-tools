@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\DockerFunctional\Robo;
+namespace Magento\MagentoCloud\Test\Functional\Robo;
 
 use Robo\Collection\CollectionBuilder;
 use Robo\TaskAccessor;

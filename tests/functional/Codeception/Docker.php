@@ -5,10 +5,10 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\DockerFunctional\Codeception;
+namespace Magento\MagentoCloud\Test\Functional\Codeception;
 
 use Codeception\Module;
-use Magento\MagentoCloud\Test\DockerFunctional\Robo\Tasks as MagentoCloudTasks;
+use Magento\MagentoCloud\Test\Functional\Robo\Tasks as MagentoCloudTasks;
 use Robo\LoadAllTasks as RoboTasks;
 use Codeception\TestInterface;
 use Codeception\Configuration;
@@ -54,7 +54,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function _initialize()
     {
-        $container = require Configuration::projectDir() . 'tests/docker-functional/bootstrap.php';
+        $container = require Configuration::projectDir() . 'tests/functional/bootstrap.php';
         $builder = CollectionBuilder::create($container, $this);
 
         $this->setContainer($container);
@@ -104,6 +104,28 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     }
 
     /**
+     * Runs composer require command
+     *
+     * @param string $version
+     * @return bool
+     * @throws \Robo\Exception\TaskException
+     */
+    public function composerRequireMagentoCloud(string $version): bool
+    {
+        $composerRequireTask = $this->taskComposerRequire('composer')
+            ->dependency('magento/magento-cloud-metapackage', $version)
+            ->workingDir($this->_getConfig('system_magento_dir'))
+            ->noInteraction()
+            ->option('--no-update');
+        $composerUpdateTask = $this->taskComposerUpdate('composer');
+
+        return $this->taskBash(self::BUILD_CONTAINER)
+            ->exec($composerRequireTask->getCommand() . ' && ' . $composerUpdateTask->getCommand())
+            ->run()
+            ->wasSuccessful();
+    }
+
+    /**
      * Runs composer install command
      *
      * @return bool
@@ -115,8 +137,36 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->noDev()
             ->noInteraction()
             ->workingDir($this->_getConfig('system_magento_dir'));
-        return $this->taskBash(self::DEPLOY_CONTAINER)
+        return $this->taskBash(self::BUILD_CONTAINER)
             ->exec($composerTask)
+            ->run()
+            ->wasSuccessful();
+    }
+
+    /**
+     * Cleans directories
+     *
+     * @param string|array $path
+     * @param string $container
+     * @return bool
+     * @throws \Robo\Exception\TaskException
+     */
+    public function cleanDirectories($path, string $container = self::BUILD_CONTAINER): bool
+    {
+        $magentoRoot = $this->_getConfig('system_magento_dir');
+
+        if (is_array($path)) {
+            $path = array_map(
+                function($val) use ($magentoRoot) { return $magentoRoot . $val; },
+                $path
+            );
+            $pathsToCleanup = implode(' ', $path);
+        } else {
+            $pathsToCleanup = $magentoRoot . $path;
+        }
+
+        return $this->taskBash($container)
+            ->exec('rm -rf ' . $pathsToCleanup)
             ->run()
             ->wasSuccessful();
     }
@@ -134,6 +184,20 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
         return $this->taskCopyFromDocker($this->_getConfig('system_magento_dir') . $source, $destination, $container)
             ->run()
             ->wasSuccessful();
+    }
+
+    /**
+     * Returns file contents
+     *
+     * @param string $source
+     * @param string $container
+     * @return false|string
+     */
+    public function grabFileContent(string $source, string $container = self::DEPLOY_CONTAINER)
+    {
+        $tmpFile = tempnam(sys_get_temp_dir(), md5($source));
+        $this->downloadFromContainer($source, $tmpFile, $container);
+        return file_get_contents($tmpFile);
     }
 
     /**

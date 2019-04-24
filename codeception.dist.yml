@@ -1,9 +1,9 @@
 paths:
-  tests: src/Test/DockerFunctional
-  output: tests/docker-functional/_output
-  data: tests/docker-functional/_data
-  support: tests/docker-functional/_support
-  envs: tests/docker-functional/_envs
+  tests: src/Test/Functional
+  output: tests/functional/_output
+  data: tests/functional/_data
+  support: tests/functional/_support
+  envs: tests/functional/_envs
 actor_suffix: Tester
 settings:
   colors: true
@@ -11,10 +11,10 @@ extensions:
   enabled:
     - Codeception\Extension\RunFailed
 params:
-  - tests/docker-functional/configuration.dist.yml
+  - tests/functional/configuration.dist.yml
 modules:
   config:
-    Magento\MagentoCloud\Test\DockerFunctional\Codeception\Docker:
+    Magento\MagentoCloud\Test\Functional\Codeception\Docker:
       db_host: "%Magento.docker.settings.db.host%"
       db_port: "%Magento.docker.settings.db.port%"
       db_username: "%Magento.docker.settings.db.username%"

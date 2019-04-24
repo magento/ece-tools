@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\DockerFunctional\Robo\Tasks\DockerCompose;
+namespace Magento\MagentoCloud\Test\Functional\Robo\Tasks\DockerCompose;
 
 use Robo\Common\CommandReceiver;
 use Robo\Common\ExecOneCommand;
