@@ -88,10 +88,6 @@
         "docker/mysql"
       ],
       [
-        "dist/docker/global.php",
-        "docker/global.php.dist"
-      ],
-      [
         "dist/docker/README.md",
         "docker/README.md"
       ],

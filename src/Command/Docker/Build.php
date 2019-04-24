@@ -9,8 +9,8 @@ namespace Magento\MagentoCloud\Command\Docker;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
-use Magento\MagentoCloud\Docker\BuilderFactory;
-use Magento\MagentoCloud\Docker\BuilderInterface;
+use Magento\MagentoCloud\Docker\ComposeManagerFactory;
+use Magento\MagentoCloud\Docker\ComposeManagerInterface;
 use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -39,7 +39,7 @@ class Build extends Command
     const OPTION_MODE = 'mode';
 
     /**
-     * @var BuilderFactory
+     * @var ComposeManagerFactory
      */
     private $builderFactory;
 
@@ -64,14 +64,14 @@ class Build extends Command
     private $distGenerator;
 
     /**
-     * @param BuilderFactory $builderFactory
+     * @param ComposeManagerFactory $builderFactory
      * @param File $file
      * @param Environment $environment
      * @param RepositoryFactory $configFactory
      * @param DistGenerator $distGenerator
      */
     public function __construct(
-        BuilderFactory $builderFactory,
+        ComposeManagerFactory $builderFactory,
         File $file,
         Environment $environment,
         RepositoryFactory $configFactory,
@@ -129,9 +129,9 @@ class Build extends Command
                 InputOption::VALUE_OPTIONAL,
                 sprintf(
                     'Mode of environment (%s)',
-                    implode(', ', [BuilderFactory::BUILDER_DEVELOP, BuilderFactory::BUILDER_PRODUCTION])
+                    implode(', ', [ComposeManagerFactory::COMPOSE_DEVELOPER, ComposeManagerFactory::COMPOSE_PRODUCTION])
                 ),
-                BuilderFactory::BUILDER_DEFAULT
+                ComposeManagerFactory::COMPOSE_DEFAULT
             );
 
         parent::configure();
@@ -151,12 +151,12 @@ class Build extends Command
         $config = $this->configFactory->create();
 
         $map = [
-            self::OPTION_PHP => BuilderInterface::PHP_VERSION,
-            self::OPTION_DB => BuilderInterface::DB_VERSION,
-            self::OPTION_NGINX => BuilderInterface::NGINX_VERSION,
-            self::OPTION_REDIS => BuilderInterface::REDIS_VERSION,
-            self::OPTION_ES => BuilderInterface::ES_VERSION,
-            self::OPTION_RABBIT_MQ => BuilderInterface::RABBIT_MQ_VERSION,
+            self::OPTION_PHP => ComposeManagerInterface::PHP_VERSION,
+            self::OPTION_DB => ComposeManagerInterface::DB_VERSION,
+            self::OPTION_NGINX => ComposeManagerInterface::NGINX_VERSION,
+            self::OPTION_REDIS => ComposeManagerInterface::REDIS_VERSION,
+            self::OPTION_ES => ComposeManagerInterface::ES_VERSION,
+            self::OPTION_RABBIT_MQ => ComposeManagerInterface::RABBIT_MQ_VERSION,
         ];
 
         array_walk($map, static function ($key, $option) use ($config, $input) {

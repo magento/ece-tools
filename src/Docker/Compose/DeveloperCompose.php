@@ -3,14 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Docker;
+namespace Magento\MagentoCloud\Docker\Compose;
 
 use Illuminate\Contracts\Config\Repository;
 
 /**
- * @inheritDoc
+ * Developer compose configuration.
+ *
+ * @codeCoverageIgnore
  */
-class DevelopBuilder extends ProductionBuilder
+class DeveloperCompose extends ProductionCompose
 {
     /**
      * @inheritDoc
@@ -30,10 +32,21 @@ class DevelopBuilder extends ProductionBuilder
     /**
      * @inheritDoc
      */
-    public function getMagentoVolumes(bool $isReadOnly): array
+    protected function getMagentoVolumes(bool $isReadOnly): array
     {
         return [
             'magento:' . self::DIR_MAGENTO . ':nocopy'
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function getVariables(): array
+    {
+        $variables = parent::getVariables();
+        $variables['MAGENTO_RUN_MODE'] = 'developer';
+
+        return $variables;
     }
 }
