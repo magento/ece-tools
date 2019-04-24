@@ -63,10 +63,10 @@ class ValidatorTest extends TestCase
     public function testValidateFailMessage()
     {
         $magentoVersion = '2.2.6';
-        $version = '1.7';
+        $version = '6.5';
         $message = sprintf(
             'Magento %s does not support version "%s" for service "%s".'
-                . 'Service version should satisfy "~2.4 || ~5.2" constraint.',
+                . 'Service version should satisfy "~1.7 || ~2.4 || ~5.2" constraint.',
             $magentoVersion,
             $version,
             Config::KEY_ELASTICSEARCH
@@ -166,7 +166,7 @@ class ValidatorTest extends TestCase
                     Config::KEY_NGINX => '0.9', //wrong
                     Config::KEY_VARNISH => '4.5',
                     Config::KEY_REDIS => '3.1',
-                    Config::KEY_ELASTICSEARCH => '1.7', //wrong
+                    Config::KEY_ELASTICSEARCH => '6.5', //wrong
                     Config::KEY_RABBITMQ => '3.5' //wrong
                 ],
                 4

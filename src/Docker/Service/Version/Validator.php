@@ -37,7 +37,7 @@ class Validator
             Config::KEY_NGINX => '^1.9',
             Config::KEY_VARNISH => '~4.0 || ~5.0',
             Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '~2.4 || ~5.2',
+            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2',
             Config::KEY_RABBITMQ => '~3.5',
         ],
         '>=2.2.8 <2.3.0' => [
@@ -46,7 +46,7 @@ class Validator
             Config::KEY_NGINX => '^1.9',
             Config::KEY_VARNISH => '~4.0 || ~5.0',
             Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '~2.4 || ~5.2 || ~6.5',
+            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2 || ~6.5',
             Config::KEY_RABBITMQ => '~3.5',
         ],
         '>=2.3.0' => [
@@ -55,7 +55,7 @@ class Validator
             Config::KEY_NGINX => '^1.9',
             Config::KEY_VARNISH => '~4.0 || ~5.0',
             Config::KEY_REDIS => '~3.2 || ~4.0 || ~5.0',
-            Config::KEY_ELASTICSEARCH => '~2.4 || ~5.2 || ~6.5',
+            Config::KEY_ELASTICSEARCH => '~1.7 || ~2.4 || ~5.2 || ~6.5',
             Config::KEY_RABBITMQ => '~3.7',
         ]
     ];
