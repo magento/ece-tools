@@ -82,6 +82,10 @@
         "docker/mnt"
       ],
       [
+        "dist/docker/tmp",
+        "docker/tmp"
+      ],
+      [
         "dist/docker/mysql",
         "docker/mysql"
       ],

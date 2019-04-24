@@ -3,10 +3,10 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
+namespace Magento\MagentoCloud\Test\Unit\Process;
 
 use Magento\MagentoCloud\Config\Deploy\Writer;
-use Magento\MagentoCloud\Process\Deploy\PreDeploy\SetProductionMode;
+use Magento\MagentoCloud\Process\SetProductionMode;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
