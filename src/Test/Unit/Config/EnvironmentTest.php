@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -43,6 +44,8 @@ class EnvironmentTest extends TestCase
      */
     protected function setUp()
     {
+        /** @var MockObject|Reader $environmentReaderMock */
+        /** @var MockObject|Schema $schemaMock */
         $environmentReaderMock = $this->createMock(Reader::class);
         $schemaMock = $this->createMock(Schema::class);
         $schemaMock->expects($this->any())
@@ -53,7 +56,6 @@ class EnvironmentTest extends TestCase
                 SystemConfigInterface::VAR_ENV_ROUTES => 'MAGENTO_CLOUD_ROUTES',
                 SystemConfigInterface::VAR_ENV_VARIABLES => 'MAGENTO_CLOUD_VARIABLES',
                 SystemConfigInterface::VAR_ENV_APPLICATION => 'MAGENTO_CLOUD_APPLICATION',
-                SystemConfigInterface::VAR_ENV_MODE => 'MAGENTO_CLOUD_MODE',
                 SystemConfigInterface::VAR_ENV_ENVIRONMENT => 'MAGENTO_CLOUD_ENVIRONMENT',
             ]);
 
