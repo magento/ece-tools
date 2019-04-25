@@ -156,7 +156,7 @@ class ValidatorTest extends TestCase
             ],
             [
                 '2.1.4',
-                [Config::KEY_PHP => '7.0.3'],
+                [Config::KEY_PHP => '5.6'],
                 1,
             ],
             [
