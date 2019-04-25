@@ -93,7 +93,7 @@ class Validator
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
-    public function validateVersions($serviceVersions)
+    public function validateVersions(array $serviceVersions): array
     {
         $errors = [];
         foreach ($serviceVersions as $name => $version) {
@@ -114,7 +114,7 @@ class Validator
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
-    private function validateService($serviceName, $version)
+    private function validateService(string $serviceName, string $version): string
     {
         if (!isset($this->getSupportedVersions()[$serviceName])) {
             return sprintf(
@@ -146,7 +146,7 @@ class Validator
      * @throws ConfigurationMismatchException
      * @throws UndefinedPackageException
      */
-    private function getSupportedVersions()
+    private function getSupportedVersions(): array
     {
         if (null === $this->supportedVersionList) {
             foreach (self::MAGENTO_SUPPORTED_SERVICE_VERSIONS as $serviceName => $magentoVersions) {
