@@ -28,7 +28,9 @@
     "phpunit/php-code-coverage": "^5.2",
     "phpunit/phpunit": "^6.2",
     "squizlabs/php_codesniffer": " ^3.0",
-    "symfony/process": "^3.4"
+    "symfony/process": "^3.4",
+    "codeception/codeception": "^2.5.3",
+    "consolidation/robo": "^1.2"
   },
   "replace": {
     "magento/ece-patches": "*",
@@ -49,7 +51,7 @@
     "psr-4": {
       "Magento\\MagentoCloud\\Test\\": "tests/static/",
       "Magento\\MagentoCloud\\Test\\Integration\\": "tests/integration/",
-      "Magento\\MagentoCloud\\Test\\DockerIntegration\\": "tests/docker-integration/"
+      "Magento\\MagentoCloud\\Test\\Functional\\": "tests/functional/"
     }
   },
   "scripts": {

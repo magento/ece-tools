@@ -3,14 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\DockerIntegration;
+declare(strict_types=1);
+
+namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * @inheritdoc
- *
- * @php 7.0
+ * @group php71
  */
-class AdminCredential21Test extends AdminCredentialTest
+class AdminCredential21Cest extends AdminCredentialCest
 {
     /**
      * @var string

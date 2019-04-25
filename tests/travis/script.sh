@@ -34,18 +34,18 @@ case $TEST_SUITE in
 
         docker-compose down -v
         ;;
-    docker-integration)
+    functional)
         ./bin/ece-tools docker:build:integration test-v2 --php ${TRAVIS_PHP_VERSION}
 
         case $TRAVIS_PHP_VERSION in
             7.0)
-                ./vendor/bin/phpunit --group php70 --verbose --configuration ./tests/docker-integration
+                ./vendor/bin/codecept run -g php70 --steps
                 ;;
             7.1)
-                ./vendor/bin/phpunit --group php71 --verbose --configuration ./tests/docker-integration
+                ./vendor/bin/codecept run -g php71 --steps
                 ;;
             7.2)
-                ./vendor/bin/phpunit --group php72 --verbose --configuration ./tests/docker-integration
+                ./vendor/bin/codecept run -g php72 --steps
                 ;;
         esac
         ;;
