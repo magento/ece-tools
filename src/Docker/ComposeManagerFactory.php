@@ -17,7 +17,6 @@ class ComposeManagerFactory
 {
     const COMPOSE_DEVELOPER = 'developer';
     const COMPOSE_PRODUCTION = 'production';
-    const COMPOSE_DEFAULT = self::COMPOSE_PRODUCTION;
     const COMPOSE_TEST_V1 = 'test-v1';
     const COMPOSE_TEST_V2 = 'test-v2';
 

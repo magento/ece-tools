@@ -114,7 +114,7 @@ class BuildTest extends TestCase
                 [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
                 [Build::OPTION_RABBIT_MQ, '3.5'],
-                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_DEFAULT]
+                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_PRODUCTION]
             ]);
 
         $this->builderFactoryMock->expects($this->once())
@@ -174,7 +174,7 @@ class BuildTest extends TestCase
                 [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
                 [Build::OPTION_RABBIT_MQ, '3.5'],
-                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_DEFAULT]
+                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_PRODUCTION]
             ]);
         $this->managerMock->expects($this->once())
             ->method('getConfigPath')

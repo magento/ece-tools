@@ -131,7 +131,7 @@ class Build extends Command
                     'Mode of environment (%s)',
                     implode(', ', [ComposeManagerFactory::COMPOSE_DEVELOPER, ComposeManagerFactory::COMPOSE_PRODUCTION])
                 ),
-                ComposeManagerFactory::COMPOSE_DEFAULT
+                ComposeManagerFactory::COMPOSE_PRODUCTION
             );
 
         parent::configure();
