@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
+use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -36,14 +37,20 @@ class ShellTest extends TestCase
     private $systemListMock;
 
     /**
+     * @var Sanitizer|MockObject
+     */
+    private $sanitizerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->systemListMock = $this->createMock(SystemList::class);
+        $this->sanitizerMock = $this->createMock(Sanitizer::class);
 
-        $this->shell = new Shell($this->loggerMock, $this->systemListMock);
+        $this->shell = new Shell($this->loggerMock, $this->systemListMock, $this->sanitizerMock);
     }
 
     /**
@@ -71,6 +78,8 @@ class ShellTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($command);
+        $this->sanitizerMock->expects($this->never())
+            ->method('sanitize');
         if ($execOutput) {
             $this->loggerMock->expects($this->once())
                 ->method('log')
@@ -95,13 +104,13 @@ class ShellTest extends TestCase
      * @param InvokedCount $logExpects
      * @param array $execOutput
      * @expectedException \RuntimeException
-     * @expectedExceptionMessage Command ls -al returned code 123
+     * @expectedExceptionMessage Command ls -al --password="***" returned code 123
      * @expectedExceptionCode 123
      * @dataProvider executeExceptionDataProvider
      */
     public function testExecuteException($logExpects, array $execOutput)
     {
-        $command = 'ls -al';
+        $command = 'ls -al --password="123"';
         $magentoRoot = '/magento';
         $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' 2>&1';
 
@@ -116,6 +125,10 @@ class ShellTest extends TestCase
         $this->systemListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
+        $this->sanitizerMock->expects($this->once())
+            ->method('sanitize')
+            ->with('ls -al --password="123"')
+            ->willReturn('ls -al --password="***"');
 
         $this->loggerMock->expects($this->once())
             ->method('info')
