@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Command\Docker;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
-use Magento\MagentoCloud\Docker\BuilderFactory;
+use Magento\MagentoCloud\Docker\ComposeManagerFactory;
 use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
@@ -39,9 +39,10 @@ class Build extends Command
     const OPTION_REDIS = 'redis';
     const OPTION_ES = 'es';
     const OPTION_RABBIT_MQ = 'rmq';
+    const OPTION_MODE = 'mode';
 
     /**
-     * @var BuilderFactory
+     * @var ComposeManagerFactory
      */
     private $builderFactory;
 
@@ -76,7 +77,7 @@ class Build extends Command
     private $versionValidator;
 
     /**
-     * @param BuilderFactory $builderFactory
+     * @param ComposeManagerFactory $builderFactory
      * @param File $file
      * @param Environment $environment
      * @param RepositoryFactory $configFactory
@@ -85,7 +86,7 @@ class Build extends Command
      * @param DistGenerator $distGenerator
      */
     public function __construct(
-        BuilderFactory $builderFactory,
+        ComposeManagerFactory $builderFactory,
         File $file,
         Environment $environment,
         RepositoryFactory $configFactory,
@@ -141,6 +142,15 @@ class Build extends Command
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'RabbitMQ version'
+            )->addOption(
+                self::OPTION_MODE,
+                'm',
+                InputOption::VALUE_OPTIONAL,
+                sprintf(
+                    'Mode of environment (%s)',
+                    implode(', ', [ComposeManagerFactory::COMPOSE_DEVELOPER, ComposeManagerFactory::COMPOSE_PRODUCTION])
+                ),
+                ComposeManagerFactory::COMPOSE_PRODUCTION
             );
 
         parent::configure();
@@ -155,7 +165,9 @@ class Build extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $builder = $this->builderFactory->create(BuilderFactory::BUILDER_DEV);
+        $type = $input->getOption(self::OPTION_MODE);
+
+        $builder = $this->builderFactory->create($type);
         $config = $this->configFactory->create();
 
         $map = [
@@ -167,7 +179,7 @@ class Build extends Command
             self::OPTION_RABBIT_MQ => Config::KEY_RABBITMQ,
         ];
 
-        array_walk($map, function ($key, $option) use ($config, $input) {
+        array_walk($map, static function ($key, $option) use ($config, $input) {
             if ($value = $input->getOption($option)) {
                 $config->set($key, $value);
             }
@@ -196,9 +208,13 @@ class Build extends Command
 
         $this->distGenerator->generate();
 
-        $this->getApplication()
-            ->find(ConfigConvert::NAME)
-            ->run(new ArrayInput([]), $output);
+        try {
+            $this->getApplication()
+                ->find(ConfigConvert::NAME)
+                ->run(new ArrayInput([]), $output);
+        } catch (\Exception $exception) {
+            throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
+        }
 
         $output->writeln('<info>Configuration was built.</info>');
     }

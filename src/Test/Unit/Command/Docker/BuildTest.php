@@ -13,7 +13,8 @@ use Magento\MagentoCloud\Command\Docker\Build;
 use Magento\MagentoCloud\Command\Docker\ConfigConvert;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
-use Magento\MagentoCloud\Docker\BuilderFactory;
+use Magento\MagentoCloud\Docker\Compose\ProductionCompose;
+use Magento\MagentoCloud\Docker\ComposeManagerFactory;
 use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\DevBuilder;
@@ -38,14 +39,14 @@ class BuildTest extends TestCase
     private $command;
 
     /**
-     * @var BuilderFactory|MockObject
+     * @var ComposeManagerFactory|MockObject
      */
     private $builderFactoryMock;
 
     /**
-     * @var DevBuilder|MockObject
+     * @var ProductionCompose|MockObject
      */
-    private $builderMock;
+    private $managerMock;
 
     /**
      * @var File|MockObject
@@ -87,8 +88,8 @@ class BuildTest extends TestCase
      */
     protected function setUp()
     {
-        $this->builderFactoryMock = $this->createMock(BuilderFactory::class);
-        $this->builderMock = $this->createMock(DevBuilder::class);
+        $this->builderFactoryMock = $this->createMock(ComposeManagerFactory::class);
+        $this->managerMock = $this->createMock(ProductionCompose::class);
         $this->fileMock = $this->createMock(File::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
@@ -124,18 +125,29 @@ class BuildTest extends TestCase
      */
     public function testExecute()
     {
-        /** @var Console\Input\InputInterface $inputMock */
+        /** @var Console\Input\InputInterface|MockObject $inputMock */
         $inputMock = $this->getMockForAbstractClass(Console\Input\InputInterface::class);
-        /** @var Console\Output\OutputInterface $outputMock */
+        /** @var Console\Output\OutputInterface|MockObject $outputMock */
         $outputMock = $this->getMockForAbstractClass(Console\Output\OutputInterface::class);
+
+        $inputMock->method('getOption')
+            ->willReturnMap([
+                [Build::OPTION_PHP, '7.1'],
+                [Build::OPTION_DB, '10'],
+                [Build::OPTION_NGINX, '1.9'],
+                [Build::OPTION_REDIS, '3.2'],
+                [Build::OPTION_ES, '2.4'],
+                [Build::OPTION_RABBIT_MQ, '3.5'],
+                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_PRODUCTION]
+            ]);
 
         $this->builderFactoryMock->expects($this->once())
             ->method('create')
-            ->willReturn($this->builderMock);
-        $this->builderMock->expects($this->once())
+            ->willReturn($this->managerMock);
+        $this->managerMock->expects($this->once())
             ->method('build')
             ->willReturn(['version' => '2']);
-        $this->builderMock->expects($this->once())
+        $this->managerMock->expects($this->once())
             ->method('getConfigPath')
             ->willReturn('magento_root/docker-compose.yml');
         $this->fileMock->expects($this->once())
@@ -171,8 +183,8 @@ class BuildTest extends TestCase
 
         $this->builderFactoryMock->expects($this->once())
             ->method('create')
-            ->willReturn($this->builderMock);
-        $this->builderMock->expects($this->once())
+            ->willReturn($this->managerMock);
+        $this->managerMock->expects($this->once())
             ->method('build')
             ->willReturn(['version' => '2']);
         $this->fileMock->expects($this->once())
@@ -185,9 +197,10 @@ class BuildTest extends TestCase
                 [Build::OPTION_NGINX, '1.9'],
                 [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
-                [Build::OPTION_RABBIT_MQ, '3.5']
+                [Build::OPTION_RABBIT_MQ, '3.5'],
+                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_PRODUCTION]
             ]);
-        $this->builderMock->expects($this->once())
+        $this->managerMock->expects($this->once())
             ->method('getConfigPath')
             ->willReturn('magento_root/docker-compose.yml');
         $this->configMock->expects($this->exactly(6))
