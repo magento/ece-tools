@@ -18,7 +18,7 @@ trait Tasks
     use TaskAccessor;
 
     /**
-     * @param $volumes
+     * @param array $volumes
      * @return Tasks\EnvUp|CollectionBuilder
      */
     protected function taskEnvUp(array $volumes): CollectionBuilder
