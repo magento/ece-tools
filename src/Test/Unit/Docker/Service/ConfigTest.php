@@ -10,6 +10,8 @@ namespace Magento\MagentoCloud\Test\Unit\Docker\Service;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\Config\Reader;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Illuminate\Config\Repository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -38,6 +40,37 @@ class ConfigTest extends TestCase
         $this->version = new Config($this->readerMock);
     }
 
+    public function testGetAllServiceVersions()
+    {
+        $customVersions = [
+            Config::KEY_DB => 'db.version1',
+            Config::KEY_ELASTICSEARCH => 'es.version1',
+        ];
+        $configVersions = [
+            'services' => [
+                Config::KEY_ELASTICSEARCH => ['version' => 'es.version2'],
+                Config::KEY_RABBITMQ => ['version' => 'rabbitmq.version2'],
+            ],
+            'type' => 'php:7.0',
+        ];
+        $result = [
+            Config::KEY_DB => 'db.version1',
+            Config::KEY_ELASTICSEARCH => 'es.version1',
+            Config::KEY_RABBITMQ => 'rabbitmq.version2',
+            Config::KEY_PHP => '7.0'
+
+        ];
+        $customConfigs = new Repository($customVersions);
+
+        $this->readerMock->expects($this->any())
+            ->method('read')
+            ->willReturn($configVersions);
+
+        $this->assertEquals($result, $this->version->getAllServiceVersions($customConfigs));
+
+
+    }
+
     /**
      * @param array $config
      * @param string $serviceName
@@ -64,6 +97,19 @@ class ConfigTest extends TestCase
             ->method('read')
             ->willReturn(['type' => 'notphp:1']);
         $this->version->getServiceVersion(Config::KEY_PHP);
+    }
+
+    /**
+     * @throws ConfigurationMismatchException
+     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
+     */
+    public function testGetServiceVersionException()
+    {
+        $exception = new FileSystemException('reader exception');
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willThrowException($exception);
+        $this->version->getServiceVersion(Config::KEY_RABBITMQ);
     }
 
     /**
@@ -104,6 +150,68 @@ class ConfigTest extends TestCase
             ->method('read')
             ->willReturn(['type' => 'notphp:7.1']);
         $this->version->getPhpVersion();
+    }
+
+    /**
+     * @throws ConfigurationMismatchException
+     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
+     */
+    public function testGetPhpVersionException()
+    {
+        $exception = new FileSystemException('reader exception');
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willThrowException($exception);
+        $this->version->getPhpVersion();
+    }
+
+    /**
+     * @param array $config
+     * @param string $result
+     * @throws ConfigurationMismatchException
+     *
+     * @dataProvider getCronDataProvider
+     */
+    public function testGetCron($config, $result)
+    {
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willReturn($config);
+        $this->assertEquals($result, $this->version->getCron());
+    }
+
+    /**
+     * @throws ConfigurationMismatchException
+     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
+     */
+    public function testGetCronException()
+    {
+        $exception = new FileSystemException('reader exception');
+        $this->readerMock->expects($this->once())
+            ->method('read')
+            ->willThrowException($exception);
+        $this->version->getCron();
+    }
+
+    /**
+     * Data provicer for testGetCron
+     *
+     * @return array
+     */
+    public function getCronDataProvider()
+    {
+        $cronData = ['some cron data'];
+
+        return [
+            [
+                [Config::KEY_CRON => $cronData],
+                $cronData
+            ],
+            [
+                ['notCron' => 'some data'],
+                []
+            ],
+        ];
     }
 
     public function getPhpVersionDataProvider(): array
