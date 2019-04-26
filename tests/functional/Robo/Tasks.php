@@ -18,11 +18,12 @@ trait Tasks
     use TaskAccessor;
 
     /**
+     * @param $volumes
      * @return Tasks\EnvUp|CollectionBuilder
      */
-    protected function taskEnvUp(): CollectionBuilder
+    protected function taskEnvUp(array $volumes): CollectionBuilder
     {
-        return $this->task(Tasks\EnvUp::class);
+        return $this->task(Tasks\EnvUp::class, $volumes);
     }
 
     /**

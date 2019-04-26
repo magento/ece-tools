@@ -24,12 +24,11 @@ env:
 
 cache:
   apt: true
-  directories:
-    - $HOME/.composer/cache
 
 before_install:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
+  - composer config --global http-basic.repo.magento.com $REPO_USERNAME $REPO_PASSWORD
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
 
 install: composer update -n --no-suggest
