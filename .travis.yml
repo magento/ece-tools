@@ -21,7 +21,8 @@ env:
     - TEST_SUITE=static-unit XDEBUG=true
     - TEST_SUITE=integration
     - TEST_SUITE=functional
-
+  global:
+    secure: XrbnSKYcPjvsFmBxVyRsNOIhzar1dCMDd8YCn4b852LfazWuulW0DkyiuwJb230scWzVz5f3MnkNlN6gmbTiYzemXgxmNTYZk38sw+qFnMtenArlfGRTCHLlE/E/zAf4hB0h79UrGHjTD2ZXJ63174s1sEzANIbDrJ8hrRpkU+lc9sWpwYg9TdnnvMTSKGlQz+Kt38Azg/gV2vPjNLAWDQQrancHiWvX7vhts6VV4flZATA5A1sznihxHRBYY5b0LpkFJukanZo0PwLW3iwS1XUkUWpvh8JckMk/dleEaYIXKLPeVotd1AGfK+BPLu57aEXlNyu/2uEmVwWnH6e3o2j9f22A1+lT3T8PudQKErnwta3R47pTq7arbVENEUqSzlcnbMD7vvvRziJcAFTgB+ST9cMZDlj0RADKR6zhlCBOFBvcfQbeK3G1e2/dSNbLKe+rdgq0MlFtElg5Zx6R/QoGxjMno0SithEo8rApjPvykbOjKsC0lNsOcvqcQ++RCOuP1QrRJxIJb5aaNQLsGIxKQ2D2q6BPtcS+rhalrmAYvJ1J1khCkcVev86ENBFJpXujM0zX9R01W2lWZ0xh1V0aG2i7G3VH9IpJ78fBRBks6h/F5VYBqsFja0iITzYzVQ4bWVkQh8I8S0GwhgSGsyW/JOWEGzVO8fSkZETsSHY=
 cache:
   apt: true
 
