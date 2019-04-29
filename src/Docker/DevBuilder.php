@@ -106,7 +106,8 @@ class DevBuilder implements BuilderInterface
         if ($nodeVersion) {
             $services['node'] = $this->serviceFactory->create(
                 ServiceFactory::SERVICE_NODE,
-                $nodeVersion
+                $nodeVersion,
+                ['volumes' => [$this->getMagentoVolume(false)]]
             );
         }
 
