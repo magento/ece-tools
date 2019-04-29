@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Shell;
 
-use Symfony\Component\Process\Process;
-
 /**
  * Provides access to system shell operations.
  */
@@ -19,8 +17,8 @@ interface ShellInterface
      *
      * @param string $command The command.
      * @param array $args Arguments to pass
-     * @return Process The output of command.
+     * @return ResultInterface The output of command.
      * @throws ShellException If command was executed with error
      */
-    public function execute(string $command, array $args = []): Process;
+    public function execute(string $command, array $args = []): ResultInterface;
 }

@@ -53,9 +53,9 @@ class System
 
         try {
             $magentoShell = $this->shellFactory->create(ShellFactory::STRATEGY_MAGENTO_SHELL);
-            $process = $magentoShell->execute('config:show', [$key]);
+            $shellResult = $magentoShell->execute('config:show', [$key]);
 
-            return explode(PHP_EOL, $process->getOutput())[0] ?? null;
+            return $shellResult->getOutput()[0] ?? null;
         } catch (ShellException $shellException) {
             return null;
         }
