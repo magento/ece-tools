@@ -14,7 +14,7 @@ use Monolog\Logger;
 /**
  * @inheritdoc
  */
-class Shell implements ShellInterface
+class Shell
 {
     /**
      * @var LoggerInterface

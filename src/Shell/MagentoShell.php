@@ -7,20 +7,22 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Shell;
 
+use Symfony\Component\Process\Process;
+
 /**
  * ./bin/magento shell wrapper.
  */
 class MagentoShell implements ShellInterface
 {
     /**
-     * @var Shell
+     * @var ShellProcess
      */
     private $shell;
 
     /**
-     * @param Shell $shell
+     * @param ShellProcess $shell
      */
-    public function __construct(Shell $shell)
+    public function __construct(ShellProcess $shell)
     {
         $this->shell = $shell;
     }
@@ -28,10 +30,8 @@ class MagentoShell implements ShellInterface
     /**
      * @inheritdoc
      */
-    public function execute(string $command, $args = []): array
+    public function execute(string $command, array $args = []): Process
     {
-        $defaultArgs = ['--ansi', '--no-interaction'];
-
-        return $this->shell->execute('php ./bin/magento ' . $command, array_merge($defaultArgs, (array)$args));
+        return $this->shell->execute('php ./bin/magento ' . $command . ' --ansi --no-interaction', $args);
     }
 }

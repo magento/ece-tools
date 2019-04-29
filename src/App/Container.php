@@ -102,7 +102,7 @@ class Container implements ContainerInterface
         );
         $this->container->singleton(
             \Magento\MagentoCloud\Shell\ShellInterface::class,
-            \Magento\MagentoCloud\Shell\Shell::class
+            \Magento\MagentoCloud\Shell\ShellProcess::class
         );
         $this->container->singleton(
             \Magento\MagentoCloud\DB\DumpInterface::class,

@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Shell;
 
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Psr\Log\LoggerInterface;
-use Monolog\Logger;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Process\Process;
 
 /**
@@ -28,13 +28,23 @@ class ShellProcess implements ShellInterface
     private $systemList;
 
     /**
+     * @var ProcessFactory
+     */
+    private $processFactory;
+
+    /**
      * @param LoggerInterface $logger
      * @param SystemList $systemList
+     * @param ProcessFactory $processFactory
      */
-    public function __construct(LoggerInterface $logger, SystemList $systemList)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        SystemList $systemList,
+        ProcessFactory $processFactory
+    ) {
         $this->logger = $logger;
         $this->systemList = $systemList;
+        $this->processFactory = $processFactory;
     }
 
     /**
@@ -46,69 +56,32 @@ class ShellProcess implements ShellInterface
      * $this->shell->execute('/bin/bash -c "set -o pipefail; firstCommand | secondCommand"');
      * ```
      */
-    public function execute(string $command, $args = []): array
+    public function execute(string $command, array $args = []): Process
     {
+        try {
+            $args = array_map('escapeshellarg', array_filter($args));
 
-        $args = array_map(
-            'escapeshellarg',
-            array_filter((array)$args)
-        );
+            if ($args) {
+                $command .= ' ' . implode(' ', $args);
+            }
 
-        if ($args) {
-            $command .= ' ' . implode(' ', $args);
+            $this->logger->info($command);
+
+            $process = $this->processFactory->create([
+                'commandline' => $command,
+                'cwd' => $this->systemList->getMagentoRoot(),
+                'timeout' => 0
+            ]);
+
+            $process->mustRun();
+        } catch (ProcessFailedException $e) {
+            throw new ShellException(
+                $e->getMessage(),
+                $e->getCode(),
+                $e
+            );
         }
-
-
-
-        $this->logger->info($command);
-
-        $fullCommand = sprintf(
-            'cd %s && %s 2>&1',
-            $this->systemList->getMagentoRoot(),
-            $command
-        );
-
-        $process = new Process($command, $this->systemList->getMagentoRoot());
-        $process->run();
 
         return $process;
-
-        exec($fullCommand, $output, $status);
-
-        /**
-         * config:show will return non-zero exit code, if the value was not changed and remains default.
-         */
-        if ($status !== 0 && strpos($command, 'config:show') !== false) {
-            return [];
-        }
-
-        return $this->handleOutput($command, $output, $status);
-    }
-
-    /**
-     * @param string $command
-     * @param array $output
-     * @param int $status
-     * @return array
-     *
-     * @throws ShellException
-     */
-    private function handleOutput(Process $process)
-    {
-        if ($process->getOutput()) {
-            $message = array_reduce(
-                $output,
-                function ($message, $line) {
-                    return $message . PHP_EOL . '  ' . $line;
-                },
-                ''
-            );
-
-            $this->logger->log($status !== 0 ? Logger::CRITICAL : Logger::DEBUG, $message);
-        }
-
-        if ($process->getStatus() !== 0) {
-            throw new ShellException("Command $command returned code $status", $status);
-        }
     }
 }
