@@ -35,6 +35,9 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     const BUILD_CONTAINER = 'build';
     const DEPLOY_CONTAINER = 'deploy';
 
+    /**
+     * @var array
+     */
     protected $config = [
         'db_host' => '',
         'db_port' => '3306',
@@ -47,6 +50,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
         'system_magento_dir' => '',
         'env_base_url' => '',
         'env_secure_base_url' => '',
+        'volumes' => []
     ];
 
     /**
@@ -66,7 +70,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function _before(TestInterface $test)
     {
-        $this->taskEnvUp()
+        $this->taskEnvUp($this->_getConfig('volumes'))
             ->run()
             ->stopOnFail();
     }

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Config\Repository;
 /**
  * General Builder interface.
  */
-interface BuilderInterface
+interface ComposeManagerInterface
 {
     const PHP_VERSION = 'php.version';
     const NGINX_VERSION = 'nginx.version';

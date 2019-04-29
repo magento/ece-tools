@@ -24,8 +24,6 @@ env:
 
 cache:
   apt: true
-  directories:
-    - $HOME/.composer/cache
 
 before_install:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env

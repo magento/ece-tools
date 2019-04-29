@@ -9,23 +9,50 @@ namespace Magento\MagentoCloud\Test\Functional\Robo\Tasks;
 
 use Robo\Common\ExecOneCommand;
 use Robo\Contract\CommandInterface;
-use Robo\Contract\TaskInterface;
 use Robo\Result;
 use Robo\Task\BaseTask;
+use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 
 /**
  * Up Docker environment
  */
-class EnvUp extends BaseTask implements CommandInterface, TaskInterface
+class EnvUp extends BaseTask implements CommandInterface
 {
     use ExecOneCommand;
+
+    /**
+     * @var array
+     */
+    private $volumes;
+
+    /**
+     * @param array $volumes
+     */
+    public function __construct(array $volumes)
+    {
+        $this->volumes = $volumes;
+    }
 
     /**
      * @inheritdoc
      */
     public function getCommand(): string
     {
-        return 'docker-compose down -v && docker-compose up -d';
+        $commands = [
+            'docker-compose down -v',
+        ];
+
+        foreach ($this->volumes as $volume) {
+            $commands[] = sprintf(
+                'docker-compose run %s bash -c "mkdir -p %s"',
+                Docker::BUILD_CONTAINER,
+                $volume
+            );
+        }
+
+        $commands[] = 'docker-compose up -d';
+
+        return implode(' && ', $commands);
     }
 
     /**

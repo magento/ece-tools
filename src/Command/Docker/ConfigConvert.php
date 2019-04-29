@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command\Docker;
 
+use Magento\MagentoCloud\Docker\Config\Converter;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\SystemList;
@@ -24,7 +25,6 @@ class ConfigConvert extends Command
      */
     private static $map = [
         '/docker/config.php' => '/docker/config.env',
-        '/docker/global.php' => '/docker/global.env',
     ];
 
     /**
@@ -38,13 +38,20 @@ class ConfigConvert extends Command
     private $file;
 
     /**
+     * @var Converter
+     */
+    private $converter;
+
+    /**
      * @param SystemList $directoryList
      * @param File $file
+     * @param Converter $converter
      */
-    public function __construct(SystemList $directoryList, File $file)
+    public function __construct(SystemList $directoryList, File $file, Converter $converter)
     {
         $this->systemList = $directoryList;
         $this->file = $file;
+        $this->converter = $converter;
 
         parent::__construct();
     }
@@ -84,12 +91,11 @@ class ConfigConvert extends Command
                 $this->file->deleteFile($envPath);
             }
 
-            $content = '';
+            $content = $this->converter->convert(
+                $this->file->requireFile($sourcePath)
+            );
 
-            foreach ($this->file->requireFile($sourcePath) as $variable => $value) {
-                $formattedValue = is_bool($value) ? var_export($value, true) : $value;
-                $content .= $variable . '=' . $formattedValue . PHP_EOL;
-            }
+            $content = implode(PHP_EOL, $content);
 
             $this->file->filePutContents($envPath, $content);
         }

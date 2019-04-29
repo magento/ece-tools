@@ -90,12 +90,12 @@
         "docker/mysql"
       ],
       [
-        "dist/docker/global.php",
-        "docker/global.php.dist"
-      ],
-      [
         "dist/docker/README.md",
         "docker/README.md"
+      ],
+      [
+        "dist/docker-sync.yml",
+        "docker-sync.yml"
       ]
     ]
   }
