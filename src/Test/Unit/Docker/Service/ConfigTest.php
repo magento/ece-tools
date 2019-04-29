@@ -67,8 +67,6 @@ class ConfigTest extends TestCase
             ->willReturn($configVersions);
 
         $this->assertEquals($result, $this->version->getAllServiceVersions($customConfigs));
-
-
     }
 
     /**
