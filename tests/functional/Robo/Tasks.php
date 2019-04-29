@@ -61,4 +61,15 @@ trait Tasks
     {
         return $this->task(Tasks\CopyFromDocker::class, $source, $destination, $container);
     }
+
+    /**
+     * @param string $source
+     * @param string $destination
+     * @param string $container
+     * @return Tasks\CopyToDocker|CollectionBuilder
+     */
+    protected function taskCopyToDocker(string $source, string $destination, string $container): CollectionBuilder
+    {
+        return $this->task(Tasks\CopyToDocker::class, $source, $destination, $container);
+    }
 }

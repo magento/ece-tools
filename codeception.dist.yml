@@ -28,3 +28,8 @@ modules:
       env_secure_base_url: "%Magento.docker.settings.env.url.secure_base%"
     PhpBrowser:
       url: "%Magento.docker.settings.env.url.base%"
+    Magento\MagentoCloud\Test\Functional\Codeception\MagentoDb:
+      dsn: "mysql:host=127.0.0.1;port=3306;dbname=%Magento.docker.settings.db.path%"
+      user: "%Magento.docker.settings.db.username%"
+      password: "%Magento.docker.settings.db.password%"
+      reconnect: true
