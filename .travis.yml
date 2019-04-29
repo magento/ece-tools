@@ -1,4 +1,5 @@
 dist: trusty
+sudo: required
 
 git:
   depth: 1
@@ -31,6 +32,9 @@ before_install:
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
 
 install: composer update -n --no-suggest
+
+before_script:
+  - sudo /etc/init.d/mysql stop
 
 script: ./tests/travis/script.sh
 
