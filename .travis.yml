@@ -1,7 +1,7 @@
 dist: trusty
 
 git:
-  depth: 2
+  depth: 1
 
 services:
   - docker
@@ -21,6 +21,9 @@ env:
     - TEST_SUITE=static-unit XDEBUG=true
     - TEST_SUITE=integration
     - TEST_SUITE=functional
+  global:
+    - secure: HR4pdrutmgu8c/0Pxz+f0oggOTeRCtk2igdKblE6pNpvbCue22oWKUw3ZLDuHYdQiUJFgP+6INLM74b1RyZ3KjvC3xejwPX/rS0Wt/KyJ1KlqfIgU8fdkIK6WrSO4cloLeKYEEwviEfA9gIwREZa5g2ssfl6UPA2j2/0+P7yEsyJQwAQXOkz+0m7cGyU53P95vGf7/DIuQ9DLtuq3Qdks18WYPYnlv+VIqDDaTvlb1kkI5OiZvCa/IvAx5S99yrmNpjaOP8DmkoOKKfQQ6iNeMgYRCSkUizMP8W/iNsxNx/8E8R698pf5Pbnp7eYombc6Iu4+sJieg9i1zETy7A897jBMLuSli8i0+C+G8xXnbZg6b/78cEZq96yls3HDXwzKV9elUeu+1tndpY8t17C4A7uNIyVk1tzYWcMPCwLWs8kpub4JlxndglrsKKRQEO3wNdJr5hODxFS6UIdKh3rBIN+2y66rFDwholzMR5Akd28k718q0kVNeP1e+MykOj6YlzVxa39wOkVVI23hF0/nhaHZQSJt6NrZWjqfoiaqfk5ui+Dv2pCmjiTW6TlJUbNwl5wVGgJ+rX21UcK8QO/gGvF4qDAIL8FHmjU5S6q/rcIsxhzzsSUpYCtTIL+n/T0HTC0CdSWOUc+bP0JJhPrQamShAxP1irjYTTf4G73k7o=
+    - secure: t1kcVUePAm9L9+Yv3f5NnT0/jXBZh6dJDN/OU01FrsjhJBbUvV+rDApgaXADtkN+kYsBSkqZRZFAdBGmUOTGluu4ABSMeFKqDYrFrNA0yDqLwxVFEB3vFCUiXzDJb4RRUQyn72XBFlTRSdGh1dAgJk5uk2YJkunNBU4PGfFEGiW1CngjXLXsH48SVgH3cMcyi+M1DVcceG9malQEon4ax+GHQK3Wxj2GC/lMUhWMTa77wHSECtortLxHIIRQa52eFh5lqPGWtLizs/FMAEFJxBJXObI4NxUmZz0m9uy2aqnGSPVt7Ioe8NZmhYfc5KGlwz6alSlD10r1rPHHVzAVSObA9PQfpJRYY89wp4spvsuSsNHsgfB7g668U3swCjRoZpSnBRSTjFjE1pznqmD0iQW0YEqLKuoxQJYg9RxGvzpDh+KX05Z2dnW0oB2Z9qamcqrxuf018PLfmAZtS7fGup+R7n7B+DFeKpoa7DH/NLgnEeaFCMZto6nTtxZT0U7uXbTq3NVgQVMqXYcWhh79llkZQWwVVBSQCmH/4CS+hW2K61jEbc0Uc8OvvErEQrHtyzDuG734hZmxPTySoL/yASAgORh0ikDMCSpcXejNmJhkC8h7ATP7qhzbUcvkPEvNgnZIDGcKMFik+T6Xeix1i5WmVtM/hdWz/qUxRjFQJ1o=
 
 cache:
   apt: true
