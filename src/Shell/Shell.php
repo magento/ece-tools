@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Shell;
 
+use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Process\Exception\ProcessFailedException;
@@ -34,24 +35,32 @@ class Shell implements ShellInterface
     /**
      * @var ResultFactory
      */
+
     private $resultFactory;
+    /**
+     * @var Sanitizer
+     */
+    private $sanitizer;
 
     /**
      * @param LoggerInterface $logger
      * @param SystemList $systemList
      * @param ProcessFactory $processFactory
      * @param ResultFactory $resultFactory
+     * @param Sanitizer $sanitizer
      */
     public function __construct(
         LoggerInterface $logger,
         SystemList $systemList,
         ProcessFactory $processFactory,
-        ResultFactory $resultFactory
+        ResultFactory $resultFactory,
+        Sanitizer $sanitizer
     ) {
         $this->logger = $logger;
         $this->systemList = $systemList;
         $this->processFactory = $processFactory;
         $this->resultFactory = $resultFactory;
+        $this->sanitizer = $sanitizer;
     }
 
     /**
@@ -83,9 +92,8 @@ class Shell implements ShellInterface
             $process->mustRun();
         } catch (ProcessFailedException $e) {
             throw new ShellException(
-                $e->getMessage(),
-                $e->getCode(),
-                $e
+                $this->sanitizer->sanitize($e->getMessage()),
+                $e->getCode()
             );
         }
 

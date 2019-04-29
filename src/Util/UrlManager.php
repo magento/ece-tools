@@ -83,7 +83,7 @@ class UrlManager
                 continue;
             }
         }
-
+return ['secure' => ['https://thunder.local/'], 'unsecure' => ['http://thunder.local/']];
         return $urls;
     }
 
