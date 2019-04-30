@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Docker\Config;
 
-use Magento\MagentoCloud\Docker\Config;
+use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 
 /**
@@ -59,9 +59,8 @@ class Relationship
     /**
      * @param Config $config
      */
-    public function __construct(
-        Config $config
-    ) {
+    public function __construct(Config $config)
+    {
         $this->config = $config;
     }
 

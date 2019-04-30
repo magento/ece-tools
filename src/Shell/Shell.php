@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Shell;
 
+use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Psr\Log\LoggerInterface;
 use Monolog\Logger;
@@ -27,13 +28,20 @@ class Shell implements ShellInterface
     private $systemList;
 
     /**
+     * @var Sanitizer
+     */
+    private $sanitizer;
+
+    /**
      * @param LoggerInterface $logger
      * @param SystemList $systemList
+     * @param Sanitizer $sanitizer
      */
-    public function __construct(LoggerInterface $logger, SystemList $systemList)
+    public function __construct(LoggerInterface $logger, SystemList $systemList, Sanitizer $sanitizer)
     {
         $this->logger = $logger;
         $this->systemList = $systemList;
+        $this->sanitizer = $sanitizer;
     }
 
     /**
@@ -99,7 +107,14 @@ class Shell implements ShellInterface
         }
 
         if ($status !== 0) {
-            throw new ShellException("Command $command returned code $status", $status);
+            throw new ShellException(
+                sprintf(
+                    "Command %s returned code %d",
+                    $this->sanitizer->sanitize($command),
+                    $status
+                ),
+                $status
+            );
         }
 
         return $output;

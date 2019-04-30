@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Docker\Config;
 
-use Magento\MagentoCloud\Docker\Config;
+use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\Config\Relationship;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use PHPUnit\Framework\MockObject\MockObject;

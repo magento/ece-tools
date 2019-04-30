@@ -5,20 +5,25 @@
  */
 namespace Magento\MagentoCloud\App\Logger\Processor;
 
+use Magento\MagentoCloud\App\Logger\Sanitizer;
+
 /**
- * Uses for sanitize sensitive data.
+ * Logger processor for sanitizing sensitive data.
  */
 class SanitizeProcessor
 {
     /**
-     * Array of replacements that will be applied to log messages.
-     *
-     * @var array
+     * @var Sanitizer
      */
-    private $replacements = [
-        '/-password=\'.*?\'(\s|$)/i' => '-password=\'******\'$1',
-        '/mysqldump (.* )-p\'[^\']+\'/i'  => 'mysqldump $1-p\'******\'',
-    ];
+    private $sanitizer;
+
+    /**
+     * @param Sanitizer $sanitizer
+     */
+    public function __construct(Sanitizer $sanitizer)
+    {
+        $this->sanitizer = $sanitizer;
+    }
 
     /**
      * Finds and replace sensitive data in record message.
@@ -28,9 +33,7 @@ class SanitizeProcessor
      */
     public function __invoke(array $record)
     {
-        foreach ($this->replacements as $pattern => $replacement) {
-            $record['message'] = preg_replace($pattern, $replacement, $record['message']);
-        }
+        $record['message'] = $this->sanitizer->sanitize($record['message']);
 
         return $record;
     }

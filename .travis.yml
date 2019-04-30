@@ -20,12 +20,10 @@ env:
   matrix:
     - TEST_SUITE=static-unit XDEBUG=true
     - TEST_SUITE=integration
-    - TEST_SUITE=docker-integration
+    - TEST_SUITE=functional
 
 cache:
   apt: true
-  directories:
-    - $HOME/.composer/cache
 
 before_install:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env

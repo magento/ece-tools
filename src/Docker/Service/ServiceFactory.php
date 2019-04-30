@@ -111,14 +111,6 @@ class ServiceFactory
         $metaConfig = self::CONFIG[$name];
         $defaultConfig = $metaConfig['config'] ?? [];
 
-        if (!in_array($version, $metaConfig['versions'], true)) {
-            throw new ConfigurationMismatchException(sprintf(
-                'Service "%s" does not support version "%s"',
-                $name,
-                $version
-            ));
-        }
-
         return array_replace(
             ['image' => sprintf($metaConfig['image'], $version)],
             $defaultConfig,
