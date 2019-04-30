@@ -10,7 +10,9 @@ namespace Magento\MagentoCloud\Shell;
 use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 
 /**
  * @inheritdoc
@@ -75,13 +77,9 @@ class Shell implements ShellInterface
     public function execute(string $command, array $args = []): ResultInterface
     {
         try {
-            $args = array_map('escapeshellarg', array_filter($args));
-
             if ($args) {
-                $command .= ' ' . implode(' ', $args);
+                $command = array_merge([$command], $args);
             }
-
-            $this->logger->info($command);
 
             $process = $this->processFactory->create([
                 'commandline' => $command,
@@ -89,14 +87,34 @@ class Shell implements ShellInterface
                 'timeout' => 0
             ]);
 
+            $this->logger->info($process->getCommandLine());
+
             $process->mustRun();
         } catch (ProcessFailedException $e) {
             throw new ShellException(
-                $this->sanitizer->sanitize($e->getMessage()),
-                $e->getCode()
+                $this->sanitizer->sanitize($e->getMessage())
             );
         }
 
+        $this->handleOutput($process);
+
         return $this->resultFactory->create($process);
+    }
+
+    /**
+     * Logs command output
+     *
+     * @param Process $process
+     * @return void
+     */
+    private function handleOutput(Process $process)
+    {
+        try {
+            if ($output = $process->getOutput()) {
+                $this->logger->debug($output);
+            }
+        } catch (LogicException $exception) {
+            $this->logger->error('Can\'t get command output: ' . $exception->getMessage());
+        }
     }
 }

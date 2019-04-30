@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
+use Magento\MagentoCloud\Shell\ResultInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Shell\UtilityManager;
 use PHPUnit\Framework\TestCase;
@@ -39,11 +40,19 @@ class UtilityManagerTest extends TestCase
 
     public function testGet()
     {
+        $resultMock1 = $this->getMockForAbstractClass(ResultInterface::class);
+        $resultMock1->expects($this->once())
+            ->method('getOutput')
+            ->willReturn(['/usr/bash']);
+        $resultMock2 = $this->getMockForAbstractClass(ResultInterface::class);
+        $resultMock2->expects($this->once())
+            ->method('getOutput')
+            ->willReturn(['/usr/timeout']);
         $this->shellMock->expects($this->any())
             ->method('execute')
             ->willReturnMap([
-                ['which ' . UtilityManager::UTILITY_BASH, [], ['/usr/bash']],
-                ['which ' . UtilityManager::UTILITY_TIMEOUT, [], ['/usr/timeout']],
+                ['which ' . UtilityManager::UTILITY_BASH, [], $resultMock1],
+                ['which ' . UtilityManager::UTILITY_TIMEOUT, [], $resultMock2],
             ]);
 
         $this->assertSame(
@@ -58,11 +67,19 @@ class UtilityManagerTest extends TestCase
      */
     public function testGetWithException()
     {
+        $resultMock1 = $this->getMockForAbstractClass(ResultInterface::class);
+        $resultMock1->expects($this->once())
+            ->method('getOutput')
+            ->willReturn(['/usr/bash']);
+        $resultMock2 = $this->getMockForAbstractClass(ResultInterface::class);
+        $resultMock2->expects($this->once())
+            ->method('getOutput')
+            ->willReturn(['/usr/timeout']);
         $this->shellMock->expects($this->any())
             ->method('execute')
             ->willReturnMap([
-                ['which ' . UtilityManager::UTILITY_BASH, [], ['/usr/bash'],],
-                ['which ' . UtilityManager::UTILITY_TIMEOUT, [], ['/usr/timeout']],
+                ['which ' . UtilityManager::UTILITY_BASH, [], $resultMock1],
+                ['which ' . UtilityManager::UTILITY_TIMEOUT, [], $resultMock2],
             ]);
 
         $this->assertSame(

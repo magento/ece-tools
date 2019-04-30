@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Shell;
 
 /**
+ * Result for shell command.
  */
 interface ResultInterface
 {
@@ -19,7 +20,7 @@ interface ResultInterface
     public function getExitCode(): int;
 
     /**
-     * Returns array of command execute
+     * Returns array filled with every line of output from the command
      *
      * @return array
      */

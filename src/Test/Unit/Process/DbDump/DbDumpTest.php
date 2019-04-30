@@ -8,10 +8,11 @@ namespace Magento\MagentoCloud\Test\Unit\Process\DbDump;
 use Magento\MagentoCloud\DB\DumpInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\DbDump\DbDump;
+use Magento\MagentoCloud\Shell\ResultInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -109,6 +110,9 @@ class DbDumpTest extends TestCase
         return 'bash -c "set -o pipefail; timeout 3600 ' . $command . ' | gzip > ' . $this->dumpFilePath . '"';
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testExecute()
     {
         $this->loggerMock->expects($this->exactly(3))
@@ -121,14 +125,21 @@ class DbDumpTest extends TestCase
 
         $command = $this->getCommand();
 
+        $resultMock = $this->getMockForAbstractClass(ResultInterface::class);
+        $resultMock->expects($this->once())
+            ->method('getExitCode')
+            ->willReturn(0);
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with($command)
-            ->willReturn([]);
+            ->willReturn($resultMock);
 
         $this->process->execute();
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testExecuteWithException()
     {
         $errorMessage = 'Some error';
@@ -150,6 +161,9 @@ class DbDumpTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testFailedCreationLockFile()
     {
         // Mock fopen() function which is used for creation lock file
@@ -171,6 +185,9 @@ class DbDumpTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testLockedFile()
     {
         // Mock fopen() function which is used for creation lock file
@@ -191,9 +208,11 @@ class DbDumpTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testExecuteWithErrors()
     {
-        $executeOutput = ['Some error'];
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -206,14 +225,20 @@ class DbDumpTest extends TestCase
 
         $command = $this->getCommand();
 
+        $resultMock1 = $this->getMockForAbstractClass(ResultInterface::class);
+        $resultMock1->expects($this->once())
+            ->method('getExitCode')
+            ->willReturn(128);
+        $resultMock2 = $this->getMockForAbstractClass(ResultInterface::class);
+
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
                 [$command],
                 ['rm ' . $this->dumpFilePath]
             )->willReturnMap([
-                [$command, [], $executeOutput],
-                ['rm ' . $this->dumpFilePath, [], []],
+                [$command, [], $resultMock1],
+                ['rm ' . $this->dumpFilePath, [], $resultMock2],
             ]);
 
         $this->process->execute();

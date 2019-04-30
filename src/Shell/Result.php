@@ -7,8 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Shell;
 
+use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Process\Process;
 
+/**
+ * Result class for shell command
+ */
 class Result implements ResultInterface
 {
     /**
@@ -25,18 +29,24 @@ class Result implements ResultInterface
     }
 
     /**
-     * @return int
+     * @inheritdoc
      */
     public function getExitCode(): int
     {
-        return $this->process->getExitCode();
+        return (int)$this->process->getExitCode();
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
     public function getOutput(): array
     {
-        return explode(PHP_EOL, $this->process->getOutput());
+        try {
+            $output = explode(PHP_EOL, $this->process->getOutput());
+        } catch (LogicException $exception) {
+            $output = [];
+        }
+
+        return $output;
     }
 }

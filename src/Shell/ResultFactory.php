@@ -10,6 +10,9 @@ namespace Magento\MagentoCloud\Shell;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Symfony\Component\Process\Process;
 
+/**
+ * Creates shell command result
+ */
 class ResultFactory
 {
     /**
@@ -26,6 +29,8 @@ class ResultFactory
     }
 
     /**
+     * Creates instance of a Result of shell command execution
+     *
      * @param Process $process
      * @return ResultInterface
      */
