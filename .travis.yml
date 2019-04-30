@@ -25,13 +25,16 @@ env:
 cache:
   apt: true
 
-before_install:
+install: composer update -n --no-suggest
+
+before_script:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
 
-install: composer update -n --no-suggest
-
-script: ./tests/travis/script.sh
+script:
+  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
+  - if [ -n $REPO_USERNAME && $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi
+  - if [ -n $REPO_USERNAME && $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi
 
 after_failure: docker ps -s
