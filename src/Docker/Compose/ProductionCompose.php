@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Docker\Compose;
 
 use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\Docker\Config;
+use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\ComposeManagerInterface;
 use Magento\MagentoCloud\Docker\Config\Converter;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
@@ -75,8 +75,8 @@ class ProductionCompose implements ComposeManagerInterface
      */
     public function build(Repository $config): array
     {
-        $phpVersion = $config->get(self::PHP_VERSION, '') ?: $this->config->getPhpVersion();
-        $dbVersion = $config->get(self::DB_VERSION, '') ?: $this->config->getServiceVersion(Config::KEY_DB);
+        $phpVersion = $config->get(Config::KEY_PHP, '') ?: $this->config->getPhpVersion();
+        $dbVersion = $config->get(Config::KEY_DB, '') ?: $this->config->getServiceVersion(Config::KEY_DB);
 
         $services = [
             'db' => $this->serviceFactory->create(
@@ -98,7 +98,7 @@ class ProductionCompose implements ComposeManagerInterface
             )
         ];
 
-        $redisVersion = $config->get(self::REDIS_VERSION) ?: $this->config->getServiceVersion(Config::KEY_REDIS);
+        $redisVersion = $config->get(Config::KEY_REDIS) ?: $this->config->getServiceVersion(Config::KEY_REDIS);
 
         if ($redisVersion) {
             $services['redis'] = $this->serviceFactory->create(
@@ -107,7 +107,8 @@ class ProductionCompose implements ComposeManagerInterface
             );
         }
 
-        $esVersion = $config->get(self::ES_VERSION) ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
+        $esVersion = $config->get(Config::KEY_ELASTICSEARCH)
+            ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
 
         if ($esVersion) {
             $services['elasticsearch'] = $this->serviceFactory->create(
@@ -116,8 +117,8 @@ class ProductionCompose implements ComposeManagerInterface
             );
         }
 
-        $rabbitMQVersion = $config->get(self::RABBIT_MQ_VERSION)
-            ?: $this->config->getServiceVersion(Config::KEY_RABBIT_MQ);
+        $rabbitMQVersion = $config->get(Config::KEY_RABBITMQ)
+            ?: $this->config->getServiceVersion(Config::KEY_RABBITMQ);
 
         if ($rabbitMQVersion) {
             $services['rabbitmq'] = $this->serviceFactory->create(
@@ -142,7 +143,7 @@ class ProductionCompose implements ComposeManagerInterface
         $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends, 'deploy.magento2.docker');
         $services['web'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_NGINX,
-            $config->get(self::NGINX_VERSION, self::DEFAULT_NGINX_VERSION),
+            $config->get(Config::KEY_NGINX, self::DEFAULT_NGINX_VERSION),
             [
                 'depends_on' => ['fpm'],
                 'extends' => 'generic',

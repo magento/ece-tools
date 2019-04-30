@@ -38,17 +38,6 @@ class ServiceFactoryTest extends TestCase
     }
 
     /**
-     * @expectedExceptionMessage Service "php-cli" does not support version "5.6"
-     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
-     *
-     * @throws ConfigurationMismatchException
-     */
-    public function testCreateVersionNotSupported()
-    {
-        $this->factory->create(ServiceFactory::SERVICE_CLI, '5.6');
-    }
-
-    /**
      * @expectedExceptionMessage Service "test" is not supported
      * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
      *
