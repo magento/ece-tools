@@ -12,10 +12,6 @@ php:
   - '7.1'
   - '7.2'
 
-addons:
-  apt:
-    update: true
-
 env:
   matrix:
     - TEST_SUITE=static-unit XDEBUG=true
