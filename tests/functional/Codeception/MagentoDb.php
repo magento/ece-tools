@@ -78,7 +78,7 @@ class MagentoDb extends Db
     /**
      * @inheritdoc
      */
-    public function _afterSuite()
+    public function _after(TestInterface $test)
     {
         $this->disconnectDatabases();
     }
