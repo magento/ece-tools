@@ -72,7 +72,7 @@ class ResultTest extends TestCase
                 'expectedResult' => ['some output'],
             ],
             'output with new lines' => [
-                'processOutput' => "some output\nline2\nline3",
+                'processOutput' => "some output\nline2\nline3\n",
                 'expectedResult' => ['some output', 'line2', 'line3'],
             ],
         ];

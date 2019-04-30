@@ -42,7 +42,7 @@ class Result implements ResultInterface
     public function getOutput(): array
     {
         try {
-            $output = explode(PHP_EOL, $this->process->getOutput());
+            $output = explode(PHP_EOL, trim($this->process->getOutput(), PHP_EOL));
         } catch (LogicException $exception) {
             $output = [];
         }
