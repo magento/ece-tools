@@ -141,8 +141,8 @@ class UrlManager
     {
         $baseUrl = $this->connection->selectOne(
             sprintf(
-                'SELECT `value` from `%score_config_data` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1',
-                ConnectionInterface::TABLE_PREFIX
+                'SELECT `value` from `%s` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1',
+                $this->connection->getTableName('core_config_data')
             ),
             ['web/unsecure/base_url']
         )['value'];
@@ -165,8 +165,8 @@ class UrlManager
     {
         $urls = $this->connection->select(
             sprintf(
-                'SELECT `value` from `%score_config_data` WHERE `path` IN (?, ?)',
-                ConnectionInterface::TABLE_PREFIX
+                'SELECT `value` from `%s` WHERE `path` IN (?, ?)',
+                $this->connection->getTableName('core_config_data')
             ),
             ['web/unsecure/base_url', 'web/secure/base_url']
         );

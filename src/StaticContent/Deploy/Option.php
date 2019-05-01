@@ -116,10 +116,10 @@ class Option implements OptionInterface
     {
         $output = $this->connection->select(
             sprintf(
-                'SELECT value FROM %score_config_data WHERE path=\'general/locale/code\' ' .
-                'UNION SELECT interface_locale FROM %sadmin_user',
-                ConnectionInterface::TABLE_PREFIX,
-                ConnectionInterface::TABLE_PREFIX
+                "SELECT `value` FROM `%s` WHERE `path`='general/locale/code' " .
+                "UNION SELECT `interface_locale` FROM `%s`",
+                $this->connection->getTableName('core_config_data'),
+                $this->connection->getTableName('admin_user')
             )
         );
 

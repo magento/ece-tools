@@ -10,8 +10,6 @@ namespace Magento\MagentoCloud\DB;
  */
 interface ConnectionInterface
 {
-    const TABLE_PREFIX = '{table_prefix}';
-
     /**
      * Read queries.
      *
@@ -77,4 +75,12 @@ interface ConnectionInterface
      * @return void
      */
     public function close();
+
+    /**
+     * Generates table name based on additional settings like `table_prefix`
+     *
+     * @param string $name
+     * @return string
+     */
+    public function getTableName(string $name): string;
 }

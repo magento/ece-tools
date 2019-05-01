@@ -16,6 +16,9 @@ use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
 
+/**
+ * Generates command for magento installation
+ */
 class InstallCommandFactory
 {
     /**

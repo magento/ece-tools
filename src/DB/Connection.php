@@ -16,7 +16,6 @@ class Connection implements ConnectionInterface
 {
     const MYSQL_ERROR_CODE_SERVER_GONE_AWAY = 2006;
 
-
     /**
      * @var \PDO
      */
@@ -223,8 +222,6 @@ class Connection implements ConnectionInterface
      */
     private function run(string $query, array $bindings, \Closure $closure)
     {
-        $query = $this->prepareQuery($query);
-
         $this->logger->debug('Query: ' . $query);
 
         if ($bindings) {
@@ -243,14 +240,15 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string $query
-     * @return string
+     * @inheritdoc
      */
-    private function prepareQuery(string $query): string
+    public function getTableName(string $name): string
     {
-        return strtr($query, [
-            self::TABLE_PREFIX => $this->getTablePrefix()
-        ]);
+        if (!empty($this->getTablePrefix())) {
+            $name = $this->getTablePrefix() . $name;
+        }
+
+        return $name;
     }
 
     /**
