@@ -74,10 +74,6 @@
         ".magento.env.yaml.dist"
       ],
       [
-        "dist/Makefile",
-        "Makefile"
-      ],
-      [
         "dist/docker-sync.yml",
         "docker-sync.yml"
       ],
@@ -92,10 +88,6 @@
       [
         "dist/docker/mysql",
         ".docker/mysql"
-      ],
-      [
-        "dist/docker/README.md",
-        ".docker/README.md"
       ],
       [
         "dist/docker/bin/bash",
@@ -116,6 +108,10 @@
       [
         "dist/docker/bin/stop",
         "bin/stop"
+      ],
+      [
+        "dist/docker/bin/restart",
+        "bin/restart"
       ]
     ],
     "chmod": [
@@ -138,6 +134,10 @@
       {
         "mask": "0755",
         "path": "bin/stop"
+      },
+      {
+        "mask": "0755",
+        "path": "bin/restart"
       }
     ]
   }
