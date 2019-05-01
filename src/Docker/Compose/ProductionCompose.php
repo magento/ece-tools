@@ -117,6 +117,16 @@ class ProductionCompose implements ComposeManagerInterface
             );
         }
 
+        $nodeVersion = $config->get(Config::KEY_NODE);
+
+        if ($nodeVersion) {
+            $services['node'] = $this->serviceFactory->create(
+                ServiceFactory::SERVICE_NODE,
+                $nodeVersion,
+                ['volumes' => [$this->getMagentoVolumes(false)]]
+            );
+        }
+
         $rabbitMQVersion = $config->get(Config::KEY_RABBITMQ)
             ?: $this->config->getServiceVersion(Config::KEY_RABBITMQ);
 
