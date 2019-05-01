@@ -25,7 +25,7 @@ class ConfigConvert extends Command
      * @var array Map of configuration files.
      */
     private static $map = [
-        '/.docker/config.php' => '/.docker/config.env',
+        '/config.php' => '/config.env',
     ];
 
     /**
