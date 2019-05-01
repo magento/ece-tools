@@ -37,8 +37,8 @@ class Shell implements ShellInterface
     /**
      * @var ResultFactory
      */
-
     private $resultFactory;
+
     /**
      * @var Sanitizer
      */
