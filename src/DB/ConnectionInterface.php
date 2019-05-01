@@ -10,6 +10,8 @@ namespace Magento\MagentoCloud\DB;
  */
 interface ConnectionInterface
 {
+    const TABLE_PREFIX_PATTERN = '{table_prefix}';
+
     /**
      * Read queries.
      *

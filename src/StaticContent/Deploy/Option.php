@@ -115,8 +115,12 @@ class Option implements OptionInterface
     public function getLocales(): array
     {
         $output = $this->connection->select(
-            'SELECT value FROM {table_prefix}core_config_data WHERE path=\'general/locale/code\' ' .
-            'UNION SELECT interface_locale FROM {table_prefix}admin_user'
+            sprintf(
+                'SELECT value FROM %score_config_data WHERE path=\'general/locale/code\' ' .
+                'UNION SELECT interface_locale FROM %sadmin_user',
+                ConnectionInterface::TABLE_PREFIX_PATTERN,
+                ConnectionInterface::TABLE_PREFIX_PATTERN
+            )
         );
 
         $locales = array_column($output, 'value');

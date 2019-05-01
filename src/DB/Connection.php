@@ -16,7 +16,6 @@ class Connection implements ConnectionInterface
 {
     const MYSQL_ERROR_CODE_SERVER_GONE_AWAY = 2006;
 
-    const TABLE_PREFIX_PATTERN = '{table_prefix}';
 
     /**
      * @var \PDO
