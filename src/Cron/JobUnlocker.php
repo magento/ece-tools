@@ -38,7 +38,7 @@ class JobUnlocker
      */
     public function unlockAll(string $message = self::UPGRADE_UNLOCK_MESSAGE): int
     {
-        $updateCronStatusQuery = 'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages'
+        $updateCronStatusQuery = 'UPDATE `{table_prefix}cron_schedule` SET `status` = :to_status, `messages` = :messages'
             . ' WHERE `status` = :from_status';
 
         return $this->connection->affectingQuery(
@@ -60,7 +60,7 @@ class JobUnlocker
      */
     public function unlockByJobCode(string $jobCode, string $message = self::UPGRADE_UNLOCK_MESSAGE): int
     {
-        $updateCronStatusQuery = 'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages'
+        $updateCronStatusQuery = 'UPDATE `{table_prefix}cron_schedule` SET `status` = :to_status, `messages` = :messages'
             . ' WHERE `status` = :from_status AND `job_code` = :job_code';
 
         return $this->connection->affectingQuery(

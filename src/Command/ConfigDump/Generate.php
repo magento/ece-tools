@@ -143,7 +143,7 @@ class Generate
          * Adding locales for admin user.
          */
         $newConfig['admin_user']['locale']['code'] = array_column(
-            $this->connection->select('SELECT DISTINCT `interface_locale` FROM `admin_user`'),
+            $this->connection->select('SELECT DISTINCT `{table_prefix}interface_locale` FROM `admin_user`'),
             'interface_locale'
         );
 

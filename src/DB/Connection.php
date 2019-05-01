@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
+use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Psr\Log\LoggerInterface;
 
@@ -14,6 +15,8 @@ use Psr\Log\LoggerInterface;
 class Connection implements ConnectionInterface
 {
     const MYSQL_ERROR_CODE_SERVER_GONE_AWAY = 2006;
+
+    const TABLE_PREFIX_PATTERN = '{table_prefix}';
 
     /**
      * @var \PDO
@@ -36,13 +39,28 @@ class Connection implements ConnectionInterface
     private $connectionFactory;
 
     /**
+     * @var MergedConfig
+     */
+    private $mergedConfig;
+
+    /**
+     * @var string
+     */
+    private $tablePrefix;
+
+    /**
      * @param LoggerInterface $logger
      * @param ConnectionFactory $connectionFactory
+     * @param MergedConfig $mergedConfig
      */
-    public function __construct(LoggerInterface $logger, ConnectionFactory $connectionFactory)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        ConnectionFactory $connectionFactory,
+        MergedConfig $mergedConfig
+    ) {
         $this->logger = $logger;
         $this->connectionFactory = $connectionFactory;
+        $this->mergedConfig = $mergedConfig;
     }
 
     /**
@@ -206,6 +224,8 @@ class Connection implements ConnectionInterface
      */
     private function run(string $query, array $bindings, \Closure $closure)
     {
+        $query = $this->prepareQuery($query);
+
         $this->logger->debug('Query: ' . $query);
 
         if ($bindings) {
@@ -218,22 +238,33 @@ class Connection implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function count(string $query, array $bindings = []): int
-    {
-        return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->getPdo()->prepare($query);
-            $this->bindValues($statement, $bindings);
-            $statement->execute();
-
-            return $statement->rowCount();
-        });
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function close()
     {
         $this->pdo = null;
+    }
+
+    /**
+     * @param string $query
+     * @return string
+     */
+    private function prepareQuery(string $query): string
+    {
+        return strtr($query, [
+            self::TABLE_PREFIX_PATTERN => $this->getTablePrefix()
+        ]);
+    }
+
+    /**
+     * Returns table_prefix value.
+     *
+     * @return string
+     */
+    private function getTablePrefix(): string
+    {
+        if ($this->tablePrefix === null) {
+            $this->tablePrefix = $this->mergedConfig->get()['table_prefix'] ?? '';
+        }
+
+        return $this->tablePrefix;
     }
 }

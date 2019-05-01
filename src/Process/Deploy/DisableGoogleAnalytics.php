@@ -65,7 +65,7 @@ class DisableGoogleAnalytics implements ProcessInterface
         ) {
             $this->logger->info('Disabling Google Analytics');
             $this->connection->affectingQuery(
-                "UPDATE `core_config_data` SET `value` = 0 WHERE `path` = 'google/analytics/active'"
+                "UPDATE `{table_prefix}core_config_data` SET `value` = 0 WHERE `path` = 'google/analytics/active'"
             );
         }
     }
