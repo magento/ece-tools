@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Command\Docker;
 
 use Magento\MagentoCloud\Docker\Config\Converter;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\SystemList;
@@ -30,7 +31,7 @@ class ConfigConvert extends Command
     /**
      * @var SystemList
      */
-    private $systemList;
+    private $directoryList;
 
     /**
      * @var File
@@ -43,13 +44,13 @@ class ConfigConvert extends Command
     private $converter;
 
     /**
-     * @param SystemList $directoryList
+     * @param DirectoryList $directoryList
      * @param File $file
      * @param Converter $converter
      */
-    public function __construct(SystemList $directoryList, File $file, Converter $converter)
+    public function __construct(DirectoryList $directoryList, File $file, Converter $converter)
     {
-        $this->systemList = $directoryList;
+        $this->directoryList = $directoryList;
         $this->file = $file;
         $this->converter = $converter;
 
@@ -72,9 +73,11 @@ class ConfigConvert extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $dockerRoot = $this->directoryList->getDockerRoot();
+
         foreach (self::$map as $sourcePath => $envPath) {
-            $sourcePath = $this->systemList->getMagentoRoot() . $sourcePath;
-            $envPath = $this->systemList->getMagentoRoot() . $envPath;
+            $sourcePath = $dockerRoot . $sourcePath;
+            $envPath = $dockerRoot . $envPath;
 
             if (!$this->file->isExists($sourcePath)) {
                 $sourcePath .= '.dist';
