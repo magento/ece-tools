@@ -78,24 +78,44 @@
         "Makefile"
       ],
       [
+        "dist/docker-sync.yml",
+        "docker-sync.yml"
+      ],
+      [
         "dist/docker/mnt",
-        "docker/mnt"
+        ".docker/mnt"
       ],
       [
         "dist/docker/tmp",
-        "docker/tmp"
+        ".docker/tmp"
       ],
       [
         "dist/docker/mysql",
-        "docker/mysql"
+        ".docker/mysql"
       ],
       [
         "dist/docker/README.md",
-        "docker/README.md"
+        ".docker/README.md"
       ],
       [
-        "dist/docker-sync.yml",
-        "docker-sync.yml"
+        "dist/docker/bin/bash",
+        "bin/bash"
+      ],
+      [
+        "dist/docker/bin/build",
+        "bin/build"
+      ],
+      [
+        "dist/docker/bin/deploy",
+        "bin/deploy"
+      ],
+      [
+        "dist/docker/bin/start",
+        "bin/start"
+      ],
+      [
+        "dist/docker/bin/stop",
+        "bin/stop"
       ]
     ]
   }

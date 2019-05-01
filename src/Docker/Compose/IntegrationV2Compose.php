@@ -69,8 +69,8 @@ class IntegrationV2Compose implements ComposeManagerInterface
                             'appdata',
                         ],
                         'env_file' => [
-                            './docker/global.env',
-                            './docker/composer.env',
+                            './.docker/global.env',
+                            './.docker/composer.env',
                         ],
                     ]
                 ),
@@ -108,8 +108,8 @@ class IntegrationV2Compose implements ComposeManagerInterface
                             'appdata',
                         ],
                         'env_file' => [
-                            './docker/global.env',
-                            './docker/composer.env',
+                            './.docker/global.env',
+                            './.docker/composer.env',
                         ],
                     ]
                 ),
@@ -192,8 +192,8 @@ class IntegrationV2Compose implements ComposeManagerInterface
                     'appdata',
                 ],
                 'env_file' => [
-                    './docker/global.env',
-                    './docker/composer.env',
+                    './.docker/global.env',
+                    './.docker/composer.env',
                 ],
             ]
         );
