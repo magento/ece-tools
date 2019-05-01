@@ -44,11 +44,4 @@ interface ConnectionInterface
      * @return string|null
      */
     public function getPassword();
-
-    /**
-     * Returns prefix of database tables or empty string if prefix wasn't configured
-     *
-     * @return string
-     */
-    public function getTablePrefix(): string;
 }

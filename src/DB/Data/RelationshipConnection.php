@@ -66,12 +66,4 @@ class RelationshipConnection implements ConnectionInterface
     {
         return $this->connectionData['password'] ?? '';
     }
-
-    /**
-     * @inheritdoc
-     */
-    public function getTablePrefix(): string
-    {
-        return $this->connectionData['table_prefix'] ?? '';
-    }
 }
