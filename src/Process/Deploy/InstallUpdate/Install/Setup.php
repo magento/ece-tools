@@ -160,7 +160,7 @@ class Setup implements ProcessInterface
         $urlUnsecure = $this->urlManager->getUnSecureUrls()[''];
         $urlSecure = $this->urlManager->getSecureUrls()[''];
 
-        return 'php ./bin/magento setup:install'
+        $command = 'php ./bin/magento setup:install'
             . ' -n --session-save=db --cleanup-database'
             . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
             . ' --base-url=' . escapeshellarg($urlUnsecure)
@@ -174,6 +174,12 @@ class Setup implements ProcessInterface
                 ?: Environment::DEFAULT_ADMIN_URL)
             . ($this->environment->getAdminEmail() ? $this->getAdminCredentials() : '')
             . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction';
+
+        if ($this->getConnectionData()->getTablePrefix()) {
+            $command .= ' --db-prefix=' . escapeshellarg($this->getConnectionData()->getTablePrefix());
+        }
+
+        return $command;
     }
 
     /**
