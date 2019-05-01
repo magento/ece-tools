@@ -119,21 +119,20 @@ class InstallCommandFactory
     {
         $urlUnsecure = $this->urlManager->getUnSecureUrls()[''];
         $urlSecure = $this->urlManager->getSecureUrls()[''];
+        $adminUrl = $this->environment->getAdminUrl() ?: Environment::DEFAULT_ADMIN_URL;
 
         $command = 'php ./bin/magento setup:install'
             . ' -n --session-save=db --cleanup-database'
+            . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction'
             . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
             . ' --base-url=' . escapeshellarg($urlUnsecure)
             . ' --base-url-secure=' . escapeshellarg($urlSecure)
+            . ' --backend-frontname=' . escapeshellarg($adminUrl)
             . ' --language=' . escapeshellarg($this->environment->getAdminLocale())
             . ' --timezone=America/Los_Angeles'
             . ' --db-host=' . escapeshellarg($this->getConnectionData()->getHost())
             . ' --db-name=' . escapeshellarg($this->getConnectionData()->getDbName())
-            . ' --db-user=' . escapeshellarg($this->getConnectionData()->getUser())
-            . ' --backend-frontname=' . escapeshellarg($this->environment->getAdminUrl()
-                ?: Environment::DEFAULT_ADMIN_URL)
-            . ($this->environment->getAdminEmail() ? $this->getAdminCredentials() : '')
-            . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction';
+            . ' --db-user=' . escapeshellarg($this->getConnectionData()->getUser());
 
         $dbPassword = $this->getConnectionData()->getPassword();
         if (strlen($dbPassword)) {
@@ -142,6 +141,10 @@ class InstallCommandFactory
 
         if ($table_prefix = $this->mergedConfig->get()['table_prefix'] ?? '') {
             $command .= ' --db-prefix=' . escapeshellarg($table_prefix);
+        }
+
+        if ($this->environment->getAdminEmail()) {
+            $command .= $this->getAdminCredentials();
         }
 
         return $command;
