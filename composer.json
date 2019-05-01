@@ -117,6 +117,28 @@
         "dist/docker/bin/stop",
         "bin/stop"
       ]
+    ],
+    "chmod": [
+      {
+        "mask": "0755",
+        "path": "bin/bash"
+      },
+      {
+        "mask": "0755",
+        "path": "bin/build"
+      },
+      {
+        "mask": "0755",
+        "path": "bin/deploy"
+      },
+      {
+        "mask": "0755",
+        "path": "bin/start"
+      },
+      {
+        "mask": "0755",
+        "path": "bin/stop"
+      }
     ]
   }
 }

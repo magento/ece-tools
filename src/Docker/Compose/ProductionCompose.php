@@ -165,7 +165,7 @@ class ProductionCompose implements ComposeManagerInterface
             'image' => 'alpine',
             'environment' => $this->converter->convert($this->getVariables()),
             'env_file' => [
-                './docker/config.env',
+                './.docker/config.env',
             ],
         ];
 
