@@ -163,6 +163,7 @@ class ShellTest extends TestCase
     /**
      * @expectedException \Magento\MagentoCloud\Shell\ShellException
      * @expectedExceptionMessage Command ls -al --password="***" failed
+     * @expectedExceptionCode 3
      */
     public function testExecuteException()
     {
@@ -174,7 +175,7 @@ class ShellTest extends TestCase
         $processMock->expects($this->exactly(2))
             ->method('getCommandLine')
             ->willReturn($command);
-        $processMock->expects($this->once())
+        $processMock->expects($this->exactly(2))
             ->method('getExitCode')
             ->willReturn(3);
         $processMock->expects($this->once())

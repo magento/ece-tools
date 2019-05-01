@@ -92,7 +92,8 @@ class Shell implements ShellInterface
             $process->mustRun();
         } catch (ProcessFailedException $e) {
             throw new ShellException(
-                $this->sanitizer->sanitize($e->getMessage())
+                $this->sanitizer->sanitize($e->getMessage()),
+                $process->getExitCode()
             );
         }
 
