@@ -101,7 +101,7 @@ class Database implements ProcessInterface
         $configBaseUrls = $this->connection->select(
             sprintf(
                 'SELECT `value`, `path` FROM `%score_config_data` WHERE (`path`=? OR `path`= ?) AND `scope_id` = ?',
-                ConnectionInterface::TABLE_PREFIX_PATTERN
+                ConnectionInterface::TABLE_PREFIX
             ),
             [
                 'web/unsecure/base_url',
@@ -131,7 +131,7 @@ class Database implements ProcessInterface
         return $this->connection->affectingQuery(
             sprintf(
                 'UPDATE `%score_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
-                ConnectionInterface::TABLE_PREFIX_PATTERN
+                ConnectionInterface::TABLE_PREFIX
             ),
             [
                 $baseHost,

@@ -249,7 +249,7 @@ class Connection implements ConnectionInterface
     private function prepareQuery(string $query): string
     {
         return strtr($query, [
-            self::TABLE_PREFIX_PATTERN => $this->getTablePrefix()
+            self::TABLE_PREFIX => $this->getTablePrefix()
         ]);
     }
 

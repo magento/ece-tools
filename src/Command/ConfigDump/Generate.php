@@ -145,7 +145,7 @@ class Generate
         $newConfig['admin_user']['locale']['code'] = array_column(
             $this->connection->select(sprintf(
                 'SELECT DISTINCT `%sinterface_locale` FROM `admin_user`',
-                ConnectionInterface::TABLE_PREFIX_PATTERN
+                ConnectionInterface::TABLE_PREFIX
             )),
             'interface_locale'
         );

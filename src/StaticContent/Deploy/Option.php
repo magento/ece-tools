@@ -118,8 +118,8 @@ class Option implements OptionInterface
             sprintf(
                 'SELECT value FROM %score_config_data WHERE path=\'general/locale/code\' ' .
                 'UNION SELECT interface_locale FROM %sadmin_user',
-                ConnectionInterface::TABLE_PREFIX_PATTERN,
-                ConnectionInterface::TABLE_PREFIX_PATTERN
+                ConnectionInterface::TABLE_PREFIX,
+                ConnectionInterface::TABLE_PREFIX
             )
         );
 
