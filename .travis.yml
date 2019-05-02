@@ -18,9 +18,6 @@ env:
     - TEST_SUITE=integration
     - TEST_SUITE=functional
 
-cache:
-  apt: true
-
 install: composer update -n --no-suggest
 
 before_script:
@@ -29,6 +26,7 @@ before_script:
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
 
 script:
+  - echo $REPO_USERNAME
   - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
   - if [ -n $REPO_USERNAME ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi
   - if [ -n $REPO_USERNAME ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi
