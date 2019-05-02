@@ -368,6 +368,10 @@ class UrlManagerTest extends TestCase
             )->willReturn([
                 'value' => 'https://example.com/',
             ]);
+        $this->connection->expects($this->once())
+            ->method('getTableName')
+            ->with('core_config_data')
+            ->willReturn('core_config_data');
 
         $this->assertEquals(
             'https://example.com/',
@@ -391,6 +395,10 @@ class UrlManagerTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
             ->willReturn($routes);
+        $this->connection->expects($this->once())
+            ->method('getTableName')
+            ->with('core_config_data')
+            ->willReturn('core_config_data');
 
         $this->assertEquals(
             'https://example.com/',
@@ -424,6 +432,10 @@ class UrlManagerTest extends TestCase
                 ['value' => 'https://example2.com/'],
                 ['value' => 'https://example3.com/'],
             ]);
+        $this->connection->expects($this->once())
+            ->method('getTableName')
+            ->with('core_config_data')
+            ->willReturn('core_config_data');
 
         $this->assertEquals(
             [
@@ -442,6 +454,10 @@ class UrlManagerTest extends TestCase
             ->with(
                 'SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)'
             )->willReturn([]);
+        $this->connection->expects($this->once())
+            ->method('getTableName')
+            ->with('core_config_data')
+            ->willReturn('core_config_data');
 
         $this->assertEquals(
             [],

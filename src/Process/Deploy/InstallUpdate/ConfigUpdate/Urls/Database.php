@@ -131,7 +131,7 @@ class Database implements ProcessInterface
         return $this->connection->affectingQuery(
             sprintf(
                 'UPDATE `%s` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
-                $this->connection->getTableName('score_config_data')
+                $this->connection->getTableName('core_config_data')
             ),
             [
                 $baseHost,

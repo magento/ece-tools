@@ -108,7 +108,15 @@ class Connection implements ConnectionInterface
      */
     public function selectOne(string $query, array $bindings = []): array
     {
-        return $this->getFetchStatement($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
+        $result = $this->getFetchStatement($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
+
+        if ($result === false) {
+            $this->logger->error('Failed to execute query: ' . var_export($this->getPdo()->errorInfo(), true));
+
+            $result = [];
+        }
+
+        return $result;
     }
 
     /**
