@@ -27,6 +27,8 @@ before_script:
 
 script:
   - echo $REPO_USERNAME
+  - echo $TRAVIS_SECURE_ENV_VARS
+  - echo $TRAVIS_PULL_REQUEST
   - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
   - if [ -n $REPO_USERNAME ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi
   - if [ -n $REPO_USERNAME ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi
