@@ -112,6 +112,10 @@
       [
         "dist/docker/bin/restart",
         "bin/restart"
+      ],
+      [
+        "dist/docker/bin/down",
+        "bin/down"
       ]
     ],
     "chmod": [
@@ -138,6 +142,10 @@
       {
         "mask": "0755",
         "path": "bin/restart"
+      },
+      {
+        "mask": "0755",
+        "path": "bin/down"
       }
     ]
   }
