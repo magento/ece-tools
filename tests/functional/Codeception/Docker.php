@@ -253,7 +253,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     {
         return $this->taskBash($container)
             ->envVars($this->prepareVariables($variables))
-            ->exec(sprintf('%s/bin/ece-tools %s', $this->_getConfig('system_ece_tools_dir'), $command))
+            ->exec(sprintf('php %s/bin/ece-tools %s', $this->_getConfig('system_ece_tools_dir'), $command))
             ->run()
             ->wasSuccessful();
     }
@@ -271,7 +271,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     {
         return $this->taskBash($container)
             ->envVars($this->prepareVariables($variables))
-            ->exec(sprintf('%s/bin/magento %s', $this->_getConfig('system_magento_dir'), $command))
+            ->exec(sprintf('php %s/bin/magento %s', $this->_getConfig('system_magento_dir'), $command))
             ->run()
             ->wasSuccessful();
     }
