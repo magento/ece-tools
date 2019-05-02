@@ -89,7 +89,7 @@ class InstallCommandFactory
     }
 
     /**
-     * Create install command
+     * Creates magento install command according to configured variables
      *
      * @return string
      */
@@ -116,6 +116,8 @@ class InstallCommandFactory
     }
 
     /**
+     * Return base part of install command
+     *
      * @return string
      */
     private function getBaseCommand(): string
@@ -154,6 +156,8 @@ class InstallCommandFactory
     }
 
     /**
+     * Returns part with admin credentials for install command
+     *
      * @return string
      */
     private function getAdminCredentials(): string
@@ -170,6 +174,8 @@ class InstallCommandFactory
     }
 
     /**
+     * Returns instance of ConnectionInterface
+     *
      * @return ConnectionInterface
      */
     private function getConnectionData(): ConnectionInterface
