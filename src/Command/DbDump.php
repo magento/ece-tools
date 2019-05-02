@@ -5,10 +5,11 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\DB\DumpGenerator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -19,23 +20,25 @@ class DbDump extends Command
 {
     const NAME = 'db-dump';
 
+    const OPTION_KEEP_DEFINERS = 'keep-definers';
+
     /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var ProcessInterface
+     * @var DumpGenerator
      */
-    private $process;
+    private $dumpGenerator;
 
     /**
-     * @param ProcessInterface $process
+     * @param DumpGenerator $dumpGenerator
      * @param LoggerInterface $logger
      */
-    public function __construct(ProcessInterface $process, LoggerInterface $logger)
+    public function __construct(DumpGenerator $dumpGenerator, LoggerInterface $logger)
     {
-        $this->process = $process;
+        $this->dumpGenerator = $dumpGenerator;
         $this->logger = $logger;
 
         parent::__construct();
@@ -48,6 +51,13 @@ class DbDump extends Command
     {
         $this->setName(self::NAME)
             ->setDescription('Creates backup of database');
+
+        $this->addOption(
+            self::OPTION_KEEP_DEFINERS,
+            'k',
+            InputOption::VALUE_NONE,
+            'Keep definers in db dump if enabled'
+        );
 
         parent::configure();
     }
@@ -70,7 +80,7 @@ class DbDump extends Command
         }
         try {
             $this->logger->info('Starting backup.');
-            $this->process->execute();
+            $this->dumpGenerator->create((bool)$input->getOption(self::OPTION_KEEP_DEFINERS));
             $this->logger->info('Backup completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());

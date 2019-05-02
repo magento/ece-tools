@@ -6,7 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\DbDump;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\DB\DumpGenerator;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -24,22 +25,22 @@ class DbDumpTest extends TestCase
     private $command;
 
     /**
-     * @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var DumpGenerator|MockObject
      */
-    private $processMock;
+    private $dumpGeneratorMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var HelperSet|\PHPUnit_Framework_MockObject_MockObject
+     * @var HelperSet|MockObject
      */
     private $helperSetMock;
 
     /**
-     * @var QuestionHelper|\PHPUnit_Framework_MockObject_MockObject
+     * @var QuestionHelper|MockObject
      */
     private $questionMock;
 
@@ -48,10 +49,8 @@ class DbDumpTest extends TestCase
      */
     protected function setUp()
     {
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->dumpGeneratorMock = $this->createMock(DumpGenerator::class);
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
             ->setMethods(['ask'])
@@ -63,7 +62,7 @@ class DbDumpTest extends TestCase
             ->willReturn($this->questionMock);
 
         $this->command = new DbDump(
-            $this->processMock,
+            $this->dumpGeneratorMock,
             $this->loggerMock
         );
         $this->command->setHelperSet($this->helperSetMock);
@@ -81,8 +80,8 @@ class DbDumpTest extends TestCase
                 ['Starting backup.'],
                 ['Backup completed.']
             );
-        $this->processMock->expects($this->once())
-            ->method('execute');
+        $this->dumpGeneratorMock->expects($this->once())
+            ->method('create');
 
         $tester = new CommandTester(
             $this->command
@@ -100,8 +99,8 @@ class DbDumpTest extends TestCase
 
         $this->loggerMock->expects($this->never())
             ->method('info');
-        $this->processMock->expects($this->never())
-            ->method('execute');
+        $this->dumpGeneratorMock->expects($this->never())
+            ->method('create');
 
         $tester = new CommandTester(
             $this->command
@@ -126,8 +125,8 @@ class DbDumpTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('critical')
             ->with('Some error');
-        $this->processMock->expects($this->once())
-            ->method('execute')
+        $this->dumpGeneratorMock->expects($this->once())
+            ->method('create')
             ->willThrowException(new \Exception('Some error'));
 
         $tester = new CommandTester(

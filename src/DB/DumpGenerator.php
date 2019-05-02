@@ -3,18 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\DbDump;
+declare(strict_types=1);
 
-use Magento\MagentoCloud\DB\DumpInterface;
+namespace Magento\MagentoCloud\DB;
+
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Process creates database dump and archives it
+ * Class generates mysql dump file
  */
-class DbDump implements ProcessInterface
+class DumpGenerator
 {
     /**
      * Template for dump file name where %s should be changed to timestamp for uniqueness
@@ -31,13 +31,6 @@ class DbDump implements ProcessInterface
      * Timeout for mysqldump command in seconds
      */
     const DUMP_TIMEOUT = 3600;
-
-    /**
-     * Generate command for DB dump
-     *
-     * @var DumpInterface
-     */
-    private $dbDump;
 
     /**
      * Used for execution shell operations
@@ -57,18 +50,23 @@ class DbDump implements ProcessInterface
     private $directoryList;
 
     /**
-     * @param DumpInterface $dbDump
+     * @var DumpInterface
+     */
+    private $dump;
+
+    /**
+     * @param DumpInterface $dump
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        DumpInterface $dbDump,
+        DumpInterface $dump,
         LoggerInterface $logger,
         ShellInterface $shell,
         DirectoryList $directoryList
     ) {
-        $this->dbDump = $dbDump;
+        $this->dump = $dump;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->directoryList = $directoryList;
@@ -84,7 +82,7 @@ class DbDump implements ProcessInterface
      *
      * {@inheritdoc}
      */
-    public function execute()
+    public function create(bool $keepDefiners = false)
     {
         $dumpFileName = sprintf(self::DUMP_FILE_NAME_TEMPLATE, time());
 
@@ -109,10 +107,15 @@ class DbDump implements ProcessInterface
             if (flock($lockFileHandle, LOCK_EX)) {
                 $this->logger->info('Start creation DB dump...');
 
-                $command = $this->getCommand() . ' | gzip > ' . $dumpFile;
+                $command = 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dump->getCommand();
+                if (!$keepDefiners) {
+                    $command .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
+                }
+                $command .= ' | gzip > ' . $dumpFile;
+
                 $errors = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
 
-                if ($errors) {
+                if ($this->filterWarnings($errors)) {
                     $this->logger->error('Error has occurred during mysqldump');
                     $this->shell->execute('rm ' . $dumpFile);
                 } else {
@@ -135,12 +138,15 @@ class DbDump implements ProcessInterface
     }
 
     /**
-     * Returns mysqldump command for executing.
+     * Removes warning errors from the list
      *
-     * @return string
+     * @param array $errors
+     * @return array
      */
-    private function getCommand()
+    private function filterWarnings(array $errors): array
     {
-        return 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dbDump->getCommand();
+        return array_filter($errors, function ($error) {
+            return strpos($error, '[Warning]') === false;
+        });
     }
 }
