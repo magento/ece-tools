@@ -23,6 +23,7 @@ class ServiceFactory
     const SERVICE_ELASTICSEARCH = 'elasticsearch';
     const SERVICE_RABBIT_MQ = 'rabbitmq';
     const SERVICE_TLS = 'tls';
+    const SERVICE_NODE = 'node';
 
     const CONFIG = [
         self::SERVICE_CLI => [
@@ -85,6 +86,10 @@ class ServiceFactory
             'image' => 'rabbitmq:%s',
             'versions' => ['3.5', '3.7']
         ],
+        self::SERVICE_NODE => [
+            'image' => 'node:%s',
+            'versions' => ['6', '8', '10', '11'],
+        ],
     ];
 
     /**
@@ -105,14 +110,6 @@ class ServiceFactory
 
         $metaConfig = self::CONFIG[$name];
         $defaultConfig = $metaConfig['config'] ?? [];
-
-        if (!in_array($version, $metaConfig['versions'], true)) {
-            throw new ConfigurationMismatchException(sprintf(
-                'Service "%s" does not support version "%s"',
-                $name,
-                $version
-            ));
-        }
 
         return array_replace(
             ['image' => sprintf($metaConfig['image'], $version)],
