@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class generates mysql dump file
+ * Creates database dump and archives it
  */
 class DumpGenerator
 {
