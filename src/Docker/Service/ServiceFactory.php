@@ -22,6 +22,8 @@ class ServiceFactory
     const SERVICE_VARNISH = 'varnish';
     const SERVICE_ELASTICSEARCH = 'elasticsearch';
     const SERVICE_RABBIT_MQ = 'rabbitmq';
+    const SERVICE_TLS = 'tls';
+    const SERVICE_NODE = 'node';
 
     const CONFIG = [
         self::SERVICE_CLI => [
@@ -54,6 +56,18 @@ class ServiceFactory
                 ],
             ]
         ],
+        self::SERVICE_TLS => [
+            'image' => 'magento/magento-cloud-docker-tls:%s',
+            'versions' => ['latest'],
+            'config' => [
+                'ports' => [
+                    '443:443'
+                ],
+                'external_links' => [
+                    'varnish:varnish'
+                ]
+            ]
+        ],
         self::SERVICE_REDIS => [
             'image' => 'redis:%s',
             'versions' => ['3.0', '3.2', '4.0', '5.0'],
@@ -71,6 +85,10 @@ class ServiceFactory
         self::SERVICE_RABBIT_MQ => [
             'image' => 'rabbitmq:%s',
             'versions' => ['3.5', '3.7']
+        ],
+        self::SERVICE_NODE => [
+            'image' => 'node:%s',
+            'versions' => ['6', '8', '10', '11'],
         ],
     ];
 
@@ -92,14 +110,6 @@ class ServiceFactory
 
         $metaConfig = self::CONFIG[$name];
         $defaultConfig = $metaConfig['config'] ?? [];
-
-        if (!in_array($version, $metaConfig['versions'], true)) {
-            throw new ConfigurationMismatchException(sprintf(
-                'Service "%s" does not support version "%s"',
-                $name,
-                $version
-            ));
-        }
 
         return array_replace(
             ['image' => sprintf($metaConfig['image'], $version)],

@@ -11,9 +11,7 @@ use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Stage\Deploy\EnvironmentConfig;
 use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
-use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -179,68 +177,6 @@ class MergedConfigTest extends TestCase
                 ],
             ],
         ];
-    }
-
-    public function testGetEnterpriseEnv()
-    {
-        $this->schemaMock->expects($this->once())
-            ->method('getDefaults')
-            ->with(StageConfigInterface::STAGE_DEPLOY)
-            ->willReturn([
-                Deploy::VAR_SCD_THREADS => 1,
-            ]);
-        $this->environmentMock->expects($this->once())
-            ->method('getEnvVarName')
-            ->with(SystemConfigInterface::VAR_ENV_MODE)
-            ->willReturn('MAGENTO_CLOUD_MODE');
-        $this->environmentMock->expects($this->once())
-            ->method('getEnv')
-            ->with('MAGENTO_CLOUD_MODE')
-            ->willReturn(Environment::CLOUD_MODE_ENTERPRISE);
-
-        $this->assertEquals(
-            [
-                Deploy::VAR_SCD_THREADS => 3,
-            ],
-            $this->mergedConfig->get()
-        );
-    }
-
-    public function testGetEnterpriseEnvOverwrittenByEnvYaml()
-    {
-        $this->schemaMock->expects($this->once())
-            ->method('getDefaults')
-            ->with(StageConfigInterface::STAGE_DEPLOY)
-            ->willReturn([
-                Deploy::VAR_SCD_THREADS => 1,
-            ]);
-        $this->environmentMock->expects($this->once())
-            ->method('getEnvVarName')
-            ->with(SystemConfigInterface::VAR_ENV_MODE)
-            ->willReturn('MAGENTO_CLOUD_MODE');
-        $this->environmentMock->expects($this->once())
-            ->method('getEnv')
-            ->with('MAGENTO_CLOUD_MODE')
-            ->willReturn(Environment::CLOUD_MODE_ENTERPRISE);
-        $this->environmentReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([
-                DeployInterface::SECTION_STAGE => [
-                    Deploy::STAGE_GLOBAL => [
-                        Deploy::VAR_SCD_THREADS => 4,
-                    ],
-                    Deploy::STAGE_DEPLOY => [
-                        Deploy::VAR_SCD_THREADS => 5,
-                    ],
-                ]
-            ]);
-
-        $this->assertEquals(
-            [
-                Deploy::VAR_SCD_THREADS => 5,
-            ],
-            $this->mergedConfig->get()
-        );
     }
 
     /**

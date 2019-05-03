@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\PlatformVariable\DecoderInterface;
 use Magento\MagentoCloud\Config\System\Variables;
 
 /**
@@ -25,11 +26,6 @@ class Environment
      */
     const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)(?:-[a-z0-9]+)?$/i';
 
-    /**
-     * @deprecated Threads environment variables must be used.
-     */
-    const CLOUD_MODE_ENTERPRISE = 'enterprise';
-
     const VAL_ENABLED = 'enabled';
     const VAL_DISABLED = 'disabled';
 
@@ -39,13 +35,20 @@ class Environment
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
+     * @var DecoderInterface
+     */
+    private $decoder;
+
+    /**
      * Environment constructor.
      *
      * @param Variables $systemConfig
+     * @param DecoderInterface $decoder
      */
-    public function __construct(Variables $systemConfig)
+    public function __construct(Variables $systemConfig, DecoderInterface $decoder)
     {
         $this->systemConfig = $systemConfig;
+        $this->decoder = $decoder;
     }
 
     /**
@@ -82,7 +85,7 @@ class Environment
             return $default;
         }
 
-        return json_decode(base64_decode($value), true);
+        return $this->decoder->decode($value);
     }
 
     /**

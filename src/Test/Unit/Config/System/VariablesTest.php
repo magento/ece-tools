@@ -47,7 +47,6 @@ class VariablesTest extends TestCase
                 SystemConfigInterface::VAR_ENV_ROUTES => 'MAGENTO_CLOUD_ROUTES',
                 SystemConfigInterface::VAR_ENV_VARIABLES => 'MAGENTO_CLOUD_VARIABLES',
                 SystemConfigInterface::VAR_ENV_APPLICATION => 'MAGENTO_CLOUD_APPLICATION',
-                SystemConfigInterface::VAR_ENV_MODE => 'MAGENTO_CLOUD_MODE',
                 SystemConfigInterface::VAR_ENV_ENVIRONMENT => 'MAGENTO_CLOUD_ENVIRONMENT',
             ]);
 
@@ -99,11 +98,6 @@ class VariablesTest extends TestCase
                 SystemConfigInterface::VAR_ENV_APPLICATION,
                 [],
                 'MAGENTO_CLOUD_APPLICATION',
-            ],
-            'default mode' => [
-                SystemConfigInterface::VAR_ENV_MODE,
-                [],
-                'MAGENTO_CLOUD_MODE',
             ],
             'default environment' => [
                 SystemConfigInterface::VAR_ENV_ENVIRONMENT,

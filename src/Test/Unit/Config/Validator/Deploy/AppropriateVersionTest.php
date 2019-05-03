@@ -82,7 +82,7 @@ class AppropriateVersionTest extends TestCase
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
             ->willReturn(false);
-        $this->configurationCheckerMock->expects($this->exactly(3))
+        $this->configurationCheckerMock->expects($this->exactly(4))
             ->method('isConfigured')
             ->willReturn(false);
 
@@ -98,7 +98,7 @@ class AppropriateVersionTest extends TestCase
         $this->magentoVersion->expects($this->once())
             ->method('satisfies')
             ->willReturn(false);
-        $this->configurationCheckerMock->expects($this->exactly(3))
+        $this->configurationCheckerMock->expects($this->exactly(4))
             ->method('isConfigured')
             ->willReturn(true);
         $this->resultFactoryMock->expects($this->once())
@@ -108,6 +108,7 @@ class AppropriateVersionTest extends TestCase
                 implode(PHP_EOL, [
                     'CRON_CONSUMERS_RUNNER is available for Magento 2.2.0 and later.',
                     'SCD_STRATEGY is available for Magento 2.2.0 and later.',
+                    'SCD_MAX_EXECUTION_TIME is available for Magento 2.2.0 and later.',
                     'GENERATED_CODE_SYMLINK is available for Magento 2.1.x.'
                 ])
             );

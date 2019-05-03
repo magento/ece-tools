@@ -15,9 +15,10 @@ use Psr\Log\LoggerInterface;
 class CommandFactory
 {
     /**
-     * A composer version constraint of versions that cannot use a static content deployment strategy.
+     * A composer version constraint of versions which can use a static content deployment strategy
+     * and max-execution-time option
      */
-    const NO_SCD_VERSION_CONSTRAINT = '<2.2';
+    const SCD_VERSION_CONSTRAINT = '>=2.2';
 
     /**
      * @var MagentoVersion
@@ -42,6 +43,8 @@ class CommandFactory
     /**
      * @param MagentoVersion $magentoVersion
      * @param GlobalSection $globalConfig
+     * @param ThemeResolver $themeResolver
+     * @param LoggerInterface $logger
      */
     public function __construct(
         MagentoVersion $magentoVersion,
@@ -133,7 +136,7 @@ class CommandFactory
             $command .= ' -f';
         }
 
-        if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)) {
+        if ($this->magentoVersion->satisfies(static::SCD_VERSION_CONSTRAINT)) {
             // Magento 2.1 doesn't have a "-s" option and can't take a strategy option.
             $strategy = $option->getStrategy();
             if (!empty($strategy)) {
@@ -151,10 +154,15 @@ class CommandFactory
             $command .= ' --jobs ' . $threadCount;
         }
 
-        if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)
-            && $this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
-        ) {
-            $command .= ' --no-html-minify';
+        if ($this->magentoVersion->satisfies(static::SCD_VERSION_CONSTRAINT)) {
+            if ($this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
+                $command .= ' --no-html-minify';
+            }
+
+            $maxExecTime = $option->getMaxExecutionTime();
+            if ($maxExecTime !== null) {
+                $command .= ' --max-execution-time ' . (int)$maxExecTime;
+            }
         }
 
         return $command;

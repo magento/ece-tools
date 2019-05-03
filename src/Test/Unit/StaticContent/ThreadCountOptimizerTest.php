@@ -5,8 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\StaticContent;
 
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
+use Magento\MagentoCloud\Util\Cpu;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -31,14 +33,21 @@ class ThreadCountOptimizerTest extends TestCase
      */
     private $magentoVersionMock;
 
+    /**
+     * @var Cpu|Mock
+     */
+    private $cpuMock;
+
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->cpuMock = $this->createMock(Cpu::class);
 
         $this->optimizer = new ThreadCountOptimizer(
             $this->loggerMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->cpuMock
         );
     }
 
@@ -109,6 +118,38 @@ class ThreadCountOptimizerTest extends TestCase
         $this->assertEquals(
             1,
             $this->optimizer->optimize(3, ThreadCountOptimizer::STRATEGY_COMPACT)
+        );
+    }
+
+    public function testOptimizeWithOptimalValue()
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>2.1.10')
+            ->willReturn(true);
+        $this->cpuMock->expects($this->once())
+            ->method('getThreadsCount')
+            ->willReturn(8);
+
+        $this->assertEquals(
+            ThreadCountOptimizer::THREAD_COUNT_OPTIMAL,
+            $this->optimizer->optimize(StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE, 'quick')
+        );
+    }
+
+    public function testOptimizeWithCpuThreadsCountLowerOptimalValue()
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('satisfies')
+            ->with('>2.1.10')
+            ->willReturn(true);
+        $this->cpuMock->expects($this->once())
+            ->method('getThreadsCount')
+            ->willReturn(2);
+
+        $this->assertEquals(
+            2,
+            $this->optimizer->optimize(StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE, 'quick')
         );
     }
 }

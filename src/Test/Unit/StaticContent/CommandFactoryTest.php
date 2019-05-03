@@ -10,6 +10,7 @@ use Magento\MagentoCloud\StaticContent\CommandFactory;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\ThemeResolver;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -73,7 +74,7 @@ class CommandFactoryTest extends TestCase
         $this->magentoVersionMock
             ->expects($this->exactly(2))
             ->method('satisfies')
-            ->willReturn(!$useScdStrategy);
+            ->willReturn($useScdStrategy);
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['excluded_themes'])))
             ->method('resolve')
@@ -101,6 +102,7 @@ class CommandFactoryTest extends TestCase
                     'locales' => ['en_US'],
                     'is_force' => true,
                     'verbosity_level' => '-v',
+                    'max_execution_time' => null,
                 ],
                 true,
                 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -f -s quick '
@@ -115,10 +117,11 @@ class CommandFactoryTest extends TestCase
                     'locales' => ['en_US', 'de_DE'],
                     'is_force' => false,
                     'verbosity_level' => '-v',
+                    'max_execution_time' => 1000,
                 ],
                 true,
                 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
-                . '-v --jobs 1 --exclude-theme theme1 en_US de_DE',
+                . '-v --jobs 1 --max-execution-time 1000 --exclude-theme theme1 en_US de_DE',
             ],
             [
                 [
@@ -143,6 +146,7 @@ class CommandFactoryTest extends TestCase
                     'locales' => ['en_US', 'de_DE'],
                     'is_force' => false,
                     'verbosity_level' => '-v',
+                    'max_execution_time' => 1000,
                 ],
                 false,
                 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -v --jobs 1 '
@@ -210,6 +214,9 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->once())
             ->method('getVerbosityLevel')
             ->willReturn($optionConfig['verbosity_level']);
+        $optionMock->expects($this->exactly($getStrategyTimes))
+            ->method('getMaxExecutionTime')
+            ->willReturn($optionConfig['max_execution_time'] ?? null);
 
         return $optionMock;
     }
@@ -223,6 +230,7 @@ class CommandFactoryTest extends TestCase
      */
     public function testMatrix(array $optionConfig, array $matrix, array $expected)
     {
+        /** @var OptionInterface|MockObject $optionMock */
         $optionMock = $this->getMockForAbstractClass(OptionInterface::class);
 
         $optionMock->expects($this->once())
@@ -240,6 +248,10 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->any())
             ->method('getVerbosityLevel')
             ->willReturn($optionConfig['verbosity_level']);
+        $this->magentoVersionMock
+            ->expects($this->any())
+            ->method('satisfies')
+            ->willReturn(true);
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['resolve_pass'])))
             ->method('resolve')
@@ -434,7 +446,7 @@ class CommandFactoryTest extends TestCase
         $this->magentoVersionMock
             ->expects($this->exactly(2))
             ->method('satisfies')
-            ->willReturn(!$useScdStrategy);
+            ->willReturn($useScdStrategy);
         $this->themeResolverMock
             ->expects($this->exactly(count($optionConfig['excluded_themes'])))
             ->method('resolve')
@@ -457,6 +469,7 @@ class CommandFactoryTest extends TestCase
         $expected =[ 'php ./bin/magento setup:static-content:deploy --ansi --no-interaction -s quick '
             . '-v --exclude-theme theme1 en_US de_DE' ];
 
+        /** @var OptionInterface|MockObject $optionMock */
         $optionMock = $this->getMockForAbstractClass(OptionInterface::class);
 
         $optionMock->expects($this->once())
@@ -474,6 +487,10 @@ class CommandFactoryTest extends TestCase
         $optionMock->expects($this->any())
             ->method('getVerbosityLevel')
             ->willReturn('-v');
+        $this->magentoVersionMock
+            ->expects($this->exactly(2))
+            ->method('satisfies')
+            ->willReturn(true);
         $this->themeResolverMock
             ->expects($this->exactly(3))
             ->method('resolve')
