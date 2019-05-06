@@ -93,9 +93,9 @@ class SearchEngine implements ProcessInterface
 
             // 2.1.x requires search config to be written to the shared config file: MAGECLOUD-1317
             if ($isMagento21) {
-                $this->sharedWriter->update($config, false);
+                $this->sharedWriter->update($config);
             } else {
-                $this->envWriter->update($config, false);
+                $this->envWriter->update($config);
             }
         } catch (GenericException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
