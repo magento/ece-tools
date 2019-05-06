@@ -80,9 +80,11 @@ class DumpGenerator
      * as well as serves a log with the name of created dump file.
      * If any error happened during dumping, dump file is removed.
      *
-     * {@inheritdoc}
+     * @param bool $keepDefiners
+     * @return void
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
-    public function create(bool $keepDefiners = false)
+    public function create(bool $keepDefiners)
     {
         $dumpFileName = sprintf(self::DUMP_FILE_NAME_TEMPLATE, time());
 

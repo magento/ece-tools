@@ -120,7 +120,12 @@ class DumpGeneratorTest extends TestCase
         return $fullCommand . ' | gzip > ' . $this->dumpFilePath . '"';
     }
 
-    public function testCreate()
+    /**
+     * @param bool $keepDefiners
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @dataProvider getCreateDataProvider
+     */
+    public function testCreate(bool $keepDefiners)
     {
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
@@ -130,14 +135,25 @@ class DumpGeneratorTest extends TestCase
                 ['Finished DB dump, it can be found here: ' . $this->dumpFilePath]
             );
 
-        $command = $this->getCommand();
+        $command = $this->getCommand($keepDefiners);
 
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with($command)
             ->willReturn([]);
 
-        $this->dumpGenerator->create();
+        $this->dumpGenerator->create($keepDefiners);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCreateDataProvider(): array
+    {
+        return [
+            'without definers' => [false],
+            'with definers' => [true],
+        ];
     }
 
     public function testCreateWithException()
@@ -154,11 +170,12 @@ class DumpGeneratorTest extends TestCase
             ->with($errorMessage);
 
         $this->getCommand();
+
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new \Exception($errorMessage));
 
-        $this->dumpGenerator->create();
+        $this->dumpGenerator->create(false);
     }
 
     public function testFailedCreationLockFile()
@@ -179,7 +196,7 @@ class DumpGeneratorTest extends TestCase
         $this->shellMock->expects($this->never())
             ->method('execute');
 
-        $this->dumpGenerator->create();
+        $this->dumpGenerator->create(false);
     }
 
     public function testLockedFile()
@@ -199,7 +216,7 @@ class DumpGeneratorTest extends TestCase
         $this->shellMock->expects($this->never())
             ->method('execute');
 
-        $this->dumpGenerator->create();
+        $this->dumpGenerator->create(false);
     }
 
     public function testCreateWithErrors()
@@ -227,6 +244,6 @@ class DumpGeneratorTest extends TestCase
                 ['rm ' . $this->dumpFilePath, [], []],
             ]);
 
-        $this->dumpGenerator->create();
+        $this->dumpGenerator->create(false);
     }
 }
