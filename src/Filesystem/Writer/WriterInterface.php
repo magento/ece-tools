@@ -25,9 +25,17 @@ interface WriterInterface
      * Updates existence configuration.
      *
      * @param array $config
-     * @param bool $recursive
      * @return void
      * @throws FileSystemException
      */
-    public function update(array $config, bool $recursive = true);
+    public function update(array $config);
+
+    /**
+     * Recursively updates existence configuration.
+     *
+     * @param array $config
+     * @return void
+     * @throws FileSystemException
+     */
+    public function updateRecursively(array $config);
 }

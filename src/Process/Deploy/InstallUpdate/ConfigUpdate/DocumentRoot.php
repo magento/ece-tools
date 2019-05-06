@@ -42,6 +42,6 @@ class DocumentRoot implements ProcessInterface
     public function execute()
     {
         $this->logger->info('The value of the property \'directories/document_root_is_pub\' set as \'true\'');
-        $this->configWriter->update(['directories' => ['document_root_is_pub' => true]]);
+        $this->configWriter->updateRecursively(['directories' => ['document_root_is_pub' => true]]);
     }
 }

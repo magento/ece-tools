@@ -129,7 +129,7 @@ class SharedTest extends TestCase
     public function testUpdate()
     {
         $this->writerMock->expects($this->once())
-            ->method('update')
+            ->method('updateRecursively')
             ->with(['some' => 'config']);
 
         $this->shared->update(['some' => 'config']);

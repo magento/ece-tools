@@ -64,7 +64,7 @@ class SetAdminUrl implements ProcessInterface
         $config['backend']['frontName'] = $adminUrl;
 
         try {
-            $this->configWriter->update($config);
+            $this->configWriter->updateRecursively($config);
         } catch (FileSystemException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }

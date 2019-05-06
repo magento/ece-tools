@@ -59,9 +59,17 @@ class Writer implements WriterInterface
      */
     public function update(array $config, bool $recursive = true)
     {
-        $updatedConfig = $recursive ?
-            array_replace_recursive($this->reader->read(), $config) :
-            array_replace($this->reader->read(), $config);
+        $updatedConfig = array_replace($this->reader->read(), $config);
+
+        $this->create($updatedConfig);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function updateRecursively(array $config)
+    {
+        $updatedConfig = array_replace_recursive($this->reader->read(), $config);
 
         $this->create($updatedConfig);
     }

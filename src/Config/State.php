@@ -85,7 +85,7 @@ class State
             return true;
         }
 
-        $this->writer->update(['install' => ['date' => date('r')]]);
+        $this->writer->updateRecursively(['install' => ['date' => date('r')]]);
 
         return true;
     }

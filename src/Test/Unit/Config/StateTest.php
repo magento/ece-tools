@@ -78,7 +78,7 @@ class StateTest extends TestCase
             ->method('listTables')
             ->willReturn($tables);
         $this->writerMock->expects($this->never())
-            ->method('update');
+            ->method('updateRecursively');
 
         $this->assertFalse($this->state->isInstalled());
     }
@@ -105,7 +105,7 @@ class StateTest extends TestCase
             ->method('listTables')
             ->willReturn($tables);
         $this->writerMock->expects($this->never())
-            ->method('update');
+            ->method('updateRecursively');
 
         $this->state->isInstalled();
     }
@@ -137,7 +137,7 @@ class StateTest extends TestCase
             ->method('read')
             ->willReturn([]);
         $this->writerMock->expects($this->once())
-            ->method('update')
+            ->method('updateRecursively')
             ->with($config);
 
         $dateMock = $this->getFunctionMock('Magento\MagentoCloud\Config', 'date');
@@ -166,7 +166,7 @@ class StateTest extends TestCase
             ->method('read')
             ->willReturn($config);
         $this->writerMock->expects($this->never())
-            ->method('update');
+            ->method('updateRecursively');
 
         $this->assertTrue($this->state->isInstalled());
     }
