@@ -96,9 +96,9 @@ class WriterTest extends TestCase
      * @param array $config
      * @param array $currentConfig
      * @param string $updatedConfig
-     * @dataProvider getUpdateRecursivelyDataProvider
+     * @dataProvider getUpdateRecursiveDataProvider
      */
-    public function testUpdateRecursively(array $config, array $currentConfig, $updatedConfig)
+    public function testUpdateRecursive(array $config, array $currentConfig, $updatedConfig)
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
@@ -111,13 +111,13 @@ class WriterTest extends TestCase
             ->method('filePutContents')
             ->with($filePath, $updatedConfig);
 
-        $this->writer->updateRecursively($config);
+        $this->writer->updateRecursive($config);
     }
 
     /**
      * @return array
      */
-    public function getUpdateRecursivelyDataProvider()
+    public function getUpdateRecursiveDataProvider()
     {
         return [
             [

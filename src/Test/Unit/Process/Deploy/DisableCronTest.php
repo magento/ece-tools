@@ -60,7 +60,7 @@ class DisableCronTest extends TestCase
             ->method('info')
             ->with('Disable cron');
         $this->writerMock->expects($this->once())
-            ->method('updateRecursively')
+            ->method('updateRecursive')
             ->with($config);
         $this->cronProcessKillMock->expects($this->once())
             ->method('execute');

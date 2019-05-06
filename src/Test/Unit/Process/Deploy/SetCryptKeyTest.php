@@ -71,7 +71,7 @@ class SetCryptKeyTest extends TestCase
             ->method('info')
             ->with('Setting encryption key');
         $this->configWriterMock->expects($this->once())
-            ->method('updateRecursively')
+            ->method('updateRecursive')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']]);
 
         $this->process->execute();
@@ -88,7 +88,7 @@ class SetCryptKeyTest extends TestCase
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
-            ->method('updateRecursively');
+            ->method('updateRecursive');
 
         $this->process->execute();
     }
@@ -103,7 +103,7 @@ class SetCryptKeyTest extends TestCase
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
-            ->method('updateRecursively');
+            ->method('updateRecursive');
 
         $this->process->execute();
     }

@@ -53,7 +53,7 @@ class DisableCron implements ProcessInterface
     public function execute()
     {
         $this->logger->info('Disable cron');
-        $this->writer->updateRecursively(['cron' => ['enabled' => 0]]);
+        $this->writer->updateRecursive(['cron' => ['enabled' => 0]]);
 
         $this->cronProcessKill->execute();
     }

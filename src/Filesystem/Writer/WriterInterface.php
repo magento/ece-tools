@@ -37,5 +37,5 @@ interface WriterInterface
      * @return void
      * @throws FileSystemException
      */
-    public function updateRecursively(array $config);
+    public function updateRecursive(array $config);
 }
