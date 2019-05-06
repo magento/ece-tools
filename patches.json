@@ -1,9 +1,5 @@
 {
   "magento/magento2-base": {
-    "Fix credis pipeline issue": {
-      "2.1.4 - 2.1.10": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch",
-      "2.2.0": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
-    },
     "Fix asset locker race condition when using Redis": {
       "2.1.4 - 2.1.14": "MDVA-2470__fix_asset_locking_race_condition__2.1.4.patch",
       "2.2.0 - 2.2.5": "MDVA-2470__fix_asset_locking_race_condition__2.2.0.patch"
@@ -20,7 +16,8 @@
       "~2.1.4": "MAGETWO-57413__move_vendor_path_autoloader__2.1.4.patch"
     },
     "Allow static assets to be loaded without URL rewrites": {
-      "~2.1.4": "MAGETWO-57414__load_static_assets_without_rewrites__2.1.4.patch"
+      "2.1.4 - 2.1.16": "MAGETWO-57414__load_static_assets_without_rewrites__2.1.4.patch",
+      "~2.1.17": "MAGETWO-57414__load_static_assets_without_rewrites__2.1.17.patch"
     },
     "Don't attempt to use non-existent setup areas": {
       "~2.1.4": "MAGETWO-45357__avoid_nonexistent_setup_area__2.1.4.patch"
@@ -62,6 +59,10 @@
       "2.2.0 - 2.2.1": "MAGECLOUD-1607__overhaul_cron_implementation__2.2.0.patch",
       "2.2.2 - 2.2.3": "MAGECLOUD-1607__overhaul_cron_implementation__2.2.2.patch",
       "2.2.4": "MAGECLOUD-1607__overhaul_cron_implementation__2.2.4.patch"
+    },
+    "Add Zookeeper and flock locks": {
+      "2.2.5 - 2.2.8": "MAGECLOUD-3054__add_zookeeper_and_flock_locks__2.2.5.patch",
+      "2.3.0 - 2.3.1": "MAGECLOUD-3054__add_zookeeper_and_flock_locks__2.3.0.patch"
     },
     "Reduce memory usage when importing customers and addresses": {
       "2.1.4 - 2.1.10": "SET-36__fix_oom_during_customer_import__2.1.4.patch",
@@ -119,6 +120,11 @@
     "Change the depth of a recursive check of directory write permissions": {
       "2.1.4 - 2.1.14": "MAGETWO-93265__fix_depth_of_recursive_check_of_directory_permissions__2.1.4.patch"
     },
+    "Google chart API used by Magento dashboard scheduled to be turned off": {
+      "2.1.4 - 2.1.17": "MAGETWO-98833__turn_off_google_chart_api__2.x.patch",
+      "2.2.0 - 2.2.8": "MAGETWO-98833__turn_off_google_chart_api__2.x.patch",
+      "2.3.0 - 2.3.1": "MAGETWO-98833__turn_off_google_chart_api__2.x.patch"
+    },
     "Do not run cron when it is disabled": {
       "2.1.4 - 2.2.5": "MAGECLOUD-2445__do_not_run_cron_when_it_is_disabled__2.1.4.patch"
     },
@@ -138,6 +144,38 @@
     "Add the possibility to install Magento without admin creation" : {
       "2.1.4 - 2.2.1": "MAGECLOUD-2573__installation_without_admin_creation__2.1.4.patch",
       "2.2.2 - 2.2.7": "MAGECLOUD-2573__installation_without_admin_creation__2.2.2.patch"
+    },
+    "Add the possibility to configure max execution time during static content deployment": {
+      "2.2.0 - 2.2.8 || 2.3.0": "MAGECLOUD-2822__configure_max_execution_time.patch",
+      "2.3.1": "MAGECLOUD-2822__configure_max_execution_time_2.3.1.patch"
+    },
+    "Suppress PDO warnings to work around PHP bugs #63812, #74401": {
+      "2.1.4": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.4.patch",
+      "2.1.5 - 2.1.12": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.5.patch",
+      "2.1.13 - 2.1.17": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.1.13.patch",
+      "2.2.0 - 2.2.8 || 2.3.0 - 2.3.1": "MAGECLOUD-2820__implement_isolated_connections_mechanism__2.2.0.patch"
+    },
+    "Pre-auth SQL": {
+      "2.1.4 - 2.1.17": "MC-5964__preauth_sql__2.1.4.patch",
+      "2.2.0 - 2.2.7": "MC-5964__preauth_sql__2.2.0.patch",
+      "2.3.0": "MC-5964__preauth_sql__2.3.0.patch"
+    }
+  },
+  "monolog/monolog": {
+    "Fix monolog Slack Handler bug for magento 2.1.x": {
+      "1.16.0": "MAGECLOUD-2793__fix_monolog_slack_handler_2.1.x.patch"
+    }
+  },
+  "colinmollenhour/cache-backend-redis": {
+    "The ability to read from the master Redis instance if the slave Redis is unavailable:": {
+      "1.10.2": "MAGECLOUD-2899__fix_redis_slave_configuration__2.1.16.patch",
+      "1.10.4": "MAGECLOUD-2899__fix_redis_slave_configuration__2.2.3.patch",
+      "1.10.5": "MAGECLOUD-2899__fix_redis_slave_configuration__2.3.0.patch"
+    }
+  },
+  "colinmollenhour/credis": {
+    "Fix credis pipeline issue": {
+      "1.6": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
     }
   }
 }

@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\Database\ConfigInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Validator as ConfigValidator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
@@ -27,6 +28,7 @@ use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Process\SetProductionMode;
 
 /**
  * @inheritdoc
@@ -64,6 +66,7 @@ class Container implements ContainerInterface
         /**
          * Binding.
          */
+        $this->container->singleton(Schema::class);
         $this->container->singleton(DirectoryList::class);
         $this->container->singleton(FileList::class);
         $this->container->singleton(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class);
@@ -144,6 +147,10 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\View\RendererInterface::class,
             \Magento\MagentoCloud\View\TwigRenderer::class
         );
+        $this->container->singleton(
+            \Magento\MagentoCloud\PlatformVariable\DecoderInterface::class,
+            \Magento\MagentoCloud\PlatformVariable\Decoder::class
+        );
         /**
          * Contextual binding.
          */
@@ -169,6 +176,7 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->container->make(BuildProcess\PreBuild::class),
+                        $this->container->make(SetProductionMode::class),
                         $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
@@ -179,6 +187,7 @@ class Container implements ContainerInterface
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
                                     $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
+                                    $this->container->make(ConfigValidator\Build\StageConfigDeprecatedVariables::class),
                                     $this->container->make(ConfigValidator\Build\ModulesExists::class),
                                     $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
                                     $this->container->make(ConfigValidator\Build\ScdOptionsIgnorance::class),
@@ -193,7 +202,6 @@ class Container implements ContainerInterface
                         $this->container->make(BuildProcess\CompileDi::class),
                         $this->container->make(BuildProcess\ComposerDumpAutoload::class),
                         $this->container->make(BuildProcess\DeployStaticContent::class),
-                        $this->container->make(BuildProcess\CompressStaticContent::class),
                     ],
                 ]);
             }
@@ -203,6 +211,7 @@ class Container implements ContainerInterface
             function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(BuildProcess\CompressStaticContent::class),
                         $this->container->make(BuildProcess\ClearInitDirectory::class),
                         $this->container->make(BuildProcess\BackupData::class),
                     ],
@@ -239,11 +248,15 @@ class Container implements ContainerInterface
                             'validators' => [
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\SearchConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\ResourceConfiguration::class),
                                     $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
+                                    $this->container->make(ConfigValidator\Deploy\ElasticSuiteIntegrity::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Deploy\AdminData::class),
-                                    $this->container->make(ConfigValidator\Deploy\SearchEngine::class),
+                                    $this->container->make(ConfigValidator\Deploy\PhpVersion::class),
+                                    $this->container->make(ConfigValidator\Deploy\SolrIntegrity::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
                                     $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
                                     $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
@@ -312,11 +325,11 @@ class Container implements ContainerInterface
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\CronConsumersRunner::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Cache::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Session::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DocumentRoot::class),
+                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Lock::class),
                     ],
                 ]);
             });
@@ -335,12 +348,13 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(DeployProcess\PreDeploy\ConfigUpdate\Cache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanViewPreprocessed::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
                         $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
-                        $this->container->make(DeployProcess\PreDeploy\SetProductionMode::class),
+                        $this->container->make(SetProductionMode::class),
                     ],
                 ]);
             });

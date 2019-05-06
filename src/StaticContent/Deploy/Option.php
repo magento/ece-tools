@@ -135,4 +135,12 @@ class Option implements OptionInterface
     {
         return $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getMaxExecutionTime()
+    {
+        return $this->stageConfig->get(DeployInterface::VAR_SCD_MAX_EXEC_TIME);
+    }
 }

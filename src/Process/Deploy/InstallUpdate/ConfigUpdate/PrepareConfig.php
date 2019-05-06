@@ -5,6 +5,8 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
@@ -57,6 +59,14 @@ class PrepareConfig implements ProcessInterface
             'force_html_minification' => (int)$this->globalConfig->get(GlobalConfig::VAR_SKIP_HTML_MINIFICATION),
         ];
 
-        $this->configWriter->update($config);
+        if ($xFrameOptions = $this->globalConfig->get(GlobalConfig::VAR_X_FRAME_CONFIGURATION)) {
+            $config['x-frame-options'] = (string)$xFrameOptions;
+        }
+
+        try {
+            $this->configWriter->update($config);
+        } catch (FileSystemException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }

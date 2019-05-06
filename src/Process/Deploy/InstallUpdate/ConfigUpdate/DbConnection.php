@@ -7,10 +7,10 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -39,6 +39,12 @@ class DbConnection implements ProcessInterface
      * @var MergedConfig
      */
     private $mergedConfig;
+
+    /**
+     * @var ResourceConfig
+     */
+    private $resourceConfig;
+
     /**
      * @var DeployInterface
      */
@@ -50,13 +56,14 @@ class DbConnection implements ProcessInterface
     private $configMerger;
 
     /**
-     * @var ConnectionInterface
+     * @var RelationshipConnectionFactory
      */
-    private $connectionData;
+    private $connectionFactory;
 
     /**
      * @param DeployInterface $stageConfig
      * @param MergedConfig $mergedConfig
+     * @param ResourceConfig $resourceConfig
      * @param ConfigWriter $configWriter
      * @param ConfigReader $configReader
      * @param ConfigMerger $configMerger
@@ -66,6 +73,7 @@ class DbConnection implements ProcessInterface
     public function __construct(
         DeployInterface $stageConfig,
         MergedConfig $mergedConfig,
+        ResourceConfig $resourceConfig,
         ConfigWriter $configWriter,
         ConfigReader $configReader,
         ConfigMerger $configMerger,
@@ -74,11 +82,12 @@ class DbConnection implements ProcessInterface
     ) {
         $this->stageConfig = $stageConfig;
         $this->mergedConfig = $mergedConfig;
+        $this->resourceConfig = $resourceConfig;
         $this->configWriter = $configWriter;
         $this->configReader = $configReader;
         $this->configMerger = $configMerger;
         $this->logger = $logger;
-        $this->connectionData = $connectionFactory->create(RelationshipConnectionFactory::CONNECTION_MAIN);
+        $this->connectionFactory = $connectionFactory;
     }
 
     /**
@@ -90,11 +99,7 @@ class DbConnection implements ProcessInterface
 
         $this->logger->info('Updating env.php DB connection configuration.');
         $config['db'] = $this->mergedConfig->get();
-        $config['resource'] = [
-            'default_setup' => [
-                'connection' => 'default',
-            ],
-        ];
+        $config['resource'] = $this->resourceConfig->get();
 
         $this->addLoggingAboutSlaveConnection();
         $this->configWriter->create($config);
@@ -106,8 +111,9 @@ class DbConnection implements ProcessInterface
     private function addLoggingAboutSlaveConnection()
     {
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
+        $connectionData = $this->connectionFactory->create(RelationshipConnectionFactory::CONNECTION_MAIN);
 
-        if (!$this->connectionData->getHost()
+        if (!$connectionData->getHost()
             || !$this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
             || (!$this->configMerger->isEmpty($envDbConfig) && !$this->configMerger->isMergeRequired($envDbConfig))
         ) {

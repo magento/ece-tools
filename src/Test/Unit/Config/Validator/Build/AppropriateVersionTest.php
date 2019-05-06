@@ -61,7 +61,7 @@ class AppropriateVersionTest extends TestCase
 
     public function testValidateVersionGreaterTwoDotTwo()
     {
-        $this->magentoVersion->expects($this->once())
+        $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
             ->willReturn(true);
         $this->stageConfigMock->expects($this->never())
@@ -70,33 +70,61 @@ class AppropriateVersionTest extends TestCase
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
-    public function testValidateVersionLowerTwoDotTwoAndStrategyEmpty()
+    public function testValidateVersionLowerTwoDotTwoAndVariablesEmpty()
     {
-        $this->magentoVersion->expects($this->once())
+        $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
             ->willReturn(false);
-        $this->stageConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(StageConfigInterface::VAR_SCD_STRATEGY)
-            ->willReturn(null);
+            ->willReturnMap([
+                [StageConfigInterface::VAR_SCD_STRATEGY, null],
+                [StageConfigInterface::VAR_SCD_MAX_EXEC_TIME, null],
+            ]);
 
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
     public function testValidateVersionLowerTwoDotTwoAndStrategyConfigured()
     {
-        $this->magentoVersion->expects($this->once())
+        $this->magentoVersion->expects($this->exactly(2))
             ->method('isGreaterOrEqual')
             ->willReturn(false);
-        $this->stageConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(StageConfigInterface::VAR_SCD_STRATEGY)
-            ->willReturn('quick');
+            ->willReturnMap([
+                [StageConfigInterface::VAR_SCD_STRATEGY, 'quick'],
+                [StageConfigInterface::VAR_SCD_MAX_EXEC_TIME, null],
+            ]);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
                 'The current configuration is not compatible with this version of Magento',
                 'SCD_STRATEGY is available for Magento 2.2.0 and later.'
+            );
+
+        $this->assertInstanceOf(Error::class, $this->validator->validate());
+    }
+
+    public function testValidateVersionLowerTwoDotTwoAndOptionsConfigured()
+    {
+        $this->magentoVersion->expects($this->exactly(2))
+            ->method('isGreaterOrEqual')
+            ->willReturn(false);
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->willReturnMap([
+                [StageConfigInterface::VAR_SCD_STRATEGY, 'quick'],
+                [StageConfigInterface::VAR_SCD_MAX_EXEC_TIME, '1000'],
+            ]);
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
+                'The current configuration is not compatible with this version of Magento',
+                implode(PHP_EOL, [
+                    'SCD_STRATEGY is available for Magento 2.2.0 and later.',
+                    'SCD_MAX_EXECUTION_TIME is available for Magento 2.2.0 and later.'
+                ])
             );
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());

@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\StaticContent;
 
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Psr\Log\LoggerInterface;
 
 /**
  * Creates static deploy command
@@ -14,9 +15,10 @@ use Magento\MagentoCloud\Package\MagentoVersion;
 class CommandFactory
 {
     /**
-     * A composer version constraint of versions that cannot use a static content deployment strategy.
+     * A composer version constraint of versions which can use a static content deployment strategy
+     * and max-execution-time option
      */
-    const NO_SCD_VERSION_CONSTRAINT = '<2.2';
+    const SCD_VERSION_CONSTRAINT = '>=2.2';
 
     /**
      * @var MagentoVersion
@@ -29,13 +31,31 @@ class CommandFactory
     private $globalConfig;
 
     /**
+     * @var ThemeResolver
+     */
+    private $themeResolver;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @param MagentoVersion $magentoVersion
      * @param GlobalSection $globalConfig
+     * @param ThemeResolver $themeResolver
+     * @param LoggerInterface $logger
      */
-    public function __construct(MagentoVersion $magentoVersion, GlobalSection $globalConfig)
-    {
+    public function __construct(
+        MagentoVersion $magentoVersion,
+        GlobalSection $globalConfig,
+        ThemeResolver $themeResolver,
+        LoggerInterface $logger
+    ) {
         $this->magentoVersion = $magentoVersion;
         $this->globalConfig = $globalConfig;
+        $this->themeResolver = $themeResolver;
+        $this->logger = $logger;
     }
 
     /**
@@ -52,11 +72,15 @@ class CommandFactory
             $option->getExcludedThemes(),
             $excludedThemes
         ));
-
+        foreach ($excludedThemes as $key => $aTheme) {
+            $excludedThemes[$key] = $this->themeResolver->resolve($aTheme);
+            if ('' === $excludedThemes[$key]) {
+                unset($excludedThemes[$key]);
+            }
+        }
         if ($excludedThemes) {
             $command .= ' --exclude-theme ' . implode(' --exclude-theme ', $excludedThemes);
         }
-
         if ($locales = $option->getLocales()) {
             $command .= ' ' . implode(' ', $locales);
         }
@@ -82,8 +106,14 @@ class CommandFactory
                 continue;
             }
 
+            $resolvedTheme = $this->themeResolver->resolve($theme);
+            if ('' === $resolvedTheme) {
+                $this->logger->warning('Unable to resolve ' . $theme . ' to an available theme.');
+                continue;
+            }
+
             $command = $this->build($option);
-            $command .= ' --theme ' . $theme;
+            $command .= ' --theme ' . $resolvedTheme;
             $command .= ' ' . implode(' ', $config['language']);
 
             $commands[] = $command;
@@ -106,7 +136,7 @@ class CommandFactory
             $command .= ' -f';
         }
 
-        if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)) {
+        if ($this->magentoVersion->satisfies(static::SCD_VERSION_CONSTRAINT)) {
             // Magento 2.1 doesn't have a "-s" option and can't take a strategy option.
             $strategy = $option->getStrategy();
             if (!empty($strategy)) {
@@ -124,10 +154,15 @@ class CommandFactory
             $command .= ' --jobs ' . $threadCount;
         }
 
-        if (!$this->magentoVersion->satisfies(static::NO_SCD_VERSION_CONSTRAINT)
-            && $this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)
-        ) {
-            $command .= ' --no-html-minify';
+        if ($this->magentoVersion->satisfies(static::SCD_VERSION_CONSTRAINT)) {
+            if ($this->globalConfig->get(GlobalSection::VAR_SKIP_HTML_MINIFICATION)) {
+                $command .= ' --no-html-minify';
+            }
+
+            $maxExecTime = $option->getMaxExecutionTime();
+            if ($maxExecTime !== null) {
+                $command .= ' --max-execution-time ' . (int)$maxExecTime;
+            }
         }
 
         return $command;

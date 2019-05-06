@@ -68,4 +68,20 @@ class PreDeployTest extends TestCase
 
         $this->process->execute();
     }
+
+    /**
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedExceptionMessage some error
+     */
+    public function testExecuteWithMaintenanceModeException()
+    {
+        $this->loggerMock->expects($this->exactly(1))
+            ->method('notice')
+            ->with('Starting pre-deploy.');
+        $this->maintenanceModeSwitcher->expects($this->once())
+            ->method('enable')
+            ->willThrowException(new \RuntimeException('some error'));
+
+        $this->process->execute();
+    }
 }

@@ -107,20 +107,24 @@ class Bootstrap
     {
         $environment = $this->getAllEnv($environment);
 
-        $_ENV = array_replace($_ENV, [
-            'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(
-                $environment->get('variables', [])
-            )),
-            'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode(
-                $environment->get('relationships', [])
-            )),
-            'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
-                $environment->get('routes', [])
-            )),
-            'MAGENTO_CLOUD_APPLICATION' => base64_encode(json_encode(
-                []
-            )),
-        ]);
+        $_ENV = array_replace(
+            $_ENV,
+            $environment->get('env', []),
+            [
+                'MAGENTO_CLOUD_VARIABLES' => base64_encode(json_encode(
+                    $environment->get('variables', [])
+                )),
+                'MAGENTO_CLOUD_RELATIONSHIPS' => base64_encode(json_encode(
+                    $environment->get('relationships', [])
+                )),
+                'MAGENTO_CLOUD_ROUTES' => base64_encode(json_encode(
+                    $environment->get('routes', [])
+                )),
+                'MAGENTO_CLOUD_APPLICATION' => base64_encode(json_encode(
+                    []
+                )),
+            ]
+        );
 
         $container = new Container(ECE_BP, $this->getSandboxDir());
 

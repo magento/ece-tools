@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Composer\Package\PackageInterface;
@@ -12,8 +14,8 @@ use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine\Config as SearchEngineConfig;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Config\SearchEngine;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -49,9 +51,9 @@ class ElasticSearchVersionTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var SearchEngineConfig|MockObject
+     * @var SearchEngine|MockObject
      */
-    private $searchEngineConfigMock;
+    private $searchEngineMock;
 
     /**
      * @var MagentoVersion|MockObject
@@ -67,7 +69,7 @@ class ElasticSearchVersionTest extends TestCase
         $this->managerMock = $this->createMock(Manager::class);
         $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->searchEngineConfigMock = $this->createMock(SearchEngineConfig::class);
+        $this->searchEngineMock = $this->createMock(SearchEngine::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->validator = new ElasticSearchVersion(
@@ -75,7 +77,7 @@ class ElasticSearchVersionTest extends TestCase
             $this->managerMock,
             $this->elasticSearchMock,
             $this->loggerMock,
-            $this->searchEngineConfigMock,
+            $this->searchEngineMock,
             $this->magentoVersionMock
         );
     }
@@ -87,8 +89,8 @@ class ElasticSearchVersionTest extends TestCase
             ->willReturn('0');
         $this->managerMock->expects($this->never())
             ->method('get');
-        $this->searchEngineConfigMock->expects($this->never())
-            ->method('get');
+        $this->searchEngineMock->expects($this->never())
+            ->method('isESFamily');
         $this->loggerMock->expects($this->never())
             ->method('warning');
         $this->resultFactoryMock->expects($this->once())
@@ -99,9 +101,9 @@ class ElasticSearchVersionTest extends TestCase
 
     public function testValidatePackageNotExists()
     {
-        $this->searchEngineConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn(['engine' => 'elasticsearch5']);
+        $this->searchEngineMock->expects($this->once())
+            ->method('isESFamily')
+            ->willReturn(true);
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
             ->willReturn(2);
@@ -120,9 +122,9 @@ class ElasticSearchVersionTest extends TestCase
 
     public function testValidateElasticSearchServiceExistsAndNotConfigured()
     {
-        $this->searchEngineConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn(['engine' => 'mysql']);
+        $this->searchEngineMock->expects($this->once())
+            ->method('isESFamily')
+            ->willReturn(false);
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
             ->willReturn(2);
@@ -154,11 +156,11 @@ class ElasticSearchVersionTest extends TestCase
         string $errorSuggestion = ''
     ) {
         $this->magentoVersionMock->expects($this->any())
-                ->method('getVersion')
-                ->willReturn($magentoVersion);
-        $this->searchEngineConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn(['engine' => 'elasticsearch']);
+            ->method('getVersion')
+            ->willReturn($magentoVersion);
+        $this->searchEngineMock->expects($this->once())
+            ->method('isESFamily')
+            ->willReturn(true);
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
             ->willReturn($esVersion);

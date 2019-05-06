@@ -3,13 +3,17 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Util\PasswordGenerator;
@@ -69,6 +73,11 @@ class SetupTest extends TestCase
     private $connectionDataMock;
 
     /**
+     * @var ElasticSuite|MockObject
+     */
+    private $elasticSuiteMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -91,6 +100,7 @@ class SetupTest extends TestCase
         $connectionFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($this->connectionDataMock);
+        $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
 
         $this->process = new Setup(
             $this->loggerMock,
@@ -100,7 +110,8 @@ class SetupTest extends TestCase
             $this->shellMock,
             $this->passwordGeneratorMock,
             $this->fileListMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->elasticSuiteMock
         );
     }
 
@@ -116,8 +127,12 @@ class SetupTest extends TestCase
      * @param string $adminUrlExpected
      * @param string $adminFirstnameExpected
      * @param string $adminLastnameExpected
+     * @param bool $elasticSuite
      * @dataProvider executeDataProvider
+     * @throws ProcessException
+     *
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function testExecute(
         $adminEmail,
@@ -130,7 +145,8 @@ class SetupTest extends TestCase
         $adminPasswordExpected,
         $adminUrlExpected,
         $adminFirstnameExpected,
-        $adminLastnameExpected
+        $adminLastnameExpected,
+        bool $elasticSuite = false
     ) {
         $installUpgradeLog = '/tmp/log.log';
 
@@ -179,23 +195,44 @@ class SetupTest extends TestCase
             ->method('getInstallUpgradeLog')
             ->willReturn($installUpgradeLog);
 
+        $elasticSuiteOption = '';
+
+        if ($elasticSuite) {
+            $this->elasticSuiteMock->expects($this->once())
+                ->method('isAvailable')
+                ->willReturn(true);
+            $this->elasticSuiteMock->expects($this->once())
+                ->method('get')
+                ->willReturn([
+                    'es_client' => [
+                        'servers' => 'localhost:9200'
+                    ]
+                ]);
+            $elasticSuiteOption = ' --es-hosts=\'localhost:9200\'';
+        }
+
         $adminCredential = $adminEmail
             ? ' --admin-user=\'' . $adminNameExpected . '\''
-                . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
-                . '\' --admin-email=\'' . $adminEmail . '\' --admin-password=\'' . $adminPasswordExpected . '\''
+            . ' --admin-firstname=\'' . $adminFirstnameExpected . '\' --admin-lastname=\'' . $adminLastnameExpected
+            . '\' --admin-email=\'' . $adminEmail . '\' --admin-password=\'' . $adminPasswordExpected . '\''
             : '';
-        $this->shellMock->expects($this->once())
+        $this->shellMock->expects($this->exactly(2))
             ->method('execute')
-            ->with(
-                '/bin/bash -c "set -o pipefail;'
-                . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
-                . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\' --language=\'fr_FR\''
-                . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
-                . ' --backend-frontname=\'' . $adminUrlExpected . '\''
-                . $adminCredential
-                . ' --use-secure-admin=1 --ansi --no-interaction'
-                . ' --db-password=\'password\' -v'
-                . ' | tee -a ' . $installUpgradeLog . '"'
+            ->withConsecutive(
+                ['echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog],
+                [
+                    '/bin/bash -c "set -o pipefail;'
+                    . ' php ./bin/magento setup:install -n --session-save=db --cleanup-database --currency=\'USD\''
+                    . ' --base-url=\'http://unsecure.url\' --base-url-secure=\'https://secure.url\''
+                    . ' --language=\'fr_FR\''
+                    . ' --timezone=America/Los_Angeles --db-host=\'localhost\' --db-name=\'magento\' --db-user=\'user\''
+                    . ' --backend-frontname=\'' . $adminUrlExpected . '\''
+                    . $adminCredential
+                    . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction'
+                    . ' --db-password=\'password\' -v'
+                    . $elasticSuiteOption
+                    . ' | tee -a ' . $installUpgradeLog . '"'
+                ]
             );
 
         $this->process->execute();
@@ -219,6 +256,7 @@ class SetupTest extends TestCase
                 'adminUrlExpected' => 'admino4ka',
                 'adminFirstnameExpected' => 'Firstname',
                 'adminLastnameExpected' => 'Lastname',
+                true
             ],
             [
                 'adminEmail' => 'admin@example.com',

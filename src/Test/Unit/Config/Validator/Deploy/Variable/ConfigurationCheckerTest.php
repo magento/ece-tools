@@ -140,7 +140,7 @@ class ConfigurationCheckerTest extends TestCase
             ->willReturn([]);
         $this->environmentReaderMock->expects($this->any())
             ->method('read')
-            ->willThrowException(new FileSystemException());
+            ->willThrowException(new FileSystemException('Some error'));
 
         $this->assertFalse($this->checker->isConfigured('test'));
     }

@@ -18,6 +18,7 @@ class Schema
     const SCHEMA_STAGE = 'stage';
     const SCHEMA_SYSTEM = 'system';
     const SCHEMA_DEFAULT_VALUE = 'default_values';
+    const SCHEMA_REPLACEMENT = 'replacement';
 
     /**
      * @var array
@@ -30,14 +31,14 @@ class Schema
      * @param string $stage
      * @return array
      */
-    public function getDefaults(string $stage)
+    public function getDefaults(string $stage): array
     {
         if (isset($this->defaults[$stage])) {
             return $this->defaults[$stage];
         }
 
         foreach ($this->getSchema() as $itemName => $itemOptions) {
-            if (isset($itemOptions[self::SCHEMA_DEFAULT_VALUE][$stage])) {
+            if (array_key_exists($stage, $itemOptions[self::SCHEMA_DEFAULT_VALUE])) {
                 $this->defaults[$stage][$itemName] = $itemOptions[self::SCHEMA_DEFAULT_VALUE][$stage];
             }
         }
@@ -95,6 +96,18 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => 4,
                 ],
             ],
+            StageConfigInterface::VAR_SCD_COMPRESSION_TIMEOUT => [
+                self::SCHEMA_TYPE => ['integer'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_BUILD,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_BUILD => 600,
+                    StageConfigInterface::STAGE_DEPLOY => 600,
+                ],
+            ],
             StageConfigInterface::VAR_SCD_STRATEGY => [
                 self::SCHEMA_TYPE => ['string'],
                 self::SCHEMA_VALUE_VALIDATION => ['compact', 'quick', 'standard'],
@@ -116,8 +129,8 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => 1,
-                    StageConfigInterface::STAGE_DEPLOY => 1,
+                    StageConfigInterface::STAGE_BUILD => StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE,
+                    StageConfigInterface::STAGE_DEPLOY => StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE,
                 ],
             ],
             StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
@@ -130,6 +143,18 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_BUILD => '',
                     StageConfigInterface::STAGE_DEPLOY => '',
+                ],
+            ],
+            StageConfigInterface::VAR_SCD_MAX_EXEC_TIME => [
+                self::SCHEMA_TYPE => ['integer'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_BUILD,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_BUILD => null,
+                    StageConfigInterface::STAGE_DEPLOY => null,
                 ],
             ],
             StageConfigInterface::VAR_SCD_MATRIX => [
@@ -190,15 +215,6 @@ class Schema
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
                     SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_APPLICATION',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_MODE => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_MODE',
                 ],
             ],
             SystemConfigInterface::VAR_ENV_ENVIRONMENT => [
@@ -326,6 +342,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
             ],
+            DeployInterface::VAR_ELASTICSUITE_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+            ],
             DeployInterface::VAR_QUEUE_CONFIGURATION => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [
@@ -357,6 +383,16 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_DATABASE_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+            ],
+            DeployInterface::VAR_RESOURCE_CONFIGURATION => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL,
@@ -405,6 +441,29 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_POST_DEPLOY => [''],
                 ],
+            ],
+            StageConfigInterface::VAR_X_FRAME_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'SAMEORIGIN'
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * Returns array of deprecated variables.
+     *
+     * @return array
+     */
+    public function getDeprecatedSchema()
+    {
+        return [
+            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
+                self::SCHEMA_REPLACEMENT => StageConfigInterface::VAR_SCD_MATRIX,
             ],
         ];
     }
