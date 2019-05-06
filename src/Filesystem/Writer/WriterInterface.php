@@ -29,4 +29,13 @@ interface WriterInterface
      * @throws FileSystemException
      */
     public function update(array $config);
+
+    /**
+     * Recursively updates existence configuration.
+     *
+     * @param array $config
+     * @return void
+     * @throws FileSystemException
+     */
+    public function updateRecursive(array $config);
 }
