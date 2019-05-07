@@ -39,6 +39,7 @@ class Build extends Command
     const OPTION_REDIS = 'redis';
     const OPTION_ES = 'es';
     const OPTION_RABBIT_MQ = 'rmq';
+    const OPTION_NODE = 'node';
     const OPTION_MODE = 'mode';
 
     /**
@@ -143,6 +144,11 @@ class Build extends Command
                 InputOption::VALUE_OPTIONAL,
                 'RabbitMQ version'
             )->addOption(
+                self::OPTION_NODE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'Node.js version'
+            )->addOption(
                 self::OPTION_MODE,
                 'm',
                 InputOption::VALUE_OPTIONAL,
@@ -176,6 +182,7 @@ class Build extends Command
             self::OPTION_NGINX => Config::KEY_NGINX,
             self::OPTION_REDIS => Config::KEY_REDIS,
             self::OPTION_ES => Config::KEY_ELASTICSEARCH,
+            self::OPTION_NODE => Config::KEY_NODE,
             self::OPTION_RABBIT_MQ => Config::KEY_RABBITMQ,
         ];
 

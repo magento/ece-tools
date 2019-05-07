@@ -23,7 +23,7 @@ class Config
     const KEY_REDIS = 'redis';
     const KEY_ELASTICSEARCH = 'elasticsearch';
     const KEY_RABBITMQ = 'rabbitmq';
-
+    const KEY_NODE = 'node';
     const KEY_CRON = 'crons';
     const KEY_VARNISH = 'varnish';
 
