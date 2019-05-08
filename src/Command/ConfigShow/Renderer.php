@@ -3,12 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
-namespace Magento\MagentoCloud\Process;
+declare(strict_types=1);
+namespace Magento\MagentoCloud\Command\ConfigShow;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\PlatformVariable\Decoder;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableCell;
@@ -18,7 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * Output encoded cloud configuration environment variables
  */
-class CloudConfig
+class Renderer
 {
     /**
      * @var LoggerInterface
@@ -26,28 +25,19 @@ class CloudConfig
     private $logger;
 
     /**
-     * @var Decoder
-     */
-    private $decoder;
-
-    /**
      * @var Environment
      */
     private $environment;
 
     /**
-     * CloudConfig constructor.
      * @param LoggerInterface $logger
-     * @param Decoder $decoder
      * @param Environment $environment
      */
     public function __construct(
         LoggerInterface $logger,
-        Decoder $decoder,
         Environment $environment
     ) {
         $this->logger = $logger;
-        $this->decoder = $decoder;
         $this->environment = $environment;
     }
 
@@ -103,9 +93,8 @@ class CloudConfig
     public function printVariables(OutputInterface $output)
     {
         $rows = [];
-        foreach ($this->environment->getVariables() as $variable => $value) {
-            $rows[] = [$variable, $value];
-        }
+        $rows = $this->buildArray($this->environment->getVariables());
+
         $this->renderTable(
             $output,
             'Magento Cloud Environment Variables',
@@ -159,11 +148,11 @@ class CloudConfig
     }
 
     /**
-     * @param string $name
+     * @param mixed $name
      * @param $depth
      * @return string
      */
-    protected function indentValue(string $name, $depth)
+    protected function indentValue($name, $depth)
     {
         if (!$depth) {
             return $name;
