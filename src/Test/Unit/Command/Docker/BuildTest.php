@@ -17,6 +17,9 @@ use Magento\MagentoCloud\Docker\Compose\ProductionCompose;
 use Magento\MagentoCloud\Docker\ComposeManagerFactory;
 use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
+use Magento\MagentoCloud\Docker\DevBuilder;
+use Magento\MagentoCloud\Docker\Service\Config;
+use Magento\MagentoCloud\Docker\Service\Version\Validator;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -71,6 +74,16 @@ class BuildTest extends TestCase
     private $distGenerator;
 
     /**
+     * @var Config|MockObject
+     */
+    private $serviceConfigMock;
+
+    /**
+     * @var Validator|MockObject
+     */
+    private $validatorMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -81,7 +94,16 @@ class BuildTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
         $this->configMock = $this->createMock(Repository::class);
+        $this->serviceConfigMock = $this->createMock(Config::class);
+        $this->validatorMock = $this->createMock(Validator::class);
         $this->distGenerator = $this->createMock(DistGenerator::class);
+
+        $this->serviceConfigMock->expects($this->any())
+            ->method('getAllServiceVersions')
+            ->willReturn([]);
+        $this->validatorMock->expects($this->any())
+            ->method('validateVersions')
+            ->willReturn([]);
 
         $this->repositoryFactoryMock->method('create')
             ->willReturn($this->configMock);
@@ -91,6 +113,8 @@ class BuildTest extends TestCase
             $this->fileMock,
             $this->environmentMock,
             $this->repositoryFactoryMock,
+            $this->serviceConfigMock,
+            $this->validatorMock,
             $this->distGenerator
         );
     }
@@ -174,12 +198,13 @@ class BuildTest extends TestCase
                 [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
                 [Build::OPTION_RABBIT_MQ, '3.5'],
-                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_PRODUCTION]
+                [Build::OPTION_NODE, '6.0'],
+                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_PRODUCTION],
             ]);
         $this->managerMock->expects($this->once())
             ->method('getConfigPath')
             ->willReturn('magento_root/docker-compose.yml');
-        $this->configMock->expects($this->exactly(6))
+        $this->configMock->expects($this->exactly(7))
             ->method('set');
         $this->distGenerator->expects($this->once())
             ->method('generate');
