@@ -2,5 +2,6 @@ actor: CliTester
 modules:
   enabled:
     - Magento\MagentoCloud\Test\Functional\Codeception\Docker
+    - Magento\MagentoCloud\Test\Functional\Codeception\MagentoDb
     - PhpBrowser
     - Asserts
