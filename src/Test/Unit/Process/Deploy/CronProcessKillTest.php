@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Process\Deploy\CronProcessKill;
-use Magento\MagentoCloud\Shell\ResultInterface;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -48,12 +48,12 @@ class CronProcessKillTest extends TestCase
 
     public function testExecute()
     {
-        $resultMock1 = $this->getMockForAbstractClass(ResultInterface::class);
-        $resultMock1->expects($this->once())
+        $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock1->expects($this->once())
             ->method('getOutput')
             ->willReturn([111, 222]);
-        $resultMock2 = $this->getMockForAbstractClass(ResultInterface::class);
-        $resultMock2->expects($this->any())
+        $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock2->expects($this->any())
             ->method('getOutput')
             ->willReturn([]);
 
@@ -64,9 +64,9 @@ class CronProcessKillTest extends TestCase
             ->method('execute')
             ->willReturnMap(
                 [
-                    ['pgrep -U "$(id -u)" -f "bin/magento cron:run"', [], $resultMock1],
-                    ["kill 111", [], $resultMock2],
-                    ["kill 222", [], $resultMock2],
+                    ['pgrep -U "$(id -u)" -f "bin/magento cron:run"', [], $processMock1],
+                    ["kill 111", [], $processMock2],
+                    ["kill 222", [], $processMock2],
                 ]
             );
         $this->process->execute();
@@ -116,8 +116,8 @@ class CronProcessKillTest extends TestCase
      */
     public function testExecuteWithExeption()
     {
-        $resultMock = $this->getMockForAbstractClass(ResultInterface::class);
-        $resultMock->expects($this->once())
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn([111, 222]);
         $this->loggerMock->expects($this->exactly(2))
@@ -129,7 +129,7 @@ class CronProcessKillTest extends TestCase
         $this->shellMock->expects($this->at(0))
             ->method('execute')
             ->with('pgrep -U "$(id -u)" -f "bin/magento cron:run"')
-            ->willReturn($resultMock);
+            ->willReturn($processMock);
         $this->shellMock->expects($this->at(1))
             ->method('execute')
             ->with("kill 111")

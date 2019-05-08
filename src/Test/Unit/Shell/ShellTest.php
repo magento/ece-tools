@@ -8,14 +8,12 @@ namespace Magento\MagentoCloud\Test\Unit\Shell;
 use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Shell\ProcessFactory;
-use Magento\MagentoCloud\Shell\ResultFactory;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\Shell;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Exception\LogicException;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 /**
  * @inheritdoc
@@ -48,11 +46,6 @@ class ShellTest extends TestCase
     private $processFactoryMock;
 
     /**
-     * @var ResultFactory|MockObject
-     */
-    private $resultFactoryMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -61,13 +54,11 @@ class ShellTest extends TestCase
         $this->systemListMock = $this->createMock(SystemList::class);
         $this->sanitizerMock = $this->createMock(Sanitizer::class);
         $this->processFactoryMock = $this->createMock(ProcessFactory::class);
-        $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
         $this->shell = new Shell(
             $this->loggerMock,
             $this->systemListMock,
             $this->processFactoryMock,
-            $this->resultFactoryMock,
             $this->sanitizerMock
         );
     }
@@ -82,12 +73,12 @@ class ShellTest extends TestCase
         $args = ['-al'];
         $magentoRoot = '/magento';
 
-        $processMock = $this->createMock(Process::class);
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getCommandLine')
             ->willReturn('ls -la');
         $processMock->expects($this->once())
-            ->method('mustRun');
+            ->method('execute');
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn($processOutput);
@@ -133,12 +124,12 @@ class ShellTest extends TestCase
         $command = 'ls';
         $magentoRoot = '/magento';
 
-        $processMock = $this->createMock(Process::class);
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getCommandLine')
             ->willReturn('ls -la');
         $processMock->expects($this->once())
-            ->method('mustRun');
+            ->method('execute');
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willThrowException(new LogicException('something went wrong'));
@@ -170,17 +161,14 @@ class ShellTest extends TestCase
         $command = 'ls -al --password="123"';
         $magentoRoot = '/magento';
 
-        /** @var Process|MockObject $processMock */
-        $processMock = $this->createMock(Process::class);
-        $processMock->expects($this->exactly(2))
+        /** @var ProcessInterface|MockObject $processMock */
+        $processMock = $this->createMock(ProcessInterface::class);
+        $processMock->expects($this->once())
             ->method('getCommandLine')
             ->willReturn($command);
-        $processMock->expects($this->exactly(2))
-            ->method('getExitCode')
-            ->willReturn(3);
         $processMock->expects($this->once())
-            ->method('mustRun')
-            ->willThrowException(new ProcessFailedException($processMock));
+            ->method('execute')
+            ->willThrowException(new \RuntimeException(sprintf('Command %s failed', $command), 3));
         $processMock->expects($this->never())
             ->method('getOutput');
         $this->processFactoryMock->expects($this->once())
@@ -213,8 +201,8 @@ class ShellTest extends TestCase
         $magentoRoot = '/magento';
         $arguments = ['arg1', 'arg2'];
 
-        /** @var Process|MockObject $processMock */
-        $processMock = $this->createMock(Process::class);
+        /** @var ProcessInterface|MockObject $processMock */
+        $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getCommandLine')
             ->willReturn('ls -al arg1 arg2');

@@ -8,10 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Shell;
 
 use Magento\MagentoCloud\App\ContainerInterface;
-use Symfony\Component\Process\Process;
 
 /**
- * Creates instance of Process
+ * Creates instance of ProcessInterface
  */
 class ProcessFactory
 {
@@ -32,9 +31,10 @@ class ProcessFactory
      * Creates instance of Process
      *
      * @param array $params
-     * @return Process
+     * @return ProcessInterface
+     * @throws \RuntimeException if Process can't be created
      */
-    public function create(array $params): Process
+    public function create(array $params): ProcessInterface
     {
         return $this->container->create(Process::class, $params);
     }

@@ -11,8 +11,6 @@ use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Exception\LogicException;
-use Symfony\Component\Process\Exception\ProcessFailedException;
-use Symfony\Component\Process\Process;
 
 /**
  * @inheritdoc
@@ -35,11 +33,6 @@ class Shell implements ShellInterface
     private $processFactory;
 
     /**
-     * @var ResultFactory
-     */
-    private $resultFactory;
-
-    /**
      * @var Sanitizer
      */
     private $sanitizer;
@@ -48,20 +41,17 @@ class Shell implements ShellInterface
      * @param LoggerInterface $logger
      * @param SystemList $systemList
      * @param ProcessFactory $processFactory
-     * @param ResultFactory $resultFactory
      * @param Sanitizer $sanitizer
      */
     public function __construct(
         LoggerInterface $logger,
         SystemList $systemList,
         ProcessFactory $processFactory,
-        ResultFactory $resultFactory,
         Sanitizer $sanitizer
     ) {
         $this->logger = $logger;
         $this->systemList = $systemList;
         $this->processFactory = $processFactory;
-        $this->resultFactory = $resultFactory;
         $this->sanitizer = $sanitizer;
     }
 
@@ -74,7 +64,7 @@ class Shell implements ShellInterface
      * $this->shell->execute('/bin/bash -c "set -o pipefail; firstCommand | secondCommand"');
      * ```
      */
-    public function execute(string $command, array $args = []): ResultInterface
+    public function execute(string $command, array $args = []): ProcessInterface
     {
         try {
             if ($args) {
@@ -89,26 +79,26 @@ class Shell implements ShellInterface
 
             $this->logger->info($process->getCommandLine());
 
-            $process->mustRun();
-        } catch (ProcessFailedException $e) {
+            $process->execute();
+        } catch (\RuntimeException $e) {
             throw new ShellException(
                 $this->sanitizer->sanitize($e->getMessage()),
-                $process->getExitCode()
+                $e->getCode()
             );
         }
 
         $this->handleOutput($process);
 
-        return $this->resultFactory->create($process);
+        return $process;
     }
 
     /**
      * Logs command output
      *
-     * @param Process $process
+     * @param ProcessInterface $process
      * @return void
      */
-    private function handleOutput(Process $process)
+    private function handleOutput(ProcessInterface $process)
     {
         try {
             if ($output = $process->getOutput()) {

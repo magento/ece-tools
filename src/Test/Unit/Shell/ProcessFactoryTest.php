@@ -8,10 +8,11 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
 use Magento\MagentoCloud\App\ContainerInterface;
+use Magento\MagentoCloud\Shell\Process;
 use Magento\MagentoCloud\Shell\ProcessFactory;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Process\Process;
 
 /**
  * @inheritdoc
@@ -40,8 +41,8 @@ class ProcessFactoryTest extends TestCase
 
     public function testCreate()
     {
-        /** @var Process|MockObject $processMock */
-        $processMock = $this->createMock(Process::class);
+        /** @var ProcessInterface|MockObject $processMock */
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $params = ['option' => 'value'];
 
         $this->containerMock->expects($this->once())

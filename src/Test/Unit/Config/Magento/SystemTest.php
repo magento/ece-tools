@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator;
 use Magento\MagentoCloud\Config\Magento\System;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Shell\ResultInterface;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -67,8 +67,8 @@ class SystemTest extends TestCase
      */
     public function testValidate($expectedResult)
     {
-        $resultMock = $this->getMockForAbstractClass(ResultInterface::class);
-        $resultMock->expects($this->once())
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn([$expectedResult]);
         $this->magentoVersionMock->expects($this->once())
@@ -78,7 +78,7 @@ class SystemTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('config:show', ['some/key'])
-            ->willReturn($resultMock);
+            ->willReturn($processMock);
 
         $this->assertSame($expectedResult, $this->config->get('some/key'));
     }
@@ -100,8 +100,8 @@ class SystemTest extends TestCase
      */
     public function testGetDefaultValue()
     {
-        $resultMock = $this->getMockForAbstractClass(ResultInterface::class);
-        $resultMock->expects($this->once())
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn([]);
         $this->magentoVersionMock->expects($this->once())
@@ -111,7 +111,7 @@ class SystemTest extends TestCase
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('config:show', ['some/key'])
-            ->willReturn($resultMock);
+            ->willReturn($processMock);
 
         $this->assertSame(null, $this->config->get('some/key'));
     }

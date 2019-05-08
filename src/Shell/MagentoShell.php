@@ -28,7 +28,7 @@ class MagentoShell implements ShellInterface
     /**
      * @inheritdoc
      */
-    public function execute(string $command, array $args = []): ResultInterface
+    public function execute(string $command, array $args = []): ProcessInterface
     {
         return $this->shell->execute('php ./bin/magento ' . $command . ' --ansi --no-interaction', $args);
     }

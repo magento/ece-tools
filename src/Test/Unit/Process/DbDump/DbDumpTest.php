@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\DbDump;
 use Magento\MagentoCloud\DB\DumpInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Process\DbDump\DbDump;
-use Magento\MagentoCloud\Shell\ResultInterface;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -125,14 +125,14 @@ class DbDumpTest extends TestCase
 
         $command = $this->getCommand();
 
-        $resultMock = $this->getMockForAbstractClass(ResultInterface::class);
-        $resultMock->expects($this->once())
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
             ->method('getExitCode')
             ->willReturn(0);
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with($command)
-            ->willReturn($resultMock);
+            ->willReturn($processMock);
 
         $this->process->execute();
     }
@@ -225,11 +225,11 @@ class DbDumpTest extends TestCase
 
         $command = $this->getCommand();
 
-        $resultMock1 = $this->getMockForAbstractClass(ResultInterface::class);
-        $resultMock1->expects($this->once())
+        $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock1->expects($this->once())
             ->method('getExitCode')
             ->willReturn(128);
-        $resultMock2 = $this->getMockForAbstractClass(ResultInterface::class);
+        $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
 
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
@@ -237,8 +237,8 @@ class DbDumpTest extends TestCase
                 [$command],
                 ['rm ' . $this->dumpFilePath]
             )->willReturnMap([
-                [$command, [], $resultMock1],
-                ['rm ' . $this->dumpFilePath, [], $resultMock2],
+                [$command, [], $processMock1],
+                ['rm ' . $this->dumpFilePath, [], $processMock2],
             ]);
 
         $this->process->execute();

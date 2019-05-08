@@ -17,8 +17,8 @@ interface ShellInterface
      *
      * @param string $command The command.
      * @param array $args Arguments to pass
-     * @return ResultInterface The output of command.
+     * @return ProcessInterface The output of command.
      * @throws ShellException If command was executed with error
      */
-    public function execute(string $command, array $args = []): ResultInterface;
+    public function execute(string $command, array $args = []): ProcessInterface;
 }
