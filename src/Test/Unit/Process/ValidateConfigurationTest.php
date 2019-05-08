@@ -28,6 +28,9 @@ class ValidateConfigurationTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testExecuteWithoutValidators()
     {
         $process = new ValidateConfiguration(
@@ -48,33 +51,18 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
      * @expectedExceptionMessage Fix configuration with given suggestions
      */
     public function testExecuteWithCriticalError()
     {
-        $criticalValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
-        $criticalResultMock = $this->createMock(Result\Error::class);
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
-
-        $criticalResultMock->expects($this->once())
-            ->method('getError')
-            ->willReturn('some error');
-        $criticalResultMock->expects($this->any())
-            ->method('getSuggestion')
-            ->willReturn('some suggestion');
-        $criticalValidator->expects($this->once())
-            ->method('validate')
-            ->willReturn($criticalResultMock);
         $warningValidator->expects($this->once())
             ->method('validate');
 
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->withConsecutive(
-                ['Validating configuration'],
-                ['End of validation']
-            );
+            ->with('Validating configuration');
         $this->loggerMock->expects($this->never())
             ->method('log');
 
@@ -82,7 +70,7 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_CRITICAL => [
-                    $criticalValidator,
+                    $this->createValidatorWithError('some error', 'some  suggestion'),
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
                     $warningValidator,
@@ -92,21 +80,11 @@ class ValidateConfigurationTest extends TestCase
         $process->execute();
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testExecuteWithWarningMessage()
     {
-        $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
-        $warningResultMock = $this->createMock(Result\Error::class);
-
-        $warningResultMock->expects($this->once())
-            ->method('getError')
-            ->willReturn('some warning');
-        $warningResultMock->expects($this->any())
-            ->method('getSuggestion')
-            ->willReturn('some warning suggestion');
-        $warningValidator->expects($this->once())
-            ->method('validate')
-            ->willReturn($warningResultMock);
-
         $this->loggerMock->expects($this->exactly(2))
             ->method('notice')
             ->withConsecutive(
@@ -125,49 +103,22 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_WARNING => [
-                    $warningValidator,
+                    $this->createValidatorWithError('some warning', 'some warning suggestion'),
                 ],
             ]
         );
         $process->execute();
     }
 
+    /**
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedExceptionMessage Fix configuration with given suggestions
+     */
     public function testExecuteWithWarningAndCriticalMessage()
     {
-        $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
-        $warningResultMock = $this->createMock(Result\Error::class);
-        $warningValidator2 = $this->getMockForAbstractClass(ValidatorInterface::class);
-        $warningResultMock2 = $this->createMock(Result\Error::class);
-        $criticalValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
-
-        $warningResultMock->expects($this->once())
-            ->method('getError')
-            ->willReturn('some warning');
-        $warningResultMock->expects($this->any())
-            ->method('getSuggestion')
-            ->willReturn('some warning suggestion');
-        $warningValidator->expects($this->once())
-            ->method('validate')
-            ->willReturn($warningResultMock);
-        $warningResultMock2->expects($this->once())
-            ->method('getError')
-            ->willReturn('some warning 2');
-        $warningResultMock2->expects($this->any())
-            ->method('getSuggestion')
-            ->willReturn('some warning suggestion 2');
-        $warningValidator2->expects($this->once())
-            ->method('validate')
-            ->willReturn($warningResultMock2);
-        $criticalValidator->expects($this->once())
-            ->method('validate')
-            ->willReturn($this->createMock(Result\Success::class));
-
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->withConsecutive(
-                ['Validating configuration'],
-                ['End of validation']
-            );
+            ->with('Validating configuration');
         $this->loggerMock->expects($this->once())
             ->method('log')
             ->with(
@@ -183,14 +134,37 @@ class ValidateConfigurationTest extends TestCase
             $this->loggerMock,
             [
                 ValidatorInterface::LEVEL_CRITICAL => [
-                    $criticalValidator,
+                    $this->createValidatorWithError('Critical error', 'some critical suggestion'),
                 ],
                 ValidatorInterface::LEVEL_WARNING => [
-                    $warningValidator,
-                    $warningValidator2,
+                    $this->createValidatorWithError('some warning', 'some warning suggestion'),
+                    $this->createValidatorWithError('some warning 2', 'some warning suggestion 2'),
                 ],
             ]
         );
         $process->execute();
+    }
+
+    /**
+     * @param string $error
+     * @param string $suggestion
+     * @return \PHPUnit\Framework\MockObject\MockObject|ValidatorInterface
+     */
+    private function createValidatorWithError(string $error, string $suggestion)
+    {
+        $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
+        $warningResultMock = $this->createMock(Result\Error::class);
+
+        $warningResultMock->expects($this->once())
+            ->method('getError')
+            ->willReturn($error);
+        $warningResultMock->expects($this->once())
+            ->method('getSuggestion')
+            ->willReturn($suggestion);
+        $warningValidator->expects($this->once())
+            ->method('validate')
+            ->willReturn($warningResultMock);
+
+        return $warningValidator;
     }
 }
