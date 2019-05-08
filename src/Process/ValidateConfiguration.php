@@ -38,15 +38,36 @@ class ValidateConfiguration implements ProcessInterface
 
     /**
      * @inheritdoc
-     *
-     * @return void
-     * @throws \Exception
      */
     public function execute()
     {
         $this->logger->notice('Validating configuration');
 
-        $maxLevel = 0;
+        $messages = $this->collectMessages();
+
+        ksort($messages);
+        foreach ($messages as $level => $levelMessages) {
+            $error = 'Fix configuration with given suggestions:' . PHP_EOL . implode(PHP_EOL, $levelMessages);
+
+            if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
+                throw new ProcessException(
+                    $error
+                );
+            }
+
+            $this->logger->log($level, $error);
+        }
+
+        $this->logger->notice('End of validation');
+    }
+
+    /**
+     * Returns all validation messages grouped by validation level
+     *
+     * @return array
+     */
+    private function collectMessages(): array
+    {
         $messages = [];
 
         /* @var $validators ValidatorInterface[] */
@@ -55,35 +76,19 @@ class ValidateConfiguration implements ProcessInterface
                 $result = $validator->validate();
 
                 if ($result instanceof Error) {
-                    $maxLevel = max($maxLevel, $level);
-
-                    $messages[] = '- ' . $result->getError();
-                    if ($result->getSuggestion()) {
-                        $messages[] = implode(PHP_EOL, array_map(
+                    $messages[$level][] = '- ' . $result->getError();
+                    if ($suggestion = $result->getSuggestion()) {
+                        $messages[$level][] = implode(PHP_EOL, array_map(
                             function ($line) {
                                 return '  ' . $line;
                             },
-                            explode(PHP_EOL, $result->getSuggestion())
+                            explode(PHP_EOL, $suggestion)
                         ));
                     }
                 }
             }
         }
 
-        $this->logger->notice('End of validation');
-
-        if (!$messages || !$maxLevel) {
-            return;
-        }
-
-        $error = 'Fix configuration with given suggestions:' . PHP_EOL . implode(PHP_EOL, $messages);
-
-        if ($maxLevel >= ValidatorInterface::LEVEL_CRITICAL) {
-            throw new \RuntimeException(
-                $error
-            );
-        }
-
-        $this->logger->log($maxLevel, $error);
+        return $messages;
     }
 }

@@ -17,7 +17,7 @@ use Robo\Task\BaseTask;
 /**
  * Run docker-compose command
  */
-class Run extends BaseTask implements CommandInterface, TaskInterface
+class Run extends BaseTask implements CommandInterface
 {
     use ExecOneCommand;
     use CommandReceiver;
