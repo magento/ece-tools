@@ -65,14 +65,14 @@ class Urls implements ProcessInterface
         if (!$this->stageConfig->get(DeployInterface::VAR_FORCE_UPDATE_URLS)) {
             if ($this->environment->isMasterBranch()) {
                 $this->logger->info(
-                    'Skipping URL updates as production/staging environment detected.'
-                    . ' You can override this behavior by FORCE_URL_UPDATES variable'
+                    'Skipping URL updates because we are deploying to a Production or Staging environment.'
+                    . ' You can override this behavior by setting the FORCE_URL_UPDATES variable to true.'
                 );
                 return;
             }
 
             if (!$this->stageConfig->get(DeployInterface::VAR_UPDATE_URLS)) {
-                $this->logger->info('Skipping URL updates as URL_UPDATES is set tot false');
+                $this->logger->info('Skipping URL updates because the URL_UPDATES variable is set to false.');
                 return;
             }
         }

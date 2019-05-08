@@ -110,7 +110,7 @@ class UrlsTest extends TestCase
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with($this->stringContains('Skipping URL updates as production/staging environment detected.'));
+            ->with($this->stringContains('Skipping URL updates because we are deploying to a Production or Staging'));
         $this->processMock->expects($this->never())
             ->method('execute');
 
@@ -131,7 +131,7 @@ class UrlsTest extends TestCase
             ->willReturnOnConsecutiveCalls(false, false);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with($this->stringContains('Skipping URL updates as URL_UPDATES is set tot false'));
+            ->with($this->stringContains('Skipping URL updates because the URL_UPDATES variable is set to false.'));
         $this->processMock->expects($this->never())
             ->method('execute');
 
