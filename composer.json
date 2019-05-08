@@ -91,61 +91,61 @@
       ],
       [
         "dist/docker/bin/bash",
-        "bin/bash"
+        "docker-bash"
       ],
       [
         "dist/docker/bin/build",
-        "bin/build"
+        "docker-build"
       ],
       [
         "dist/docker/bin/deploy",
-        "bin/deploy"
+        "docker-deploy"
       ],
       [
         "dist/docker/bin/start",
-        "bin/start"
+        "docker-start"
       ],
       [
         "dist/docker/bin/stop",
-        "bin/stop"
+        "docker-stop"
       ],
       [
         "dist/docker/bin/restart",
-        "bin/restart"
+        "docker-restart"
       ],
       [
         "dist/docker/bin/down",
-        "bin/down"
+        "docker-down"
       ]
     ],
     "chmod": [
       {
         "mask": "0755",
-        "path": "bin/bash"
+        "path": "docker-bash"
       },
       {
         "mask": "0755",
-        "path": "bin/build"
+        "path": "docker-build"
       },
       {
         "mask": "0755",
-        "path": "bin/deploy"
+        "path": "docker-deploy"
       },
       {
         "mask": "0755",
-        "path": "bin/start"
+        "path": "docker-start"
       },
       {
         "mask": "0755",
-        "path": "bin/stop"
+        "path": "docker-stop"
       },
       {
         "mask": "0755",
-        "path": "bin/restart"
+        "path": "docker-restart"
       },
       {
         "mask": "0755",
-        "path": "bin/down"
+        "path": "dockerdown"
       }
     ]
   }
