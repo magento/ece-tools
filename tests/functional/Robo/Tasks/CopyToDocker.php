@@ -16,7 +16,7 @@ use Robo\Task\BaseTask;
 /**
  * Copy files to Docker environment
  */
-class CopyToDocker extends BaseTask implements CommandInterface, TaskInterface
+class CopyToDocker extends BaseTask implements CommandInterface
 {
     use ExecOneCommand;
 
@@ -42,15 +42,37 @@ class CopyToDocker extends BaseTask implements CommandInterface, TaskInterface
     protected $destination;
 
     /**
-     * @param string $source
-     * @param string $destination
      * @param string $container
      */
-    public function __construct(string $source, string $destination, string $container)
+    public function __construct(string $container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * Sets the source path on the local machine
+     *
+     * @param string $source
+     * @return self
+     */
+    public function source(string $source): self
+    {
         $this->source = $source;
+
+        return $this;
+    }
+
+    /**
+     * Sets the destination path on the Docker
+     *
+     * @param string $destination
+     * @return self
+     */
+    public function destination(string $destination): self
+    {
         $this->destination = $destination;
+
+        return $this;
     }
 
     /**
@@ -73,6 +95,10 @@ class CopyToDocker extends BaseTask implements CommandInterface, TaskInterface
     {
         if (!file_exists($this->source)) {
             throw new \RuntimeException(sprintf('The path "%s" does not exist', $this->source));
+        }
+
+        if (!$this->destination) {
+            throw new \RuntimeException('The destination path is empty');
         }
 
         return $this->executeCommand($this->getCommand());

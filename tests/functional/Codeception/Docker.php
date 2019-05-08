@@ -184,7 +184,9 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function downloadFromContainer(string $source , string $destination, string $container): bool
     {
-        return $this->taskCopyFromDocker($this->_getConfig('system_magento_dir') . $source, $destination, $container)
+        return $this->taskCopyFromDocker($container)
+            ->source($this->_getConfig('system_magento_dir') . $source)
+            ->destination($destination)
             ->run()
             ->wasSuccessful();
     }
@@ -221,7 +223,9 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             $source = Configuration::dataDir() . $source;
         }
 
-        return $this->taskCopyToDocker($source, $this->_getConfig('system_magento_dir') . $destination, $container)
+        return $this->taskCopyToDocker($container)
+            ->source($source)
+            ->destination($this->_getConfig('system_magento_dir') . $destination)
             ->run()
             ->wasSuccessful();
     }
