@@ -15,6 +15,16 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 class Process extends \Symfony\Component\Process\Process implements ProcessInterface
 {
     /**
+     * Trim new lines from command output
+     *
+     * {@inheritdoc}
+     */
+    public function getOutput()
+    {
+        return trim(parent::getOutput(), PHP_EOL);
+    }
+
+    /**
      * @inheritdoc
      */
     public function execute()

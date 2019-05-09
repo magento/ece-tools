@@ -43,11 +43,11 @@ class UtilityManagerTest extends TestCase
         $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock1->expects($this->once())
             ->method('getOutput')
-            ->willReturn(['/usr/bash']);
+            ->willReturn("/usr/bash\n/usr/bin/bash");
         $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock2->expects($this->once())
             ->method('getOutput')
-            ->willReturn(['/usr/timeout']);
+            ->willReturn('/usr/timeout');
         $this->shellMock->expects($this->any())
             ->method('execute')
             ->willReturnMap([
@@ -70,11 +70,11 @@ class UtilityManagerTest extends TestCase
         $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock1->expects($this->once())
             ->method('getOutput')
-            ->willReturn(['/usr/bash']);
+            ->willReturn('/usr/bash');
         $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock2->expects($this->once())
             ->method('getOutput')
-            ->willReturn(['/usr/timeout']);
+            ->willReturn('/usr/timeout');
         $this->shellMock->expects($this->any())
             ->method('execute')
             ->willReturnMap([

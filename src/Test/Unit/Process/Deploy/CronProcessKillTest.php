@@ -51,7 +51,7 @@ class CronProcessKillTest extends TestCase
         $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock1->expects($this->once())
             ->method('getOutput')
-            ->willReturn([111, 222]);
+            ->willReturn("111\n222");
         $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock2->expects($this->any())
             ->method('getOutput')
@@ -119,7 +119,7 @@ class CronProcessKillTest extends TestCase
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
-            ->willReturn([111, 222]);
+            ->willReturn("111\n222");
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(

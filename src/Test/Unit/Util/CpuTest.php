@@ -48,7 +48,7 @@ class CpuTest extends TestCase
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
-            ->willReturn([8]);
+            ->willReturn('8');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('grep -c processor /proc/cpuinfo')

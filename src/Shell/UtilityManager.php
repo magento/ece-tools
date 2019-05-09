@@ -65,8 +65,8 @@ class UtilityManager
 
             foreach ($list as $name) {
                 try {
-                    $result = $this->shell->execute('which ' . $name);
-                    $this->utilities[$name] = $result->getOutput()[0];
+                    $process = $this->shell->execute('which ' . $name);
+                    $this->utilities[$name] = explode(PHP_EOL, $process->getOutput())[0];
                 } catch (\Exception $exception) {
                     throw new \RuntimeException(sprintf(
                         'Required utility %s was not found',

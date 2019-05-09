@@ -46,7 +46,7 @@ class Cpu
     {
         try {
             $result = $this->shell->execute('grep -c processor /proc/cpuinfo');
-            $threadCount = (int)$result->getOutput()[0] ?? 1;
+            $threadCount = (int)$result->getOutput() ?? 1;
         } catch (ShellException $e) {
             $this->logger->error('Can\'t get system processor count: ' . $e->getMessage());
             $threadCount = 1;

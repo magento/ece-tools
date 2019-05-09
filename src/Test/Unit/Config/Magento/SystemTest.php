@@ -70,7 +70,7 @@ class SystemTest extends TestCase
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
-            ->willReturn([$expectedResult]);
+            ->willReturn($expectedResult);
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->with('2.2.0')
@@ -103,7 +103,7 @@ class SystemTest extends TestCase
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getOutput')
-            ->willReturn([]);
+            ->willReturn('');
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
             ->with('2.2.0')
@@ -113,7 +113,7 @@ class SystemTest extends TestCase
             ->with('config:show', ['some/key'])
             ->willReturn($processMock);
 
-        $this->assertSame(null, $this->config->get('some/key'));
+        $this->assertSame('', $this->config->get('some/key'));
     }
 
     /**
