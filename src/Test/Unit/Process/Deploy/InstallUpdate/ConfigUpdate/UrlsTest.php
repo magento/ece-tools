@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -62,17 +61,34 @@ class UrlsTest extends TestCase
         );
     }
 
-    /**
-     * @inheritdoc
-     */
     public function testExecute()
     {
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
             ->willReturn(false);
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->withConsecutive(
+                [DeployInterface::VAR_FORCE_UPDATE_URLS],
+                [DeployInterface::VAR_UPDATE_URLS]
+            )
+            ->willReturnOnConsecutiveCalls(false, true);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating secure and unsecure URLs');
+        $this->processMock->expects($this->once())
+            ->method('execute');
+
+        $this->process->execute();
+    }
+
+    public function testExecuteForceUpdate()
+    {
+        $this->environmentMock->expects($this->never())
+            ->method('isMasterBranch');
         $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_UPDATE_URLS)
+            ->with(DeployInterface::VAR_FORCE_UPDATE_URLS)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
@@ -83,43 +99,42 @@ class UrlsTest extends TestCase
         $this->process->execute();
     }
 
-    /**
-     * @param bool $envIsMasterBranchWillReturn
-     * @param InvokedCount $envIsUpdateUrlsEnabledExpects
-     * @dataProvider executeSkippedDataProvider
-     */
-    public function testExecuteSkipped(
-        bool $envIsMasterBranchWillReturn,
-        InvokedCount $envIsUpdateUrlsEnabledExpects
-    ) {
+    public function testExecuteSkippedIsMasterBranch()
+    {
         $this->environmentMock->expects($this->once())
             ->method('isMasterBranch')
-            ->willReturn($envIsMasterBranchWillReturn);
-        $this->stageConfigMock->expects($envIsUpdateUrlsEnabledExpects)
+            ->willReturn(true);
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->with(DeployInterface::VAR_UPDATE_URLS)
+            ->with(DeployInterface::VAR_FORCE_UPDATE_URLS)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Skipping URL updates');
+            ->with($this->stringContains('Skipping URL updates because we are deploying to a Production or Staging'));
+        $this->processMock->expects($this->never())
+            ->method('execute');
 
         $this->process->execute();
     }
 
-    /**
-     * @return array
-     */
-    public function executeSkippedDataProvider(): array
+    public function testExecuteSkippedUpdateUrlsIsFalse()
     {
-        return [
-            [
-                'envIsMasterBranchWillReturn' => true,
-                'envIsUpdateUrlsEnabledExpects' => $this->never(),
-            ],
-            [
-                'envIsMasterBranchWillReturn' => false,
-                'envIsMasterBranchExpects' => $this->once(),
-            ],
-        ];
+        $this->environmentMock->expects($this->once())
+            ->method('isMasterBranch')
+            ->willReturn(false);
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->withConsecutive(
+                [DeployInterface::VAR_FORCE_UPDATE_URLS],
+                [DeployInterface::VAR_UPDATE_URLS]
+            )
+            ->willReturnOnConsecutiveCalls(false, false);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with($this->stringContains('Skipping URL updates because the URL_UPDATES variable is set to false.'));
+        $this->processMock->expects($this->never())
+            ->method('execute');
+
+        $this->process->execute();
     }
 }

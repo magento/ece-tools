@@ -16,7 +16,7 @@ use Robo\Task\BaseTask;
 /**
  * Down Docker environment
  */
-class EnvDown extends BaseTask implements CommandInterface, TaskInterface
+class EnvDown extends BaseTask implements CommandInterface
 {
     use ExecOneCommand;
 

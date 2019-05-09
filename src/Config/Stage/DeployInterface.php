@@ -23,6 +23,7 @@ interface DeployInterface extends StageConfigInterface
     const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
     const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
     const VAR_UPDATE_URLS = 'UPDATE_URLS';
+    const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
 
     /**
      * The variable responsible to set Redis slave connection when it has true value.

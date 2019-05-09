@@ -68,6 +68,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_CLEAN_STATIC_FILES => true,
                 DeployInterface::VAR_STATIC_CONTENT_SYMLINK => true,
                 DeployInterface::VAR_UPDATE_URLS => true,
+                DeployInterface::VAR_FORCE_UPDATE_URLS => false,
                 DeployInterface::VAR_SKIP_SCD => false,
                 DeployInterface::VAR_SCD_THREADS => -1,
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK => true,
