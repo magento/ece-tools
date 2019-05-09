@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Shell;
 
 /**
- *
+ * Process for executing shell commands.
  */
 interface ProcessInterface
 {
@@ -34,7 +34,7 @@ interface ProcessInterface
     public function getCommandLine();
 
     /**
-     * Runs the process
+     * Runs the process.
      *
      * @return void
      * @throws \RuntimeException
