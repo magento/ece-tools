@@ -74,6 +74,8 @@ abstract class AbstractTest extends TestCase
     {
         $this->shell->execute('php ./bin/magento setup:uninstall -n');
         $this->shell->execute('rm -rf vendor/*');
+        $this->shell->execute('rm -rf setup/*');
+
         $this->connection->close();
     }
 }
