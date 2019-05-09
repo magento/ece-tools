@@ -78,7 +78,7 @@ class IntegrationV2Compose implements ComposeManagerInterface
                     ServiceFactory::SERVICE_DB,
                     $dbVersion,
                     [
-                        'ports' => [3306],
+                        'ports' => ['3306:3306'],
                         'volumes' => [
                             '/var/lib/mysql',
                         ],
@@ -138,8 +138,7 @@ class IntegrationV2Compose implements ComposeManagerInterface
             'cron',
             false,
             ['db'],
-            'cron.magento2.docker',
-            true
+            'cron.magento2.docker'
         );
         $services ['services']['appdata'] = [
             'image' => 'tianon/true',
