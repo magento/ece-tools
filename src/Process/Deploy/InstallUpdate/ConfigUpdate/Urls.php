@@ -54,15 +54,27 @@ class Urls implements ProcessInterface
     }
 
     /**
+     * Runs update url processes.
+     * Always run if FORCE_UPDATE_URLS set to true
+     * Skip url updates if master branch is detected or UPDATE_URLS set to false
+     *
      * @inheritdoc
      */
     public function execute()
     {
-        if ($this->environment->isMasterBranch()
-            || !$this->stageConfig->get(DeployInterface::VAR_UPDATE_URLS)) {
-            $this->logger->info('Skipping URL updates');
+        if (!$this->stageConfig->get(DeployInterface::VAR_FORCE_UPDATE_URLS)) {
+            if ($this->environment->isMasterBranch()) {
+                $this->logger->info(
+                    'Skipping URL updates because we are deploying to a Production or Staging environment.'
+                    . ' You can override this behavior by setting the FORCE_URL_UPDATES variable to true.'
+                );
+                return;
+            }
 
-            return;
+            if (!$this->stageConfig->get(DeployInterface::VAR_UPDATE_URLS)) {
+                $this->logger->info('Skipping URL updates because the URL_UPDATES variable is set to false.');
+                return;
+            }
         }
 
         $this->logger->info('Updating secure and unsecure URLs');
