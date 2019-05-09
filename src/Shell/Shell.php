@@ -74,13 +74,13 @@ class Shell implements ShellInterface
             $process = $this->processFactory->create([
                 'commandline' => $command,
                 'cwd' => $this->systemList->getMagentoRoot(),
-                'timeout' => 0
+                'timeout' => null
             ]);
 
             $this->logger->info($process->getCommandLine());
 
             $process->execute();
-        } catch (\RuntimeException $e) {
+        } catch (ProcessException $e) {
             throw new ShellException(
                 $this->sanitizer->sanitize($e->getMessage()),
                 $e->getCode()

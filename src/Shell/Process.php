@@ -33,7 +33,7 @@ class Process extends \Symfony\Component\Process\Process implements ProcessInter
         try {
             parent::mustRun();
         } catch (ProcessFailedException $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getProcess()->getExitCode());
+            throw new ProcessException($e->getMessage(), $e->getProcess()->getExitCode());
         }
     }
 }

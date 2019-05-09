@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Shell;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
+use Magento\MagentoCloud\Shell\ProcessException;
 use Magento\MagentoCloud\Shell\ProcessFactory;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\Shell;
@@ -87,7 +88,7 @@ class ShellTest extends TestCase
             ->with([
                 'commandline' => [$command, $args[0]],
                 'cwd' => $magentoRoot,
-                'timeout' => 0
+                'timeout' => null
             ])
             ->willReturn($processMock);
         $this->systemListMock->expects($this->once())
@@ -168,7 +169,7 @@ class ShellTest extends TestCase
             ->willReturn($command);
         $processMock->expects($this->once())
             ->method('execute')
-            ->willThrowException(new \RuntimeException(sprintf('Command %s failed', $command), 3));
+            ->willThrowException(new ProcessException(sprintf('Command %s failed', $command), 3));
         $processMock->expects($this->never())
             ->method('getOutput');
         $this->processFactoryMock->expects($this->once())

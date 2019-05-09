@@ -112,7 +112,7 @@ class DbDump implements ProcessInterface
                 $command = $this->getCommand() . ' | gzip > ' . $dumpFile;
                 $process = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
 
-                if ($process->getExitCode() !== 0) {
+                if ($process->getExitCode() !== ShellInterface::CODE_SUCCESS) {
                     $this->logger->error('Error has occurred during mysqldump');
                     $this->shell->execute('rm ' . $dumpFile);
                 } else {

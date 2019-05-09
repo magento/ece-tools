@@ -37,7 +37,7 @@ interface ProcessInterface
      * Runs the process.
      *
      * @return void
-     * @throws \RuntimeException
+     * @throws ProcessException
      */
     public function execute();
 }
