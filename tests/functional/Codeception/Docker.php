@@ -35,6 +35,9 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     const BUILD_CONTAINER = 'build';
     const DEPLOY_CONTAINER = 'deploy';
 
+    /**
+     * @var array
+     */
     protected $config = [
         'db_host' => '',
         'db_port' => '3306',
@@ -47,6 +50,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
         'system_magento_dir' => '',
         'env_base_url' => '',
         'env_secure_base_url' => '',
+        'volumes' => []
     ];
 
     /**
@@ -66,7 +70,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function _before(TestInterface $test)
     {
-        $this->taskEnvUp()
+        $this->taskEnvUp($this->_getConfig('volumes'))
             ->run()
             ->stopOnFail();
     }
@@ -180,7 +184,48 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function downloadFromContainer(string $source , string $destination, string $container): bool
     {
-        return $this->taskCopyFromDocker($this->_getConfig('system_magento_dir') . $source, $destination, $container)
+        return $this->taskCopyFromDocker($container)
+            ->source($this->_getConfig('system_magento_dir') . $source)
+            ->destination($destination)
+            ->run()
+            ->wasSuccessful();
+    }
+
+    /**
+     * Creates folder on Docker
+     *
+     * @param string $path
+     * @param string $container
+     * @return bool
+     * @throws \Robo\Exception\TaskException
+     */
+    public function createDirectory(string $path, string $container): bool
+    {
+        return $this->taskBash($container)
+            ->exec(sprintf('mkdir -p %s', $this->_getConfig('system_magento_dir') . $path))
+            ->run()
+            ->wasSuccessful();
+    }
+
+    /**
+     * Uploads files to Docker container
+     *
+     * Relative paths for $source will be expanded from Codeception's data directory.
+     *
+     * @param string $source
+     * @param string $destination
+     * @param string $container
+     * @return bool
+     */
+    public function uploadToContainer(string $source, string $destination, string $container): bool
+    {
+        if (substr($source, 0, 1) != '/') {
+            $source = Configuration::dataDir() . $source;
+        }
+
+        return $this->taskCopyToDocker($container)
+            ->source($source)
+            ->destination($this->_getConfig('system_magento_dir') . $destination)
             ->run()
             ->wasSuccessful();
     }
@@ -210,17 +255,46 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function runEceToolsCommand(string $command, string $container, array $variables = []): bool
     {
+        return $this->taskBash($container)
+            ->envVars($this->prepareVariables($variables))
+            ->exec(sprintf('php %s/bin/ece-tools %s', $this->_getConfig('system_ece_tools_dir'), $command))
+            ->run()
+            ->wasSuccessful();
+    }
+
+    /**
+     * Runs bin/magento command on Docker container
+     *
+     * @param string $command
+     * @param string $container
+     * @param array $variables
+     * @return bool
+     * @throws \Robo\Exception\TaskException
+     */
+    public function runBinMagentoCommand(string $command, string $container, array $variables = []): bool
+    {
+        return $this->taskBash($container)
+            ->envVars($this->prepareVariables($variables))
+            ->exec(sprintf('php %s/bin/magento %s', $this->_getConfig('system_magento_dir'), $command))
+            ->run()
+            ->wasSuccessful();
+    }
+
+    /**
+     * Prepares environment variables
+     *
+     * @param array $variables
+     * @return array
+     */
+    private function prepareVariables(array $variables): array
+    {
         $variables = array_replace($this->getDefaultVariables(), $variables);
 
         foreach ($variables as $varName => $varValue) {
             $variables[$varName] = base64_encode(json_encode($varValue));
         }
 
-        return $this->taskBash($container)
-            ->envVars($variables)
-            ->exec(sprintf('%s/bin/ece-tools %s', $this->_getConfig('system_ece_tools_dir'), $command))
-            ->run()
-            ->wasSuccessful();
+        return $variables;
     }
 
     /**

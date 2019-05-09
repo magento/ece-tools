@@ -18,11 +18,12 @@ trait Tasks
     use TaskAccessor;
 
     /**
+     * @param array $volumes
      * @return Tasks\EnvUp|CollectionBuilder
      */
-    protected function taskEnvUp(): CollectionBuilder
+    protected function taskEnvUp(array $volumes): CollectionBuilder
     {
-        return $this->task(Tasks\EnvUp::class);
+        return $this->task(Tasks\EnvUp::class, $volumes);
     }
 
     /**
@@ -52,13 +53,20 @@ trait Tasks
     }
 
     /**
-     * @param string $source
-     * @param string $destination
      * @param string $container
      * @return Tasks\CopyFromDocker|CollectionBuilder
      */
-    protected function taskCopyFromDocker(string $source, string $destination, string $container): CollectionBuilder
+    protected function taskCopyFromDocker(string $container): CollectionBuilder
     {
-        return $this->task(Tasks\CopyFromDocker::class, $source, $destination, $container);
+        return $this->task(Tasks\CopyFromDocker::class, $container);
+    }
+
+    /**
+     * @param string $container
+     * @return Tasks\CopyToDocker|CollectionBuilder
+     */
+    protected function taskCopyToDocker(string $container): CollectionBuilder
+    {
+        return $this->task(Tasks\CopyToDocker::class, $container);
     }
 }

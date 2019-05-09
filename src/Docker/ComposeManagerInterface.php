@@ -10,7 +10,7 @@ use Illuminate\Contracts\Config\Repository;
 /**
  * General Builder interface.
  */
-interface BuilderInterface
+interface ComposeManagerInterface
 {
     const PHP_VERSION = 'php.version';
     const NGINX_VERSION = 'nginx.version';
@@ -18,6 +18,7 @@ interface BuilderInterface
     const REDIS_VERSION = 'redis.version';
     const ES_VERSION = 'es.version';
     const RABBIT_MQ_VERSION = 'rmq.version';
+    const NODE_VERSION = 'node.version';
 
     /**
      * @param Repository $config

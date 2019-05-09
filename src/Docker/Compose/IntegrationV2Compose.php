@@ -5,9 +5,11 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Docker;
+namespace Magento\MagentoCloud\Docker\Compose;
 
 use Illuminate\Contracts\Config\Repository;
+use Magento\MagentoCloud\Docker\ComposeManagerInterface;
+use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 
@@ -16,7 +18,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
  *
  * @codeCoverageIgnore
  */
-class IntegrationV2Builder implements BuilderInterface
+class IntegrationV2Compose implements ComposeManagerInterface
 {
     /**
      * @var FileList
@@ -76,7 +78,7 @@ class IntegrationV2Builder implements BuilderInterface
                     ServiceFactory::SERVICE_DB,
                     $dbVersion,
                     [
-                        'ports' => [3306],
+                        'ports' => ['3306:3306'],
                         'volumes' => [
                             '/var/lib/mysql',
                         ],
@@ -136,8 +138,7 @@ class IntegrationV2Builder implements BuilderInterface
             'cron',
             false,
             ['db'],
-            'cron.magento2.docker',
-            true
+            'cron.magento2.docker'
         );
         $services ['services']['appdata'] = [
             'image' => 'tianon/true',
