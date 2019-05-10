@@ -129,8 +129,8 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => 1,
-                    StageConfigInterface::STAGE_DEPLOY => 1,
+                    StageConfigInterface::STAGE_BUILD => StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE,
+                    StageConfigInterface::STAGE_DEPLOY => StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE,
                 ],
             ],
             StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
@@ -215,15 +215,6 @@ class Schema
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
                     SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_APPLICATION',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_MODE => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_MODE',
                 ],
             ],
             SystemConfigInterface::VAR_ENV_ENVIRONMENT => [
@@ -321,6 +312,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => true,
                 ],
             ],
+            DeployInterface::VAR_FORCE_UPDATE_URLS => [
+                self::SCHEMA_TYPE => ['boolean'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => false,
+                ],
+            ],
             DeployInterface::VAR_STATIC_CONTENT_SYMLINK => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
@@ -342,6 +343,16 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_SEARCH_CONFIGURATION => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+            ],
+            DeployInterface::VAR_ELASTICSUITE_CONFIGURATION => [
                 self::SCHEMA_TYPE => ['array'],
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL,

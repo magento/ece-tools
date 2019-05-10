@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
 use Magento\MagentoCloud\Config\Schema;
@@ -103,10 +105,23 @@ class PostDeployTest extends TestCase
      */
     public function testNotExists()
     {
-        $this->environmentReaderMock->expects($this->any())
+        $this->environmentReaderMock->expects($this->never())
             ->method('read')
             ->willReturn([]);
 
         $this->config->get('NOT_EXISTS_VALUE');
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage Some error
+     */
+    public function testCannotMerge()
+    {
+        $this->environmentReaderMock->expects($this->once())
+            ->method('read')
+            ->willThrowException(new \Exception('Some error'));
+
+        $this->config->get(PostDeploy::VAR_WARM_UP_PAGES);
     }
 }

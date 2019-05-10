@@ -14,6 +14,7 @@ interface DeployInterface extends StageConfigInterface
 {
     const VAR_QUEUE_CONFIGURATION = 'QUEUE_CONFIGURATION';
     const VAR_SEARCH_CONFIGURATION = 'SEARCH_CONFIGURATION';
+    const VAR_ELASTICSUITE_CONFIGURATION = 'ELASTICSUITE_CONFIGURATION';
     const VAR_CACHE_CONFIGURATION = 'CACHE_CONFIGURATION';
     const VAR_SESSION_CONFIGURATION = 'SESSION_CONFIGURATION';
     const VAR_DATABASE_CONFIGURATION = 'DATABASE_CONFIGURATION';
@@ -22,6 +23,7 @@ interface DeployInterface extends StageConfigInterface
     const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
     const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
     const VAR_UPDATE_URLS = 'UPDATE_URLS';
+    const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
 
     /**
      * The variable responsible to set Redis slave connection when it has true value.

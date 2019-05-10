@@ -39,7 +39,7 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_SKIP_SCD => false,
                 BuildInterface::VAR_SCD_COMPRESSION_LEVEL => 6,
                 BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT => 600,
-                BuildInterface::VAR_SCD_THREADS => 1,
+                BuildInterface::VAR_SCD_THREADS => -1,
                 BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
@@ -58,6 +58,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_SCD_MAX_EXEC_TIME => null,
                 DeployInterface::VAR_SCD_COMPRESSION_TIMEOUT => 600,
                 DeployInterface::VAR_SEARCH_CONFIGURATION => [],
+                DeployInterface::VAR_ELASTICSUITE_CONFIGURATION => [],
                 DeployInterface::VAR_QUEUE_CONFIGURATION => [],
                 DeployInterface::VAR_CACHE_CONFIGURATION => [],
                 DeployInterface::VAR_SESSION_CONFIGURATION => [],
@@ -67,8 +68,9 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_CLEAN_STATIC_FILES => true,
                 DeployInterface::VAR_STATIC_CONTENT_SYMLINK => true,
                 DeployInterface::VAR_UPDATE_URLS => true,
+                DeployInterface::VAR_FORCE_UPDATE_URLS => false,
                 DeployInterface::VAR_SKIP_SCD => false,
-                DeployInterface::VAR_SCD_THREADS => 1,
+                DeployInterface::VAR_SCD_THREADS => -1,
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK => true,
                 DeployInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => false,
@@ -101,7 +103,6 @@ class SchemaTest extends TestCase
                 SystemConfigInterface::VAR_ENV_ROUTES => 'MAGENTO_CLOUD_ROUTES',
                 SystemConfigInterface::VAR_ENV_VARIABLES => 'MAGENTO_CLOUD_VARIABLES',
                 SystemConfigInterface::VAR_ENV_APPLICATION => 'MAGENTO_CLOUD_APPLICATION',
-                SystemConfigInterface::VAR_ENV_MODE => 'MAGENTO_CLOUD_MODE',
                 SystemConfigInterface::VAR_ENV_ENVIRONMENT => 'MAGENTO_CLOUD_ENVIRONMENT',
             ],
             $this->schema->getDefaults(SystemConfigInterface::SYSTEM_VARIABLES)
@@ -154,7 +155,6 @@ class SchemaTest extends TestCase
             SystemConfigInterface::VAR_ENV_ROUTES,
             SystemConfigInterface::VAR_ENV_VARIABLES,
             SystemConfigInterface::VAR_ENV_APPLICATION,
-            SystemConfigInterface::VAR_ENV_MODE,
             SystemConfigInterface::VAR_ENV_ENVIRONMENT
         ];
 
