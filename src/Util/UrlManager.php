@@ -153,15 +153,10 @@ class UrlManager
      */
     public function getBaseUrl(): string
     {
-        $baseUrl = $this->connection->selectOne(
-            'SELECT `value` from `core_config_data` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1',
-            ['web/unsecure/base_url']
-        )['value'];
+        $this->loadStoreBaseUrls();
 
-        if (strpos($baseUrl, self::PREFIX_SECURE) === 0
-            || strpos($baseUrl, self::PREFIX_UNSECURE) === 0
-        ) {
-            return $baseUrl;
+        if ($this->storeBaseUrls) {
+            return reset($this->storeBaseUrls);
         }
 
         return $this->getSecureUrls()[''];
@@ -187,7 +182,7 @@ class UrlManager
     {
         $this->loadStoreBaseUrls();
 
-        return $this->storeBaseUrls[$storeId] ?? $this->storeBaseUrls[0] ?? $this->getBaseUrl();
+        return $this->storeBaseUrls[$storeId] ?? $this->getBaseUrl();
     }
 
     /**
@@ -196,7 +191,7 @@ class UrlManager
     private function loadStoreBaseUrls()
     {
         if (!$this->storeBaseUrls) {
-            $output = $this->shell->execute('php bin/magento config:show:store-url -all');
+            $output = $this->shell->execute('php bin/magento config:show:store-url --all');
 
             if (isset($output[0])) {
                 $this->storeBaseUrls = json_decode($output[0], true);
