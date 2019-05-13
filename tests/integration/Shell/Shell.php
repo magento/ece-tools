@@ -5,12 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Integration\Shell;
 
-use Magento\MagentoCloud\Shell\ShellInterface;
-
 /**
  * @inheritdoc
  */
-class Shell implements ShellInterface
+class Shell
 {
     /**
      * @var string
@@ -28,7 +26,7 @@ class Shell implements ShellInterface
     /**
      * @inheritdoc
      */
-    public function execute(string $command, $args = []): array
+    public function execute(string $command)
     {
         $rootPathCommand = sprintf(
             'cd %s && %s 2>&1',
