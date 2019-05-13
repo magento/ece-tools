@@ -1,4 +1,5 @@
 dist: trusty
+sudo: required
 
 git:
   depth: 1
@@ -12,26 +13,23 @@ php:
   - '7.1'
   - '7.2'
 
-addons:
-  apt:
-    update: true
-
 env:
   matrix:
     - TEST_SUITE=static-unit XDEBUG=true
     - TEST_SUITE=integration
     - TEST_SUITE=functional
 
-cache:
-  apt: true
+install: composer update -n --no-suggest
 
-before_install:
+before_script:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
+  - sudo /etc/init.d/mysql stop
 
-install: composer update -n --no-suggest
-
-script: ./tests/travis/script.sh
+script:
+  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
+  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi
+  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi
 
 after_failure: docker ps -s

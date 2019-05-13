@@ -23,6 +23,7 @@ class ServiceFactory
     const SERVICE_ELASTICSEARCH = 'elasticsearch';
     const SERVICE_RABBIT_MQ = 'rabbitmq';
     const SERVICE_TLS = 'tls';
+    const SERVICE_NODE = 'node';
 
     const CONFIG = [
         self::SERVICE_CLI => [
@@ -84,6 +85,10 @@ class ServiceFactory
         self::SERVICE_RABBIT_MQ => [
             'image' => 'rabbitmq:%s',
             'versions' => ['3.5', '3.7']
+        ],
+        self::SERVICE_NODE => [
+            'image' => 'node:%s',
+            'versions' => ['6', '8', '10', '11'],
         ],
     ];
 
