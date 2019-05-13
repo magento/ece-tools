@@ -104,6 +104,10 @@ class GenerateTest extends TestCase
                 ['interface_locale' => 'fr_FR'],
                 ['interface_locale' => 'ua_UA'],
             ]);
+        $this->connectionMock->expects($this->once())
+            ->method('getTableName')
+            ->with('interface_locale')
+            ->willReturn('interface_locale');
         $this->formatterMock->expects($this->once())
             ->method('format')
             ->with(require $generatedConfig)
