@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -36,11 +35,6 @@ class UrlManager
     private $logger;
 
     /**
-     * @var ConnectionInterface
-     */
-    private $connection;
-
-    /**
      * @var array
      */
     private $storeBaseUrls = [];
@@ -53,18 +47,15 @@ class UrlManager
     /**
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param ConnectionInterface $connection
      * @param ShellInterface $shell
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        ConnectionInterface $connection,
         ShellInterface $shell
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->connection = $connection;
         $this->shell = $shell;
     }
 
