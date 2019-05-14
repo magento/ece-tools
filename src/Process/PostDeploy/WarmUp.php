@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
@@ -191,34 +192,42 @@ class WarmUp implements ProcessInterface
 
     /**
      * @param string $warmUpPattern
-     * @return array|mixed
-     * @throws \RuntimeException if
+     * @return array
      */
     private function getUrlsByPattern(string $warmUpPattern): array
     {
-        list($entity, $storeId, $pattern) = explode(':', $warmUpPattern);
+        try {
+            list($entity, $storeId, $pattern) = explode(':', $warmUpPattern);
 
-        $command = sprintf('config:get:rewrite-urls --entity-type="%s"', $entity);
-        if ($storeId && $storeId !== '*') {
-            $command .= sprintf(' --store_id="%s"', $storeId);
-        }
+            $command = sprintf('config:get:rewrite-urls --entity-type="%s"', $entity);
+            if ($storeId && $storeId !== '*') {
+                $command .= sprintf(' --store_id="%s"', $storeId);
+            }
 
-        $result = $this->shell->execute($command);
-        $urls = json_decode($result[0]);
+            $result = $this->shell->execute($command);
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException('Can\'t parse result from config:get:rewrite-urls' . json_last_error_msg());
-        }
+            $urls = json_decode($result[0]);
 
-        if ($pattern === '*') {
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                $this->logger->error('Can\'t parse result from config:get:rewrite-urls: ' . json_last_error_msg());
+                return [];
+            }
+
+            if ($pattern === '*') {
+                return $urls;
+            }
+
+            $pattern = '/' . preg_quote($pattern) . '/';
+            $urls = array_filter($urls, function($url) use ($pattern) {
+                return preg_match($pattern, $url);
+            });
+
             return $urls;
+
+        } catch (ShellException $e) {
+            $this->logger->error('Can\'t get result from config:get:rewrite-urls: ' . $e->getMessage());
+            return [];
         }
 
-        $pattern = '/' . preg_quote($pattern) . '/';
-        $urls = array_filter($urls, function($url) use ($pattern) {
-            return preg_match($pattern, $url);
-        });
-
-        return $urls;
     }
 }
