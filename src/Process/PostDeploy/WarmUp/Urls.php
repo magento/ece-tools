@@ -142,9 +142,9 @@ class Urls
                 $command .= sprintf(' --store_id="%s"', $storeId);
             }
 
-            $result = $this->shell->execute($command);
+            $process = $this->shell->execute($command);
 
-            $urls = json_decode($result[0]);
+            $urls = json_decode($process->getOutput());
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $this->logger->error(sprintf(

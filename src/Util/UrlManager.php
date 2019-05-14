@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -173,14 +174,16 @@ class UrlManager
     private function loadStoreBaseUrls()
     {
         if (!$this->storeBaseUrls) {
-            $output = $this->shell->execute('php bin/magento config:show:store-url --all');
+            try {
+                $process = $this->shell->execute('php bin/magento config:show:store-url --all');
 
-            if (isset($output[0])) {
-                $baseUrls = json_decode($output[0], true);
+                $baseUrls = json_decode($process->getOutput(), true);
 
                 if (json_last_error() === JSON_ERROR_NONE && is_array($baseUrls)) {
                     $this->storeBaseUrls = $baseUrls;
                 }
+            } catch (ShellException $e) {
+                $this->logger->error('Can\'t fetch store urls. ' . $e->getMessage());
             }
         }
     }
