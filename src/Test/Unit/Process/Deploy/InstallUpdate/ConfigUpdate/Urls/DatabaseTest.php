@@ -89,6 +89,9 @@ class DatabaseTest extends TestCase
                 ['value' => 'https://example1.com', 'path' => 'web/secure/base_url'],
                 ['value' => 'http://example1.com', 'path' => 'web/unsecure/base_url'],
             ]);
+        $this->connectionMock->expects($this->any())
+            ->method('getTableName')
+            ->willReturnArgument(0);
         $this->urlManagerMock->expects($this->once())
             ->method('getUrls')
             ->willReturn($urlManagerGetUrlsWillReturn);

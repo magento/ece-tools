@@ -21,7 +21,7 @@ case $TRAVIS_PHP_VERSION in
         $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php71 --verbose --configuration ${DIR_TOOLS}/tests/integration"
         ;;
     7.2)
-        $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --group php72 --verbose --configuration ${DIR_TOOLS}/tests/integration"
+        $BASH -c "${DIR_TOOLS}/vendor/bin/phpunit --exclude-group php70,php71  --verbose --configuration ${DIR_TOOLS}/tests/integration"
         ;;
 esac
 
