@@ -176,7 +176,11 @@ class UrlManager
             $output = $this->shell->execute('php bin/magento config:show:store-url --all');
 
             if (isset($output[0])) {
-                $this->storeBaseUrls = json_decode($output[0], true);
+                $baseUrls = json_decode($output[0], true);
+
+                if (json_last_error() === JSON_ERROR_NONE && is_array($baseUrls)) {
+                    $this->storeBaseUrls = $baseUrls;
+                }
             }
         }
     }
