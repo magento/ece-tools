@@ -137,7 +137,7 @@ class Urls
         try {
             list($entity, $storeId, $pattern) = explode(':', $warmUpPattern);
 
-            $command = sprintf('config:get:rewrite-urls --entity-type="%s"', $entity);
+            $command = sprintf('config:show:urls --entity-type="%s"', $entity);
             if ($storeId && $storeId !== '*') {
                 $command .= sprintf(' --store_id="%s"', $storeId);
             }
