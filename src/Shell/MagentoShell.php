@@ -28,10 +28,8 @@ class MagentoShell implements ShellInterface
     /**
      * @inheritdoc
      */
-    public function execute(string $command, $args = []): array
+    public function execute(string $command, array $args = []): ProcessInterface
     {
-        $defaultArgs = ['--ansi', '--no-interaction'];
-
-        return $this->shell->execute('php ./bin/magento ' . $command, array_merge($defaultArgs, (array)$args));
+        return $this->shell->execute('php ./bin/magento ' . $command . ' --ansi --no-interaction', $args);
     }
 }
