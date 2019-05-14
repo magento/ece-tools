@@ -1,5 +1,9 @@
 dist: trusty
-sudo: required
+sudo:
+
+addons:
+  hosts:
+    - web
 
 git:
   depth: 1
