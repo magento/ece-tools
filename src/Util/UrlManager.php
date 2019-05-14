@@ -140,6 +140,8 @@ class UrlManager
     }
 
     /**
+     * Returns base url
+     *
      * @return string
      */
     public function getBaseUrl(): string
@@ -154,7 +156,7 @@ class UrlManager
     }
 
     /**
-     * Returns all base urls from core_config_data table.
+     * Returns all base urls.
      *
      * @return string[]
      */
@@ -163,17 +165,6 @@ class UrlManager
         $this->loadStoreBaseUrls();
 
         return $this->storeBaseUrls;
-    }
-
-    /**
-     * @param $storeId
-     * @return string
-     */
-    public function getStoreBaseUrl($storeId): string
-    {
-        $this->loadStoreBaseUrls();
-
-        return $this->storeBaseUrls[$storeId] ?? $this->getBaseUrl();
     }
 
     /**

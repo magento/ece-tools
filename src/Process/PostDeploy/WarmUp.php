@@ -6,14 +6,12 @@
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Pool;
-use GuzzleHttp\Psr7\Request;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
-use Magento\MagentoCloud\Process\PostDeploy\WarmUp\UrlRewriteTable;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
@@ -22,6 +20,9 @@ use Psr\Log\LoggerInterface;
  */
 class WarmUp implements ProcessInterface
 {
+    const ENTITY_CATEGORY = 'category';
+    const ENTITY_CMS_PAGE = 'cms-page';
+
     /**
      * @var PostDeployInterface
      */
@@ -55,9 +56,9 @@ class WarmUp implements ProcessInterface
     private $baseHosts;
 
     /**
-     * @var UrlRewriteTable
+     * @var ShellInterface
      */
-    private $urlRewriteTable;
+    private $shell;
 
     /**
      * @param PostDeployInterface $postDeploy
@@ -65,7 +66,7 @@ class WarmUp implements ProcessInterface
      * @param RequestFactory $requestFactory
      * @param UrlManager $urlManager
      * @param LoggerInterface $logger
-     * @param UrlRewriteTable $urlRewriteTable
+     * @param ShellInterface $shell
      */
     public function __construct(
         PostDeployInterface $postDeploy,
@@ -73,14 +74,14 @@ class WarmUp implements ProcessInterface
         RequestFactory $requestFactory,
         UrlManager $urlManager,
         LoggerInterface $logger,
-        UrlRewriteTable $urlRewriteTable
+        ShellInterface $shell
     ) {
         $this->postDeploy = $postDeploy;
         $this->clientFactory = $clientFactory;
         $this->requestFactory = $requestFactory;
         $this->urlManager = $urlManager;
         $this->logger = $logger;
-        $this->urlRewriteTable = $urlRewriteTable;
+        $this->shell = $shell;
     }
 
     /**
@@ -139,8 +140,8 @@ class WarmUp implements ProcessInterface
 
         $urlPattern = sprintf(
             '/^(%s|%s):(\d+|\*):.{1,}/',
-            UrlRewriteTable::ENTITY_CATEGORY,
-            UrlRewriteTable::ENTITY_CMS_PAGE
+            self::ENTITY_CATEGORY,
+            self::ENTITY_CMS_PAGE
         );
 
         foreach ($pages as $page) {
@@ -188,15 +189,36 @@ class WarmUp implements ProcessInterface
         return in_array(parse_url($url, PHP_URL_HOST), $this->baseHosts);
     }
 
-    private function getUrlsByPattern($pattern)
+    /**
+     * @param string $warmUpPattern
+     * @return array|mixed
+     * @throws \RuntimeException if
+     */
+    private function getUrlsByPattern(string $warmUpPattern): array
     {
-        list($entity, $storeId, $pattern) = explode(':', $pattern);
-        $patternUrls = $this->urlRewriteTable->getUrls(
-            $entity,
-            $pattern,
-            $storeId == '*' ? null : (int)$storeId
-        );
+        list($entity, $storeId, $pattern) = explode(':', $warmUpPattern);
 
-        return $patternUrls;
+        $command = sprintf('config:get:rewrite-urls --entity-type="%s"', $entity);
+        if ($storeId && $storeId !== '*') {
+            $command .= sprintf(' --store_id="%s"', $storeId);
+        }
+
+        $result = $this->shell->execute($command);
+        $urls = json_decode($result[0]);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException('Can\'t parse result from config:get:rewrite-urls' . json_last_error_msg());
+        }
+
+        if ($pattern === '*') {
+            return $urls;
+        }
+
+        $pattern = '/' . preg_quote($pattern) . '/';
+        $urls = array_filter($urls, function($url) use ($pattern) {
+            return preg_match($pattern, $url);
+        });
+
+        return $urls;
     }
 }
