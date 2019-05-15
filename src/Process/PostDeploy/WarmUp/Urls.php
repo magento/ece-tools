@@ -162,12 +162,11 @@ class Urls
             }
 
             $pattern = '/' . str_replace('/', '\/', $pattern) . '/';
-            $urls = array_filter($urls, function($url) use ($pattern) {
+            $urls = array_filter($urls, function ($url) use ($pattern) {
                 return preg_match($pattern, $url);
             });
 
             return $urls;
-
         } catch (ShellException $e) {
             $this->logger->error('Command execution failed: ' . $e->getMessage());
             return [];
