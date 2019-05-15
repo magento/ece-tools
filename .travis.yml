@@ -1,5 +1,5 @@
 dist: trusty
-sudo:
+sudo: required
 
 addons:
   hosts:
