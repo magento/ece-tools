@@ -129,6 +129,8 @@ class Urls
     }
 
     /**
+     * Fetch urls from config:show:urls command and filtering the by given pattern
+     *
      * @param string $warmUpPattern
      * @return array
      */
@@ -159,7 +161,7 @@ class Urls
                 return $urls;
             }
 
-            $pattern = '/' . $pattern . '/';
+            $pattern = '/' . str_replace('/', '\/', $pattern) . '/';
             $urls = array_filter($urls, function($url) use ($pattern) {
                 return preg_match($pattern, $url);
             });
