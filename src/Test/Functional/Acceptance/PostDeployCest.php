@@ -20,31 +20,31 @@ class PostDeployCest
      * @throws \Robo\Exception\TaskException
      * @dataProvider postDeployDataProvider
      */
-//    public function testPostDeploy(\CliTester $I, \Codeception\Example $data)
-//    {
-//        $I->assertTrue($I->cloneTemplate('2.3.1'));
-//        $I->assertTrue($I->composerInstall());
-//        $I->uploadToContainer('files/scdondemand/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
-//        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
-//        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
-//        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
-//
-//        $log = $I->grabFileContent('/var/log/cloud.log');
-//        $I->assertContains('NOTICE: Starting post-deploy.', $log);
-//        $I->assertContains('INFO: Warmed up page:', $log);
-//        $I->assertContains('NOTICE: Post-deploy is complete.', $log);
-//    }
-//
-//    /**
-//     * @return array
-//     */
-//    public function postDeployDataProvider(): array
-//    {
-//        return [
-//            ['variables' => ['ADMIN_EMAIL' => 'admin@example.com']],
-//            ['variables' => []],
-//        ];
-//    }
+    public function testPostDeploy(\CliTester $I, \Codeception\Example $data)
+    {
+        $I->assertTrue($I->cloneTemplate('2.3.1'));
+        $I->assertTrue($I->composerInstall());
+        $I->uploadToContainer('files/scdondemand/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
+        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
+
+        $log = $I->grabFileContent('/var/log/cloud.log');
+        $I->assertContains('NOTICE: Starting post-deploy.', $log);
+        $I->assertContains('INFO: Warmed up page:', $log);
+        $I->assertContains('NOTICE: Post-deploy is complete.', $log);
+    }
+
+    /**
+     * @return array
+     */
+    public function postDeployDataProvider(): array
+    {
+        return [
+            ['variables' => ['ADMIN_EMAIL' => 'admin@example.com']],
+            ['variables' => []],
+        ];
+    }
 
     /**
      * @param \CliTester $I
