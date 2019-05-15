@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Config\Magento;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
 
 /**
@@ -50,9 +51,13 @@ class System
             return null;
         }
 
-        return implode(PHP_EOL, $this->shellFactory->create(ShellFactory::STRATEGY_MAGENTO_SHELL)->execute(
-            'config:show',
-            $key
-        ));
+        try {
+            $magentoShell = $this->shellFactory->create(ShellFactory::STRATEGY_MAGENTO_SHELL);
+            $process = $magentoShell->execute('config:show', [$key]);
+
+            return $process->getOutput() ?? null;
+        } catch (ShellException $shellException) {
+            return null;
+        }
     }
 }

@@ -48,19 +48,19 @@ class ShellLoggingTest extends AbstractTest
         $this->shell->execute('echo Magento Cloud');
         $logContent = $this->getLogContent();
         $this->assertContains('INFO: echo Magento Cloud', $logContent);
-        $this->assertContains("DEBUG: \n  Magento Cloud", $logContent);
+        $this->assertContains('DEBUG: Magento Cloud', $logContent);
     }
 
     public function testShellLoggingWithNonZeroCode()
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionCode(127);
-        $this->expectExceptionMessage('Command non-exist-command returned code 127');
+        $this->expectExceptionMessage('The command "non-exist-command" failed.');
 
         $this->shell->execute('non-exist-command');
         $logContent = $this->getLogContent();
-        $this->assertContains('Command: non-exist-command ', $logContent);
-        $this->assertRegExp('/CRITICAL:\n.*non-exist-command: command not found/', $logContent);
+        $this->assertContains('command "non-exist-command" failed', $logContent);
+        $this->assertRegExp('/CRITICAL:.*non-exist-command: not found/i', $logContent);
     }
 
     private function getLogContent()
