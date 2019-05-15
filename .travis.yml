@@ -1,6 +1,10 @@
 dist: trusty
 sudo: required
 
+addons:
+  hosts:
+    - web
+
 git:
   depth: 1
 

@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Codeception;
 use Codeception\Module;
 use Magento\MagentoCloud\Test\Functional\Robo\Tasks as MagentoCloudTasks;
 use Robo\LoadAllTasks as RoboTasks;
+use Robo\Result;
 use Codeception\TestInterface;
 use Codeception\Configuration;
 use Robo\Collection\CollectionBuilder;
@@ -50,8 +51,14 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
         'system_magento_dir' => '',
         'env_base_url' => '',
         'env_secure_base_url' => '',
-        'volumes' => []
+        'volumes' => [],
+        'printOutput' => false,
     ];
+
+    /**
+     * @var string
+     */
+    protected $output = '';
 
     /**
      * @inheritdoc
@@ -70,9 +77,12 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function _before(TestInterface $test)
     {
-        $this->taskEnvUp($this->_getConfig('volumes'))
+        $this->output = $this->taskEnvUp($this->_getConfig('volumes'))
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->run()
-            ->stopOnFail();
+            ->stopOnFail()
+            ->getMessage();
     }
 
     /**
@@ -80,9 +90,12 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function _after(TestInterface $test)
     {
-        $this->taskEnvDown()
+        $this->output = $this->taskEnvDown()
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->run()
-            ->stopOnFail();
+            ->stopOnFail()
+            ->getMessage();
     }
 
     /**
@@ -100,10 +113,15 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->exec('git fetch')
             ->checkout($version ?: $this->_getConfig('repo_branch'));
 
-        return $this->taskBash(self::BUILD_CONTAINER)
+        /** @var Result $result */
+        $result = $this->taskBash(self::BUILD_CONTAINER)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->exec($gitTask)
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**
@@ -122,10 +140,15 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->option('--no-update');
         $composerUpdateTask = $this->taskComposerUpdate('composer');
 
-        return $this->taskBash(self::BUILD_CONTAINER)
+        /** @var Result $result */
+        $result = $this->taskBash(self::BUILD_CONTAINER)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->exec($composerRequireTask->getCommand() . ' && ' . $composerUpdateTask->getCommand())
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**
@@ -140,10 +163,16 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->noDev()
             ->noInteraction()
             ->workingDir($this->_getConfig('system_magento_dir'));
-        return $this->taskBash(self::BUILD_CONTAINER)
+
+        /** @var Result $result */
+        $result = $this->taskBash(self::BUILD_CONTAINER)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->exec($composerTask)
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**
@@ -168,10 +197,15 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             $pathsToCleanup = $magentoRoot . $path;
         }
 
-        return $this->taskBash($container)
+        /** @var Result $result */
+        $result = $this->taskBash($container)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->exec('rm -rf ' . $pathsToCleanup)
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**
@@ -184,11 +218,16 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function downloadFromContainer(string $source , string $destination, string $container): bool
     {
-        return $this->taskCopyFromDocker($container)
+        /** @var Result $result */
+        $result = $this->taskCopyFromDocker($container)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->source($this->_getConfig('system_magento_dir') . $source)
             ->destination($destination)
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**
@@ -201,10 +240,15 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function createDirectory(string $path, string $container): bool
     {
-        return $this->taskBash($container)
+        /** @var Result $result */
+        $result = $this->taskBash($container)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->exec(sprintf('mkdir -p %s', $this->_getConfig('system_magento_dir') . $path))
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**
@@ -223,11 +267,16 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             $source = Configuration::dataDir() . $source;
         }
 
-        return $this->taskCopyToDocker($container)
+        /** @var Result $result */
+        $result = $this->taskCopyToDocker($container)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->source($source)
             ->destination($this->_getConfig('system_magento_dir') . $destination)
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**
@@ -255,11 +304,26 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function runEceToolsCommand(string $command, string $container, array $variables = []): bool
     {
-        return $this->taskBash($container)
+        /** @var Result $result */
+        $result = $this->taskBash($container)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->envVars($this->prepareVariables($variables))
             ->exec(sprintf('php %s/bin/ece-tools %s', $this->_getConfig('system_ece_tools_dir'), $command))
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
+    }
+
+    /**
+     * Checks that output contains $text
+     *
+     * @param string $text
+     */
+    public function seeInOutput(string $text)
+    {
+        \PHPUnit\Framework\Assert::assertContains($text, $this->output);
     }
 
     /**
@@ -273,11 +337,16 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function runBinMagentoCommand(string $command, string $container, array $variables = []): bool
     {
-        return $this->taskBash($container)
+        /** @var Result $result */
+        $result = $this->taskBash($container)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
             ->envVars($this->prepareVariables($variables))
             ->exec(sprintf('php %s/bin/magento %s', $this->_getConfig('system_magento_dir'), $command))
-            ->run()
-            ->wasSuccessful();
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**

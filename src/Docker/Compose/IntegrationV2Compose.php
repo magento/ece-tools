@@ -95,7 +95,7 @@ class IntegrationV2Compose implements ComposeManagerInterface
                     $nginxVersion,
                     [
                         'ports' => [
-                            '8030:80',
+                            '80:80',
                         ],
                         'links' => [
                             'fpm',
@@ -133,13 +133,6 @@ class IntegrationV2Compose implements ComposeManagerInterface
             ['db'],
             'deploy.magento2.docker'
         );
-        $services['services']['cron'] = $this->getCliService(
-            $phpVersion,
-            'cron',
-            false,
-            ['db'],
-            'cron.magento2.docker'
-        );
         $services ['services']['appdata'] = [
             'image' => 'tianon/true',
             'volumes' => [
@@ -160,7 +153,6 @@ class IntegrationV2Compose implements ComposeManagerInterface
      * @param bool $isReadOnly
      * @param array $depends
      * @param string $hostname
-     * @param bool $cron
      * @return array
      * @throws ConfigurationMismatchException
      */
@@ -169,8 +161,7 @@ class IntegrationV2Compose implements ComposeManagerInterface
         string $name,
         bool $isReadOnly,
         array $depends,
-        string $hostname,
-        bool $cron = false
+        string $hostname
     ): array {
         $composeCacheDirectory = file_exists(getenv('HOME') . '/.cache/composer')
             ? '~/.cache/composer'
@@ -196,10 +187,6 @@ class IntegrationV2Compose implements ComposeManagerInterface
                 ],
             ]
         );
-
-        if ($cron) {
-            $config['command'] = 'run-cron';
-        }
 
         return $config;
     }
