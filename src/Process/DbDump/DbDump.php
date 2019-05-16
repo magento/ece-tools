@@ -110,9 +110,9 @@ class DbDump implements ProcessInterface
                 $this->logger->info('Start creation DB dump...');
 
                 $command = $this->getCommand() . ' | gzip > ' . $dumpFile;
-                $errors = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
+                $process = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
 
-                if ($errors) {
+                if ($process->getExitCode() !== ShellInterface::CODE_SUCCESS) {
                     $this->logger->error('Error has occurred during mysqldump');
                     $this->shell->execute('rm ' . $dumpFile);
                 } else {

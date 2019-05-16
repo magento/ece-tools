@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Test\Functional\Robo\Tasks\DockerCompose;
 use Robo\Common\CommandReceiver;
 use Robo\Common\ExecOneCommand;
 use Robo\Contract\CommandInterface;
-use Robo\Contract\TaskInterface;
 use Robo\Result;
 use Robo\Task\BaseTask;
 

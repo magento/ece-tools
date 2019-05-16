@@ -76,6 +76,10 @@ class DisableGoogleAnalyticsTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('affectingQuery')
             ->with("UPDATE `core_config_data` SET `value` = 0 WHERE `path` = 'google/analytics/active'");
+        $this->connectionMock->expects($this->once())
+            ->method('getTableName')
+            ->with('core_config_data')
+            ->willReturn('core_config_data');
 
         $this->process->execute();
     }
