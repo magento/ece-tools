@@ -1,0 +1,27 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    up)
+        docker-compose up --detach
+        ;;
+    down)
+        docker-compose down --volumes
+        ;;
+    build)
+        docker-compose run build cloud-build
+        ;;
+    deploy)
+        docker-compose run deploy cloud-deploy
+        ;;
+    bash)
+        docker-compose run deploy bash
+        ;;
+    restart)
+        docker-compose restart
+        ;;
+    *)
+        echo "Wrong command passed"
+        exit 1
+esac

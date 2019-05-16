@@ -90,62 +90,14 @@
         ".docker/mysql"
       ],
       [
-        "dist/docker/bin/bash",
-        "docker-bash"
-      ],
-      [
-        "dist/docker/bin/build",
-        "docker-build"
-      ],
-      [
-        "dist/docker/bin/deploy",
-        "docker-deploy"
-      ],
-      [
-        "dist/docker/bin/start",
-        "docker-start"
-      ],
-      [
-        "dist/docker/bin/stop",
-        "docker-stop"
-      ],
-      [
-        "dist/docker/bin/restart",
-        "docker-restart"
-      ],
-      [
-        "dist/docker/bin/down",
-        "docker-down"
+        "dist/docker/bin/docker",
+        "bin/docker"
       ]
     ],
     "chmod": [
       {
         "mask": "0755",
-        "path": "docker-bash"
-      },
-      {
-        "mask": "0755",
-        "path": "docker-build"
-      },
-      {
-        "mask": "0755",
-        "path": "docker-deploy"
-      },
-      {
-        "mask": "0755",
-        "path": "docker-start"
-      },
-      {
-        "mask": "0755",
-        "path": "docker-stop"
-      },
-      {
-        "mask": "0755",
-        "path": "docker-restart"
-      },
-      {
-        "mask": "0755",
-        "path": "dockerdown"
+        "path": "bin/docker"
       }
     ]
   }
