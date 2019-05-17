@@ -31,8 +31,6 @@ case "$1" in
     up)
         docker-compose down --volumes
         docker-compose up --detach
-        docker-compose run build cloud-build
-        docker-compose run deploy cloud-deploy
         ;;
     down)
         docker-compose down --volumes
