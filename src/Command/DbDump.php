@@ -20,7 +20,7 @@ class DbDump extends Command
 {
     const NAME = 'db-dump';
 
-    const OPTION_KEEP_DEFINERS = 'keep-definers';
+    const OPTION_REMOVE_DEFINERS = 'remove-definers';
 
     /**
      * @var LoggerInterface
@@ -53,10 +53,10 @@ class DbDump extends Command
             ->setDescription('Creates backup of database');
 
         $this->addOption(
-            self::OPTION_KEEP_DEFINERS,
-            'k',
+            self::OPTION_REMOVE_DEFINERS,
+            'd',
             InputOption::VALUE_NONE,
-            'Keep definers in db dump if enabled'
+            'Remove definers from the database dump'
         );
 
         parent::configure();
@@ -80,7 +80,7 @@ class DbDump extends Command
         }
         try {
             $this->logger->info('Starting backup.');
-            $this->dumpGenerator->create((bool)$input->getOption(self::OPTION_KEEP_DEFINERS));
+            $this->dumpGenerator->create((bool)$input->getOption(self::OPTION_REMOVE_DEFINERS));
             $this->logger->info('Backup completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());

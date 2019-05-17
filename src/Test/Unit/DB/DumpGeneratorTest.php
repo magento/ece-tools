@@ -102,10 +102,10 @@ class DumpGeneratorTest extends TestCase
     }
 
     /**
-     * @param bool $keepDefiners
+     * @param bool $removeDefiners
      * @return string
      */
-    private function getCommand(bool $keepDefiners = false): string
+    private function getCommand(bool $removeDefiners = false): string
     {
         $command = 'mysqldump -h localhost';
         $this->dbDumpMock->expects($this->once())
@@ -113,7 +113,7 @@ class DumpGeneratorTest extends TestCase
             ->willReturn($command);
 
         $fullCommand = 'bash -c "set -o pipefail; timeout 3600 ' . $command;
-        if (!$keepDefiners) {
+        if ($removeDefiners) {
             $fullCommand .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
         }
 
@@ -121,11 +121,11 @@ class DumpGeneratorTest extends TestCase
     }
 
     /**
-     * @param bool $keepDefiners
+     * @param bool $removeDefiners
      * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      * @dataProvider getCreateDataProvider
      */
-    public function testCreate(bool $keepDefiners)
+    public function testCreate(bool $removeDefiners)
     {
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
@@ -135,14 +135,14 @@ class DumpGeneratorTest extends TestCase
                 ['Finished DB dump, it can be found here: ' . $this->dumpFilePath]
             );
 
-        $command = $this->getCommand($keepDefiners);
+        $command = $this->getCommand($removeDefiners);
 
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with($command)
             ->willReturn([]);
 
-        $this->dumpGenerator->create($keepDefiners);
+        $this->dumpGenerator->create($removeDefiners);
     }
 
     /**
@@ -151,8 +151,8 @@ class DumpGeneratorTest extends TestCase
     public function getCreateDataProvider(): array
     {
         return [
-            'without definers' => [false],
-            'with definers' => [true],
+            'without definers' => [true],
+            'with definers' => [false],
         ];
     }
 

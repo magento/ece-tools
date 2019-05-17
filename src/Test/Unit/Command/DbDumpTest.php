@@ -81,7 +81,8 @@ class DbDumpTest extends TestCase
                 ['Backup completed.']
             );
         $this->dumpGeneratorMock->expects($this->once())
-            ->method('create');
+            ->method('create')
+            ->with(false);
 
         $tester = new CommandTester(
             $this->command
@@ -100,7 +101,8 @@ class DbDumpTest extends TestCase
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->dumpGeneratorMock->expects($this->never())
-            ->method('create');
+            ->method('create')
+            ->with(false);
 
         $tester = new CommandTester(
             $this->command
@@ -108,6 +110,45 @@ class DbDumpTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(0, $tester->getStatusCode());
+    }
+
+    /**
+     * @param array $options
+     * @dataProvider executeWithRemovingDefinersDataProvider
+     */
+    public function testExecuteWithRemovingDefiners(array $options)
+    {
+        $this->questionMock->expects($this->once())
+            ->method('ask')
+            ->willReturn(true);
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Starting backup.'],
+                ['Backup completed.']
+            );
+        $this->dumpGeneratorMock->expects($this->once())
+            ->method('create')
+            ->with(true);
+
+        $tester = new CommandTester(
+            $this->command
+        );
+        $tester->execute($options);
+
+        $this->assertSame(0, $tester->getStatusCode());
+    }
+
+    /**
+     * @return array
+     */
+    public function executeWithRemovingDefinersDataProvider(): array
+    {
+        return [
+            [['--' . DbDump::OPTION_REMOVE_DEFINERS => true]],
+            [['-d' => true]],
+        ];
     }
 
     /**

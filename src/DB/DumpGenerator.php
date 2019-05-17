@@ -80,11 +80,11 @@ class DumpGenerator
      * as well as serves a log with the name of created dump file.
      * If any error happened during dumping, dump file is removed.
      *
-     * @param bool $keepDefiners
+     * @param bool $removeDefiners
      * @return void
      * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
-    public function create(bool $keepDefiners)
+    public function create(bool $removeDefiners)
     {
         $dumpFileName = sprintf(self::DUMP_FILE_NAME_TEMPLATE, time());
 
@@ -110,7 +110,7 @@ class DumpGenerator
                 $this->logger->info('Start creation DB dump...');
 
                 $command = 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dump->getCommand();
-                if (!$keepDefiners) {
+                if ($removeDefiners) {
                     $command .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
                 }
                 $command .= ' | gzip > ' . $dumpFile;
