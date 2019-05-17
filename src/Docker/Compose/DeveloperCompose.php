@@ -21,7 +21,7 @@ class DeveloperCompose extends ProductionCompose
     {
         $compose = parent::build($config);
         $compose['volumes'] = [
-            'magento' => [
+            'magento-sync' => [
                 'external' => true
             ]
         ];

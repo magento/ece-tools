@@ -10,7 +10,7 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 BASH="docker-compose run cli bash"
 DIR_TOOLS="/var/www/ece-tools"
 
-./bin/ece-tools docker:build:integration test-v1 --php ${TRAVIS_PHP_VERSION}
+./bin/ece-tools docker:build:integration integration --php ${TRAVIS_PHP_VERSION}
 docker-compose up -d
 
 case $TRAVIS_PHP_VERSION in

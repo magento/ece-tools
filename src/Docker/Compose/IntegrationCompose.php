@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
  *
  * @codeCoverageIgnore
  */
-class IntegrationV1Compose implements ComposeManagerInterface
+class IntegrationCompose implements ComposeManagerInterface
 {
     /**
      * @var FileList
@@ -61,8 +61,8 @@ class IntegrationV1Compose implements ComposeManagerInterface
                             'appdata',
                         ],
                         'env_file' => [
-                            './docker/global.env',
-                            './docker/composer.env',
+                            './.docker/global.env',
+                            './.docker/composer.env',
                         ]
                     ]
                 ),
@@ -80,8 +80,8 @@ class IntegrationV1Compose implements ComposeManagerInterface
                             'appdata',
                         ],
                         'env_file' => [
-                            './docker/global.env',
-                            './docker/composer.env',
+                            './.docker/global.env',
+                            './.docker/composer.env',
                         ],
                     ]
                 ),
@@ -118,8 +118,8 @@ class IntegrationV1Compose implements ComposeManagerInterface
                             'appdata',
                         ],
                         'env_file' => [
-                            './docker/global.env',
-                            './docker/composer.env',
+                            './.docker/global.env',
+                            './.docker/composer.env',
                         ],
                     ]
                 ),
