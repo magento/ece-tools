@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy\WarmUp;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp\Urls;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp\UrlsPattern;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -40,11 +39,6 @@ class UrlsTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ShellInterface|MockObject
-     */
-    private $shellMock;
-
-    /**
      * @var UrlsPattern|MockObject
      */
     private $urlsPatternMock;
@@ -57,14 +51,12 @@ class UrlsTest extends TestCase
         $this->postDeployMock = $this->getMockForAbstractClass(PostDeployInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->urlsPatternMock = $this->createPartialMock(UrlsPattern::class, ['get']);
 
         $this->urls = new Urls(
             $this->postDeployMock,
             $this->urlManagerMock,
             $this->loggerMock,
-            $this->shellMock,
             $this->urlsPatternMock
         );
     }

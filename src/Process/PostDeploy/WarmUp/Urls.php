@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Process\PostDeploy\WarmUp;
 
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
@@ -40,11 +39,6 @@ class Urls
     private $baseHosts;
 
     /**
-     * @var ShellInterface
-     */
-    private $shell;
-
-    /**
      * @var UrlsPattern
      */
     private $urlsPattern;
@@ -53,20 +47,17 @@ class Urls
      * @param PostDeployInterface $postDeploy
      * @param UrlManager $urlManager
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
      * @param UrlsPattern $urlsPattern
      */
     public function __construct(
         PostDeployInterface $postDeploy,
         UrlManager $urlManager,
         LoggerInterface $logger,
-        ShellInterface $shell,
         UrlsPattern $urlsPattern
     ) {
         $this->postDeploy = $postDeploy;
         $this->urlManager = $urlManager;
         $this->logger = $logger;
-        $this->shell = $shell;
         $this->urlsPattern = $urlsPattern;
     }
 

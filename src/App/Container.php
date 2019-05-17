@@ -399,7 +399,7 @@ class Container implements ContainerInterface
         $this->container->when(CronKill::class)
             ->needs(ProcessInterface::class)
             ->give(DeployProcess\CronProcessKill::class);
-        $this->container->when(PostDeployProcess\WarmUp\Urls::class)
+        $this->container->when(PostDeployProcess\WarmUp\UrlsPattern::class)
             ->needs(\Magento\MagentoCloud\Shell\ShellInterface::class)
             ->give(\Magento\MagentoCloud\Shell\MagentoShell::class);
 
