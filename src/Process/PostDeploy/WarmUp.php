@@ -63,11 +63,11 @@ class WarmUp implements ProcessInterface
      */
     public function execute()
     {
-        $client = $this->clientFactory->create();
-        $promises = [];
-
         try {
             $this->logger->info('Starting page warming up');
+
+            $client = $this->clientFactory->create();
+            $promises = [];
 
             foreach ($this->urls->getAll() as $url) {
                 $request = $this->requestFactory->create('GET', $url);

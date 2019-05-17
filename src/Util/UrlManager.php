@@ -157,7 +157,7 @@ class UrlManager
     }
 
     /**
-     * Returns all base urls.
+     * Returns base urls for all stores.
      *
      * @return string[]
      */
