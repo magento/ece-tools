@@ -17,8 +17,8 @@ class ComposeManagerFactory
 {
     const COMPOSE_DEVELOPER = 'developer';
     const COMPOSE_PRODUCTION = 'production';
-    const COMPOSE_TEST_V1 = 'test-v1';
-    const COMPOSE_TEST_V2 = 'test-v2';
+    const COMPOSE_INTEGRATION = 'integration';
+    const COMPOSE_FUNCTIONAL = 'functional';
 
     /**
      * @var array
@@ -27,8 +27,8 @@ class ComposeManagerFactory
         self::COMPOSE_DEVELOPER => Compose\DeveloperCompose::class,
         self::COMPOSE_PRODUCTION => Compose\ProductionCompose::class,
         /** Internal CI configurations. */
-        self::COMPOSE_TEST_V1 => Compose\IntegrationV1Compose::class,
-        self::COMPOSE_TEST_V2 => Compose\IntegrationV2Compose::class
+        self::COMPOSE_INTEGRATION => Compose\IntegrationCompose::class,
+        self::COMPOSE_FUNCTIONAL => Compose\FunctionalCompose::class
     ];
 
     /**

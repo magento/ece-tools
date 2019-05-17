@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
  *
  * @codeCoverageIgnore
  */
-class IntegrationV1Compose implements ComposeManagerInterface
+class IntegrationCompose implements ComposeManagerInterface
 {
     /**
      * @var FileList
