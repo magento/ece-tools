@@ -13,6 +13,8 @@ USAGE="Magento Cloud Docker
   deploy        deploy application
   redeploy      re-build and re-deploy application
   bash          connect to bash
+  stop          stop containers
+  start         start containers
   restart       restart containers
 
 \033[33mOptions:\033[0m
@@ -47,6 +49,12 @@ case "$1" in
         ;;
     bash)
         docker-compose run deploy bash
+        ;;
+    stop)
+        docker-compose stop
+        ;;
+    start)
+        docker-compose start
         ;;
     restart)
         docker-compose restart
