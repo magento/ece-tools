@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB;
 
+use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Psr\Log\LoggerInterface;
 
@@ -36,13 +37,28 @@ class Connection implements ConnectionInterface
     private $connectionFactory;
 
     /**
+     * @var MergedConfig
+     */
+    private $mergedConfig;
+
+    /**
+     * @var string
+     */
+    private $tablePrefix;
+
+    /**
      * @param LoggerInterface $logger
      * @param ConnectionFactory $connectionFactory
+     * @param MergedConfig $mergedConfig
      */
-    public function __construct(LoggerInterface $logger, ConnectionFactory $connectionFactory)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        ConnectionFactory $connectionFactory,
+        MergedConfig $mergedConfig
+    ) {
         $this->logger = $logger;
         $this->connectionFactory = $connectionFactory;
+        $this->mergedConfig = $mergedConfig;
     }
 
     /**
@@ -92,7 +108,15 @@ class Connection implements ConnectionInterface
      */
     public function selectOne(string $query, array $bindings = []): array
     {
-        return $this->getFetchStatement($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
+        $result = $this->getFetchStatement($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
+
+        if ($result === false) {
+            $this->logger->error('Failed to execute query: ' . var_export($this->getPdo()->errorInfo(), true));
+
+            $result = [];
+        }
+
+        return $result;
     }
 
     /**
@@ -218,22 +242,34 @@ class Connection implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function count(string $query, array $bindings = []): int
+    public function close()
     {
-        return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->getPdo()->prepare($query);
-            $this->bindValues($statement, $bindings);
-            $statement->execute();
-
-            return $statement->rowCount();
-        });
+        $this->pdo = null;
     }
 
     /**
      * @inheritdoc
      */
-    public function close()
+    public function getTableName(string $name): string
     {
-        $this->pdo = null;
+        if (!empty($this->getTablePrefix())) {
+            $name = $this->getTablePrefix() . $name;
+        }
+
+        return $name;
+    }
+
+    /**
+     * Returns table_prefix value.
+     *
+     * @return string
+     */
+    private function getTablePrefix(): string
+    {
+        if ($this->tablePrefix === null) {
+            $this->tablePrefix = $this->mergedConfig->get()['table_prefix'] ?? '';
+        }
+
+        return $this->tablePrefix;
     }
 }

@@ -7,20 +7,20 @@ namespace Magento\MagentoCloud\Test\Unit\Shell;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
+use Magento\MagentoCloud\Shell\ProcessException;
+use Magento\MagentoCloud\Shell\ProcessFactory;
+use Magento\MagentoCloud\Shell\ProcessInterface;
+use Magento\MagentoCloud\Shell\Shell;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Shell\Shell;
 use Psr\Log\LoggerInterface;
-use Monolog\Logger;
+use Symfony\Component\Console\Exception\LogicException;
 
 /**
  * @inheritdoc
  */
 class ShellTest extends TestCase
 {
-    use \phpmock\phpunit\PHPMock;
-
     /**
      * @var Shell
      */
@@ -42,6 +42,11 @@ class ShellTest extends TestCase
     private $sanitizerMock;
 
     /**
+     * @var ProcessFactory|MockObject
+     */
+    private $processFactoryMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -49,44 +54,59 @@ class ShellTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->systemListMock = $this->createMock(SystemList::class);
         $this->sanitizerMock = $this->createMock(Sanitizer::class);
+        $this->processFactoryMock = $this->createMock(ProcessFactory::class);
 
-        $this->shell = new Shell($this->loggerMock, $this->systemListMock, $this->sanitizerMock);
+        $this->shell = new Shell(
+            $this->loggerMock,
+            $this->systemListMock,
+            $this->processFactoryMock,
+            $this->sanitizerMock
+        );
     }
 
     /**
-     * @param string $execOutput
+     * @param string $processOutput
      * @dataProvider executeDataProvider
      */
-    public function testExecute($execOutput)
+    public function testExecute($processOutput)
     {
-        $command = 'ls -al';
+        $command = 'ls';
+        $args = ['-al'];
         $magentoRoot = '/magento';
-        $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' 2>&1';
 
-        $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
-        $execMock->expects($this->once())
-            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand, $execOutput) {
-                $this->assertSame($execCommand, $cmd);
-                $status = 0;
-                $output = $execOutput;
-            });
-
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getCommandLine')
+            ->willReturn('ls -la');
+        $processMock->expects($this->once())
+            ->method('execute');
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn($processOutput);
+        $this->processFactoryMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'commandline' => [$command, $args[0]],
+                'cwd' => $magentoRoot,
+                'timeout' => null
+            ])
+            ->willReturn($processMock);
         $this->systemListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
-
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with($command);
+            ->with('ls -la');
         $this->sanitizerMock->expects($this->never())
             ->method('sanitize');
-        if ($execOutput) {
+
+        if ($processOutput) {
             $this->loggerMock->expects($this->once())
-                ->method('log')
-                ->with(Logger::DEBUG, PHP_EOL . '  ' . $execOutput[0]);
+                ->method('debug')
+                ->with($processOutput);
         }
 
-        $this->shell->execute($command);
+        $this->shell->execute($command, $args);
     }
 
     /**
@@ -95,113 +115,113 @@ class ShellTest extends TestCase
     public function executeDataProvider(): array
     {
         return [
-            ['execOutput' => []],
-            ['execOutput' => ['test']],
+            'empty process output' => ['processOutput' => ''],
+            'non empty process output' => ['processOutput' => 'test'],
         ];
     }
 
-    /**
-     * @param InvokedCount $logExpects
-     * @param array $execOutput
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Command ls -al --password="***" returned code 123
-     * @expectedExceptionCode 123
-     * @dataProvider executeExceptionDataProvider
-     */
-    public function testExecuteException($logExpects, array $execOutput)
+    public function testExecuteHandleOutputException()
     {
-        $command = 'ls -al --password="123"';
+        $command = 'ls';
         $magentoRoot = '/magento';
-        $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' 2>&1';
 
-        $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
-        $execMock->expects($this->once())
-            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand, $execOutput) {
-                $this->assertSame($execCommand, $cmd);
-                $status = 123;
-                $output = $execOutput;
-            });
-
+        $processMock = $this->createMock(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getCommandLine')
+            ->willReturn('ls -la');
+        $processMock->expects($this->once())
+            ->method('execute');
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willThrowException(new LogicException('something went wrong'));
+        $this->processFactoryMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'commandline' => $command,
+                'cwd' => $magentoRoot,
+                'timeout' => 0
+            ])
+            ->willReturn($processMock);
         $this->systemListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
-        $this->sanitizerMock->expects($this->once())
-            ->method('sanitize')
-            ->with('ls -al --password="123"')
-            ->willReturn('ls -al --password="***"');
-
         $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with($command);
-        $this->loggerMock->expects($logExpects)
-            ->method('log')
-            ->with(Logger::CRITICAL, PHP_EOL . '  test');
+            ->method('error')
+            ->with('Can\'t get command output: something went wrong');
 
         $this->shell->execute($command);
     }
 
     /**
-     * @return array
+     * @expectedException \Magento\MagentoCloud\Shell\ShellException
+     * @expectedExceptionMessage Command ls -al --password="***" failed
+     * @expectedExceptionCode 3
      */
-    public function executeExceptionDataProvider(): array
+    public function testExecuteException()
     {
-        return [
-            [
-                'logExpects' => $this->never(),
-                'execOutput' => [],
-            ],
-            [
-                'logExpects' => $this->once(),
-                'execOutput' => ['test'],
-            ],
-        ];
+        $command = 'ls -al --password="123"';
+        $magentoRoot = '/magento';
+
+        /** @var ProcessInterface|MockObject $processMock */
+        $processMock = $this->createMock(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getCommandLine')
+            ->willReturn($command);
+        $processMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new ProcessException(sprintf('Command %s failed', $command), 3));
+        $processMock->expects($this->never())
+            ->method('getOutput');
+        $this->processFactoryMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'commandline' => $command,
+                'cwd' => $magentoRoot,
+                'timeout' => 0
+            ])
+            ->willReturn($processMock);
+        $this->systemListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn($magentoRoot);
+        $this->sanitizerMock->expects($this->once())
+            ->method('sanitize')
+            ->with($this->stringContains('ls -al --password="123"'))
+            ->willReturn('Command ls -al --password="***" failed');
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with($command);
+        $this->loggerMock->expects($this->never())
+            ->method('debug');
+
+        $this->shell->execute($command);
     }
 
     public function testExecuteWithArguments()
     {
         $command = 'ls -al';
         $magentoRoot = '/magento';
-        $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' \'arg1\' \'arg2\' 2>&1';
+        $arguments = ['arg1', 'arg2'];
 
-        $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
-        $execMock->expects($this->once())
-            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand) {
-                $this->assertSame($execCommand, $cmd);
-                $status = 0;
-                $output = [];
-            });
-
+        /** @var ProcessInterface|MockObject $processMock */
+        $processMock = $this->createMock(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getCommandLine')
+            ->willReturn('ls -al arg1 arg2');
+        $this->processFactoryMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'commandline' => array_merge([$command], $arguments),
+                'cwd' => $magentoRoot,
+                'timeout' => 0
+            ])
+            ->willReturn($processMock);
         $this->systemListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with($command . ' \'arg1\' \'arg2\'');
+            ->with('ls -al arg1 arg2');
 
         $this->shell->execute($command, ['arg1', 'arg2']);
-    }
-
-    public function testExecuteWithStringArgument()
-    {
-        $command = 'ls -al';
-        $magentoRoot = '/magento';
-        $execCommand = 'cd ' . $magentoRoot . ' && ' . $command . ' \'arg1\' 2>&1';
-
-        $execMock = $this->getFunctionMock('Magento\MagentoCloud\Shell', 'exec');
-        $execMock->expects($this->once())
-            ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand) {
-                $this->assertSame($execCommand, $cmd);
-                $status = 0;
-                $output = [];
-            });
-
-        $this->systemListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn($magentoRoot);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with($command . ' \'arg1\'');
-
-        $this->shell->execute($command, 'arg1');
     }
 }

@@ -13,12 +13,17 @@ namespace Magento\MagentoCloud\Shell;
 interface ShellInterface
 {
     /**
+     * Exit code for successful command execution.
+     */
+    const CODE_SUCCESS = 0;
+
+    /**
      * Runs shell command.
      *
      * @param string $command The command.
-     * @param string|array $args Arguments to pass
-     * @return array The output of command.
+     * @param array $args Arguments to pass
+     * @return ProcessInterface The output of command.
      * @throws ShellException If command was executed with error
      */
-    public function execute(string $command, $args = []): array;
+    public function execute(string $command, array $args = []): ProcessInterface;
 }

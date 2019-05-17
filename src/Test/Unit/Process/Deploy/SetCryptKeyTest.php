@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\Deploy\SetCryptKey;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -18,27 +19,27 @@ use Psr\Log\LoggerInterface;
 class SetCryptKeyTest extends TestCase
 {
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigReader|Mock
+     * @var ConfigReader|MockObject
      */
     private $configReaderMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
     /**
-     * @var DbConnection
+     * @var SetCryptKey
      */
     private $process;
 
@@ -70,7 +71,7 @@ class SetCryptKeyTest extends TestCase
             ->method('info')
             ->with('Setting encryption key');
         $this->configWriterMock->expects($this->once())
-            ->method('update')
+            ->method('updateRecursive')
             ->with(['crypt' => ['key' => 'TWFnZW50byBSb3g=']]);
 
         $this->process->execute();
@@ -87,7 +88,7 @@ class SetCryptKeyTest extends TestCase
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
-            ->method('update');
+            ->method('updateRecursive');
 
         $this->process->execute();
     }
@@ -102,7 +103,7 @@ class SetCryptKeyTest extends TestCase
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
-            ->method('update');
+            ->method('updateRecursive');
 
         $this->process->execute();
     }

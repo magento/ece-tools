@@ -10,10 +10,11 @@ namespace Magento\MagentoCloud\Test\Unit\DB;
 use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\DB\DumpInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritdoc
@@ -137,10 +138,14 @@ class DumpGeneratorTest extends TestCase
 
         $command = $this->getCommand($removeDefiners);
 
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getExitCode')
+            ->willReturn(0);
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with($command)
-            ->willReturn([]);
+            ->willReturn($processMock);
 
         $this->dumpGenerator->create($removeDefiners);
     }
@@ -156,6 +161,9 @@ class DumpGeneratorTest extends TestCase
         ];
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testCreateWithException()
     {
         $errorMessage = 'Some error';
@@ -219,9 +227,11 @@ class DumpGeneratorTest extends TestCase
         $this->dumpGenerator->create(false);
     }
 
+    /**
+     * @throws \Magento\MagentoCloud\Process\ProcessException
+     */
     public function testCreateWithErrors()
     {
-        $createOutput = ['Some error'];
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -234,14 +244,20 @@ class DumpGeneratorTest extends TestCase
 
         $command = $this->getCommand();
 
+        $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock1->expects($this->once())
+            ->method('getExitCode')
+            ->willReturn(128);
+        $processMock2 = $this->getMockForAbstractClass(ProcessInterface::class);
+
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
                 [$command],
                 ['rm ' . $this->dumpFilePath]
             )->willReturnMap([
-                [$command, [], $createOutput],
-                ['rm ' . $this->dumpFilePath, [], []],
+                [$command, [], $processMock1],
+                ['rm ' . $this->dumpFilePath, [], $processMock2],
             ]);
 
         $this->dumpGenerator->create(false);

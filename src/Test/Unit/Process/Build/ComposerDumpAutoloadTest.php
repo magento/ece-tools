@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Process\Build\ComposerDumpAutoload;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -42,6 +43,20 @@ class ComposerDumpAutoloadTest extends TestCase
         $this->shell->expects($this->once())
             ->method('execute')
             ->with('composer dump-autoload -o --ansi --no-interaction');
+
+        $this->process->execute();
+    }
+
+    /**
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedExceptionMessage something went wrong
+     */
+    public function testExecuteWithException()
+    {
+        $this->shell->expects($this->once())
+            ->method('execute')
+            ->with('composer dump-autoload -o --ansi --no-interaction')
+            ->willThrowException(new ShellException('something went wrong'));
 
         $this->process->execute();
     }

@@ -41,7 +41,7 @@ class DisableGoogleAnalytics implements ProcessInterface
      * @param ConnectionInterface $connection
      * @param LoggerInterface $logger
      * @param Environment $environment
-     * @param DeployConfig $globalConfig
+     * @param DeployConfig $deployConfig
      */
     public function __construct(
         ConnectionInterface $connection,
@@ -64,9 +64,10 @@ class DisableGoogleAnalytics implements ProcessInterface
             !$this->deployConfig->get(DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS)
         ) {
             $this->logger->info('Disabling Google Analytics');
-            $this->connection->affectingQuery(
-                "UPDATE `core_config_data` SET `value` = 0 WHERE `path` = 'google/analytics/active'"
-            );
+            $this->connection->affectingQuery(sprintf(
+                "UPDATE `%s` SET `value` = 0 WHERE `path` = 'google/analytics/active'",
+                $this->connection->getTableName('core_config_data')
+            ));
         }
     }
 }

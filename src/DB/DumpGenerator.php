@@ -115,9 +115,9 @@ class DumpGenerator
                 }
                 $command .= ' | gzip > ' . $dumpFile;
 
-                $errors = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
+                $process = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
 
-                if ($this->filterWarnings($errors)) {
+                if ($process->getExitCode() !== ShellInterface::CODE_SUCCESS) {
                     $this->logger->error('Error has occurred during mysqldump');
                     $this->shell->execute('rm ' . $dumpFile);
                 } else {
@@ -137,18 +137,5 @@ class DumpGenerator
             $this->logger->error($e->getMessage());
             fclose($lockFileHandle);
         }
-    }
-
-    /**
-     * Removes warning errors from the list
-     *
-     * @param array $errors
-     * @return array
-     */
-    private function filterWarnings(array $errors): array
-    {
-        return array_filter($errors, function ($error) {
-            return strpos($error, '[Warning]') === false;
-        });
     }
 }

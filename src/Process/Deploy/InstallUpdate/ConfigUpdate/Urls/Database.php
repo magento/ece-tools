@@ -99,7 +99,10 @@ class Database implements ProcessInterface
     private function getBaseUrls(): array
     {
         $configBaseUrls = $this->connection->select(
-            'SELECT `value`, `path` FROM `core_config_data` WHERE (`path`=? OR `path`= ?) AND `scope_id` = ?',
+            sprintf(
+                'SELECT `value`, `path` FROM `%s` WHERE (`path`=? OR `path`= ?) AND `scope_id` = ?',
+                $this->connection->getTableName('core_config_data')
+            ),
             [
                 'web/unsecure/base_url',
                 'web/secure/base_url',
@@ -126,7 +129,10 @@ class Database implements ProcessInterface
     private function updateUrl(string $baseHost, string $actualHost): int
     {
         return $this->connection->affectingQuery(
-            'UPDATE `core_config_data` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
+            sprintf(
+                'UPDATE `%s` SET `value` = REPLACE(`value`, ?, ?) WHERE `value` LIKE ?',
+                $this->connection->getTableName('core_config_data')
+            ),
             [
                 $baseHost,
                 $actualHost,

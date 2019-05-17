@@ -15,5 +15,5 @@ Magento:
           ece_dir: '/var/www/ece-tools'
       env:
         url:
-          base: 'http://localhost:8030'
-          secure_base: 'https://localhost:8030'
+          base: 'http://web/'
+          secure_base: 'https://web/'

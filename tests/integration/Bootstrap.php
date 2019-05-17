@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Integration;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Test\Integration\Shell\Shell;
 
 /**
  * Integration testing bootstrap.
@@ -34,7 +34,7 @@ class Bootstrap
     private $file;
 
     /**
-     * @var ShellInterface
+     * @var Shell
      */
     private $shell;
 
@@ -44,7 +44,7 @@ class Bootstrap
     public function __construct()
     {
         $this->file = new File();
-        $this->shell = new Shell\Shell(
+        $this->shell = new Shell(
             $this->getSandboxDir()
         );
     }
@@ -197,7 +197,6 @@ class Bootstrap
      * @param string $command
      * @return array
      * @deprecated
-     * @see \Magento\MagentoCloud\Shell\ShellInterface
      */
     public function execute(string $command): array
     {
