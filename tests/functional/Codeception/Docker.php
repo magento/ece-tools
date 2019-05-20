@@ -77,12 +77,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function _before(TestInterface $test)
     {
-        $this->output = $this->taskEnvUp($this->_getConfig('volumes'))
-            ->printOutput($this->_getConfig('printOutput'))
-            ->interactive(false)
-            ->run()
-            ->stopOnFail()
-            ->getMessage();
+        $this->resetEnvironment();
     }
 
     /**
@@ -96,6 +91,24 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run()
             ->stopOnFail()
             ->getMessage();
+    }
+
+    /**
+     * Resets containers
+     *
+     * @return bool
+     */
+    public function resetEnvironment(): bool
+    {
+        /** @var Result $result */
+        $result = $this->taskEnvUp($this->_getConfig('volumes'))
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->run()
+            ->stopOnFail();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
     }
 
     /**
@@ -298,17 +311,23 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      *
      * @param string $command
      * @param string $container
-     * @param array $variables
+     * @param array $cloudVariables
+     * @param array $rawVariables
      * @return bool
      * @throws \Robo\Exception\TaskException
      */
-    public function runEceToolsCommand(string $command, string $container, array $variables = []): bool
-    {
+    public function runEceToolsCommand(
+        string $command,
+        string $container,
+        array $cloudVariables = [],
+        array $rawVariables = []
+    ): bool {
         /** @var Result $result */
         $result = $this->taskBash($container)
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
-            ->envVars($this->prepareVariables($variables))
+            ->envVars($this->prepareVariables($cloudVariables))
+            ->envVars($rawVariables)
             ->exec(sprintf('php %s/bin/ece-tools %s', $this->_getConfig('system_ece_tools_dir'), $command))
             ->run();
 
@@ -331,17 +350,23 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      *
      * @param string $command
      * @param string $container
-     * @param array $variables
+     * @param array $cloudVariables
+     * @param array $rawVariables
      * @return bool
      * @throws \Robo\Exception\TaskException
      */
-    public function runBinMagentoCommand(string $command, string $container, array $variables = []): bool
-    {
+    public function runBinMagentoCommand(
+        string $command,
+        string $container,
+        array $cloudVariables = [],
+        array $rawVariables = []
+    ): bool {
         /** @var Result $result */
         $result = $this->taskBash($container)
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
-            ->envVars($this->prepareVariables($variables))
+            ->envVars($this->prepareVariables($cloudVariables))
+            ->envVars($rawVariables)
             ->exec(sprintf('php %s/bin/magento %s', $this->_getConfig('system_magento_dir'), $command))
             ->run();
 
