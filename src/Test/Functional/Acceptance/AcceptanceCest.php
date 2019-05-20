@@ -79,6 +79,7 @@ class AcceptanceCest
 
     /**
      * @return array
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function defaultDataProvider(): array
     {
