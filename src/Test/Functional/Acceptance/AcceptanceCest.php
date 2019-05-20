@@ -20,16 +20,32 @@ use Magento\MagentoCloud\Util\ArrayManager;
  */
 class AcceptanceCest
 {
-    public function test(\CliTester $I)
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @throws \Robo\Exception\TaskException
+     * @dataProvider defaultDataProvider
+     */
+    public function testDefault(\CliTester $I, \Codeception\Example $data)
     {
         $I->assertTrue($I->cloneTemplate());
         $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand(
+            'deploy',
+            Docker::DEPLOY_CONTAINER,
+            $data['cloudVariables'],
+            $data['rawVariables']
+        ));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
 
         $I->amOnPage('/');
         $I->see('Home page');
+
+        $destination = sys_get_temp_dir() . '/app/etc/env.php';
+        $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
+        $config = require $destination;
+        $I->assertArraySubset($data['expectedConfig'], $config);
 
         $I->assertTrue($I->runEceToolsCommand('config:dump', Docker::DEPLOY_CONTAINER));
         $destination = sys_get_temp_dir() . '/app/etc/config.php';
@@ -53,5 +69,213 @@ class AcceptanceCest
 
         $I->amOnPage('/');
         $I->see('Home page');
+
+        $log = $I->grabFileContent('/var/log/cloud.log');
+        $I->assertContains('--admin-password=\'******\'', $log);
+        if (strpos($log, '--db-password') !== false) {
+            $I->assertContains('--db-password=\'******\'', $log);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    protected function defaultDataProvider(): array
+    {
+        return [
+            'default configuration' => [
+                'cloudVariables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                    ],
+                ],
+                'rawVariables' => [],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 10000,
+                        'consumers' => [],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                    'lock' => [
+                        'provider' => 'db',
+                        'config' => [
+                            'prefix' => null,
+                        ],
+                    ],
+                ],
+            ],
+            'test cron_consumers_runner with array and there is MAGENTO_CLOUD_LOCKS_DIR' => [
+                'cloudVariables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => [
+                            'cron_run' => true,
+                            'max_messages' => 5000,
+                            'consumers' => ['test'],
+                        ],
+                    ],
+                ],
+                'rawVariables' => [
+                    'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
+                ],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 5000,
+                        'consumers' => ['test'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                    'lock' => [
+                        'provider' => 'file',
+                        'config' => [
+                            'path' => '/tmp/locks',
+                        ],
+                    ],
+                ],
+            ],
+            'test cron_consumers_runner with wrong array' => [
+                'cloudVariables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => [
+                            'cron_run' => 'true',
+                            'max_messages' => 5000,
+                            'consumers' => ['test'],
+                        ],
+                    ],
+                ],
+                'rawVariables' => [],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 5000,
+                        'consumers' => ['test'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
+            'test cron_consumers_runner with string' => [
+                'cloudVariables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
+                    ],
+                ],
+                'rawVariables' => [],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => true,
+                        'max_messages' => 100,
+                        'consumers' => ['test2'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
+            'test cron_consumers_runner with wrong string' => [
+                'cloudVariables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
+                    ],
+                ],
+                'rawVariables' => [],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 100,
+                        'consumers' => ['test2'],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
+            'disabled static content symlinks 3 jobs' => [
+                'cloudVariables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'STATIC_CONTENT_SYMLINK' => 'disabled',
+                        'STATIC_CONTENT_THREADS' => 3,
+                    ],
+                ],
+                'rawVariables' => [],
+                'expectedConfig' => [
+                    'cron_consumers_runner' => [
+                        'cron_run' => false,
+                        'max_messages' => 10000,
+                        'consumers' => [],
+                    ],
+                    'directories' => [
+                        'document_root_is_pub' => true,
+                    ],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function testWithSplitBuildCommand(\CliTester $I)
+    {
+        $I->assertTrue($I->cloneTemplate());
+        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->runEceToolsCommand('build:generate', Docker::BUILD_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('build:transfer', Docker::BUILD_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+    }
+
+    /**
+     * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function testDeployInBuild(\CliTester $I)
+    {
+        $tmpConfig = sys_get_temp_dir() . '/app/etc/config.php';
+
+        $I->assertTrue($I->cloneTemplate());
+        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('config:dump', Docker::DEPLOY_CONTAINER));
+        $I->assertNotContains(
+            'Static content deployment was performed during the build phase or disabled. '
+                . 'Skipping deploy phase static content compression.',
+            $I->grabFileContent('/var/log/cloud.log')
+        );
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+        $I->assertTrue($I->downloadFromContainer('/app/etc/config.php', $tmpConfig, Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->resetEnvironment());
+        $I->assertTrue($I->cloneTemplate());
+        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->uploadToContainer($tmpConfig, '/app/etc/config.php', Docker::BUILD_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertContains(
+            'Static content deployment was performed during the build phase or disabled. '
+            . 'Skipping deploy phase static content compression.',
+            $I->grabFileContent('/var/log/cloud.log')
+        );
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
     }
 }
