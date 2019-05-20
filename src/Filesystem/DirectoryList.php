@@ -227,4 +227,12 @@ class DirectoryList
     {
         return $this->getRoot() . '/views';
     }
+
+    /**
+     * @return string
+     */
+    public function getDockerRoot(): string
+    {
+        return $this->getMagentoRoot() . '/.docker';
+    }
 }

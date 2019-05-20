@@ -86,8 +86,8 @@ class BuildIntegration extends Command
                 InputArgument::REQUIRED,
                 sprintf(
                     'Version of integration framework configuration (%s/%s)',
-                    ComposeManagerFactory::COMPOSE_TEST_V1,
-                    ComposeManagerFactory::COMPOSE_TEST_V2
+                    ComposeManagerFactory::COMPOSE_INTEGRATION,
+                    ComposeManagerFactory::COMPOSE_FUNCTIONAL
                 )
             )->addOption(
                 self::OPTION_PHP,
@@ -121,7 +121,7 @@ class BuildIntegration extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $strategy = $input->getArgument(self::ARGUMENT_VERSION);
-        $allowedStrategies = [ComposeManagerFactory::COMPOSE_TEST_V1, ComposeManagerFactory::COMPOSE_TEST_V2];
+        $allowedStrategies = [ComposeManagerFactory::COMPOSE_INTEGRATION, ComposeManagerFactory::COMPOSE_FUNCTIONAL];
 
         if (!in_array($strategy, $allowedStrategies, true)) {
             throw new ConfigurationMismatchException('Wrong framework version');

@@ -23,12 +23,19 @@ env:
     - TEST_SUITE=integration
     - TEST_SUITE=functional
 
+matrix:
+  exclude:
+    - php: '7.0'
+      env: TEST_SUITE=integration
+    - php: '7.1'
+      env: TEST_SUITE=integration
+
 install: composer update -n --no-suggest
 
 before_script:
-  - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./docker/composer.env
-  - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./docker/composer.env
-  - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./docker/global.env; fi;
+  - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env
+  - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.docker/composer.env
+  - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
   - sudo /etc/init.d/mysql stop
 
 script:
