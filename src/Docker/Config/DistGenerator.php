@@ -84,7 +84,7 @@ class DistGenerator
      */
     public function generate()
     {
-        $configPath = $this->directoryList->getMagentoRoot() . '/docker/config.php.dist';
+        $configPath = $this->directoryList->getDockerRoot() . '/config.php.dist';
 
         $config = array_merge(
             ['MAGENTO_CLOUD_RELATIONSHIPS' => $this->relationship->get()],
@@ -106,7 +106,7 @@ class DistGenerator
         $result = "<?php\n\nreturn [";
         foreach ($config as $key => $value) {
             $result .= "\n    '{$key}' => ";
-            $result .= 'base64_encode(json_encode(' . $this->phpFormatter->varExportShort($value, 2) .')),';
+            $result .= 'base64_encode(json_encode(' . $this->phpFormatter->varExportShort($value, 2) . ')),';
         }
         $result .= "\n];\n";
 
