@@ -72,25 +72,28 @@ class WarmUp implements ProcessInterface
             foreach ($this->urls->getAll() as $url) {
                 $request = $this->requestFactory->create('GET', $url);
 
-                $promises[] = $client->sendAsync($request)->then(function () use ($url) {
-                    $this->logger->info('Warmed up page: ' . $url);
-                }, function (RequestException $exception) use ($url) {
-                    $context = [];
-                    if ($exception->getResponse()) {
-                        $context = [
-                            'error' => $exception->getResponse()->getReasonPhrase(),
-                            'code' => $exception->getResponse()->getStatusCode(),
-                        ];
-                    } else if ($exception->getHandlerContext()) {
-                        $context = [
-                            'error' => $exception->getHandlerContext()['error'] ?? '',
-                            'errno' => $exception->getHandlerContext()['errno'] ?? '',
-                            'total_time' => $exception->getHandlerContext()['total_time'] ?? ''
-                        ];
-                    }
+                $promises[] = $client->sendAsync($request)->then(
+                    function () use ($url) {
+                        $this->logger->info('Warmed up page: ' . $url);
+                    },
+                    function (RequestException $exception) use ($url) {
+                        $context = [];
+                        if ($exception->getResponse()) {
+                            $context = [
+                                'error' => $exception->getResponse()->getReasonPhrase(),
+                                'code' => $exception->getResponse()->getStatusCode(),
+                            ];
+                        } else if ($exception->getHandlerContext()) {
+                            $context = [
+                                'error' => $exception->getHandlerContext()['error'] ?? '',
+                                'errno' => $exception->getHandlerContext()['errno'] ?? '',
+                                'total_time' => $exception->getHandlerContext()['total_time'] ?? ''
+                            ];
+                        }
 
-                    $this->logger->error('Warming up failed: ' . $url, $context);
-                });
+                        $this->logger->error('Warming up failed: ' . $url, $context);
+                    }
+                );
             }
 
             \GuzzleHttp\Promise\unwrap($promises);
