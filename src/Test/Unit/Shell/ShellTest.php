@@ -205,7 +205,7 @@ class ShellTest extends TestCase
         $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getCommandLine')
-            ->willReturn( "ls -al 'arg1' 'arg2'");
+            ->willReturn("ls -al 'arg1' 'arg2'");
         $this->processFactoryMock->expects($this->once())
             ->method('create')
             ->with([
@@ -219,7 +219,7 @@ class ShellTest extends TestCase
             ->willReturn($magentoRoot);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with( "ls -al 'arg1' 'arg2'");
+            ->with("ls -al 'arg1' 'arg2'");
 
         $this->shell->execute($command, ['arg1', 'arg2']);
     }
