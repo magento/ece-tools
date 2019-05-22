@@ -1,0 +1,47 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+declare(strict_types=1);
+
+namespace Magento\MagentoCloud\Test\Functional\Acceptance;
+
+use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
+
+/**
+ * @group php72
+ */
+class ScdMatrixCest
+{
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @throws \Robo\Exception\TaskException
+     * @dataProvider scdOnDeployDataProvider
+     */
+    public function testScdOnDeploy(\CliTester $I, \Codeception\Example $data)
+    {
+        $I->assertTrue($I->cloneTemplate());
+        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->uploadToContainer($data['env_yaml'], '/.magento.env.yaml', Docker::BUILD_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
+    }
+
+    /**
+     * @return array
+     */
+    protected function scdOnDeployDataProvider(): array
+    {
+        return [
+            ['env_yaml' => 'files/scd/env_matrix_1.yaml'],
+            ['env_yaml' => 'files/scd/env_matrix_2.yaml'],
+            ['env_yaml' => 'files/scd/env_matrix_3.yaml'],
+        ];
+    }
+}
