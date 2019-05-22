@@ -6,7 +6,7 @@
 set -e
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
-test_set_list=$(grep -Rcl 'php70\|php71' src/Test/Functional/Acceptance | grep ':0$' | sed 's/..$//' | sort)
+test_set_list=$(grep -Rc 'php70\|php71' src/Test/Functional/Acceptance | grep ':0$' | sed 's/..$//' | sort)
 test_set_count=$(printf "$test_set_list" | wc -l)
 let "test_set_count++"
 
