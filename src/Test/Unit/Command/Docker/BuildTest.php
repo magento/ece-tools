@@ -17,7 +17,6 @@ use Magento\MagentoCloud\Docker\Compose\ProductionCompose;
 use Magento\MagentoCloud\Docker\ComposeManagerFactory;
 use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
-use Magento\MagentoCloud\Docker\DevBuilder;
 use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\Service\Version\Validator;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -25,6 +24,7 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console;
+use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
@@ -231,5 +231,38 @@ class BuildTest extends TestCase
 
         $this->assertFalse($this->command->isEnabled());
         $this->assertTrue($this->command->isEnabled());
+    }
+
+    /**
+     * @param string $optionName
+     *
+     * @expectedException \Symfony\Component\Console\Exception\InvalidOptionException
+     *
+     * @dataProvider executeWithEmptyOptionDataProvider
+     */
+    public function testExecuteWithEmptyOption(string $optionName)
+    {
+        $this->expectExceptionMessage(sprintf('The "--%s" option requires a value', $optionName));
+
+        $tester = new CommandTester($this->command);
+
+        $tester->execute(['--' . $optionName => null]);
+    }
+
+    /**
+     * @return array
+     */
+    public function executeWithEmptyOptionDataProvider(): array
+    {
+        return [
+            [Build::OPTION_PHP],
+            [Build::OPTION_DB],
+            [Build::OPTION_NGINX],
+            [Build::OPTION_REDIS],
+            [Build::OPTION_ES],
+            [Build::OPTION_RABBIT_MQ],
+            [Build::OPTION_NODE],
+            [Build::OPTION_MODE],
+        ];
     }
 }
