@@ -77,7 +77,7 @@ class ShellTest extends TestCase
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getCommandLine')
-            ->willReturn('ls -la');
+            ->willReturn("ls '-al'");
         $processMock->expects($this->once())
             ->method('execute');
         $processMock->expects($this->once())
@@ -86,7 +86,7 @@ class ShellTest extends TestCase
         $this->processFactoryMock->expects($this->once())
             ->method('create')
             ->with([
-                'commandline' => [$command, $args[0]],
+                'commandline' => "ls '-al'",
                 'cwd' => $magentoRoot,
                 'timeout' => null
             ])
@@ -96,7 +96,7 @@ class ShellTest extends TestCase
             ->willReturn($magentoRoot);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('ls -la');
+            ->with("ls '-al'");
         $this->sanitizerMock->expects($this->never())
             ->method('sanitize');
 
@@ -200,17 +200,16 @@ class ShellTest extends TestCase
     {
         $command = 'ls -al';
         $magentoRoot = '/magento';
-        $arguments = ['arg1', 'arg2'];
 
         /** @var ProcessInterface|MockObject $processMock */
         $processMock = $this->createMock(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getCommandLine')
-            ->willReturn('ls -al arg1 arg2');
+            ->willReturn( "ls -al 'arg1' 'arg2'");
         $this->processFactoryMock->expects($this->once())
             ->method('create')
             ->with([
-                'commandline' => array_merge([$command], $arguments),
+                'commandline' => "ls -al 'arg1' 'arg2'",
                 'cwd' => $magentoRoot,
                 'timeout' => 0
             ])
@@ -220,7 +219,7 @@ class ShellTest extends TestCase
             ->willReturn($magentoRoot);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('ls -al arg1 arg2');
+            ->with( "ls -al 'arg1' 'arg2'");
 
         $this->shell->execute($command, ['arg1', 'arg2']);
     }

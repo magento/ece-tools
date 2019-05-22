@@ -63,12 +63,16 @@ class Shell implements ShellInterface
      * ```php
      * $this->shell->execute('/bin/bash -c "set -o pipefail; firstCommand | secondCommand"');
      * ```
+     *
+     *  `commandline` should be always a string as symfony/process package v2.x doesn't support array-type `commandLine`
      */
     public function execute(string $command, array $args = []): ProcessInterface
     {
         try {
+            $args = array_map('escapeshellarg', array_filter($args));
+
             if ($args) {
-                $command = array_merge([$command], $args);
+                $command .= ' ' . implode(' ', $args);
             }
 
             $process = $this->processFactory->create([
