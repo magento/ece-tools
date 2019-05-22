@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 use Magento\MagentoCloud\Util\ArrayManager;
 
 /**
- * @group php72
+ * This test runs on the latest version of PHP
  *
  * 1. Test successful deploy
  * 2. Test content presence
