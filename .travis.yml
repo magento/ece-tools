@@ -46,6 +46,9 @@ matrix:
     - php: '7.1'
       env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
 
+    - php: 7.2
+      env: TEST_SUITE=functional
+
 install: composer update -n --no-suggest
 
 before_script:
