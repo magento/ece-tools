@@ -3,11 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Process\DbDump;
+declare(strict_types=1);
 
+namespace Magento\MagentoCloud\Test\Unit\DB;
+
+use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\DB\DumpInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Process\DbDump\DbDump;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -17,14 +19,14 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class DbDumpTest extends TestCase
+class DumpGeneratorTest extends TestCase
 {
     use \phpmock\phpunit\PHPMock;
 
     /**
-     * @var DbDump
+     * @var DumpGenerator
      */
-    private $process;
+    private $dumpGenerator;
 
     /**
      * @var DumpInterface|MockObject
@@ -77,14 +79,14 @@ class DbDumpTest extends TestCase
         $time = 123456;
         $this->dumpFilePath = $this->tmpDir . '/dump-' . $time . '.sql.gz';
 
-        $timeMock = $this->getFunctionMock('Magento\MagentoCloud\Process\DbDump', 'time');
+        $timeMock = $this->getFunctionMock('Magento\MagentoCloud\DB', 'time');
         $timeMock->expects($this->once())
             ->willReturn($time);
 
-        self::defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'fopen');
-        self::defineFunctionMock('Magento\MagentoCloud\Process\DbDump', 'flock');
+        self::defineFunctionMock('Magento\MagentoCloud\DB', 'fopen');
+        self::defineFunctionMock('Magento\MagentoCloud\DB', 'flock');
 
-        $this->process = new DbDump(
+        $this->dumpGenerator = new DumpGenerator(
             $this->dbDumpMock,
             $this->loggerMock,
             $this->shellMock,
@@ -100,20 +102,31 @@ class DbDumpTest extends TestCase
         parent::tearDown();
     }
 
-    private function getCommand()
+    /**
+     * @param bool $removeDefiners
+     * @return string
+     */
+    private function getCommand(bool $removeDefiners = false): string
     {
         $command = 'mysqldump -h localhost';
         $this->dbDumpMock->expects($this->once())
             ->method('getCommand')
             ->willReturn($command);
 
-        return 'bash -c "set -o pipefail; timeout 3600 ' . $command . ' | gzip > ' . $this->dumpFilePath . '"';
+        $fullCommand = 'bash -c "set -o pipefail; timeout 3600 ' . $command;
+        if ($removeDefiners) {
+            $fullCommand .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
+        }
+
+        return $fullCommand . ' | gzip > ' . $this->dumpFilePath . '"';
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Process\ProcessException
+     * @param bool $removeDefiners
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @dataProvider getCreateDataProvider
      */
-    public function testExecute()
+    public function testCreate(bool $removeDefiners)
     {
         $this->loggerMock->expects($this->exactly(3))
             ->method('info')
@@ -123,7 +136,7 @@ class DbDumpTest extends TestCase
                 ['Finished DB dump, it can be found here: ' . $this->dumpFilePath]
             );
 
-        $command = $this->getCommand();
+        $command = $this->getCommand($removeDefiners);
 
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
@@ -134,13 +147,24 @@ class DbDumpTest extends TestCase
             ->with($command)
             ->willReturn($processMock);
 
-        $this->process->execute();
+        $this->dumpGenerator->create($removeDefiners);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCreateDataProvider(): array
+    {
+        return [
+            'without definers' => [true],
+            'with definers' => [false],
+        ];
     }
 
     /**
      * @throws \Magento\MagentoCloud\Process\ProcessException
      */
-    public function testExecuteWithException()
+    public function testCreateWithException()
     {
         $errorMessage = 'Some error';
         $this->loggerMock->expects($this->exactly(2))
@@ -154,20 +178,18 @@ class DbDumpTest extends TestCase
             ->with($errorMessage);
 
         $this->getCommand();
+
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new \Exception($errorMessage));
 
-        $this->process->execute();
+        $this->dumpGenerator->create(false);
     }
 
-    /**
-     * @throws \Magento\MagentoCloud\Process\ProcessException
-     */
     public function testFailedCreationLockFile()
     {
         // Mock fopen() function which is used for creation lock file
-        $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\Process\DbDump', 'fopen');
+        $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\DB', 'fopen');
         $fopenMock->expects($this->once())
             ->willReturn(false);
 
@@ -182,16 +204,13 @@ class DbDumpTest extends TestCase
         $this->shellMock->expects($this->never())
             ->method('execute');
 
-        $this->process->execute();
+        $this->dumpGenerator->create(false);
     }
 
-    /**
-     * @throws \Magento\MagentoCloud\Process\ProcessException
-     */
     public function testLockedFile()
     {
         // Mock fopen() function which is used for creation lock file
-        $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\Process\DbDump', 'flock');
+        $fopenMock = $this->getFunctionMock('Magento\MagentoCloud\DB', 'flock');
         $fopenMock->expects($this->once())
             ->willReturn(false);
 
@@ -205,13 +224,13 @@ class DbDumpTest extends TestCase
         $this->shellMock->expects($this->never())
             ->method('execute');
 
-        $this->process->execute();
+        $this->dumpGenerator->create(false);
     }
 
     /**
      * @throws \Magento\MagentoCloud\Process\ProcessException
      */
-    public function testExecuteWithErrors()
+    public function testCreateWithErrors()
     {
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -241,6 +260,6 @@ class DbDumpTest extends TestCase
                 ['rm ' . $this->dumpFilePath, [], $processMock2],
             ]);
 
-        $this->process->execute();
+        $this->dumpGenerator->create(false);
     }
 }
