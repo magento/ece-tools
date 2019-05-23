@@ -71,13 +71,14 @@ class ShellTest extends TestCase
     public function testExecute($processOutput)
     {
         $command = 'ls';
-        $args = ['-al'];
+        $args = ['-al', '0'];
         $magentoRoot = '/magento';
+        $commandWithArgs = "ls '-al' '0'";
 
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock->expects($this->once())
             ->method('getCommandLine')
-            ->willReturn("ls '-al'");
+            ->willReturn($commandWithArgs);
         $processMock->expects($this->once())
             ->method('execute');
         $processMock->expects($this->once())
@@ -86,7 +87,7 @@ class ShellTest extends TestCase
         $this->processFactoryMock->expects($this->once())
             ->method('create')
             ->with([
-                'commandline' => "ls '-al'",
+                'commandline' => $commandWithArgs,
                 'cwd' => $magentoRoot,
                 'timeout' => null
             ])
@@ -96,7 +97,7 @@ class ShellTest extends TestCase
             ->willReturn($magentoRoot);
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with("ls '-al'");
+            ->with($commandWithArgs);
         $this->sanitizerMock->expects($this->never())
             ->method('sanitize');
 

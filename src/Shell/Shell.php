@@ -69,10 +69,8 @@ class Shell implements ShellInterface
     public function execute(string $command, array $args = []): ProcessInterface
     {
         try {
-            $args = array_map('escapeshellarg', array_filter($args));
-
             if ($args) {
-                $command .= ' ' . implode(' ', $args);
+                $command .= ' ' . implode(' ', array_map('escapeshellarg', $args));
             }
 
             $process = $this->processFactory->create([
