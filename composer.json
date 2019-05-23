@@ -2,7 +2,7 @@
   "name": "magento/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
   "type": "magento2-component",
-  "version": "2002.0.18",
+  "version": "2002.0.19",
   "license": "OSL-3.0",
   "require": {
     "php": "^7.0",
