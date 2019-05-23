@@ -96,9 +96,9 @@ class WriterTest extends TestCase
      * @param array $config
      * @param array $currentConfig
      * @param string $updatedConfig
-     * @dataProvider updateRecursiveDataProvider
+     * @dataProvider updateDataProvider
      */
-    public function testUpdateRecursive(array $config, array $currentConfig, $updatedConfig)
+    public function testupdate(array $config, array $currentConfig, $updatedConfig)
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
@@ -111,13 +111,13 @@ class WriterTest extends TestCase
             ->method('filePutContents')
             ->with($filePath, $updatedConfig);
 
-        $this->writer->updateRecursive($config);
+        $this->writer->update($config);
     }
 
     /**
      * @return array
      */
-    public function updateRecursiveDataProvider(): array
+    public function updateDataProvider(): array
     {
         return [
             [
@@ -151,68 +151,6 @@ class WriterTest extends TestCase
                 "<?php\nreturn array (\n  'key1' => \n  array (\n    'key11' => 'value1',\n" .
                 "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
             ],
-        ];
-    }
-
-    /**
-     * @param array $config
-     * @param array $currentConfig
-     * @param string $updatedConfig
-     * @dataProvider getUpdateDataProvider
-     */
-    public function testUpdate(array $config, array $currentConfig, $updatedConfig)
-    {
-        $filePath = '/path/to/file';
-        $this->fileListMock->expects($this->once())
-            ->method('getConfig')
-            ->willReturn($filePath);
-        $this->readerMock->expects($this->once())
-            ->method('read')
-            ->willReturn($currentConfig);
-        $this->fileMock->expects($this->once())
-            ->method('filePutContents')
-            ->with($filePath, $updatedConfig);
-
-        $this->writer->update($config);
-    }
-
-    /**
-     * @return array
-     */
-    public function getUpdateDataProvider()
-    {
-        return [
-            [
-                [],
-                [],
-                "<?php\nreturn array (\n);",
-            ],
-            [
-                ['key' => 'value'],
-                ['key1' => 'value1'],
-                "<?php\nreturn array (\n  'key1' => 'value1',\n  'key' => 'value',\n);",
-            ],
-            [
-                ['key1' => 'value1', 'key2' => 'value2'],
-                ['key1' => 'value0', 'key3' => 'value3'],
-                "<?php\nreturn array (\n  'key1' => 'value1',\n  'key3' => 'value3',\n  'key2' => 'value2',\n);",
-            ],
-            [
-                [
-                    'key1' => [
-                        'key12' => 'value2new',
-                        'key13' => 'value3new',
-                    ]
-                ],
-                [
-                    'key1' => [
-                        'key11' => 'value1',
-                        'key12' => 'value2',
-                    ]
-                ],
-                "<?php\nreturn array (\n  'key1' => \n  array (\n" .
-                "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
-            ]
         ];
     }
 }

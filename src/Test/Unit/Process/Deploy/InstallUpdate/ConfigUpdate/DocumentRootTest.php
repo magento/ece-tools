@@ -54,7 +54,7 @@ class DocumentRootTest extends TestCase
             ->method('info')
             ->with('The value of the property \'directories/document_root_is_pub\' set as \'true\'');
         $this->configWriterMock->expects($this->once())
-            ->method('updateRecursive')
+            ->method('update')
             ->with(['directories' => ['document_root_is_pub' => true]]);
 
         $this->process->execute();
