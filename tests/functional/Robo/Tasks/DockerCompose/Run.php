@@ -10,14 +10,13 @@ namespace Magento\MagentoCloud\Test\Functional\Robo\Tasks\DockerCompose;
 use Robo\Common\CommandReceiver;
 use Robo\Common\ExecOneCommand;
 use Robo\Contract\CommandInterface;
-use Robo\Contract\TaskInterface;
 use Robo\Result;
 use Robo\Task\BaseTask;
 
 /**
  * Run docker-compose command
  */
-class Run extends BaseTask implements CommandInterface, TaskInterface
+class Run extends BaseTask implements CommandInterface
 {
     use ExecOneCommand;
     use CommandReceiver;

@@ -47,15 +47,6 @@ interface ConnectionInterface
     public function selectOne(string $query, array $bindings = []): array;
 
     /**
-     * Count results according to query.
-     *
-     * @param string $query
-     * @param array $bindings
-     * @return int
-     */
-    public function count(string $query, array $bindings = []): int;
-
-    /**
      * List existing tables.
      *
      * @return array
@@ -84,4 +75,12 @@ interface ConnectionInterface
      * @return void
      */
     public function close();
+
+    /**
+     * Generates table name based on additional settings like `table_prefix`
+     *
+     * @param string $name
+     * @return string
+     */
+    public function getTableName(string $name): string;
 }

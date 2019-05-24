@@ -12,6 +12,7 @@ use Composer\Repository\WritableRepositoryInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Patch\Applier;
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Config\GlobalSection;
@@ -220,14 +221,17 @@ class ApplierTest extends TestCase
 
     /**
      * @param string $command
-     * @return array
+     * @return ProcessInterface
      * @throws ShellException when the command isn't a reverse
      */
-    public function shellMockReverseCallback(string $command): array
+    public function shellMockReverseCallback(string $command): ProcessInterface
     {
         if (strpos($command, '--reverse') !== false && strpos($command, '--check') !== false) {
             // Command was the reverse check, it's all good.
-            return [];
+            /** @var ProcessInterface|MockObject $result */
+            $result = $this->getMockForAbstractClass(ProcessInterface::class);
+
+            return $result;
         }
 
         // Not a reverse, better throw an exception.

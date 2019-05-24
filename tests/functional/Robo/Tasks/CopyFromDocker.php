@@ -9,14 +9,13 @@ namespace Magento\MagentoCloud\Test\Functional\Robo\Tasks;
 
 use Robo\Common\ExecOneCommand;
 use Robo\Contract\CommandInterface;
-use Robo\Contract\TaskInterface;
 use Robo\Result;
 use Robo\Task\BaseTask;
 
 /**
  * Copy files from Docker environment
  */
-class CopyFromDocker extends BaseTask implements CommandInterface, TaskInterface
+class CopyFromDocker extends BaseTask implements CommandInterface
 {
     use ExecOneCommand;
 
@@ -42,15 +41,37 @@ class CopyFromDocker extends BaseTask implements CommandInterface, TaskInterface
     protected $destination;
 
     /**
-     * @param string $source
-     * @param string $destination
      * @param string $container
      */
-    public function __construct(string $source, string $destination, string $container)
+    public function __construct(string $container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * Sets the source path on the Docker
+     *
+     * @param string $source
+     * @return self
+     */
+    public function source(string $source): self
+    {
         $this->source = $source;
+
+        return $this;
+    }
+
+    /**
+     * Sets the destination path on the local machine
+     *
+     * @param string $destination
+     * @return self
+     */
+    public function destination(string $destination): self
+    {
         $this->destination = $destination;
+
+        return $this;
     }
 
     /**
@@ -71,6 +92,14 @@ class CopyFromDocker extends BaseTask implements CommandInterface, TaskInterface
      */
     public function run(): Result
     {
+        if (!$this->destination) {
+            throw new \RuntimeException('The destination path is empty');
+        }
+
+        if (!$this->source) {
+            throw new \RuntimeException('The source path is empty');
+        }
+
         $dir = pathinfo($this->destination, PATHINFO_DIRNAME);
 
         if (!is_dir($dir)) {

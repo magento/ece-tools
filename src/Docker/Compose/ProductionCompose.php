@@ -175,7 +175,7 @@ class ProductionCompose implements ComposeManagerInterface
             'image' => 'alpine',
             'environment' => $this->converter->convert($this->getVariables()),
             'env_file' => [
-                './docker/config.env',
+                './.docker/config.env',
             ],
         ];
 
@@ -299,10 +299,10 @@ class ProductionCompose implements ComposeManagerInterface
             'magento-vendor:' . self::DIR_MAGENTO . '/vendor' . $flag,
             'magento-generated:' . self::DIR_MAGENTO . '/generated' . $flag,
             'magento-setup:' . self::DIR_MAGENTO . '/setup' . $flag,
-            'magento-var:' . self::DIR_MAGENTO . '/var:rw',
-            'magento-etc:' . self::DIR_MAGENTO . '/app/etc:rw',
-            'magento-static:' . self::DIR_MAGENTO . '/pub/static:rw',
-            'magento-media:' . self::DIR_MAGENTO . '/pub/media:rw',
+            'magento-var:' . self::DIR_MAGENTO . '/var:delegated',
+            'magento-etc:' . self::DIR_MAGENTO . '/app/etc:delegated',
+            'magento-static:' . self::DIR_MAGENTO . '/pub/static:delegated',
+            'magento-media:' . self::DIR_MAGENTO . '/pub/media:delegated',
         ];
     }
 
@@ -316,7 +316,7 @@ class ProductionCompose implements ComposeManagerInterface
             : '~/.composer/cache';
 
         return [
-            $composeCacheDirectory . ':/root/.composer/cache',
+            $composeCacheDirectory . ':/root/.composer/cache:delegated',
         ];
     }
 

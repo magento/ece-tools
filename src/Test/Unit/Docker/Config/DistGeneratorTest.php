@@ -67,9 +67,9 @@ class DistGeneratorTest extends TestCase
      */
     public function testGenerate()
     {
-        $rootDir = '/path/to';
+        $rootDir = '/path/to/docker';
         $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
+            ->method('getDockerRoot')
             ->willReturn($rootDir);
         $this->relationshipMock->expects($this->once())
             ->method('get')
@@ -114,7 +114,7 @@ class DistGeneratorTest extends TestCase
             ]);
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
-            ->with($rootDir . '/docker/config.php.dist', $this->getConfigForUpdate());
+            ->with($rootDir . '/config.php.dist', $this->getConfigForUpdate());
 
         $this->distGenerator->generate();
     }

@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronKill;
-use Magento\MagentoCloud\Command\DbDump;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\Database\ConfigInterface;
@@ -23,7 +22,6 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
-use Magento\MagentoCloud\Process\DbDump as DbDumpProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Magento\MagentoCloud\Process\ProcessComposite;
@@ -364,15 +362,6 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->get(DeployProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
-        $this->container->when(DbDump::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DbDumpProcess\DbDump::class),
                     ],
                 ]);
             });

@@ -9,14 +9,13 @@ namespace Magento\MagentoCloud\Test\Functional\Robo\Tasks;
 
 use Robo\Common\ExecOneCommand;
 use Robo\Contract\CommandInterface;
-use Robo\Contract\TaskInterface;
 use Robo\Result;
 use Robo\Task\BaseTask;
 
 /**
  * Down Docker environment
  */
-class EnvDown extends BaseTask implements CommandInterface, TaskInterface
+class EnvDown extends BaseTask implements CommandInterface
 {
     use ExecOneCommand;
 

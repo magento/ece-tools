@@ -157,13 +157,16 @@ class OptionTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('select')
             ->with(
-                'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' ' .
-                'UNION SELECT interface_locale FROM admin_user'
+                "SELECT `value` FROM `core_config_data` WHERE `path`='general/locale/code' " .
+                "UNION SELECT `interface_locale` FROM `admin_user`"
             )
             ->willReturn([
                 ['value' => 'fr_FR'],
                 ['value' => 'de_DE'],
             ]);
+        $this->connectionMock->expects($this->exactly(2))
+            ->method('getTableName')
+            ->willReturnArgument(0);
         $this->environmentMock->expects($this->exactly(2))
             ->method('getAdminLocale')
             ->willReturn('en_US');
@@ -183,13 +186,16 @@ class OptionTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('select')
             ->with(
-                'SELECT value FROM core_config_data WHERE path=\'general/locale/code\' ' .
-                'UNION SELECT interface_locale FROM admin_user'
+                "SELECT `value` FROM `core_config_data` WHERE `path`='general/locale/code' " .
+                "UNION SELECT `interface_locale` FROM `admin_user`"
             )
             ->willReturn([
                 ['value' => 'fr_FR'],
                 ['value' => 'de_DE'],
             ]);
+        $this->connectionMock->expects($this->exactly(2))
+            ->method('getTableName')
+            ->willReturnArgument(0);
         $this->environmentMock->expects($this->exactly(1))
             ->method('getAdminLocale')
             ->willReturn('fr_FR');
