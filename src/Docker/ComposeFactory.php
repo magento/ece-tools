@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Docker\Compose;
  *
  * @codeCoverageIgnore
  */
-class ComposeManagerFactory
+class ComposeFactory
 {
     const COMPOSE_DEVELOPER = 'developer';
     const COMPOSE_PRODUCTION = 'production';
@@ -46,10 +46,10 @@ class ComposeManagerFactory
 
     /**
      * @param string $strategy
-     * @return ComposeManagerInterface
+     * @return ComposeInterface
      * @throws ConfigurationMismatchException
      */
-    public function create(string $strategy): ComposeManagerInterface
+    public function create(string $strategy): ComposeInterface
     {
         if (!array_key_exists($strategy, self::$map)) {
             throw new ConfigurationMismatchException(

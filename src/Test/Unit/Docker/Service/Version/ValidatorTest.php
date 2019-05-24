@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Docker\Service\Version;
 
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
-use Magento\MagentoCloud\Docker\Service\Version\Validator;
+use Magento\MagentoCloud\Service\Validator;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

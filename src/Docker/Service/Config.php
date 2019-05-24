@@ -11,34 +11,25 @@ use Magento\MagentoCloud\Docker\Config\Reader;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Illuminate\Contracts\Config\Repository;
+use Magento\MagentoCloud\Service\Service;
 
 /**
  * Retrieve Service versions/configs from Cloud configuration.
  */
 class Config
 {
-    const KEY_PHP = 'php';
-    const KEY_DB = 'mysql';
-    const KEY_NGINX = 'nginx';
-    const KEY_REDIS = 'redis';
-    const KEY_ELASTICSEARCH = 'elasticsearch';
-    const KEY_RABBITMQ = 'rabbitmq';
-    const KEY_NODE = 'node';
-    const KEY_CRON = 'crons';
-    const KEY_VARNISH = 'varnish';
-
     /**
      * List of services which can be configured in Cloud docker
      *
      * @var array
      */
-    private $configurableServices = [
-        self::KEY_PHP,
-        self::KEY_DB,
-        self::KEY_NGINX,
-        self::KEY_REDIS,
-        self::KEY_ELASTICSEARCH,
-        self::KEY_RABBITMQ,
+    private static $configurableServices = [
+        Service::NAME_PHP => 'php',
+        Service::NAME_DB => 'mysql',
+        Service::NAME_NGINX => 'nginx',
+        Service::NAME_REDIS => 'redis',
+        Service::NAME_ELASTICSEARCH => 'elasticsearch',
+        Service::NAME_RABBITMQ => 'rabbitmq',
     ];
 
     /**
@@ -74,12 +65,14 @@ class Config
     public function getAllServiceVersions(Repository $customVersions): array
     {
         $configuredVersions = [];
-        foreach ($this->configurableServices as $serviceName) {
+
+        foreach (self::$configurableServices as $serviceName) {
             $version = $customVersions->get($serviceName) ?: $this->getServiceVersion($serviceName);
             if ($version) {
                 $configuredVersions[$serviceName] = $version;
             }
         }
+
         return $configuredVersions;
     }
 
@@ -93,10 +86,18 @@ class Config
      */
     public function getServiceVersion(string $serviceName)
     {
+        if (!array_key_exists($serviceName, self::$configurableServices)) {
+            throw new ConfigurationMismatchException(sprintf(
+                'Service %s is not supported',
+                $serviceName
+            ));
+        }
+
         try {
-            $version = $serviceName == self::KEY_PHP
+            $version = $serviceName === Service::NAME_PHP
                 ? $this->getPhpVersion()
                 : $this->reader->read()['services'][$serviceName]['version'] ?? null;
+
             return $version;
         } catch (FileSystemException $exception) {
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
@@ -118,7 +119,7 @@ class Config
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        if ($type !== self::KEY_PHP) {
+        if ($type !== Service::NAME_PHP) {
             throw new ConfigurationMismatchException(sprintf(
                 'Type "%s" is not supported',
                 $type
@@ -140,7 +141,7 @@ class Config
     public function getCron(): array
     {
         try {
-            return $this->reader->read()[self::KEY_CRON] ?? [];
+            return $this->reader->read()['crons'] ?? [];
         } catch (FileSystemException $exception) {
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
         }
