@@ -162,7 +162,9 @@
     },
     "Multi-thread SCD": {
       "2.2.0 - 2.2.3": "MAGECLOUD_3611_multi_thread_scd__2.2.0.patch",
-      "2.2.4 - 2.2.8": "MAGECLOUD_3611_multi_thread_scd__2.2.4.patch"
+      "2.2.4 - 2.2.9": "MAGECLOUD_3611_multi_thread_scd__2.2.4.patch",
+      "2.3.0 - 2.3.1": "MAGECLOUD_3611_multi_thread_scd__2.3.0.patch",
+      "2.3.2": "MAGECLOUD_3611_multi_thread_scd__2.3.2.patch"
     }
   },
   "monolog/monolog": {
