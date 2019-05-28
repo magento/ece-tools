@@ -1,4 +1,4 @@
-diff --git a/vendor/magento/module-deploy/Process/Queue.php b/vendor/magento/module-deploy/Process/Queue.php
+diff -Naur a/vendor/magento/module-deploy/Process/Queue.php b/vendor/magento/module-deploy/Process/Queue.php
 index e5e10c8f54a..85ef6514432 100644
 --- a/vendor/magento/module-deploy/Process/Queue.php
 +++ b/vendor/magento/module-deploy/Process/Queue.php

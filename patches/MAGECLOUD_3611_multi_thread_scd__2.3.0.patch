@@ -1,7 +1,7 @@
-diff --git a/app/code/Magento/Deploy/Process/Queue.php b/app/code/Magento/Deploy/Process/Queue.php
+diff -Naur a/vendor/magento/module-deploy/Process/Queue.php b/vendor/magento/module-deploy/Process/Queue.php
 index e5e10c8f54a..85ef6514432 100644
---- a/app/code/Magento/Deploy/Process/Queue.php
-+++ b/app/code/Magento/Deploy/Process/Queue.php
+--- a/vendor/magento/module-deploy/Process/Queue.php
++++ b/vendor/magento/module-deploy/Process/Queue.php
 @@ -291,12 +291,30 @@ class Queue
      {
          if ($this->isCanBeParalleled()) {
