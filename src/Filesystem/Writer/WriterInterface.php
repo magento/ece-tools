@@ -22,20 +22,11 @@ interface WriterInterface
     public function create(array $config);
 
     /**
-     * Updates existence configuration.
-     *
-     * @param array $config
-     * @return void
-     * @throws FileSystemException
-     */
-    public function update(array $config);
-
-    /**
      * Recursively updates existence configuration.
      *
      * @param array $config
      * @return void
      * @throws FileSystemException
      */
-    public function updateRecursive(array $config);
+    public function update(array $config);
 }
