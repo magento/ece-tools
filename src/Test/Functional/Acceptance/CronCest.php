@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 
 /**
- * @group php72
+ * This test runs on the latest version of PHP
  */
 class CronCest
 {
