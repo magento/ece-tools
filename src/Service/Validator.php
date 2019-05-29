@@ -120,7 +120,6 @@ class Validator
     {
         $magentoVersion = $this->magentoVersion->getVersion();
 
-
         if (!isset($this->getSupportedVersions()[$serviceName])) {
             return sprintf(
                 'Service "%s" is not supported for Magento "%s"',
@@ -131,7 +130,7 @@ class Validator
         $constraint = $this->getSupportedVersions()[$serviceName];
         if ($version !== 'latest' && !Semver::satisfies($version, $this->getSupportedVersions()[$serviceName])) {
             return sprintf(
-                'Magento %s does not support version "%s" for service "%s".'
+                'Magento %s does not support version "%s" for service "%s". '
                     . 'Service version should satisfy "%s" constraint.',
                 $magentoVersion,
                 $version,

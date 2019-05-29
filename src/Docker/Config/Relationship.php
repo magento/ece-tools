@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Docker\Config;
 
 use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
+use Magento\MagentoCloud\Service\Service;
 
 /**
  * Generates relationship data for current configuration
@@ -90,7 +91,7 @@ class Relationship
     private function convertServiceName(string $serviceName): string
     {
         $map = [
-            'database' => Config::KEY_DB
+            'database' => Service::NAME_DB
         ];
 
         return $map[$serviceName] ?? $serviceName;

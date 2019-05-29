@@ -65,7 +65,7 @@ class Build extends Command
     /**
      * @var Validator
      */
-    private $versionValidator;
+    private $validator;
 
     /**
      * @var Writer
@@ -92,7 +92,7 @@ class Build extends Command
         $this->environment = $environment;
         $this->configFactory = $configFactory;
         $this->serviceConfig = $serviceConfig;
-        $this->versionValidator = $versionValidator;
+        $this->validator = $versionValidator;
         $this->writer = $writer;
 
         parent::__construct();
@@ -185,7 +185,7 @@ class Build extends Command
         });
 
         $versionList = $this->serviceConfig->getAllServiceVersions($config);
-        $errorList = $this->versionValidator->validateVersions($versionList);
+        $errorList = $this->validator->validateVersions($versionList);
 
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion(

@@ -124,7 +124,7 @@ class ProductionCompose implements ComposeInterface
             $services['node'] = $this->serviceFactory->create(
                 ServiceFactory::SERVICE_NODE,
                 $nodeVersion,
-                ['volumes' => [$this->getMagentoVolumes(false)]]
+                ['volumes' => $this->getMagentoVolumes(false)]
             );
         }
 
@@ -181,12 +181,7 @@ class ProductionCompose implements ComposeInterface
             ],
         ];
 
-        $volumeConfig = [
-            'driver_opts' => [
-                'type' => 'tmpfs',
-                'device' => 'tmpfs'
-            ]
-        ];
+        $volumeConfig = [];
 
         return [
             'version' => '2',

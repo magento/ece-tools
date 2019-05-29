@@ -5,6 +5,9 @@
  */
 namespace Magento\MagentoCloud\Service;
 
+/**
+ * Generic service definition.
+ */
 class Service
 {
     const NAME_PHP = 'php';

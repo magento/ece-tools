@@ -13,6 +13,9 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Yaml\Yaml;
 
+/**
+ * Writes Docker configuration.
+ */
 class Writer
 {
     /**
@@ -36,6 +39,8 @@ class Writer
     }
 
     /**
+     * Write configuration to file.
+     *
      * @param ComposeInterface $compose
      * @param Repository $config
      * @throws ConfigurationMismatchException
@@ -47,7 +52,6 @@ class Writer
             $compose->getPath(),
             Yaml::dump($compose->build($config), 4, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)
         );
-
         $this->distGenerator->generate();
     }
 }

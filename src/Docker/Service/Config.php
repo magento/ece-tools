@@ -30,6 +30,7 @@ class Config
         Service::NAME_REDIS => 'redis',
         Service::NAME_ELASTICSEARCH => 'elasticsearch',
         Service::NAME_RABBITMQ => 'rabbitmq',
+        Service::NAME_NODE => 'node'
     ];
 
     /**
@@ -86,13 +87,6 @@ class Config
      */
     public function getServiceVersion(string $serviceName)
     {
-        if (!array_key_exists($serviceName, self::$configurableServices)) {
-            throw new ConfigurationMismatchException(sprintf(
-                'Service %s is not supported',
-                $serviceName
-            ));
-        }
-
         try {
             $version = $serviceName === Service::NAME_PHP
                 ? $this->getPhpVersion()
