@@ -5,7 +5,7 @@
   "version": "2002.0.19",
   "license": "OSL-3.0",
   "require": {
-    "php": "^7.0",
+    "php": "^7.1",
     "ext-PDO": "*",
     "ext-json": "*",
     "composer/composer": "@stable",
@@ -19,7 +19,7 @@
     "psr/container": "^1.0",
     "psr/log": "^1.0",
     "symfony/console": "^2.6||^4.0",
-    "symfony/yaml": "^3.3",
+    "symfony/yaml": "^4.0",
     "symfony/process": "~2.1||~4.1.0",
     "twig/twig": "^1.0||^2.0"
   },
