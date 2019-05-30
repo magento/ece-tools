@@ -128,7 +128,6 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
 
         /** @var Result $result */
         $result = $this->taskBash(self::BUILD_CONTAINER)
-            ->dir($this->_getConfig('system_magento_dir'))
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->exec($gitTask)
