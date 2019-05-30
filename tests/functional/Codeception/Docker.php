@@ -121,7 +121,6 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     public function cloneTemplate(string $version = null): bool
     {
         $gitTask = $this->taskGitStack()
-            ->dir($this->_getConfig('system_magento_dir'))
             ->exec('git init')
             ->exec(sprintf('git remote add origin %s', $this->_getConfig('repo_url')))
             ->exec('git fetch')
@@ -129,6 +128,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
 
         /** @var Result $result */
         $result = $this->taskBash(self::BUILD_CONTAINER)
+            ->dir($this->_getConfig('system_magento_dir'))
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->exec($gitTask)
