@@ -151,13 +151,27 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->workingDir($this->_getConfig('system_magento_dir'))
             ->noInteraction()
             ->option('--no-update');
+        /**
+         * This is temporary fix for MAGECLOUD-3714
+         */
+        $composerRequireCarbonTask = $this->taskComposerRequire('composer')
+            ->dependency('nesbot/carbon', '<1.38||^2.0')
+            ->workingDir($this->_getConfig('system_magento_dir'))
+            ->noInteraction()
+            ->option('--no-update');
         $composerUpdateTask = $this->taskComposerUpdate('composer');
+
+        $tasks = [
+            $composerRequireTask->getCommand(),
+            $composerRequireCarbonTask->getCommand(),
+            $composerUpdateTask->getCommand()
+        ];
 
         /** @var Result $result */
         $result = $this->taskBash(self::BUILD_CONTAINER)
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
-            ->exec($composerRequireTask->getCommand() . ' && ' . $composerUpdateTask->getCommand())
+            ->exec(implode(' && ', $tasks))
             ->run();
 
         $this->output = $result->getMessage();
