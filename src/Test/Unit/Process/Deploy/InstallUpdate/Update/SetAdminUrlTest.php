@@ -66,7 +66,7 @@ class SetAdminUrlTest extends TestCase
             ->method('getAdminUrl')
             ->willReturn($frontName);
         $this->configWriterMock->expects($this->once())
-            ->method('updateRecursive')
+            ->method('update')
             ->with(['backend' => ['frontName' => $frontName]]);
 
         $this->setAdminUrl->execute();
@@ -84,7 +84,7 @@ class SetAdminUrlTest extends TestCase
             ->method('info')
             ->with('Not updating env.php backend front name. (ADMIN_URL not set)');
         $this->configWriterMock->expects($this->never())
-            ->method('updateRecursive');
+            ->method('update');
 
         $this->setAdminUrl->execute();
     }

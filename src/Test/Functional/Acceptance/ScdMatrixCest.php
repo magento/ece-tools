@@ -12,45 +12,36 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class UpgradeCest
+class ScdMatrixCest
 {
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
-     * @dataProvider testProvider
+     * @dataProvider scdOnDeployDataProvider
      */
-    public function test(\CliTester $I, \Codeception\Example $data)
+    public function testScdOnDeploy(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->cloneTemplate($data['from']));
+        $I->assertTrue($I->cloneTemplate());
         $I->assertTrue($I->composerInstall());
-        $this->assert($I);
-        $I->assertTrue($I->cleanDirectories(['/vendor/*', '/app/etc/*', '/setup/*']));
-        $I->assertTrue($I->composerRequireMagentoCloud($data['to']));
-        $this->assert($I);
-    }
-
-    /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    protected function assert(\CliTester $I)
-    {
+        $I->assertTrue($I->uploadToContainer($data['env_yaml'], '/.magento.env.yaml', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
-
         $I->amOnPage('/');
         $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
     }
 
     /**
      * @return array
      */
-    protected function testProvider()
+    protected function scdOnDeployDataProvider(): array
     {
         return [
-            ['from' => '2.3.0', 'to' => '2.3.*']
+            ['env_yaml' => 'files/scd/env_matrix_1.yaml'],
+            ['env_yaml' => 'files/scd/env_matrix_2.yaml'],
+            ['env_yaml' => 'files/scd/env_matrix_3.yaml'],
         ];
     }
 }

@@ -3,18 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\DbDump;
+declare(strict_types=1);
 
-use Magento\MagentoCloud\DB\DumpInterface;
+namespace Magento\MagentoCloud\DB;
+
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Process creates database dump and archives it
+ * Creates database dump and archives it
  */
-class DbDump implements ProcessInterface
+class DumpGenerator
 {
     /**
      * Template for dump file name where %s should be changed to timestamp for uniqueness
@@ -31,13 +31,6 @@ class DbDump implements ProcessInterface
      * Timeout for mysqldump command in seconds
      */
     const DUMP_TIMEOUT = 3600;
-
-    /**
-     * Generate command for DB dump
-     *
-     * @var DumpInterface
-     */
-    private $dbDump;
 
     /**
      * Used for execution shell operations
@@ -57,18 +50,23 @@ class DbDump implements ProcessInterface
     private $directoryList;
 
     /**
-     * @param DumpInterface $dbDump
+     * @var DumpInterface
+     */
+    private $dump;
+
+    /**
+     * @param DumpInterface $dump
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        DumpInterface $dbDump,
+        DumpInterface $dump,
         LoggerInterface $logger,
         ShellInterface $shell,
         DirectoryList $directoryList
     ) {
-        $this->dbDump = $dbDump;
+        $this->dump = $dump;
         $this->logger = $logger;
         $this->shell = $shell;
         $this->directoryList = $directoryList;
@@ -82,9 +80,11 @@ class DbDump implements ProcessInterface
      * as well as serves a log with the name of created dump file.
      * If any error happened during dumping, dump file is removed.
      *
-     * {@inheritdoc}
+     * @param bool $removeDefiners
+     * @return void
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
-    public function execute()
+    public function create(bool $removeDefiners)
     {
         $dumpFileName = sprintf(self::DUMP_FILE_NAME_TEMPLATE, time());
 
@@ -109,7 +109,12 @@ class DbDump implements ProcessInterface
             if (flock($lockFileHandle, LOCK_EX)) {
                 $this->logger->info('Start creation DB dump...');
 
-                $command = $this->getCommand() . ' | gzip > ' . $dumpFile;
+                $command = 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dump->getCommand();
+                if ($removeDefiners) {
+                    $command .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
+                }
+                $command .= ' | gzip > ' . $dumpFile;
+
                 $process = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
 
                 if ($process->getExitCode() !== ShellInterface::CODE_SUCCESS) {
@@ -132,15 +137,5 @@ class DbDump implements ProcessInterface
             $this->logger->error($e->getMessage());
             fclose($lockFileHandle);
         }
-    }
-
-    /**
-     * Returns mysqldump command for executing.
-     *
-     * @return string
-     */
-    private function getCommand()
-    {
-        return 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dbDump->getCommand();
     }
 }
