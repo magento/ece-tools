@@ -5,11 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Docker\Service\Version;
+namespace Magento\MagentoCloud\Test\Unit\Service;
 
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
-use Magento\MagentoCloud\Docker\Service\Version\Validator;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Service\Service;
+use Magento\MagentoCloud\Service\Validator;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -44,47 +46,46 @@ class ValidatorTest extends TestCase
      * @param array $versions
      * @param int $errorsNumber
      * @throws ConfigurationMismatchException
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @throws UndefinedPackageException
      *
      * @dataProvider validateVersionsDataProvider
      */
     public function testValidateVersions(string $magentoVersion, array $versions, int $errorsNumber = 0)
     {
-        $this->magentoVersionMock->expects($this->any())
-            ->method('getVersion')
+        $this->magentoVersionMock->method('getVersion')
             ->willReturn($magentoVersion);
+
         $this->assertEquals($errorsNumber, count($this->validator->validateVersions($versions)));
     }
 
     /**
      * @throws ConfigurationMismatchException
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @throws UndefinedPackageException
      */
     public function testValidateFailMessage()
     {
         $magentoVersion = '2.2.6';
         $version = '6.5';
         $message = sprintf(
-            'Magento %s does not support version "%s" for service "%s".'
-                . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
+            'Magento %s does not support version "%s" for service "%s". '
+            . 'Service version should satisfy "~1.7.0 || ~2.4.0 || ~5.2.0" constraint.',
             $magentoVersion,
             $version,
-            Config::KEY_ELASTICSEARCH
+            Service::NAME_ELASTICSEARCH
         );
 
-        $this->magentoVersionMock->expects($this->any())
-            ->method('getVersion')
+        $this->magentoVersionMock->method('getVersion')
             ->willReturn($magentoVersion);
 
         $this->assertEquals(
             [$message],
-            $this->validator->validateVersions([Config::KEY_ELASTICSEARCH => $version])
+            $this->validator->validateVersions([Service::NAME_ELASTICSEARCH => $version])
         );
     }
 
     /**
      * @throws ConfigurationMismatchException
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @throws UndefinedPackageException
      */
     public function testValidateNonexistentService()
     {
@@ -108,7 +109,7 @@ class ValidatorTest extends TestCase
     /**
      * @return array
      */
-    public function validateVersionsDataProvider()
+    public function validateVersionsDataProvider(): array
     {
         return [
             [
@@ -117,58 +118,58 @@ class ValidatorTest extends TestCase
             ],
             [
                 '2.1.4',
-                [ Config::KEY_PHP => '7.0.2',]
+                [Service::NAME_PHP => '7.0.2',]
             ],
             [
                 '2.2.2',
-                [ Config::KEY_NGINX => 'latest',]
+                [Service::NAME_NGINX => 'latest',]
             ],
             [
                 '2.2.4',
                 [
-                    Config::KEY_PHP => '7.0.13',
-                    Config::KEY_DB => '10.0',
-                    Config::KEY_NGINX => '1.9',
-                    Config::KEY_VARNISH => '4.5',
-                    Config::KEY_REDIS => '5.0',
-                    Config::KEY_ELASTICSEARCH => '2.4.2',
-                    Config::KEY_RABBITMQ => '3.5'
+                    Service::NAME_PHP => '7.0.13',
+                    Service::NAME_DB => '10.0',
+                    Service::NAME_NGINX => '1.9',
+                    Service::NAME_VARNISH => '4.5',
+                    Service::NAME_REDIS => '5.0',
+                    Service::NAME_ELASTICSEARCH => '2.4.2',
+                    Service::NAME_RABBITMQ => '3.5'
                 ]
             ],
             [
                 '2.2.8',
                 [
-                    Config::KEY_ELASTICSEARCH => '6.5.13',
+                    Service::NAME_ELASTICSEARCH => '6.5.13',
                 ]
             ],
             [
                 '2.5.0',
                 [
-                    Config::KEY_PHP => '7.2.13',
-                    Config::KEY_DB => '10.2.1',
-                    Config::KEY_NGINX => '1.9',
-                    Config::KEY_VARNISH => '5.5',
-                    Config::KEY_REDIS => 'latest',
-                    Config::KEY_ELASTICSEARCH => '6.7', // wrong
-                    Config::KEY_RABBITMQ => '3.7'
+                    Service::NAME_PHP => '7.2.13',
+                    Service::NAME_DB => '10.2.1',
+                    Service::NAME_NGINX => '1.9',
+                    Service::NAME_VARNISH => '5.5',
+                    Service::NAME_REDIS => 'latest',
+                    Service::NAME_ELASTICSEARCH => '6.7', // wrong
+                    Service::NAME_RABBITMQ => '3.7'
                 ],
                 1
             ],
             [
                 '2.1.4',
-                [Config::KEY_PHP => '5.6'],
+                [Service::NAME_PHP => '5.6'],
                 1,
             ],
             [
                 '2.2.4',
                 [
-                    Config::KEY_PHP => '7.0.13',
-                    Config::KEY_DB => '11.0', //wrong
-                    Config::KEY_NGINX => '0.9', //wrong
-                    Config::KEY_VARNISH => '4.0.9',
-                    Config::KEY_REDIS => '3.1',
-                    Config::KEY_ELASTICSEARCH => '6.5', //wrong
-                    Config::KEY_RABBITMQ => '3.5' //wrong
+                    Service::NAME_PHP => '7.0.13',
+                    Service::NAME_DB => '11.0', //wrong
+                    Service::NAME_NGINX => '0.9', //wrong
+                    Service::NAME_VARNISH => '4.0.9',
+                    Service::NAME_REDIS => '3.1',
+                    Service::NAME_ELASTICSEARCH => '6.5', //wrong
+                    Service::NAME_RABBITMQ => '3.5' //wrong
                 ],
                 4
             ],

@@ -10,7 +10,7 @@ use Illuminate\Contracts\Config\Repository;
 /**
  * General Builder interface.
  */
-interface ComposeManagerInterface
+interface ComposeInterface
 {
     const PHP_VERSION = 'php.version';
     const NGINX_VERSION = 'nginx.version';
@@ -30,5 +30,5 @@ interface ComposeManagerInterface
     /**
      * @return string
      */
-    public function getConfigPath(): string;
+    public function getPath(): string;
 }
