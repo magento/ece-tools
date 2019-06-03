@@ -8,5 +8,6 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 
 ./vendor/bin/phpcs ./src --standard=./tests/static/phpcs-ruleset.xml -p -n
 ./vendor/bin/phpmd ./src xml ./tests/static/phpmd-ruleset.xml
+./vendor/bin/phpstan analyse ./src -c ./tests/static/phpstan.neon
 ./vendor/bin/phpunit --configuration ./tests/unit --coverage-clover ./tests/unit/tmp/clover.xml && php ./tests/unit/code-coverage.php ./tests/unit/tmp/clover.xml
 ./vendor/bin/phpunit --configuration ./tests/unit
