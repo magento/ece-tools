@@ -159,6 +159,12 @@
       "2.1.4 - 2.1.17": "MC-5964__preauth_sql__2.1.4.patch",
       "2.2.0 - 2.2.7": "MC-5964__preauth_sql__2.2.0.patch",
       "2.3.0": "MC-5964__preauth_sql__2.3.0.patch"
+    },
+    "Multi-thread SCD": {
+      "2.2.0 - 2.2.3": "MAGECLOUD-3611__multi_thread_scd__2.2.0.patch",
+      "2.2.4 - 2.2.9": "MAGECLOUD-3611__multi_thread_scd__2.2.4.patch",
+      "2.3.0 - 2.3.1": "MAGECLOUD-3611__multi_thread_scd__2.3.0.patch",
+      "2.3.2": "MAGECLOUD-3611__multi_thread_scd__2.3.2.patch"
     }
   },
   "monolog/monolog": {
