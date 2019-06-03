@@ -73,7 +73,7 @@ class SchemaValidator
         }
 
         if (is_callable($allowedValues)) {
-            return $allowedValues($key, $value);
+            return $allowedValues($value);
         }
 
         if ($allowedValues && !in_array($value, $allowedValues)) {

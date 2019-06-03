@@ -58,7 +58,7 @@ class Schema
      * @return array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getSchema()
+    public function getSchema(): array
     {
         return [
             StageConfigInterface::VAR_VERBOSE_COMMANDS => [
@@ -76,15 +76,15 @@ class Schema
             ],
             StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL => [
                 self::SCHEMA_TYPE => ['integer'],
-                self::SCHEMA_VALUE_VALIDATION => function (string $key, $value) {
-                    if (!in_array($value, range(0, 9))) {
+                self::SCHEMA_VALUE_VALIDATION => static function ($value) {
+                    if (!in_array($value, range(0, 9), false)) {
                         return sprintf(
                             'The SCD_COMPRESSION_LEVEL variable contains an invalid value of type string. ' .
-                            'Use an integer value from 0 to 9.',
-                            $key,
-                            $value
+                            'Use an integer value from 0 to 9.'
                         );
                     }
+
+                    return null;
                 },
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL,
@@ -469,7 +469,7 @@ class Schema
      *
      * @return array
      */
-    public function getDeprecatedSchema()
+    public function getDeprecatedSchema(): array
     {
         return [
             StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [

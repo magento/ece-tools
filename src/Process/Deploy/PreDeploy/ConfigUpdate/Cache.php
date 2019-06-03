@@ -92,12 +92,14 @@ class Cache implements ProcessInterface
      * @param array $backendOptions
      *
      * @return bool
+     * @throws ProcessException
      */
     private function testRedisConnection(array $backendOptions): bool
     {
-        extract($backendOptions);
+        $server = $backendOptions['server'] ?? null;
+        $port = $backendOptions['port'] ?? null;
 
-        if (!isset($server) || !isset($port)) {
+        if (!isset($server, $port)) {
             throw new ProcessException('Missing required Redis configuration!');
         }
 

@@ -5,9 +5,7 @@
  */
 namespace Magento\MagentoCloud\StaticContent;
 
-use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
  * Resolves themes to their correct names
@@ -37,26 +35,32 @@ class ThemeResolver
      *
      * @param string $themeName
      * @return string
+     * @throws \ReflectionException
      */
     public function resolve(string $themeName): string
     {
         $availableThemes = $this->getThemes();
-        if (!in_array($themeName, $availableThemes)) {
+
+        if (!in_array($themeName, $availableThemes, true)) {
             $this->logger->warning('Theme ' . $themeName . ' does not exist, attempting to resolve.');
             $themeNamePosition = array_search(
                 strtolower($themeName),
-                array_map('strtolower', $availableThemes)
+                array_map('strtolower', $availableThemes),
+                true
             );
             if (false !== $themeNamePosition) {
                 $this->logger->warning(
                     'Theme found as ' . $availableThemes[$themeNamePosition] . '.  Using corrected name instead.'
                 );
+
                 return $availableThemes[$themeNamePosition];
-            } else {
-                $this->logger->error('Unable to resolve theme.');
-                return '';
             }
+
+            $this->logger->error('Unable to resolve theme.');
+
+            return '';
         }
+
         return $themeName;
     }
 
@@ -89,6 +93,7 @@ class ThemeResolver
             }
         }
         $this->logger->debug('End of finding available themes.');
+
         return $this->themes;
     }
 }

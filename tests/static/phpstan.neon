@@ -1,0 +1,7 @@
+parameters:
+    level: 1
+    excludes_analyse:
+        - %currentWorkingDirectory%/src/Test/*
+    ignoreErrors:
+        - '#Class Magento\\Framework\\Component\\ComponentRegistrar not found.#'
+        - '#Access to constant THEME on an unknown class Magento\\Framework\\Component\\ComponentRegistrar.#'

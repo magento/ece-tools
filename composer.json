@@ -8,6 +8,7 @@
     "php": "^7.0",
     "ext-PDO": "*",
     "ext-json": "*",
+    "ext-sockets": "*",
     "composer/composer": "@stable",
     "composer/semver": "^1.4",
     "graylog2/gelf-php": "^1.4.2",
@@ -19,18 +20,19 @@
     "psr/container": "^1.0",
     "psr/log": "^1.0",
     "symfony/console": "^2.6||^4.0",
-    "symfony/yaml": "^3.3||^4.0",
     "symfony/process": "~2.1||~4.1.0",
+    "symfony/yaml": "^3.3||^4.0",
     "twig/twig": "^1.0||^2.0"
   },
   "require-dev": {
+    "codeception/codeception": "^2.5.3",
+    "consolidation/robo": "^1.2",
     "php-mock/php-mock-phpunit": "^2.0",
     "phpmd/phpmd": "@stable",
+    "phpstan/phpstan": "^0.11.8",
     "phpunit/php-code-coverage": "^5.2",
     "phpunit/phpunit": "^6.2",
-    "squizlabs/php_codesniffer": "^3.0",
-    "codeception/codeception": "^2.5.3",
-    "consolidation/robo": "^1.2"
+    "squizlabs/php_codesniffer": "^3.0"
   },
   "conflict": {
     "nesbot/carbon": ">=1.38 <2.0"
@@ -59,12 +61,17 @@
   },
   "scripts": {
     "test": [
-      "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
-      "phpmd src xml tests/static/phpmd-ruleset.xml",
-      "phpunit --configuration tests/unit",
-      "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml"
+      "@phpcs",
+      "@phpmd",
+      "@phpunit",
+      "@coverage"
     ],
-    "test-coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage"
+    "phpcs": "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
+    "phpmd": "phpmd src xml tests/static/phpmd-ruleset.xml",
+    "phpstan": "phpstan analyse src -c tests/static/phpstan.neon",
+    "phpunit": "phpunit --configuration tests/unit",
+    "coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
+    "coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage"
   },
   "config": {
     "sort-packages": true
