@@ -9,18 +9,19 @@ namespace Magento\MagentoCloud\Docker\Compose;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Docker\Service\Config;
-use Magento\MagentoCloud\Docker\ComposeManagerInterface;
+use Magento\MagentoCloud\Docker\ComposeInterface;
 use Magento\MagentoCloud\Docker\Config\Converter;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Service\Service;
 
 /**
  * Production compose configuration.
  *
  * @codeCoverageIgnore
  */
-class ProductionCompose implements ComposeManagerInterface
+class ProductionCompose implements ComposeInterface
 {
     const DEFAULT_NGINX_VERSION = 'latest';
     const DEFAULT_VARNISH_VERSION = 'latest';
@@ -75,8 +76,8 @@ class ProductionCompose implements ComposeManagerInterface
      */
     public function build(Repository $config): array
     {
-        $phpVersion = $config->get(Config::KEY_PHP, '') ?: $this->config->getPhpVersion();
-        $dbVersion = $config->get(Config::KEY_DB, '') ?: $this->config->getServiceVersion(Config::KEY_DB);
+        $phpVersion = $config->get(Service::NAME_PHP, '') ?: $this->config->getPhpVersion();
+        $dbVersion = $config->get(Service::NAME_DB, '') ?: $this->config->getServiceVersion(Service::NAME_DB);
 
         $services = [
             'db' => $this->serviceFactory->create(
@@ -86,7 +87,7 @@ class ProductionCompose implements ComposeManagerInterface
                     'ports' => [3306],
                     'volumes' => [
                         '/var/lib/mysql',
-                        './docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
+                        './.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
                     ],
                     'environment' => [
                         'MYSQL_ROOT_PASSWORD=magento2',
@@ -98,7 +99,7 @@ class ProductionCompose implements ComposeManagerInterface
             )
         ];
 
-        $redisVersion = $config->get(Config::KEY_REDIS) ?: $this->config->getServiceVersion(Config::KEY_REDIS);
+        $redisVersion = $config->get(Service::NAME_REDIS) ?: $this->config->getServiceVersion(Service::NAME_REDIS);
 
         if ($redisVersion) {
             $services['redis'] = $this->serviceFactory->create(
@@ -107,8 +108,8 @@ class ProductionCompose implements ComposeManagerInterface
             );
         }
 
-        $esVersion = $config->get(Config::KEY_ELASTICSEARCH)
-            ?: $this->config->getServiceVersion(Config::KEY_ELASTICSEARCH);
+        $esVersion = $config->get(Service::NAME_ELASTICSEARCH)
+            ?: $this->config->getServiceVersion(Service::NAME_ELASTICSEARCH);
 
         if ($esVersion) {
             $services['elasticsearch'] = $this->serviceFactory->create(
@@ -117,18 +118,18 @@ class ProductionCompose implements ComposeManagerInterface
             );
         }
 
-        $nodeVersion = $config->get(Config::KEY_NODE);
+        $nodeVersion = $config->get(Service::NAME_NODE);
 
         if ($nodeVersion) {
             $services['node'] = $this->serviceFactory->create(
                 ServiceFactory::SERVICE_NODE,
                 $nodeVersion,
-                ['volumes' => [$this->getMagentoVolumes(false)]]
+                ['volumes' => $this->getMagentoVolumes(false)]
             );
         }
 
-        $rabbitMQVersion = $config->get(Config::KEY_RABBITMQ)
-            ?: $this->config->getServiceVersion(Config::KEY_RABBITMQ);
+        $rabbitMQVersion = $config->get(Service::NAME_RABBITMQ)
+            ?: $this->config->getServiceVersion(Service::NAME_RABBITMQ);
 
         if ($rabbitMQVersion) {
             $services['rabbitmq'] = $this->serviceFactory->create(
@@ -153,8 +154,9 @@ class ProductionCompose implements ComposeManagerInterface
         $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends, 'deploy.magento2.docker');
         $services['web'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_NGINX,
-            $config->get(Config::KEY_NGINX, self::DEFAULT_NGINX_VERSION),
+            $config->get(Service::NAME_NGINX, self::DEFAULT_NGINX_VERSION),
             [
+                'hostname' => 'web.magento2.docker',
                 'depends_on' => ['fpm'],
                 'extends' => 'generic',
                 'volumes' => $this->getMagentoVolumes(true),
@@ -179,12 +181,7 @@ class ProductionCompose implements ComposeManagerInterface
             ],
         ];
 
-        $volumeConfig = [
-            'driver_opts' => [
-                'type' => 'tmpfs',
-                'device' => 'tmpfs'
-            ]
-        ];
+        $volumeConfig = [];
 
         return [
             'version' => '2',
@@ -268,8 +265,8 @@ class ProductionCompose implements ComposeManagerInterface
                     $this->getMagentoVolumes($isReadOnly),
                     $this->getComposerVolumes(),
                     [
-                        './docker/mnt:/mnt',
-                        './docker/tmp:/tmp'
+                        './.docker/mnt:/mnt',
+                        './.docker/tmp:/tmp'
                     ]
                 )
             ]
@@ -281,7 +278,7 @@ class ProductionCompose implements ComposeManagerInterface
     /**
      * @return string
      */
-    public function getConfigPath(): string
+    public function getPath(): string
     {
         return $this->fileList->getMagentoDockerCompose();
     }
@@ -327,14 +324,11 @@ class ProductionCompose implements ComposeManagerInterface
     {
         return [
             'PHP_MEMORY_LIMIT' => '2048M',
-            'DEBUG' => 'false',
-            'ENABLE_SENDMAIL' => 'false',
             'UPLOAD_MAX_FILESIZE' => '64M',
             'MAGENTO_ROOT' => self::DIR_MAGENTO,
-            'PHP_ENABLE_XDEBUG' => 'false',
-            # name of your server in IDE
+            # Name of your server in IDE
             'PHP_IDE_CONFIG' => 'serverName=magento_cloud_docker',
-            # docker host for developer environments, can be different for your OS
+            # Docker host for developer environments, can be different for your OS
             'XDEBUG_CONFIG' => 'remote_host=host.docker.internal',
         ];
     }

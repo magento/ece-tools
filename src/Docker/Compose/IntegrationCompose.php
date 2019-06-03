@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Docker\Compose;
 
 use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\Docker\ComposeManagerInterface;
+use Magento\MagentoCloud\Docker\ComposeInterface;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 
@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
  *
  * @codeCoverageIgnore
  */
-class IntegrationCompose implements ComposeManagerInterface
+class IntegrationCompose implements ComposeInterface
 {
     /**
      * @var FileList
@@ -137,7 +137,7 @@ class IntegrationCompose implements ComposeManagerInterface
     /**
      * @inheritdoc
      */
-    public function getConfigPath(): string
+    public function getPath(): string
     {
         return $this->fileList->getToolsDockerCompose();
     }

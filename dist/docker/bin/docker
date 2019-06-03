@@ -6,16 +6,16 @@ if [ ${#@} -ne 0 ] && [ "${@#"-h"}" = "" ]; then
 USAGE="Magento Cloud Docker
 
 \033[33mArguments:\033[0m
-  pull          pull latest images
-  up            destroy, re-create and start containers
-  down          destroy containers
-  build         build application
-  deploy        deploy application
-  redeploy      re-build and re-deploy application
-  bash          connect to bash
-  stop          stop containers
-  start         start containers
-  restart       restart containers
+  pull              pull latest images
+  up                destroy, re-create and start containers
+  down              destroy containers
+  bash              connect to bash
+  stop              stop containers
+  start             start containers
+  restart           restart containers
+  ece-build         build application
+  ece-deploy        deploy application
+  ece-redeploy      re-build and re-deploy application
 
 \033[33mOptions:\033[0m
   -h            show this help text\n"
@@ -35,16 +35,6 @@ case "$1" in
     down)
         docker-compose down --volumes
         ;;
-    build)
-        docker-compose run build cloud-build
-        ;;
-    deploy)
-        docker-compose run deploy cloud-deploy
-        ;;
-    redeploy)
-        docker-compose run build cloud-build
-        docker-compose run deploy cloud-deploy
-        ;;
     bash)
         docker-compose run deploy bash
         ;;
@@ -56,6 +46,16 @@ case "$1" in
         ;;
     restart)
         docker-compose restart
+        ;;
+    ece-build)
+        docker-compose run build cloud-build
+        ;;
+    ece-deploy)
+        docker-compose run deploy cloud-deploy
+        ;;
+    ece-redeploy)
+        docker-compose run build cloud-build
+        docker-compose run deploy cloud-deploy
         ;;
     *)
         printf "\033[31m Wrong command passed\033[0m\n"
