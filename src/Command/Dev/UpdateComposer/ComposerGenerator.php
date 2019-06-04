@@ -59,7 +59,7 @@ class ComposerGenerator
         if ($this->file->isExists($rootComposerJsonPath)) {
             $rootComposer = json_decode($this->file->fileGetContents($rootComposerJsonPath), true);
             $composer['require'] += $rootComposer['require'];
-            $composer['repositories'] = array_merge($composer['repositories'], $rootComposer['repositories']);
+            $composer['repositories'] = array_merge($composer['repositories'], $rootComposer['repositories'] ?? []);
         } else {
             $composer['require'] += ['magento/ece-tools' => '2002.0.*'];
         }
@@ -119,7 +119,7 @@ class ComposerGenerator
 
         foreach (array_keys($repoOptions) as $repoName) {
             $preparePackagesScripts[] = sprintf(
-                "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
+                "rsync -av --progress --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
                 . "--exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./%s/ ./",
                 $repoName
             );
