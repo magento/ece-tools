@@ -108,32 +108,32 @@ class Build extends Command
             ->addOption(
                 self::OPTION_PHP,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'PHP version'
             )->addOption(
                 self::OPTION_NGINX,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Nginx version'
             )->addOption(
                 self::OPTION_DB,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'DB version'
             )->addOption(
                 self::OPTION_REDIS,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Redis version'
             )->addOption(
                 self::OPTION_ES,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Elasticsearch version'
             )->addOption(
                 self::OPTION_RABBIT_MQ,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'RabbitMQ version'
             )->addOption(
                 self::OPTION_NODE,
@@ -143,7 +143,7 @@ class Build extends Command
             )->addOption(
                 self::OPTION_MODE,
                 'm',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 sprintf(
                     'Mode of environment (%s)',
                     implode(', ', [ComposeFactory::COMPOSE_DEVELOPER, ComposeFactory::COMPOSE_PRODUCTION])
