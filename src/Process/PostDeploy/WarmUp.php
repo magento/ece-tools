@@ -7,8 +7,7 @@ namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
-use Magento\MagentoCloud\Http\ClientFactory;
-use Magento\MagentoCloud\Http\RequestFactory;
+use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -25,14 +24,9 @@ class WarmUp implements ProcessInterface
     private $postDeploy;
 
     /**
-     * @var ClientFactory
+     * @var PoolFactory
      */
-    private $clientFactory;
-
-    /**
-     * @var RequestFactory
-     */
-    private $requestFactory;
+    private $poolFactory;
 
     /**
      * @var UrlManager
@@ -45,28 +39,20 @@ class WarmUp implements ProcessInterface
     private $logger;
 
     /**
-     * Variable for caching base urls hosts from config table
-     *
-     * @var string
-     */
-    private $baseHosts;
-
-    /**
      * @param PostDeployInterface $postDeploy
-     * @param ClientFactory $clientFactory
+     * @param PoolFactory $poolFactory
      * @param RequestFactory $requestFactory
      * @param UrlManager $urlManager
      * @param LoggerInterface $logger
      */
     public function __construct(
         PostDeployInterface $postDeploy,
-        ClientFactory $clientFactory,
-        RequestFactory $requestFactory,
+        PoolFactory $poolFactory,
         UrlManager $urlManager,
         LoggerInterface $logger
     ) {
         $this->postDeploy = $postDeploy;
-        $this->clientFactory = $clientFactory;
+        $this->poolFactory = $poolFactory;
         $this->requestFactory = $requestFactory;
         $this->urlManager = $urlManager;
         $this->logger = $logger;
@@ -79,28 +65,27 @@ class WarmUp implements ProcessInterface
      */
     public function execute()
     {
-        $client = $this->clientFactory->create();
-        $promises = [];
+        $fulfilled = function () use ($url) {
+            $this->logger->info('Warmed up page: ' . $url);
+        };
 
-        try {
-            foreach ($this->getUrlsForWarmUp() as $url) {
-                $request = $this->requestFactory->create('GET', $url);
+        $rejected = function (RequestException $exception) use ($url) {
+            $context = [];
 
-                $promises[] = $client->sendAsync($request)->then(function () use ($url) {
-                    $this->logger->info('Warmed up page: ' . $url);
-                }, function (RequestException $exception) use ($url) {
-                    $context = $exception->getResponse()
-                        ? [
-                            'error' => $exception->getResponse()->getReasonPhrase(),
-                            'code' => $exception->getResponse()->getStatusCode(),
-                        ]
-                        : [];
-
-                    $this->logger->error('Warming up failed: ' . $url, $context);
-                });
+            if ($exception->getResponse()) {
+                $context = [
+                    'error' => $exception->getResponse()->getReasonPhrase(),
+                    'code' => $exception->getResponse()->getStatusCode(),
+                ];
             }
 
-            \GuzzleHttp\Promise\unwrap($promises);
+            $this->logger->error('Warming up failed: ' . $url, $context);
+        };
+
+        try {
+            $pool = $this->poolFactory->create($this->getUrlsForWarmUp(), compact('fulfilled', 'rejected'));
+
+            $pool->promise()->wait();
         } catch (\Throwable $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
@@ -113,13 +98,10 @@ class WarmUp implements ProcessInterface
      */
     private function getUrlsForWarmUp(): array
     {
-        $pages = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES);
-        $baseUrl = rtrim($this->urlManager->getBaseUrl(), '/');
-        $urls = [];
-
-        foreach ($pages as $page) {
-            if (strpos($page, 'http') === 0) {
-                if (!$this->isRelatedDomain($page)) {
+        return array_filter(
+            $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES),
+            function ($page) {
+                if (!$this->urlManager->isUrlValid($page)) {
                     $this->logger->error(
                         sprintf(
                             'Page "%s" can\'t be warmed-up because such domain ' .
@@ -127,34 +109,12 @@ class WarmUp implements ProcessInterface
                             $page
                         )
                     );
-                } else {
-                    $urls[] = $page;
+
+                    return false;
                 }
-            } else {
-                $urls[] = $baseUrl . '/' . $page;
+
+                return true;
             }
-        }
-
-        return $urls;
-    }
-
-    /**
-     * Checks that host from $url is using in current Magento installation
-     *
-     * @param string $url
-     * @return bool
-     */
-    private function isRelatedDomain(string $url): bool
-    {
-        if ($this->baseHosts === null) {
-            $this->baseHosts = array_map(
-                function ($baseHostUrl) {
-                    return parse_url($baseHostUrl, PHP_URL_HOST);
-                },
-                $this->urlManager->getBaseUrls()
-            );
-        }
-
-        return in_array(parse_url($url, PHP_URL_HOST), $this->baseHosts);
+        );
     }
 }

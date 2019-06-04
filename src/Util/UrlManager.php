@@ -147,9 +147,7 @@ class UrlManager
             ['web/unsecure/base_url']
         )['value'];
 
-        if (strpos($baseUrl, self::PREFIX_SECURE) === 0
-            || strpos($baseUrl, self::PREFIX_UNSECURE) === 0
-        ) {
+        if (strpos($baseUrl, self::PREFIX_SECURE) === 0 || strpos($baseUrl, self::PREFIX_UNSECURE) === 0) {
             return $baseUrl;
         }
 
@@ -172,5 +170,48 @@ class UrlManager
         );
 
         return array_column($urls, 'value');
+    }
+
+    /**
+     * Test if $url is either relative or has the same host as one of the configured base URLs.
+     *
+     * @param string $url
+     * @return bool
+     */
+    public function isUrlValid(string $url): bool
+    {
+        return parse_url($url, PHP_URL_HOST) === null || $this->isRelatedDomain($url);
+    }
+
+    /**
+     * Prepend base URL to relative URLs.
+     *
+     * @param string $url
+     * @return string
+     */
+    public function expandUrl(string $url): string
+    {
+        if (parse_url($url, PHP_URL_HOST) === null) {
+            return rtrim($this->getBaseUrl(), '/') . '/' . $url;
+        } else {
+            return $url;
+        }
+    }
+
+    /**
+     * Checks that host from $url is using in current Magento installation
+     *
+     * @param string $url
+     * @return bool
+     */
+    public function isRelatedDomain(string $url): bool
+    {
+        foreach ($this->getBaseUrls() as $baseUrl) {
+            if (parse_url($url, PHP_URL_HOST) === parse_url($baseUrl, PHP_URL_HOST)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
