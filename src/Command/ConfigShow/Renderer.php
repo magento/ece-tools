@@ -115,8 +115,10 @@ class Renderer
         $table
             ->setHeaders($header)
             ->setRows($rows);
-        $table->setColumnWidth(0, 40);
-        $table->setColumnWidth(1, 60);
+        if (method_exists($table, 'setColumnWidth')) {
+            $table->setColumnWidth(0, 40);
+            $table->setColumnWidth(1, 60);
+        }
         $table->render();
     }
 
