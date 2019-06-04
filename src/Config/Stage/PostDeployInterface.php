@@ -13,4 +13,8 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 interface PostDeployInterface extends StageConfigInterface
 {
     const VAR_WARM_UP_PAGES = 'WARM_UP_PAGES';
+
+    const VAR_TTFB_TESTED_URLS = 'TTFB_TESTED_URLS';
+
+    const VAR_ENABLE_TTFB_TEST = 'ENABLE_TTFB_TEST';
 }
