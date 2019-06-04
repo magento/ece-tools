@@ -93,7 +93,7 @@ class ConfigShow extends Command
 
     /**
      * @param OutputInterface $output
-     * @param array $vars
+     * @param array $variables
      */
     protected function printVariables(OutputInterface $output, array $variables = [])
     {

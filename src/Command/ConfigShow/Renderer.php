@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Command\ConfigShow;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Helper\TableCell;
@@ -93,7 +92,6 @@ class Renderer
      */
     public function printVariables(OutputInterface $output)
     {
-        $rows = [];
         $rows = $this->buildArray($this->environment->getVariables());
 
         $this->renderTable(
@@ -137,10 +135,8 @@ class Renderer
             } else {
                 if (is_null($value)) {
                     $value = 'null';
-                } elseif (is_bool($value) && $value) {
-                    $value = 'true';
-                } elseif (is_bool($value) && !$value) {
-                    $value = 'false';
+                } elseif (is_bool($value)) {
+                    $value = $value ? 'true' : 'false';
                 }
                 $rows[] = [$this->indentValue($name, $depth), $value];
             }
