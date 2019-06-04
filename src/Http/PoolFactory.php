@@ -53,6 +53,6 @@ class PoolFactory
             }
         };
 
-        return $this->container->make(Pool::class, compact('client', 'requests', 'config'));
+        return $this->container->create(Pool::class, compact('client', 'requests', 'config'));
     }
 }
