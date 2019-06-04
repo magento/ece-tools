@@ -41,7 +41,6 @@ class WarmUp implements ProcessInterface
     /**
      * @param PostDeployInterface $postDeploy
      * @param PoolFactory $poolFactory
-     * @param RequestFactory $requestFactory
      * @param UrlManager $urlManager
      * @param LoggerInterface $logger
      */
@@ -53,7 +52,6 @@ class WarmUp implements ProcessInterface
     ) {
         $this->postDeploy = $postDeploy;
         $this->poolFactory = $poolFactory;
-        $this->requestFactory = $requestFactory;
         $this->urlManager = $urlManager;
         $this->logger = $logger;
     }
@@ -65,11 +63,13 @@ class WarmUp implements ProcessInterface
      */
     public function execute()
     {
-        $fulfilled = function () use ($url) {
-            $this->logger->info('Warmed up page: ' . $url);
+        $urls = $this->getUrlsForWarmUp();
+
+        $fulfilled = function ($respons, $index) use ($urls) {
+            $this->logger->info('Warmed up page: ' . $urls[$index]);
         };
 
-        $rejected = function (RequestException $exception) use ($url) {
+        $rejected = function (RequestException $exception, $index) use ($urls) {
             $context = [];
 
             if ($exception->getResponse()) {
@@ -79,11 +79,11 @@ class WarmUp implements ProcessInterface
                 ];
             }
 
-            $this->logger->error('Warming up failed: ' . $url, $context);
+            $this->logger->error('Warming up failed: ' . $urls[$index], $context);
         };
 
         try {
-            $pool = $this->poolFactory->create($this->getUrlsForWarmUp(), compact('fulfilled', 'rejected'));
+            $pool = $this->poolFactory->create($urls, compact('fulfilled', 'rejected'));
 
             $pool->promise()->wait();
         } catch (\Throwable $exception) {
