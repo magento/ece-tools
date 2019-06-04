@@ -27,24 +27,19 @@ class ServiceFactory
 
     const CONFIG = [
         self::SERVICE_CLI => [
-            'image' => 'magento/magento-cloud-docker-php:%s-cli',
-            'versions' => ['7.0', '7.1', '7.2']
+            'image' => 'magento/magento-cloud-docker-php:%s-cli'
         ],
         self::SERVICE_FPM => [
-            'image' => 'magento/magento-cloud-docker-php:%s-fpm',
-            'versions' => ['7.0', '7.1', '7.2']
+            'image' => 'magento/magento-cloud-docker-php:%s-fpm'
         ],
         self::SERVICE_DB => [
-            'image' => 'mariadb:%s',
-            'versions' => ['10.0', '10.1', '10.2']
+            'image' => 'mariadb:%s'
         ],
         self::SERVICE_NGINX => [
-            'image' => 'magento/magento-cloud-docker-nginx:%s',
-            'versions' => ['1.9', 'latest']
+            'image' => 'magento/magento-cloud-docker-nginx:%s'
         ],
         self::SERVICE_VARNISH => [
             'image' => 'magento/magento-cloud-docker-varnish:%s',
-            'versions' => ['latest'],
             'config' => [
                 'environment' => [
                     'VIRTUAL_HOST=magento2.docker',
@@ -70,7 +65,6 @@ class ServiceFactory
         ],
         self::SERVICE_REDIS => [
             'image' => 'redis:%s',
-            'versions' => ['3.0', '3.2', '4.0', '5.0'],
             'config' => [
                 'volumes' => [
                     '/data',
@@ -79,16 +73,13 @@ class ServiceFactory
             ]
         ],
         self::SERVICE_ELASTICSEARCH => [
-            'image' => 'magento/magento-cloud-docker-elasticsearch:%s',
-            'versions' => ['1.7', '2.4', '5.2', '6.5']
+            'image' => 'magento/magento-cloud-docker-elasticsearch:%s'
         ],
         self::SERVICE_RABBIT_MQ => [
             'image' => 'rabbitmq:%s',
-            'versions' => ['3.5', '3.7']
         ],
         self::SERVICE_NODE => [
             'image' => 'node:%s',
-            'versions' => ['6', '8', '10', '11'],
         ],
     ];
 

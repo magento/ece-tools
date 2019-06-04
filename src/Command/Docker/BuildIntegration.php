@@ -9,8 +9,8 @@ namespace Magento\MagentoCloud\Command\Docker;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
-use Magento\MagentoCloud\Docker\ComposeManagerFactory;
-use Magento\MagentoCloud\Docker\ComposeManagerInterface;
+use Magento\MagentoCloud\Docker\ComposeFactory;
+use Magento\MagentoCloud\Docker\ComposeInterface;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -35,7 +35,7 @@ class BuildIntegration extends Command
     const OPTION_DB = 'db';
 
     /**
-     * @var ComposeManagerFactory
+     * @var ComposeFactory
      */
     private $builderFactory;
 
@@ -55,18 +55,18 @@ class BuildIntegration extends Command
     private $environment;
 
     /**
-     * @param ComposeManagerFactory $builderFactory
+     * @param ComposeFactory $composeFactory
      * @param File $file
      * @param RepositoryFactory $configFactory
      * @param Environment $environment
      */
     public function __construct(
-        ComposeManagerFactory $builderFactory,
+        ComposeFactory $composeFactory,
         File $file,
         RepositoryFactory $configFactory,
         Environment $environment
     ) {
-        $this->builderFactory = $builderFactory;
+        $this->builderFactory = $composeFactory;
         $this->file = $file;
         $this->configFactory = $configFactory;
         $this->environment = $environment;
@@ -86,8 +86,8 @@ class BuildIntegration extends Command
                 InputArgument::REQUIRED,
                 sprintf(
                     'Version of integration framework configuration (%s/%s)',
-                    ComposeManagerFactory::COMPOSE_TEST_V1,
-                    ComposeManagerFactory::COMPOSE_TEST_V2
+                    ComposeFactory::COMPOSE_INTEGRATION,
+                    ComposeFactory::COMPOSE_FUNCTIONAL
                 )
             )->addOption(
                 self::OPTION_PHP,
@@ -121,7 +121,7 @@ class BuildIntegration extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $strategy = $input->getArgument(self::ARGUMENT_VERSION);
-        $allowedStrategies = [ComposeManagerFactory::COMPOSE_TEST_V1, ComposeManagerFactory::COMPOSE_TEST_V2];
+        $allowedStrategies = [ComposeFactory::COMPOSE_INTEGRATION, ComposeFactory::COMPOSE_FUNCTIONAL];
 
         if (!in_array($strategy, $allowedStrategies, true)) {
             throw new ConfigurationMismatchException('Wrong framework version');
@@ -131,9 +131,9 @@ class BuildIntegration extends Command
         $config = $this->configFactory->create();
 
         $map = [
-            self::OPTION_PHP => ComposeManagerInterface::PHP_VERSION,
-            self::OPTION_DB => ComposeManagerInterface::DB_VERSION,
-            self::OPTION_NGINX => ComposeManagerInterface::NGINX_VERSION,
+            self::OPTION_PHP => ComposeInterface::PHP_VERSION,
+            self::OPTION_DB => ComposeInterface::DB_VERSION,
+            self::OPTION_NGINX => ComposeInterface::NGINX_VERSION,
         ];
 
         array_walk($map, function ($key, $option) use ($config, $input) {
@@ -141,7 +141,7 @@ class BuildIntegration extends Command
         });
 
         $this->file->filePutContents(
-            $builder->getConfigPath(),
+            $builder->getPath(),
             Yaml::dump($builder->build($config), 4, 2)
         );
 

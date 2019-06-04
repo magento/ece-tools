@@ -21,7 +21,7 @@ class DeveloperCompose extends ProductionCompose
     {
         $compose = parent::build($config);
         $compose['volumes'] = [
-            'magento' => [
+            'magento-sync' => [
                 'external' => true
             ]
         ];
@@ -35,7 +35,7 @@ class DeveloperCompose extends ProductionCompose
     protected function getMagentoVolumes(bool $isReadOnly): array
     {
         return [
-            'magento:' . self::DIR_MAGENTO . ':nocopy'
+            'magento-sync:' . self::DIR_MAGENTO . ':nocopy'
         ];
     }
 

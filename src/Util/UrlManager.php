@@ -140,7 +140,10 @@ class UrlManager
     public function getBaseUrl(): string
     {
         $baseUrl = $this->connection->selectOne(
-            'SELECT `value` from `core_config_data` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1',
+            sprintf(
+                'SELECT `value` from `%s` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1',
+                $this->connection->getTableName('core_config_data')
+            ),
             ['web/unsecure/base_url']
         )['value'];
 
@@ -161,7 +164,10 @@ class UrlManager
     public function getBaseUrls(): array
     {
         $urls = $this->connection->select(
-            'SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)',
+            sprintf(
+                'SELECT `value` from `%s` WHERE `path` IN (?, ?)',
+                $this->connection->getTableName('core_config_data')
+            ),
             ['web/unsecure/base_url', 'web/secure/base_url']
         );
 

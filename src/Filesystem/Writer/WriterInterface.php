@@ -22,7 +22,7 @@ interface WriterInterface
     public function create(array $config);
 
     /**
-     * Updates existence configuration.
+     * Recursively updates existence configuration.
      *
      * @param array $config
      * @return void

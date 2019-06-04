@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Process\Deploy\SetCryptKey;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -18,27 +19,27 @@ use Psr\Log\LoggerInterface;
 class SetCryptKeyTest extends TestCase
 {
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigReader|Mock
+     * @var ConfigReader|MockObject
      */
     private $configReaderMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
     /**
-     * @var DbConnection
+     * @var SetCryptKey
      */
     private $process;
 

@@ -5,6 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
+use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\Cpu;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -44,10 +45,14 @@ class CpuTest extends TestCase
 
     public function testGetTreadsCount()
     {
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn('8');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('grep -c processor /proc/cpuinfo')
-            ->willReturn([8]);
+            ->willReturn($processMock);
 
         $this->assertEquals(8, $this->cpu->getThreadsCount());
     }

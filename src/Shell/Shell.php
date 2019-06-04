@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Shell;
 use Magento\MagentoCloud\App\Logger\Sanitizer;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Psr\Log\LoggerInterface;
-use Monolog\Logger;
+use Symfony\Component\Console\Exception\LogicException;
 
 /**
  * @inheritdoc
@@ -28,6 +28,11 @@ class Shell implements ShellInterface
     private $systemList;
 
     /**
+     * @var ProcessFactory
+     */
+    private $processFactory;
+
+    /**
      * @var Sanitizer
      */
     private $sanitizer;
@@ -35,12 +40,18 @@ class Shell implements ShellInterface
     /**
      * @param LoggerInterface $logger
      * @param SystemList $systemList
+     * @param ProcessFactory $processFactory
      * @param Sanitizer $sanitizer
      */
-    public function __construct(LoggerInterface $logger, SystemList $systemList, Sanitizer $sanitizer)
-    {
+    public function __construct(
+        LoggerInterface $logger,
+        SystemList $systemList,
+        ProcessFactory $processFactory,
+        Sanitizer $sanitizer
+    ) {
         $this->logger = $logger;
         $this->systemList = $systemList;
+        $this->processFactory = $processFactory;
         $this->sanitizer = $sanitizer;
     }
 
@@ -52,71 +63,51 @@ class Shell implements ShellInterface
      * ```php
      * $this->shell->execute('/bin/bash -c "set -o pipefail; firstCommand | secondCommand"');
      * ```
+     *
+     *  `commandline` should be always a string as symfony/process package v2.x doesn't support array-type `commandLine`
      */
-    public function execute(string $command, $args = []): array
+    public function execute(string $command, array $args = []): ProcessInterface
     {
-        $args = array_map(
-            'escapeshellarg',
-            array_filter((array)$args)
-        );
+        try {
+            if ($args) {
+                $command .= ' ' . implode(' ', array_map('escapeshellarg', $args));
+            }
 
-        if ($args) {
-            $command .= ' ' . implode(' ', $args);
+            $process = $this->processFactory->create([
+                'commandline' => $command,
+                'cwd' => $this->systemList->getMagentoRoot(),
+                'timeout' => null
+            ]);
+
+            $this->logger->info($process->getCommandLine());
+
+            $process->execute();
+        } catch (ProcessException $e) {
+            throw new ShellException(
+                $this->sanitizer->sanitize($e->getMessage()),
+                $e->getCode()
+            );
         }
 
-        $this->logger->info($command);
+        $this->handleOutput($process);
 
-        $fullCommand = sprintf(
-            'cd %s && %s 2>&1',
-            $this->systemList->getMagentoRoot(),
-            $command
-        );
-
-        exec($fullCommand, $output, $status);
-
-        /**
-         * config:show will return non-zero exit code, if the value was not changed and remains default.
-         */
-        if ($status !== 0 && strpos($command, 'config:show') !== false) {
-            return [];
-        }
-
-        return $this->handleOutput($command, $output, $status);
+        return $process;
     }
 
     /**
-     * @param string $command
-     * @param array $output
-     * @param int $status
-     * @return array
+     * Logs command output
      *
-     * @throws ShellException
+     * @param ProcessInterface $process
+     * @return void
      */
-    private function handleOutput(string $command, array $output, int $status): array
+    private function handleOutput(ProcessInterface $process)
     {
-        if ($output) {
-            $message = array_reduce(
-                $output,
-                function ($message, $line) {
-                    return $message . PHP_EOL . '  ' . $line;
-                },
-                ''
-            );
-
-            $this->logger->log($status !== 0 ? Logger::CRITICAL : Logger::DEBUG, $message);
+        try {
+            if ($output = $process->getOutput()) {
+                $this->logger->debug($output);
+            }
+        } catch (LogicException $exception) {
+            $this->logger->error('Can\'t get command output: ' . $exception->getMessage());
         }
-
-        if ($status !== 0) {
-            throw new ShellException(
-                sprintf(
-                    "Command %s returned code %d",
-                    $this->sanitizer->sanitize($command),
-                    $status
-                ),
-                $status
-            );
-        }
-
-        return $output;
     }
 }

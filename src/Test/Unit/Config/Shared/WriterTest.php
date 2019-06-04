@@ -98,7 +98,7 @@ class WriterTest extends TestCase
      * @param string $updatedConfig
      * @dataProvider updateDataProvider
      */
-    public function testUpdate(array $config, array $currentConfig, $updatedConfig)
+    public function testupdate(array $config, array $currentConfig, $updatedConfig)
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
@@ -134,6 +134,22 @@ class WriterTest extends TestCase
                 ['key1' => 'value1', 'key2' => 'value2'],
                 ['key1' => 'value0', 'key3' => 'value3'],
                 "<?php\nreturn array (\n  'key1' => 'value1',\n  'key3' => 'value3',\n  'key2' => 'value2',\n);",
+            ],
+            [
+                [
+                    'key1' => [
+                        'key12' => 'value2new',
+                        'key13' => 'value3new',
+                    ]
+                ],
+                [
+                    'key1' => [
+                        'key11' => 'value1',
+                        'key12' => 'value2',
+                    ]
+                ],
+                "<?php\nreturn array (\n  'key1' => \n  array (\n    'key11' => 'value1',\n" .
+                "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
             ],
         ];
     }

@@ -25,6 +25,9 @@ class JobUnlockerTest extends TestCase
      */
     private $cronJobUnlocker;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
@@ -35,16 +38,21 @@ class JobUnlockerTest extends TestCase
     public function testUnlockAll()
     {
         $this->connectionMock->expects($this->once())
-        ->method('affectingQuery')
-        ->with(
-            'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages WHERE `status` = :from_status',
-            [
-                ':to_status' => JobUnlocker::STATUS_ERROR,
-                ':from_status' => JobUnlocker::STATUS_RUNNING,
-                ':messages' => 'some message'
-            ]
-        )
-        ->willReturn(3);
+            ->method('affectingQuery')
+            ->with(
+                'UPDATE `cron_schedule` SET `status` = :to_status, `messages` = :messages ' .
+                'WHERE `status` = :from_status',
+                [
+                    ':to_status' => JobUnlocker::STATUS_ERROR,
+                    ':from_status' => JobUnlocker::STATUS_RUNNING,
+                    ':messages' => 'some message'
+                ]
+            )
+            ->willReturn(3);
+        $this->connectionMock->expects($this->once())
+            ->method('getTableName')
+            ->with('cron_schedule')
+            ->willReturn('cron_schedule');
 
         $this->assertEquals(3, $this->cronJobUnlocker->unlockAll('some message'));
     }
@@ -64,6 +72,10 @@ class JobUnlockerTest extends TestCase
                 ]
             )
             ->willReturn(3);
+        $this->connectionMock->expects($this->once())
+            ->method('getTableName')
+            ->with('cron_schedule')
+            ->willReturn('cron_schedule');
 
         $this->assertEquals(3, $this->cronJobUnlocker->unlockByJobCode('some_code', 'some_message'));
     }

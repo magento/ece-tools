@@ -6,7 +6,7 @@
 set -e
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
-./bin/ece-tools docker:build:integration test-v2 --php ${TRAVIS_PHP_VERSION}
+./bin/ece-tools docker:build:integration functional --php ${TRAVIS_PHP_VERSION}
 
 case $TRAVIS_PHP_VERSION in
     7.0)
@@ -16,6 +16,6 @@ case $TRAVIS_PHP_VERSION in
         ./vendor/bin/codecept run -g php71 --steps
         ;;
     7.2)
-        ./vendor/bin/codecept run -g php72 --steps
+        ./vendor/bin/codecept run -g php72parallel_"$FUNCTIONAL_INDEX" --steps
         ;;
 esac
