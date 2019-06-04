@@ -68,7 +68,7 @@ class ConfigShow extends Command
             ->addArgument(
                 'variable',
                 InputArgument::IS_ARRAY,
-                "Environment variables to display, possible options: " . implode(',', $this->allowedVariables),
+                'Environment variables to display, possible options: ' . implode(',', $this->allowedVariables),
                 []
             );
 

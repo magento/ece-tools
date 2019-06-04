@@ -45,6 +45,9 @@ class RendererTest extends TestCase
      */
     private $outputFormatterMock;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);

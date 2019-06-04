@@ -112,8 +112,7 @@ class Renderer
     {
         $output->writeln(PHP_EOL . "<info>{$title}:</info>");
         $table = new Table($output);
-        $table
-            ->setHeaders($header)
+        $table->setHeaders($header)
             ->setRows($rows);
         if (method_exists($table, 'setColumnWidth')) {
             $table->setColumnWidth(0, 40);
