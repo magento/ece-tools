@@ -58,14 +58,12 @@ class WarmUp implements ProcessInterface
 
     /**
      * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
      */
     public function execute()
     {
         $urls = $this->getUrlsForWarmUp();
 
-        $fulfilled = function ($respons, $index) use ($urls) {
+        $fulfilled = function ($response, $index) use ($urls) {
             $this->logger->info('Warmed up page: ' . $urls[$index]);
         };
 
