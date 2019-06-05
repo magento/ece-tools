@@ -89,7 +89,9 @@ class SchemaTest extends TestCase
             [
                 PostDeployInterface::VAR_WARM_UP_PAGES => [
                     '',
-                ]
+                ],
+                PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
+                PostDeployInterface::VAR_ENABLE_TTFB_TEST => true,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
         );
@@ -151,6 +153,8 @@ class SchemaTest extends TestCase
             DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
             PostDeployInterface::VAR_WARM_UP_PAGES,
+            PostDeployInterface::VAR_TTFB_TESTED_PAGES,
+            PostDeployInterface::VAR_ENABLE_TTFB_TEST,
             SystemConfigInterface::VAR_ENV_RELATIONSHIPS,
             SystemConfigInterface::VAR_ENV_ROUTES,
             SystemConfigInterface::VAR_ENV_VARIABLES,

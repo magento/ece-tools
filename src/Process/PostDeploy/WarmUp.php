@@ -94,7 +94,7 @@ class WarmUp implements ProcessInterface
      *
      * @return array
      */
-    private function getUrlsForWarmUp(): array
+    public function getUrlsForWarmUp(): array
     {
         return array_filter(
             $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES),
