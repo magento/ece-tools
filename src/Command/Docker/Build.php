@@ -7,22 +7,22 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command\Docker;
 
+use Magento\MagentoCloud\Command\Docker\Build\Writer;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
-use Magento\MagentoCloud\Docker\ComposeManagerFactory;
-use Magento\MagentoCloud\Docker\Config\DistGenerator;
+use Magento\MagentoCloud\Docker\ComposeFactory;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
-use Magento\MagentoCloud\Docker\Service\Version\Validator as VersionValidator;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Service\Service;
+use Magento\MagentoCloud\Service\Validator;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Yaml\Yaml;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -43,14 +43,9 @@ class Build extends Command
     const OPTION_MODE = 'mode';
 
     /**
-     * @var ComposeManagerFactory
+     * @var ComposeFactory
      */
-    private $builderFactory;
-
-    /**
-     * @var File
-     */
-    private $file;
+    private $composeFactory;
 
     /**
      * @var Environment
@@ -63,45 +58,42 @@ class Build extends Command
     private $configFactory;
 
     /**
-     * @var DistGenerator
-     */
-    private $distGenerator;
-
-    /**
      * @var Config
      */
     private $serviceConfig;
 
     /**
-     * @var VersionValidator
+     * @var Validator
      */
-    private $versionValidator;
+    private $validator;
 
     /**
-     * @param ComposeManagerFactory $builderFactory
-     * @param File $file
+     * @var Writer
+     */
+    private $writer;
+
+    /**
+     * @param ComposeFactory $composeFactory
      * @param Environment $environment
      * @param RepositoryFactory $configFactory
      * @param Config $serviceConfig
-     * @param VersionValidator $versionValidator
-     * @param DistGenerator $distGenerator
+     * @param Validator $versionValidator
+     * @param Writer $writer
      */
     public function __construct(
-        ComposeManagerFactory $builderFactory,
-        File $file,
+        ComposeFactory $composeFactory,
         Environment $environment,
         RepositoryFactory $configFactory,
         Config $serviceConfig,
-        VersionValidator $versionValidator,
-        DistGenerator $distGenerator
+        Validator $versionValidator,
+        Writer $writer
     ) {
-        $this->builderFactory = $builderFactory;
-        $this->file = $file;
+        $this->composeFactory = $composeFactory;
         $this->environment = $environment;
         $this->configFactory = $configFactory;
         $this->serviceConfig = $serviceConfig;
-        $this->versionValidator = $versionValidator;
-        $this->distGenerator = $distGenerator;
+        $this->validator = $versionValidator;
+        $this->writer = $writer;
 
         parent::__construct();
     }
@@ -116,32 +108,32 @@ class Build extends Command
             ->addOption(
                 self::OPTION_PHP,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'PHP version'
             )->addOption(
                 self::OPTION_NGINX,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Nginx version'
             )->addOption(
                 self::OPTION_DB,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'DB version'
             )->addOption(
                 self::OPTION_REDIS,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Redis version'
             )->addOption(
                 self::OPTION_ES,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Elasticsearch version'
             )->addOption(
                 self::OPTION_RABBIT_MQ,
                 null,
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'RabbitMQ version'
             )->addOption(
                 self::OPTION_NODE,
@@ -151,12 +143,12 @@ class Build extends Command
             )->addOption(
                 self::OPTION_MODE,
                 'm',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 sprintf(
                     'Mode of environment (%s)',
-                    implode(', ', [ComposeManagerFactory::COMPOSE_DEVELOPER, ComposeManagerFactory::COMPOSE_PRODUCTION])
+                    implode(', ', [ComposeFactory::COMPOSE_DEVELOPER, ComposeFactory::COMPOSE_PRODUCTION])
                 ),
-                ComposeManagerFactory::COMPOSE_PRODUCTION
+                ComposeFactory::COMPOSE_PRODUCTION
             );
 
         parent::configure();
@@ -167,23 +159,23 @@ class Build extends Command
      *
      * @throws ConfigurationMismatchException
      * @throws FileSystemException
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @throws UndefinedPackageException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $type = $input->getOption(self::OPTION_MODE);
 
-        $builder = $this->builderFactory->create($type);
+        $compose = $this->composeFactory->create($type);
         $config = $this->configFactory->create();
 
         $map = [
-            self::OPTION_PHP => Config::KEY_PHP,
-            self::OPTION_DB => Config::KEY_DB,
-            self::OPTION_NGINX => Config::KEY_NGINX,
-            self::OPTION_REDIS => Config::KEY_REDIS,
-            self::OPTION_ES => Config::KEY_ELASTICSEARCH,
-            self::OPTION_NODE => Config::KEY_NODE,
-            self::OPTION_RABBIT_MQ => Config::KEY_RABBITMQ,
+            self::OPTION_PHP => Service::NAME_PHP,
+            self::OPTION_DB => Service::NAME_DB,
+            self::OPTION_NGINX => Service::NAME_NGINX,
+            self::OPTION_REDIS => Service::NAME_REDIS,
+            self::OPTION_ES => Service::NAME_ELASTICSEARCH,
+            self::OPTION_NODE => Service::NAME_NODE,
+            self::OPTION_RABBIT_MQ => Service::NAME_RABBITMQ,
         ];
 
         array_walk($map, static function ($key, $option) use ($config, $input) {
@@ -193,27 +185,21 @@ class Build extends Command
         });
 
         $versionList = $this->serviceConfig->getAllServiceVersions($config);
-
-        $unsupportedErrorMsg = $this->versionValidator->validateVersions($versionList);
+        $errorList = $this->validator->validateVersions($versionList);
 
         $helper = $this->getHelper('question');
         $question = new ConfirmationQuestion(
             'There are some service versions which are not supported'
-                . ' by current Magento version:' . "\n" . implode("\n", $unsupportedErrorMsg) . "\n"
-                . 'Do you want to continue?[y/N]',
+            . ' by current Magento version:' . "\n" . implode("\n", $errorList) . "\n"
+            . 'Do you want to continue?[y/N]',
             false
         );
 
-        if ($unsupportedErrorMsg && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
-            return null;
+        if ($errorList && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
+            return 1;
         }
 
-        $this->file->filePutContents(
-            $builder->getConfigPath(),
-            Yaml::dump($builder->build($config), 4, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)
-        );
-
-        $this->distGenerator->generate();
+        $this->writer->write($compose, $config);
 
         try {
             $this->getApplication()
@@ -224,6 +210,8 @@ class Build extends Command
         }
 
         $output->writeln('<info>Configuration was built.</info>');
+
+        return 0;
     }
 
     /**
