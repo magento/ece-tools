@@ -10,8 +10,12 @@ namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\TransferStats;
+use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Util\UrlManager;
+use Psr\Log\LoggerInterface;
 
 class TimeToFirstByte implements ProcessInterface
 {
@@ -41,7 +45,7 @@ class TimeToFirstByte implements ProcessInterface
         UrlManager $urlManager,
         LoggerInterface $logger
     ) {
-        $this->postDeploy = $postDeploy;
+        $this->postDeploy = $config;
         $this->poolFactory = $poolFactory;
         $this->urlManager = $urlManager;
         $this->logger = $logger;
