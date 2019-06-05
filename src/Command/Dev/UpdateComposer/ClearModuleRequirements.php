@@ -49,28 +49,43 @@ class ClearModuleRequirements
     {
         $rootDirectory = $this->directoryList->getMagentoRoot();
         $clearModulesFilePath = $rootDirectory . '/' . self::SCRIPT_PATH;
-        $reposArrayToString = '[\'' . implode('\', \'', $repos) . '\']';
+        $stringRepos = var_export($repos, true);
+        $standaloneType = ComposerGenerator::REPO_TYPE_STANDALONE;
 
         $clearModulesCode = <<<CODE
 <?php
-foreach ({$reposArrayToString} as \$repoName) {
-    foreach (glob(__DIR__ .'/' . \$repoName . '/app/code/Magento/*') as \$moduleDir) {
-        if (!file_exists(\$moduleDir . '/composer.json')) {
-            continue;
+\$repos = {$stringRepos};
+ 
+function clearRequirements(\$dir) {
+    if (!file_exists(\$dir . '/composer.json')) {
+        return;
+    }
+
+    \$composerJson = json_decode(file_get_contents(\$dir . '/composer.json'), true);
+
+    foreach (\$composerJson['require'] as \$requireName => \$requireVersion) {
+        if (preg_match('{^(magento\/|elasticsearch\/)}i', \$requireName)) {
+            unset(\$composerJson['require'][\$requireName]);
         }
+    }
 
-        \$composerJson = json_decode(file_get_contents(\$moduleDir . '/composer.json'), true);
+    file_put_contents(
+        \$dir . '/composer.json',
+        json_encode(\$composerJson, JSON_PRETTY_PRINT)
+    );
+}
 
-        foreach (\$composerJson['require'] as \$requireName => \$requireVersion) {
-            if (preg_match('{^(magento\/|elasticsearch\/)}i', \$requireName)) {
-                unset(\$composerJson['require'][\$requireName]);
-            }
-        }
 
-        file_put_contents(
-            \$moduleDir . '/composer.json',
-            json_encode(\$composerJson, JSON_PRETTY_PRINT)
-        );
+foreach (\$repos as \$repoName => \$repoOptions) {
+    \$repoDir = __DIR__ .'/' . \$repoName;
+    
+    if (isset(\$repoOptions['type']) && \$repoOptions['type'] == {$standaloneType}) {
+        clearRequirements(\$repoDir);
+        continue;
+    }
+    
+    foreach (glob(\$repoDir . '/app/code/Magento/*') as \$moduleDir) {
+        clearRequirements(\$moduleDir);
     }
 }
 CODE;

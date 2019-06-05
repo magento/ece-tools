@@ -14,6 +14,8 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class ComposerGenerator
 {
+    const REPO_TYPE_STANDALONE = 'standalone';
+
     /**
      * @var DirectoryList
      */
@@ -117,7 +119,11 @@ class ComposerGenerator
 
         $preparePackagesScripts = [];
 
-        foreach (array_keys($repoOptions) as $repoName) {
+        foreach ($repoOptions as $repoName => $gitOption) {
+            if ($this->isStandAlonePackage($gitOption)) {
+                continue;
+            }
+
             $preparePackagesScripts[] = sprintf(
                 "rsync -av --progress --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
                 . "--exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./%s/ ./",
@@ -209,8 +215,13 @@ class ComposerGenerator
             $composer['require'][$dirComposer['name']] = $dirComposer['version'] ?? '*';
         };
 
-        foreach (array_keys($repoOptions) as $repoName) {
+        foreach ($repoOptions as $repoName => $gitOption) {
             $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
+            if ($this->isStandAlonePackage($gitOption)) {
+                $add($baseRepoFolder);
+                continue;
+            }
+
             foreach (glob($baseRepoFolder . '/app/code/Magento/*') as $dir) {
                 $add($dir);
             }
@@ -228,5 +239,14 @@ class ComposerGenerator
         }
 
         return $composer;
+    }
+
+    /**
+     * @param array $repoOptions
+     * @return bool
+     */
+    private function isStandAlonePackage(array $repoOptions): bool
+    {
+        return isset($repoOptions['type']) && $repoOptions['type'] == self::REPO_TYPE_STANDALONE;
     }
 }
