@@ -79,6 +79,10 @@ class ComposerGenerator
             );
         }
 
+        if (isset($composer['require']['magento/framework'])) {
+            $composer['require']['magento/framework'] = '*';
+        }
+
         $composer = $this->addModules($repoOptions, $composer);
 
         return $composer;
@@ -199,7 +203,7 @@ class ComposerGenerator
      */
     private function addModules(array $repoOptions, array $composer): array
     {
-        $add = function ($dir) use (&$composer) {
+        $add = function ($dir, $version = null) use (&$composer) {
             if (!$this->file->isExists($dir . '/composer.json')) {
                 return;
             }
@@ -212,13 +216,13 @@ class ComposerGenerator
                     'symlink' => false,
                 ],
             ];
-            $composer['require'][$dirComposer['name']] = $dirComposer['version'] ?? '*';
+            $composer['require'][$dirComposer['name']] = $version ?? $dirComposer['version'] ?? '*';
         };
 
         foreach ($repoOptions as $repoName => $gitOption) {
             $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
             if ($this->isStandAlonePackage($gitOption)) {
-                $add($baseRepoFolder);
+                $add($baseRepoFolder, '*');
                 continue;
             }
 

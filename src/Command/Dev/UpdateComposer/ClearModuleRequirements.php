@@ -79,7 +79,7 @@ function clearRequirements(\$dir) {
 foreach (\$repos as \$repoName => \$repoOptions) {
     \$repoDir = __DIR__ .'/' . \$repoName;
     
-    if (isset(\$repoOptions['type']) && \$repoOptions['type'] == {$standaloneType}) {
+    if (isset(\$repoOptions['type']) && \$repoOptions['type'] == '{$standaloneType}') {
         clearRequirements(\$repoDir);
         continue;
     }
