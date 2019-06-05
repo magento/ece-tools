@@ -11,6 +11,7 @@ namespace Magento\MagentoCloud\Http;
 use GuzzleHttp\Pool;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
+use Psr\Http\Message\RequestInterface;
 
 /**
  * Create Guzzle request pools.
@@ -45,14 +46,19 @@ class PoolFactory
     {
         $client = $this->clientFactory->create($clientConfig);
 
-        $requests = function () use ($urls, $requestMethod) {
-            foreach ($urls as $url) {
-                $url = $this->urlManager->expandUrl($url);
+        return $this->container->create(Pool::class, [
+            'client' => $client,
+            'requests' => $this->yieldRequest($urls, $requestMethod),
+            'config' => $config,
+        ]);
+    }
 
-                yield $this->requestFactory->create($requestMethod, $url);
-            }
-        };
+    public function yieldRequest(array $urls, string $requestMethod): \Iterator
+    {
+        foreach ($urls as $url) {
+            $url = $this->urlManager->expandUrl($url);
 
-        return $this->container->create(Pool::class, compact('client', 'requests', 'config'));
+            yield $this->requestFactory->create($requestMethod, $url);
+        }
     }
 }
