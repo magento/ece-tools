@@ -192,7 +192,7 @@ class UrlManager
     public function expandUrl(string $url): string
     {
         if (parse_url($url, PHP_URL_HOST) === null) {
-            return rtrim($this->getBaseUrl(), '/') . '/' . $url;
+            return rtrim($this->getBaseUrl(), '/') . '/' . ltrim($url, '/');
         } else {
             return $url;
         }
