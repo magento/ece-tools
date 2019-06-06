@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Command\Docker;
 use Magento\MagentoCloud\Command\Docker\Build\Writer;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Compose\DeveloperCompose;
 use Magento\MagentoCloud\Docker\ComposeFactory;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
@@ -41,6 +42,7 @@ class Build extends Command
     const OPTION_RABBIT_MQ = 'rmq';
     const OPTION_NODE = 'node';
     const OPTION_MODE = 'mode';
+    const OPTION_SYNC_ENGINE = 'sync-engine';
 
     /**
      * @var ComposeFactory
@@ -149,6 +151,15 @@ class Build extends Command
                     implode(', ', [ComposeFactory::COMPOSE_DEVELOPER, ComposeFactory::COMPOSE_PRODUCTION])
                 ),
                 ComposeFactory::COMPOSE_PRODUCTION
+            )->addOption(
+                self::OPTION_SYNC_ENGINE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                sprintf(
+                    'Sync Engine for Docker (%s)',
+                    implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
+                ),
+                DeveloperCompose::SYNC_ENGINE_DOCKER_SYNC
             );
 
         parent::configure();
@@ -164,6 +175,7 @@ class Build extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $type = $input->getOption(self::OPTION_MODE);
+        $syncEngine = $input->getOption(self::OPTION_SYNC_ENGINE);
 
         $compose = $this->composeFactory->create($type);
         $config = $this->configFactory->create();
@@ -198,6 +210,19 @@ class Build extends Command
         if ($errorList && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
             return 1;
         }
+
+        if (
+            ComposeFactory::COMPOSE_DEVELOPER === $type
+            && !in_array($syncEngine, DeveloperCompose::SYNC_ENGINES_LIST)
+        ) {
+            throw new ConfigurationMismatchException(sprintf(
+                "We don't support %s. We support only: %s.",
+                $syncEngine,
+                implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
+            ));
+        }
+
+        $config->set(DeveloperCompose::SYNC_ENGINE, $syncEngine);
 
         $this->writer->write($compose, $config);
 
