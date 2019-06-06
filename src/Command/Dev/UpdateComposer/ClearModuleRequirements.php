@@ -87,6 +87,7 @@ foreach (\$repos as \$repoName => \$repoOptions) {
         clearRequirements(\$moduleDir);
     }
 }
+
 CODE;
         $this->file->filePutContents($clearModulesFilePath, $clearModulesCode);
 
