@@ -118,7 +118,7 @@ class TimeToFirstByte implements ProcessInterface
         $status = $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : 'unknown';
 
         if (300 < $status && $status < 400) {
-            $this->logger->debug('TTFB response was a redirect', ['url' => $stats->getEffectiveUri()]);
+            $this->logger->debug('TTFB response was a redirect', ['url' => (string) $stats->getEffectiveUri()]);
             return;
         }
 
@@ -131,7 +131,7 @@ class TimeToFirstByte implements ProcessInterface
 
         $this->logger->info(
             sprintf('TTFB test result: %01.3fs', $time),
-            ['url' => $stats->getEffectiveUri(), 'status' => $status]
+            ['url' => (string) $stats->getEffectiveUri(), 'status' => $status]
         );
 
         while ($this->lock);
@@ -143,7 +143,7 @@ class TimeToFirstByte implements ProcessInterface
 
         $historicData[] = [
             'timestamp' => date('Y-m-d H:i:s'),
-            'url' => $stats->getEffectiveUri(),
+            'url' => (string) $stats->getEffectiveUri(),
             'status' => $status,
             'ttfb' => $time,
         ];
