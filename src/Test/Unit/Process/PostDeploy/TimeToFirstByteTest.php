@@ -15,6 +15,8 @@ use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\TransferStats;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Process\PostDeploy\TimeToFirstByte;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -41,6 +43,12 @@ class TimeToFirstByteTest extends TestCase
     /** @var LoggerInterface|MockObject */
     private $loggerMock;
 
+    /** @var FileList|MockObject */
+    private $fileListMock;
+
+    /** @var File|MockObject */
+    private $fileMock;
+
     /** @var Pool|MockObject */
     private $poolMock;
 
@@ -56,6 +64,8 @@ class TimeToFirstByteTest extends TestCase
         $this->poolFactoryMock = $this->createMock(PoolFactory::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->fileListMock = $this->createMock(FileList::class);
+        $this->fileMock = $this->createMock(File::class);
         $this->poolMock = $this->createMock(Pool::class);
         $this->promiseMock = $this->createMock(PromiseInterface::class);
 
@@ -66,7 +76,9 @@ class TimeToFirstByteTest extends TestCase
             $this->postDeployMock,
             $this->poolFactoryMock,
             $this->urlManagerMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->fileListMock,
+            $this->fileMock
         );
     }
 
@@ -164,6 +176,27 @@ class TimeToFirstByteTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('TTFB test result: 3.142s', ['url' => '/', 'status' => 'unknown']);
+        $this->fileListMock->method('getTtfbLog')
+            ->willReturn('/path/to/ttfb.json');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('/path/to/ttfb.json')
+            ->willReturn(false);
+        $this->fileMock->expects($this->never())
+            ->method('fileGetContents');
+        $this->fileMock->expects($this->once())
+            ->method('filePutContents')
+            ->with(
+                $this->equalTo('/path/to/ttfb.json'),
+                $this->callBack(function (string $subject) {
+                    $this->assertRegExp('/"timestamp"\s*:\s*"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"/', $subject);
+                    $this->assertRegExp('/"url"\s*:\s*"\/"/', $subject);
+                    $this->assertRegExp('/"status"\s*:\s*"unknown"/', $subject);
+                    $this->assertRegExp('/"ttfb"\s*:\s*3.141592/', $subject);
+
+                    return true;
+                })
+            );
 
         $this->process->statHandler($stats);
     }
@@ -183,6 +216,30 @@ class TimeToFirstByteTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('TTFB test result: 0.620s', ['url' => '/customer', 'status' => 200]);
+        $this->fileListMock->method('getTtfbLog')
+            ->willReturn('/path/to/ttfb.json');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('/path/to/ttfb.json')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->with('/path/to/ttfb.json')
+            ->willReturn('[{"previous": "result"}]');
+        $this->fileMock->expects($this->once())
+            ->method('filePutContents')
+            ->with(
+                $this->equalTo('/path/to/ttfb.json'),
+                $this->callBack(function (string $subject) {
+                    $this->assertRegExp('/\{\s*"previous"\s*:\s*"result"\s*\}/', $subject);
+                    $this->assertRegExp('/"timestamp"\s*:\s*"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"/', $subject);
+                    $this->assertRegExp('/"url"\s*:\s*"\/customer"/', $subject);
+                    $this->assertRegExp('/"status"\s*:\s*200/', $subject);
+                    $this->assertRegExp('/"ttfb"\s*:\s*0\.62/', $subject);
+
+                    return true;
+                })
+            );
 
         $this->process->statHandler($stats);
     }

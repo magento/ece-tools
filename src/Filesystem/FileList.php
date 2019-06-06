@@ -37,6 +37,14 @@ class FileList extends ConfigFileList
     /**
      * @return string
      */
+    public function getTtfbLog(): string
+    {
+        return $this->directoryList->getLog() . '/ttfb_results.json';
+    }
+
+    /**
+     * @return string
+     */
     public function getInitCloudLog(): string
     {
         return $this->directoryList->getInit() . '/var/log/cloud.log';

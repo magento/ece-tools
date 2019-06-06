@@ -11,6 +11,8 @@ namespace Magento\MagentoCloud\Process\PostDeploy;
 use GuzzleHttp\RequestOptions;
 use GuzzleHttp\TransferStats;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
+use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessException;
@@ -39,16 +41,29 @@ class TimeToFirstByte implements ProcessInterface
      */
     private $logger;
 
+    /** @var File */
+    private $file;
+
+    /** @var FileList */
+    private $fileList;
+
+    /** @var bool */
+    private $lock = false;
+
     public function __construct(
         PostDeployInterface $config,
         PoolFactory $poolFactory,
         UrlManager $urlManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        FileList $fileList,
+        File $file
     ) {
         $this->postDeploy = $config;
         $this->poolFactory = $poolFactory;
         $this->urlManager = $urlManager;
         $this->logger = $logger;
+        $this->fileList = $fileList;
+        $this->file = $file;
     }
 
     public function execute(): void
@@ -118,5 +133,23 @@ class TimeToFirstByte implements ProcessInterface
             sprintf('TTFB test result: %01.3fs', $time),
             ['url' => $stats->getEffectiveUri(), 'status' => $status]
         );
+
+        while ($this->lock);
+        $this->lock = true;
+
+        $historicData = $this->file->isExists($this->fileList->getTtfbLog())
+            ? json_decode($this->file->fileGetContents($this->fileList->getTtfbLog()), true)
+            : [];
+
+        $historicData[] = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'url' => $stats->getEffectiveUri(),
+            'status' => $status,
+            'ttfb' => $time,
+        ];
+
+        $this->file->filePutContents($this->fileList->getTtfbLog(), json_encode($historicData, JSON_UNESCAPED_SLASHES));
+
+        $this->lock = false;
     }
 }
