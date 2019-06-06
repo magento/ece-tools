@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ConfigShow extends Command
 {
-    const NAME = 'config:show';
+    const NAME = 'env:config:show';
 
     const RELATIONSHIPS = 'services';
     const ROUTES = 'routes';
