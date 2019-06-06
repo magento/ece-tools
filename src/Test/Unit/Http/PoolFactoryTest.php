@@ -39,7 +39,7 @@ class PoolFactoryTest extends TestCase
     /** @var PoolFactory */
     private $poolFactory;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->containerMock = $this->createMock(ContainerInterface::class);
         $this->clientFactoryMock = $this->createMock(ClientFactory::class);
@@ -54,7 +54,7 @@ class PoolFactoryTest extends TestCase
         );
     }
 
-    public function testYieldRequest(): void
+    public function testYieldRequest()
     {
         $urls = ['/', '/foo/bar', 'http://example2.com/products'];
 
@@ -80,7 +80,7 @@ class PoolFactoryTest extends TestCase
         }
     }
 
-    public function testCreate(): void
+    public function testCreate()
     {
         $clientMock = $this->createMock(ClientInterface::class);
         $poolMock = $this->createMock(Pool::class);

@@ -58,7 +58,7 @@ class TimeToFirstByteTest extends TestCase
     /** @var TimeToFirstByte */
     private $process;
 
-    protected function setUp(): void
+    protected function setUp()
     {
         $this->postDeployMock = $this->createMock(PostDeployInterface::class);
         $this->poolFactoryMock = $this->createMock(PoolFactory::class);
@@ -82,7 +82,7 @@ class TimeToFirstByteTest extends TestCase
         );
     }
 
-    public function testGetUrlsForTesting(): void
+    public function testGetUrlsForTesting()
     {
         $this->postDeployMock->expects($this->once())
             ->method('get')
@@ -106,7 +106,7 @@ class TimeToFirstByteTest extends TestCase
         $this->assertSame(['index.php', 'https://example.com/products/'], $this->process->getUrlsForTesting());
     }
 
-    public function testExecuteTtfbDisabled(): void
+    public function testExecuteTtfbDisabled()
     {
         $this->postDeployMock->expects($this->once())
             ->method('get')
@@ -121,7 +121,7 @@ class TimeToFirstByteTest extends TestCase
         $this->process->execute();
     }
 
-    public function testExecute(): void
+    public function testExecute()
     {
         $urls = ['/', '/customer/account/create'];
 
@@ -145,7 +145,7 @@ class TimeToFirstByteTest extends TestCase
         $this->process->execute();
     }
 
-    public function testStatHandlerRedirect(): void
+    public function testStatHandlerRedirect()
     {
         $mockRequest = $this->createMock(RequestInterface::class);
         $mockResponse = $this->createMock(ResponseInterface::class);
@@ -162,7 +162,7 @@ class TimeToFirstByteTest extends TestCase
         $this->process->statHandler($stats);
     }
 
-    public function testStatHandlerTransferTime(): void
+    public function testStatHandlerTransferTime()
     {
         $mockRequest = $this->createMock(RequestInterface::class);
 
@@ -201,7 +201,7 @@ class TimeToFirstByteTest extends TestCase
         $this->process->statHandler($stats);
     }
 
-    public function testStatHandlerCurlStats(): void
+    public function testStatHandlerCurlStats()
     {
         $mockRequest = $this->createMock(RequestInterface::class);
         $mockResponse = $this->createMock(ResponseInterface::class);

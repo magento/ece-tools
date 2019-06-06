@@ -137,7 +137,7 @@ class WarmUpTest extends TestCase
         $this->process->execute();
     }
 
-    public function testGetUrlsForWarmUp($value=''): void
+    public function testGetUrlsForWarmUp($value='')
     {
         $this->postDeployMock->expects($this->once())
             ->method('get')

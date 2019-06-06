@@ -379,7 +379,7 @@ class UrlManagerTest extends TestCase
         );
     }
 
-    public function testExpandUrl(): void
+    public function testExpandUrl()
     {
         $this->connection->method('selectOne')
             ->with(
@@ -396,7 +396,7 @@ class UrlManagerTest extends TestCase
         $this->assertSame('https://example2.com/catalog', $this->manager->expandUrl('https://example2.com/catalog'));
     }
 
-    public function testIsRelatedDomain(): void
+    public function testIsRelatedDomain()
     {
         $this->connection->method('select')
             ->with('SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)')
@@ -416,7 +416,7 @@ class UrlManagerTest extends TestCase
         $this->assertFalse($this->manager->isRelatedDomain('https://example4.com'));
     }
 
-    public function testIsUrlValid(): void
+    public function testIsUrlValid()
     {
         $this->connection->method('select')
             ->with('SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)')

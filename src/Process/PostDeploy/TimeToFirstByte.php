@@ -66,7 +66,7 @@ class TimeToFirstByte implements ProcessInterface
         $this->file = $file;
     }
 
-    public function execute(): void
+    public function execute()
     {
         if (!$this->postDeploy->get(PostDeployInterface::VAR_ENABLE_TTFB_TEST)) {
             $this->logger->debug('Time to first byte testing has been disabled.');
@@ -113,7 +113,7 @@ class TimeToFirstByte implements ProcessInterface
      *
      * @param TransferStats $stats
      */
-    public function statHandler(TransferStats $stats): void
+    public function statHandler(TransferStats $stats)
     {
         $status = $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : 'unknown';
 

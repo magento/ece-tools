@@ -103,7 +103,7 @@ class FileListTest extends TestCase
         $this->assertSame('magento_root/.magento/services.yaml', $this->fileList->getServicesConfig());
     }
 
-    public function testGetTtfbLog(): void
+    public function testGetTtfbLog()
     {
         $this->assertSame('magento_root/var/log/ttfb_results.json', $this->fileList->getTtfbLog());
     }
