@@ -379,6 +379,65 @@ class UrlManagerTest extends TestCase
         );
     }
 
+    public function testExpandUrl(): void
+    {
+        $this->connection->method('selectOne')
+            ->with(
+                'SELECT `value` from `core_config_data` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1'
+            )->willReturn([
+                'value' => 'https://example.com/',
+            ]);
+        $this->connection->method('getTableName')
+            ->with('core_config_data')
+            ->willReturn('core_config_data');
+
+        $this->assertSame('https://example.com/products/123', $this->manager->expandUrl('/products/123'));
+        $this->assertSame('https://example.com/products/123', $this->manager->expandUrl('products/123'));
+        $this->assertSame('https://example2.com/catalog', $this->manager->expandUrl('https://example2.com/catalog'));
+    }
+
+    public function testIsRelatedDomain(): void
+    {
+        $this->connection->method('select')
+            ->with('SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)')
+            ->willReturn([
+                ['value' => 'https://example.com/'],
+                ['value' => 'https://example2.com/'],
+                ['value' => 'https://example3.com/'],
+            ]);
+        $this->connection->method('getTableName')
+            ->with('core_config_data')
+            ->willReturn('core_config_data');
+
+        $this->assertTrue($this->manager->isRelatedDomain('https://example.com/'));
+        $this->assertTrue($this->manager->isRelatedDomain('https://example2.com'));
+        $this->assertTrue($this->manager->isRelatedDomain('http://example3.com/'));
+        $this->assertTrue($this->manager->isRelatedDomain('http://example.com/some/extra/path'));
+        $this->assertFalse($this->manager->isRelatedDomain('https://example4.com'));
+    }
+
+    public function testIsUrlValid(): void
+    {
+        $this->connection->method('select')
+            ->with('SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)')
+            ->willReturn([
+                ['value' => 'https://example.com/'],
+                ['value' => 'https://example2.com/'],
+                ['value' => 'https://example3.com/'],
+            ]);
+        $this->connection->method('getTableName')
+            ->with('core_config_data')
+            ->willReturn('core_config_data');
+
+        $this->assertTrue($this->manager->isUrlValid('https://example.com/'));
+        $this->assertTrue($this->manager->isUrlValid('http://example2.com'));
+        $this->assertTrue($this->manager->isUrlValid('https://example.com/some/extra/path'));
+        $this->assertTrue($this->manager->isUrlValid('relative/path/name'));
+        $this->assertTrue($this->manager->isUrlValid('/rooted/relative/path'));
+        $this->assertFalse($this->manager->isUrlValid('http://example4.com'));
+        $this->assertFalse($this->manager->isUrlValid('https://example4.com/some/more/path'));
+    }
+
     /**
      * @param array $routes
      * @dataProvider getBaseUrlPlaceholderDataProvider

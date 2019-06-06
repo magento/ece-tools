@@ -58,30 +58,7 @@ class TimeToFirstByte implements ProcessInterface
             return;
         }
 
-        $requestOpts = [
-            RequestOptions::ON_STATS => function (TransferStats $stats) {
-                if (!array_key_exists(CURLINFO_STARTTRANSFER_TIME, $stats->getHandlerStats())) {
-                    $this->logger->debug('cURL stats are missing from the request; using total transfer time.');
-                    $time = $stats->getTransferTime();
-                } else {
-                    $time = $stats->getHandlerStats()[CURLINFO_STARTTRANSFER_TIME];
-                }
-
-                $status = $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : 'unknown';
-
-                if (300 < $status && $status < 400) {
-                    $this->logger->debug('TTFB response was a redirect');
-                    return;
-                }
-
-                $this->logger->info(sprintf(
-                    'TTFB test results: { url: %s, status: %s, time: %01.3f }',
-                    $stats->getEffectiveUri(),
-                    $status,
-                    $time
-                ));
-            }
-        ];
+        $requestOpts = [RequestOptions::ON_STATS => [$this, 'statHandler']];
 
         try {
             $pool = $this->poolFactory->create($this->getUrlsForTesting(), [
@@ -113,6 +90,33 @@ class TimeToFirstByte implements ProcessInterface
 
                 return true;
             }
+        );
+    }
+
+    /**
+     * Log stats from Guzzle request.
+     *
+     * @param TransferStats $stats
+     */
+    public function statHandler(TransferStats $stats): void
+    {
+        $status = $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : 'unknown';
+
+        if (300 < $status && $status < 400) {
+            $this->logger->debug('TTFB response was a redirect', ['url' => $stats->getEffectiveUri()]);
+            return;
+        }
+
+        if (!array_key_exists(CURLINFO_STARTTRANSFER_TIME, $stats->getHandlerStats())) {
+            $this->logger->debug('cURL stats are missing from the request; using total transfer time');
+            $time = $stats->getTransferTime();
+        } else {
+            $time = $stats->getHandlerStats()[CURLINFO_STARTTRANSFER_TIME];
+        }
+
+        $this->logger->info(
+            sprintf('TTFB test result: %01.3fs', $time),
+            ['url' => $stats->getEffectiveUri(), 'status' => $status]
         );
     }
 }

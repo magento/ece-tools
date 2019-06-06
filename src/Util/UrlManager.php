@@ -193,9 +193,9 @@ class UrlManager
     {
         if (parse_url($url, PHP_URL_HOST) === null) {
             return rtrim($this->getBaseUrl(), '/') . '/' . ltrim($url, '/');
-        } else {
-            return $url;
         }
+
+        return $url;
     }
 
     /**
