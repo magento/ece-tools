@@ -101,9 +101,9 @@ class ComposerGeneratorTest extends TestCase
         $this->assertArrayHasKey('install-from-git', $composer['scripts']);
         $this->assertEquals(
             [
-                "rsync -av --progress --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
+                "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
                 . " --exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./repo1/ ./",
-                "rsync -av --progress --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
+                "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
                 . " --exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./repo2/ ./",
             ],
             $composer['scripts']['prepare-packages']

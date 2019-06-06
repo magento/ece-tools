@@ -50,7 +50,7 @@ class ClearModuleRequirements
         $rootDirectory = $this->directoryList->getMagentoRoot();
         $clearModulesFilePath = $rootDirectory . '/' . self::SCRIPT_PATH;
         $stringRepos = var_export($repos, true);
-        $standaloneType = ComposerGenerator::REPO_TYPE_STANDALONE;
+        $singlePackageType = ComposerGenerator::REPO_TYPE_SINGLE_PACKAGE;
 
         $clearModulesCode = <<<CODE
 <?php
@@ -79,7 +79,7 @@ function clearRequirements(\$dir) {
 foreach (\$repos as \$repoName => \$repoOptions) {
     \$repoDir = __DIR__ .'/' . \$repoName;
     
-    if (isset(\$repoOptions['type']) && \$repoOptions['type'] == '{$standaloneType}') {
+    if (isset(\$repoOptions['type']) && \$repoOptions['type'] == '{$singlePackageType}') {
         clearRequirements(\$repoDir);
         continue;
     }
