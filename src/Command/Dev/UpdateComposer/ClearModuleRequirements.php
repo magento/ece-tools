@@ -55,7 +55,7 @@ class ClearModuleRequirements
         $clearModulesCode = <<<CODE
 <?php
 \$repos = {$stringRepos};
- 
+
 function clearRequirements(\$dir) {
     if (!file_exists(\$dir . '/composer.json')) {
         return;
@@ -75,15 +75,14 @@ function clearRequirements(\$dir) {
     );
 }
 
-
 foreach (\$repos as \$repoName => \$repoOptions) {
     \$repoDir = __DIR__ .'/' . \$repoName;
-    
+
     if (isset(\$repoOptions['type']) && \$repoOptions['type'] == '{$singlePackageType}') {
         clearRequirements(\$repoDir);
         continue;
     }
-    
+
     foreach (glob(\$repoDir . '/app/code/Magento/*') as \$moduleDir) {
         clearRequirements(\$moduleDir);
     }

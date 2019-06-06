@@ -79,8 +79,10 @@ class ComposerGenerator
             );
         }
 
-        if (isset($composer['require']['magento/framework'])) {
-            $composer['require']['magento/framework'] = '*';
+        foreach (array_keys($composer['require']) as $packageName) {
+            if (preg_match('/magento\/framework|magento\/module/', $packageName)) {
+                $composer['require'][$packageName] = '*';
+            }
         }
 
         $composer = $this->addModules($repoOptions, $composer);
@@ -117,7 +119,7 @@ class ComposerGenerator
      * @param array $repoOptions
      * @return array
      */
-    protected function getBaseComposer(array $repoOptions): array
+    private function getBaseComposer(array $repoOptions): array
     {
         $installFromGitScripts = $this->getInstallFromGitScripts($repoOptions);
 
