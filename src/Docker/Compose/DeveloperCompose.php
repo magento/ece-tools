@@ -14,11 +14,11 @@ use Illuminate\Contracts\Config\Repository;
  */
 class DeveloperCompose extends ProductionCompose
 {
-    CONST SYNC_ENGINE_DOCKER_SYNC = 'docker-sync';
-    CONST SYNC_ENGINE_MUTAGEN = 'mutagen';
+    const SYNC_ENGINE_DOCKER_SYNC = 'docker-sync';
+    const SYNC_ENGINE_MUTAGEN = 'mutagen';
     const SYNC_ENGINE = 'sync-engine';
 
-    CONST SYNC_ENGINES_LIST = [
+    const SYNC_ENGINES_LIST = [
         self::SYNC_ENGINE_DOCKER_SYNC,
         self::SYNC_ENGINE_MUTAGEN,
     ];

@@ -156,7 +156,7 @@ class Build extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 sprintf(
-                    'Sync Engine for Docker (%s)',
+                    'File sync engine. Works only with developer mode. Available: (%s)',
                     implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
                 ),
                 DeveloperCompose::SYNC_ENGINE_DOCKER_SYNC
@@ -179,6 +179,15 @@ class Build extends Command
 
         $compose = $this->composeFactory->create($type);
         $config = $this->configFactory->create();
+
+        if (ComposeFactory::COMPOSE_DEVELOPER === $type
+            && !in_array($syncEngine, DeveloperCompose::SYNC_ENGINES_LIST)) {
+            throw new ConfigurationMismatchException(sprintf(
+                "File sync engine `%s` is not supported. Available: %s",
+                $syncEngine,
+                implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
+            ));
+        }
 
         $map = [
             self::OPTION_PHP => Service::NAME_PHP,
@@ -209,17 +218,6 @@ class Build extends Command
 
         if ($errorList && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
             return 1;
-        }
-
-        if (
-            ComposeFactory::COMPOSE_DEVELOPER === $type
-            && !in_array($syncEngine, DeveloperCompose::SYNC_ENGINES_LIST)
-        ) {
-            throw new ConfigurationMismatchException(sprintf(
-                "We don't support %s. We support only: %s.",
-                $syncEngine,
-                implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
-            ));
         }
 
         $config->set(DeveloperCompose::SYNC_ENGINE, $syncEngine);
