@@ -11,6 +11,8 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Config\State;
+use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Filesystem\BackupList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -60,6 +62,11 @@ class CheckEnvFileTest extends TestCase
     private $stateMock;
 
     /**
+     * @var DatabaseConfiguration|MockObject
+     */
+    private $databaseValidatorMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -70,6 +77,7 @@ class CheckEnvFileTest extends TestCase
         $this->readerMock = $this->createMock(Reader::class);
         $this->writerMock = $this->createMock(Writer::class);
         $this->stateMock = $this->createMock(State::class);
+        $this->databaseValidatorMock = $this->createMock(DatabaseConfiguration::class);
 
         $this->process = new CheckEnvFile(
             $this->loggerMock,
@@ -77,8 +85,20 @@ class CheckEnvFileTest extends TestCase
             $this->fileMock,
             $this->readerMock,
             $this->writerMock,
-            $this->stateMock
+            $this->stateMock,
+            $this->databaseValidatorMock
         );
+    }
+
+    public function testExecuteWrongDatabaseConfig()
+    {
+        $this->databaseValidatorMock->expects($this->once())
+            ->method('validate')
+            ->willReturn(new Error('some error'));
+        $this->fileListMock->expects($this->never())
+            ->method('getEnv');
+
+        $this->process->execute();
     }
 
     public function testExecuteNotInstalled()

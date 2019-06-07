@@ -11,6 +11,8 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Config\State;
+use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Filesystem\BackupList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -54,12 +56,18 @@ class CheckEnvFile implements ProcessInterface
     private $file;
 
     /**
+     * @var DatabaseConfiguration
+     */
+    private $databaseValidator;
+
+    /**
      * @param LoggerInterface $logger
      * @param FileList $fileList
      * @param File $file
      * @param Reader $reader
      * @param Writer $writer
      * @param State $state
+     * @param DatabaseConfiguration $databaseValidator
      */
     public function __construct(
         LoggerInterface $logger,
@@ -67,7 +75,8 @@ class CheckEnvFile implements ProcessInterface
         File $file,
         Reader $reader,
         Writer $writer,
-        State $state
+        State $state,
+        DatabaseConfiguration $databaseValidator
     ) {
         $this->logger = $logger;
         $this->reader = $reader;
@@ -75,6 +84,7 @@ class CheckEnvFile implements ProcessInterface
         $this->state = $state;
         $this->fileList = $fileList;
         $this->file = $file;
+        $this->databaseValidator = $databaseValidator;
     }
 
     /**
@@ -83,12 +93,14 @@ class CheckEnvFile implements ProcessInterface
      * If file doesn't exist restores it from backup.
      * If backup doesn't exists creates new file.
      *
+     * Skips checking if db configuration isn't valid or application isn't installed
+     *
      * @inheritdoc
      */
     public function execute()
     {
         try {
-            if (!$this->state->isInstalled()) {
+            if ($this->databaseValidator->validate() instanceof Error || !$this->state->isInstalled()) {
                 return;
             }
 
