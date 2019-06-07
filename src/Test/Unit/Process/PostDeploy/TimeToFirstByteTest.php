@@ -95,31 +95,14 @@ class TimeToFirstByteTest extends TestCase
         $this->assertSame(['index.php', 'https://example.com/products/'], $this->process->getUrlsForTesting());
     }
 
-    public function testExecuteTtfbDisabled()
-    {
-        $this->postDeployMock->expects($this->once())
-            ->method('get')
-            ->with(PostDeployInterface::VAR_ENABLE_TTFB_TEST)
-            ->willReturn(false);
-        $this->loggerMock->expects($this->once())
-            ->method('debug')
-            ->with('Time to first byte testing has been disabled.');
-        $this->poolFactoryMock->expects($this->never())
-            ->method('create');
-
-        $this->process->execute();
-    }
-
     public function testExecute()
     {
         $urls = ['/', '/customer/account/create'];
 
-        $this->postDeployMock->expects($this->exactly(2))
+        $this->postDeployMock->expects($this->once())
             ->method('get')
-            ->willReturnMap([
-                [PostDeployInterface::VAR_ENABLE_TTFB_TEST, true],
-                [PostDeployInterface::VAR_TTFB_TESTED_PAGES, $urls],
-            ]);
+            ->with(PostDeployInterface::VAR_TTFB_TESTED_PAGES)
+            ->willReturn($urls);
         $this->urlManagerMock->method('isUrlValid')
             ->willReturn(true);
         $this->poolFactoryMock->expects($this->once())
