@@ -9,11 +9,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\RequestOptions;
-use GuzzleHttp\TransferStats;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Http\PoolFactory;
+use Magento\MagentoCloud\Http\TransferStatsHandler;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -41,29 +39,21 @@ class TimeToFirstByte implements ProcessInterface
      */
     private $logger;
 
-    /** @var File */
-    private $file;
-
-    /** @var FileList */
-    private $fileList;
-
-    /** @var bool */
-    private $lock = false;
+    /** @var TransferStatsHandler */
+    private $statHandler;
 
     public function __construct(
         PostDeployInterface $config,
         PoolFactory $poolFactory,
         UrlManager $urlManager,
-        LoggerInterface $logger,
-        FileList $fileList,
-        File $file
+        TransferStatsHandler $statHandler,
+        LoggerInterface $logger
     ) {
         $this->postDeploy = $config;
         $this->poolFactory = $poolFactory;
         $this->urlManager = $urlManager;
+        $this->statHandler = $statHandler;
         $this->logger = $logger;
-        $this->fileList = $fileList;
-        $this->file = $file;
     }
 
     public function execute()
@@ -73,7 +63,7 @@ class TimeToFirstByte implements ProcessInterface
             return;
         }
 
-        $requestOpts = [RequestOptions::ON_STATS => [$this, 'statHandler']];
+        $requestOpts = [RequestOptions::ON_STATS => $this->statHandler];
 
         try {
             $pool = $this->poolFactory->create($this->getUrlsForTesting(), [
@@ -106,50 +96,5 @@ class TimeToFirstByte implements ProcessInterface
                 return true;
             }
         );
-    }
-
-    /**
-     * Log stats from Guzzle request.
-     *
-     * @param TransferStats $stats
-     */
-    public function statHandler(TransferStats $stats)
-    {
-        $status = $stats->hasResponse() ? $stats->getResponse()->getStatusCode() : 'unknown';
-
-        if (300 < $status && $status < 400) {
-            $this->logger->debug('TTFB response was a redirect', ['url' => (string) $stats->getEffectiveUri()]);
-            return;
-        }
-
-        if (!array_key_exists(CURLINFO_STARTTRANSFER_TIME, $stats->getHandlerStats())) {
-            $this->logger->debug('cURL stats are missing from the request; using total transfer time');
-            $time = $stats->getTransferTime();
-        } else {
-            $time = $stats->getHandlerStats()[CURLINFO_STARTTRANSFER_TIME];
-        }
-
-        $this->logger->info(
-            sprintf('TTFB test result: %01.3fs', $time),
-            ['url' => (string) $stats->getEffectiveUri(), 'status' => $status]
-        );
-
-        while ($this->lock);
-        $this->lock = true;
-
-        $historicData = $this->file->isExists($this->fileList->getTtfbLog())
-            ? json_decode($this->file->fileGetContents($this->fileList->getTtfbLog()), true)
-            : [];
-
-        $historicData[] = [
-            'timestamp' => date('Y-m-d H:i:s'),
-            'url' => (string) $stats->getEffectiveUri(),
-            'status' => $status,
-            'ttfb' => $time,
-        ];
-
-        $this->file->filePutContents($this->fileList->getTtfbLog(), json_encode($historicData, JSON_UNESCAPED_SLASHES));
-
-        $this->lock = false;
     }
 }
