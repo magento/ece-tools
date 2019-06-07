@@ -346,6 +346,7 @@ class Container implements ContainerInterface
             ->give(function () {
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
+                        $this->container->make(DeployProcess\PreDeploy\CheckEnvFile::class),
                         $this->container->make(DeployProcess\PreDeploy\ConfigUpdate\Cache::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
                         $this->container->make(DeployProcess\PreDeploy\CleanViewPreprocessed::class),

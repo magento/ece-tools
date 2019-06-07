@@ -61,6 +61,8 @@ class RestoreWritableDirectories implements ProcessInterface
      */
     public function execute()
     {
+        $this->logger->notice('Starting copying recoverable directories.');
+
         foreach ($this->recoverableDirectoryList->getList() as $dirOptions) {
             $this->buildDirCopier->copy(
                 $dirOptions[RecoverableDirectoryList::OPTION_DIRECTORY],
@@ -68,7 +70,6 @@ class RestoreWritableDirectories implements ProcessInterface
             );
         }
 
-        // Restore mounted directories.
         $this->logger->notice('Recoverable directories were copied back.');
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
