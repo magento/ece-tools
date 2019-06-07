@@ -31,16 +31,6 @@ class StateTest extends TestCase
     private $connectionMock;
 
     /**
-     * @var Reader|Mock
-     */
-    private $readerMock;
-
-    /**
-     * @var Writer|Mock
-     */
-    private $writerMock;
-
-    /**
      * @var State
      */
     private $state;

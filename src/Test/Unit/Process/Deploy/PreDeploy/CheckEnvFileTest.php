@@ -81,7 +81,6 @@ class CheckEnvFileTest extends TestCase
         );
     }
 
-
     public function testExecuteNotInstalled()
     {
         $this->stateMock->expects($this->once())
@@ -166,7 +165,7 @@ class CheckEnvFileTest extends TestCase
             ->willReturnOnConsecutiveCalls(false, true);
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Magento is installed but environment configuration file doesn\'t exist.');
+            ->with('Magento is installed but the environment configuration file doesn\'t exist.');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Restoring environment configuration file from the backup.');
@@ -197,7 +196,7 @@ class CheckEnvFileTest extends TestCase
             ->willReturnOnConsecutiveCalls(false, false);
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('Magento is installed but environment configuration file doesn\'t exist.');
+            ->with('Magento is installed but the environment configuration file doesn\'t exist.');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Generating new environment configuration file.');

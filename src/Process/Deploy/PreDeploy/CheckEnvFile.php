@@ -105,7 +105,7 @@ class CheckEnvFile implements ProcessInterface
                 return;
             }
 
-            $this->logger->warning('Magento is installed but the  environment configuration file doesn\'t exist.');
+            $this->logger->warning('Magento is installed but the environment configuration file doesn\'t exist.');
 
             $backupFilePatch = $envFilePath . BackupList::BACKUP_SUFFIX;
             if ($this->file->isExists($backupFilePatch)) {
