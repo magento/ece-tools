@@ -24,4 +24,6 @@
     <rule ref="Squiz.WhiteSpace.LogicalOperatorSpacing"/>
     <rule ref="Squiz.Commenting.VariableComment" />
     <rule ref="Squiz.Commenting.ClassComment" />
+
+    <exclude-pattern>_files</exclude-pattern>
 </ruleset>
