@@ -99,23 +99,34 @@ class CheckEnvFile implements ProcessInterface
                 if (isset($data['install']['date'])) {
                     $this->logger->info('Magento was installed on ' . $data['install']['date']);
                 } else {
-                    $this->writer->update(['install' => ['date' => date('r')]]);
+                    $this->updateInstallDate();
                 }
 
                 return;
             }
 
-            $this->logger->warning('Magento is installed but environment configuration file doesn\'t exist.');
+            $this->logger->warning('Magento is installed but the  environment configuration file doesn\'t exist.');
 
             $backupFilePatch = $envFilePath . BackupList::BACKUP_SUFFIX;
             if ($this->file->isExists($backupFilePatch)) {
-                $this->logger->info('Restoring environment configuration file form the backup.');
+                $this->logger->info('Restoring environment configuration file from the backup.');
                 $this->file->copy($backupFilePatch, $envFilePath);
             } else {
                 $this->logger->info('Generating new environment configuration file.');
+                $this->updateInstallDate();
             }
         } catch (GenericException $e) {
             throw new ProcessException($e->getMessage(), $e->getCode(), $e);
         }
+    }
+
+    /**
+     * Update installation date in the env.php file
+     *
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    private function updateInstallDate()
+    {
+        $this->writer->update(['install' => ['date' => date('r')]]);
     }
 }
