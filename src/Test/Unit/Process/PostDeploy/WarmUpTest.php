@@ -137,7 +137,7 @@ class WarmUpTest extends TestCase
         $this->process->execute();
     }
 
-    public function testGetUrlsForWarmUp($value='')
+    public function testGetUrlsForWarmUp()
     {
         $this->postDeployMock->expects($this->once())
             ->method('get')
@@ -156,7 +156,10 @@ class WarmUpTest extends TestCase
             ]);
         $this->loggerMock->expects($this->once())
             ->method('error')
-            ->with('Page "https://example2.com/products/" can\'t be warmed-up because such domain is not registered in current Magento installation');
+            ->with(
+                'Page "https://example2.com/products/" can\'t be warmed-up because '.
+                'such domain is not registered in current Magento installation'
+            );
 
         $this->assertSame(['index.php', 'https://example.com/products/'], $this->process->getUrlsForWarmUp());
     }

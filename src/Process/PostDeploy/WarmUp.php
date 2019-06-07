@@ -58,6 +58,7 @@ class WarmUp implements ProcessInterface
 
     /**
      * {@inheritdoc}
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      */
     public function execute()
     {

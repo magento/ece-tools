@@ -54,7 +54,7 @@ class TimeToFirstByteTest extends TestCase
         $this->postDeployMock = $this->createMock(PostDeployInterface::class);
         $this->poolFactoryMock = $this->createMock(PoolFactory::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->statHandler = $this->createMock(TransferStatsHandler::class);
+        $this->statHandlerMock = $this->createMock(TransferStatsHandler::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->poolMock = $this->createMock(Pool::class);
         $this->promiseMock = $this->createMock(PromiseInterface::class);
@@ -66,7 +66,7 @@ class TimeToFirstByteTest extends TestCase
             $this->postDeployMock,
             $this->poolFactoryMock,
             $this->urlManagerMock,
-            $this->statHandler,
+            $this->statHandlerMock,
             $this->loggerMock
         );
     }
@@ -126,7 +126,7 @@ class TimeToFirstByteTest extends TestCase
             ->method('create')
             ->with(
                 $urls,
-                ['options' => [RequestOptions::ON_STATS => $this->statHandler], 'concurrency' => 1]
+                ['options' => [RequestOptions::ON_STATS => $this->statHandlerMock], 'concurrency' => 1]
             )->willReturn($this->poolMock);
         $this->promiseMock->expects($this->once())
             ->method('wait');

@@ -18,6 +18,9 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * {@inheritdoc}
+ */
 class TransferStatsHandlerTest extends TestCase
 {
     /** @var FileList|MockObject */

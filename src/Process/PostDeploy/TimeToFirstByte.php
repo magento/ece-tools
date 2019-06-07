@@ -17,6 +17,9 @@ use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Request configured URLs and record their time to first byte.
+ */
 class TimeToFirstByte implements ProcessInterface
 {
     /**
