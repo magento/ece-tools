@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class UpgradeCest
+class UpgradeCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -25,9 +25,12 @@ class UpgradeCest
         $I->assertTrue($I->cloneTemplate($data['from']));
         $I->assertTrue($I->composerInstall());
         $this->assert($I);
-        $I->assertTrue($I->cleanDirectories(['/vendor/*', '/app/etc/*', '/setup/*']));
+        $I->runBinMagentoCommand('config:set general/region/state_required US --lock-env', Docker::DEPLOY_CONTAINER);
+        $this->checkConfigurationIsNotRemoved($I);
+        $I->assertTrue($I->cleanDirectories(['/vendor/*', '/app/etc/di.xml', '/setup/*']));
         $I->assertTrue($I->composerRequireMagentoCloud($data['to']));
         $this->assert($I);
+        $this->checkConfigurationIsNotRemoved($I);
     }
 
     /**
@@ -42,6 +45,22 @@ class UpgradeCest
 
         $I->amOnPage('/');
         $I->see('Home page');
+    }
+
+    /**
+     * @param \CliTester $I
+     * @return array
+     */
+    protected function checkConfigurationIsNotRemoved(\CliTester $I)
+    {
+        $destination = sys_get_temp_dir() . '/app/etc/env.php';
+        $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
+        $config = require $destination;
+
+        $I->assertArraySubset(
+            ['general' => ['region' => ['state_required' => 'US']]],
+            $config['system']['default']
+        );
     }
 
     /**

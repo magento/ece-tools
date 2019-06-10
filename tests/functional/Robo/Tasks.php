@@ -69,4 +69,21 @@ trait Tasks
     {
         return $this->task(Tasks\CopyToDocker::class, $container);
     }
+
+    /**
+     * @param array $services
+     * @return Tasks\GenerateDockerCompose|CollectionBuilder
+     */
+    protected function taskGenerateDockerCompose(array $services = []): CollectionBuilder
+    {
+        return $this->task(Tasks\GenerateDockerCompose::class, $services);
+    }
+
+    /**
+     * @return Tasks\RemoveDockerCompose|CollectionBuilder
+     */
+    protected function taskRemoveDockerCompose(): CollectionBuilder
+    {
+        return $this->task(Tasks\RemoveDockerCompose::class);
+    }
 }

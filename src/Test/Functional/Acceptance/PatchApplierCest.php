@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class PatchApplierCest
+class PatchApplierCest extends AbstractCest
 {
     /**
      * @param \CliTester $I

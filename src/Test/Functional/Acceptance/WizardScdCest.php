@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class WizardScdCest
+class WizardScdCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -20,6 +20,7 @@ class WizardScdCest
      */
     public function _before(\CliTester $I)
     {
+        parent::_before($I);
         $I->assertTrue($I->cloneTemplate());
         $I->assertTrue($I->composerInstall());
     }

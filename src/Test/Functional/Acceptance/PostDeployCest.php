@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class PostDeployCest
+class PostDeployCest extends AbstractCest
 {
     /**
      * @param \CliTester $I

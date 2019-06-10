@@ -18,7 +18,7 @@ use Magento\MagentoCloud\Util\ArrayManager;
  * 3. Test config dump
  * 4. Test content presence
  */
-class AcceptanceCest
+class AcceptanceCest extends AbstractCest
 {
     /**
      * @param \CliTester $I

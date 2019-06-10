@@ -39,7 +39,7 @@ class EnvUp extends BaseTask implements CommandInterface
     public function getCommand(): string
     {
         $commands = [
-            'docker-compose down -v',
+            'docker-compose down -v --remove-orphans',
         ];
 
         foreach ($this->volumes as $volume) {
