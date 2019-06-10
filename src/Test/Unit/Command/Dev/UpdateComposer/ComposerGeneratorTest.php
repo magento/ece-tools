@@ -29,6 +29,11 @@ class ComposerGeneratorTest extends TestCase
             'repo' => 'path_to_repo2',
             'branch' => '1.0.0',
         ],
+        'repo3' => [
+            'repo' => 'path_to_repo3',
+            'branch' => '3.0.0',
+            'type' => 'single-package'
+        ],
     ];
 
     /**
@@ -81,15 +86,21 @@ class ComposerGeneratorTest extends TestCase
         $this->magentoVersionMock->expects($this->once())
             ->method('getVersion')
             ->willReturn('2.2');
-        $this->fileMock->expects($this->exactly(3))
+        $this->fileMock->expects($this->exactly(5))
             ->method('isExists')
-            ->willReturnOnConsecutiveCalls(true, true, true);
-        $this->fileMock->expects($this->exactly(3))
+            ->willReturn(true);
+        $this->fileMock->expects($this->exactly(5))
             ->method('fileGetContents')
             ->willReturnOnConsecutiveCalls(
                 '{"require": {"package": "*"}, "repositories": {"repo": {"type": "git", "url": "url"}}}',
-                '{"require": {"repo_package1": "*"}, "repositories": {"repo": {"type": "git", "url": "url"}}}',
-                '{"require": {"repo_package2": "*"}, "repositories": {"repo": {"type": "git", "url": "url"}}}'
+                '{"name": "repo1", "require": {"package/require1": "*"}, "repositories": ' .
+                '{"repo1": {"type": "git", "url": "url"}}}',
+                '{"name": "repo2", "require": {"package/require2": "*", "magento/module-test": ">102.0.0"}, ' .
+                '"repositories": {"repo2": {"type": "git", "url": "url"}}}',
+                '{"name": "repo3", "require": {"package/require3": "*", "magento/framework": ">100.1.1"}, ' .
+                '"repositories": {"repo3": {"type": "git", "url": "url"}}}',
+                '{"name": "repo3", "require": {"package/require3": "*", "magento/framework": ">100.1.1"}, ' .
+                '"repositories": {"repo3": {"type": "git", "url": "url"}}}'
             );
 
         $composer = $this->composerGenerator->generate($this->repoOptions);
@@ -101,9 +112,9 @@ class ComposerGeneratorTest extends TestCase
         $this->assertArrayHasKey('install-from-git', $composer['scripts']);
         $this->assertEquals(
             [
-                "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
+                "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
                 . " --exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./repo1/ ./",
-                "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
+                "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/'"
                 . " --exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./repo2/ ./",
             ],
             $composer['scripts']['prepare-packages']
@@ -111,8 +122,17 @@ class ComposerGeneratorTest extends TestCase
         $this->assertInstallFromGitScripts($composer['scripts']['install-from-git']);
 
         $this->assertArrayHasKey('require', $composer);
-        $this->assertArrayHasKey('repo_package1', $composer['require']);
-        $this->assertArrayHasKey('repo_package1', $composer['require']);
+        $this->assertArrayHasKey('package/require1', $composer['require']);
+        $this->assertArrayHasKey('package/require2', $composer['require']);
+        $this->assertArrayHasKey('package/require3', $composer['require']);
+        $this->assertArrayHasKey('magento/framework', $composer['require']);
+        $this->assertArrayHasKey('magento/module-test', $composer['require']);
+
+        $this->assertEquals('*', $composer['require']['magento/framework']);
+        $this->assertEquals('*', $composer['require']['magento/module-test']);
+
+        $this->assertArrayHasKey('repositories', $composer);
+        $this->assertArrayHasKey('repo3', $composer['repositories']);
     }
 
     /**
@@ -125,9 +145,10 @@ class ComposerGeneratorTest extends TestCase
         $this->assertEquals(
             [
                 'php -r"@mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
-                'rm -rf repo1 repo2',
+                'rm -rf repo1 repo2 repo3',
                 'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo1 repo1',
                 'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo2 repo2',
+                'git clone -b 3.0.0 --single-branch --depth 1 path_to_repo3 repo3',
             ],
             $actual
         );
