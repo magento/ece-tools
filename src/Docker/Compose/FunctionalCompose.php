@@ -28,6 +28,7 @@ class FunctionalCompose extends ProductionCompose
         $compose['services']['generic']['env_file'] = [
             './.docker/composer.env'
         ];
+        $compose['services']['db']['ports'] = ['3306:3306'];
         $compose['volumes']['magento'] = [];
 
         return $compose;

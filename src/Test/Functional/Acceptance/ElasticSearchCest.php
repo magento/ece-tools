@@ -38,6 +38,9 @@ class ElasticSearchCest extends AbstractCest
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
 
+        $I->runBinMagentoCommand('config:set general/region/state_required US --lock-env', Docker::DEPLOY_CONTAINER);
+        $this->checkConfigurationIsNotRemoved($I);
+
         $I->amOnPage('/');
         $I->see('Home page');
 
@@ -47,6 +50,8 @@ class ElasticSearchCest extends AbstractCest
             $config['system']['default']['catalog']['search']
         );
 
+        $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
+
         $relationships = [
             'MAGENTO_CLOUD_RELATIONSHIPS' => [
                 'database' => [
@@ -55,8 +60,10 @@ class ElasticSearchCest extends AbstractCest
             ],
         ];
 
+        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $relationships));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $relationships));
+        $this->checkConfigurationIsNotRemoved($I);
 
         $I->amOnPage('/');
         $I->see('Home page');
@@ -77,6 +84,20 @@ class ElasticSearchCest extends AbstractCest
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
         return require $destination;
+    }
+
+    /**
+     * @param \CliTester $I
+     * @return array
+     */
+    private function checkConfigurationIsNotRemoved(\CliTester $I)
+    {
+        $config = $this->getConfig($I);
+
+        $I->assertArraySubset(
+            ['general' => ['region' => ['state_required' => 'US']]],
+            $config['system']['default']
+        );
     }
 
     /**
