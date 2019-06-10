@@ -93,14 +93,16 @@ class ElasticSearch
 
             $esConfig = $relationships['elasticsearch'][0];
 
-            $url = sprintf('%s:%s', $esConfig['host'], $esConfig['port']);
-
             try {
-                $esConfiguration = $this->call($url);
+                $esConfiguration = $this->call(sprintf(
+                    '%s:%s',
+                    $esConfig['host'],
+                    $esConfig['port']
+                ));
 
                 $this->version = $esConfiguration['version']['number'];
             } catch (\Exception $exception) {
-                $this->logger->warning('Can\'t get version of elasticsearch: ' . $url. ' ' . $exception->getMessage());
+                $this->logger->warning('Can\'t get version of elasticsearch: ' . $exception->getMessage());
             }
         }
 
@@ -121,13 +123,16 @@ class ElasticSearch
             return [];
         }
 
-        $url = sprintf('%s:%s/_template', $config['host'], $config['port']);
         try {
-            $templates = $this->call($url);
+            $templates = $this->call(sprintf(
+                '%s:%s/_template',
+                $config['host'],
+                $config['port']
+            ));
 
             return $templates ? reset($templates)['settings'] : [];
         } catch (\Exception $exception) {
-            $this->logger->warning('Can\'t get configuration of elasticsearch: '. $url . ' '  . $exception->getMessage());
+            $this->logger->warning('Can\'t get configuration of elasticsearch: ' . $exception->getMessage());
 
             return [];
         }
