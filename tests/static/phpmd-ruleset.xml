@@ -43,4 +43,6 @@
     <rule ref="rulesets/naming.xml/ShortMethodName" />
     <rule ref="rulesets/naming.xml/ConstantNamingConventions" />
     <rule ref="rulesets/naming.xml/BooleanGetMethodName" />
+
+    <exclude-pattern>_files</exclude-pattern>
 </ruleset>

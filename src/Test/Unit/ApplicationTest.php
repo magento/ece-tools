@@ -78,6 +78,7 @@ class ApplicationTest extends TestCase
         Command\Docker\BuildIntegration::NAME => Command\Docker\BuildIntegration::class,
         Command\Docker\ConfigConvert::NAME => Command\Docker\ConfigConvert::class,
         Command\CronKill::NAME => Command\CronKill::class,
+        Command\ConfigShow::NAME => Command\ConfigShow::class,
     ];
 
     /**
