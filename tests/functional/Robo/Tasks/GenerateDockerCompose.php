@@ -36,7 +36,7 @@ class GenerateDockerCompose extends BaseTask implements CommandInterface
     public function __construct(array $services = [])
     {
         if (!isset($services['php'])) {
-            $services['php'] = (float) PHP_VERSION;
+            $services['php'] = PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
         }
 
         $this->checkServicesAvailability($services);

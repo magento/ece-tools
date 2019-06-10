@@ -24,6 +24,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console;
 use Symfony\Component\Console\Tester\CommandTester;
+use Magento\MagentoCloud\Docker\Config\DistGenerator;
 
 /**
  * @inheritdoc
@@ -78,6 +79,11 @@ class BuildTest extends TestCase
     private $writerMock;
 
     /**
+     * @var DistGenerator|MockObject
+     */
+    private $distGeneratorMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -90,6 +96,7 @@ class BuildTest extends TestCase
         $this->serviceConfigMock = $this->createMock(Config::class);
         $this->validatorMock = $this->createMock(Validator::class);
         $this->writerMock = $this->createMock(Build\Writer::class);
+        $this->distGeneratorMock = $this->createMock(DistGenerator::class);
 
         $this->serviceConfigMock->method('getAllServiceVersions')
             ->willReturn([]);
@@ -104,7 +111,8 @@ class BuildTest extends TestCase
             $this->repositoryFactoryMock,
             $this->serviceConfigMock,
             $this->validatorMock,
-            $this->writerMock
+            $this->writerMock,
+            $this->distGeneratorMock
         );
     }
 
