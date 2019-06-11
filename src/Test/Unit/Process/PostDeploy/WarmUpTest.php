@@ -10,6 +10,7 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
+use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -67,11 +68,17 @@ class WarmUpTest extends TestCase
     private $promiseMock;
 
     /**
+     * @var Manager|Mock
+     */
+    private $packageManagerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->postDeployMock = $this->getMockForAbstractClass(PostDeployInterface::class);
+        $this->packageManagerMock = $this->createMock(Manager::class);
         $this->clientFactoryMock = $this->createMock(ClientFactory::class);
         $this->urlsMock = $this->createMock(WarmUp\Urls::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
@@ -91,12 +98,61 @@ class WarmUpTest extends TestCase
             $this->clientFactoryMock,
             $this->requestFactoryMock,
             $this->loggerMock,
-            $this->urlsMock
+            $this->urlsMock,
+            $this->packageManagerMock,
+            $this->postDeployMock
         );
     }
 
+    public function testExecuteVariableNotConfigured()
+    {
+        $this->postDeployMock->expects($this->once())
+            ->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_PAGES)
+            ->willReturn([]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Skipping the warm-up phase because the WARM_UP_PAGES variable is not configured.');
+        $this->clientMock->expects($this->never())
+            ->method('sendAsync');
+        $this->packageManagerMock->expects($this->never())
+            ->method('has');
+
+        $this->process->execute();
+    }
+
+    public function testExecuteVModuleNOtInstalled()
+    {
+        $this->packageManagerMock->expects($this->once())
+            ->method('has')
+            ->with('magento/magento-cloud-components', '*')
+            ->willReturn(false);
+        $this->postDeployMock->expects($this->once())
+            ->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_PAGES)
+            ->willReturn(['some_url']);
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Skipping the warm-up phase because `magento/magento-cloud-components` is not installed.');
+        $this->loggerMock->expects($this->never())
+            ->method('info');
+        $this->clientMock->expects($this->never())
+            ->method('sendAsync');
+
+        $this->process->execute();
+    }
+
+
     public function testExecute()
     {
+        $this->postDeployMock->expects($this->once())
+            ->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_PAGES)
+            ->willReturn(['some_url']);
+        $this->packageManagerMock->expects($this->once())
+            ->method('has')
+            ->with('magento/magento-cloud-components', '*')
+            ->willReturn(true);
         $this->urlsMock->expects($this->any())
             ->method('getAll')
             ->willReturn([
@@ -128,6 +184,14 @@ class WarmUpTest extends TestCase
      */
     public function testExecuteWithPromiseException()
     {
+        $this->postDeployMock->expects($this->once())
+            ->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_PAGES)
+            ->willReturn(['some_url']);
+        $this->packageManagerMock->expects($this->once())
+            ->method('has')
+            ->with('magento/magento-cloud-components', '*')
+            ->willReturn(true);
         $this->urlsMock->expects($this->any())
             ->method('getAll')
             ->willReturn([

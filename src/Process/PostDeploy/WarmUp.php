@@ -6,8 +6,10 @@
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
+use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
+use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp\Urls;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -39,21 +41,37 @@ class WarmUp implements ProcessInterface
     private $urls;
 
     /**
+     * @var PostDeployInterface
+     */
+    private $postDeploy;
+
+    /**
+     * @var Manager
+     */
+    private $packageManager;
+
+    /**
      * @param ClientFactory $clientFactory
      * @param RequestFactory $requestFactory
      * @param LoggerInterface $logger
      * @param Urls $urls
+     * @param Manager $packageManager
+     * @param PostDeployInterface $postDeploy
      */
     public function __construct(
         ClientFactory $clientFactory,
         RequestFactory $requestFactory,
         LoggerInterface $logger,
-        Urls $urls
+        Urls $urls,
+        Manager $packageManager,
+        PostDeployInterface $postDeploy
     ) {
         $this->clientFactory = $clientFactory;
         $this->requestFactory = $requestFactory;
         $this->logger = $logger;
         $this->urls = $urls;
+        $this->packageManager = $packageManager;
+        $this->postDeploy = $postDeploy;
     }
 
     /**
@@ -64,6 +82,22 @@ class WarmUp implements ProcessInterface
     public function execute()
     {
         try {
+            $pages = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES);
+            if (!$pages) {
+                $this->logger->info(sprintf(
+                    'Skipping the warm-up phase because the %s variable is not configured.',
+                    PostDeployInterface::VAR_WARM_UP_PAGES
+                ));
+                return;
+            }
+
+            if (!$this->packageManager->has('magento/magento-cloud-components', '*')) {
+                $this->logger->warning(
+                    'Skipping the warm-up phase because `magento/magento-cloud-components` is not installed.'
+                );
+                return;
+            }
+
             $this->logger->info('Starting page warming up');
 
             $client = $this->clientFactory->create();
