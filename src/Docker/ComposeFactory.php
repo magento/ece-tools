@@ -17,7 +17,6 @@ class ComposeFactory
 {
     const COMPOSE_DEVELOPER = 'developer';
     const COMPOSE_PRODUCTION = 'production';
-    const COMPOSE_INTEGRATION = 'integration';
     const COMPOSE_FUNCTIONAL = 'functional';
 
     /**
@@ -27,7 +26,6 @@ class ComposeFactory
         self::COMPOSE_DEVELOPER => Compose\DeveloperCompose::class,
         self::COMPOSE_PRODUCTION => Compose\ProductionCompose::class,
         /** Internal CI configurations. */
-        self::COMPOSE_INTEGRATION => Compose\IntegrationCompose::class,
         self::COMPOSE_FUNCTIONAL => Compose\FunctionalCompose::class
     ];
 

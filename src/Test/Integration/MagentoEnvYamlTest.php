@@ -7,19 +7,24 @@ namespace Magento\MagentoCloud\Test\Integration;
 
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Check if the file dist/.magento.env.yaml contains a description of all variables
+ * Check if the file dist/.magento.env.yaml contains a description of all variables.
  */
 class MagentoEnvYamlTest extends TestCase
 {
     /**
-     * @var ContainerInterface
+     * @var File
      */
-    private $container;
+    private $file;
+
+    /**
+     * @var Schema
+     */
+    private $schema;
 
     /**
      * The list of variables which are not to be checked
@@ -36,21 +41,20 @@ class MagentoEnvYamlTest extends TestCase
      */
     protected function setUp()
     {
-        $this->container = Bootstrap::getInstance()
-            ->createApplication()
-            ->getContainer();
+        $this->file = new File();
+        $this->schema = new Schema();
     }
 
     /**
-     * Check if the file dist/.magento.env.yaml contains a description of all variables
+     * Check if the file dist/.magento.env.yaml contains a description of all variables.
+     *
+     * @throws FileSystemException
      */
     public function testCheckVariables()
     {
-        /** @var File $file */
-        $file = $this->container->get(File::class);
-        $schema = $this->container->get(Schema::class)->getSchema();
+        $schema = $this->schema->getSchema();
         $path = '/dist/.magento.env.yaml';
-        $content = $file->fileGetContents(ECE_BP . $path);
+        $content = $this->file->fileGetContents(ECE_BP . $path);
         $matches = [];
 
         if (!preg_match_all('|# ([A-Z_]+) |', $content, $matches)) {
