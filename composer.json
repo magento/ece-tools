@@ -86,6 +86,10 @@
         "docker-sync.yml"
       ],
       [
+        "dist/mutagen.sh",
+        "mutagen.sh"
+      ],
+      [
         "dist/docker/mnt",
         ".docker/mnt"
       ],
