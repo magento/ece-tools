@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Http;
@@ -42,6 +41,11 @@ class PoolFactory
         $this->urlManager = $urlManager;
     }
 
+    /**
+     * Create a Pool instance.
+     *
+     * @param array $config Configuration options for Pool instance
+     */
     public function create(array $urls, array $config, array $clientConfig = [], string $requestMethod = 'GET'): Pool
     {
         $client = $this->clientFactory->create($clientConfig);
@@ -53,6 +57,9 @@ class PoolFactory
         ]);
     }
 
+    /**
+     * Generate Requests instances for a Pool.
+     */
     public function yieldRequest(array $urls, string $requestMethod): \Iterator
     {
         foreach ($urls as $url) {
