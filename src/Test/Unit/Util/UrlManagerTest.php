@@ -384,7 +384,7 @@ class UrlManagerTest extends TestCase
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url --all')
+            ->with('php bin/magento config:show:store-url')
             ->willReturn($processMock);
     }
 

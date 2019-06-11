@@ -175,7 +175,7 @@ class UrlManager
     {
         if (!$this->storeBaseUrls) {
             try {
-                $process = $this->shell->execute('php bin/magento config:show:store-url --all');
+                $process = $this->shell->execute('php bin/magento config:show:store-url');
 
                 $baseUrls = json_decode($process->getOutput(), true);
 
