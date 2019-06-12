@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Command\Docker\Build;
 use Magento\MagentoCloud\Command\Docker\ConfigConvert;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Compose\DeveloperCompose;
 use Magento\MagentoCloud\Docker\Compose\ProductionCompose;
 use Magento\MagentoCloud\Docker\ComposeFactory;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
@@ -136,7 +137,8 @@ class BuildTest extends TestCase
                 [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
                 [Build::OPTION_RABBIT_MQ, '3.5'],
-                [Build::OPTION_MODE, ComposeFactory::COMPOSE_PRODUCTION]
+                [Build::OPTION_MODE, ComposeFactory::COMPOSE_PRODUCTION],
+                [Build::OPTION_SYNC_ENGINE, DeveloperCompose::SYNC_ENGINE_DOCKER_SYNC],
             ]);
 
         $this->builderFactoryMock->expects($this->once())
@@ -185,8 +187,9 @@ class BuildTest extends TestCase
                 [Build::OPTION_RABBIT_MQ, '3.5'],
                 [Build::OPTION_NODE, '6.0'],
                 [Build::OPTION_MODE, ComposeFactory::COMPOSE_PRODUCTION],
+                [Build::OPTION_SYNC_ENGINE, DeveloperCompose::SYNC_ENGINE_DOCKER_SYNC],
             ]);
-        $this->configMock->expects($this->exactly(7))
+        $this->configMock->expects($this->exactly(8))
             ->method('set');
         $this->writerMock->expects($this->once())
             ->method('write')

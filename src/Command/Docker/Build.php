@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Command\Docker;
 use Magento\MagentoCloud\Command\Docker\Build\Writer;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Compose\DeveloperCompose;
 use Magento\MagentoCloud\Docker\ComposeFactory;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
@@ -42,6 +43,7 @@ class Build extends Command
     const OPTION_RABBIT_MQ = 'rmq';
     const OPTION_NODE = 'node';
     const OPTION_MODE = 'mode';
+    const OPTION_SYNC_ENGINE = 'sync-engine';
 
     /**
      * @var ComposeFactory
@@ -165,6 +167,15 @@ class Build extends Command
                     )
                 ),
                 ComposeFactory::COMPOSE_PRODUCTION
+            )->addOption(
+                self::OPTION_SYNC_ENGINE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                sprintf(
+                    'File sync engine. Works only with developer mode. Available: (%s)',
+                    implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
+                ),
+                DeveloperCompose::SYNC_ENGINE_DOCKER_SYNC
             );
 
         parent::configure();
@@ -180,9 +191,19 @@ class Build extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $type = $input->getOption(self::OPTION_MODE);
+        $syncEngine = $input->getOption(self::OPTION_SYNC_ENGINE);
 
         $compose = $this->composeFactory->create($type);
         $config = $this->configFactory->create();
+
+        if (ComposeFactory::COMPOSE_DEVELOPER === $type
+            && !in_array($syncEngine, DeveloperCompose::SYNC_ENGINES_LIST)) {
+            throw new ConfigurationMismatchException(sprintf(
+                "File sync engine `%s` is not supported. Available: %s",
+                $syncEngine,
+                implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
+            ));
+        }
 
         $map = [
             self::OPTION_PHP => Service::NAME_PHP,
@@ -230,6 +251,7 @@ class Build extends Command
             }
         }
 
+        $config->set(DeveloperCompose::SYNC_ENGINE, $syncEngine);
         $this->writer->write($compose, $config);
         $output->writeln('<info>Configuration was built.</info>');
 

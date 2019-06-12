@@ -9,10 +9,17 @@ You can submit issues and pull requests to extend functionality or fix potential
 
 *Please note:* this repository is not an official support channel. To get project-specific help, please create support ticket through [Support Portal](https://support.magento.com). Support-related issues will be closed with the request to open a support ticket.
 
+## Magento Cloud Module for Core
+The ece-tools  package uses extended core functionality that is provided by the [Magento Cloud Components](https://github.com/magento/magento-cloud-components) module. Starting with ece-tools `2002.0.20`, this module is required to support some advanced features, such as cache warm-up using regex. The [Magento Cloud Components](https://github.com/magento/magento-cloud-components) module is installed automatically when you upgrade the ece-tools package to `2002.0.20` or later.
+
+## Magento Cloud Docker for Local Development and CICD
+The ece-tools package uses images that are generated from code in the [Magento Cloud Docker](https://github.com/magento/magento-cloud-docker) repository. Magento maintains a list of images based on the list of service versions available for Magento Commerce. These images are used for building your Docker environment using the ece-tools package.
+
 ## Useful Resources
+- [Release Notes](https://github.com/magento/ece-tools/releases)
 - [Cloud DevDocs](https://devdocs.magento.com/guides/v2.2/cloud/bk-cloud.html)
 - [Cloud Knowledge Base and Support](https://support.magento.com)
-- [Cloud Slack Channel](https://tinyurl.com/engcom-signup) (join #cloud)
+- [Cloud Slack Channel](https://magentocommeng.slack.com) (join #cloud and #cloud-docker)
 
 ## License
 Each Magento source file included in this distribution is licensed under OSL-3.0 license.
