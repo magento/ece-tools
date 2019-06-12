@@ -22,6 +22,7 @@ class UpgradeCest extends AbstractCest
      */
     public function test(\CliTester $I, \Codeception\Example $data)
     {
+        $I->startEnvironment();
         $I->assertTrue($I->cloneTemplate($data['from']));
         $I->assertTrue($I->composerInstall());
         $this->assert($I);

@@ -31,6 +31,7 @@ class AcceptanceCest extends AbstractCest
         $I->assertTrue($I->cloneTemplate());
         $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand(
             'deploy',
             Docker::DEPLOY_CONTAINER,
@@ -233,6 +234,7 @@ class AcceptanceCest extends AbstractCest
         $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build:generate', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build:transfer', Docker::BUILD_CONTAINER));
+        $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
         $I->amOnPage('/');

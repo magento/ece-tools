@@ -31,10 +31,11 @@ class ElasticSearchCest extends AbstractCest
     public function testElastic(\CliTester $I, \Codeception\Example $data)
     {
         $I->generateDockerCompose($data['services']);
-        $I->resetEnvironment();
+        $I->cleanUpEnvironment();
         $I->cloneTemplate($data['magento']);
         $I->composerInstall();
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
 
@@ -60,6 +61,7 @@ class ElasticSearchCest extends AbstractCest
             ],
         ];
 
+        $I->composerInstall();
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $relationships));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $relationships));
@@ -107,18 +109,9 @@ class ElasticSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => '2.2.8',
+                'magento' => '2.3.0',
                 'services' => [],
                 'expectedResult' => ['engine' => 'mysql'],
-            ],
-            [
-                'magento' => '2.2.8',
-                'services' => ['es' => '2.4'],
-                'expectedResult' => [
-                    'engine' => 'elasticsearch',
-                    'elasticsearch_server_hostname' => 'elasticsearch',
-                    'elasticsearch_server_port' => '9200'
-                ],
             ],
             [
                 'magento' => '2.3.0',

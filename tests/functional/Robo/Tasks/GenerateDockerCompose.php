@@ -11,6 +11,7 @@ use Robo\Common\ExecOneCommand;
 use Robo\Contract\CommandInterface;
 use Robo\Result;
 use Robo\Task\BaseTask;
+use Magento\MagentoCloud\Command\Docker\Build as DockerBuild;
 
 /**
  * Generate docker-compose.yml
@@ -27,7 +28,15 @@ class GenerateDockerCompose extends BaseTask implements CommandInterface
     /**
      * @var array
      */
-    private $availableServices = ['php', 'nginx', 'db', 'es', 'redis', 'rmq', 'node'];
+    private $availableServices = [
+        DockerBuild::OPTION_PHP,
+        DockerBuild::OPTION_NGINX,
+        DockerBuild::OPTION_DB,
+        DockerBuild::OPTION_ES,
+        DockerBuild::OPTION_REDIS,
+        DockerBuild::OPTION_RABBIT_MQ,
+        DockerBuild::OPTION_NODE,
+    ];
 
     /**
      * @param array $services
