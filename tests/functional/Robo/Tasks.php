@@ -19,11 +19,20 @@ trait Tasks
 
     /**
      * @param array $volumes
+     * @return Tasks\EnvCleanUp|CollectionBuilder
+     */
+    protected function taskEnvCleanUp(array $volumes): CollectionBuilder
+    {
+        return $this->task(Tasks\EnvCleanUp::class, $volumes);
+    }
+
+    /**
+     * @param array $volumes
      * @return Tasks\EnvUp|CollectionBuilder
      */
-    protected function taskEnvUp(array $volumes): CollectionBuilder
+    protected function taskEnvUp(): CollectionBuilder
     {
-        return $this->task(Tasks\EnvUp::class, $volumes);
+        return $this->task(Tasks\EnvUp::class);
     }
 
     /**

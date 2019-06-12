@@ -82,9 +82,24 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      *
      * @return bool
      */
-    public function stopDocker(): bool
+    public function stopEnvironment(): bool
     {
         return $this->taskEnvDown()
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->run()
+            ->stopOnFail()
+            ->wasSuccessful();
+    }
+
+    /**
+     * Start Docker env
+     *
+     * @return bool
+     */
+    public function startEnvironment(): bool
+    {
+        return $this->taskEnvUp()
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->run()
@@ -128,14 +143,14 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     }
 
     /**
-     * Resets containers
+     * Clean up Docker env
      *
      * @return bool
      */
-    public function resetEnvironment(): bool
+    public function cleanUpEnvironment(): bool
     {
         /** @var Result $result */
-        $result = $this->taskEnvUp($this->_getConfig('volumes'))
+        $result = $this->taskEnvCleanUp($this->_getConfig('volumes'))
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->run()

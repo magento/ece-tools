@@ -247,7 +247,7 @@ class AcceptanceCest extends AbstractCest
     public function testDeployInBuild(\CliTester $I)
     {
         $tmpConfig = sys_get_temp_dir() . '/app/etc/config.php';
-
+        $I->startEnvironment();
         $I->assertTrue($I->cloneTemplate());
         $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
@@ -263,13 +263,16 @@ class AcceptanceCest extends AbstractCest
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
         $I->assertTrue($I->downloadFromContainer('/app/etc/config.php', $tmpConfig, Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->resetEnvironment());
+
+        $I->assertTrue($I->cleanUpEnvironment());
+
         $I->assertTrue($I->cloneTemplate());
         $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->uploadToContainer($tmpConfig, '/app/etc/config.php', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->startEnvironment();
         $I->assertContains(
             'Static content deployment was performed during the build phase or disabled. '
             . 'Skipping deploy phase static content compression.',
