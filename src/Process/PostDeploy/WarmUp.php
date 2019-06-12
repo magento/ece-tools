@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
-use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
 use Magento\MagentoCloud\Package\Manager;
@@ -41,11 +40,6 @@ class WarmUp implements ProcessInterface
     private $urls;
 
     /**
-     * @var PostDeployInterface
-     */
-    private $postDeploy;
-
-    /**
      * @var Manager
      */
     private $packageManager;
@@ -56,22 +50,19 @@ class WarmUp implements ProcessInterface
      * @param LoggerInterface $logger
      * @param Urls $urls
      * @param Manager $packageManager
-     * @param PostDeployInterface $postDeploy
      */
     public function __construct(
         ClientFactory $clientFactory,
         RequestFactory $requestFactory,
         LoggerInterface $logger,
         Urls $urls,
-        Manager $packageManager,
-        PostDeployInterface $postDeploy
+        Manager $packageManager
     ) {
         $this->clientFactory = $clientFactory;
         $this->requestFactory = $requestFactory;
         $this->logger = $logger;
         $this->urls = $urls;
         $this->packageManager = $packageManager;
-        $this->postDeploy = $postDeploy;
     }
 
     /**
@@ -82,15 +73,6 @@ class WarmUp implements ProcessInterface
     public function execute()
     {
         try {
-            $pages = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES);
-            if (!$pages) {
-                $this->logger->info(sprintf(
-                    'Skipping the warm-up phase because the %s variable is not configured.',
-                    PostDeployInterface::VAR_WARM_UP_PAGES
-                ));
-                return;
-            }
-
             if (!$this->packageManager->has('magento/magento-cloud-components', '*')) {
                 $this->logger->warning(
                     'Skipping the warm-up phase because `magento/magento-cloud-components` is not installed.'

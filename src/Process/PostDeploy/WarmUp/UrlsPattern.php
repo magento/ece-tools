@@ -55,11 +55,11 @@ class UrlsPattern
                 return [];
             }
 
-            list($entity, $storeId, $pattern) = explode(':', $warmUpPattern);
+            list($entity, $pattern, $storeId) = explode(':', $warmUpPattern);
 
             $command = sprintf('config:show:urls --entity-type="%s"', $entity);
             if ($storeId && $storeId !== '*') {
-                $command .= sprintf(' --store_id="%s"', $storeId);
+                $command .= sprintf(' --store-id="%s"', $storeId);
             }
 
             $process = $this->shell->execute($command);
@@ -79,13 +79,10 @@ class UrlsPattern
                 return $urls;
             }
 
-            if (@preg_match($pattern, '') === false) {
-                $this->logger->error(sprintf('Regex pattern "%s" isn\'t valid.', $pattern));
-                return [];
-            }
-
             $urls = array_filter($urls, function ($url) use ($pattern) {
-                return preg_match($pattern, $url);
+                return @preg_match($pattern, '') !== false ?
+                    preg_match($pattern, $url) :
+                    trim($pattern, '/') === trim(parse_url($url, PHP_URL_PATH), '/');
             });
 
             return $urls;
@@ -104,7 +101,7 @@ class UrlsPattern
     public function isValid(string $warmUpPattern): bool
     {
         $regex = sprintf(
-            '/^(%s|%s):(\d+|\*):.{1,}/',
+            '/^(%s|%s):.{1,}:(\w+|\*)/',
             self::ENTITY_CATEGORY,
             self::ENTITY_CMS_PAGE
         );

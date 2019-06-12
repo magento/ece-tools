@@ -41,6 +41,11 @@ class UrlManager
     private $storeBaseUrls = [];
 
     /**
+     * @var null
+     */
+    private $baseUrl = null;
+
+    /**
      * @var ShellInterface
      */
     private $shell;
@@ -147,13 +152,18 @@ class UrlManager
      */
     public function getBaseUrl(): string
     {
-        $this->loadStoreBaseUrls();
+        if ($this->baseUrl === null) {
+            try {
+                $process = $this->shell->execute('php bin/magento config:show:store-url default');
 
-        if ($this->storeBaseUrls) {
-            return reset($this->storeBaseUrls);
+                $this->baseUrl = $process->getOutput();
+            } catch (ShellException $e) {
+                $this->logger->error('Can\'t fetch base url. ' . $e->getMessage());
+                $this->baseUrl = $this->getSecureUrls()[''];
+            }
         }
 
-        return $this->getSecureUrls()[''];
+        return $this->baseUrl;
     }
 
     /**

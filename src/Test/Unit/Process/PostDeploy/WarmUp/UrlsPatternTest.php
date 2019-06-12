@@ -64,7 +64,7 @@ class UrlsPatternTest extends TestCase
             ->with($command)
             ->willReturn($processMock);
 
-        $this->assertEquals($expectedResult, $this->urlsPattern->get($pattern));
+        $this->assertEquals($expectedResult, array_values($this->urlsPattern->get($pattern)));
     }
 
     /**
@@ -74,8 +74,8 @@ class UrlsPatternTest extends TestCase
     {
         return [
             [
-                'category:1:*',
-                'config:show:urls --entity-type="category" --store_id="1"',
+                'category:*:1',
+                'config:show:urls --entity-type="category" --store-id="1"',
                 [],
                 [],
             ],
@@ -92,17 +92,7 @@ class UrlsPatternTest extends TestCase
                 ],
             ],
             [
-                'category:*:wrong_regex_pattern',
-                'config:show:urls --entity-type="category"',
-                [
-                    'http://site1.com/category1',
-                    'http://site1.com/category2',
-                ],
-                [
-                ],
-            ],
-            [
-                'category:*:/category.*/',
+                'category:/category.*/:*',
                 'config:show:urls --entity-type="category"',
                 [
                     'http://site1.com/category1',
@@ -113,6 +103,22 @@ class UrlsPatternTest extends TestCase
                 [
                     'http://site1.com/category1',
                     'http://site1.com/category2',
+                ],
+            ],
+            [
+                'category:cat1:*',
+                'config:show:urls --entity-type="category"',
+                [
+                    'http://site1.com/category1',
+                    'http://site1.com/cat1',
+                    'http://site1.com/cat2',
+                    'http://site2.com/category1',
+                    'http://site2.com/cat1',
+                    'http://site2.com/cat2',
+                ],
+                [
+                    'http://site1.com/cat1',
+                    'http://site2.com/cat1',
                 ],
             ],
         ];
@@ -146,23 +152,6 @@ class UrlsPatternTest extends TestCase
         $this->urlsPattern->get('category:*:*');
     }
 
-    public function testGetRegexPatternNotValid()
-    {
-        $processMock = $this->createMock(Process::class);
-        $processMock->expects($this->once())
-            ->method('getOutput')
-            ->willReturn(json_encode(['http://site1.com/']));
-        $this->shellMock->expects($this->once())
-            ->method('execute')
-            ->with('config:show:urls --entity-type="category"')
-            ->willReturn($processMock);
-        $this->loggerMock->expects($this->once())
-            ->method('error')
-            ->with('Regex pattern "wrong_pattern" isn\'t valid.');
-
-        $this->urlsPattern->get('category:*:wrong_pattern');
-    }
-
     /**
      * @param string $pattern
      * @param bool $expected
@@ -183,10 +172,10 @@ class UrlsPatternTest extends TestCase
             ['http://example.com', false],
             ['http://example.com:8000', false],
             ['product:*:*', false],
-            ['category:one:*', false],
-            ['category:1:*', true],
+            ['category:*:store_fr', true],
+            ['category:*:1', true],
             ['category:*:*', true],
-            ['cms-page:1:*', true],
+            ['cms-page:*:1', true],
             ['cms-page:*:*', true],
             ['cms_page:*:*', false],
         ];

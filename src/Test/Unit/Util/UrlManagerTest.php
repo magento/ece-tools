@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Shell\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -362,9 +363,15 @@ class UrlManagerTest extends TestCase
 
     public function testGetBaseUrl()
     {
-        $this->loadStoreBaseUrls([
-            '0' => 'https://example.com/'
-        ]);
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn('https://example.com/');
+
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php bin/magento config:show:store-url default')
+            ->willReturn($processMock);
 
         $this->environmentMock->expects($this->never())
             ->method('getRoutes');
@@ -375,22 +382,16 @@ class UrlManagerTest extends TestCase
         );
     }
 
-    private function loadStoreBaseUrls(array $baseUrls)
+    public function testGetBaseUrlWithEmptyStoreUrls()
     {
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $processMock->expects($this->once())
-            ->method('getOutput')
-            ->willReturn(json_encode($baseUrls));
+        $processMock->expects($this->never())
+            ->method('getOutput');
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url')
-            ->willReturn($processMock);
-    }
-
-    public function testGetBaseUrlWithEmptyStoreUrls()
-    {
-        $this->loadStoreBaseUrls([]);
+            ->with('php bin/magento config:show:store-url default')
+            ->willThrowException(new ShellException('some error'));
 
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
@@ -404,10 +405,18 @@ class UrlManagerTest extends TestCase
 
     public function testGetBaseUrls()
     {
-        $this->loadStoreBaseUrls([
-            'https://example.com/',
-            'https://example2.com/',
-        ]);
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn(json_encode([
+                'https://example.com/',
+                'https://example2.com/',
+            ]));
+
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php bin/magento config:show:store-url')
+            ->willReturn($processMock);
 
         $this->assertEquals(
             [
