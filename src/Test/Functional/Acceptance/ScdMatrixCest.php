@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class ScdMatrixCest
+class ScdMatrixCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -26,6 +26,7 @@ class ScdMatrixCest
         $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->uploadToContainer($data['env_yaml'], '/.magento.env.yaml', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
         $I->amOnPage('/');

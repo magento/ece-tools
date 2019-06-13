@@ -80,7 +80,7 @@ class CopyFromDocker extends BaseTask implements CommandInterface
     public function getCommand(): string
     {
         return sprintf(
-            'docker cp %s:%s %s',
+            'docker cp "$(docker-compose ps -q %s)":%s %s',
             $this->container,
             $this->source,
             $this->destination

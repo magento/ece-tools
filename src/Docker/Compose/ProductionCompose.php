@@ -29,15 +29,12 @@ class ProductionCompose implements ComposeInterface
 
     const DIR_MAGENTO = '/app';
 
+    const CRON_ENABLED = true;
+
     /**
      * @var ServiceFactory
      */
     private $serviceFactory;
-
-    /**
-     * @var FileList
-     */
-    private $fileList;
 
     /**
      * @var Config
@@ -48,6 +45,11 @@ class ProductionCompose implements ComposeInterface
      * @var Converter
      */
     private $converter;
+
+    /**
+     * @var FileList
+     */
+    protected $fileList;
 
     /**
      * @param ServiceFactory $serviceFactory
@@ -76,8 +78,8 @@ class ProductionCompose implements ComposeInterface
      */
     public function build(Repository $config): array
     {
-        $phpVersion = $config->get(Service::NAME_PHP, '') ?: $this->config->getPhpVersion();
-        $dbVersion = $config->get(Service::NAME_DB, '') ?: $this->config->getServiceVersion(Service::NAME_DB);
+        $phpVersion = $config->get(Service::NAME_PHP, '') ?: $this->getPhpVersion();
+        $dbVersion = $config->get(Service::NAME_DB, '') ?: $this->getServiceVersion(Service::NAME_DB);
 
         $services = [
             'db' => $this->serviceFactory->create(
@@ -99,7 +101,7 @@ class ProductionCompose implements ComposeInterface
             )
         ];
 
-        $redisVersion = $config->get(Service::NAME_REDIS) ?: $this->config->getServiceVersion(Service::NAME_REDIS);
+        $redisVersion = $config->get(Service::NAME_REDIS) ?: $this->getServiceVersion(Service::NAME_REDIS);
 
         if ($redisVersion) {
             $services['redis'] = $this->serviceFactory->create(
@@ -109,7 +111,7 @@ class ProductionCompose implements ComposeInterface
         }
 
         $esVersion = $config->get(Service::NAME_ELASTICSEARCH)
-            ?: $this->config->getServiceVersion(Service::NAME_ELASTICSEARCH);
+            ?: $this->getServiceVersion(Service::NAME_ELASTICSEARCH);
 
         if ($esVersion) {
             $services['elasticsearch'] = $this->serviceFactory->create(
@@ -129,7 +131,7 @@ class ProductionCompose implements ComposeInterface
         }
 
         $rabbitMQVersion = $config->get(Service::NAME_RABBITMQ)
-            ?: $this->config->getServiceVersion(Service::NAME_RABBITMQ);
+            ?: $this->getServiceVersion(Service::NAME_RABBITMQ);
 
         if ($rabbitMQVersion) {
             $services['rabbitmq'] = $this->serviceFactory->create(
@@ -150,7 +152,23 @@ class ProductionCompose implements ComposeInterface
                 'volumes' => $this->getMagentoVolumes(true),
             ]
         );
-        $services['build'] = $this->getCliService($phpVersion, false, $cliDepends, 'build.magento2.docker');
+        $services['build'] = $this->serviceFactory->create(
+            ServiceFactory::SERVICE_CLI,
+            $phpVersion,
+            [
+                'hostname' => 'deploy.magento2.docker',
+                'depends_on' => $cliDepends,
+                'extends' => 'generic',
+                'volumes' => array_merge(
+                    $this->getMagentoBuildVolumes(false),
+                    $this->getComposerVolumes(),
+                    [
+                        './.docker/mnt:/mnt',
+                        './.docker/tmp:/tmp'
+                    ]
+                )
+            ]
+        );
         $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends, 'deploy.magento2.docker');
         $services['web'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_NGINX,
@@ -172,7 +190,6 @@ class ProductionCompose implements ComposeInterface
             self::DEFAULT_TLS_VERSION,
             ['depends_on' => ['varnish']]
         );
-        $services['cron'] = $this->getCronCliService($phpVersion, true, $cliDepends, 'cron.magento2.docker');
         $services['generic'] = [
             'image' => 'alpine',
             'environment' => $this->converter->convert($this->getVariables()),
@@ -180,6 +197,10 @@ class ProductionCompose implements ComposeInterface
                 './.docker/config.env',
             ],
         ];
+
+        if (static::CRON_ENABLED) {
+            $services['cron'] = $this->getCronCliService($phpVersion, true, $cliDepends, 'cron.magento2.docker');
+        }
 
         $volumeConfig = [];
 
@@ -303,6 +324,22 @@ class ProductionCompose implements ComposeInterface
         ];
     }
 
+    /**
+     * @param bool $isReadOnly
+     * @return array
+     */
+    protected function getMagentoBuildVolumes(bool $isReadOnly): array
+    {
+        $flag = $isReadOnly ? ':ro' : ':rw';
+
+        return [
+            'magento:' . self::DIR_MAGENTO . $flag,
+            'magento-vendor:' . self::DIR_MAGENTO . '/vendor' . $flag,
+            'magento-generated:' . self::DIR_MAGENTO . '/generated' . $flag,
+            'magento-setup:' . self::DIR_MAGENTO . '/setup' . $flag,
+        ];
+    }
+
     /***
      * @return array
      */
@@ -331,5 +368,24 @@ class ProductionCompose implements ComposeInterface
             # Docker host for developer environments, can be different for your OS
             'XDEBUG_CONFIG' => 'remote_host=host.docker.internal',
         ];
+    }
+
+    /**
+     * @param string $serviceName
+     * @return string|null
+     * @throws ConfigurationMismatchException
+     */
+    protected function getServiceVersion(string $serviceName)
+    {
+        return $this->config->getServiceVersion($serviceName);
+    }
+
+    /**
+     * @return string
+     * @throws ConfigurationMismatchException
+     */
+    protected function getPhpVersion()
+    {
+        return $this->config->getPhpVersion();
     }
 }

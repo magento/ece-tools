@@ -121,7 +121,7 @@ class BuildIntegration extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $strategy = $input->getArgument(self::ARGUMENT_VERSION);
-        $allowedStrategies = [ComposeFactory::COMPOSE_INTEGRATION, ComposeFactory::COMPOSE_FUNCTIONAL];
+        $allowedStrategies = [ComposeFactory::COMPOSE_INTEGRATION];
 
         if (!in_array($strategy, $allowedStrategies, true)) {
             throw new ConfigurationMismatchException('Wrong framework version');
