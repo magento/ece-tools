@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Http;
@@ -23,16 +22,24 @@ use Psr\Log\LoggerInterface;
  */
 class TransferStatsHandlerTest extends TestCase
 {
-    /** @var FileList|MockObject */
+    /**
+     * @var FileList|MockObject
+     */
     private $fileListMock;
 
-    /** @var File|MockObject */
+    /**
+     * @var File|MockObject
+     */
     private $fileMock;
 
-    /** @var LoggerInterface|MockObject */
+    /**
+     * @var LoggerInterface|MockObject
+     */
     private $loggerMock;
 
-    /** @var TransferStatsHandler */
+    /**
+     * @var TransferStatsHandler
+     */
     private $handler;
 
     public function setUp()

@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Http;
@@ -18,13 +17,19 @@ use Psr\Log\LoggerInterface;
  */
 class TransferStatsHandler
 {
-    /** @var File */
+    /**
+     * @var File
+     */
     private $file;
 
-    /** @var FileList */
+    /**
+     * @var FileList
+     */
     private $fileList;
 
-    /** @var LoggerInterface */
+    /**
+     * @var LoggerInterface
+     */
     private $logger;
 
     public function __construct(File $file, FileList $fileList, LoggerInterface $logger)

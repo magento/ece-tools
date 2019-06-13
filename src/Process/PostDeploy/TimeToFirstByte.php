@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Process\PostDeploy;
@@ -42,9 +41,18 @@ class TimeToFirstByte implements ProcessInterface
      */
     private $logger;
 
-    /** @var TransferStatsHandler */
+    /**
+     * @var TransferStatsHandler
+     */
     private $statHandler;
 
+    /**
+     * @param PostDeployInterface $config
+     * @param PoolFactory $poolFactory
+     * @param UrlManager $urlManager
+     * @param TransferStatsHandler $statHandler
+     * @param LoggerInterface $logger
+     */
     public function __construct(
         PostDeployInterface $config,
         PoolFactory $poolFactory,
@@ -59,12 +67,17 @@ class TimeToFirstByte implements ProcessInterface
         $this->logger = $logger;
     }
 
+    /**
+     * Run time to first byte tests.
+     *
+     * @throws ProcessException
+     */
     public function execute()
     {
         $requestOpts = [RequestOptions::ON_STATS => $this->statHandler];
 
         try {
-            $pool = $this->poolFactory->create($this->getUrlsForTesting(), [
+            $pool = $this->poolFactory->create($this->getUrls(), [
                 'options' => $requestOpts,
                 'concurrency' => 1,
             ]);
@@ -80,13 +93,13 @@ class TimeToFirstByte implements ProcessInterface
      *
      * @return array
      */
-    public function getUrlsForTesting(): array
+    private function getUrls(): array
     {
         return array_filter(
             $this->postDeploy->get(PostDeployInterface::VAR_TTFB_TESTED_PAGES),
             function ($page) {
                 if (!$this->urlManager->isUrlValid($page)) {
-                    $this->logger->error(sprintf('Will not test %s, host is not a configured store domain', $page));
+                    $this->logger->warning(sprintf('Will not test %s, host is not a configured store domain', $page));
 
                     return false;
                 }

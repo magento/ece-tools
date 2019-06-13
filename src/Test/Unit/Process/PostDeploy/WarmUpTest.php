@@ -136,31 +136,4 @@ class WarmUpTest extends TestCase
 
         $this->process->execute();
     }
-
-    public function testGetUrlsForWarmUp()
-    {
-        $this->postDeployMock->expects($this->once())
-            ->method('get')
-            ->with(PostDeployInterface::VAR_WARM_UP_PAGES)
-            ->willReturn([
-                'index.php',
-                'https://example.com/products/',
-                'https://example2.com/products/',
-            ]);
-        $this->urlManagerMock->expects($this->exactly(3))
-            ->method('isUrlValid')
-            ->willReturnMap([
-                ['index.php', true],
-                ['https://example.com/products/', true],
-                ['https://example2.com/products/', false]
-            ]);
-        $this->loggerMock->expects($this->once())
-            ->method('error')
-            ->with(
-                'Page "https://example2.com/products/" can\'t be warmed-up because '.
-                'such domain is not registered in current Magento installation'
-            );
-
-        $this->assertSame(['index.php', 'https://example.com/products/'], $this->process->getUrlsForWarmUp());
-    }
 }

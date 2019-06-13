@@ -62,7 +62,7 @@ class WarmUp implements ProcessInterface
      */
     public function execute()
     {
-        $urls = $this->getUrlsForWarmUp();
+        $urls = $this->getUrls();
 
         $fulfilled = function ($response, $index) use ($urls) {
             $this->logger->info('Warmed up page: ' . $urls[$index]);
@@ -95,13 +95,13 @@ class WarmUp implements ProcessInterface
      *
      * @return array
      */
-    public function getUrlsForWarmUp(): array
+    private function getUrls(): array
     {
         return array_filter(
             $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES),
             function ($page) {
                 if (!$this->urlManager->isUrlValid($page)) {
-                    $this->logger->error(
+                    $this->logger->warning(
                         sprintf(
                             'Page "%s" can\'t be warmed-up because such domain ' .
                             'is not registered in current Magento installation',

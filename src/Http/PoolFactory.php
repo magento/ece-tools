@@ -17,18 +17,32 @@ use Psr\Http\Message\RequestInterface;
  */
 class PoolFactory
 {
-    /** @var ContainerInterface */
+    /**
+     * @var ContainerInterface
+     */
     private $container;
 
-    /** @var ClientFactory */
+    /**
+     * @var ClientFactory
+     */
     private $clientFactory;
 
-    /** @var RequestFactory */
+    /**
+     * @var RequestFactory
+     */
     private $requestFactory;
 
-    /** @var UrlManager */
+    /**
+     * @var UrlManager
+     */
     private $urlManager;
 
+    /**
+     * @param ContainerInterface $container
+     * @param ClientFactory $clientFactory
+     * @param RequestFactory $requestFactory
+     * @param UrlManager $urlManager
+     */
     public function __construct(
         ContainerInterface $container,
         ClientFactory $clientFactory,
@@ -44,28 +58,20 @@ class PoolFactory
     /**
      * Create a Pool instance.
      *
+     * @param array $urls
      * @param array $config Configuration options for Pool instance
+     * @param array $clientConfig
+     * @param string $requestMethod
+     * @return Pool
      */
     public function create(array $urls, array $config, array $clientConfig = [], string $requestMethod = 'GET'): Pool
     {
         $client = $this->clientFactory->create($clientConfig);
 
-        return $this->container->create(Pool::class, [
-            'client' => $client,
-            'requests' => $this->yieldRequest($urls, $requestMethod),
-            'config' => $config,
-        ]);
-    }
+        $requests = array_map(function ($url) use ($requestMethod) {
+            return $this->requestFactory->create($requestMethod, $this->urlManager->expandUrl($url));
+        }, $urls);
 
-    /**
-     * Generate Requests instances for a Pool.
-     */
-    public function yieldRequest(array $urls, string $requestMethod): \Iterator
-    {
-        foreach ($urls as $url) {
-            $url = $this->urlManager->expandUrl($url);
-
-            yield $this->requestFactory->create($requestMethod, $url);
-        }
+        return $this->container->create(Pool::class, compact('client', 'requests', 'config'));
     }
 }

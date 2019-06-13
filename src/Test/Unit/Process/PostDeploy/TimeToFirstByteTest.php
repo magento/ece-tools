@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
@@ -25,28 +24,44 @@ use Psr\Log\LoggerInterface;
  */
 class TimeToFirstByteTest extends TestCase
 {
-    /** @var PostDeployInterface|MockObject */
+    /**
+     * @var PostDeployInterface|MockObject
+     */
     private $postDeployMock;
 
-    /** @var PoolFactory|MockObject */
+    /**
+     * @var PoolFactory|MockObject
+     */
     private $poolFactoryMock;
 
-    /** @var UrlManager|MockObject */
+    /**
+     * @var UrlManager|MockObject
+     */
     private $urlManagerMock;
 
-    /** @var TransferStatsHandler|MockObject */
+    /**
+     * @var TransferStatsHandler|MockObject
+     */
     private $statHandlerMock;
 
-    /** @var LoggerInterface|MockObject */
+    /**
+     * @var LoggerInterface|MockObject
+     */
     private $loggerMock;
 
-    /** @var Pool|MockObject */
+    /**
+     * @var Pool|MockObject
+     */
     private $poolMock;
 
-    /** @var PromiseInterface|MockObject */
+    /**
+     * @var PromiseInterface|MockObject
+     */
     private $promiseMock;
 
-    /** @var TimeToFirstByte */
+    /**
+     * @var TimeToFirstByte
+     */
     private $process;
 
     protected function setUp()
@@ -69,30 +84,6 @@ class TimeToFirstByteTest extends TestCase
             $this->statHandlerMock,
             $this->loggerMock
         );
-    }
-
-    public function testGetUrlsForTesting()
-    {
-        $this->postDeployMock->expects($this->once())
-            ->method('get')
-            ->with(PostDeployInterface::VAR_TTFB_TESTED_PAGES)
-            ->willReturn([
-                'index.php',
-                'https://example.com/products/',
-                'https://example2.com/products/',
-            ]);
-        $this->urlManagerMock->expects($this->exactly(3))
-            ->method('isUrlValid')
-            ->willReturnMap([
-                ['index.php', true],
-                ['https://example.com/products/', true],
-                ['https://example2.com/products/', false]
-            ]);
-        $this->loggerMock->expects($this->once())
-            ->method('error')
-            ->with('Will not test https://example2.com/products/, host is not a configured store domain');
-
-        $this->assertSame(['index.php', 'https://example.com/products/'], $this->process->getUrlsForTesting());
     }
 
     public function testExecute()
