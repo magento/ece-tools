@@ -13,9 +13,9 @@ use Robo\Result;
 use Robo\Task\BaseTask;
 
 /**
- * Down Docker environment
+ * Remove docker-compose.yml
  */
-class EnvDown extends BaseTask implements CommandInterface
+class RemoveDockerCompose extends BaseTask implements CommandInterface
 {
     use ExecOneCommand;
 
@@ -24,7 +24,7 @@ class EnvDown extends BaseTask implements CommandInterface
      */
     public function getCommand(): string
     {
-        return 'docker-compose down -v --remove-orphans';
+        return 'rm docker-compose.yml';
     }
 
     /**

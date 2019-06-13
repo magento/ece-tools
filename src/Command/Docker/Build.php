@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Command\Docker;
 use Magento\MagentoCloud\Command\Docker\Build\Writer;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Compose\DeveloperCompose;
 use Magento\MagentoCloud\Docker\ComposeFactory;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
@@ -23,6 +24,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Magento\MagentoCloud\Docker\Config\DistGenerator;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -41,6 +43,7 @@ class Build extends Command
     const OPTION_RABBIT_MQ = 'rmq';
     const OPTION_NODE = 'node';
     const OPTION_MODE = 'mode';
+    const OPTION_SYNC_ENGINE = 'sync-engine';
 
     /**
      * @var ComposeFactory
@@ -73,12 +76,18 @@ class Build extends Command
     private $writer;
 
     /**
+     * @var DistGenerator
+     */
+    private $distGenerator;
+
+    /**
      * @param ComposeFactory $composeFactory
      * @param Environment $environment
      * @param RepositoryFactory $configFactory
      * @param Config $serviceConfig
      * @param Validator $versionValidator
      * @param Writer $writer
+     * @param DistGenerator $distGenerator
      */
     public function __construct(
         ComposeFactory $composeFactory,
@@ -86,7 +95,8 @@ class Build extends Command
         RepositoryFactory $configFactory,
         Config $serviceConfig,
         Validator $versionValidator,
-        Writer $writer
+        Writer $writer,
+        DistGenerator $distGenerator
     ) {
         $this->composeFactory = $composeFactory;
         $this->environment = $environment;
@@ -94,6 +104,7 @@ class Build extends Command
         $this->serviceConfig = $serviceConfig;
         $this->validator = $versionValidator;
         $this->writer = $writer;
+        $this->distGenerator = $distGenerator;
 
         parent::__construct();
     }
@@ -146,9 +157,25 @@ class Build extends Command
                 InputOption::VALUE_REQUIRED,
                 sprintf(
                     'Mode of environment (%s)',
-                    implode(', ', [ComposeFactory::COMPOSE_DEVELOPER, ComposeFactory::COMPOSE_PRODUCTION])
+                    implode(
+                        ', ',
+                        [
+                            ComposeFactory::COMPOSE_DEVELOPER,
+                            ComposeFactory::COMPOSE_PRODUCTION,
+                            ComposeFactory::COMPOSE_FUNCTIONAL,
+                        ]
+                    )
                 ),
                 ComposeFactory::COMPOSE_PRODUCTION
+            )->addOption(
+                self::OPTION_SYNC_ENGINE,
+                null,
+                InputOption::VALUE_REQUIRED,
+                sprintf(
+                    'File sync engine. Works only with developer mode. Available: (%s)',
+                    implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
+                ),
+                DeveloperCompose::SYNC_ENGINE_DOCKER_SYNC
             );
 
         parent::configure();
@@ -164,9 +191,19 @@ class Build extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $type = $input->getOption(self::OPTION_MODE);
+        $syncEngine = $input->getOption(self::OPTION_SYNC_ENGINE);
 
         $compose = $this->composeFactory->create($type);
         $config = $this->configFactory->create();
+
+        if (ComposeFactory::COMPOSE_DEVELOPER === $type
+            && !in_array($syncEngine, DeveloperCompose::SYNC_ENGINES_LIST)) {
+            throw new ConfigurationMismatchException(sprintf(
+                "File sync engine `%s` is not supported. Available: %s",
+                $syncEngine,
+                implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
+            ));
+        }
 
         $map = [
             self::OPTION_PHP => Service::NAME_PHP,
@@ -184,31 +221,38 @@ class Build extends Command
             }
         });
 
-        $versionList = $this->serviceConfig->getAllServiceVersions($config);
-        $errorList = $this->validator->validateVersions($versionList);
-
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion(
-            'There are some service versions which are not supported'
-            . ' by current Magento version:' . "\n" . implode("\n", $errorList) . "\n"
-            . 'Do you want to continue?[y/N]',
+        if (in_array(
+            $input->getOption(self::OPTION_MODE),
+            [ComposeFactory::COMPOSE_DEVELOPER, ComposeFactory::COMPOSE_PRODUCTION],
             false
-        );
+        )) {
+            $versionList = $this->serviceConfig->getAllServiceVersions($config);
+            $errorList = $this->validator->validateVersions($versionList);
 
-        if ($errorList && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
-            return 1;
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(
+                'There are some service versions which are not supported'
+                . ' by current Magento version:' . "\n" . implode("\n", $errorList) . "\n"
+                . 'Do you want to continue?[y/N]',
+                false
+            );
+
+            if ($errorList && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
+                return 1;
+            }
+
+            $this->distGenerator->generate();
+            try {
+                $this->getApplication()
+                    ->find(ConfigConvert::NAME)
+                    ->run(new ArrayInput([]), $output);
+            } catch (\Exception $exception) {
+                throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
+            }
         }
 
+        $config->set(DeveloperCompose::SYNC_ENGINE, $syncEngine);
         $this->writer->write($compose, $config);
-
-        try {
-            $this->getApplication()
-                ->find(ConfigConvert::NAME)
-                ->run(new ArrayInput([]), $output);
-        } catch (\Exception $exception) {
-            throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
-        }
-
         $output->writeln('<info>Configuration was built.</info>');
 
         return 0;

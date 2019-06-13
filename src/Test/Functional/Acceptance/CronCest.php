@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class CronCest
+class CronCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -28,6 +28,7 @@ class CronCest
         $I->createDirectory('/app/code/Magento/CronTest', Docker::BUILD_CONTAINER);
         $I->uploadToContainer('modules/Magento/CronTest/.', '/app/code/Magento/CronTest', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
         $I->deleteFromDatabase('cron_schedule');
