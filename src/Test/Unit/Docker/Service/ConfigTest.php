@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\Config\Reader;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Illuminate\Config\Repository;
+use Magento\MagentoCloud\Service\Service;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -43,21 +44,21 @@ class ConfigTest extends TestCase
     public function testGetAllServiceVersions()
     {
         $customVersions = [
-            Config::KEY_DB => 'db.version1',
-            Config::KEY_ELASTICSEARCH => 'es.version1',
+            Service::NAME_DB => 'db.version1',
+            Service::NAME_ELASTICSEARCH => 'es.version1',
         ];
         $configVersions = [
             'services' => [
-                Config::KEY_ELASTICSEARCH => ['version' => 'es.version2'],
-                Config::KEY_RABBITMQ => ['version' => 'rabbitmq.version2'],
+                Service::NAME_ELASTICSEARCH => ['version' => 'es.version2'],
+                Service::NAME_RABBITMQ => ['version' => 'rabbitmq.version2'],
             ],
             'type' => 'php:7.0',
         ];
         $result = [
-            Config::KEY_DB => 'db.version1',
-            Config::KEY_ELASTICSEARCH => 'es.version1',
-            Config::KEY_RABBITMQ => 'rabbitmq.version2',
-            Config::KEY_PHP => '7.0'
+            Service::NAME_DB => 'db.version1',
+            Service::NAME_ELASTICSEARCH => 'es.version1',
+            Service::NAME_RABBITMQ => 'rabbitmq.version2',
+            Service::NAME_PHP => '7.0'
 
         ];
         $customConfigs = new Repository($customVersions);
@@ -94,7 +95,7 @@ class ConfigTest extends TestCase
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn(['type' => 'notphp:1']);
-        $this->version->getServiceVersion(Config::KEY_PHP);
+        $this->version->getServiceVersion(Service::NAME_PHP);
     }
 
     /**
@@ -107,7 +108,7 @@ class ConfigTest extends TestCase
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willThrowException($exception);
-        $this->version->getServiceVersion(Config::KEY_RABBITMQ);
+        $this->version->getServiceVersion(Service::NAME_RABBITMQ);
     }
 
     /**
@@ -202,7 +203,7 @@ class ConfigTest extends TestCase
 
         return [
             [
-                [Config::KEY_CRON => $cronData],
+                ['crons' => $cronData],
                 $cronData
             ],
             [
@@ -234,25 +235,25 @@ class ConfigTest extends TestCase
         return [
             [
                 ['type' => 'php:7.1'],
-                Config::KEY_PHP,
+                Service::NAME_PHP,
                 7.1
             ],
             [
                 [
                     'type' => 'php:7.1',
                     'services' => [
-                        Config::KEY_ELASTICSEARCH => [
+                        Service::NAME_ELASTICSEARCH => [
                             'version' => '6.7'
                         ]
                     ]
                 ],
-                Config::KEY_ELASTICSEARCH,
+                Service::NAME_ELASTICSEARCH,
                 6.7
             ],
             [
                 [
                     'services' => [
-                        Config::KEY_ELASTICSEARCH => [
+                        Service::NAME_ELASTICSEARCH => [
                             'version' => '6.7'
                         ]
                     ]

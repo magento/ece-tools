@@ -79,7 +79,7 @@ class Shared implements ConfigInterface
     public function update(array $config)
     {
         $this->reset();
-        $this->writer->updateRecursive($config);
+        $this->writer->update($config);
     }
 
     /**

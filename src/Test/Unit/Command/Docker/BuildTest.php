@@ -13,18 +13,18 @@ use Magento\MagentoCloud\Command\Docker\Build;
 use Magento\MagentoCloud\Command\Docker\ConfigConvert;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
+use Magento\MagentoCloud\Docker\Compose\DeveloperCompose;
 use Magento\MagentoCloud\Docker\Compose\ProductionCompose;
-use Magento\MagentoCloud\Docker\ComposeManagerFactory;
-use Magento\MagentoCloud\Docker\Config\DistGenerator;
+use Magento\MagentoCloud\Docker\ComposeFactory;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
-use Magento\MagentoCloud\Docker\DevBuilder;
 use Magento\MagentoCloud\Docker\Service\Config;
-use Magento\MagentoCloud\Docker\Service\Version\Validator;
-use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Service\Validator;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console;
+use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
@@ -39,7 +39,7 @@ class BuildTest extends TestCase
     private $command;
 
     /**
-     * @var ComposeManagerFactory|MockObject
+     * @var ComposeFactory|MockObject
      */
     private $builderFactoryMock;
 
@@ -47,11 +47,6 @@ class BuildTest extends TestCase
      * @var ProductionCompose|MockObject
      */
     private $managerMock;
-
-    /**
-     * @var File|MockObject
-     */
-    private $fileMock;
 
     /**
      * @var Environment|MockObject
@@ -69,11 +64,6 @@ class BuildTest extends TestCase
     private $configMock;
 
     /**
-     * @var DistGenerator|MockObject
-     */
-    private $distGenerator;
-
-    /**
      * @var Config|MockObject
      */
     private $serviceConfigMock;
@@ -84,44 +74,45 @@ class BuildTest extends TestCase
     private $validatorMock;
 
     /**
+     * @var Build\Writer|MockObject
+     */
+    private $writerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->builderFactoryMock = $this->createMock(ComposeManagerFactory::class);
+        $this->builderFactoryMock = $this->createMock(ComposeFactory::class);
         $this->managerMock = $this->createMock(ProductionCompose::class);
-        $this->fileMock = $this->createMock(File::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->repositoryFactoryMock = $this->createMock(RepositoryFactory::class);
         $this->configMock = $this->createMock(Repository::class);
         $this->serviceConfigMock = $this->createMock(Config::class);
         $this->validatorMock = $this->createMock(Validator::class);
-        $this->distGenerator = $this->createMock(DistGenerator::class);
+        $this->writerMock = $this->createMock(Build\Writer::class);
 
-        $this->serviceConfigMock->expects($this->any())
-            ->method('getAllServiceVersions')
+        $this->serviceConfigMock->method('getAllServiceVersions')
             ->willReturn([]);
-        $this->validatorMock->expects($this->any())
-            ->method('validateVersions')
+        $this->validatorMock->method('validateVersions')
             ->willReturn([]);
-
         $this->repositoryFactoryMock->method('create')
             ->willReturn($this->configMock);
 
         $this->command = new Build(
             $this->builderFactoryMock,
-            $this->fileMock,
             $this->environmentMock,
             $this->repositoryFactoryMock,
             $this->serviceConfigMock,
             $this->validatorMock,
-            $this->distGenerator
+            $this->writerMock
         );
     }
 
     /**
      * @throws ConfigurationMismatchException
      * @throws FileSystemException
+     * @throws UndefinedPackageException
      */
     public function testExecute()
     {
@@ -138,23 +129,16 @@ class BuildTest extends TestCase
                 [Build::OPTION_REDIS, '3.2'],
                 [Build::OPTION_ES, '2.4'],
                 [Build::OPTION_RABBIT_MQ, '3.5'],
-                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_PRODUCTION]
+                [Build::OPTION_MODE, ComposeFactory::COMPOSE_PRODUCTION],
+                [Build::OPTION_SYNC_ENGINE, DeveloperCompose::SYNC_ENGINE_DOCKER_SYNC],
             ]);
 
         $this->builderFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($this->managerMock);
-        $this->managerMock->expects($this->once())
-            ->method('build')
-            ->willReturn(['version' => '2']);
-        $this->managerMock->expects($this->once())
-            ->method('getConfigPath')
-            ->willReturn('magento_root/docker-compose.yml');
-        $this->fileMock->expects($this->once())
-            ->method('filePutContents')
-            ->with('magento_root/docker-compose.yml', "version: '2'\n");
-        $this->distGenerator->expects($this->once())
-            ->method('generate');
+        $this->writerMock->expects($this->once())
+            ->method('write')
+            ->with($this->managerMock, $this->configMock);
 
         /** @var Console\Application|MockObject $applicationMock */
         $applicationMock = $this->createMock(Console\Application::class);
@@ -173,6 +157,7 @@ class BuildTest extends TestCase
     /**
      * @throws ConfigurationMismatchException
      * @throws FileSystemException
+     * @throws UndefinedPackageException
      */
     public function testExecuteWithParams()
     {
@@ -184,12 +169,6 @@ class BuildTest extends TestCase
         $this->builderFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($this->managerMock);
-        $this->managerMock->expects($this->once())
-            ->method('build')
-            ->willReturn(['version' => '2']);
-        $this->fileMock->expects($this->once())
-            ->method('filePutContents')
-            ->with('magento_root/docker-compose.yml', "version: '2'\n");
         $inputMock->method('getOption')
             ->willReturnMap([
                 [Build::OPTION_PHP, '7.1'],
@@ -199,15 +178,14 @@ class BuildTest extends TestCase
                 [Build::OPTION_ES, '2.4'],
                 [Build::OPTION_RABBIT_MQ, '3.5'],
                 [Build::OPTION_NODE, '6.0'],
-                [Build::OPTION_MODE, ComposeManagerFactory::COMPOSE_PRODUCTION],
+                [Build::OPTION_MODE, ComposeFactory::COMPOSE_PRODUCTION],
+                [Build::OPTION_SYNC_ENGINE, DeveloperCompose::SYNC_ENGINE_DOCKER_SYNC],
             ]);
-        $this->managerMock->expects($this->once())
-            ->method('getConfigPath')
-            ->willReturn('magento_root/docker-compose.yml');
-        $this->configMock->expects($this->exactly(7))
+        $this->configMock->expects($this->exactly(8))
             ->method('set');
-        $this->distGenerator->expects($this->once())
-            ->method('generate');
+        $this->writerMock->expects($this->once())
+            ->method('write')
+            ->with($this->managerMock, $this->configMock);
 
         /** @var Console\Application|MockObject $applicationMock */
         $applicationMock = $this->createMock(Application::class);
@@ -231,5 +209,38 @@ class BuildTest extends TestCase
 
         $this->assertFalse($this->command->isEnabled());
         $this->assertTrue($this->command->isEnabled());
+    }
+
+    /**
+     * @param string $optionName
+     *
+     * @expectedException \Symfony\Component\Console\Exception\InvalidOptionException
+     *
+     * @dataProvider executeWithEmptyOptionDataProvider
+     */
+    public function testExecuteWithEmptyOption(string $optionName)
+    {
+        $this->expectExceptionMessage(sprintf('The "--%s" option requires a value', $optionName));
+
+        $tester = new CommandTester($this->command);
+
+        $tester->execute(['--' . $optionName => null]);
+    }
+
+    /**
+     * @return array
+     */
+    public function executeWithEmptyOptionDataProvider(): array
+    {
+        return [
+            [Build::OPTION_PHP],
+            [Build::OPTION_DB],
+            [Build::OPTION_NGINX],
+            [Build::OPTION_REDIS],
+            [Build::OPTION_ES],
+            [Build::OPTION_RABBIT_MQ],
+            [Build::OPTION_NODE],
+            [Build::OPTION_MODE],
+        ];
     }
 }

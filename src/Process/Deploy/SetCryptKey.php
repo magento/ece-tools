@@ -79,7 +79,7 @@ class SetCryptKey implements ProcessInterface
         $config['crypt']['key'] = $key;
 
         try {
-            $this->configWriter->updateRecursive($config);
+            $this->configWriter->update($config);
         } catch (FileSystemException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }

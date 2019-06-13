@@ -75,6 +75,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\Docker\BuildIntegration::class),
                 $this->container->create(Command\Docker\ConfigConvert::class),
                 $this->container->create(Command\CronKill::class),
+                $this->container->create(Command\ConfigShow::class),
             ]
         );
     }
