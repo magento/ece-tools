@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Command\Docker\Build;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Docker\ComposeInterface;
-use Magento\MagentoCloud\Docker\Config\DistGenerator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -24,18 +23,11 @@ class Writer
     private $file;
 
     /**
-     * @var DistGenerator
-     */
-    private $distGenerator;
-
-    /**
      * @param File $file
-     * @param DistGenerator $distGenerator
      */
-    public function __construct(File $file, DistGenerator $distGenerator)
+    public function __construct(File $file)
     {
         $this->file = $file;
-        $this->distGenerator = $distGenerator;
     }
 
     /**
@@ -52,6 +44,5 @@ class Writer
             $compose->getPath(),
             Yaml::dump($compose->build($config), 4, 2, Yaml::DUMP_MULTI_LINE_LITERAL_BLOCK)
         );
-        $this->distGenerator->generate();
     }
 }

@@ -3,203 +3,113 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
-
 namespace Magento\MagentoCloud\Docker\Compose;
 
-use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\Docker\ComposeInterface;
+use Magento\MagentoCloud\Service\Service;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
-use Magento\MagentoCloud\Docker\Service\ServiceFactory;
-use Magento\MagentoCloud\Filesystem\FileList;
+use Illuminate\Contracts\Config\Repository;
 
 /**
- * Docker integration test builder.
+ * Docker functional test builder.
  *
  * @codeCoverageIgnore
  */
-class FunctionalCompose implements ComposeInterface
+class FunctionalCompose extends ProductionCompose
 {
-    /**
-     * @var FileList
-     */
-    private $fileList;
+    const DIR_MAGENTO = '/var/www/magento';
+    const CRON_ENABLED = false;
 
     /**
-     * @var ServiceFactory
+     * @inheritDoc
      */
-    private $serviceFactory;
-
-    /**
-     * @param FileList $fileList
-     * @param ServiceFactory $serviceFactory
-     */
-    public function __construct(FileList $fileList, ServiceFactory $serviceFactory)
+    public function build(Repository $config): array
     {
-        $this->fileList = $fileList;
-        $this->serviceFactory = $serviceFactory;
+        $compose = parent::build($config);
+        $compose['services']['generic']['env_file'] = [
+            './.docker/composer.env'
+        ];
+        $compose['services']['db']['ports'] = ['3306:3306'];
+        $compose['volumes']['magento'] = [];
+
+        return $compose;
+    }
+
+    /**
+     * @param bool $isReadOnly
+     * @return array
+     */
+    protected function getMagentoVolumes(bool $isReadOnly): array
+    {
+        $flag = $isReadOnly ? ':ro' : ':rw';
+
+        return [
+            '.:/var/www/ece-tools',
+            'magento:' . self::DIR_MAGENTO . $flag,
+            'magento-var:' . self::DIR_MAGENTO . '/var:delegated',
+            'magento-etc:' . self::DIR_MAGENTO . '/app/etc:delegated',
+            'magento-static:' . self::DIR_MAGENTO . '/pub/static:delegated',
+            'magento-media:' . self::DIR_MAGENTO . '/pub/media:delegated',
+        ];
+    }
+
+    /**
+     * @param bool $isReadOnly
+     * @return array
+     */
+    protected function getMagentoBuildVolumes(bool $isReadOnly): array
+    {
+        $flag = $isReadOnly ? ':ro' : ':rw';
+
+        return [
+            '.:/var/www/ece-tools',
+            'magento:' . self::DIR_MAGENTO . $flag,
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    protected function getVariables(): array
+    {
+        return [
+            'MAGENTO_RUN_MODE' => 'production',
+            'PHP_MEMORY_LIMIT' => '2048M',
+            'DEBUG' => 'false',
+            'ENABLE_SENDMAIL' => 'false',
+            'UPLOAD_MAX_FILESIZE' => '64M',
+            'MAGENTO_ROOT' => self::DIR_MAGENTO,
+        ];
     }
 
     /**
      * @inheritdoc
-     *
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function build(Repository $repository): array
+    protected function getServiceVersion(string $serviceName)
     {
-        $phpVersion = $repository->get(self::PHP_VERSION);
-        $dbVersion = $repository->get(self::DB_VERSION);
-        $nginxVersion = $repository->get(self::NGINX_VERSION);
-
-        $services = [
-            'version' => '2',
-            'services' => [
-                'fpm' => $this->serviceFactory->create(
-                    ServiceFactory::SERVICE_FPM,
-                    $phpVersion,
-                    [
-                        'ports' => [9000],
-                        'links' => [
-                            'db',
-                        ],
-                        'volumes' => [
-                            $this->getMagentoVolume(true)
-                        ],
-                        'volumes_from' => [
-                            'appdata',
-                        ],
-                        'env_file' => [
-                            './.docker/global.env',
-                            './.docker/composer.env',
-                        ],
-                    ]
-                ),
-                'db' => $this->serviceFactory->create(
-                    ServiceFactory::SERVICE_DB,
-                    $dbVersion,
-                    [
-                        'ports' => ['3306:3306'],
-                        'volumes' => [
-                            '/var/lib/mysql',
-                        ],
-                        'environment' => [
-                            'MYSQL_ROOT_PASSWORD=magento2',
-                            'MYSQL_DATABASE=magento2',
-                            'MYSQL_USER=magento2',
-                            'MYSQL_PASSWORD=magento2',
-                        ],
-                    ]
-                ),
-                'web' => $this->serviceFactory->create(
-                    ServiceFactory::SERVICE_NGINX,
-                    $nginxVersion,
-                    [
-                        'ports' => [
-                            '80:80',
-                        ],
-                        'links' => [
-                            'fpm',
-                            'db',
-                        ],
-                        'volumes' => [
-                            $this->getMagentoVolume(true)
-                        ],
-                        'volumes_from' => [
-                            'appdata',
-                        ],
-                        'env_file' => [
-                            './.docker/global.env',
-                            './.docker/composer.env',
-                        ],
-                    ]
-                ),
-            ],
-            'volumes' => [
-                'magento' => []
-            ]
+        $mapDefaultVersion = [
+            Service::NAME_DB => '10.2',
+            Service::NAME_PHP => '7.2',
+            Service::NAME_NGINX => self::DEFAULT_NGINX_VERSION,
+            Service::NAME_VARNISH => self::DEFAULT_VARNISH_VERSION,
+            Service::NAME_ELASTICSEARCH => null,
+            Service::NAME_NODE => null,
+            Service::NAME_RABBITMQ => null,
+            Service::NAME_REDIS => null,
         ];
 
-        $services['services']['build'] = $this->getCliService(
-            $phpVersion,
-            'build',
-            false,
-            ['db'],
-            'build.magento2.docker'
-        );
-        $services['services']['deploy'] = $this->getCliService(
-            $phpVersion,
-            'deploy',
-            false,
-            ['db'],
-            'deploy.magento2.docker'
-        );
-        $services ['services']['appdata'] = [
-            'image' => 'tianon/true',
-            'volumes' => [
-                '.:/var/www/ece-tools',
-                '/var/www/magento/pub/static',
-                '/var/www/magento/pub/media',
-                '/var/www/magento/var',
-                '/var/www/magento/app/etc',
-            ],
-        ];
+        if (!array_key_exists($serviceName, $mapDefaultVersion)) {
+            throw new ConfigurationMismatchException(sprintf('Type "%s" is not supported', $serviceName));
+        }
 
-        return $services;
+        return $mapDefaultVersion[$serviceName];
     }
 
     /**
-     * @param string $version
-     * @param string $name
-     * @param bool $isReadOnly
-     * @param array $depends
-     * @param string $hostname
-     * @return array
-     * @throws ConfigurationMismatchException
+     * @inheritdoc
      */
-    private function getCliService(
-        string $version,
-        string $name,
-        bool $isReadOnly,
-        array $depends,
-        string $hostname
-    ): array {
-        $composeCacheDirectory = file_exists(getenv('HOME') . '/.cache/composer')
-            ? '~/.cache/composer'
-            : '~/.composer/cache';
-
-        $config = $this->serviceFactory->create(
-            ServiceFactory::SERVICE_CLI,
-            $version,
-            [
-                'hostname' => $hostname,
-                'container_name' => $name,
-                'depends_on' => $depends,
-                'volumes' => [
-                    $composeCacheDirectory . ':/root/.composer/cache',
-                    $this->getMagentoVolume($isReadOnly),
-                ],
-                'volumes_from' => [
-                    'appdata',
-                ],
-                'env_file' => [
-                    './.docker/global.env',
-                    './.docker/composer.env',
-                ],
-            ]
-        );
-
-        return $config;
-    }
-
-    /**
-     * @param bool $isReadOnly
-     * @return string
-     */
-    private function getMagentoVolume(bool $isReadOnly): string
+    protected function getPhpVersion()
     {
-        $volume = 'magento:/var/www/magento';
-
-        return $isReadOnly ? $volume . ':ro' : $volume . ':rw';
+        return $this->getServiceVersion(Service::NAME_PHP);
     }
 
     /**

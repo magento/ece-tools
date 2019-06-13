@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class PostDeployCest
+class PostDeployCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -26,6 +26,7 @@ class PostDeployCest
         $I->assertTrue($I->composerInstall());
         $I->uploadToContainer('files/scdondemand/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
 
@@ -60,6 +61,7 @@ class PostDeployCest
             Docker::BUILD_CONTAINER
         );
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->startEnvironment();
         $I->assertFalse($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->seeInOutput('Variable DATABASE_CONFIGURATION is not configured properly');
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
