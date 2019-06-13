@@ -61,6 +61,11 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     protected $output = '';
 
     /**
+     * @var array
+     */
+    protected $services = [];
+
+    /**
      * @inheritdoc
      */
     public function _initialize()
@@ -73,35 +78,79 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     }
 
     /**
-     * @inheritdoc
+     * Stops Docker env
+     *
+     * @return bool
      */
-    public function _before(TestInterface $test)
+    public function stopEnvironment(): bool
     {
-        $this->resetEnvironment();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function _after(TestInterface $test)
-    {
-        $this->output = $this->taskEnvDown()
+        return $this->taskEnvDown()
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->run()
             ->stopOnFail()
-            ->getMessage();
+            ->wasSuccessful();
     }
 
     /**
-     * Resets containers
+     * Start Docker env
      *
      * @return bool
      */
-    public function resetEnvironment(): bool
+    public function startEnvironment(): bool
+    {
+        return $this->taskEnvUp()
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->run()
+            ->stopOnFail()
+            ->wasSuccessful();
+    }
+
+    /**
+     * Removes docker-compose.yml
+     *
+     * @return bool
+     */
+    public function removeDockerCompose(): bool
+    {
+        return $this->taskRemoveDockerCompose()
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->run()
+            ->stopOnFail()
+            ->wasSuccessful();
+    }
+
+    /**
+     * Generates docker-compose.yml
+     *
+     * @param array $services
+     * @return bool
+     */
+    public function generateDockerCompose(array $services = []): bool
+    {
+        $this->services = $services;
+        /** @var Result $result */
+        $result = $this->taskGenerateDockerCompose($services)
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->run()
+            ->stopOnFail();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
+    }
+
+    /**
+     * Clean up Docker env
+     *
+     * @return bool
+     */
+    public function cleanUpEnvironment(): bool
     {
         /** @var Result $result */
-        $result = $this->taskEnvUp($this->_getConfig('volumes'))
+        $result = $this->taskEnvCleanUp($this->_getConfig('volumes'))
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->run()
@@ -389,6 +438,22 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     }
 
     /**
+     * Returns DB credential
+     *
+     * @return array
+     */
+    public function getDbCredential(): array
+    {
+        return [
+            'host' => $this->_getConfig('db_host'),
+            'path' => $this->_getConfig('db_path'),
+            'password' => $this->_getConfig('db_password'),
+            'username' => $this->_getConfig('db_username'),
+            'port' => $this->_getConfig('db_port'),
+        ];
+    }
+
+    /**
      * Prepares environment variables
      *
      * @param array $variables
@@ -412,16 +477,10 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     private function getDefaultVariables(): array
     {
-        return [
+        $variables = [
             'MAGENTO_CLOUD_RELATIONSHIPS' => [
                 'database' => [
-                    0 => [
-                        'host' => $this->_getConfig('db_host'),
-                        'path' => $this->_getConfig('db_path'),
-                        'password' => $this->_getConfig('db_password'),
-                        'username' => $this->_getConfig('db_username'),
-                        'port' => $this->_getConfig('db_port'),
-                    ],
+                    $this->getDbCredential(),
                 ],
             ],
             'MAGENTO_CLOUD_ROUTES' => [
@@ -438,5 +497,36 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
                 'ADMIN_EMAIL' => 'admin@example.com',
             ],
         ];
+
+        if (isset($this->services['es'])) {
+            $variables['MAGENTO_CLOUD_RELATIONSHIPS']['elasticsearch'] = [
+                [
+                    'host' => 'elasticsearch',
+                    'port' => '9200',
+                ],
+            ];
+        }
+
+        if (isset($this->services['redis'])) {
+            $variables['MAGENTO_CLOUD_RELATIONSHIPS']['redis'] = [
+                [
+                    'host' => 'redis',
+                    'port' => '6379',
+                ],
+            ];
+        }
+
+        if (isset($this->services['rmq'])) {
+            $variables['MAGENTO_CLOUD_RELATIONSHIPS']['rabbitmq'] = [
+                [
+                    'host' => 'rabbitmq',
+                    'port' => '5672',
+                    'username' => 'guest',
+                    'password' => 'guest',
+                ],
+            ];
+        }
+
+        return $variables;
     }
 }

@@ -37,6 +37,17 @@ class DeveloperCompose extends ProductionCompose
     }
 
     /**
+     * @param bool $isReadOnly
+     * @return array
+     */
+    protected function getMagentoBuildVolumes(bool $isReadOnly): array
+    {
+        return [
+            'magento-sync:' . self::DIR_MAGENTO . ':nocopy'
+        ];
+    }
+
+    /**
      * @inheritDoc
      */
     protected function getMagentoVolumes(bool $isReadOnly): array

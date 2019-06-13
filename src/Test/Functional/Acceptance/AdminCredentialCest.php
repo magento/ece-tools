@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 /**
  * This test runs on the latest version of PHP
  */
-class AdminCredentialCest
+class AdminCredentialCest extends AbstractCest
 {
     /**
      * @var string
@@ -30,6 +30,7 @@ class AdminCredentialCest
         $I->assertTrue($I->cloneTemplate($this->magentoCloudTemplate));
         $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
 
@@ -80,6 +81,7 @@ class AdminCredentialCest
         $I->assertTrue($I->cloneTemplate($this->magentoCloudTemplate));
         $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
 
