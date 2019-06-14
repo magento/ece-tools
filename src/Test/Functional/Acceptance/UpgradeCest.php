@@ -50,8 +50,10 @@ class UpgradeCest extends AbstractCest
      */
     protected function testProvider()
     {
+        // @TODO change version to 2.3.* after fix in magento core.
+        // https://magento2.atlassian.net/browse/MAGECLOUD-3725
         return [
-            ['from' => '2.3.0', 'to' => '2.3.*']
+            ['from' => '2.3.0', 'to' => '2.3.1']
         ];
     }
 }
