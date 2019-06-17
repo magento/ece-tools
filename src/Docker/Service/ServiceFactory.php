@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Docker\Service;
 
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
+use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
  * Create instance of Docker service configuration.
@@ -84,11 +86,32 @@ class ServiceFactory
     ];
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @var DirectoryList
+     */
+    private $directoryList;
+
+    /**
+     * @param File $file
+     * @param DirectoryList $directoryList
+     */
+    public function __construct(File $file, DirectoryList $directoryList)
+    {
+        $this->file = $file;
+        $this->directoryList = $directoryList;
+    }
+
+    /**
      * @param string $name
      * @param string $version
      * @param array $extendedConfig
      * @return array
      * @throws ConfigurationMismatchException
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     public function create(string $name, string $version, array $extendedConfig = []): array
     {
@@ -101,11 +124,45 @@ class ServiceFactory
 
         $metaConfig = self::CONFIG[$name];
         $defaultConfig = $metaConfig['config'] ?? [];
+        $extendedConfig = $this->prepareServiceConfig($name, $version, $extendedConfig);
 
         return array_replace(
             ['image' => sprintf($metaConfig['image'], $version)],
             $defaultConfig,
             $extendedConfig
         );
+    }
+
+    /**
+     * @param string $name
+     * @param string $version
+     * @param array $extendedConfig
+     * @return array
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    private function prepareServiceConfig(string $name, string $version, array $extendedConfig): array
+    {
+        $config = $extendedConfig;
+        if ($name == self::SERVICE_ELASTICSEARCH && $extendedConfig['plugins']) {
+            $config = [
+                'build' => [
+                    'context' => 'docker/elasticsearch'
+                ]
+            ];
+            // create docker/elasticsearch/Dockerfile file
+            $pluginInstall = [];
+            foreach ($extendedConfig['plugins'] as $pluginName) {
+                $pluginInstall[] = 'bin/elasticsearch-plugin install ' . $pluginName;
+            }
+            $dockerFile = 'FROM ' . sprintf(self::CONFIG[self::SERVICE_ELASTICSEARCH]['image'], $version) . "\n\n"
+                . 'RUN ' . implode($pluginInstall, "&& \\ \n" ) . "\n";
+
+            $this->file->filePutContents(
+                $this->directoryList->getMagentoRoot() . '/docker/elasticsearch/Dockerfile',
+                $dockerFile
+            );
+        }
+
+        return $config;
     }
 }

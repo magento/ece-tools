@@ -116,7 +116,8 @@ class ProductionCompose implements ComposeInterface
         if ($esVersion) {
             $services['elasticsearch'] = $this->serviceFactory->create(
                 ServiceFactory::SERVICE_ELASTICSEARCH,
-                $esVersion
+                $esVersion,
+                $this->config->getServiceConfig(Service::NAME_ELASTICSEARCH)
             );
         }
 

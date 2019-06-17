@@ -140,4 +140,20 @@ class Config
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
+
+    /**
+     * Retrieves service configuration if exists, otherwise returns null
+     *
+     * @param string $serviceName
+     * @return array|null
+     * @throws ConfigurationMismatchException
+     */
+    public function getServiceConfig(string $serviceName)
+    {
+        try {
+            return $this->reader->read()['services'][$serviceName]['configuration'] ?? null;
+        } catch (FileSystemException $exception) {
+            throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
 }
