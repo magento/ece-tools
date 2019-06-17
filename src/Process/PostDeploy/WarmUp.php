@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Process\PostDeploy;
 use GuzzleHttp\Exception\RequestException;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Magento\MagentoCloud\Http\RequestFactory;
-use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp\Urls;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
@@ -40,29 +39,21 @@ class WarmUp implements ProcessInterface
     private $urls;
 
     /**
-     * @var Manager
-     */
-    private $packageManager;
-
-    /**
      * @param ClientFactory $clientFactory
      * @param RequestFactory $requestFactory
      * @param LoggerInterface $logger
      * @param Urls $urls
-     * @param Manager $packageManager
      */
     public function __construct(
         ClientFactory $clientFactory,
         RequestFactory $requestFactory,
         LoggerInterface $logger,
-        Urls $urls,
-        Manager $packageManager
+        Urls $urls
     ) {
         $this->clientFactory = $clientFactory;
         $this->requestFactory = $requestFactory;
         $this->logger = $logger;
         $this->urls = $urls;
-        $this->packageManager = $packageManager;
     }
 
     /**
@@ -73,13 +64,6 @@ class WarmUp implements ProcessInterface
     public function execute()
     {
         try {
-            if (!$this->packageManager->has('magento/magento-cloud-components', '*')) {
-                $this->logger->warning(
-                    'Skipping the warm-up phase because `magento/magento-cloud-components` is not installed.'
-                );
-                return;
-            }
-
             $this->logger->info('Starting page warming up');
 
             $client = $this->clientFactory->create();

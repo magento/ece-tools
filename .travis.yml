@@ -50,7 +50,7 @@ matrix:
       env: TEST_SUITE=functional
 
 install:
-  - echo "{\"http-basic\":{\"repo.magento.com\":{\"username\":\"${REPO_USERNAME}\",\"password\":\"${REPO_PASSWORD}\"}}}" > auth.json
+  - composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
   - composer update -n --no-suggest
 
 before_script:
