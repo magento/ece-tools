@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Service;
 
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**

@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Config\SearchEngine;
+namespace Magento\MagentoCloud\Service;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;

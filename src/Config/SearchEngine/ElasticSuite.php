@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Service\ElasticSearch;
 
 /**
  * Provides an access to ElasticSuite configuration.
