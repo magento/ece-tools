@@ -144,21 +144,27 @@ class ServiceFactory
     {
         $config = $extendedConfig;
         if ($name == self::SERVICE_ELASTICSEARCH && $extendedConfig['plugins']) {
-            $config = [
-                'build' => [
-                    'context' => 'docker/elasticsearch'
-                ]
-            ];
-            // create docker/elasticsearch/Dockerfile file
             $pluginInstall = [];
             foreach ($extendedConfig['plugins'] as $pluginName) {
                 $pluginInstall[] = 'bin/elasticsearch-plugin install ' . $pluginName;
             }
             $dockerFile = 'FROM ' . sprintf(self::CONFIG[self::SERVICE_ELASTICSEARCH]['image'], $version) . "\n\n"
-                . 'RUN ' . implode($pluginInstall, "&& \\ \n" ) . "\n";
+                . 'RUN ' . implode($pluginInstall, " && \\ \n    " ) . "\n";
 
+
+            $dirPath = 'docker/elasticsearch';
+            $fullDirPath = $this->directoryList->getMagentoRoot() . '/' . $dirPath;
+            $config = [
+                'build' => [
+                    'context' => $dirPath
+                ]
+            ];
+
+            if (!$this->file->isExists($fullDirPath)) {
+                $this->file->createDirectory($fullDirPath, 0777);
+            }
             $this->file->filePutContents(
-                $this->directoryList->getMagentoRoot() . '/docker/elasticsearch/Dockerfile',
+                $fullDirPath. '/Dockerfile',
                 $dockerFile
             );
         }
