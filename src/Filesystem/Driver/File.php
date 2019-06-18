@@ -196,8 +196,8 @@ class File
             '/bin/bash -c %s',
             escapeshellarg(sprintf(
                 'shopt -s dotglob; cp -R %s/* %s/',
-                escapeshellarg($source),
-                escapeshellarg($destination)
+                escapeshellarg(rtrim($source, '/')),
+                escapeshellarg(rtrim($destination, '/'))
             ))
         ));
     }

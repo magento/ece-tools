@@ -6,11 +6,10 @@
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
-use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
+use Magento\MagentoCloud\Process\PostDeploy\WarmUp\Urls;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,19 +18,9 @@ use Psr\Log\LoggerInterface;
 class WarmUp implements ProcessInterface
 {
     /**
-     * @var PostDeployInterface
-     */
-    private $postDeploy;
-
-    /**
      * @var PoolFactory
      */
     private $poolFactory;
-
-    /**
-     * @var UrlManager
-     */
-    private $urlManager;
 
     /**
      * @var LoggerInterface
@@ -39,21 +28,23 @@ class WarmUp implements ProcessInterface
     private $logger;
 
     /**
-     * @param PostDeployInterface $postDeploy
+     * @var Urls
+     */
+    private $urls;
+
+    /**
      * @param PoolFactory $poolFactory
-     * @param UrlManager $urlManager
      * @param LoggerInterface $logger
+     * @param Urls $urls
      */
     public function __construct(
-        PostDeployInterface $postDeploy,
         PoolFactory $poolFactory,
-        UrlManager $urlManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        Urls $urls
     ) {
-        $this->postDeploy = $postDeploy;
         $this->poolFactory = $poolFactory;
-        $this->urlManager = $urlManager;
         $this->logger = $logger;
+        $this->urls = $urls;
     }
 
     /**
@@ -62,7 +53,9 @@ class WarmUp implements ProcessInterface
      */
     public function execute()
     {
-        $urls = $this->getUrls();
+        $this->logger->info('Starting page warming up');
+
+        $urls = $this->urls->getAll();
 
         $fulfilled = function ($response, $index) use ($urls) {
             $this->logger->info('Warmed up page: ' . $urls[$index]);
@@ -76,6 +69,12 @@ class WarmUp implements ProcessInterface
                     'error' => $exception->getResponse()->getReasonPhrase(),
                     'code' => $exception->getResponse()->getStatusCode(),
                 ];
+            } else if ($exception->getHandlerContext()) {
+                $context = [
+                    'error' => $exception->getHandlerContext()['error'] ?? '',
+                    'errno' => $exception->getHandlerContext()['errno'] ?? '',
+                    'total_time' => $exception->getHandlerContext()['total_time'] ?? '',
+                ];
             }
 
             $this->logger->error('Warming up failed: ' . $urls[$index], $context);
@@ -88,32 +87,5 @@ class WarmUp implements ProcessInterface
         } catch (\Throwable $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
-    }
-
-    /**
-     * Returns list of URLs which should be warm up.
-     *
-     * @return array
-     */
-    private function getUrls(): array
-    {
-        return array_filter(
-            $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES),
-            function ($page) {
-                if (!$this->urlManager->isUrlValid($page)) {
-                    $this->logger->warning(
-                        sprintf(
-                            'Page "%s" can\'t be warmed-up because such domain ' .
-                            'is not registered in current Magento installation',
-                            $page
-                        )
-                    );
-
-                    return false;
-                }
-
-                return true;
-            }
-        );
     }
 }

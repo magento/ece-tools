@@ -8,10 +8,9 @@ namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Promise\PromiseInterface;
-use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp;
-use Magento\MagentoCloud\Util\UrlManager;
+use Magento\MagentoCloud\Process\ProcessException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\RequestInterface;
@@ -29,11 +28,6 @@ class WarmUpTest extends TestCase
     private $process;
 
     /**
-     * @var PostDeployInterface|MockObject
-     */
-    private $postDeployMock;
-
-    /**
      * @var PoolFactory|MockObject
      */
     private $poolFactoryMock;
@@ -44,9 +38,9 @@ class WarmUpTest extends TestCase
     private $poolMock;
 
     /**
-     * @var UrlManager|MockObject
+     * @var WarmUp\Urls|Mock
      */
-    private $urlManagerMock;
+    private $urlsMock;
 
     /**
      * @var LoggerInterface|MockObject
@@ -63,30 +57,31 @@ class WarmUpTest extends TestCase
      */
     protected function setUp()
     {
-        $this->postDeployMock = $this->createMock(PostDeployInterface::class);
         $this->poolFactoryMock = $this->createMock(PoolFactory::class);
-        $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->poolMock = $this->createMock(Pool::class);
         $this->promiseMock = $this->createMock(PromiseInterface::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
+        $this->urlsMock = $this->createMock(WarmUp\Urls::class);
 
         $this->poolMock->method('promise')
             ->willReturn($this->promiseMock);
 
         $this->process = new WarmUp(
-            $this->postDeployMock,
             $this->poolFactoryMock,
-            $this->urlManagerMock,
-            $this->loggerMock
+            $this->loggerMock,
+            $this->urlsMock
         );
     }
 
     public function testExecute()
     {
         $urls = [
-            'index.php',
-            'index.php/customer/account/create',
+            'http://base-url.com/index.php',
+            'http://base-url.com/index.php/customer/account/create'
         ];
+
+        $this->urlsMock->method('getAll')
+            ->willReturn($urls);
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockException = $this->createMock(RequestException::class);
@@ -98,13 +93,6 @@ class WarmUpTest extends TestCase
         $mockResponse->method('getReasonPhrase')
             ->willReturn('Service Unavailable');
 
-        $this->postDeployMock->expects($this->once())
-            ->method('get')
-            ->with(PostDeployInterface::VAR_WARM_UP_PAGES)
-            ->willReturn($urls);
-        $this->urlManagerMock->expects($this->atLeastOnce())
-            ->method('isUrlValid')
-            ->willReturn(true);
         $this->poolFactoryMock->expects($this->once())
             ->method('create')
             ->with(
@@ -125,14 +113,35 @@ class WarmUpTest extends TestCase
         $this->promiseMock->expects($this->once())
             ->method('wait');
         $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Warmed up page: index.php');
-        $this->loggerMock->expects($this->once())
             ->method('error')
             ->with(
-                'Warming up failed: index.php/customer/account/create',
+                'Warming up failed: http://base-url.com/index.php/customer/account/create',
                 ['error' => 'Service Unavailable', 'code' => 503]
             );
+
+        $this->process->execute();
+    }
+
+    public function testExecuteWithPromiseException()
+    {
+        $urls = [
+            'http://base-url.com/index.php',
+            'http://base-url.com/index.php/customer/account/create'
+        ];
+
+        $this->urlsMock->expects($this->any())
+            ->method('getAll')
+            ->willReturn($urls);
+        $this->poolFactoryMock->expects($this->once())
+            ->method('create')
+            ->with($this->equalTo($urls), $this->isType('array'))
+            ->willReturn($this->poolMock);
+        $this->promiseMock->expects($this->any())
+            ->method('wait')
+            ->willThrowException(new \Exception('some error'));
+
+        $this->expectException(ProcessException::class);
+        $this->expectExceptionMessage('some error');
 
         $this->process->execute();
     }
