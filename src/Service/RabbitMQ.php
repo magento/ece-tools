@@ -56,16 +56,7 @@ class RabbitMQ implements ServiceInterface
         foreach ($this->possibleRelationshipNames as $relationshipName) {
             $mqConfig = $this->environment->getRelationship($relationshipName);
             if (count($mqConfig)) {
-                $amqpConfig = $mqConfig[0];
-                return [
-                    'amqp' => [
-                        'host' => $amqpConfig['host'],
-                        'port' => $amqpConfig['port'],
-                        'user' => $amqpConfig['username'],
-                        'password' => $amqpConfig['password'],
-                        'virtualhost' => isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/',
-                    ]
-                ];
+                return $mqConfig[0];
             }
         }
 

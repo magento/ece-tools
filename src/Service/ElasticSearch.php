@@ -86,18 +86,16 @@ class ElasticSearch implements ServiceInterface
         if ($this->version === null) {
             $this->version = '0';
 
-            $relationships = $this->environment->getRelationships();
-            if (!isset($relationships['elasticsearch'])) {
+            $config = $this->getConfiguration();
+            if (!$config) {
                 return $this->version;
             }
-
-            $esConfig = $relationships['elasticsearch'][0];
 
             try {
                 $esConfiguration = $this->call(sprintf(
                     '%s:%s',
-                    $esConfig['host'],
-                    $esConfig['port']
+                    $config['host'],
+                    $config['port']
                 ));
 
                 $this->version = $esConfiguration['version']['number'];

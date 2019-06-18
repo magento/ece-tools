@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
@@ -50,30 +51,35 @@ class ServiceVersion implements ValidatorInterface
     }
 
     /**
-     * @return Validator\ResultInterface
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
-     * @throws \Magento\MagentoCloud\Service\ConfigurationMismatchException
+     * Validates compatibility Redis and RabbitMq services with installed Magento version.
+     *
+     * {@inheritdoc}
      */
     public function validate(): Validator\ResultInterface
     {
-        $services = [
-            ServiceInterface::NAME_RABBITMQ,
-            ServiceInterface::NAME_REDIS
-        ];
+        try {
+            $services = [
+                ServiceInterface::NAME_RABBITMQ,
+                ServiceInterface::NAME_REDIS,
+                ServiceInterface::NAME_DB
+            ];
 
-        $errors = [];
-        foreach ($services as $serviceName) {
-            $service = $this->serviceFactory->create($serviceName);
-            if ($error = $this->serviceVersionValidator->validateService($serviceName, $service->getVersion())) {
-                $errors[] = $error;
+            $errors = [];
+            foreach ($services as $serviceName) {
+                $service = $this->serviceFactory->create($serviceName);
+                if ($error = $this->serviceVersionValidator->validateService($serviceName, $service->getVersion())) {
+                    $errors[] = $error;
+                }
             }
-        }
 
-        if ($errors) {
-            return $this->resultFactory->error(
-                'The current configuration is not compatible with this version of Magento',
-                implode(PHP_EOL, $errors)
-            );
+            if ($errors) {
+                return $this->resultFactory->error(
+                    'The current configuration is not compatible with this version of Magento',
+                    implode(PHP_EOL, $errors)
+                );
+            }
+        } catch (GenericException $e) {
+            return $this->resultFactory->error('Can\'t validate version of some services: ' . $e->getMessage());
         }
 
         return $this->resultFactory->success();

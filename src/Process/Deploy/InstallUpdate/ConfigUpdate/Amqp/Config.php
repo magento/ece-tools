@@ -52,7 +52,7 @@ class Config
     public function get(): array
     {
         $envQueueConfig = $this->stageConfig->get(DeployInterface::VAR_QUEUE_CONFIGURATION);
-        $mqConfig = $this->rabbitMQ->getConfiguration();
+        $mqConfig = $this->getAmqpConfig();
 
         if ($this->configMerger->isEmpty($envQueueConfig)) {
             return $mqConfig;
@@ -63,5 +63,27 @@ class Config
         }
 
         return $this->configMerger->clear($envQueueConfig);
+    }
+
+    /**
+     * Convert amqp service configuration to magento format.
+     *
+     * @return array
+     */
+    private function getAmqpConfig(): array
+    {
+        if ($amqpConfig = $this->rabbitMQ->getConfiguration()) {
+            return [
+                'amqp' => [
+                    'host' => $amqpConfig['host'],
+                    'port' => $amqpConfig['port'],
+                    'user' => $amqpConfig['username'],
+                    'password' => $amqpConfig['password'],
+                    'virtualhost' => isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/',
+                ]
+            ];
+        }
+
+        return [];
     }
 }
