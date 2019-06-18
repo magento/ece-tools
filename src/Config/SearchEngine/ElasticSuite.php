@@ -96,7 +96,7 @@ class ElasticSuite
      */
     private function getConfig(): array
     {
-        $esConfig = $this->elasticSearch->getRelationship();
+        $esConfig = $this->elasticSearch->getConfiguration();
 
         if (!isset($esConfig['host'], $esConfig['port'])) {
             return [];

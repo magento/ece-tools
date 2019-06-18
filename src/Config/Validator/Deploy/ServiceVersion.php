@@ -7,73 +7,75 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Service\Service;
+use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
+/**
+ * Validates installed service versions according to version mapping.
+ * @see \Magento\MagentoCloud\Service\Validator::MAGENTO_SUPPORTED_SERVICE_VERSIONS
+ */
 class ServiceVersion implements ValidatorInterface
 {
+    /**
+     * @var Validator\ResultFactory
+     */
+    private $resultFactory;
+
     /**
      * @var ServiceVersionValidator
      */
     private $serviceVersionValidator;
-    /**
-     * @var ElasticSearch
-     */
-    private $elasticSearch;
 
     /**
+     * @var ServiceFactory
+     */
+    private $serviceFactory;
+
+    /**
+     * @param Validator\ResultFactory $resultFactory
      * @param ServiceVersionValidator $serviceVersionValidator
+     * @param ServiceFactory $serviceFactory
      */
     public function __construct(
+        Validator\ResultFactory $resultFactory,
         ServiceVersionValidator $serviceVersionValidator,
-        ElasticSearch $elasticSearch
+        ServiceFactory $serviceFactory
     ) {
+        $this->resultFactory = $resultFactory;
         $this->serviceVersionValidator = $serviceVersionValidator;
-        $this->elasticSearch = $elasticSearch;
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
      * @return Validator\ResultInterface
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     * @throws \Magento\MagentoCloud\Service\ConfigurationMismatchException
      */
     public function validate(): Validator\ResultInterface
     {
         $services = [
-            Service::NAME_PHP => PHP_VERSION
-        ];
-
-        if ($this->elasticSearch->getVersion()) {
-            $services[Service::NAME_REDIS] = $this->elasticSearch->getVersion();
-        }
-
-        if ($redisInstalled) {
-            $services[Service::NAME_RABBITMQ] = $this->elasticSearch->getVersion();
-        }
-            Service::NAME_REDIS => $this->elasticSearch->getVersion(),
-            Service::NAME_RABBITMQ,
-            Service::NAME_ELASTICSEARCH,
+            ServiceInterface::NAME_RABBITMQ,
+            ServiceInterface::NAME_REDIS
         ];
 
         $errors = [];
-        foreach ($services as $name => $version) {
-            $errors = $this->validateService($name, $version);
-            if ($error = $this->serviceVersionValidator->validateService($name, $version)) {
+        foreach ($services as $serviceName) {
+            $service = $this->serviceFactory->create($serviceName);
+            if ($error = $this->serviceVersionValidator->validateService($serviceName, $service->getVersion())) {
                 $errors[] = $error;
             }
         }
-    }
 
-    /**
-     * @param string $name
-     * @param string $version
-     * @return string
-     */
-    private function validateService(string $name, string $version): string
-    {
-        try {
+        if ($errors) {
+            return $this->resultFactory->error(
+                'The current configuration is not compatible with this version of Magento',
+                implode(PHP_EOL, $errors)
+            );
+        }
 
-        } catch (Con)
+        return $this->resultFactory->success();
     }
 }

@@ -143,7 +143,7 @@ class SearchEngine
      */
     private function getSearchConfig(): array
     {
-        if ($esConfig = $this->environment->getRelationship(ElasticSearch::RELATIONSHIP_KEY)[0] ?? []) {
+        if ($esConfig = $this->elasticSearch->getConfiguration()) {
             return $this->getElasticSearchConfiguration($esConfig);
         }
 

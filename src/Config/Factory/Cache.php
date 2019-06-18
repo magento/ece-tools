@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Config\Factory;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Service\Redis;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,9 +26,9 @@ class Cache
     const REDIS_DATABASE_PAGE_CACHE = 2;
 
     /**
-     * @var Environment
+     * @var Redis
      */
-    private $environment;
+    private $redis;
 
     /**
      * @var DeployInterface
@@ -46,18 +46,18 @@ class Cache
     private $configMerger;
 
     /**
-     * @param Environment $environment
+     * @param Redis $redis
      * @param DeployInterface $stageConfig
      * @param LoggerInterface $logger
      * @param ConfigMerger $configMerger
      */
     public function __construct(
-        Environment $environment,
+        Redis $redis,
         DeployInterface $stageConfig,
         LoggerInterface $logger,
         ConfigMerger $configMerger
     ) {
-        $this->environment = $environment;
+        $this->redis = $redis;
         $this->stageConfig = $stageConfig;
         $this->logger = $logger;
         $this->configMerger = $configMerger;
@@ -92,7 +92,7 @@ class Cache
             return $this->configMerger->clear($envCacheConfiguration);
         }
 
-        $redisConfig = $this->environment->getRelationship('redis');
+        $redisConfig = $this->redis->getConfiguration();
 
         if (empty($redisConfig)) {
             return [];
@@ -159,7 +159,7 @@ class Cache
     private function getSlaveConnection(): array
     {
         $connectionData = [];
-        $redisSlaveConfig = $this->environment->getRelationship('redis-slave');
+        $redisSlaveConfig = $this->redis->getSlaveConfiguration();
         $slaveHost = $redisSlaveConfig[0]['host'] ?? null;
 
         if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION) && $slaveHost) {

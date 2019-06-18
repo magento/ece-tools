@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Docker\Compose\DeveloperCompose;
 use Magento\MagentoCloud\Docker\ComposeFactory;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
-use Magento\MagentoCloud\Service\Service;
+use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\Validator;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
@@ -206,13 +206,13 @@ class Build extends Command
         }
 
         $map = [
-            self::OPTION_PHP => Service::NAME_PHP,
-            self::OPTION_DB => Service::NAME_DB,
-            self::OPTION_NGINX => Service::NAME_NGINX,
-            self::OPTION_REDIS => Service::NAME_REDIS,
-            self::OPTION_ES => Service::NAME_ELASTICSEARCH,
-            self::OPTION_NODE => Service::NAME_NODE,
-            self::OPTION_RABBIT_MQ => Service::NAME_RABBITMQ,
+            self::OPTION_PHP => ServiceInterface::NAME_PHP,
+            self::OPTION_DB => ServiceInterface::NAME_DB,
+            self::OPTION_NGINX => ServiceInterface::NAME_NGINX,
+            self::OPTION_REDIS => ServiceInterface::NAME_REDIS,
+            self::OPTION_ES => ServiceInterface::NAME_ELASTICSEARCH,
+            self::OPTION_NODE => ServiceInterface::NAME_NODE,
+            self::OPTION_RABBIT_MQ => ServiceInterface::NAME_RABBITMQ,
         ];
 
         array_walk($map, static function ($key, $option) use ($config, $input) {

@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Returns configurations from ElasticSearch.
  */
-class ElasticSearch
+class ElasticSearch implements ServiceInterface
 {
     const RELATIONSHIP_KEY = 'elasticsearch';
     const ENGINE_NAME = 'elasticsearch';
@@ -61,7 +61,7 @@ class ElasticSearch
      */
     public function isInstalled(): bool
     {
-        return (bool)$this->environment->getRelationship(self::RELATIONSHIP_KEY);
+        return (bool)$this->getConfiguration();
     }
 
     /**
@@ -69,7 +69,7 @@ class ElasticSearch
      *
      * @return array
      */
-    public function getRelationship(): array
+    public function getConfiguration(): array
     {
         return $this->environment->getRelationship(self::RELATIONSHIP_KEY)[0] ?? [];
     }
@@ -117,7 +117,7 @@ class ElasticSearch
      */
     public function getTemplate(): array
     {
-        $config = $this->getRelationship();
+        $config = $this->getConfiguration();
 
         if (!$config) {
             return [];
