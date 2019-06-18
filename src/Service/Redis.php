@@ -10,6 +10,9 @@ use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Returns Redis service configurations.
+ */
 class Redis implements ServiceInterface
 {
     const RELATIONSHIP_KEY = 'redis';

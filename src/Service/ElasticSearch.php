@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Http\ClientFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * Returns configurations from ElasticSearch.
+ * Returns ElasticSearch service configurations.
  */
 class ElasticSearch implements ServiceInterface
 {

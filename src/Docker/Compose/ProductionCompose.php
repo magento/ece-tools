@@ -101,7 +101,8 @@ class ProductionCompose implements ComposeInterface
             )
         ];
 
-        $redisVersion = $config->get(ServiceInterface::NAME_REDIS) ?: $this->getServiceVersion(ServiceInterface::NAME_REDIS);
+        $redisVersion = $config->get(ServiceInterface::NAME_REDIS) ?:
+            $this->getServiceVersion(ServiceInterface::NAME_REDIS);
 
         if ($redisVersion) {
             $services['redis'] = $this->serviceFactory->create(
