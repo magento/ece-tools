@@ -101,8 +101,8 @@ class Cache
         $redisCache = [
             'backend' => 'Cm_Cache_Backend_Redis',
             'backend_options' => [
-                'server' => $redisConfig[0]['host'],
-                'port' => $redisConfig[0]['port'],
+                'server' => $redisConfig['host'],
+                'port' => $redisConfig['port'],
             ],
         ];
 
@@ -160,12 +160,12 @@ class Cache
     {
         $connectionData = [];
         $redisSlaveConfig = $this->redis->getSlaveConfiguration();
-        $slaveHost = $redisSlaveConfig[0]['host'] ?? null;
+        $slaveHost = $redisSlaveConfig['host'] ?? null;
 
         if ($this->stageConfig->get(DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION) && $slaveHost) {
             $connectionData = [
                 'server' => $slaveHost,
-                'port' => $redisSlaveConfig[0]['port'] ?? '',
+                'port' => $redisSlaveConfig['port'] ?? '',
             ];
         }
 
@@ -188,9 +188,9 @@ class Cache
     ): bool {
         foreach (['default', 'page_cache'] as $type) {
             if ((isset($envCacheConfig['frontend'][$type]['backend_options']['server'])
-                    && $envCacheConfig['frontend'][$type]['backend_options']['server'] !== $redisConfig[0]['host'])
+                    && $envCacheConfig['frontend'][$type]['backend_options']['server'] !== $redisConfig['host'])
                 || (isset($envCacheConfig['frontend'][$type]['backend_options']['port'])
-                    && $envCacheConfig['frontend'][$type]['backend_options']['port'] !== $redisConfig[0]['port'])
+                    && $envCacheConfig['frontend'][$type]['backend_options']['port'] !== $redisConfig['port'])
             ) {
                 return false;
             }

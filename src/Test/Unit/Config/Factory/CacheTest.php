@@ -177,19 +177,15 @@ class CacheTest extends TestCase
      */
     public function getFromRelationshipsDataProvider()
     {
-        $relationshipsRedis = [
-            [
-                'host' => 'master.host',
-                'port' => 'master.port',
-                'scheme' => 'redis',
-            ]
+        $redisConfiguration = [
+            'host' => 'master.host',
+            'port' => 'master.port',
+            'scheme' => 'redis',
         ];
-        $relationshipsRedisSlave = [
-            [
-                'host' => 'slave.host',
-                'port' => 'slave.port',
-                'scheme' => 'redis',
-            ]
+        $redisSlaveConfiguration = [
+            'host' => 'slave.host',
+            'port' => 'slave.port',
+            'scheme' => 'redis',
         ];
 
         $resultMasterOnlyConnection = [
@@ -247,29 +243,29 @@ class CacheTest extends TestCase
         return [
             [
                 [],
-                $relationshipsRedis,
+                $redisConfiguration,
                 [],
                 false,
                 $resultMasterOnlyConnection
             ],
             [
                 [],
-                $relationshipsRedis,
-                $relationshipsRedisSlave,
+                $redisConfiguration,
+                $redisSlaveConfiguration,
                 false,
                 $resultMasterOnlyConnection
             ],
             [
                 [],
-                $relationshipsRedis,
+                $redisConfiguration,
                 [],
                 true,
                 $resultMasterOnlyConnection
             ],
             [
                 [],
-                $relationshipsRedis,
-                $relationshipsRedisSlave,
+                $redisConfiguration,
+                $redisSlaveConfiguration,
                 true,
                 $resultMasterSlaveConnection
             ],
@@ -284,8 +280,8 @@ class CacheTest extends TestCase
                     ],
                     StageConfigInterface::OPTION_MERGE => true
                 ],
-                $relationshipsRedis,
-                $relationshipsRedisSlave,
+                $redisConfiguration,
+                $redisSlaveConfiguration,
                 true,
                 $resultMasterSlaveConnectionWithMergedValue
             ],
@@ -301,8 +297,8 @@ class CacheTest extends TestCase
                     ],
                     StageConfigInterface::OPTION_MERGE => true
                 ],
-                $relationshipsRedis,
-                $relationshipsRedisSlave,
+                $redisConfiguration,
+                $redisSlaveConfiguration,
                 true,
                 $resultMasterSlaveConnectionWithDiffHost
             ],
@@ -311,13 +307,13 @@ class CacheTest extends TestCase
 
     /**
      * @param array $envCacheConfiguration
-     * @param array $relationships
+     * @param array $redisConfiguration
      * @param array $expected
      * @dataProvider envConfigurationMergingDataProvider
      */
     public function testEnvConfigurationMerging(
         array $envCacheConfiguration,
-        array $relationships,
+        array $redisConfiguration,
         array $expected
     ) {
         $this->stageConfigMock
@@ -334,7 +330,7 @@ class CacheTest extends TestCase
             ]);
         $this->redisMock->expects($this->any())
             ->method('getConfiguration')
-            ->willReturn($relationships);
+            ->willReturn($redisConfiguration);
         $this->redisMock->expects($this->any())
             ->method('getSlaveConfiguration')
             ->willReturn([]);
@@ -351,12 +347,10 @@ class CacheTest extends TestCase
      */
     public function envConfigurationMergingDataProvider(): array
     {
-        $relationships = [
-            [
-                'host' => 'master.host',
-                'port' => 'master.port',
-                'scheme' => 'redis',
-            ]
+        $redisConfiguration = [
+            'host' => 'master.host',
+            'port' => 'master.port',
+            'scheme' => 'redis',
         ];
 
         $result = [
@@ -391,12 +385,12 @@ class CacheTest extends TestCase
         return [
             [
                 [],
-                $relationships,
+                $redisConfiguration,
                 $result,
             ],
             [
                 [StageConfigInterface::OPTION_MERGE => true],
-                $relationships,
+                $redisConfiguration,
                 $result,
             ],
             [
@@ -404,7 +398,7 @@ class CacheTest extends TestCase
                     StageConfigInterface::OPTION_MERGE => true,
                     'key' => 'value',
                 ],
-                $relationships,
+                $redisConfiguration,
                 $resultWithMergedKey,
             ],
             [
@@ -420,7 +414,7 @@ class CacheTest extends TestCase
                         ],
                     ],
                 ],
-                $relationships,
+                $redisConfiguration,
                 $resultWithMergedHostAndPort,
             ],
             [
@@ -436,7 +430,7 @@ class CacheTest extends TestCase
                         ],
                     ],
                 ],
-                $relationships,
+                $redisConfiguration,
                 [
                     'frontend' => [
                         'default' => [
