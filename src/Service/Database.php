@@ -36,14 +36,6 @@ class Database implements ServiceInterface
     /**
      * @inheritdoc
      */
-    public function isInstalled(): bool
-    {
-        return (bool)$this->getConfiguration();
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getConfiguration(): array
     {
         return $this->environment->getRelationship(self::RELATIONSHIP_KEY)[0] ?? [];
@@ -71,7 +63,7 @@ class Database implements ServiceInterface
 
             $databaseConfig = $this->getConfiguration();
 
-            if (isset($databaseConfig['type']) && strpos(':', $databaseConfig['type']) !== false) {
+            if (isset($databaseConfig['type']) && strpos($databaseConfig['type'], ':') !== false) {
                 $this->version = explode(':', $databaseConfig['type'])[1];
             }
         }

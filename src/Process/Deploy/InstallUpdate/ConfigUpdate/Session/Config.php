@@ -89,15 +89,15 @@ class Config
 
         $redisConfig = $this->redis->getConfiguration();
 
-        if (!count($redisConfig)) {
+        if (!$redisConfig) {
             return [];
         }
 
         $defaultConfig = [
             'save' => 'redis',
             'redis' => [
-                'host' => $redisConfig[0]['host'],
-                'port' => $redisConfig[0]['port'],
+                'host' => $redisConfig['host'],
+                'port' => $redisConfig['port'],
                 'database' => self::REDIS_DATABASE_SESSION,
             ],
         ];

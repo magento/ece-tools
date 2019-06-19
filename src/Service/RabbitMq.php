@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Config\Environment;
 /**
  *
  */
-class RabbitMQ implements ServiceInterface
+class RabbitMq implements ServiceInterface
 {
     /**
      * Possible names for amqp relationship
@@ -35,14 +35,6 @@ class RabbitMQ implements ServiceInterface
     public function __construct(Environment $environment)
     {
         $this->environment = $environment;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function isInstalled(): bool
-    {
-        return (bool)$this->getConfiguration();
     }
 
     /**
@@ -73,7 +65,7 @@ class RabbitMQ implements ServiceInterface
 
             $config = $this->getConfiguration();
 
-            if (isset($config['type']) && strpos(':', $config['type']) !== false) {
+            if (isset($config['type']) && strpos($config['type'], ':') !== false) {
                 $this->version = explode(':', $config['type'])[1];
             }
         }

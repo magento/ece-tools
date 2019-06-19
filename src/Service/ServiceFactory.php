@@ -18,7 +18,7 @@ class ServiceFactory
     private $serviceMap = [
         ServiceInterface::NAME_REDIS => Redis::class,
         ServiceInterface::NAME_ELASTICSEARCH => ElasticSearch::class,
-        ServiceInterface::NAME_RABBITMQ => RabbitMQ::class,
+        ServiceInterface::NAME_RABBITMQ => RabbitMq::class,
         ServiceInterface::NAME_DB => Database::class,
     ];
 

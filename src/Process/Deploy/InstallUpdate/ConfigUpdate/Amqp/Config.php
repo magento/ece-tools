@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Service\RabbitMQ;
+use Magento\MagentoCloud\Service\RabbitMq;
 
 /**
  * Returns queue configuration.
@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Service\RabbitMQ;
 class Config
 {
     /**
-     * @var RabbitMQ
+     * @var RabbitMq
      */
     private $rabbitMQ;
 
@@ -30,12 +30,12 @@ class Config
     private $configMerger;
 
     /**
-     * @param RabbitMQ $rabbitMQ
+     * @param RabbitMq $rabbitMQ
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
      */
     public function __construct(
-        RabbitMQ $rabbitMQ,
+        RabbitMq $rabbitMQ,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger
     ) {

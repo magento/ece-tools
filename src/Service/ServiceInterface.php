@@ -20,14 +20,8 @@ interface ServiceInterface
     const NAME_VARNISH = 'varnish';
 
     /**
-     * Checks if service is installed.
-     *
-     * @return bool
-     */
-    public function isInstalled(): bool;
-
-    /**
      * Returns service configuration.
+     * Returns an empty array if service isn't configured
      *
      * @return array
      */
