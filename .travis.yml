@@ -49,7 +49,9 @@ matrix:
     - php: '7.2'
       env: TEST_SUITE=functional
 
-install: composer update -n --no-suggest
+install:
+  - composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
+  - composer update -n --no-suggest
 
 before_script:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env
