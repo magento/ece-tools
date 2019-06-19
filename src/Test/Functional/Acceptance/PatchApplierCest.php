@@ -33,7 +33,6 @@ class PatchApplierCest extends AbstractCest
         $I->assertContains('## Additional Info', $targetFile);
         $log = $I->grabFileContent('/var/log/cloud.log', Docker::BUILD_CONTAINER);
         $I->assertContains('INFO: Applying patch /var/www/magento/m2-hotfixes/patch.patch', $log);
-        $I->assertContains('INFO: git apply /var/www/magento/m2-hotfixes/patch.patch', $log);
     }
 
     /**
