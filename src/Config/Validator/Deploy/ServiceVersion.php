@@ -67,7 +67,9 @@ class ServiceVersion implements ValidatorInterface
             $errors = [];
             foreach ($services as $serviceName) {
                 $service = $this->serviceFactory->create($serviceName);
-                if ($error = $this->serviceVersionValidator->validateService($serviceName, $service->getVersion())) {
+                if ($service->getVersion() !== '0' &&
+                    $error = $this->serviceVersionValidator->validateService($serviceName, $service->getVersion())
+                ) {
                     $errors[] = $error;
                 }
             }

@@ -51,6 +51,6 @@ class ServiceFactory
             ));
         }
 
-        return $this->container->create($serviceName);
+        return $this->container->create($this->serviceMap[$serviceName]);
     }
 }

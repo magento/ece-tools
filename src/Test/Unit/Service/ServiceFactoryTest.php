@@ -9,6 +9,10 @@ namespace Magento\MagentoCloud\Test\Unit\Service;
 
 use Codeception\PHPUnit\TestCase;
 use Magento\MagentoCloud\App\ContainerInterface;
+use Magento\MagentoCloud\Service\Database;
+use Magento\MagentoCloud\Service\ElasticSearch;
+use Magento\MagentoCloud\Service\RabbitMq;
+use Magento\MagentoCloud\Service\Redis;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -40,15 +44,15 @@ class ServiceFactoryTest extends TestCase
 
     /**
      * @param string $serviceName
+     * @param string $serviceClass
      * @throws \Magento\MagentoCloud\Service\ConfigurationMismatchException
-     *
      * @dataProvider createDataProvider
      */
-    public function testCreate(string $serviceName)
+    public function testCreate(string $serviceName, string $serviceClass)
     {
         $this->containerMock->expects($this->once())
             ->method('create')
-            ->with($serviceName)
+            ->with($serviceClass)
             ->willReturn($this->getMockForAbstractClass(ServiceInterface::class));
 
         $this->assertInstanceOf(
@@ -75,10 +79,10 @@ class ServiceFactoryTest extends TestCase
     public function createDataProvider(): array
     {
         return [
-            [ServiceInterface::NAME_REDIS],
-            [ServiceInterface::NAME_RABBITMQ],
-            [ServiceInterface::NAME_ELASTICSEARCH],
-            [ServiceInterface::NAME_DB],
+            [ServiceInterface::NAME_REDIS, Redis::class],
+            [ServiceInterface::NAME_RABBITMQ, RabbitMq::class],
+            [ServiceInterface::NAME_ELASTICSEARCH, ElasticSearch::class],
+            [ServiceInterface::NAME_DB, Database::class],
         ];
     }
 }
