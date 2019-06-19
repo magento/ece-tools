@@ -64,6 +64,9 @@ class TimeToFirstByteTest extends TestCase
      */
     private $process;
 
+    /**
+     * {@inheritdoc}
+     */
     protected function setUp()
     {
         $this->postDeployMock = $this->createMock(PostDeployInterface::class);

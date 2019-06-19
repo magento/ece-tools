@@ -48,6 +48,9 @@ class PoolFactoryTest extends TestCase
      */
     private $poolFactory;
 
+    /**
+     * {@inheritdoc}
+     */
     protected function setUp()
     {
         $this->containerMock = $this->createMock(ContainerInterface::class);

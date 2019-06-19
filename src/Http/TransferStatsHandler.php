@@ -32,6 +32,11 @@ class TransferStatsHandler
      */
     private $logger;
 
+    /**
+     * @param File $file
+     * @param FileList $fileList
+     * @param LoggerInterface $logger
+     */
     public function __construct(File $file, FileList $fileList, LoggerInterface $logger)
     {
         $this->file = $file;
