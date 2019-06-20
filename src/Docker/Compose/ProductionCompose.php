@@ -307,7 +307,6 @@ class ProductionCompose implements ComposeInterface
             self::DEFAULT_TLS_VERSION,
             ['depends_on' => ['varnish']]
         );
-        $services['cron'] = $this->getCronCliService($phpVersion, true, $cliDepends, 'cron.magento2.docker');
         $phpExtensions = $this->getPhpExtensions($phpVersion);
         $services['generic'] = [
             'image' => 'alpine',
