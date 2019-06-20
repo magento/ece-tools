@@ -32,7 +32,6 @@ class PostDeployCest extends AbstractCest
 
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains('NOTICE: Starting post-deploy.', $log);
-        $I->assertContains('INFO: Warmed up page:', $log);
         $I->assertContains('NOTICE: Post-deploy is complete.', $log);
     }
 
