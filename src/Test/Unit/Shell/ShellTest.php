@@ -187,11 +187,9 @@ class ShellTest extends TestCase
             ->method('sanitize')
             ->with($this->stringContains('ls -al --password="123"'))
             ->willReturn('Command ls -al --password="***" failed');
-        $this->loggerMock->expects($this->never())
-            ->method('info')
-            ->with($command);
         $this->loggerMock->expects($this->once())
-            ->method('debug');
+            ->method('debug')
+            ->with($command);
 
         $this->shell->execute($command);
     }
