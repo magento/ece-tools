@@ -12,7 +12,6 @@ use Composer\Semver\VersionParser;
 use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 
-
 /**
  * Returns list of PHP extensions which will be enabled in Docker PHP container.
  */
@@ -64,6 +63,7 @@ class PhpExtension
         'mysqli' => '>=7.0.0 <7.3.0',
         'oauth' => '>=7.0.0 <7.3.0',
         'opcache' => '>=7.0.0 <7.3.0',
+        'pcntl' => '>=7.0.0 <7.3.0',
         'pdo_mysql' => '>=7.0.0 <7.3.0',
         'propro' => '>=7.0.0 <7.3.0',
         'pspell' => '>=7.0.0 <7.3.0',
@@ -84,7 +84,6 @@ class PhpExtension
         'xsl' => '>=7.0.0 <7.3.0',
         'yaml' => '>=7.0.0 <7.3.0',
         'zip' => '>=7.0.0 <7.3.0',
-        'pcntl' => '>=7.0.0 <7.3.0',
     ];
 
     /**
@@ -139,7 +138,8 @@ class PhpExtension
      * @param Config $config
      * @param VersionParser $versionParser
      */
-    public function __construct(Config $config, VersionParser $versionParser) {
+    public function __construct(Config $config, VersionParser $versionParser)
+    {
         $this->config = $config;
         $this->versionParser = $versionParser;
     }
@@ -155,7 +155,9 @@ class PhpExtension
     {
         $phpConstraint = new Constraint('==', $this->versionParser->normalize($phpVersion));
         $phpExtensions = array_diff(
-            array_merge(self::DEFAULT_PHP_EXTENSIONS, $this->config->getEnabledPhpExtensions()),
+            array_unique(
+                array_merge(self::DEFAULT_PHP_EXTENSIONS, $this->config->getEnabledPhpExtensions())
+            ),
             $this->config->getDisabledPhpExtensions(),
             self::IGNORED_EXTENSIONS
         );
@@ -176,9 +178,10 @@ class PhpExtension
                     $result[] = $phpExtName;
                     continue;
                 }
-                $messages[] = "PHP extension $phpExtName is not available for PHP version $phpVersion";
+                $messages[] = "PHP extension $phpExtName is not available for PHP version $phpVersion.";
+                continue;
             }
-            $messages[] = "PHP extension $phpExtName is not supported";
+            $messages[] = "PHP extension $phpExtName is not supported.";
         }
         if (!empty($messages)) {
             throw new ConfigurationMismatchException(implode(PHP_EOL, $messages));
