@@ -516,7 +516,7 @@ class ProductionCompose implements ComposeInterface
      * @return array
      * @throws ConfigurationMismatchException
      */
-    private function getPhpExtensions(string $phpVersion): array
+    protected function getPhpExtensions(string $phpVersion): array
     {
         $phpConstraint = new Constraint('==', $this->versionParser->normalize($phpVersion));
         $phpExtensions = array_diff(
