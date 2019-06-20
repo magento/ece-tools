@@ -234,7 +234,7 @@ class ReaderTest extends TestCase
                             'redis' => 'redis:redis',
                             'elasticsearch' => 'elasticsearch:elasticsearch',
                             'mq' => 'myrabbitmq:rabbitmq'
-                        ]
+                        ],
                     ]),
                 ],
                 [
@@ -281,6 +281,10 @@ class ReaderTest extends TestCase
                     'service' => 'rabbitmq',
                     'version' => '3.5'
                 ]
+            ],
+            'runtime' => [
+                'extensions' => [],
+                'disabled_extensions' => [],
             ]
         ], $this->reader->read());
     }
