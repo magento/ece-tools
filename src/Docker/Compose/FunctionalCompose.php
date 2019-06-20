@@ -126,6 +126,6 @@ class FunctionalCompose extends ProductionCompose
      */
     protected function getPhpExtensions(string $phpVersion): array
     {
-        return [];
+        return self::DEFAULT_PHP_EXTENSIONS;
     }
 }
