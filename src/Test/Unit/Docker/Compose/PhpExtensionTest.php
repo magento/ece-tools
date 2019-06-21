@@ -153,7 +153,7 @@ class PhpExtensionTest extends TestCase
     /**
      * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
      * @expectedExceptionMessage PHP extension mcrypt is not available for PHP version 7.2.
-    PHP extension fakeExt is not supported.
+     * PHP extension fakeExt is not supported.
      */
     public function testGetWithException()
     {
