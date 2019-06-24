@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Http\TransferStatsHandler;
 use Magento\MagentoCloud\Process\PostDeploy\TimeToFirstByte;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -91,22 +92,50 @@ class TimeToFirstByteTest extends TestCase
 
     public function testExecute()
     {
-        $urls = ['/', '/customer/account/create'];
+        $urls = ['/', '/customer/account/create', 'https://example.com'];
 
         $this->postDeployMock->expects($this->once())
             ->method('get')
             ->with(PostDeployInterface::VAR_TTFB_TESTED_PAGES)
-            ->willReturn($urls);
+            ->willReturn(['/', '/customer/account/create', 'https://example.com']);
+        $this->urlManagerMock->method('isUrlValid')
+            ->willReturnMap([
+                ['/', true],
+                ['/customer/account/create', true],
+                ['https://example.com', false],
+            ]);
+        $this->poolFactoryMock->expects($this->once())
+            ->method('create')
+            ->with(
+                ['/', '/customer/account/create'],
+                ['options' => [RequestOptions::ON_STATS => $this->statHandlerMock], 'concurrency' => 1]
+            )->willReturn($this->poolMock);
+        $this->promiseMock->expects($this->once())
+            ->method('wait');
+
+        $this->process->execute();
+    }
+
+    public function testExecuteWithException(): void
+    {
+        $this->postDeployMock->expects($this->once())
+            ->method('get')
+            ->with(PostDeployInterface::VAR_TTFB_TESTED_PAGES)
+            ->willReturn(['/']);
         $this->urlManagerMock->method('isUrlValid')
             ->willReturn(true);
         $this->poolFactoryMock->expects($this->once())
             ->method('create')
             ->with(
-                $urls,
+                ['/'],
                 ['options' => [RequestOptions::ON_STATS => $this->statHandlerMock], 'concurrency' => 1]
             )->willReturn($this->poolMock);
         $this->promiseMock->expects($this->once())
-            ->method('wait');
+            ->method('wait')
+            ->willThrowException(new \Exception('Promise exception'));
+
+        $this->expectException(ProcessException::class);
+        $this->expectExceptionMessage('Promise exception');
 
         $this->process->execute();
     }
