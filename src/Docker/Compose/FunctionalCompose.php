@@ -119,4 +119,13 @@ class FunctionalCompose extends ProductionCompose
     {
         return $this->fileList->getToolsDockerCompose();
     }
+
+    /**
+     * @param string $phpVersion
+     * @return array
+     */
+    protected function getPhpExtensions(string $phpVersion): array
+    {
+        return PhpExtension::DEFAULT_PHP_EXTENSIONS;
+    }
 }

@@ -140,4 +140,30 @@ class Config
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
+
+    /**
+     * @return array
+     * @throws ConfigurationMismatchException
+     */
+    public function getEnabledPhpExtensions(): array
+    {
+        try {
+            return $this->reader->read()['runtime']['extensions'];
+        } catch (FileSystemException $exception) {
+            throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
+
+    /**
+     * @return array
+     * @throws ConfigurationMismatchException
+     */
+    public function getDisabledPhpExtensions(): array
+    {
+        try {
+            return $this->reader->read()['runtime']['disabled_extensions'];
+        } catch (FileSystemException $exception) {
+            throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
+        }
+    }
 }
