@@ -92,8 +92,6 @@ class TimeToFirstByteTest extends TestCase
 
     public function testExecute()
     {
-        $urls = ['/', '/customer/account/create', 'https://example.com'];
-
         $this->postDeployMock->expects($this->once())
             ->method('get')
             ->with(PostDeployInterface::VAR_TTFB_TESTED_PAGES)
