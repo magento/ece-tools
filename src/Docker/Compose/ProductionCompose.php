@@ -52,21 +52,29 @@ class ProductionCompose implements ComposeInterface
     protected $fileList;
 
     /**
+     * @var PhpExtension
+     */
+    private $phpExtension;
+
+    /**
      * @param ServiceFactory $serviceFactory
      * @param FileList $fileList
      * @param Config $config
      * @param Converter $converter
+     * @param PhpExtension $phpExtension
      */
     public function __construct(
         ServiceFactory $serviceFactory,
         FileList $fileList,
         Config $config,
-        Converter $converter
+        Converter $converter,
+        PhpExtension $phpExtension
     ) {
         $this->serviceFactory = $serviceFactory;
         $this->fileList = $fileList;
         $this->config = $config;
         $this->converter = $converter;
+        $this->phpExtension = $phpExtension;
     }
 
     /**
@@ -191,9 +199,13 @@ class ProductionCompose implements ComposeInterface
             self::DEFAULT_TLS_VERSION,
             ['depends_on' => ['varnish']]
         );
+        $phpExtensions = $this->getPhpExtensions($phpVersion);
         $services['generic'] = [
             'image' => 'alpine',
-            'environment' => $this->converter->convert($this->getVariables()),
+            'environment' => $this->converter->convert(array_merge(
+                $this->getVariables(),
+                !empty($phpExtensions) ? ['PHP_EXTENSIONS' => implode(' ', $phpExtensions)] : []
+            )),
             'env_file' => [
                 './.docker/config.env',
             ],
@@ -388,5 +400,15 @@ class ProductionCompose implements ComposeInterface
     protected function getPhpVersion()
     {
         return $this->config->getPhpVersion();
+    }
+
+    /**
+     * @param string $phpVersion
+     * @return array
+     * @throws ConfigurationMismatchException
+     */
+    protected function getPhpExtensions(string $phpVersion): array
+    {
+        return $this->phpExtension->get($phpVersion);
     }
 }
