@@ -79,7 +79,7 @@ class Shell implements ShellInterface
                 'timeout' => null
             ]);
 
-            $this->logger->info($process->getCommandLine());
+            $this->logger->debug($process->getCommandLine());
 
             $process->execute();
         } catch (ProcessException $e) {
