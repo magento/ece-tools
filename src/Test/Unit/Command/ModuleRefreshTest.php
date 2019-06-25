@@ -48,14 +48,41 @@ class ModuleRefreshTest extends TestCase
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->exactly(2))
+        $modules = [
+            'Magento_Module1',
+            'Magento_Module2',
+            'Magento_Module3',
+        ];
+
+        $this->loggerMock->expects($this->exactly(3))
             ->method('info')
             ->withConsecutive(
                 ['Refreshing modules started.'],
+                ['The following modules have been enabled:' . PHP_EOL . implode(PHP_EOL, $modules)],
                 ['Refreshing modules completed.']
             );
         $this->configMock->expects($this->once())
-            ->method('refresh');
+            ->method('refresh')
+            ->willReturn($modules);
+
+        $tester = new CommandTester(
+            $this->command
+        );
+        $tester->execute([]);
+    }
+
+    public function testExecuteNoModulesChanged()
+    {
+        $this->loggerMock->expects($this->exactly(3))
+            ->method('info')
+            ->withConsecutive(
+                ['Refreshing modules started.'],
+                ['No modules were changed.'],
+                ['Refreshing modules completed.']
+            );
+        $this->configMock->expects($this->once())
+            ->method('refresh')
+            ->willReturn([]);
 
         $tester = new CommandTester(
             $this->command

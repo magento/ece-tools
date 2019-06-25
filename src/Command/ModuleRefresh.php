@@ -58,7 +58,12 @@ class ModuleRefresh extends Command
     {
         try {
             $this->logger->info('Refreshing modules started.');
-            $this->config->refresh();
+            $enabledModules = $this->config->refresh();
+            $this->logger->info(
+                $enabledModules ?
+                    'The following modules have been enabled:' . PHP_EOL . implode(PHP_EOL, $enabledModules) :
+                    'No modules were changed.'
+            );
             $this->logger->info('Refreshing modules completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());

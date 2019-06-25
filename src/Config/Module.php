@@ -36,22 +36,40 @@ class Module
 
     /**
      * Reconciling installed modules with shared config.
+     * Returns list of enabled modules or an empty array if no modules were enabled.
      *
      * @throws ShellException
      * @throws FileSystemException
      */
-    public function refresh()
+    public function refresh(): array
     {
         $moduleConfig = (array)$this->config->get('modules');
 
-        if (!$moduleConfig) {
-            $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
-            $this->config->reset();
+        $process = $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
 
-            return;
+        if (!$moduleConfig) {
+            $this->config->reset();
+        } else {
+            $this->config->update(['modules' => $moduleConfig]);
         }
 
-        $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
-        $this->config->update(['modules' => $moduleConfig]);
+        return $this->parseModuleList($process->getOutput());
+    }
+
+    /**
+     * Parse list of modules from the output of module:enable command.
+     *
+     * @param string $output
+     * @return array
+     */
+    private function parseModuleList(string $output): array
+    {
+        if (strpos($output, 'have been enabled') === false) {
+            return [];
+        }
+
+        preg_match_all('/-\s(?P<modules>\w+_\w+)/', $output, $modulesMatch);
+
+        return $modulesMatch['modules'] ?? [];
     }
 }
