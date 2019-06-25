@@ -32,13 +32,6 @@ class Urls
     private $logger;
 
     /**
-     * Variable for caching base urls hosts from config table
-     *
-     * @var string
-     */
-    private $baseHosts;
-
-    /**
      * @var UrlsPattern
      */
     private $urlsPattern;
@@ -78,7 +71,7 @@ class Urls
                 $this->logger->info(sprintf('Found %d urls for pattern "%s"', count($patternUrls), $page));
                 $urls = array_merge($urls, $patternUrls);
             } else if (strpos($page, 'http') === 0) {
-                if (!$this->isRelatedDomain($page)) {
+                if (!$this->urlManager->isRelatedDomain($page)) {
                     $this->logger->error(
                         sprintf(
                             'Page "%s" can\'t be warmed-up because such domain ' .
@@ -97,25 +90,5 @@ class Urls
         }
 
         return $urls;
-    }
-
-    /**
-     * Checks that host from $url is using in current Magento installation
-     *
-     * @param string $url
-     * @return bool
-     */
-    private function isRelatedDomain(string $url): bool
-    {
-        if ($this->baseHosts === null) {
-            $this->baseHosts = array_map(
-                function ($baseHostUrl) {
-                    return parse_url($baseHostUrl, PHP_URL_HOST);
-                },
-                $this->urlManager->getBaseUrls()
-            );
-        }
-
-        return in_array(parse_url($url, PHP_URL_HOST), $this->baseHosts);
     }
 }
