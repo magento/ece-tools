@@ -382,6 +382,71 @@ class UrlManagerTest extends TestCase
         );
     }
 
+    public function testExpandUrl()
+    {
+        $processMock = $this->createMock(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn('https://example.com/');
+
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php bin/magento config:show:store-url default')
+            ->willReturn($processMock);
+
+        $this->assertSame('https://example.com/products/123', $this->manager->expandUrl('/products/123'));
+        $this->assertSame('https://example.com/products/123', $this->manager->expandUrl('products/123'));
+        $this->assertSame('https://example2.com/catalog', $this->manager->expandUrl('https://example2.com/catalog'));
+    }
+
+    public function testIsRelatedDomain()
+    {
+        $processMock = $this->createMock(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn(json_encode([
+                'https://example.com/',
+                'https://example2.com/',
+                'https://example3.com/',
+            ]));
+
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php bin/magento config:show:store-url')
+            ->willReturn($processMock);
+
+        $this->assertTrue($this->manager->isRelatedDomain('https://example.com/'));
+        $this->assertTrue($this->manager->isRelatedDomain('https://example2.com'));
+        $this->assertTrue($this->manager->isRelatedDomain('http://example3.com/'));
+        $this->assertTrue($this->manager->isRelatedDomain('http://example.com/some/extra/path'));
+        $this->assertFalse($this->manager->isRelatedDomain('https://example4.com'));
+    }
+
+    public function testIsUrlValid()
+    {
+        $processMock = $this->createMock(ProcessInterface::class);
+        $processMock->expects($this->once())
+            ->method('getOutput')
+            ->willReturn(json_encode([
+                'https://example.com/',
+                'https://example2.com/',
+                'https://example3.com/',
+            ]));
+
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php bin/magento config:show:store-url')
+            ->willReturn($processMock);
+
+        $this->assertTrue($this->manager->isUrlValid('https://example.com/'));
+        $this->assertTrue($this->manager->isUrlValid('http://example2.com'));
+        $this->assertTrue($this->manager->isUrlValid('https://example.com/some/extra/path'));
+        $this->assertTrue($this->manager->isUrlValid('relative/path/name'));
+        $this->assertTrue($this->manager->isUrlValid('/rooted/relative/path'));
+        $this->assertFalse($this->manager->isUrlValid('http://example4.com'));
+        $this->assertFalse($this->manager->isUrlValid('https://example4.com/some/more/path'));
+    }
+
     public function testGetBaseUrlWithEmptyStoreUrls()
     {
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
