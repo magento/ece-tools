@@ -108,7 +108,7 @@ class UpdateComposer extends Command
         $composer = $this->composerGenerator->generate($gitOptions['repositories']);
 
         if (!empty($gitOptions['clear_magento_module_requirements'])) {
-            $this->clearModuleRequirements->generate(array_keys($gitOptions['repositories']));
+            $this->clearModuleRequirements->generate($gitOptions['repositories']);
             $composer['scripts']['install-from-git'][] = 'php ' . ClearModuleRequirements::SCRIPT_PATH;
         }
 

@@ -6,12 +6,10 @@
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
-use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
-use Magento\MagentoCloud\Http\ClientFactory;
-use Magento\MagentoCloud\Http\RequestFactory;
+use Magento\MagentoCloud\Http\PoolFactory;
+use Magento\MagentoCloud\Process\PostDeploy\WarmUp\Urls;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,24 +18,9 @@ use Psr\Log\LoggerInterface;
 class WarmUp implements ProcessInterface
 {
     /**
-     * @var PostDeployInterface
+     * @var PoolFactory
      */
-    private $postDeploy;
-
-    /**
-     * @var ClientFactory
-     */
-    private $clientFactory;
-
-    /**
-     * @var RequestFactory
-     */
-    private $requestFactory;
-
-    /**
-     * @var UrlManager
-     */
-    private $urlManager;
+    private $poolFactory;
 
     /**
      * @var LoggerInterface
@@ -45,116 +28,64 @@ class WarmUp implements ProcessInterface
     private $logger;
 
     /**
-     * Variable for caching base urls hosts from config table
-     *
-     * @var string
+     * @var Urls
      */
-    private $baseHosts;
+    private $urls;
 
     /**
-     * @param PostDeployInterface $postDeploy
-     * @param ClientFactory $clientFactory
-     * @param RequestFactory $requestFactory
-     * @param UrlManager $urlManager
+     * @param PoolFactory $poolFactory
      * @param LoggerInterface $logger
+     * @param Urls $urls
      */
     public function __construct(
-        PostDeployInterface $postDeploy,
-        ClientFactory $clientFactory,
-        RequestFactory $requestFactory,
-        UrlManager $urlManager,
-        LoggerInterface $logger
+        PoolFactory $poolFactory,
+        LoggerInterface $logger,
+        Urls $urls
     ) {
-        $this->postDeploy = $postDeploy;
-        $this->clientFactory = $clientFactory;
-        $this->requestFactory = $requestFactory;
-        $this->urlManager = $urlManager;
+        $this->poolFactory = $poolFactory;
         $this->logger = $logger;
+        $this->urls = $urls;
     }
 
     /**
      * {@inheritdoc}
-     *
-     * @codeCoverageIgnore
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
      */
     public function execute()
     {
-        $client = $this->clientFactory->create();
-        $promises = [];
+        $this->logger->info('Starting page warming up');
 
-        try {
-            foreach ($this->getUrlsForWarmUp() as $url) {
-                $request = $this->requestFactory->create('GET', $url);
+        $urls = $this->urls->getAll();
 
-                $promises[] = $client->sendAsync($request)->then(function () use ($url) {
-                    $this->logger->info('Warmed up page: ' . $url);
-                }, function (RequestException $exception) use ($url) {
-                    $context = $exception->getResponse()
-                        ? [
-                            'error' => $exception->getResponse()->getReasonPhrase(),
-                            'code' => $exception->getResponse()->getStatusCode(),
-                        ]
-                        : [];
+        $fulfilled = function ($response, $index) use ($urls) {
+            $this->logger->info('Warmed up page: ' . $urls[$index]);
+        };
 
-                    $this->logger->error('Warming up failed: ' . $url, $context);
-                });
+        $rejected = function (RequestException $exception, $index) use ($urls) {
+            $context = [];
+
+            if ($exception->getResponse()) {
+                $context = [
+                    'error' => $exception->getResponse()->getReasonPhrase(),
+                    'code' => $exception->getResponse()->getStatusCode(),
+                ];
+            } else if ($exception->getHandlerContext()) {
+                $context = [
+                    'error' => $exception->getHandlerContext()['error'] ?? '',
+                    'errno' => $exception->getHandlerContext()['errno'] ?? '',
+                    'total_time' => $exception->getHandlerContext()['total_time'] ?? '',
+                ];
             }
 
-            \GuzzleHttp\Promise\unwrap($promises);
+            $this->logger->error('Warming up failed: ' . $urls[$index], $context);
+        };
+
+        try {
+            $pool = $this->poolFactory->create($urls, compact('fulfilled', 'rejected'));
+
+            $pool->promise()->wait();
         } catch (\Throwable $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
-    }
-
-    /**
-     * Returns list of URLs which should be warm up.
-     *
-     * @return array
-     */
-    private function getUrlsForWarmUp(): array
-    {
-        $pages = $this->postDeploy->get(PostDeployInterface::VAR_WARM_UP_PAGES);
-        $baseUrl = rtrim($this->urlManager->getBaseUrl(), '/');
-        $urls = [];
-
-        foreach ($pages as $page) {
-            if (strpos($page, 'http') === 0) {
-                if (!$this->isRelatedDomain($page)) {
-                    $this->logger->error(
-                        sprintf(
-                            'Page "%s" can\'t be warmed-up because such domain ' .
-                            'is not registered in current Magento installation',
-                            $page
-                        )
-                    );
-                } else {
-                    $urls[] = $page;
-                }
-            } else {
-                $urls[] = $baseUrl . '/' . $page;
-            }
-        }
-
-        return $urls;
-    }
-
-    /**
-     * Checks that host from $url is using in current Magento installation
-     *
-     * @param string $url
-     * @return bool
-     */
-    private function isRelatedDomain(string $url): bool
-    {
-        if ($this->baseHosts === null) {
-            $this->baseHosts = array_map(
-                function ($baseHostUrl) {
-                    return parse_url($baseHostUrl, PHP_URL_HOST);
-                },
-                $this->urlManager->getBaseUrls()
-            );
-        }
-
-        return in_array(parse_url($url, PHP_URL_HOST), $this->baseHosts);
     }
 }

@@ -312,6 +312,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => true,
                 ],
             ],
+            DeployInterface::VAR_FORCE_UPDATE_URLS => [
+                self::SCHEMA_TYPE => ['boolean'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => false,
+                ],
+            ],
             DeployInterface::VAR_STATIC_CONTENT_SYMLINK => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
@@ -440,6 +450,16 @@ class Schema
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_POST_DEPLOY => [''],
+                ],
+            ],
+            PostDeployInterface::VAR_TTFB_TESTED_PAGES => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_POST_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_POST_DEPLOY => [],
                 ],
             ],
             StageConfigInterface::VAR_X_FRAME_CONFIGURATION => [

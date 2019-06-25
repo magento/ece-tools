@@ -14,6 +14,8 @@ use Magento\MagentoCloud\Package\MagentoVersion;
  */
 class ComposerGenerator
 {
+    const REPO_TYPE_SINGLE_PACKAGE = 'single-package';
+
     /**
      * @var DirectoryList
      */
@@ -59,7 +61,7 @@ class ComposerGenerator
         if ($this->file->isExists($rootComposerJsonPath)) {
             $rootComposer = json_decode($this->file->fileGetContents($rootComposerJsonPath), true);
             $composer['require'] += $rootComposer['require'];
-            $composer['repositories'] = array_merge($composer['repositories'], $rootComposer['repositories']);
+            $composer['repositories'] = array_merge($composer['repositories'], $rootComposer['repositories'] ?? []);
         } else {
             $composer['require'] += ['magento/ece-tools' => '2002.0.*'];
         }
@@ -75,6 +77,12 @@ class ComposerGenerator
                 $composer['require'],
                 json_decode($repoComposer, true)['require']
             );
+        }
+
+        foreach (array_keys($composer['require']) as $packageName) {
+            if (preg_match('/magento\/framework|magento\/module/', $packageName)) {
+                $composer['require'][$packageName] = '*';
+            }
         }
 
         $composer = $this->addModules($repoOptions, $composer);
@@ -111,15 +119,19 @@ class ComposerGenerator
      * @param array $repoOptions
      * @return array
      */
-    protected function getBaseComposer(array $repoOptions): array
+    private function getBaseComposer(array $repoOptions): array
     {
         $installFromGitScripts = $this->getInstallFromGitScripts($repoOptions);
 
         $preparePackagesScripts = [];
 
-        foreach (array_keys($repoOptions) as $repoName) {
+        foreach ($repoOptions as $repoName => $gitOption) {
+            if ($this->isSinglePackage($gitOption)) {
+                continue;
+            }
+
             $preparePackagesScripts[] = sprintf(
-                "rsync -av --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
+                "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
                 . "--exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./%s/ ./",
                 $repoName
             );
@@ -193,7 +205,7 @@ class ComposerGenerator
      */
     private function addModules(array $repoOptions, array $composer): array
     {
-        $add = function ($dir) use (&$composer) {
+        $add = function ($dir, $version = null) use (&$composer) {
             if (!$this->file->isExists($dir . '/composer.json')) {
                 return;
             }
@@ -206,11 +218,16 @@ class ComposerGenerator
                     'symlink' => false,
                 ],
             ];
-            $composer['require'][$dirComposer['name']] = $dirComposer['version'] ?? '*';
+            $composer['require'][$dirComposer['name']] = $version ?? $dirComposer['version'] ?? '*';
         };
 
-        foreach (array_keys($repoOptions) as $repoName) {
+        foreach ($repoOptions as $repoName => $gitOption) {
             $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
+            if ($this->isSinglePackage($gitOption)) {
+                $add($baseRepoFolder, '*');
+                continue;
+            }
+
             foreach (glob($baseRepoFolder . '/app/code/Magento/*') as $dir) {
                 $add($dir);
             }
@@ -228,5 +245,14 @@ class ComposerGenerator
         }
 
         return $composer;
+    }
+
+    /**
+     * @param array $repoOptions
+     * @return bool
+     */
+    private function isSinglePackage(array $repoOptions): bool
+    {
+        return isset($repoOptions['type']) && $repoOptions['type'] == self::REPO_TYPE_SINGLE_PACKAGE;
     }
 }

@@ -6,7 +6,8 @@
 namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\DB\ConnectionInterface;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -35,23 +36,33 @@ class UrlManager
     private $logger;
 
     /**
-     * @var ConnectionInterface
+     * @var array
      */
-    private $connection;
+    private $storeBaseUrls = [];
+
+    /**
+     * @var null
+     */
+    private $baseUrl = null;
+
+    /**
+     * @var ShellInterface
+     */
+    private $shell;
 
     /**
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param ConnectionInterface $connection
+     * @param ShellInterface $shell
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        ConnectionInterface $connection
+        ShellInterface $shell
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->connection = $connection;
+        $this->shell = $shell;
     }
 
     /**
@@ -135,36 +146,98 @@ class UrlManager
     }
 
     /**
+     * Returns base url
+     *
      * @return string
      */
     public function getBaseUrl(): string
     {
-        $baseUrl = $this->connection->selectOne(
-            'SELECT `value` from `core_config_data` WHERE `path` = ? ORDER BY `config_id` ASC LIMIT 1',
-            ['web/unsecure/base_url']
-        )['value'];
+        if ($this->baseUrl === null) {
+            try {
+                $process = $this->shell->execute('php bin/magento config:show:store-url default');
 
-        if (strpos($baseUrl, self::PREFIX_SECURE) === 0
-            || strpos($baseUrl, self::PREFIX_UNSECURE) === 0
-        ) {
-            return $baseUrl;
+                $this->baseUrl = $process->getOutput();
+            } catch (ShellException $e) {
+                $this->logger->error('Can\'t fetch base url. ' . $e->getMessage());
+                $this->baseUrl = $this->getSecureUrls()[''];
+            }
         }
 
-        return $this->getSecureUrls()[''];
+        return $this->baseUrl;
     }
 
     /**
-     * Returns all base urls from core_config_data table.
+     * Returns base urls for all stores.
      *
      * @return string[]
      */
     public function getBaseUrls(): array
     {
-        $urls = $this->connection->select(
-            'SELECT `value` from `core_config_data` WHERE `path` IN (?, ?)',
-            ['web/unsecure/base_url', 'web/secure/base_url']
-        );
+        $this->loadStoreBaseUrls();
 
-        return array_column($urls, 'value');
+        return $this->storeBaseUrls;
+    }
+
+    /**
+     * Retrieves base urls for each store and save them into $storeBaseUrls
+     */
+    private function loadStoreBaseUrls()
+    {
+        if (!$this->storeBaseUrls) {
+            try {
+                $process = $this->shell->execute('php bin/magento config:show:store-url');
+
+                $baseUrls = json_decode($process->getOutput(), true);
+
+                if (json_last_error() === JSON_ERROR_NONE && is_array($baseUrls)) {
+                    $this->storeBaseUrls = $baseUrls;
+                }
+            } catch (ShellException $e) {
+                $this->logger->error('Can\'t fetch store urls. ' . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Test if $url is either relative or has the same host as one of the configured base URLs.
+     *
+     * @param string $url
+     * @return bool
+     */
+    public function isUrlValid(string $url): bool
+    {
+        return parse_url($url, PHP_URL_HOST) === null || $this->isRelatedDomain($url);
+    }
+
+    /**
+     * Prepend base URL to relative URLs.
+     *
+     * @param string $url
+     * @return string
+     */
+    public function expandUrl(string $url): string
+    {
+        if (parse_url($url, PHP_URL_HOST) === null) {
+            return rtrim($this->getBaseUrl(), '/') . '/' . ltrim($url, '/');
+        }
+
+        return $url;
+    }
+
+    /**
+     * Checks that host from $url is using in current Magento installation
+     *
+     * @param string $url
+     * @return bool
+     */
+    public function isRelatedDomain(string $url): bool
+    {
+        foreach ($this->getBaseUrls() as $baseUrl) {
+            if (parse_url($url, PHP_URL_HOST) === parse_url($baseUrl, PHP_URL_HOST)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

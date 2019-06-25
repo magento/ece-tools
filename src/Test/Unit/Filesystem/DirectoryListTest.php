@@ -74,6 +74,11 @@ class DirectoryListTest extends TestCase
         );
     }
 
+    public function testGetDockerRoot()
+    {
+        $this->assertSame(__DIR__ . '/.docker', $this->get22DirectoryList()->getDockerRoot());
+    }
+
     /**
      * @param DirectoryList $directoryList
      * @param string $path

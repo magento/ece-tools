@@ -10,9 +10,9 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 
 /**
- * @group php72
+ * This test runs on the latest version of PHP
  */
-class UpgradeCest
+class UpgradeCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -22,10 +22,11 @@ class UpgradeCest
      */
     public function test(\CliTester $I, \Codeception\Example $data)
     {
+        $I->startEnvironment();
         $I->assertTrue($I->cloneTemplate($data['from']));
         $I->assertTrue($I->composerInstall());
         $this->assert($I);
-        $I->assertTrue($I->cleanDirectories(['/vendor/*', '/app/etc/*', '/setup/*']));
+        $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
         $I->assertTrue($I->composerRequireMagentoCloud($data['to']));
         $this->assert($I);
     }
@@ -49,8 +50,10 @@ class UpgradeCest
      */
     protected function testProvider()
     {
+        // @TODO change version to 2.3.* after fix in magento core.
+        // https://magento2.atlassian.net/browse/MAGECLOUD-3725
         return [
-            ['from' => '2.3.0', 'to' => '2.3.*']
+            ['from' => '2.3.0', 'to' => '2.3.1']
         ];
     }
 }

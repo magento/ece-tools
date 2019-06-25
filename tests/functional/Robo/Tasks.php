@@ -19,11 +19,20 @@ trait Tasks
 
     /**
      * @param array $volumes
+     * @return Tasks\EnvCleanUp|CollectionBuilder
+     */
+    protected function taskEnvCleanUp(array $volumes): CollectionBuilder
+    {
+        return $this->task(Tasks\EnvCleanUp::class, $volumes);
+    }
+
+    /**
+     * @param array $volumes
      * @return Tasks\EnvUp|CollectionBuilder
      */
-    protected function taskEnvUp(array $volumes): CollectionBuilder
+    protected function taskEnvUp(): CollectionBuilder
     {
-        return $this->task(Tasks\EnvUp::class, $volumes);
+        return $this->task(Tasks\EnvUp::class);
     }
 
     /**
@@ -53,13 +62,37 @@ trait Tasks
     }
 
     /**
-     * @param string $source
-     * @param string $destination
      * @param string $container
      * @return Tasks\CopyFromDocker|CollectionBuilder
      */
-    protected function taskCopyFromDocker(string $source, string $destination, string $container): CollectionBuilder
+    protected function taskCopyFromDocker(string $container): CollectionBuilder
     {
-        return $this->task(Tasks\CopyFromDocker::class, $source, $destination, $container);
+        return $this->task(Tasks\CopyFromDocker::class, $container);
+    }
+
+    /**
+     * @param string $container
+     * @return Tasks\CopyToDocker|CollectionBuilder
+     */
+    protected function taskCopyToDocker(string $container): CollectionBuilder
+    {
+        return $this->task(Tasks\CopyToDocker::class, $container);
+    }
+
+    /**
+     * @param array $services
+     * @return Tasks\GenerateDockerCompose|CollectionBuilder
+     */
+    protected function taskGenerateDockerCompose(array $services = []): CollectionBuilder
+    {
+        return $this->task(Tasks\GenerateDockerCompose::class, $services);
+    }
+
+    /**
+     * @return Tasks\RemoveDockerCompose|CollectionBuilder
+     */
+    protected function taskRemoveDockerCompose(): CollectionBuilder
+    {
+        return $this->task(Tasks\RemoveDockerCompose::class);
     }
 }

@@ -68,6 +68,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_CLEAN_STATIC_FILES => true,
                 DeployInterface::VAR_STATIC_CONTENT_SYMLINK => true,
                 DeployInterface::VAR_UPDATE_URLS => true,
+                DeployInterface::VAR_FORCE_UPDATE_URLS => false,
                 DeployInterface::VAR_SKIP_SCD => false,
                 DeployInterface::VAR_SCD_THREADS => -1,
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK => true,
@@ -88,7 +89,8 @@ class SchemaTest extends TestCase
             [
                 PostDeployInterface::VAR_WARM_UP_PAGES => [
                     '',
-                ]
+                ],
+                PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
         );
@@ -150,6 +152,7 @@ class SchemaTest extends TestCase
             DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
             PostDeployInterface::VAR_WARM_UP_PAGES,
+            PostDeployInterface::VAR_TTFB_TESTED_PAGES,
             SystemConfigInterface::VAR_ENV_RELATIONSHIPS,
             SystemConfigInterface::VAR_ENV_ROUTES,
             SystemConfigInterface::VAR_ENV_VARIABLES,

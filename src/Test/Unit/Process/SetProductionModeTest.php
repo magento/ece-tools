@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process;
 
 use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Process\SetProductionMode;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -53,6 +54,22 @@ class SetProductionModeTest extends TestCase
         $this->writer->expects($this->once())
             ->method('update')
             ->with(['MAGE_MODE' => 'production']);
+
+        $this->process->execute();
+    }
+
+    /**
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedExceptionMessage can't update file
+     */
+    public function testExecuteWitException()
+    {
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->willReturn("Set Magento application mode to 'production'");
+        $this->writer->expects($this->once())
+            ->method('update')
+            ->willThrowException(new FileSystemException('can\'t update file'));
 
         $this->process->execute();
     }
