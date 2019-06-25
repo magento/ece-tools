@@ -452,6 +452,16 @@ class Schema
                     StageConfigInterface::STAGE_POST_DEPLOY => [''],
                 ],
             ],
+            PostDeployInterface::VAR_TTFB_TESTED_PAGES => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_POST_DEPLOY
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_POST_DEPLOY => [],
+                ],
+            ],
             StageConfigInterface::VAR_X_FRAME_CONFIGURATION => [
                 self::SCHEMA_TYPE => ['string'],
                 self::SCHEMA_STAGE => [

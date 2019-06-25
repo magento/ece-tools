@@ -126,6 +126,10 @@ class FunctionalCompose extends ProductionCompose
      */
     protected function getPhpExtensions(string $phpVersion): array
     {
-        return PhpExtension::DEFAULT_PHP_EXTENSIONS;
+        return array_unique(array_merge(
+            PhpExtension::DEFAULT_PHP_EXTENSIONS,
+            ['xsl', 'redis'],
+            in_array($phpVersion, ['7.0', '7.1']) ? ['mcrypt'] : []
+        ));
     }
 }

@@ -76,11 +76,12 @@ class UrlsTest extends TestCase
                 'somepage',
                 'somepage2'
             ]);
-        $this->urlManagerMock->expects($this->once())
-            ->method('getBaseUrls')
-            ->willReturn([
-                'http://site1.com/',
-                'http://site2.com/',
+        $this->urlManagerMock->method('isRelatedDomain')
+            ->willReturnMap([
+                ['http://site1.com/', true],
+                ['http://site2.com/', true],
+                ['http://site3.com/', false],
+                ['http://site4.com/', false],
             ]);
         $this->urlManagerMock->expects($this->once())
             ->method('getBaseUrl')
