@@ -95,17 +95,16 @@ class ShellTest extends TestCase
         $this->systemListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with($commandWithArgs);
+
+        $logExpects = [[$commandWithArgs]];
+        if ($processOutput) {
+            $logExpects[] = [$processOutput];
+        }
+        $this->loggerMock->expects($this->exactly(count($logExpects)))
+            ->method('debug')
+            ->withConsecutive(...$logExpects);
         $this->sanitizerMock->expects($this->never())
             ->method('sanitize');
-
-        if ($processOutput) {
-            $this->loggerMock->expects($this->once())
-                ->method('debug')
-                ->with($processOutput);
-        }
 
         $this->shell->execute($command, $args);
     }
@@ -189,10 +188,8 @@ class ShellTest extends TestCase
             ->with($this->stringContains('ls -al --password="123"'))
             ->willReturn('Command ls -al --password="***" failed');
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('debug')
             ->with($command);
-        $this->loggerMock->expects($this->never())
-            ->method('debug');
 
         $this->shell->execute($command);
     }
@@ -219,7 +216,7 @@ class ShellTest extends TestCase
             ->method('getMagentoRoot')
             ->willReturn($magentoRoot);
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('debug')
             ->with("ls -al 'arg1' 'arg2'");
 
         $this->shell->execute($command, ['arg1', 'arg2']);

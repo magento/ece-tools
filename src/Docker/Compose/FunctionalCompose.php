@@ -119,4 +119,17 @@ class FunctionalCompose extends ProductionCompose
     {
         return $this->fileList->getToolsDockerCompose();
     }
+
+    /**
+     * @param string $phpVersion
+     * @return array
+     */
+    protected function getPhpExtensions(string $phpVersion): array
+    {
+        return array_unique(array_merge(
+            PhpExtension::DEFAULT_PHP_EXTENSIONS,
+            ['xsl', 'redis'],
+            in_array($phpVersion, ['7.0', '7.1']) ? ['mcrypt'] : []
+        ));
+    }
 }
