@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\MagentoShell;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -24,9 +24,9 @@ class MaintenanceModeSwitcher
     const FLAG_FILENAME = '.maintenance.flag';
 
     /**
-     * @var ShellInterface
+     * @var MagentoShell
      */
-    private $shell;
+    private $magentoShell;
 
     /**
      * @var LoggerInterface
@@ -49,20 +49,20 @@ class MaintenanceModeSwitcher
     private $directoryList;
 
     /**
-     * @param ShellInterface $shell
+     * @param MagentoShell $magentoShell
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
      * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        ShellInterface $shell,
+        MagentoShell $magentoShell,
         LoggerInterface $logger,
         DeployInterface $stageConfig,
         File $file,
         DirectoryList $directoryList
     ) {
-        $this->shell = $shell;
+        $this->magentoShell = $magentoShell;
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
         $this->file = $file;
@@ -79,10 +79,10 @@ class MaintenanceModeSwitcher
     {
         $this->logger->notice('Enabling Maintenance mode');
         try {
-            $this->shell->execute(sprintf(
-                'php ./bin/magento maintenance:enable --ansi --no-interaction %s',
-                $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
-            ));
+            $this->magentoShell->execute(
+                'maintenance:enable',
+                [$this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)]
+            );
         } catch (ShellException $e) {
             $this->logger->warning(
                 'Command maintenance:enable finished with an error. Creating a maintenance flag file manually.'
@@ -100,10 +100,10 @@ class MaintenanceModeSwitcher
     public function disable()
     {
         try {
-            $this->shell->execute(sprintf(
-                'php ./bin/magento maintenance:disable --ansi --no-interaction %s',
-                $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)
-            ));
+            $this->magentoShell->execute(
+                'maintenance:disable',
+                [$this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)]
+            );
         } catch (ShellException $e) {
             throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
         }

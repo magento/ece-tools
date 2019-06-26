@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ConfigImport;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\MagentoShell;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -23,9 +23,9 @@ class ConfigImportTest extends TestCase
     private $process;
 
     /**
-     * @var ShellInterface|Mock
+     * @var MagentoShell|Mock
      */
-    private $shellMock;
+    private $magentoShellMock;
 
     /**
      * @var LoggerInterface|Mock
@@ -42,12 +42,12 @@ class ConfigImportTest extends TestCase
      */
     protected function setUp()
     {
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->magentoShellMock = $this->createMock(MagentoShell::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->process = new ConfigImport(
-            $this->shellMock,
+            $this->magentoShellMock,
             $this->loggerMock,
             $this->magentoVersionMock
         );
@@ -60,9 +60,9 @@ class ConfigImportTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Run app:config:import command');
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento app:config:import --ansi --no-interaction');
+            ->with('app:config:import');
 
         $this->process->execute();
     }
@@ -73,7 +73,7 @@ class ConfigImportTest extends TestCase
             ->willReturn(false);
         $this->loggerMock->expects($this->never())
             ->method('info');
-        $this->shellMock->expects($this->never())
+        $this->magentoShellMock->expects($this->never())
             ->method('execute');
 
         $this->process->execute();

@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellInterface;
 
 /**
  * Performs module management operations.
@@ -20,18 +20,18 @@ class Module
     private $config;
 
     /**
-     * @var ShellInterface
+     * @var MagentoShell
      */
-    private $shell;
+    private $magentoShell;
 
     /**
      * @param ConfigInterface $config
-     * @param ShellInterface $shell
+     * @param MagentoShell $magentoShell
      */
-    public function __construct(ConfigInterface $config, ShellInterface $shell)
+    public function __construct(ConfigInterface $config, MagentoShell $magentoShell)
     {
         $this->config = $config;
-        $this->shell = $shell;
+        $this->magentoShell = $magentoShell;
     }
 
     /**
@@ -45,13 +45,13 @@ class Module
         $moduleConfig = (array)$this->config->get('modules');
 
         if (!$moduleConfig) {
-            $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
+            $this->magentoShell->execute('module:enable --all');
             $this->config->reset();
 
             return;
         }
 
-        $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
+        $this->magentoShell->execute('module:enable --all');
         $this->config->update(['modules' => $moduleConfig]);
     }
 }

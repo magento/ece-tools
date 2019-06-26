@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\ConfigInterface;
 use Magento\MagentoCloud\Config\Module;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\MagentoShell;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -27,9 +27,9 @@ class ModuleTest extends TestCase
     private $configMock;
 
     /**
-     * @var ShellInterface|MockObject
+     * @var MagentoShell|MockObject
      */
-    private $shellMock;
+    private $magentoShellMock;
 
     /**
      * @inheritdoc
@@ -37,11 +37,11 @@ class ModuleTest extends TestCase
     protected function setUp()
     {
         $this->configMock = $this->getMockForAbstractClass(ConfigInterface::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->magentoShellMock = $this->createMock(MagentoShell::class);
 
         $this->module = new Module(
             $this->configMock,
-            $this->shellMock
+            $this->magentoShellMock
         );
     }
 
@@ -53,9 +53,9 @@ class ModuleTest extends TestCase
             ->willReturn(null);
         $this->configMock->expects($this->once())
             ->method('reset');
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento module:enable --all --ansi --no-interaction');
+            ->with('module:enable --all');
         $this->configMock->expects($this->never())
             ->method('update');
 
@@ -68,9 +68,9 @@ class ModuleTest extends TestCase
             ->method('get')
             ->with('modules')
             ->willReturn(['Some_OtherModule' => 1]);
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento module:enable --all --ansi --no-interaction');
+            ->with('module:enable --all');
         $this->configMock->expects($this->never())
             ->method('reset');
         $this->configMock->expects($this->once())

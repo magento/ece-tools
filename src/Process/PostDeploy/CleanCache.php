@@ -10,7 +10,7 @@ use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\MagentoShell;
 
 /**
  * Cleans all cache by tags.
@@ -18,9 +18,9 @@ use Magento\MagentoCloud\Shell\ShellInterface;
 class CleanCache implements ProcessInterface
 {
     /**
-     * @var ShellInterface
+     * @var MagentoShell
      */
-    private $shell;
+    private $magentoShell;
 
     /**
      * @var DeployInterface
@@ -28,14 +28,14 @@ class CleanCache implements ProcessInterface
     private $stageConfig;
 
     /**
-     * @param ShellInterface $shell
+     * @param MagentoShell $magentoShell
      * @param DeployInterface $stageConfig
      */
     public function __construct(
-        ShellInterface $shell,
+        MagentoShell $magentoShell,
         DeployInterface $stageConfig
     ) {
-        $this->shell = $shell;
+        $this->magentoShell = $magentoShell;
         $this->stageConfig = $stageConfig;
     }
 
@@ -45,10 +45,10 @@ class CleanCache implements ProcessInterface
     public function execute()
     {
         try {
-            $this->shell->execute(sprintf(
-                'php ./bin/magento cache:flush --ansi --no-interaction %s',
-                $this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)
-            ));
+            $this->magentoShell->execute(
+                'cache:flush',
+                [$this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)]
+            );
         } catch (ShellException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }

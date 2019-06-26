@@ -7,9 +7,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -36,9 +36,9 @@ class UrlManagerTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var ShellInterface|MockObject
+     * @var MagentoShell|MockObject
      */
-    private $shellMock;
+    private $magentoShellMock;
 
     /**
      * @inheritdoc
@@ -47,12 +47,12 @@ class UrlManagerTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->magentoShellMock = $this->createMock(MagentoShell::class);
 
         $this->manager = new UrlManager(
             $this->environmentMock,
             $this->loggerMock,
-            $this->shellMock
+            $this->magentoShellMock
         );
     }
 
@@ -368,9 +368,9 @@ class UrlManagerTest extends TestCase
             ->method('getOutput')
             ->willReturn('https://example.com/');
 
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url default')
+            ->with('config:show:store-url default')
             ->willReturn($processMock);
 
         $this->environmentMock->expects($this->never())
@@ -389,9 +389,9 @@ class UrlManagerTest extends TestCase
             ->method('getOutput')
             ->willReturn('https://example.com/');
 
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url default')
+            ->with('config:show:store-url default')
             ->willReturn($processMock);
 
         $this->assertSame('https://example.com/products/123', $this->manager->expandUrl('/products/123'));
@@ -410,9 +410,9 @@ class UrlManagerTest extends TestCase
                 'https://example3.com/',
             ]));
 
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url')
+            ->with('config:show:store-url')
             ->willReturn($processMock);
 
         $this->assertTrue($this->manager->isRelatedDomain('https://example.com/'));
@@ -433,9 +433,9 @@ class UrlManagerTest extends TestCase
                 'https://example3.com/',
             ]));
 
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url')
+            ->with('config:show:store-url')
             ->willReturn($processMock);
 
         $this->assertTrue($this->manager->isUrlValid('https://example.com/'));
@@ -453,9 +453,9 @@ class UrlManagerTest extends TestCase
         $processMock->expects($this->never())
             ->method('getOutput');
 
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url default')
+            ->with('config:show:store-url default')
             ->willThrowException(new ShellException('some error'));
 
         $this->environmentMock->expects($this->once())
@@ -478,9 +478,9 @@ class UrlManagerTest extends TestCase
                 'https://example2.com/',
             ]));
 
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url')
+            ->with('config:show:store-url')
             ->willReturn($processMock);
 
         $this->assertEquals(
