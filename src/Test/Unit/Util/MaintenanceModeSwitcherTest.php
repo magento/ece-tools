@@ -81,7 +81,7 @@ class MaintenanceModeSwitcherTest extends TestCase
             ->with('Enabling Maintenance mode');
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('maintenance:enable',  ['-v']);
+            ->with('maintenance:enable', ['-v']);
         $this->loggerMock->expects($this->never())
             ->method('warning');
         $this->fileMock->expects($this->never())
@@ -103,7 +103,7 @@ class MaintenanceModeSwitcherTest extends TestCase
             ->with('Enabling Maintenance mode');
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('maintenance:enable',  ['-v'])
+            ->with('maintenance:enable', ['-v'])
             ->willThrowException(new ShellException('command error'));
         $this->loggerMock->expects($this->once())
             ->method('warning')
@@ -129,7 +129,7 @@ class MaintenanceModeSwitcherTest extends TestCase
             ->with('Maintenance mode is disabled.');
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('maintenance:disable',  ['-v']);
+            ->with('maintenance:disable', ['-v']);
 
         $this->maintenanceModeSwitcher->disable();
     }
@@ -148,7 +148,7 @@ class MaintenanceModeSwitcherTest extends TestCase
             ->method('notice');
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento maintenance:disable --ansi --no-interaction -v')
+            ->with('maintenance:disable', ['-v'])
             ->willThrowException(new ShellException('command error'));
 
         $this->maintenanceModeSwitcher->disable();

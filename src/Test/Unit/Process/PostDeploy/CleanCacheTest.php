@@ -108,7 +108,7 @@ class CleanCacheTest extends TestCase
             ->willReturn('');
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento cache:flush --ansi --no-interaction ');
+            ->with('cache:flush');
 
         $this->process->execute();
     }
