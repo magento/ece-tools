@@ -30,6 +30,7 @@ class AcceptanceCest extends AbstractCest
     {
         $I->assertTrue($I->cloneTemplate());
         $I->assertTrue($I->composerInstall());
+        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand(

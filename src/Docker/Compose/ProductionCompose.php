@@ -204,7 +204,7 @@ class ProductionCompose implements ComposeInterface
             'image' => 'alpine',
             'environment' => $this->converter->convert(array_merge(
                 $this->getVariables(),
-                !empty($phpExtensions) ? ['PHP_EXTENSIONS' => implode(' ', $phpExtensions)] : []
+                ['PHP_EXTENSIONS' => implode(' ', $phpExtensions)]
             )),
             'env_file' => [
                 './.docker/config.env',
