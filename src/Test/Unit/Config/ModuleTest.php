@@ -7,7 +7,6 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\ConfigInterface;
 use Magento\MagentoCloud\Config\Module;
-use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -48,20 +47,21 @@ class ModuleTest extends TestCase
 
     public function testRefreshWithMissingModuleConfig()
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $processMock->expects($this->once())
-            ->method('getOutput')
-            ->willReturn('The following modules have been enabled: - Magento_Module1 - Magento_Module2');
-        $this->configMock->expects($this->once())
+        $this->configMock->expects($this->exactly(2))
             ->method('get')
             ->with('modules')
-            ->willReturn(null);
+            ->willReturnOnConsecutiveCalls(
+                null,
+                [
+                    'Magento_Module1' => 1,
+                    'Magento_Module2' => 1,
+                ]
+            );
         $this->configMock->expects($this->once())
             ->method('reset');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento module:enable --all --ansi --no-interaction')
-            ->willReturn($processMock);
+            ->with('php ./bin/magento module:enable --all --ansi --no-interaction');
         $this->configMock->expects($this->never())
             ->method('update');
 
@@ -76,25 +76,42 @@ class ModuleTest extends TestCase
 
     public function testRefreshWithNewModules()
     {
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $processMock->expects($this->once())
-            ->method('getOutput')
-            ->willReturn('No modules were changed.');
-        $this->configMock->expects($this->once())
+        $this->configMock->expects($this->exactly(2))
             ->method('get')
             ->with('modules')
-            ->willReturn(['Some_OtherModule' => 1]);
+            ->willReturnOnConsecutiveCalls(
+                [
+                    'Magento_Module1' => 1,
+                    'Magento_Module2' => 0,
+                    'Magento_Module3' => 1,
+                ],
+                [
+                    'Magento_Module1' => 1,
+                    'Magento_Module2' => 1,
+                    'Magento_Module3' => 1,
+                    'Magento_Module4' => 1,
+                    'Magento_Module5' => 1,
+                ]
+            );
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento module:enable --all --ansi --no-interaction')
-            ->willReturn($processMock);
-        $this->configMock->expects($this->never())
+            ->with('php ./bin/magento module:enable --all --ansi --no-interaction');
+        $this->configMock->expects($this->once())
             ->method('reset');
         $this->configMock->expects($this->once())
             ->method('update')
-            ->with(['modules' => ['Some_OtherModule' => 1]])
-            ->willReturn(null);
+            ->with(['modules' => [
+                'Magento_Module1' => 1,
+                'Magento_Module2' => 0,
+                'Magento_Module3' => 1,
+            ]]);
 
-        $this->assertEquals([], $this->module->refresh());
+        $this->assertEquals(
+            [
+                'Magento_Module4',
+                'Magento_Module5',
+            ],
+            $this->module->refresh()
+        );
     }
 }

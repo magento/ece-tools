@@ -45,31 +45,16 @@ class Module
     {
         $moduleConfig = (array)$this->config->get('modules');
 
-        $process = $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
+        $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
 
-        if (!$moduleConfig) {
-            $this->config->reset();
-        } else {
+        $this->config->reset();
+
+        $updatedModuleConfig = (array)$this->config->get('modules');
+
+        if ($moduleConfig) {
             $this->config->update(['modules' => $moduleConfig]);
         }
 
-        return $this->parseModuleList($process->getOutput());
-    }
-
-    /**
-     * Parse list of modules from the output of module:enable command.
-     *
-     * @param string $output
-     * @return array
-     */
-    private function parseModuleList(string $output): array
-    {
-        if (strpos($output, 'have been enabled') === false) {
-            return [];
-        }
-
-        preg_match_all('/-\s(?P<modules>\w+_\w+)/', $output, $modulesMatch);
-
-        return $modulesMatch['modules'] ?? [];
+        return array_keys(array_diff_key($updatedModuleConfig, $moduleConfig));
     }
 }
