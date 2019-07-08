@@ -58,9 +58,9 @@ class CompileDi implements ProcessInterface
         try {
             $this->magentoShell->execute(
                 'setup:di:compile',
-                [
+                array_filter([
                     $this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS)
-                ]
+                ])
             );
         } catch (ShellException $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
