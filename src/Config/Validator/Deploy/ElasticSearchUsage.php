@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\SearchEngine;
+use Magento\MagentoCloud\Service\ElasticSearch;
 
 /**
  * Validates that different search engine configured when elasticsearch service is installed.
@@ -27,19 +28,19 @@ class ElasticSearchUsage implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var SearchEngine\ElasticSearch
+     * @var ElasticSearch
      */
     private $elasticSearch;
 
     /**
      * @param SearchEngine $searchEngine
      * @param Validator\ResultFactory $resultFactory
-     * @param SearchEngine\ElasticSearch $elasticSearch
+     * @param ElasticSearch $elasticSearch
      */
     public function __construct(
         SearchEngine $searchEngine,
         Validator\ResultFactory $resultFactory,
-        SearchEngine\ElasticSearch $elasticSearch
+        ElasticSearch $elasticSearch
     ) {
         $this->searchEngine = $searchEngine;
         $this->resultFactory = $resultFactory;

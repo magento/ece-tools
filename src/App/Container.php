@@ -263,6 +263,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\JsonFormatVariable::class),
+                                    $this->container->make(ConfigValidator\Deploy\ServiceVersion::class),
                                 ],
                             ],
                         ]),

@@ -5,16 +5,16 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Config\SearchEngine;
+namespace Magento\MagentoCloud\Service;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * Returns configurations from ElasticSearch.
+ * Returns ElasticSearch service configurations.
  */
-class ElasticSearch
+class ElasticSearch implements ServiceInterface
 {
     const RELATIONSHIP_KEY = 'elasticsearch';
     const ENGINE_NAME = 'elasticsearch';
@@ -61,7 +61,7 @@ class ElasticSearch
      */
     public function isInstalled(): bool
     {
-        return (bool)$this->environment->getRelationship(self::RELATIONSHIP_KEY);
+        return (bool)$this->getConfiguration();
     }
 
     /**
@@ -69,7 +69,7 @@ class ElasticSearch
      *
      * @return array
      */
-    public function getRelationship(): array
+    public function getConfiguration(): array
     {
         return $this->environment->getRelationship(self::RELATIONSHIP_KEY)[0] ?? [];
     }
@@ -86,18 +86,16 @@ class ElasticSearch
         if ($this->version === null) {
             $this->version = '0';
 
-            $relationships = $this->environment->getRelationships();
-            if (!isset($relationships['elasticsearch'])) {
+            $config = $this->getConfiguration();
+            if (!$config) {
                 return $this->version;
             }
-
-            $esConfig = $relationships['elasticsearch'][0];
 
             try {
                 $esConfiguration = $this->call(sprintf(
                     '%s:%s',
-                    $esConfig['host'],
-                    $esConfig['port']
+                    $config['host'],
+                    $config['port']
                 ));
 
                 $this->version = $esConfiguration['version']['number'];
@@ -117,7 +115,7 @@ class ElasticSearch
      */
     public function getTemplate(): array
     {
-        $config = $this->getRelationship();
+        $config = $this->getConfiguration();
 
         if (!$config) {
             return [];

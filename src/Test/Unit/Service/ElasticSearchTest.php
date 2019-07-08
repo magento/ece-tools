@@ -11,7 +11,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Http\ClientFactory;
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Service\ElasticSearch;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\StreamInterface;
@@ -61,7 +61,7 @@ class ElasticSearchTest extends TestCase
     public function testGetVersionElasticSearchNotExistInRelationShips()
     {
         $this->environmentMock->expects($this->once())
-            ->method('getRelationships')
+            ->method('getRelationship')
             ->willReturn([]);
         $this->loggerMock->expects($this->never())
             ->method('warning');
@@ -72,21 +72,21 @@ class ElasticSearchTest extends TestCase
     }
 
     /**
-     * @param array $relationships
+     * @param array $esRelationship
      * @param string $esConfiguration
      * @param string $expectedVersion
      * @dataProvider getVersionDataProvider
      */
-    public function testGetVersion(array $relationships, string $esConfiguration, string $expectedVersion)
+    public function testGetVersion(array $esRelationship, string $esConfiguration, string $expectedVersion)
     {
-        $esConfig = $relationships['elasticsearch'][0];
+        $esConfig = $esRelationship[0];
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
         $streamMock = $this->getMockForAbstractClass(StreamInterface::class);
 
         $this->environmentMock->expects($this->once())
-            ->method('getRelationships')
-            ->willReturn($relationships);
+            ->method('getRelationship')
+            ->willReturn($esRelationship);
         $clientMock->expects($this->once())
             ->method('get')
             ->with($esConfig['host'] . ':' . $esConfig['port'])
@@ -112,11 +112,9 @@ class ElasticSearchTest extends TestCase
     public function getVersionDataProvider(): array
     {
         $relationships = [
-            'elasticsearch' => [
-                [
-                    'host' => '127.0.0.1',
-                    'port' => '1234',
-                ],
+            [
+                'host' => '127.0.0.1',
+                'port' => '1234',
             ],
         ];
 
@@ -157,13 +155,11 @@ class ElasticSearchTest extends TestCase
     public function testGetVersionWithException()
     {
         $this->environmentMock->expects($this->once())
-            ->method('getRelationships')
+            ->method('getRelationship')
             ->willReturn([
-                'elasticsearch' => [
-                    [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
-                    ],
+                [
+                    'host' => '127.0.0.1',
+                    'port' => '1234',
                 ],
             ]);
         $clientMock = $this->createPartialMock(Client::class, ['get']);
@@ -186,14 +182,12 @@ class ElasticSearchTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getRelationship')
             ->with('elasticsearch')
-            ->willReturn(
+            ->willReturn([
                 [
-                    [
-                        'host' => '127.0.0.1',
-                        'port' => '1234',
-                    ],
+                    'host' => '127.0.0.1',
+                    'port' => '1234',
                 ]
-            );
+            ]);
         $clientMock = $this->createPartialMock(Client::class, ['get']);
         $responseMock = $this->createMock(Response::class);
         $streamMock = $this->getMockForAbstractClass(StreamInterface::class);

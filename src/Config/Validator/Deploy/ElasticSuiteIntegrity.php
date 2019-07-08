@@ -7,12 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\SearchEngine;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Service\ElasticSearch;
 
 /**
  * Validates different aspects of ElasticSuite's configuration.
