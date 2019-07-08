@@ -8,8 +8,9 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ConfigImport;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,17 +24,17 @@ class ConfigImportTest extends TestCase
     private $process;
 
     /**
-     * @var MagentoShell|Mock
+     * @var MagentoShell|MockObject
      */
     private $magentoShellMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var MagentoVersion|Mock
+     * @var MagentoVersion|MockObject
      */
     private $magentoVersionMock;
 
@@ -45,9 +46,14 @@ class ConfigImportTest extends TestCase
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        /** @var ShellFactory|MockObject $shellFactoryMock */
+        $shellFactoryMock = $this->createMock(ShellFactory::class);
+        $shellFactoryMock->expects($this->once())
+            ->method('createMagento')
+            ->willReturn($this->magentoShellMock);
 
         $this->process = new ConfigImport(
-            $this->magentoShellMock,
+            $shellFactoryMock,
             $this->loggerMock,
             $this->magentoVersionMock
         );

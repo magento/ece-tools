@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 
 /**
  * Cleans all cache by tags.
@@ -28,14 +29,14 @@ class CleanCache implements ProcessInterface
     private $stageConfig;
 
     /**
-     * @param MagentoShell $magentoShell
+     * @param ShellFactory $shellFactory
      * @param DeployInterface $stageConfig
      */
     public function __construct(
-        MagentoShell $magentoShell,
+        ShellFactory $shellFactory,
         DeployInterface $stageConfig
     ) {
-        $this->magentoShell = $magentoShell;
+        $this->magentoShell = $shellFactory->createMagento();
         $this->stageConfig = $stageConfig;
     }
 

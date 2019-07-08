@@ -10,8 +10,9 @@ use Magento\MagentoCloud\Process\PostDeploy\CleanCache;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -24,12 +25,12 @@ class CleanCacheTest extends TestCase
     private $process;
 
     /**
-     * @var MagentoShell|Mock
+     * @var MagentoShell|MockObject
      */
     private $magentoShellMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfig;
 
@@ -40,9 +41,14 @@ class CleanCacheTest extends TestCase
     {
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         $this->stageConfig = $this->getMockForAbstractClass(DeployInterface::class);
+        /** @var ShellFactory|MockObject $shellFactoryMock */
+        $shellFactoryMock = $this->createMock(ShellFactory::class);
+        $shellFactoryMock->expects($this->once())
+            ->method('createMagento')
+            ->willReturn($this->magentoShellMock);
 
         $this->process = new CleanCache(
-            $this->magentoShellMock,
+            $shellFactoryMock,
             $this->stageConfig
         );
     }

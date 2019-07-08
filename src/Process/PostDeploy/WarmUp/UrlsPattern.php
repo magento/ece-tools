@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Process\PostDeploy\WarmUp;
 
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -31,14 +32,14 @@ class UrlsPattern
 
     /**
      * @param LoggerInterface $logger
-     * @param MagentoShell $magentoShell
+     * @param ShellFactory $shellFactory
      */
     public function __construct(
         LoggerInterface $logger,
-        MagentoShell $magentoShell
+        ShellFactory $shellFactory
     ) {
         $this->logger = $logger;
-        $this->magentoShell = $magentoShell;
+        $this->magentoShell = $shellFactory->createMagento();
     }
 
     /**

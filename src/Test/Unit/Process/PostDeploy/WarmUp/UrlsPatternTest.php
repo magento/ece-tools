@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy\WarmUp;
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp\UrlsPattern;
 use Magento\MagentoCloud\Shell\Process;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -39,10 +40,15 @@ class UrlsPatternTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
+        /** @var ShellFactory|MockObject $shellFactoryMock */
+        $shellFactoryMock = $this->createMock(ShellFactory::class);
+        $shellFactoryMock->expects($this->once())
+            ->method('createMagento')
+            ->willReturn($this->magentoShellMock);
 
         $this->urlsPattern = new UrlsPattern(
             $this->loggerMock,
-            $this->magentoShellMock
+            $shellFactoryMock
         );
     }
 

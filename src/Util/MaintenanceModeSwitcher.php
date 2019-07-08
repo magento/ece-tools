@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -49,20 +50,20 @@ class MaintenanceModeSwitcher
     private $directoryList;
 
     /**
-     * @param MagentoShell $magentoShell
+     * @param ShellFactory $shellFactory
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
      * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
-        MagentoShell $magentoShell,
+        ShellFactory $shellFactory,
         LoggerInterface $logger,
         DeployInterface $stageConfig,
         File $file,
         DirectoryList $directoryList
     ) {
-        $this->magentoShell = $magentoShell;
+        $this->magentoShell = $shellFactory->createMagento();
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
         $this->file = $file;

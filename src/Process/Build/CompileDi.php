@@ -9,6 +9,7 @@ use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 
@@ -34,16 +35,16 @@ class CompileDi implements ProcessInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param MagentoShell $magentoShell
+     * @param ShellFactory $shellFactory
      * @param BuildInterface $stageConfig
      */
     public function __construct(
         LoggerInterface $logger,
-        MagentoShell $magentoShell,
+        ShellFactory $shellFactory,
         BuildInterface $stageConfig
     ) {
         $this->logger = $logger;
-        $this->magentoShell = $magentoShell;
+        $this->magentoShell = $shellFactory->createMagento();
         $this->stageConfig = $stageConfig;
     }
 

@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -33,16 +34,16 @@ class ConfigImport implements ProcessInterface
     private $magentoVersion;
 
     /**
-     * @param MagentoShell $magentoShell
+     * @param ShellFactory $shellFactory
      * @param LoggerInterface $logger
      * @param MagentoVersion $version
      */
     public function __construct(
-        MagentoShell $magentoShell,
+        ShellFactory $shellFactory,
         LoggerInterface $logger,
         MagentoVersion $version
     ) {
-        $this->magentoShell = $magentoShell;
+        $this->magentoShell = $shellFactory->createMagento();
         $this->logger = $logger;
         $this->magentoVersion = $version;
     }

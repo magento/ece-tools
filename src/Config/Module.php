@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Config;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellFactory;
 
 /**
  * Performs module management operations.
@@ -26,12 +27,12 @@ class Module
 
     /**
      * @param ConfigInterface $config
-     * @param MagentoShell $magentoShell
+     * @param ShellFactory $shellFactory
      */
-    public function __construct(ConfigInterface $config, MagentoShell $magentoShell)
+    public function __construct(ConfigInterface $config, ShellFactory $shellFactory)
     {
         $this->config = $config;
-        $this->magentoShell = $magentoShell;
+        $this->magentoShell = $shellFactory->createMagento();
     }
 
     /**

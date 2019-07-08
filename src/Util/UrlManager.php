@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Util;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -53,16 +54,16 @@ class UrlManager
     /**
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param MagentoShell $magentoShell
+     * @param ShellFactory $shellFactory
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        MagentoShell $magentoShell
+        ShellFactory $shellFactory
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->magentoShell = $magentoShell;
+        $this->magentoShell = $shellFactory->createMagento();
     }
 
     /**

@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Magento\MagentoCloud\Config\ConfigInterface;
 use Magento\MagentoCloud\Config\Module;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -38,10 +39,15 @@ class ModuleTest extends TestCase
     {
         $this->configMock = $this->getMockForAbstractClass(ConfigInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
+        /** @var ShellFactory|MockObject $shellFactoryMock */
+        $shellFactoryMock = $this->createMock(ShellFactory::class);
+        $shellFactoryMock->expects($this->once())
+            ->method('createMagento')
+            ->willReturn($this->magentoShellMock);
 
         $this->module = new Module(
             $this->configMock,
-            $this->magentoShellMock
+            $shellFactoryMock
         );
     }
 

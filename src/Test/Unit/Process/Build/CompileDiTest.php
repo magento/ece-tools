@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Process\Build\CompileDi;
 use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -44,11 +45,16 @@ class CompileDiTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
+        /** @var ShellFactory|MockObject $shellFactoryMock */
+        $shellFactoryMock = $this->createMock(ShellFactory::class);
+        $shellFactoryMock->expects($this->once())
+            ->method('createMagento')
+            ->willReturn($this->magentoShellMock);
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
 
         $this->process = new CompileDi(
             $this->loggerMock,
-            $this->magentoShellMock,
+            $shellFactoryMock,
             $this->stageConfigMock
         );
     }
