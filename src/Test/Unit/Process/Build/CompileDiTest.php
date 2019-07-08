@@ -71,23 +71,4 @@ class CompileDiTest extends TestCase
 
         $this->process->execute();
     }
-
-    public function testExecuteWithEmptyArgument()
-    {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
-            ->willReturn('');
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('notice')
-            ->withConsecutive(
-                ['Running DI compilation'],
-                ['End of running DI compilation']
-            );
-        $this->magentoShellMock->expects($this->once())
-            ->method('execute')
-            ->with('setup:di:compile', []);
-
-        $this->process->execute();
-    }
 }
