@@ -154,7 +154,7 @@ class UrlManager
     {
         if ($this->baseUrl === null) {
             try {
-                $process = $this->shell->execute('php bin/magento config:show:store-url default');
+                $process = $this->shell->execute('php bin/magento config:show:default-url');
 
                 $this->baseUrl = $process->getOutput();
             } catch (ShellException $e) {

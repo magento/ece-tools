@@ -370,7 +370,7 @@ class UrlManagerTest extends TestCase
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url default')
+            ->with('php bin/magento config:show:default-url')
             ->willReturn($processMock);
 
         $this->environmentMock->expects($this->never())
@@ -391,7 +391,7 @@ class UrlManagerTest extends TestCase
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url default')
+            ->with('php bin/magento config:show:default-url')
             ->willReturn($processMock);
 
         $this->assertSame('https://example.com/products/123', $this->manager->expandUrl('/products/123'));
@@ -455,7 +455,7 @@ class UrlManagerTest extends TestCase
 
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('php bin/magento config:show:store-url default')
+            ->with('php bin/magento config:show:default-url')
             ->willThrowException(new ShellException('some error'));
 
         $this->environmentMock->expects($this->once())
