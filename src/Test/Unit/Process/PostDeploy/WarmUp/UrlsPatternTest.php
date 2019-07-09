@@ -7,7 +7,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy\WarmUp;
 
 use Magento\MagentoCloud\Process\PostDeploy\WarmUp\UrlsPattern;
 use Magento\MagentoCloud\Shell\Process;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -28,9 +29,9 @@ class UrlsPatternTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ShellInterface|MockObject
+     * @var MagentoShell|MockObject
      */
-    private $shellMock;
+    private $magentoShellMock;
 
     /**
      * @inheritdoc
@@ -38,30 +39,35 @@ class UrlsPatternTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->magentoShellMock = $this->createMock(MagentoShell::class);
+        /** @var ShellFactory|MockObject $shellFactoryMock */
+        $shellFactoryMock = $this->createMock(ShellFactory::class);
+        $shellFactoryMock->expects($this->once())
+            ->method('createMagento')
+            ->willReturn($this->magentoShellMock);
 
         $this->urlsPattern = new UrlsPattern(
             $this->loggerMock,
-            $this->shellMock
+            $shellFactoryMock
         );
     }
 
     /**
      * @param string $pattern
-     * @param string $command
+     * @param array $commandArguments
      * @param array $urlsFromCommand
      * @param array $expectedResult
      * @dataProvider getDataProvider
      */
-    public function testGet(string $pattern, string $command, array $urlsFromCommand, array $expectedResult)
+    public function testGet(string $pattern, array $commandArguments, array $urlsFromCommand, array $expectedResult)
     {
         $processMock = $this->createMock(Process::class);
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn(json_encode($urlsFromCommand));
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with($command)
+            ->with('config:show:urls', $commandArguments)
             ->willReturn($processMock);
 
         $this->assertEquals($expectedResult, array_values($this->urlsPattern->get($pattern)));
@@ -75,13 +81,16 @@ class UrlsPatternTest extends TestCase
         return [
             [
                 'category:*:1',
-                'config:show:urls --entity-type="category" --store-id="1"',
+                [
+                    '--entity-type="category"',
+                    '--store-id="1"'
+                ],
                 [],
                 [],
             ],
             [
                 'category:*:*',
-                'config:show:urls --entity-type="category"',
+                ['--entity-type="category"'],
                 [
                     'http://site1.com/category1',
                     'http://site1.com/category2',
@@ -93,7 +102,7 @@ class UrlsPatternTest extends TestCase
             ],
             [
                 'category:/category.*/:*',
-                'config:show:urls --entity-type="category"',
+                ['--entity-type="category"'],
                 [
                     'http://site1.com/category1',
                     'http://site1.com/category2',
@@ -107,7 +116,7 @@ class UrlsPatternTest extends TestCase
             ],
             [
                 'category:cat1:*',
-                'config:show:urls --entity-type="category"',
+                ['--entity-type="category"'],
                 [
                     'http://site1.com/category1',
                     'http://site1.com/cat1',
@@ -129,7 +138,7 @@ class UrlsPatternTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('error')
             ->with('Warm-up pattern "wrong:pattern" isn\'t valid.');
-        $this->shellMock->expects($this->never())
+        $this->magentoShellMock->expects($this->never())
             ->method('execute');
 
         $this->urlsPattern->get('wrong:pattern');
@@ -141,9 +150,9 @@ class UrlsPatternTest extends TestCase
         $processMock->expects($this->once())
             ->method('getOutput')
             ->willReturn('wrong_json');
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('config:show:urls --entity-type="category"')
+            ->with('config:show:urls', ['--entity-type="category"'])
             ->willReturn($processMock);
         $this->loggerMock->expects($this->once())
             ->method('error')
