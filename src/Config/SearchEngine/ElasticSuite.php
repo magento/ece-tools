@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Config\SearchEngine;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Service\ElasticSearch;
 
 /**
  * Provides an access to ElasticSuite configuration.
@@ -95,7 +96,7 @@ class ElasticSuite
      */
     private function getConfig(): array
     {
-        $esConfig = $this->elasticSearch->getRelationship();
+        $esConfig = $this->elasticSearch->getConfiguration();
 
         if (!isset($esConfig['host'], $esConfig['port'])) {
             return [];

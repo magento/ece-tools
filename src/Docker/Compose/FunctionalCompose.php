@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Docker\Compose;
 
-use Magento\MagentoCloud\Service\Service;
+use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Illuminate\Contracts\Config\Repository;
 
@@ -87,14 +87,14 @@ class FunctionalCompose extends ProductionCompose
     protected function getServiceVersion(string $serviceName)
     {
         $mapDefaultVersion = [
-            Service::NAME_DB => '10.2',
-            Service::NAME_PHP => '7.2',
-            Service::NAME_NGINX => self::DEFAULT_NGINX_VERSION,
-            Service::NAME_VARNISH => self::DEFAULT_VARNISH_VERSION,
-            Service::NAME_ELASTICSEARCH => null,
-            Service::NAME_NODE => null,
-            Service::NAME_RABBITMQ => null,
-            Service::NAME_REDIS => null,
+            ServiceInterface::NAME_DB => '10.2',
+            ServiceInterface::NAME_PHP => '7.2',
+            ServiceInterface::NAME_NGINX => self::DEFAULT_NGINX_VERSION,
+            ServiceInterface::NAME_VARNISH => self::DEFAULT_VARNISH_VERSION,
+            ServiceInterface::NAME_ELASTICSEARCH => null,
+            ServiceInterface::NAME_NODE => null,
+            ServiceInterface::NAME_RABBITMQ => null,
+            ServiceInterface::NAME_REDIS => null,
         ];
 
         if (!array_key_exists($serviceName, $mapDefaultVersion)) {
@@ -109,7 +109,7 @@ class FunctionalCompose extends ProductionCompose
      */
     protected function getPhpVersion()
     {
-        return $this->getServiceVersion(Service::NAME_PHP);
+        return $this->getServiceVersion(ServiceInterface::NAME_PHP);
     }
 
     /**

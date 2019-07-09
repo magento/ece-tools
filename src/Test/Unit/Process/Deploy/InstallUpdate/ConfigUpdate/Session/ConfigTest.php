@@ -8,11 +8,11 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 use Composer\Package\PackageInterface;
 use Composer\Semver\Comparator;
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
+use Magento\MagentoCloud\Service\Redis;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -22,9 +22,9 @@ use PHPUnit\Framework\TestCase;
 class ConfigTest extends TestCase
 {
     /**
-     * @var Environment|MockObject
+     * @var Redis|MockObject
      */
-    private $environmentMock;
+    private $redisMock;
 
     /**
      * @var DeployInterface|MockObject
@@ -51,16 +51,19 @@ class ConfigTest extends TestCase
      */
     private $config;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->redisMock = $this->createMock(Redis::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->configMergerMock = $this->createTestProxy(ConfigMerger::class);
         $this->managerMock = $this->createMock(Manager::class);
         $this->comparatorMock = new Comparator();
 
         $this->config = new Config(
-            $this->environmentMock,
+            $this->redisMock,
             $this->stageConfigMock,
             $this->configMergerMock,
             $this->managerMock,
@@ -74,9 +77,8 @@ class ConfigTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
             ->willReturn(['save' => 'some_storage']);
-        $this->environmentMock->expects($this->never())
-            ->method('getRelationship')
-            ->with('redis');
+        $this->redisMock->expects($this->never())
+            ->method('getConfiguration');
 
         $this->assertEquals(
             ['save' => 'some_storage'],
@@ -86,23 +88,22 @@ class ConfigTest extends TestCase
 
     /**
      * @param array $envSessionConfiguration
-     * @param array $relationships
+     * @param array $redisConfig
      * @param array $expected
      * @dataProvider envConfigurationMergingDataProvider
      */
     public function testEnvConfigurationMerging(
         array $envSessionConfiguration,
-        array $relationships,
+        array $redisConfig,
         array $expected
     ) {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
             ->willReturn($envSessionConfiguration);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('redis')
-            ->willReturn($relationships);
+        $this->redisMock->expects($this->once())
+            ->method('getConfiguration')
+            ->willReturn($redisConfig);
         $package = $this->getMockForAbstractClass(PackageInterface::class);
         $this->managerMock->expects($this->once())
             ->method('get')
@@ -123,12 +124,10 @@ class ConfigTest extends TestCase
      */
     public function envConfigurationMergingDataProvider(): array
     {
-        $relationships = [
-            [
-                'host' => 'host',
-                'port' => 'port',
-                'scheme' => 'redis',
-            ],
+        $redisConfig = [
+            'host' => 'host',
+            'port' => 'port',
+            'scheme' => 'redis',
         ];
 
         $result = [
@@ -151,12 +150,12 @@ class ConfigTest extends TestCase
         return [
             [
                 [],
-                $relationships,
+                $redisConfig,
                 $result,
             ],
             [
                 [StageConfigInterface::OPTION_MERGE => true],
-                $relationships,
+                $redisConfig,
                 $result,
             ],
             [
@@ -164,7 +163,7 @@ class ConfigTest extends TestCase
                     StageConfigInterface::OPTION_MERGE => true,
                     'key' => 'value',
                 ],
-                $relationships,
+                $redisConfig,
                 $resultWithMergedKey,
             ],
             [
@@ -175,7 +174,7 @@ class ConfigTest extends TestCase
                         'port' => 'new_port',
                     ],
                 ],
-                $relationships,
+                $redisConfig,
                 $resultWithMergedHostAndPort,
             ],
         ];
@@ -183,23 +182,22 @@ class ConfigTest extends TestCase
 
     /**
      * @param array $envSessionConfiguration
-     * @param array $relationships
+     * @param array $redisConfig
      * @param array $expected
      * @dataProvider envConfigurationMergingWithPrevVersionDataProvider
      */
     public function testEnvConfigurationMergingWithPrevVersion(
         array $envSessionConfiguration,
-        array $relationships,
+        array $redisConfig,
         array $expected
     ) {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SESSION_CONFIGURATION)
             ->willReturn($envSessionConfiguration);
-        $this->environmentMock->expects($this->once())
-            ->method('getRelationship')
-            ->with('redis')
-            ->willReturn($relationships);
+        $this->redisMock->expects($this->once())
+            ->method('getConfiguration')
+            ->willReturn($redisConfig);
         $package = $this->getMockForAbstractClass(PackageInterface::class);
         $this->managerMock->expects($this->once())
             ->method('get')
@@ -220,12 +218,10 @@ class ConfigTest extends TestCase
      */
     public function envConfigurationMergingWithPrevVersionDataProvider(): array
     {
-        $relationships = [
-            [
-                'host' => 'host',
-                'port' => 'port',
-                'scheme' => 'redis',
-            ],
+        $redisConfig = [
+            'host' => 'host',
+            'port' => 'port',
+            'scheme' => 'redis',
         ];
 
         $result = [
@@ -248,12 +244,12 @@ class ConfigTest extends TestCase
         return [
             [
                 [],
-                $relationships,
+                $redisConfig,
                 $result,
             ],
             [
                 [StageConfigInterface::OPTION_MERGE => true],
-                $relationships,
+                $redisConfig,
                 $result,
             ],
             [
@@ -261,7 +257,7 @@ class ConfigTest extends TestCase
                     StageConfigInterface::OPTION_MERGE => true,
                     'key' => 'value',
                 ],
-                $relationships,
+                $redisConfig,
                 $resultWithMergedKey,
             ],
             [
@@ -272,7 +268,7 @@ class ConfigTest extends TestCase
                         'port' => 'new_port',
                     ],
                 ],
-                $relationships,
+                $redisConfig,
                 $resultWithMergedHostAndPort,
             ],
         ];
