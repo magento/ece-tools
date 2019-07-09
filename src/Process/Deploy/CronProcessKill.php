@@ -74,7 +74,8 @@ class CronProcessKill implements ProcessInterface
         try {
             $this->shell->execute("kill $pid");
         } catch (\RuntimeException $e) {
-            $this->logger->info('There is an error during killing the cron processes: ' . $e->getMessage());
+            $this->logger->info(sprintf('Couldn\'t kill process #%d it may be already finished', $pid));
+            $this->logger->debug($e->getMessage());
         }
     }
 }
