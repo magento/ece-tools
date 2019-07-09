@@ -36,7 +36,7 @@ class Module
 
     /**
      * Reconciling installed modules with shared config.
-     * Returns list of enabled modules or an empty array if no modules were enabled.
+     * Returns list of new enabled modules or an empty array if no modules were enabled.
      *
      * @throws ShellException
      * @throws FileSystemException
