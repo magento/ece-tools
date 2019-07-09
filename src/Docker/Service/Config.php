@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Docker\Config\Reader;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Illuminate\Contracts\Config\Repository;
-use Magento\MagentoCloud\Service\Service;
+use Magento\MagentoCloud\Service\ServiceInterface;
 
 /**
  * Retrieve Service versions/configs from Cloud configuration.
@@ -24,13 +24,13 @@ class Config
      * @var array
      */
     private static $configurableServices = [
-        Service::NAME_PHP => 'php',
-        Service::NAME_DB => 'mysql',
-        Service::NAME_NGINX => 'nginx',
-        Service::NAME_REDIS => 'redis',
-        Service::NAME_ELASTICSEARCH => 'elasticsearch',
-        Service::NAME_RABBITMQ => 'rabbitmq',
-        Service::NAME_NODE => 'node'
+        ServiceInterface::NAME_PHP => 'php',
+        ServiceInterface::NAME_DB => 'mysql',
+        ServiceInterface::NAME_NGINX => 'nginx',
+        ServiceInterface::NAME_REDIS => 'redis',
+        ServiceInterface::NAME_ELASTICSEARCH => 'elasticsearch',
+        ServiceInterface::NAME_RABBITMQ => 'rabbitmq',
+        ServiceInterface::NAME_NODE => 'node'
     ];
 
     /**
@@ -88,7 +88,7 @@ class Config
     public function getServiceVersion(string $serviceName)
     {
         try {
-            $version = $serviceName === Service::NAME_PHP
+            $version = $serviceName === ServiceInterface::NAME_PHP
                 ? $this->getPhpVersion()
                 : $this->reader->read()['services'][$serviceName]['version'] ?? null;
 
@@ -113,7 +113,7 @@ class Config
             throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
-        if ($type !== Service::NAME_PHP) {
+        if ($type !== ServiceInterface::NAME_PHP) {
             throw new ConfigurationMismatchException(sprintf(
                 'Type "%s" is not supported',
                 $type
