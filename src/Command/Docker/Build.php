@@ -209,8 +209,6 @@ class Build extends Command
         $type = $input->getOption(self::OPTION_MODE);
         $syncEngine = $input->getOption(self::OPTION_SYNC_ENGINE);
 
-        $this->distGenerator->generate();
-
         $compose = $this->composeFactory->create($type);
         $config = $this->configFactory->create();
 
@@ -251,6 +249,8 @@ class Build extends Command
             if ($errorList && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
                 return 1;
             }
+
+            $this->distGenerator->generate();
         }
 
         $this->writer->write($compose, $config);
