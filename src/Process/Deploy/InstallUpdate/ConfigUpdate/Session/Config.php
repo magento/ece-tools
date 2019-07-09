@@ -7,9 +7,9 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session
 
 use Composer\Semver\Comparator;
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\Manager;
+use Magento\MagentoCloud\Service\Redis;
 
 /**
  * Returns session configuration.
@@ -20,10 +20,11 @@ class Config
      * Redis database to store session data
      */
     const REDIS_DATABASE_SESSION = 0;
+
     /**
-     * @var Environment
+     * @var Redis
      */
-    private $environment;
+    private $redis;
 
     /**
      * @var DeployInterface
@@ -46,20 +47,20 @@ class Config
     private $comparator;
 
     /**
-     * @param Environment $environment
+     * @param Redis $redis
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
      * @param Manager $manager
      * @param Comparator $comparator
      */
     public function __construct(
-        Environment $environment,
+        Redis $redis,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
         Manager $manager,
         Comparator $comparator
     ) {
-        $this->environment = $environment;
+        $this->redis = $redis;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
         $this->manager = $manager;
@@ -86,17 +87,17 @@ class Config
             return $envSessionConfiguration;
         }
 
-        $redisConfig = $this->environment->getRelationship('redis');
+        $redisConfig = $this->redis->getConfiguration();
 
-        if (!count($redisConfig)) {
+        if (!$redisConfig) {
             return [];
         }
 
         $defaultConfig = [
             'save' => 'redis',
             'redis' => [
-                'host' => $redisConfig[0]['host'],
-                'port' => $redisConfig[0]['port'],
+                'host' => $redisConfig['host'],
+                'port' => $redisConfig['port'],
                 'database' => self::REDIS_DATABASE_SESSION,
             ],
         ];

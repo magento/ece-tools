@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\SearchEngine;
+use Magento\MagentoCloud\Service\ElasticSearch;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -42,7 +43,7 @@ class ElasticSearchUsageTest extends TestCase
     private $searchEngineConfigMock;
 
     /**
-     * @var SearchEngine\ElasticSearch|MockObject
+     * @var ElasticSearch|MockObject
      */
     private $elasticSearchMock;
 
@@ -57,7 +58,7 @@ class ElasticSearchUsageTest extends TestCase
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
         ]);
-        $this->elasticSearchMock = $this->createMock(SearchEngine\ElasticSearch::class);
+        $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
 
         $this->validator = new ElasticSearchUsage(
             $this->searchEngineConfigMock,

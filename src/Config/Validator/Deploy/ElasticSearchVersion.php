@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
+use Magento\MagentoCloud\Service\ElasticSearch;
 use Psr\Log\LoggerInterface;
 
 /**

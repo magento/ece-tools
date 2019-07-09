@@ -9,11 +9,11 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\SearchEngine;
+use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Config\SearchEngine;
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
+use Magento\MagentoCloud\Service\ElasticSearch;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -106,16 +106,17 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param string $version
-     * @param array $relationship
-     * @param array $expected
      * @param array $customSearchConfig
+     * @param string $version
+     * @param array $esServiceConfig
+     * @param array $expected
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      * @dataProvider testGetWithElasticSearchDataProvider
      */
     public function testGetWithElasticSearch(
         array $customSearchConfig,
         string $version,
-        array $relationship,
+        array $esServiceConfig,
         array $expected
     ) {
         $this->stageConfigMock->expects($this->once())
@@ -123,8 +124,8 @@ class SearchEngineTest extends TestCase
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
             ->willReturn($customSearchConfig);
         $this->elasticSearchMock->expects($this->once())
-            ->method('getRelationship')
-            ->willReturn($relationship);
+            ->method('getConfiguration')
+            ->willReturn($esServiceConfig);
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
             ->willReturn($version);
@@ -161,7 +162,7 @@ class SearchEngineTest extends TestCase
             [
                 'customSearchConfig' => ['some_key' => 'some_value'],
                 'version' => '2.4',
-                'relationship' => [
+                'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                     'query' => ['index' => 'stg'],
@@ -181,7 +182,7 @@ class SearchEngineTest extends TestCase
                     '_merge' => true,
                 ],
                 'version' => '2.4',
-                'relationship' => [
+                'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                 ],
@@ -199,7 +200,7 @@ class SearchEngineTest extends TestCase
                     '_merge' => true,
                 ],
                 'version' => '2.4',
-                'relationship' => [
+                'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                 ],
@@ -215,7 +216,7 @@ class SearchEngineTest extends TestCase
                     '_merge' => true,
                 ],
                 'version' => '2.4',
-                'relationship' => [
+                'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                 ],
@@ -228,7 +229,7 @@ class SearchEngineTest extends TestCase
             [
                 'customSearchConfig' => [],
                 'version' => '5',
-                'relationships' => [
+                'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                     'query' => ['index' => 'stg'],
@@ -248,7 +249,7 @@ class SearchEngineTest extends TestCase
                     '_merge' => true,
                 ],
                 'version' => '5.1',
-                'relationships' => [
+                'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                 ],
@@ -270,16 +271,17 @@ class SearchEngineTest extends TestCase
     }
 
     /**
-     * @param string $version
-     * @param array $relationship
-     * @param array $expected
      * @param array $customSearchConfig
+     * @param string $version
+     * @param array $esServiceConfig
+     * @param array $expected
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      * @dataProvider testGetWithElasticSuiteDataProvider
      */
     public function testGetWithElasticSuite(
         array $customSearchConfig,
         string $version,
-        array $relationship,
+        array $esServiceConfig,
         array $expected
     ) {
         $this->stageConfigMock->expects($this->once())
@@ -287,8 +289,8 @@ class SearchEngineTest extends TestCase
             ->with(DeployInterface::VAR_SEARCH_CONFIGURATION)
             ->willReturn($customSearchConfig);
         $this->elasticSearchMock->expects($this->once())
-            ->method('getRelationship')
-            ->willReturn($relationship);
+            ->method('getConfiguration')
+            ->willReturn($esServiceConfig);
         $this->elasticSearchMock->expects($this->once())
             ->method('getVersion')
             ->willReturn($version);
@@ -317,7 +319,7 @@ class SearchEngineTest extends TestCase
             [
                 'customSearchConfig' => ['some_key' => 'some_value'],
                 'version' => '2.4',
-                'relationship' => [
+                'esServiceConfig' => [
                     'host' => 'localhost',
                     'port' => 1234,
                     'query' => ['index' => 'stg'],

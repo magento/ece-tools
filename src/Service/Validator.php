@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Service;
 
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
@@ -23,34 +22,34 @@ class Validator
      * and value of its element is the service version constraint
      */
     const MAGENTO_SUPPORTED_SERVICE_VERSIONS = [
-        Service::NAME_PHP => [
+        ServiceInterface::NAME_PHP => [
             '<=2.2.4' => '>=7.0 <7.2',        //'7.0.2|7.0.4|~7.0.6|~7.1.0',
             '>=2.2.5 <2.3.0' => '>=7.0 <7.2', //'~7.0.13|~7.1.0',
             '>=2.3.0' => '>=7.1 <7.3',        //'~7.1.3 || ~7.2.0',
         ],
-        Service::NAME_DB => [
+        ServiceInterface::NAME_DB => [
             '*' => '>=10.0 <10.3',
         ],
-        Service::NAME_NGINX => [
+        ServiceInterface::NAME_NGINX => [
             '*' => '^1.9.0',
         ],
-        Service::NAME_VARNISH=> [
+        ServiceInterface::NAME_VARNISH=> [
             '<2.2.0' => '~3.5.0 || ^4.0',
             '>=2.2.0' => '^4.0 || ^5.0',
         ],
-        Service::NAME_REDIS => [
+        ServiceInterface::NAME_REDIS => [
             '*' => '~3.2.0 || ~4.0.0 || ~5.0.0',
         ],
-        Service::NAME_ELASTICSEARCH => [
+        ServiceInterface::NAME_ELASTICSEARCH => [
             '<2.2.0' => '~1.7.0 || ~2.4.0',
             '>=2.2.0 <2.2.8 || 2.3.0' => '~1.7.0 || ~2.4.0 || ~5.2.0',
             '>=2.2.8 <2.3.0 || >=2.3.1' => '~1.7.0 || ~2.4.0 || ~5.2.0 || ~6.5.0',
         ],
-        Service::NAME_RABBITMQ => [
+        ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
             '>=2.3.0' => '~3.5.0 || ~3.7.0',
         ],
-        Service::NAME_NODE => [
+        ServiceInterface::NAME_NODE => [
             '*' => '^6 || ^8 || ^10 || ^11',
         ]
     ];

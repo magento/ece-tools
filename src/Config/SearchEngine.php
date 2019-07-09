@@ -8,13 +8,11 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 use Composer\Semver\Semver;
-use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\SearchEngine\ElasticSearch;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Service\ElasticSearch;
 
 /**
  * Returns search configuration.
@@ -145,7 +143,7 @@ class SearchEngine
      */
     private function getSearchConfig(): array
     {
-        if ($esConfig = $this->elasticSearch->getRelationship()) {
+        if ($esConfig = $this->elasticSearch->getConfiguration()) {
             return $this->getElasticSearchConfiguration($esConfig);
         }
 
