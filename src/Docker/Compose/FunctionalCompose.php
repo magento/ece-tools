@@ -35,8 +35,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @param bool $isReadOnly
-     * @return array
+     * @inheritDoc
      */
     protected function getMagentoVolumes(bool $isReadOnly): array
     {
@@ -53,8 +52,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @param bool $isReadOnly
-     * @return array
+     * @inheritDoc
      */
     protected function getMagentoBuildVolumes(bool $isReadOnly): array
     {
@@ -67,7 +65,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @return array
+     * @inheritDoc
      */
     protected function getVariables(): array
     {
@@ -107,7 +105,7 @@ class FunctionalCompose extends ProductionCompose
     /**
      * @inheritdoc
      */
-    protected function getPhpVersion()
+    protected function getPhpVersion(): string
     {
         return $this->getServiceVersion(ServiceInterface::NAME_PHP);
     }
@@ -121,8 +119,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @param string $phpVersion
-     * @return array
+     * @inheritDoc
      */
     protected function getPhpExtensions(string $phpVersion): array
     {

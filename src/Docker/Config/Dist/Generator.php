@@ -3,8 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Docker\Config;
+declare(strict_types=1);
 
+namespace Magento\MagentoCloud\Docker\Config\Dist;
+
+use Magento\MagentoCloud\Docker\Config\Relationship;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -14,7 +17,7 @@ use Magento\MagentoCloud\Util\PhpFormatter;
 /**
  * Creates docker/config.php.dist file
  */
-class DistGenerator
+class Generator
 {
     /**
      * @var DirectoryList
@@ -39,7 +42,7 @@ class DistGenerator
     /**
      * @var array
      */
-    private $baseConfig = [
+    private static $baseConfig = [
         'MAGENTO_CLOUD_ROUTES' => [
             'http://magento2.docker/' => [
                 'type' => 'upstream',
@@ -88,7 +91,7 @@ class DistGenerator
 
         $config = array_merge(
             ['MAGENTO_CLOUD_RELATIONSHIPS' => $this->relationship->get()],
-            $this->baseConfig
+            self::$baseConfig
         );
 
         $this->saveConfig($configPath, $config);

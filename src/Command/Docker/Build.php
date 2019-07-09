@@ -12,19 +12,19 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\Compose\DeveloperCompose;
 use Magento\MagentoCloud\Docker\ComposeFactory;
+use Magento\MagentoCloud\Docker\Config\Dist\Generator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\Validator;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Magento\MagentoCloud\Docker\Config\DistGenerator;
 
 /**
  * Builds Docker configuration for Magento project.
@@ -44,6 +44,21 @@ class Build extends Command
     const OPTION_NODE = 'node';
     const OPTION_MODE = 'mode';
     const OPTION_SYNC_ENGINE = 'sync-engine';
+
+    /**
+     * Option key to service name map.
+     *
+     * @var array
+     */
+    private static $optionsMap = [
+        self::OPTION_PHP => ServiceInterface::NAME_PHP,
+        self::OPTION_DB => ServiceInterface::NAME_DB,
+        self::OPTION_NGINX => ServiceInterface::NAME_NGINX,
+        self::OPTION_REDIS => ServiceInterface::NAME_REDIS,
+        self::OPTION_ES => ServiceInterface::NAME_ELASTICSEARCH,
+        self::OPTION_NODE => ServiceInterface::NAME_NODE,
+        self::OPTION_RABBIT_MQ => ServiceInterface::NAME_RABBITMQ,
+    ];
 
     /**
      * @var ComposeFactory
@@ -76,7 +91,7 @@ class Build extends Command
     private $writer;
 
     /**
-     * @var DistGenerator
+     * @var Generator
      */
     private $distGenerator;
 
@@ -87,7 +102,7 @@ class Build extends Command
      * @param Config $serviceConfig
      * @param Validator $versionValidator
      * @param Writer $writer
-     * @param DistGenerator $distGenerator
+     * @param Generator $distGenerator
      */
     public function __construct(
         ComposeFactory $composeFactory,
@@ -96,7 +111,7 @@ class Build extends Command
         Config $serviceConfig,
         Validator $versionValidator,
         Writer $writer,
-        DistGenerator $distGenerator
+        Generator $distGenerator
     ) {
         $this->composeFactory = $composeFactory;
         $this->environment = $environment;
@@ -187,39 +202,35 @@ class Build extends Command
      * @throws ConfigurationMismatchException
      * @throws FileSystemException
      * @throws UndefinedPackageException
+     * @throws ServiceMismatchException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $type = $input->getOption(self::OPTION_MODE);
         $syncEngine = $input->getOption(self::OPTION_SYNC_ENGINE);
 
+        $this->distGenerator->generate();
+
         $compose = $this->composeFactory->create($type);
         $config = $this->configFactory->create();
 
         if (ComposeFactory::COMPOSE_DEVELOPER === $type
-            && !in_array($syncEngine, DeveloperCompose::SYNC_ENGINES_LIST)) {
+            && !in_array($syncEngine, DeveloperCompose::SYNC_ENGINES_LIST, true)
+        ) {
             throw new ConfigurationMismatchException(sprintf(
-                "File sync engine `%s` is not supported. Available: %s",
+                "File sync engine '%s' is not supported. Available: %s",
                 $syncEngine,
                 implode(', ', DeveloperCompose::SYNC_ENGINES_LIST)
             ));
         }
 
-        $map = [
-            self::OPTION_PHP => ServiceInterface::NAME_PHP,
-            self::OPTION_DB => ServiceInterface::NAME_DB,
-            self::OPTION_NGINX => ServiceInterface::NAME_NGINX,
-            self::OPTION_REDIS => ServiceInterface::NAME_REDIS,
-            self::OPTION_ES => ServiceInterface::NAME_ELASTICSEARCH,
-            self::OPTION_NODE => ServiceInterface::NAME_NODE,
-            self::OPTION_RABBIT_MQ => ServiceInterface::NAME_RABBITMQ,
-        ];
-
-        array_walk($map, static function ($key, $option) use ($config, $input) {
+        array_walk(self::$optionsMap, static function ($key, $option) use ($config, $input) {
             if ($value = $input->getOption($option)) {
                 $config->set($key, $value);
             }
         });
+
+        $config->set(DeveloperCompose::SYNC_ENGINE, $syncEngine);
 
         if (in_array(
             $input->getOption(self::OPTION_MODE),
@@ -240,18 +251,8 @@ class Build extends Command
             if ($errorList && !$helper->ask($input, $output, $question) && $input->isInteractive()) {
                 return 1;
             }
-
-            $this->distGenerator->generate();
-            try {
-                $this->getApplication()
-                    ->find(ConfigConvert::NAME)
-                    ->run(new ArrayInput([]), $output);
-            } catch (\Exception $exception) {
-                throw new ConfigurationMismatchException($exception->getMessage(), $exception->getCode(), $exception);
-            }
         }
 
-        $config->set(DeveloperCompose::SYNC_ENGINE, $syncEngine);
         $this->writer->write($compose, $config);
         $output->writeln('<info>Configuration was built.</info>');
 

@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator\Deploy\ServiceVersion;
-use Magento\MagentoCloud\Service\ConfigurationMismatchException;
+use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\Validator as ServiceVersionValidator;
@@ -129,7 +129,7 @@ class ServiceVersionTest extends TestCase
     {
         $this->serviceFactory->expects($this->any())
             ->method('create')
-            ->willThrowException(new ConfigurationMismatchException('some error'));
+            ->willThrowException(new ServiceMismatchException('some error'));
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with('Can\'t validate version of some services: some error');

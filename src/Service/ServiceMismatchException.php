@@ -12,6 +12,6 @@ use Magento\MagentoCloud\App\GenericException;
 /**
  * @inheritdoc
  */
-class ConfigurationMismatchException extends GenericException
+class ServiceMismatchException extends GenericException
 {
 }
