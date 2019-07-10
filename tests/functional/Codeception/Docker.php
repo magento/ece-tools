@@ -252,6 +252,34 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     }
 
     /**
+     * Add local checkout of ECE Tools to composer repositories.
+     *
+     * @return bool
+     * @throws \Robo\Exception\TaskException
+     */
+    public function addEceComposerRepo(): bool
+    {
+        $composerConfig = $this->taskComposerConfig('composer')
+            ->repository('ece-tools', $this->_getConfig('system_ece_tools_dir'))
+            ->noInteraction()
+            ->getCommand();
+        $composerRequire = $this->taskComposerRequire('composer')
+            ->dependency('magento/ece-tools', 'dev-' . exec('git branch --show-current') . ' as 2002.0.999')
+            ->noInteraction()
+            ->getCommand();
+
+        $result = $this->taskBash(self::BUILD_CONTAINER)
+            ->workingDir($this->_getConfig('system_magento_dir'))
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->exec($composerConfig . ' && ' . $composerRequire)
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
+    }
+
+    /**
      * Cleans directories
      *
      * @param string|array $path

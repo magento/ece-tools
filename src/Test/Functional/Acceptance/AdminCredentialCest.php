@@ -21,15 +21,24 @@ class AdminCredentialCest extends AbstractCest
 
     /**
      * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function _before(\CliTester $I)
+    {
+        parent::_before($I);
+        $I->cloneTemplate($this->magentoCloudTemplate);
+        $I->addEceComposerRepo();
+        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+    }
+
+    /**
+     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider installWithoutAdminEmailDataProvider
      */
     public function testInstallWithoutAdminEmail(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->cloneTemplate($this->magentoCloudTemplate));
-        $I->assertTrue($I->composerInstall());
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
@@ -79,9 +88,6 @@ class AdminCredentialCest extends AbstractCest
      */
     public function testInstallWithDifferentVariables(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->cloneTemplate($this->magentoCloudTemplate));
-        $I->assertTrue($I->composerInstall());
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
@@ -117,7 +123,7 @@ class AdminCredentialCest extends AbstractCest
     /**
      * @return array
      */
-    public function installWithDifferentVariablesDataProvider()
+    protected function installWithDifferentVariablesDataProvider()
     {
         return [
             [
