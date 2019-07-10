@@ -37,7 +37,7 @@ class GenerateDist extends Command
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      */
     protected function configure()
     {
@@ -46,7 +46,7 @@ class GenerateDist extends Command
     }
 
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      *
      * @throws FileSystemException
      * @throws ConfigurationMismatchException
