@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\SystemList;
 
 /**
- * Reader for .env files.
+ * Reader of config.php and config.php.dist files.
  */
 class Reader
 {
