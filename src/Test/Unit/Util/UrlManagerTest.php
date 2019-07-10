@@ -461,6 +461,15 @@ class UrlManagerTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
             ->willReturn(['http://example.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream']]);
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with('Can\'t fetch base URL using command config:show:default-url. URL from routes will be used');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('debug')
+            ->withConsecutive(
+                ['some error'],
+                [$this->anything()]
+            );
 
         $this->assertEquals(
             'https://example.com/',
