@@ -42,6 +42,7 @@ class GenerateDist extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
+            ->setAliases(['docker:config:convert'])
             ->setDescription('Generates Docker .dist files');
     }
 
