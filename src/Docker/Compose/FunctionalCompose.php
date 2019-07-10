@@ -20,7 +20,7 @@ class FunctionalCompose extends ProductionCompose
     const CRON_ENABLED = false;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function build(Repository $config): array
     {
@@ -35,7 +35,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function getMagentoVolumes(bool $isReadOnly): array
     {
@@ -52,7 +52,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function getMagentoBuildVolumes(bool $isReadOnly): array
     {
@@ -65,7 +65,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function getVariables(): array
     {
@@ -80,7 +80,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function getServiceVersion(string $serviceName)
     {
@@ -103,7 +103,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function getPhpVersion(): string
     {
@@ -111,7 +111,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     public function getPath(): string
     {
@@ -119,7 +119,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function getPhpExtensions(string $phpVersion): array
     {

@@ -37,7 +37,7 @@ class GenerateDist extends Command
     }
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function configure()
     {

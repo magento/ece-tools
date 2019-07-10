@@ -17,7 +17,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * {@inheritDoc}
+ * @inheritDoc
  */
 class GenerateDistTest extends TestCase
 {
@@ -31,7 +31,7 @@ class GenerateDistTest extends TestCase
     private $distGeneratorMock;
 
     /**
-     * {@inheritDoc}
+     * @inheritDoc
      */
     protected function setUp()
     {

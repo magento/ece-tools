@@ -31,7 +31,7 @@ class ProcessFactory
      * Creates instance of Process
      *
      * @param array $params
-     * @return ProcessInterface
+     * @return Process|ProcessInterface
      * @throws \RuntimeException if Process can't be created
      */
     public function create(array $params): ProcessInterface
