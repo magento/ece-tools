@@ -7,7 +7,9 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Process\Build\CompileDi;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -22,17 +24,17 @@ class CompileDiTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ShellInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var MagentoShell|MockObject
      */
-    private $shellMock;
+    private $magentoShellMock;
 
     /**
-     * @var BuildInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var BuildInterface|MockObject
      */
     private $stageConfigMock;
 
@@ -41,16 +43,18 @@ class CompileDiTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->shellMock = $this->getMockBuilder(ShellInterface::class)
-            ->getMockForAbstractClass();
-        $this->stageConfigMock = $this->getMockBuilder(BuildInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->magentoShellMock = $this->createMock(MagentoShell::class);
+        /** @var ShellFactory|MockObject $shellFactoryMock */
+        $shellFactoryMock = $this->createMock(ShellFactory::class);
+        $shellFactoryMock->expects($this->once())
+            ->method('createMagento')
+            ->willReturn($this->magentoShellMock);
+        $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
 
         $this->process = new CompileDi(
             $this->loggerMock,
-            $this->shellMock,
+            $shellFactoryMock,
             $this->stageConfigMock
         );
     }
@@ -67,9 +71,9 @@ class CompileDiTest extends TestCase
                 ['Running DI compilation'],
                 ['End of running DI compilation']
             );
-        $this->shellMock->expects($this->once())
+        $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('php ./bin/magento setup:di:compile -vvv --ansi --no-interaction');
+            ->with('setup:di:compile', ['-vvv']);
 
         $this->process->execute();
     }
