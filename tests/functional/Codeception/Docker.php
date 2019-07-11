@@ -264,7 +264,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->noInteraction()
             ->getCommand();
         $composerRequire = $this->taskComposerRequire('composer')
-            ->dependency('magento/ece-tools', 'dev-' . exec('git branch --show-current') . ' as 2002.0.999')
+            ->dependency('magento/ece-tools', 'dev-' . exec('git rev-parse --abbrev-ref HEAD') . ' as 2002.0.999')
             ->noInteraction()
             ->getCommand();
 
