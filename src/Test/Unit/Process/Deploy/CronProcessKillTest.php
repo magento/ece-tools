@@ -124,15 +124,18 @@ class CronProcessKillTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Trying to kill running cron jobs'],
-                ['There is an error during killing the cron processes: some error']
+                ['Couldn\'t kill process #111 it may be already finished']
             );
+        $this->loggerMock->expects($this->once())
+            ->method('debug')
+            ->with('some error');
         $this->shellMock->expects($this->at(0))
             ->method('execute')
             ->with('pgrep -U "$(id -u)" -f "bin/magento cron:run"')
             ->willReturn($processMock);
         $this->shellMock->expects($this->at(1))
             ->method('execute')
-            ->with("kill 111")
+            ->with('kill 111')
             ->willThrowException(new \RuntimeException('some error', 1));
         $this->process->execute();
     }
