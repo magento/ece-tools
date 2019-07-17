@@ -3,9 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Docker\Config;
+namespace Magento\MagentoCloud\Test\Unit\Docker\Config\Environment;
 
-use Magento\MagentoCloud\Docker\Config\Converter;
+use Magento\MagentoCloud\Docker\Config\Environment\Converter;
 use PHPUnit\Framework\TestCase;
 
 /**

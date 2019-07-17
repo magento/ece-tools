@@ -45,7 +45,7 @@ class ServiceFactoryTest extends TestCase
     /**
      * @param string $serviceName
      * @param string $serviceClass
-     * @throws \Magento\MagentoCloud\Service\ConfigurationMismatchException
+     * @throws \Magento\MagentoCloud\Service\ServiceMismatchException
      * @dataProvider createDataProvider
      */
     public function testCreate(string $serviceName, string $serviceClass)
@@ -62,7 +62,7 @@ class ServiceFactoryTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Service\ConfigurationMismatchException
+     * @expectedException \Magento\MagentoCloud\Service\ServiceMismatchException
      * @expectedExceptionMessage  Service "wrong-service-name" is not supported
      */
     public function testServiceNotExists()

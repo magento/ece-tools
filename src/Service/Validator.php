@@ -91,7 +91,7 @@ class Validator
      * @param array $serviceVersions List of services and their names which should be validates.
      * @return array List of warning messages. One message for one unsupported service.
      *
-     * @throws ConfigurationMismatchException
+     * @throws ServiceMismatchException
      * @throws UndefinedPackageException
      */
     public function validateVersions(array $serviceVersions): array
@@ -112,7 +112,7 @@ class Validator
      * @param string $version Service version for validation
      * @return string Failed validation message
      *
-     * @throws ConfigurationMismatchException
+     * @throws ServiceMismatchException
      * @throws UndefinedPackageException
      */
     public function validateService(string $serviceName, string $version): string
@@ -146,7 +146,7 @@ class Validator
      *
      * @return array
      *
-     * @throws ConfigurationMismatchException
+     * @throws ServiceMismatchException
      * @throws UndefinedPackageException
      */
     private function getSupportedVersions(): array
@@ -160,7 +160,7 @@ class Validator
                     }
                 }
                 if (!$this->supportedVersionList[$serviceName]) {
-                    throw new ConfigurationMismatchException(sprintf(
+                    throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',
                         $serviceName,
                         $this->magentoVersion->getVersion()
