@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * @inheritdoc
+ * @inheritDoc
  */
 class ReaderTest extends TestCase
 {
@@ -36,7 +36,7 @@ class ReaderTest extends TestCase
     private $fileMock;
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     protected function setUp()
     {

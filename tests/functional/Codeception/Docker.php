@@ -252,6 +252,48 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     }
 
     /**
+     * Add local checkout of ECE Tools to composer repositories.
+     *
+     * @return bool
+     * @throws \Robo\Exception\TaskException
+     */
+    public function addEceComposerRepo(): bool
+    {
+        $eceToolsVersion = '2002.0.999';
+        $repoConfig = [
+            'type' => 'package',
+            'package' => [
+                'name' => 'magento/ece-tools',
+                'version' => $eceToolsVersion,
+                'source' => [
+                    'type' => 'git',
+                    'url' => $this->_getConfig('system_ece_tools_dir'),
+                    'reference' => exec('git rev-parse HEAD'),
+                ],
+            ],
+        ];
+
+        $composerConfig = $this->taskComposerConfig('composer')
+            ->set('repositories.ece-tools', addslashes(json_encode($repoConfig, JSON_UNESCAPED_SLASHES)))
+            ->noInteraction()
+            ->getCommand();
+        $composerRequire = $this->taskComposerRequire('composer')
+            ->dependency('magento/ece-tools', $eceToolsVersion)
+            ->noInteraction()
+            ->getCommand();
+
+        $result = $this->taskBash(self::BUILD_CONTAINER)
+            ->workingDir($this->_getConfig('system_magento_dir'))
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->exec($composerConfig . ' && ' . $composerRequire)
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
+    }
+
+    /**
      * Cleans directories
      *
      * @param string|array $path

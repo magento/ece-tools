@@ -33,7 +33,7 @@ class ElasticSearchCest extends AbstractCest
         $I->generateDockerCompose($data['services']);
         $I->cleanUpEnvironment();
         $I->cloneTemplate($data['magento']);
-        $I->composerInstall();
+        $I->addEceComposerRepo();
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));

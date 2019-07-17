@@ -18,11 +18,20 @@ class PatchApplierCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
+    public function _before(\CliTester $I)
+    {
+        parent::_before($I);
+        $I->cloneTemplate();
+        $I->addEceComposerRepo();
+        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+    }
+
+    /**
+     * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
     public function testApplyingPatch(\CliTester $I)
     {
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
         $I->uploadToContainer('files/patches/target_file.md', '/target_file.md', Docker::BUILD_CONTAINER);
         $I->uploadToContainer('files/patches/patch.patch', '/m2-hotfixes/patch.patch', Docker::BUILD_CONTAINER);
 
@@ -43,8 +52,6 @@ class PatchApplierCest extends AbstractCest
      */
     public function testApplyingExistingPatch(\CliTester $I)
     {
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
         $I->uploadToContainer('files/patches/target_file_applied_patch.md', '/target_file.md', Docker::BUILD_CONTAINER);
         $I->uploadToContainer('files/patches/patch.patch', '/m2-hotfixes/patch.patch', Docker::BUILD_CONTAINER);
 

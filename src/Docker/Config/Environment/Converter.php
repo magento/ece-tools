@@ -3,7 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Docker\Config;
+namespace Magento\MagentoCloud\Docker\Config\Environment;
 
 /**
  * Converter for Docker environment variables.
