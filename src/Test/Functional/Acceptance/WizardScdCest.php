@@ -22,7 +22,7 @@ class WizardScdCest extends AbstractCest
     {
         parent::_before($I);
         $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->addEceComposerRepo());
     }
 
     /**

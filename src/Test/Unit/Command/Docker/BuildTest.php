@@ -10,7 +10,6 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Docker;
 use Composer\Console\Application;
 use Illuminate\Config\Repository;
 use Magento\MagentoCloud\Command\Docker\Build;
-use Magento\MagentoCloud\Command\Docker\ConfigConvert;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Docker\Compose\DeveloperCompose;
@@ -19,13 +18,14 @@ use Magento\MagentoCloud\Docker\ComposeFactory;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Service\ServiceMismatchException;
 use Magento\MagentoCloud\Service\Validator;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console;
 use Symfony\Component\Console\Tester\CommandTester;
-use Magento\MagentoCloud\Docker\Config\DistGenerator;
+use Magento\MagentoCloud\Docker\Config\Dist\Generator;
 
 /**
  * @inheritdoc
@@ -80,7 +80,7 @@ class BuildTest extends TestCase
     private $writerMock;
 
     /**
-     * @var DistGenerator|MockObject
+     * @var Generator|MockObject
      */
     private $distGeneratorMock;
 
@@ -97,7 +97,7 @@ class BuildTest extends TestCase
         $this->serviceConfigMock = $this->createMock(Config::class);
         $this->validatorMock = $this->createMock(Validator::class);
         $this->writerMock = $this->createMock(Build\Writer::class);
-        $this->distGeneratorMock = $this->createMock(DistGenerator::class);
+        $this->distGeneratorMock = $this->createMock(Generator::class);
 
         $this->serviceConfigMock->method('getAllServiceVersions')
             ->willReturn([]);
@@ -121,6 +121,7 @@ class BuildTest extends TestCase
      * @throws ConfigurationMismatchException
      * @throws FileSystemException
      * @throws UndefinedPackageException
+     * @throws ServiceMismatchException
      */
     public function testExecute()
     {
@@ -147,16 +148,13 @@ class BuildTest extends TestCase
         $this->writerMock->expects($this->once())
             ->method('write')
             ->with($this->managerMock, $this->configMock);
+        $this->distGeneratorMock->expects($this->once())
+            ->method('generate');
 
         /** @var Console\Application|MockObject $applicationMock */
         $applicationMock = $this->createMock(Console\Application::class);
         $applicationMock->method('getHelperSet')
             ->willReturn($this->createMock(Console\Helper\HelperSet::class));
-        $applicationMock->expects($this->once())
-            ->method('find')
-            ->willReturnMap([
-                [ConfigConvert::NAME, $this->createMock(ConfigConvert::class)],
-            ]);
 
         $this->command->setApplication($applicationMock);
         $this->command->execute($inputMock, $outputMock);
@@ -166,6 +164,7 @@ class BuildTest extends TestCase
      * @throws ConfigurationMismatchException
      * @throws FileSystemException
      * @throws UndefinedPackageException
+     * @throws ServiceMismatchException
      */
     public function testExecuteWithParams()
     {
@@ -194,16 +193,13 @@ class BuildTest extends TestCase
         $this->writerMock->expects($this->once())
             ->method('write')
             ->with($this->managerMock, $this->configMock);
+        $this->distGeneratorMock->expects($this->once())
+            ->method('generate');
 
         /** @var Console\Application|MockObject $applicationMock */
         $applicationMock = $this->createMock(Application::class);
         $applicationMock->method('getHelperSet')
             ->willReturn($this->createMock(Console\Helper\HelperSet::class));
-        $applicationMock->expects($this->once())
-            ->method('find')
-            ->willReturnMap([
-                [ConfigConvert::NAME, $this->createMock(ConfigConvert::class)],
-            ]);
 
         $this->command->setApplication($applicationMock);
         $this->command->execute($inputMock, $outputMock);

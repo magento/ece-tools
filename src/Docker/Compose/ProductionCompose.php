@@ -10,11 +10,12 @@ namespace Magento\MagentoCloud\Docker\Compose;
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\ComposeInterface;
-use Magento\MagentoCloud\Docker\Config\Converter;
+use Magento\MagentoCloud\Docker\Config\Environment\Converter;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Docker\Config\Environment\Reader;
 
 /**
  * Production compose configuration.
@@ -57,24 +58,32 @@ class ProductionCompose implements ComposeInterface
     private $phpExtension;
 
     /**
+     * @var Reader
+     */
+    private $reader;
+
+    /**
      * @param ServiceFactory $serviceFactory
      * @param FileList $fileList
      * @param Config $config
      * @param Converter $converter
      * @param PhpExtension $phpExtension
+     * @param Reader $reader
      */
     public function __construct(
         ServiceFactory $serviceFactory,
         FileList $fileList,
         Config $config,
         Converter $converter,
-        PhpExtension $phpExtension
+        PhpExtension $phpExtension,
+        Reader $reader
     ) {
         $this->serviceFactory = $serviceFactory;
         $this->fileList = $fileList;
         $this->config = $config;
         $this->converter = $converter;
         $this->phpExtension = $phpExtension;
+        $this->reader = $reader;
     }
 
     /**
@@ -93,19 +102,7 @@ class ProductionCompose implements ComposeInterface
             'db' => $this->serviceFactory->create(
                 ServiceFactory::SERVICE_DB,
                 $dbVersion,
-                [
-                    'ports' => [3306],
-                    'volumes' => [
-                        '/var/lib/mysql',
-                        './.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
-                    ],
-                    'environment' => [
-                        'MYSQL_ROOT_PASSWORD=magento2',
-                        'MYSQL_DATABASE=magento2',
-                        'MYSQL_USER=magento2',
-                        'MYSQL_PASSWORD=magento2',
-                    ],
-                ]
+                ['ports' => [3306]]
             )
         ];
 
@@ -206,9 +203,6 @@ class ProductionCompose implements ComposeInterface
                 $this->getVariables(),
                 ['PHP_EXTENSIONS' => implode(' ', $phpExtensions)]
             )),
-            'env_file' => [
-                './.docker/config.env',
-            ],
         ];
 
         if (static::CRON_ENABLED) {
@@ -369,10 +363,12 @@ class ProductionCompose implements ComposeInterface
 
     /**
      * @return array
+     *
+     * @throws ConfigurationMismatchException
      */
     protected function getVariables(): array
     {
-        return [
+        return array_merge([
             'PHP_MEMORY_LIMIT' => '2048M',
             'UPLOAD_MAX_FILESIZE' => '64M',
             'MAGENTO_ROOT' => self::DIR_MAGENTO,
@@ -380,7 +376,7 @@ class ProductionCompose implements ComposeInterface
             'PHP_IDE_CONFIG' => 'serverName=magento_cloud_docker',
             # Docker host for developer environments, can be different for your OS
             'XDEBUG_CONFIG' => 'remote_host=host.docker.internal',
-        ];
+        ], $this->reader->read());
     }
 
     /**
@@ -397,7 +393,7 @@ class ProductionCompose implements ComposeInterface
      * @return string
      * @throws ConfigurationMismatchException
      */
-    protected function getPhpVersion()
+    protected function getPhpVersion(): string
     {
         return $this->config->getPhpVersion();
     }

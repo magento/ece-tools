@@ -6,7 +6,7 @@ addons:
     - web
 
 git:
-  depth: 1
+  depth: false
 
 services:
   - docker
