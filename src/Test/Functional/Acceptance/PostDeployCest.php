@@ -16,14 +16,23 @@ class PostDeployCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function _before(\CliTester $I)
+    {
+        parent::_before($I);
+        $I->cloneTemplate();
+        $I->addEceComposerRepo();
+    }
+
+    /**
+     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider postDeployDataProvider
      */
     public function testPostDeploy(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->cloneTemplate('2.3.1'));
-        $I->assertTrue($I->composerInstall());
         $I->uploadToContainer('files/scdondemand/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
         $I->startEnvironment();
@@ -38,7 +47,7 @@ class PostDeployCest extends AbstractCest
     /**
      * @return array
      */
-    public function postDeployDataProvider(): array
+    protected function postDeployDataProvider(): array
     {
         return [
             ['variables' => ['ADMIN_EMAIL' => 'admin@example.com']],
@@ -52,8 +61,6 @@ class PostDeployCest extends AbstractCest
      */
     public function testPostDeployIsNotRun(\CliTester $I)
     {
-        $I->assertTrue($I->cloneTemplate('2.3.1'));
-        $I->assertTrue($I->composerInstall());
         $I->uploadToContainer(
             'files/wrong_db_configuration/.magento.env.yaml',
             '/.magento.env.yaml',
