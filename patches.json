@@ -166,10 +166,10 @@
       "2.3.0 - 2.3.1": "MAGECLOUD-3611__multi_thread_scd__2.3.0.patch",
       "2.3.2": "MAGECLOUD-3611__multi_thread_scd__2.3.2.patch"
     },
-    "setup:upgrade failure with app:config:import fail": {
-      "2.2.0": "MAGECLOUD-3806__failure_setup:upgrade_if_app:config:import_failed__2.2.0.patch",
-      "2.2.1 - 2.2.9": "MAGECLOUD-3806__failure_setup:upgrade_if_app:config:import_failed__2.2.1.patch",
-      "2.3.0 - 2.3.2": "MAGECLOUD-3806__failure_setup:upgrade_if_app:config:import_failed__2.3.0.patch"
+    "setup:upgrade returns error code if app:config:import failed": {
+      "2.2.0": "MAGECLOUD-3806__error_code_fix_for_setup_upgrade__2.2.0.patch",
+      "2.2.1 - 2.2.9": "MAGECLOUD-3806__error_code_fix_for_setup_upgrade__2.2.1.patch",
+      "2.3.0 - 2.3.2": "MAGECLOUD-3806__error_code_fix_for_setup_upgrade__2.3.0.patch"
     }
   },
   "monolog/monolog": {
