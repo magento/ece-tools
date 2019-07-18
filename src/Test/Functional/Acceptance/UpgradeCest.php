@@ -24,7 +24,7 @@ class UpgradeCest extends AbstractCest
     {
         $I->startEnvironment();
         $I->assertTrue($I->cloneTemplate($data['from']));
-        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->addEceComposerRepo());
         $this->assert($I);
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
         $I->assertTrue($I->composerRequireMagentoCloud($data['to']));

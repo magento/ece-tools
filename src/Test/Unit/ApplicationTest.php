@@ -75,7 +75,7 @@ class ApplicationTest extends TestCase
         Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
         Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
         Command\Docker\Build::NAME => Command\Docker\Build::class,
-        Command\Docker\ConfigConvert::NAME => Command\Docker\ConfigConvert::class,
+        Command\Docker\GenerateDist::NAME => Command\Docker\GenerateDist::class,
         Command\CronKill::NAME => Command\CronKill::class,
         Command\ConfigShow::NAME => Command\ConfigShow::class,
     ];

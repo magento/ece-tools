@@ -43,6 +43,13 @@ class Run extends BaseTask implements CommandInterface
     protected $runWrapper = '%s';
 
     /**
+     * Docker working directory
+     *
+     * @var string
+     */
+    protected $workingDir = '/var/www/magento';
+
+    /**
      * @param string $container
      */
     public function __construct($container)
@@ -56,9 +63,10 @@ class Run extends BaseTask implements CommandInterface
     public function getCommand()
     {
         return trim(sprintf(
-            'docker-compose run -w "/var/www/magento" %s %s ' . $this->runWrapper,
+            'docker-compose run -w %s %s %s ' . $this->runWrapper,
+            escapeshellarg($this->workingDir),
             $this->arguments,
-            $this->container,
+            escapeshellarg($this->container),
             $this->run
         ));
     }
@@ -81,6 +89,18 @@ class Run extends BaseTask implements CommandInterface
     public function exec($run)
     {
         $this->run = $this->receiveCommand($run);
+        return $this;
+    }
+
+    /**
+     * Set the command working directory.
+     *
+     * @param string
+     * @return $this
+     */
+    public function workingDir(string $dir): self
+    {
+        $this->workingDir = $dir;
         return $this;
     }
 
