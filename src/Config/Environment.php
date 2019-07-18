@@ -114,7 +114,7 @@ class Environment
     /**
      * Get routes information from MagentoCloud environment variable.
      *
-     * @return mixed
+     * @return array
      */
     public function getRoutes(): array
     {

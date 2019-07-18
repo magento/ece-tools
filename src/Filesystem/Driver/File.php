@@ -16,7 +16,6 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
  */
 class File
 {
-
     /**
      * This is the prefix we use for directories we are deleting in the background.
      */
@@ -113,7 +112,7 @@ class File
     }
 
     /**
-     * @param $path
+     * @param string $path
      * @param int $mode
      * @param bool $recursive
      * @return bool

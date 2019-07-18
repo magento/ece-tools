@@ -38,7 +38,7 @@ class WritableDirectories implements ProcessInterface
     private $globalConfig;
 
     /**
-     * @var LoggerInterface|Logger
+     * @var Logger
      */
     private $logger;
 

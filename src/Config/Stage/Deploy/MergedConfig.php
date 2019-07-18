@@ -62,7 +62,7 @@ class MergedConfig
     /**
      * Returns all merged configuration for deploy stage.
      *
-     * @return mixed
+     * @return array
      * @throws \RuntimeException If the configuration file can't be read or can't be parsed
      */
     public function get(): array

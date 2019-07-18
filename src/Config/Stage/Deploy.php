@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 class Deploy implements DeployInterface
 {
     /**
-     * @var array
+     * @var MergedConfig
      */
     private $mergedConfig;
 
