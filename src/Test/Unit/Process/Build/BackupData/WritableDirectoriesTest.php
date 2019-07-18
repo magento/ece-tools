@@ -5,12 +5,12 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build\BackupData;
 
+use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\BackupData\WritableDirectories;
-use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
