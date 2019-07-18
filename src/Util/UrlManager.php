@@ -160,7 +160,7 @@ class UrlManager
                 $this->baseUrl = $process->getOutput();
             } catch (ShellException $e) {
                 $this->logger->error(
-                    'Can\'t fetch base URL using command config:show:default-url. URL from routes will be used'
+                    'Cannot fetch base URL using the config:show:default-url command. URL from routes will be used'
                 );
                 $this->logger->debug($e->getMessage());
                 $this->baseUrl = $this->getSecureUrls()[''];
