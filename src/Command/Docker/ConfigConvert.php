@@ -9,7 +9,6 @@ use Magento\MagentoCloud\Docker\Config\Converter;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Filesystem\SystemList;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,7 +28,7 @@ class ConfigConvert extends Command
     ];
 
     /**
-     * @var SystemList
+     * @var DirectoryList
      */
     private $directoryList;
 

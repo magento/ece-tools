@@ -24,7 +24,7 @@ class File
     /**
      * Returns last warning message string
      *
-     * @return string
+     * @return string|null
      */
     private function getWarningMessage()
     {
@@ -143,7 +143,7 @@ class File
 
             return $result;
         } catch (\Exception $e) {
-            throw new FileSystemException($e->getMessage(), $e);
+            throw new FileSystemException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -317,7 +317,8 @@ class File
     public function backgroundClearDirectory(string $path, array $excludes = [])
     {
         if ($this->isLink($path)) {
-            return $this->deleteFile($path);
+            $this->deleteFile($path);
+            return;
         }
 
         $timestamp = time();

@@ -70,15 +70,15 @@ class IdealState implements CompositeValidator
         $postDeployError = $this->validatorFactory->create(Deploy\PostDeploy::class)->validate();
         $htmlMinificationError = $this->validatorFactory->create(GlobalStage\SkipHtmlMinification::class)->validate();
 
-        if (!$scdBuildError instanceof Result\Success) {
+        if ($scdBuildError instanceof Result\Error) {
             $errors[] = $scdBuildError;
         }
 
-        if (!$postDeployError instanceof Result\Success) {
+        if ($postDeployError instanceof Result\Error) {
             $errors[] = $postDeployError;
         }
 
-        if (!$htmlMinificationError instanceof Result\Success) {
+        if ($htmlMinificationError instanceof Result\Error) {
             $errors[] = $htmlMinificationError;
         }
 

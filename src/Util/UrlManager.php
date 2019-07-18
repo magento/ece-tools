@@ -41,9 +41,9 @@ class UrlManager
     private $storeBaseUrls = [];
 
     /**
-     * @var null
+     * @var string
      */
-    private $baseUrl = null;
+    private $baseUrl;
 
     /**
      * @var ShellInterface

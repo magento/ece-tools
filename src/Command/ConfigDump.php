@@ -117,7 +117,7 @@ class ConfigDump extends Command
             if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
                 $this->logger->info('Dump completed.');
 
-                return;
+                return 0;
             }
 
             $this->shell->execute('app:config:import');

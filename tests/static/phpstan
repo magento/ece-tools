@@ -1,3 +1,0 @@
-parameters:
-	excludes_analyse:
-		- %rootDir%/src/Test/*

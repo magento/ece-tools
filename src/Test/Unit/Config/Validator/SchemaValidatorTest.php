@@ -106,7 +106,7 @@ class SchemaValidatorTest extends TestCase
             [
                 StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
                 10,
-                'The SCD_COMPRESSION_LEVEL variable contains an invalid value of type string. ' .
+                'The SCD_COMPRESSION_LEVEL variable contains an invalid value #10. ' .
                 'Use an integer value from 0 to 9.'
             ],
             [

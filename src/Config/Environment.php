@@ -62,7 +62,7 @@ class Environment
      * returns false if not found
      *
      * @param string $key
-     * @return array|string|int|null
+     * @return array|string|int|null|bool
      */
     public function getEnv(string $key)
     {
