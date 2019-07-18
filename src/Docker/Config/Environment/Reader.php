@@ -18,7 +18,7 @@ use Magento\MagentoCloud\Filesystem\SystemList;
 class Reader
 {
     /**
-     * @var SystemList
+     * @var DirectoryList
      */
     private $directoryList;
 
