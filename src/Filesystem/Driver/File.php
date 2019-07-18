@@ -374,7 +374,7 @@ class File
      *
      * @param string $path
      * @param string $content
-     * @param string|null $mode
+     * @param int|null $mode
      * @return int The number of bytes that were written.
      * @throws FileSystemException
      */
@@ -442,15 +442,15 @@ class File
      * Retrieve file contents from given path
      *
      * @param string $path
-     * @param string|null $flag
+     * @param bool $useIncludedPath
      * @param resource|null $context
      * @return string
      * @throws FileSystemException
      */
-    public function fileGetContents($path, $flag = null, $context = null)
+    public function fileGetContents($path, $useIncludedPath = false, $context = null)
     {
         clearstatcache();
-        $result = @file_get_contents($path, $flag, $context);
+        $result = @file_get_contents($path, $useIncludedPath, $context);
         if (false === $result) {
             $this->fileSystemException('Cannot read contents from file "%1" %2', [$path, $this->getWarningMessage()]);
         }

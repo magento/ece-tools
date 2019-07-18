@@ -92,7 +92,7 @@ class Environment
      * Get environment variable and get the name from .magento.env.yaml configuration file.
      *
      * @param string $name
-     * @param string|int|null $default
+     * @param mixed $default
      * @return array|string|int|null
      */
     public function getEnvVar(string $name, $default = null)
