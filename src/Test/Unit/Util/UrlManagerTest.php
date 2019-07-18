@@ -469,7 +469,7 @@ class UrlManagerTest extends TestCase
             ->willReturn(['http://example.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream']]);
         $this->loggerMock->expects($this->once())
             ->method('error')
-            ->with('Can\'t fetch base URL using command config:show:default-url. URL from routes will be used');
+            ->with('Cannot fetch base URL using the config:show:default-url command. URL from routes will be used');
         $this->loggerMock->expects($this->exactly(2))
             ->method('debug')
             ->withConsecutive(
