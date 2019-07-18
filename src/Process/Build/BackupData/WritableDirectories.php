@@ -11,7 +11,8 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Monolog\Logger;
+use Magento\MagentoCloud\App\Logger;
+
 
 /**
  * Writable directories will be erased when the writable filesystem is mounted to them.
