@@ -95,14 +95,12 @@ class Cache implements ProcessInterface
      */
     private function testRedisConnection(array $backendOptions): bool
     {
-        extract($backendOptions);
-
-        if (!isset($server) || !isset($port)) {
+        if (!isset($backendOptions['server']) || !isset($backendOptions['port'])) {
             throw new ProcessException('Missing required Redis configuration!');
         }
 
         $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        $connected = @socket_connect($sock, $server, $port);
+        $connected = @socket_connect($sock, $backendOptions['server'], $backendOptions['port']);
         socket_close($sock);
 
         return $connected;
