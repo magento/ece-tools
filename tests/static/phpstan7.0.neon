@@ -1,3 +1,6 @@
 parameters:
-	excludes_analyse:
-		- %currentWorkingDirectory%/src/Test/*
+    level: 1
+    paths:
+        - src
+    excludes_analyse:
+        - %currentWorkingDirectory%/src/Test/*
