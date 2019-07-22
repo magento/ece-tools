@@ -224,7 +224,6 @@ class ProductionCompose implements ComposeInterface
                 ],
                 'magento-vendor' => $volumeConfig,
                 'magento-generated' => $volumeConfig,
-                'magento-setup' => $volumeConfig,
                 'magento-var' => $volumeConfig,
                 'magento-etc' => $volumeConfig,
                 'magento-static' => $volumeConfig,
@@ -323,7 +322,6 @@ class ProductionCompose implements ComposeInterface
             'magento:' . self::DIR_MAGENTO . $flag,
             'magento-vendor:' . self::DIR_MAGENTO . '/vendor' . $flag,
             'magento-generated:' . self::DIR_MAGENTO . '/generated' . $flag,
-            'magento-setup:' . self::DIR_MAGENTO . '/setup' . $flag,
             'magento-var:' . self::DIR_MAGENTO . '/var:delegated',
             'magento-etc:' . self::DIR_MAGENTO . '/app/etc:delegated',
             'magento-static:' . self::DIR_MAGENTO . '/pub/static:delegated',
@@ -343,7 +341,6 @@ class ProductionCompose implements ComposeInterface
             'magento:' . self::DIR_MAGENTO . $flag,
             'magento-vendor:' . self::DIR_MAGENTO . '/vendor' . $flag,
             'magento-generated:' . self::DIR_MAGENTO . '/generated' . $flag,
-            'magento-setup:' . self::DIR_MAGENTO . '/setup' . $flag,
         ];
     }
 
