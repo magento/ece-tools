@@ -16,7 +16,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Yaml;
 
 /**
- * @inheritdoc
+ * @inheritDoc
  */
 class ReaderTest extends TestCase
 {
@@ -36,7 +36,7 @@ class ReaderTest extends TestCase
     private $fileMock;
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     protected function setUp()
     {
@@ -80,8 +80,8 @@ class ReaderTest extends TestCase
         $this->fileMock->expects($this->exactly(2))
             ->method('fileGetContents')
             ->willReturnMap([
-                ['/root/.magento.app.yaml', null, null, Yaml::dump(['type' => 'php:7.1'])],
-                ['/root/.magento/services.yaml', null, null, Yaml::dump([])]
+                ['/root/.magento.app.yaml', false, null, Yaml::dump(['type' => 'php:7.1'])],
+                ['/root/.magento/services.yaml', false, null, Yaml::dump([])]
             ]);
 
         $this->reader->read();
@@ -100,7 +100,7 @@ class ReaderTest extends TestCase
             ->willReturnMap([
                 [
                     '/root/.magento.app.yaml',
-                    null,
+                    false,
                     null,
                     Yaml::dump([
                         'type' => 'php:7.1',
@@ -113,7 +113,7 @@ class ReaderTest extends TestCase
                 ],
                 [
                     '/root/.magento/services.yaml',
-                    null,
+                    false,
                     null,
                     Yaml::dump([
                         'mysql' => [
@@ -169,7 +169,7 @@ class ReaderTest extends TestCase
             ->willReturnMap([
                 [
                     '/root/.magento.app.yaml',
-                    null,
+                    false,
                     null,
                     Yaml::dump([
                         'type' => 'php:7.1',
@@ -182,7 +182,7 @@ class ReaderTest extends TestCase
                 ],
                 [
                     '/root/.magento/services.yaml',
-                    null,
+                    false,
                     null,
                     Yaml::dump([
                         'mysql' => [
@@ -225,7 +225,7 @@ class ReaderTest extends TestCase
             ->willReturnMap([
                 [
                     '/root/.magento.app.yaml',
-                    null,
+                    false,
                     null,
                     Yaml::dump([
                         'type' => 'php:7.1',
@@ -239,7 +239,7 @@ class ReaderTest extends TestCase
                 ],
                 [
                     '/root/.magento/services.yaml',
-                    null,
+                    false,
                     null,
                     Yaml::dump([
                         'mysql' => [

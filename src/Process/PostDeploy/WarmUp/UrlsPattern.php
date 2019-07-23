@@ -7,8 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Process\PostDeploy\WarmUp;
 
+use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,20 +26,20 @@ class UrlsPattern
     private $logger;
 
     /**
-     * @var ShellInterface
+     * @var MagentoShell
      */
-    private $shell;
+    private $magentoShell;
 
     /**
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
+     * @param ShellFactory $shellFactory
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellInterface $shell
+        ShellFactory $shellFactory
     ) {
         $this->logger = $logger;
-        $this->shell = $shell;
+        $this->magentoShell = $shellFactory->createMagento();
     }
 
     /**
@@ -57,12 +58,13 @@ class UrlsPattern
 
             list($entity, $pattern, $storeId) = explode(':', $warmUpPattern);
 
-            $command = sprintf('config:show:urls --entity-type="%s"', $entity);
+            $command = 'config:show:urls';
+            $commandArguments = [sprintf('--entity-type="%s"', $entity)];
             if ($storeId && $storeId !== '*') {
-                $command .= sprintf(' --store-id="%s"', $storeId);
+                $commandArguments [] = sprintf('--store-id="%s"', $storeId);
             }
 
-            $process = $this->shell->execute($command);
+            $process = $this->magentoShell->execute($command, $commandArguments);
 
             $urls = json_decode($process->getOutput(), true);
 

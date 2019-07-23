@@ -3,10 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Test\Unit\Docker\Config;
+declare(strict_types=1);
 
-use Magento\MagentoCloud\Docker\Config\DistGenerator;
+namespace Magento\MagentoCloud\Test\Unit\Docker\Config\Dist;
+
+use Magento\MagentoCloud\Docker\Config\Dist\Generator;
 use Magento\MagentoCloud\Docker\Config\Relationship;
+use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -17,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @inheritdoc
  */
-class DistGeneratorTest extends TestCase
+class GeneratorTest extends TestCase
 {
     /**
      * @var DirectoryList|MockObject
@@ -40,7 +43,7 @@ class DistGeneratorTest extends TestCase
     private $phpFormatterMock;
 
     /**
-     * @var DistGenerator
+     * @var Generator
      */
     private $distGenerator;
 
@@ -54,7 +57,7 @@ class DistGeneratorTest extends TestCase
         $this->relationshipMock = $this->createMock(Relationship::class);
         $this->phpFormatterMock = $this->createMock(PhpFormatter::class);
 
-        $this->distGenerator = new DistGenerator(
+        $this->distGenerator = new Generator(
             $this->directoryListMock,
             $this->fileMock,
             $this->relationshipMock,
@@ -64,6 +67,9 @@ class DistGeneratorTest extends TestCase
 
     /**
      * @inheritdoc
+     *
+     * @throws FileSystemException
+     * @throws ConfigurationMismatchException
      */
     public function testGenerate()
     {
@@ -139,6 +145,9 @@ TEXT;
     /**
      * @expectedExceptionMessage file system error
      * @expectedException \Magento\MagentoCloud\Filesystem\FileSystemException
+     *
+     * @throws FileSystemException
+     * @throws ConfigurationMismatchException
      */
     public function testGenerateFileSystemException()
     {

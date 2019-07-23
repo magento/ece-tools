@@ -394,9 +394,6 @@ class Container implements ContainerInterface
         $this->container->when(ModuleRefresh::class)
             ->needs(ProcessInterface::class)
             ->give(BuildProcess\RefreshModules::class);
-        $this->container->when(PostDeployProcess\WarmUp\UrlsPattern::class)
-            ->needs(\Magento\MagentoCloud\Shell\ShellInterface::class)
-            ->give(\Magento\MagentoCloud\Shell\MagentoShell::class);
 
         $this->container->singleton(ConfigInterface::class, MergedConfig::class);
     }

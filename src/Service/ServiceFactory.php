@@ -40,12 +40,12 @@ class ServiceFactory
      *
      * @param string $serviceName
      * @return ServiceInterface
-     * @throws ConfigurationMismatchException when service isn't defined in service map
+     * @throws ServiceMismatchException when service isn't defined in service map
      */
     public function create(string $serviceName): ServiceInterface
     {
         if (!array_key_exists($serviceName, $this->serviceMap)) {
-            throw new ConfigurationMismatchException(sprintf(
+            throw new ServiceMismatchException(sprintf(
                 'Service "%s" is not supported',
                 $serviceName
             ));

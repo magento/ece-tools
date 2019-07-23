@@ -74,7 +74,7 @@ class PostDeploy extends Command
             if ($this->flagManager->exists(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED)) {
                 $this->logger->warning('Post-deploy is skipped because deploy was failed.');
 
-                return;
+                return 0;
             }
 
             $this->logger->notice('Starting post-deploy.');

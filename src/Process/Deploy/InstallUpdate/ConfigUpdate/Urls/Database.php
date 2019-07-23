@@ -121,8 +121,8 @@ class Database implements ProcessInterface
     /**
      * Updates the base_url configuration in the `core_config_data` table.
      *
-     * @param $baseHost
-     * @param $actualHost
+     * @param string $baseHost
+     * @param string $actualHost
      *
      * @return int Returns the number of updated URLs
      */

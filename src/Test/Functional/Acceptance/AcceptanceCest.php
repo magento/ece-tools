@@ -22,15 +22,24 @@ class AcceptanceCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function _before(\CliTester $I)
+    {
+        parent::_before($I);
+        $I->cloneTemplate();
+        $I->addEceComposerRepo();
+        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+    }
+
+    /**
+     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider defaultDataProvider
      */
     public function testDefault(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand(
@@ -231,8 +240,6 @@ class AcceptanceCest extends AbstractCest
      */
     public function testWithSplitBuildCommand(\CliTester $I)
     {
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build:generate', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build:transfer', Docker::BUILD_CONTAINER));
         $I->startEnvironment();
@@ -251,8 +258,6 @@ class AcceptanceCest extends AbstractCest
     {
         $tmpConfig = sys_get_temp_dir() . '/app/etc/config.php';
         $I->startEnvironment();
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
@@ -270,7 +275,7 @@ class AcceptanceCest extends AbstractCest
         $I->assertTrue($I->cleanUpEnvironment());
 
         $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->addEceComposerRepo());
         $I->assertTrue($I->uploadToContainer($tmpConfig, '/app/etc/config.php', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));

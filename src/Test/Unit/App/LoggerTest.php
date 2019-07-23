@@ -94,8 +94,8 @@ class LoggerTest extends TestCase
         $this->fileMock->expects($this->exactly($fileMockFileGetContentsExpects))
             ->method('fileGetContents')
             ->willReturnMap([
-                [$buildPhaseLogPath, null, null, $buildPhaseLogContent],
-                [$deployLogPath, null, null, $deployLogContent],
+                [$buildPhaseLogPath, false, null, $buildPhaseLogContent],
+                [$deployLogPath, false, null, $deployLogContent],
             ]);
         $this->fileMock->expects($this->exactly(2))
             ->method('isExists')
