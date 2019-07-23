@@ -6,7 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\ModuleRefresh;
-use Magento\MagentoCloud\Config\Module;
+use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -23,66 +24,35 @@ class ModuleRefreshTest extends TestCase
     private $command;
 
     /**
+     * @var ProcessInterface|MockObject
+     */
+    private $processMock;
+
+    /**
      * @var LoggerInterface|MockObject
      */
     private $loggerMock;
-
-    /**
-     * @var Module|MockObject
-     */
-    private $configMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->configMock = $this->createMock(Module::class);
 
         $this->command = new ModuleRefresh(
-            $this->loggerMock,
-            $this->configMock
+            $this->processMock,
+            $this->loggerMock
         );
     }
 
     public function testExecute()
     {
-        $modules = [
-            'Magento_Module1',
-            'Magento_Module2',
-            'Magento_Module3',
-        ];
-
-        $this->loggerMock->expects($this->exactly(3))
-            ->method('info')
-            ->withConsecutive(
-                ['Refreshing modules started.'],
-                ['The following modules have been enabled:' . PHP_EOL . implode(PHP_EOL, $modules)],
-                ['Refreshing modules completed.']
-            );
-        $this->configMock->expects($this->once())
-            ->method('refresh')
-            ->willReturn($modules);
-
-        $tester = new CommandTester(
-            $this->command
-        );
-        $tester->execute([]);
-    }
-
-    public function testExecuteNoModulesChanged()
-    {
-        $this->loggerMock->expects($this->exactly(3))
-            ->method('info')
-            ->withConsecutive(
-                ['Refreshing modules started.'],
-                ['No modules were changed.'],
-                ['Refreshing modules completed.']
-            );
-        $this->configMock->expects($this->once())
-            ->method('refresh')
-            ->willReturn([]);
+        $this->processMock->expects($this->once())
+            ->method('execute');
+        $this->loggerMock->expects($this->never())
+            ->method('critical');
 
         $tester = new CommandTester(
             $this->command
@@ -91,17 +61,17 @@ class ModuleRefreshTest extends TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Some exception
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedExceptionMessage Some error
      */
     public function testExecuteWithException()
     {
-        $this->configMock->expects($this->once())
-            ->method('refresh')
-            ->willThrowException(new \RuntimeException('Some exception'));
+        $this->processMock->expects($this->once())
+            ->method('execute')
+            ->willThrowException(new ProcessException('Some error'));
         $this->loggerMock->expects($this->once())
             ->method('critical')
-            ->with('Some exception');
+            ->with('Some error');
 
         $tester = new CommandTester(
             $this->command

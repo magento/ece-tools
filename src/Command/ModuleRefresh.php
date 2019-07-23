@@ -5,7 +5,8 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Config\Module;
+use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,23 +20,23 @@ class ModuleRefresh extends Command
     const NAME = 'module:refresh';
 
     /**
+     * @var ProcessInterface
+     */
+    private $process;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var Module
-     */
-    private $config;
-
-    /**
+     * @param ProcessInterface $process
      * @param LoggerInterface $logger
-     * @param Module $config
      */
-    public function __construct(LoggerInterface $logger, Module $config)
+    public function __construct(ProcessInterface $process, LoggerInterface $logger)
     {
+        $this->process = $process;
         $this->logger = $logger;
-        $this->config = $config;
 
         parent::__construct();
     }
@@ -52,20 +53,13 @@ class ModuleRefresh extends Command
     /**
      * {@inheritdoc}
      *
-     * @throws \Exception
+     * @throws ProcessException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->logger->info('Refreshing modules started.');
-            $enabledModules = $this->config->refresh();
-            $this->logger->info(
-                $enabledModules ?
-                    'The following modules have been enabled:' . PHP_EOL . implode(PHP_EOL, $enabledModules) :
-                    'No modules were changed.'
-            );
-            $this->logger->info('Refreshing modules completed.');
-        } catch (\Exception $exception) {
+            $this->process->execute();
+        } catch (ProcessException $exception) {
             $this->logger->critical($exception->getMessage());
 
             throw $exception;
