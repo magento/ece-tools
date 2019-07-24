@@ -32,6 +32,8 @@ class ProductionCompose implements ComposeInterface
 
     const CRON_ENABLED = true;
 
+    const VARNISH_CACHE_APPLICATION_ID = '2';
+
     /**
      * @var ServiceFactory
      */
@@ -377,7 +379,7 @@ class ProductionCompose implements ComposeInterface
             # Docker host for developer environments, can be different for your OS
             'XDEBUG_CONFIG' => 'remote_host=host.docker.internal',
             # Tell Magento to automatically use the Varnish cache
-            'CONFIG__DEFAULT__SYSTEM__FULL_PAGE_CACHE__CACHING_APPLICATION' => '2',
+            'CONFIG__DEFAULT__SYSTEM__FULL_PAGE_CACHE__CACHING_APPLICATION' => self::VARNISH_CACHE_APPLICATION_ID,
         ], $this->reader->read());
     }
 
