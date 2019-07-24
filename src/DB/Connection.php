@@ -17,7 +17,7 @@ class Connection implements ConnectionInterface
     const MYSQL_ERROR_CODE_SERVER_GONE_AWAY = 2006;
 
     /**
-     * @var \PDO
+     * @var \PDO|null
      */
     private $pdo;
 

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator;
 
+use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\ValidatorFactory;
 
 /**
@@ -40,7 +41,7 @@ class IdealState implements CompositeValidator
     public function validate(): ResultInterface
     {
         if ($errors = $this->getErrors()) {
-            $suggestion = array_reduce($errors, function ($suggestion, $item) {
+            $suggestion = array_reduce($errors, function ($suggestion, Error $item) {
                 $suggestion .= $item->getError() . PHP_EOL;
 
                 if ($itemSuggestion = $item->getSuggestion()) {
@@ -69,15 +70,15 @@ class IdealState implements CompositeValidator
         $postDeployError = $this->validatorFactory->create(Deploy\PostDeploy::class)->validate();
         $htmlMinificationError = $this->validatorFactory->create(GlobalStage\SkipHtmlMinification::class)->validate();
 
-        if (!$scdBuildError instanceof Result\Success) {
+        if ($scdBuildError instanceof Result\Error) {
             $errors[] = $scdBuildError;
         }
 
-        if (!$postDeployError instanceof Result\Success) {
+        if ($postDeployError instanceof Result\Error) {
             $errors[] = $postDeployError;
         }
 
-        if (!$htmlMinificationError instanceof Result\Success) {
+        if ($htmlMinificationError instanceof Result\Error) {
             $errors[] = $htmlMinificationError;
         }
 

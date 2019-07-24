@@ -101,7 +101,7 @@ class BuildOptionsIni implements ValidatorInterface
      * Convert option values in the same way as it made in \Magento\MagentoCloud\Config\Stage\Build::getDeprecatedConfig
      *
      * @param string $name
-     * @param $value
+     * @param mixed $value
      * @return bool|int|string
      */
     private function prepareValue(string $name, $value)

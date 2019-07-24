@@ -25,7 +25,7 @@ class ScdOnBuild extends Command
     private $outputFormatter;
 
     /**
-     * @var ScdOnBuild
+     * @var ScdOnBuildValidator
      */
     private $scdOnBuildValidator;
 
