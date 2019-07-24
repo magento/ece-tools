@@ -376,6 +376,8 @@ class ProductionCompose implements ComposeInterface
             'PHP_IDE_CONFIG' => 'serverName=magento_cloud_docker',
             # Docker host for developer environments, can be different for your OS
             'XDEBUG_CONFIG' => 'remote_host=host.docker.internal',
+            # Tell Magento to automatically use the Varnish cache
+            'CONFIG__DEFAULT__SYSTEM__FULL_PAGE_CACHE__CACHING_APPLICATION' => '2',
         ], $this->reader->read());
     }
 
