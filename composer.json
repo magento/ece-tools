@@ -29,7 +29,10 @@
     "symfony/process": "~2.1||~4.1.0",
     "symfony/yaml": "^3.3||^4.0",
     "twig/twig": "^1.0||^2.0",
-    "magento/magento-cloud-components": "^1.0"
+    "magento/magento-cloud-components": "^1.0",
+
+
+    "magento/framework": "*"
   },
   "require-dev": {
     "php-mock/php-mock-phpunit": "^2.0",
@@ -87,10 +90,7 @@
     "phpmd": "phpmd src xml tests/static/phpmd-ruleset.xml",
     "phpunit": "phpunit --configuration tests/unit",
     "coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
-    "coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage",
-    "clear-components-autoload": "composer remove magento/magento-cloud-components --no-update",
-    "pre-install-cmd": "@clear-components-autoload",
-    "pre-update-cmd": "@clear-components-autoload"
+    "coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage"
   },
   "config": {
     "sort-packages": true
