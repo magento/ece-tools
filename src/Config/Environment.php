@@ -62,7 +62,7 @@ class Environment
      * returns false if not found
      *
      * @param string $key
-     * @return array|string|int|null
+     * @return array|string|int|null|bool
      */
     public function getEnv(string $key)
     {
@@ -92,7 +92,7 @@ class Environment
      * Get environment variable and get the name from .magento.env.yaml configuration file.
      *
      * @param string $name
-     * @param string|int|null $default
+     * @param mixed $default
      * @return array|string|int|null
      */
     public function getEnvVar(string $name, $default = null)
@@ -114,7 +114,7 @@ class Environment
     /**
      * Get routes information from MagentoCloud environment variable.
      *
-     * @return mixed
+     * @return array
      */
     public function getRoutes(): array
     {

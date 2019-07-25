@@ -6,7 +6,6 @@
 namespace Magento\MagentoCloud\Http;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\ClientInterface;
 use Magento\MagentoCloud\App\ContainerInterface;
 
 /**
@@ -33,9 +32,9 @@ class ClientFactory
      * Creates a Client instance.
      *
      * @param array $config
-     * @return Client|ClientInterface
+     * @return Client
      */
-    public function create(array $config = []): ClientInterface
+    public function create(array $config = []): Client
     {
         return $this->container->create(Client::class, ['config' => $config]);
     }
