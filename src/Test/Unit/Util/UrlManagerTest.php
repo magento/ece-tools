@@ -469,7 +469,10 @@ class UrlManagerTest extends TestCase
             ->willReturn(['http://example.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream']]);
         $this->loggerMock->expects($this->once())
             ->method('error')
-            ->with('Cannot fetch base URL using the config:show:default-url command. URL from routes will be used');
+            ->with(
+                'Cannot fetch base URL using the config:show:default-url command. ' .
+                'Instead, using the URL from the MAGENTO_CLOUD_ROUTES variable.'
+            );
         $this->loggerMock->expects($this->exactly(2))
             ->method('debug')
             ->withConsecutive(
