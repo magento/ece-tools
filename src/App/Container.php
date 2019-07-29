@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\App;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\ModuleRefresh;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\Database\ConfigInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
@@ -390,6 +391,9 @@ class Container implements ContainerInterface
         $this->container->when(CronKill::class)
             ->needs(ProcessInterface::class)
             ->give(DeployProcess\CronProcessKill::class);
+        $this->container->when(ModuleRefresh::class)
+            ->needs(ProcessInterface::class)
+            ->give(BuildProcess\RefreshModules::class);
 
         $this->container->singleton(ConfigInterface::class, MergedConfig::class);
     }
