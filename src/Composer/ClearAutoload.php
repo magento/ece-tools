@@ -13,6 +13,8 @@ use Composer\Script\Event;
 
 /**
  * Clears registration.php file of magento/magento-cloud-components package from composer autoload
+ *
+ * @codeCoverageIgnore
  */
 class ClearAutoload
 {
