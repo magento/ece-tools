@@ -4,6 +4,7 @@ parameters:
         - src
     excludes_analyse:
         - %currentWorkingDirectory%/src/Test/*
+    reportUnmatchedIgnoredErrors: false
     ignoreErrors:
         - message: "#.*ComponentRegistrar.*#"
           path: %currentWorkingDirectory%/src/StaticContent/ThemeResolver.php
