@@ -51,6 +51,11 @@ matrix:
 
 install:
   - composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
+  - composer config github-oauth.github.com ${GITHUB_TOKEN}
+  - composer config repositories.mcc git git@github.com:magento/magento-cloud-components.git
+  - composer require "magento/magento-cloud-components:dev-master as 1.0.99" --no-update
+  - composer config repositories.mcd git git@github.com:magento/magento-cloud-docker.git
+  - composer require "magento/magento-cloud-docker:dev-develop as 1.0.99" --no-update
   - composer update -n --no-suggest
 
 before_script:

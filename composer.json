@@ -1,137 +1,150 @@
 {
-  "name": "magento/ece-tools",
-  "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
-  "type": "magento2-component",
-  "version": "2002.0.20",
-  "license": "OSL-3.0",
-  "repositories": [
-    {
-      "type": "composer",
-      "url": "https://repo.magento.com/"
-    }
-  ],
-  "require": {
-    "php": "^7.0",
-    "ext-PDO": "*",
-    "ext-json": "*",
-    "ext-sockets": "*",
-    "composer/composer": "@stable",
-    "composer/semver": "^1.4",
-    "graylog2/gelf-php": "^1.4.2",
-    "guzzlehttp/guzzle": "^6.2",
-    "illuminate/config": "^5.5",
-    "illuminate/container": "^5.5",
-    "illuminate/contracts": "^5.5",
-    "monolog/monolog": "^1.16",
-    "psr/container": "^1.0",
-    "psr/log": "^1.0",
-    "symfony/console": "^2.6||^4.0",
-    "symfony/process": "~2.1||~4.1.0",
-    "symfony/yaml": "^3.3||^4.0",
-    "twig/twig": "^1.0||^2.0",
-    "magento/magento-cloud-components": "^1.0"
-  },
-  "require-dev": {
-    "php-mock/php-mock-phpunit": "^2.0",
-    "phpmd/phpmd": "@stable",
-    "phpunit/php-code-coverage": "^5.2",
-    "phpunit/phpunit": "^6.2",
-    "squizlabs/php_codesniffer": "^3.0",
-    "codeception/codeception": "^2.5.3",
-    "consolidation/robo": "^1.2",
-    "phpstan/phpstan": "@stable"
-  },
-  "conflict": {
-    "nesbot/carbon": ">=1.38 <2.0"
-  },
-  "replace": {
-    "magento/ece-patches": "*",
-    "magento/magento-cloud-configuration": "*"
-  },
-  "bin": [
-    "bin/ece-tools",
-    "m2-ece-build",
-    "m2-ece-deploy",
-    "m2-ece-scd-dump"
-  ],
-  "autoload": {
-    "psr-4": {
-      "Magento\\MagentoCloud\\": "src/"
-    }
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Magento\\MagentoCloud\\Test\\": "tests/static/",
-      "Magento\\MagentoCloud\\Test\\Integration\\": "tests/integration/",
-      "Magento\\MagentoCloud\\Test\\Functional\\": "tests/functional/"
-    }
-  },
-  "scripts": {
-    "test": [
-      "@phpstan",
-      "@phpcs",
-      "@phpmd",
-      "@phpunit",
-      "@coverage"
+    "name": "magento/ece-tools",
+    "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
+    "type": "magento2-component",
+    "version": "2002.0.20",
+    "license": "OSL-3.0",
+    "repositories": {
+        "0": {
+            "type": "composer",
+            "url": "https://repo.magento.com/"
+        },
+        "1": {
+            "type": "git",
+            "url": "git@github.com:magento/magento-cloud-docker.git"
+        },
+        "mcd": {
+            "type": "git",
+            "url": "git@github.com:magento/magento-cloud-docker.git"
+        },
+        "mcc": {
+            "type": "git",
+            "url": "git@github.com:magento/magento-cloud-components.git"
+        }
+    },
+    "require": {
+        "php": "^7.0",
+        "ext-PDO": "*",
+        "ext-json": "*",
+        "ext-sockets": "*",
+        "composer/composer": "@stable",
+        "composer/semver": "^1.4",
+        "graylog2/gelf-php": "^1.4.2",
+        "guzzlehttp/guzzle": "^6.2",
+        "illuminate/config": "^5.5",
+        "illuminate/container": "^5.5",
+        "illuminate/contracts": "^5.5",
+        "magento/magento-cloud-components": "dev-master as 1.0.99",
+        "magento/magento-cloud-docker": "dev-develop as 1.0.99",
+        "monolog/monolog": "^1.16",
+        "psr/container": "^1.0",
+        "psr/log": "^1.0",
+        "symfony/console": "^2.6||^4.0",
+        "symfony/process": "~2.1||~4.1.0",
+        "symfony/yaml": "^3.3||^4.0",
+        "twig/twig": "^1.0||^2.0"
+    },
+    "require-dev": {
+        "php-mock/php-mock-phpunit": "^2.0",
+        "phpmd/phpmd": "@stable",
+        "phpunit/php-code-coverage": "^5.2",
+        "phpunit/phpunit": "^6.2",
+        "squizlabs/php_codesniffer": "^3.0",
+        "codeception/codeception": "^2.5.3",
+        "consolidation/robo": "^1.2",
+        "phpstan/phpstan": "@stable"
+    },
+    "conflict": {
+        "nesbot/carbon": ">=1.38 <2.0"
+    },
+    "replace": {
+        "magento/ece-patches": "*",
+        "magento/magento-cloud-configuration": "*"
+    },
+    "bin": [
+        "bin/ece-tools",
+        "m2-ece-build",
+        "m2-ece-deploy",
+        "m2-ece-scd-dump"
     ],
-    "test7.0": [
-      "@phpstan7.0",
-      "@phpcs",
-      "@phpmd",
-      "@phpunit",
-      "@coverage"
-    ],
-    "phpstan": "phpstan analyse -c tests/static/phpstan.neon",
-    "phpstan7.0": "phpstan analyse -l 1 -c tests/static/phpstan7.0.neon src",
-    "phpcs": "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
-    "phpmd": "phpmd src xml tests/static/phpmd-ruleset.xml",
-    "phpunit": "phpunit --configuration tests/unit",
-    "coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
-    "coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage",
-    "pre-autoload-dump": [
-      "Magento\\MagentoCloud\\Composer\\ClearAutoload::preAutoloadDump"
-    ]
-  },
-  "config": {
-    "sort-packages": true
-  },
-  "prefer-stable": true,
-  "extra": {
-    "map": [
-      [
-        "dist/.magento.env.yaml",
-        ".magento.env.yaml.dist"
-      ],
-      [
-        "dist/docker-sync.yml",
-        "docker-sync.yml"
-      ],
-      [
-        "dist/mutagen.sh",
-        "mutagen.sh"
-      ],
-      [
-        "dist/docker/mnt",
-        ".docker/mnt"
-      ],
-      [
-        "dist/docker/tmp",
-        ".docker/tmp"
-      ],
-      [
-        "dist/docker/mysql",
-        ".docker/mysql"
-      ],
-      [
-        "dist/docker/bin/docker",
-        "bin/docker"
-      ]
-    ],
-    "chmod": [
-      {
-        "mask": "0755",
-        "path": "bin/docker"
-      }
-    ]
-  }
+    "autoload": {
+        "psr-4": {
+            "Magento\\MagentoCloud\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Magento\\MagentoCloud\\Test\\": "tests/static/",
+            "Magento\\MagentoCloud\\Test\\Integration\\": "tests/integration/",
+            "Magento\\MagentoCloud\\Test\\Functional\\": "tests/functional/"
+        }
+    },
+    "scripts": {
+        "test": [
+            "@phpstan",
+            "@phpcs",
+            "@phpmd",
+            "@phpunit",
+            "@coverage"
+        ],
+        "test7.0": [
+            "@phpstan7.0",
+            "@phpcs",
+            "@phpmd",
+            "@phpunit",
+            "@coverage"
+        ],
+        "phpstan": "phpstan analyse -c tests/static/phpstan.neon",
+        "phpstan7.0": "phpstan analyse -l 1 -c tests/static/phpstan7.0.neon src",
+        "phpcs": "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
+        "phpmd": "phpmd src xml tests/static/phpmd-ruleset.xml",
+        "phpunit": "phpunit --configuration tests/unit",
+        "coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
+        "coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage",
+        "pre-autoload-dump": [
+            "Magento\\MagentoCloud\\Composer\\ClearAutoload::preAutoloadDump"
+        ]
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "prefer-stable": true,
+    "extra": {
+        "map": [
+            [
+                "dist/.magento.env.yaml",
+                ".magento.env.yaml.dist"
+            ],
+            [
+                "dist/docker-sync.yml",
+                "docker-sync.yml"
+            ],
+            [
+                "dist/mutagen.sh",
+                "mutagen.sh"
+            ],
+            [
+                "dist/docker/mnt",
+                ".docker/mnt"
+            ],
+            [
+                "dist/docker/tmp",
+                ".docker/tmp"
+            ],
+            [
+                "dist/docker/mysql",
+                ".docker/mysql"
+            ],
+            [
+                "dist/docker/bin/docker",
+                "bin/docker"
+            ]
+        ],
+        "chmod": [
+            {
+                "mask": "0755",
+                "path": "bin/docker"
+            }
+        ]
+    }
 }
