@@ -59,9 +59,9 @@ class UrlsPattern
             list($entity, $pattern, $storeId) = explode(':', $warmUpPattern);
 
             $command = 'config:show:urls';
-            $commandArguments = [sprintf('--entity-type="%s"', $entity)];
+            $commandArguments = [sprintf('--entity-type=%s', $entity)];
             if ($storeId && $storeId !== '*') {
-                $commandArguments [] = sprintf('--store-id="%s"', $storeId);
+                $commandArguments [] = sprintf('--store-id=%s', $storeId);
             }
 
             $process = $this->magentoShell->execute($command, $commandArguments);

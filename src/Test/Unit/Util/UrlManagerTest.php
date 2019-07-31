@@ -376,7 +376,7 @@ class UrlManagerTest extends TestCase
 
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('config:show:store-url default')
+            ->with('config:show:default-url')
             ->willReturn($processMock);
 
         $this->environmentMock->expects($this->never())
@@ -397,7 +397,7 @@ class UrlManagerTest extends TestCase
 
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('config:show:store-url default')
+            ->with('config:show:default-url')
             ->willReturn($processMock);
 
         $this->assertSame('https://example.com/products/123', $this->manager->expandUrl('/products/123'));
@@ -461,12 +461,24 @@ class UrlManagerTest extends TestCase
 
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('config:show:store-url default')
+            ->with('config:show:default-url')
             ->willThrowException(new ShellException('some error'));
 
         $this->environmentMock->expects($this->once())
             ->method('getRoutes')
             ->willReturn(['http://example.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream']]);
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with(
+                'Cannot fetch base URL using the config:show:default-url command. ' .
+                'Instead, using the URL from the MAGENTO_CLOUD_ROUTES variable.'
+            );
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('debug')
+            ->withConsecutive(
+                ['some error'],
+                [$this->anything()]
+            );
 
         $this->assertEquals(
             'https://example.com/',
