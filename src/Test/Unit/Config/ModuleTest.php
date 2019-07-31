@@ -53,10 +53,16 @@ class ModuleTest extends TestCase
 
     public function testRefreshWithMissingModuleConfig()
     {
-        $this->configMock->expects($this->once())
+        $this->configMock->expects($this->exactly(2))
             ->method('get')
             ->with('modules')
-            ->willReturn(null);
+            ->willReturnOnConsecutiveCalls(
+                null,
+                [
+                    'Magento_Module1' => 1,
+                    'Magento_Module2' => 1,
+                ]
+            );
         $this->configMock->expects($this->once())
             ->method('reset');
         $this->magentoShellMock->expects($this->once())
@@ -65,41 +71,53 @@ class ModuleTest extends TestCase
         $this->configMock->expects($this->never())
             ->method('update');
 
-        $this->module->refresh();
+        $this->assertEquals(
+            [
+                'Magento_Module1',
+                'Magento_Module2',
+            ],
+            $this->module->refresh()
+        );
     }
 
     public function testRefreshWithNewModules()
     {
-        $this->configMock->expects($this->once())
+        $this->configMock->expects($this->exactly(2))
             ->method('get')
             ->with('modules')
-            ->willReturn(['Some_OtherModule' => 1]);
+            ->willReturnOnConsecutiveCalls(
+                [
+                    'Magento_Module1' => 1,
+                    'Magento_Module2' => 0,
+                    'Magento_Module3' => 1,
+                ],
+                [
+                    'Magento_Module1' => 1,
+                    'Magento_Module2' => 1,
+                    'Magento_Module3' => 1,
+                    'Magento_Module4' => 1,
+                    'Magento_Module5' => 1,
+                ]
+            );
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
             ->with('module:enable --all');
-        $this->configMock->expects($this->never())
+        $this->configMock->expects($this->once())
             ->method('reset');
         $this->configMock->expects($this->once())
             ->method('update')
-            ->with(['modules' => ['Some_OtherModule' => 1]])
-            ->willReturn(null);
+            ->with(['modules' => [
+                'Magento_Module1' => 1,
+                'Magento_Module2' => 0,
+                'Magento_Module3' => 1,
+            ]]);
 
-        $this->module->refresh();
-    }
-
-    public function testRefreshWithNoNewModules()
-    {
-        $this->configMock->expects($this->once())
-            ->method('get')
-            ->with('modules')
-            ->willReturn(['Some_ExistingModule' => 1]);
-        $this->configMock->expects($this->any())
-            ->method('all')
-            ->willReturn(['modules' => ['Some_ExistingModule' => 1]]);
-        $this->configMock->expects($this->any())
-            ->method('update')
-            ->willReturn(null);
-
-        $this->module->refresh();
+        $this->assertEquals(
+            [
+                'Magento_Module4',
+                'Magento_Module5',
+            ],
+            $this->module->refresh()
+        );
     }
 }

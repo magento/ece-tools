@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Process\Build;
 use Magento\MagentoCloud\Config\Module;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Shell\ShellException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -46,8 +45,13 @@ class RefreshModules implements ProcessInterface
         $this->logger->notice('Reconciling installed modules with shared config.');
 
         try {
-            $this->config->refresh();
-        } catch (ShellException $exception) {
+            $enabledModules = $this->config->refresh();
+            $this->logger->info(
+                $enabledModules ?
+                    'The following modules have been enabled:' . PHP_EOL . implode(PHP_EOL, $enabledModules) :
+                    'No modules were changed.'
+            );
+        } catch (\Exception $exception) {
             throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
         }
         $this->logger->notice('End of reconciling modules.');

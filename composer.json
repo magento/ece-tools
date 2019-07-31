@@ -88,7 +88,10 @@
     "phpmd": "phpmd src xml tests/static/phpmd-ruleset.xml",
     "phpunit": "phpunit --configuration tests/unit",
     "coverage": "phpunit --configuration tests/unit --coverage-clover tests/unit/tmp/clover.xml && php tests/unit/code-coverage.php tests/unit/tmp/clover.xml",
-    "coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage"
+    "coverage-generate": "phpunit --configuration tests/unit --coverage-html tests/unit/tmp/coverage",
+    "pre-autoload-dump": [
+      "Magento\\MagentoCloud\\Composer\\ClearAutoload::preAutoloadDump"
+    ]
   },
   "config": {
     "sort-packages": true

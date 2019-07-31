@@ -37,22 +37,25 @@ class Module
 
     /**
      * Reconciling installed modules with shared config.
+     * Returns list of new enabled modules or an empty array if no modules were enabled.
      *
      * @throws ShellException
      * @throws FileSystemException
      */
-    public function refresh()
+    public function refresh(): array
     {
         $moduleConfig = (array)$this->config->get('modules');
 
-        if (!$moduleConfig) {
-            $this->magentoShell->execute('module:enable --all');
-            $this->config->reset();
+        $this->magentoShell->execute('module:enable --all');
 
-            return;
+        $this->config->reset();
+
+        $updatedModuleConfig = (array)$this->config->get('modules');
+
+        if ($moduleConfig) {
+            $this->config->update(['modules' => $moduleConfig]);
         }
 
-        $this->magentoShell->execute('module:enable --all');
-        $this->config->update(['modules' => $moduleConfig]);
+        return array_keys(array_diff_key($updatedModuleConfig, $moduleConfig));
     }
 }
