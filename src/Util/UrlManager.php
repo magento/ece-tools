@@ -155,11 +155,15 @@ class UrlManager
     {
         if ($this->baseUrl === null) {
             try {
-                $process = $this->magentoShell->execute('config:show:store-url default');
+                $process = $this->magentoShell->execute('config:show:default-url');
 
                 $this->baseUrl = $process->getOutput();
             } catch (ShellException $e) {
-                $this->logger->error('Can\'t fetch base url. ' . $e->getMessage());
+                $this->logger->error(
+                    'Cannot fetch base URL using the config:show:default-url command. ' .
+                    'Instead, using the URL from the MAGENTO_CLOUD_ROUTES variable.'
+                );
+                $this->logger->debug($e->getMessage());
                 $this->baseUrl = $this->getSecureUrls()[''];
             }
         }
