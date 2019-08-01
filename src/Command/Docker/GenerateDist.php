@@ -7,9 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command\Docker;
 
-use Magento\MagentoCloud\Docker\Config\Dist\Generator;
-use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -22,16 +21,16 @@ class GenerateDist extends Command
     const NAME = 'docker:generate-dist';
 
     /**
-     * @var Generator
+     * @var ShellInterface
      */
-    private $distGenerator;
+    private $shell;
 
     /**
-     * @param Generator $distGenerator
+     * @param ShellInterface $shell
      */
-    public function __construct(Generator $distGenerator)
+    public function __construct(ShellInterface $shell)
     {
-        $this->distGenerator = $distGenerator;
+        $this->shell = $shell;
 
         parent::__construct();
     }
@@ -43,19 +42,20 @@ class GenerateDist extends Command
     {
         $this->setName(self::NAME)
             ->setAliases(['docker:config:convert'])
-            ->setDescription('Generates Docker .dist files');
+            ->setDescription('(deprecated) Generates Docker .dist files');
     }
 
     /**
      * {@inheritDoc}
      *
-     * @throws FileSystemException
-     * @throws ConfigurationMismatchException
+     * @throws ShellException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->distGenerator->generate();
+        $process = $this->shell->execute('./vendor/bin/ece-docker build:dist');
 
-        $output->writeln('<info>Dist files generated</info>');
+        $output->write($process->getOutput());
+
+        return $process->getExitCode();
     }
 }
