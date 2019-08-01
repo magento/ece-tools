@@ -69,7 +69,7 @@ class GenerateDockerCompose extends BaseTask implements CommandInterface
      */
     public function getCommand(): string
     {
-        $command = './vendor/bin/ece-docker build --mode=functional';
+        $command = './vendor/bin/ece-docker build:compose --mode=functional';
 
         foreach ($this->services as $service => $version) {
             $command .= sprintf(' --%s=%s', $service, $version);
