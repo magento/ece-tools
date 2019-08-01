@@ -15,6 +15,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Generates .dist files.
+ *
+ * @codeCoverageIgnore
  */
 class GenerateDist extends Command
 {
