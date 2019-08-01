@@ -4,3 +4,4 @@ parameters:
         - %currentWorkingDirectory%/src/Test/*
     ignoreErrors:
         - "#.*ComponentRegistrar not found.#"
+        - "#InputInterface to string#"
