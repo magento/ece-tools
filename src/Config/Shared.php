@@ -25,7 +25,7 @@ class Shared implements ConfigInterface
     private $writer;
 
     /**
-     * @var Repository
+     * @var Repository|null
      */
     private $config;
 

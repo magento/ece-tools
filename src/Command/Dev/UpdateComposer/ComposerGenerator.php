@@ -207,7 +207,7 @@ class ComposerGenerator
     {
         $add = function ($dir, $version = null) use (&$composer) {
             if (!$this->file->isExists($dir . '/composer.json')) {
-                return;
+                return 0;
             }
 
             $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);

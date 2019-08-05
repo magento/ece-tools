@@ -30,7 +30,8 @@ class DeveloperCompose extends ProductionCompose
     {
         $compose = parent::build($config);
         $compose['volumes'] = [
-            'magento-sync' => self::SYNC_ENGINE_DOCKER_SYNC === $config[self::SYNC_ENGINE] ? ['external' => true] : []
+            'magento-sync' => self::SYNC_ENGINE_DOCKER_SYNC === $config->get(self::SYNC_ENGINE) ?
+                ['external' => true] : []
         ];
 
         return $compose;

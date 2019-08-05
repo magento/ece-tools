@@ -1,0 +1,5 @@
+parameters:
+    excludes_analyse:
+        - %currentWorkingDirectory%/src/Test/*
+    ignoreErrors:
+        - "#.*ComponentRegistrar not found.#"
