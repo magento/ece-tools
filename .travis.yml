@@ -50,8 +50,8 @@ matrix:
       env: TEST_SUITE=functional
 
 install:
-  - if [ $TRAVIS_SECURE_ENV_VARS == "false" ]; then composer remove magento/magento-cloud-components --no-update; fi;
-  - composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}
+  - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer remove magento/magento-cloud-components --no-update; fi;
+  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}; fi;
   - composer update -n --no-suggest
 
 before_script:
