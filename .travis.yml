@@ -51,7 +51,7 @@ matrix:
 
 install:
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer remove magento/magento-cloud-components --no-update; fi;
-  - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer config --unset repositories.repo.magento.com fi;
+  - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer config --unset repositories.repo.magento.com; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}; fi;
   - composer update -n --no-suggest
 
