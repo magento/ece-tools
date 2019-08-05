@@ -26,7 +26,7 @@ class ValidateConfiguration implements ProcessInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param $validators
+     * @param array $validators
      */
     public function __construct(
         LoggerInterface $logger,

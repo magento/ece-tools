@@ -46,7 +46,7 @@ class SlaveConfig implements ConfigInterface
             $slaveConnection = [
                 'host' => $host,
                 'username' => $connectionData->getUser(),
-                'dbname' => $connectionData->getDBName(),
+                'dbname' => $connectionData->getDbName(),
                 'password' => $connectionData->getPassword(),
                 'model' => 'mysql4',
                 'engine' => 'innodb',

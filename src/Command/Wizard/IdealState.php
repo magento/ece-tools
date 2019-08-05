@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Command\Wizard;
 
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use Magento\MagentoCloud\Config\Validator\IdealState as IdealStateValidator;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -59,7 +60,7 @@ class IdealState extends Command
     {
         $message = 'The configured state is ideal';
 
-        if (!($result = $this->validator->validate()) instanceof Success) {
+        if (($result = $this->validator->validate()) instanceof Error) {
             $message = $result->getError();
 
             foreach ($this->validator->getErrors() as $error) {

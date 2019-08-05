@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\DB\Data;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Service\Database;
 
 /**
@@ -17,7 +16,7 @@ class RelationshipConnectionFactory
     const CONNECTION_SLAVE = 'slave';
 
     /**
-     * @var Environment
+     * @var Database
      */
     private $database;
 

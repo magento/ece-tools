@@ -1,0 +1,11 @@
+parameters:
+    level: 5
+    paths:
+        - src
+    excludes_analyse:
+        - %currentWorkingDirectory%/src/Test/*
+    ignoreErrors:
+        - message: "#.*ComponentRegistrar.*#"
+          path: %currentWorkingDirectory%/src/StaticContent/ThemeResolver.php
+        - message: "#Strict comparison using === between bool and null will always evaluate to false.#"
+          path: %currentWorkingDirectory%/src/Filesystem/Driver/File.php

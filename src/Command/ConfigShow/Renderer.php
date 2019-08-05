@@ -147,7 +147,7 @@ class Renderer
 
     /**
      * @param mixed $name
-     * @param $depth
+     * @param int $depth
      * @return string
      */
     protected function indentValue($name, $depth)

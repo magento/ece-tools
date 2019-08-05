@@ -5,14 +5,13 @@
  */
 namespace Magento\MagentoCloud\Process\Build\BackupData;
 
+use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
-use Monolog\Logger;
-use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
+use Magento\MagentoCloud\App\Logger;
 
 /**
  * Writable directories will be erased when the writable filesystem is mounted to them.
@@ -38,7 +37,7 @@ class WritableDirectories implements ProcessInterface
     private $globalConfig;
 
     /**
-     * @var LoggerInterface|Logger
+     * @var Logger
      */
     private $logger;
 
@@ -51,14 +50,14 @@ class WritableDirectories implements ProcessInterface
      * @param File $file
      * @param DirectoryList $directoryList
      * @param GlobalConfig $globalConfig
-     * @param LoggerInterface $logger
+     * @param Logger $logger
      * @param LoggerPool $loggerPool
      */
     public function __construct(
         File $file,
         DirectoryList $directoryList,
         GlobalConfig $globalConfig,
-        LoggerInterface $logger,
+        Logger $logger,
         LoggerPool $loggerPool
     ) {
         $this->file = $file;
