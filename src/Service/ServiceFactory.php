@@ -20,7 +20,6 @@ class ServiceFactory
         ServiceInterface::NAME_ELASTICSEARCH => ElasticSearch::class,
         ServiceInterface::NAME_RABBITMQ => RabbitMq::class,
         ServiceInterface::NAME_DB => Database::class,
-        ServiceInterface::NAME_PHP => Php::class,
     ];
 
     /**
