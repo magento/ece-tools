@@ -164,7 +164,9 @@ class UrlManager
                     'Instead, using the URL from the MAGENTO_CLOUD_ROUTES variable.'
                 );
                 $this->logger->debug($e->getMessage());
-                $this->baseUrl = $this->getSecureUrls()[''];
+
+                $urls = $this->getSecureUrls() ?? $this->getUnSecureUrls();
+                $this->baseUrl = $urls[''] ?? reset($urls);
             }
         }
 
