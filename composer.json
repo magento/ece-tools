@@ -102,7 +102,7 @@
       [
         "dist/.magento.env.yaml",
         ".magento.env.yaml.dist"
-      ],
+      ]
     ]
   }
 }
