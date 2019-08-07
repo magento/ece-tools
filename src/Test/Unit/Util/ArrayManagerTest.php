@@ -116,6 +116,14 @@ class ArrayManagerTest extends TestCase
             ],
             [
                 [
+                    'admin_user/locale/code' => [],
+                ],
+                'admin_user/locale/code',
+                false,
+                [],
+            ],
+            [
+                [
                     'admin_user/locale/code' => 'en_US',
                 ],
                 'admin_user/locale/code',
