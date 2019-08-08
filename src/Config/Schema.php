@@ -282,6 +282,17 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL => '',
                 ],
             ],
+            DeployInterface::VAR_LOCK_PROVIDER => [
+                self::SCHEMA_TYPE => ['string'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                self::SCHEMA_VALUE_VALIDATION => ['db', 'file'],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_DEPLOY => 'file',
+                ],
+            ],
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
