@@ -4,12 +4,12 @@
   "type": "magento2-component",
   "version": "2002.0.20",
   "license": "OSL-3.0",
-  "repositories": [
-    {
+  "repositories": {
+    "repo.magento.com": {
       "type": "composer",
       "url": "https://repo.magento.com/"
     }
-  ],
+  },
   "require": {
     "php": "^7.0",
     "ext-PDO": "*",

@@ -82,15 +82,15 @@ class UrlsPatternTest extends TestCase
             [
                 'category:*:1',
                 [
-                    '--entity-type="category"',
-                    '--store-id="1"'
+                    '--entity-type=category',
+                    '--store-id=1'
                 ],
                 [],
                 [],
             ],
             [
                 'category:*:*',
-                ['--entity-type="category"'],
+                ['--entity-type=category'],
                 [
                     'http://site1.com/category1',
                     'http://site1.com/category2',
@@ -102,7 +102,7 @@ class UrlsPatternTest extends TestCase
             ],
             [
                 'category:/category.*/:*',
-                ['--entity-type="category"'],
+                ['--entity-type=category'],
                 [
                     'http://site1.com/category1',
                     'http://site1.com/category2',
@@ -116,7 +116,7 @@ class UrlsPatternTest extends TestCase
             ],
             [
                 'category:cat1:*',
-                ['--entity-type="category"'],
+                ['--entity-type=category'],
                 [
                     'http://site1.com/category1',
                     'http://site1.com/cat1',
@@ -152,7 +152,7 @@ class UrlsPatternTest extends TestCase
             ->willReturn('wrong_json');
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('config:show:urls', ['--entity-type="category"'])
+            ->with('config:show:urls', ['--entity-type=category'])
             ->willReturn($processMock);
         $this->loggerMock->expects($this->once())
             ->method('error')

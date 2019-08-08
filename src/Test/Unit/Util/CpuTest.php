@@ -51,7 +51,7 @@ class CpuTest extends TestCase
             ->willReturn('8');
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->with('grep -c processor /proc/cpuinfo')
+            ->with('nproc')
             ->willReturn($processMock);
 
         $this->assertEquals(8, $this->cpu->getThreadsCount());
