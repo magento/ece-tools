@@ -55,7 +55,7 @@ class ArrayManager
             }
         }
 
-        return array_unique(array_values($filteredResult));
+        return array_unique(array_filter(array_values($filteredResult)));
     }
 
     /**
