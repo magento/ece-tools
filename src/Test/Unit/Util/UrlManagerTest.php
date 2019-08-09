@@ -486,6 +486,66 @@ class UrlManagerTest extends TestCase
         );
     }
 
+    /**
+     * @param array $routes
+     * @param string $expectedUrl
+     * @dataProvider getBaseUrlDataProvider
+     */
+    public function testGetBaseUrlWithErrorFromDefaultUrlCommand(array $routes, string $expectedUrl)
+    {
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $processMock->expects($this->never())
+            ->method('getOutput');
+        $this->magentoShellMock->expects($this->once())
+            ->method('execute')
+            ->with('config:show:default-url')
+            ->willThrowException(new ShellException('some error'));
+        $this->environmentMock->expects($this->once())
+            ->method('getRoutes')
+            ->willReturn($routes);
+
+        $this->assertEquals($expectedUrl, $this->manager->getBaseUrl());
+    }
+
+    /**
+     * @return array
+     */
+    public function getBaseUrlDataProvider(): array
+    {
+        return [
+            [
+                [
+                    'http://unsecure.com/' => ['original_url' => 'https://{all}', 'type' => 'upstream']
+                ],
+                'https://unsecure.com/'
+            ],
+            [
+                [
+                    'http://unsecure.com/' => ['original_url' => 'https://{all}', 'type' => 'upstream'],
+                    'http://unsecure-default.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream'],
+                ],
+                'https://unsecure-default.com/'
+            ],
+            [
+                [
+                    'https://secure.com/' => ['original_url' => 'https://{all}', 'type' => 'upstream'],
+                    'http://unsecure.com/' => ['original_url' => 'https://{all}', 'type' => 'upstream'],
+                    'http://unsecure-default.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream'],
+                ],
+                'https://secure.com/'
+            ],
+            [
+                [
+                    'https://secure.com/' => ['original_url' => 'https://{all}', 'type' => 'upstream'],
+                    'https://secure-default.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream'],
+                    'http://unsecure.com/' => ['original_url' => 'https://{all}', 'type' => 'upstream'],
+                    'http://unsecure-default.com/' => ['original_url' => 'https://{default}', 'type' => 'upstream'],
+                ],
+                'https://secure-default.com/'
+            ],
+        ];
+    }
+
     public function testGetBaseUrls()
     {
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
