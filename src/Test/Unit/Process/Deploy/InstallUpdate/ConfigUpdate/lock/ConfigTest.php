@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Lock\Config;
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -21,6 +22,11 @@ class ConfigTest extends TestCase
     private $environmentMock;
 
     /**
+     * @var DeployInterface|Mock
+     */
+    private $stageConfigMock;
+
+    /**
      * @var Config
      */
     private $config;
@@ -31,20 +37,26 @@ class ConfigTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->config = new Config($this->environmentMock);
+        $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->config = new Config($this->environmentMock, $this->stageConfigMock);
     }
 
     /**
      * @param $lockPath
+     * @param string $lockProvider
      * @param array $expectedResult
      * @dataProvider getDataProvider
      */
-    public function testGet($lockPath, array $expectedResult)
+    public function testGet($lockPath, $lockProvider, array $expectedResult)
     {
         $this->environmentMock->expects($this->once())
             ->method('getEnv')
             ->with('MAGENTO_CLOUD_LOCKS_DIR')
             ->willReturn($lockPath);
+        $this->stageConfigMock->expects($this->any())
+            ->method('get')
+            ->with(DeployInterface::VAR_LOCK_PROVIDER)
+            ->willReturn($lockProvider);
         $this->assertSame($expectedResult, $this->config->get());
     }
 
@@ -54,8 +66,9 @@ class ConfigTest extends TestCase
     public function getDataProvider(): array
     {
         return [
-            'There is MAGENTO_CLOUD_LOCKS_DIR' => [
+            'There is MAGENTO_CLOUD_LOCKS_DIR and LOCK_PROVIDER is file' => [
                 'lockPath' => '/tmp/locks',
+                'lockProvider' => 'file',
                 'expectedResult' => [
                     'provider' => 'file',
                     'config' => [
@@ -63,8 +76,29 @@ class ConfigTest extends TestCase
                     ],
                 ],
             ],
-            'There is no MAGENTO_CLOUD_LOCKS_DIR' => [
+            'There is MAGENTO_CLOUD_LOCKS_DIR and LOCK_PROVIDER is db' => [
+                'lockPath' => '/tmp/locks',
+                'lockProvider' => 'db',
+                'expectedResult' => [
+                    'provider' => 'db',
+                    'config' => [
+                        'prefix' => null,
+                    ],
+                ],
+            ],
+            'There is no MAGENTO_CLOUD_LOCKS_DIR and LOCK_PROVIDER is file' => [
                 'lockPath' => null,
+                'lockProvider' => 'file',
+                'expectedResult' => [
+                    'provider' => 'db',
+                    'config' => [
+                        'prefix' => null,
+                    ],
+                ],
+            ],
+            'There is no MAGENTO_CLOUD_LOCKS_DIR and LOCK_PROVIDER is db' => [
+                'lockPath' => null,
+                'lockProvider' => 'db',
                 'expectedResult' => [
                     'provider' => 'db',
                     'config' => [

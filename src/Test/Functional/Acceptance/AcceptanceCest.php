@@ -150,10 +150,11 @@ class AcceptanceCest extends AbstractCest
                     ],
                 ],
             ],
-            'test cron_consumers_runner with wrong array' => [
+            'test cron_consumers_runner with wrong array, there is MAGENTO_CLOUD_LOCKS_DIR, LOCK_PROVIDER is db' => [
                 'cloudVariables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
+                        'LOCK_PROVIDER' => 'db',
                         'CRON_CONSUMERS_RUNNER' => [
                             'cron_run' => 'true',
                             'max_messages' => 5000,
@@ -161,7 +162,9 @@ class AcceptanceCest extends AbstractCest
                         ],
                     ],
                 ],
-                'rawVariables' => [],
+                'rawVariables' => [
+                    'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
+                ],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
@@ -170,6 +173,12 @@ class AcceptanceCest extends AbstractCest
                     ],
                     'directories' => [
                         'document_root_is_pub' => true,
+                    ],
+                    'lock' => [
+                        'provider' => 'db',
+                        'config' => [
+                            'prefix' => null,
+                        ],
                     ],
                 ],
             ],
