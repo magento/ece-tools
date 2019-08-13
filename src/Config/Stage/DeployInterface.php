@@ -26,6 +26,11 @@ interface DeployInterface extends StageConfigInterface
     const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
 
     /**
+     * The variable responsible to set lock provider for Magento 2.2.5 and higher.
+     */
+    const VAR_LOCK_PROVIDER = 'LOCK_PROVIDER';
+
+    /**
      * The variable responsible to set Redis slave connection when it has true value.
      */
     const VAR_REDIS_USE_SLAVE_CONNECTION = 'REDIS_USE_SLAVE_CONNECTION';

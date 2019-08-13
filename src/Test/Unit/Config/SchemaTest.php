@@ -78,6 +78,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => false,
                 DeployInterface::VAR_SCD_MATRIX => [],
                 DeployInterface::VAR_RESOURCE_CONFIGURATION => [],
+                DeployInterface::VAR_LOCK_PROVIDER => 'file',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
