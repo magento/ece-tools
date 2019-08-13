@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Lock;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
  * Returns lock configuration.
@@ -18,11 +19,18 @@ class Config
     private $environment;
 
     /**
-     * @param Environment $environment
+     * @var DeployInterface
      */
-    public function __construct(Environment $environment)
+    private $stageConfig;
+
+    /**
+     * @param Environment $environment
+     * @param DeployInterface $stageConfig
+     */
+    public function __construct(Environment $environment, DeployInterface $stageConfig)
     {
         $this->environment = $environment;
+        $this->stageConfig = $stageConfig;
     }
 
     /**
@@ -36,7 +44,7 @@ class Config
     public function get(): array
     {
         $lockPath = $this->environment->getEnv('MAGENTO_CLOUD_LOCKS_DIR');
-        if ($lockPath) {
+        if ($lockPath && $this->stageConfig->get(DeployInterface::VAR_LOCK_PROVIDER) === 'file') {
             return [
                 'provider' => 'file',
                 'config' => [

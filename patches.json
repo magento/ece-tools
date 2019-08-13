@@ -107,7 +107,13 @@
     },
     "Fix Problems with Consumer Runners on Cloud Clusters": {
       "2.2.0 - 2.2.3": "MAGECLOUD-2464__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.0.patch",
-      "2.2.4 - 2.2.5": "MAGECLOUD-2464__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.4.patch"
+      "2.2.4": "MAGECLOUD-2464__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.4.patch",
+      "2.2.5": "MAGECLOUD-3913__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.5.patch",
+      "2.2.6": "MAGECLOUD-3913__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.6.patch",
+      "2.2.7": "MAGECLOUD-3913__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.7.patch",
+      "2.2.8 - 2.2.9": "MAGECLOUD-3913__fix_problems_with_consumer_runners_on_cloud_clusters__2.2.8.patch",
+      "2.3.0": "MAGECLOUD-3913__fix_problems_with_consumer_runners_on_cloud_clusters__2.3.0.patch",
+      "2.3.1 - 2.3.2": "MAGECLOUD-3913__fix_problems_with_consumer_runners_on_cloud_clusters__2.3.1.patch"
     },
     "Resolve Issues with Cron Schedule": {
       "2.1.10 - 2.1.14 || 2.2.2 - 2.2.5": "MAGECLOUD-2427__resolve_issues_with_cron_schedule.patch"
