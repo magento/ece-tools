@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -29,14 +30,22 @@ class DeprecatedVariables implements ValidatorInterface
     private $environment;
 
     /**
+     * @var MergedConfig
+     */
+    private $config;
+
+    /**
      * @param Environment $environment
+     * @param MergedConfig $config
      * @param ResultFactory $resultFactory
      */
     public function __construct(
         Environment $environment,
+        MergedConfig $config,
         ResultFactory $resultFactory
     ) {
         $this->environment = $environment;
+        $this->config = $config;
         $this->resultFactory = $resultFactory;
     }
 
@@ -47,7 +56,7 @@ class DeprecatedVariables implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $variables = $this->environment->getVariables();
+        $variables = $this->config->get();
         $errors = [];
 
         if (isset($variables[DeployInterface::VAR_VERBOSE_COMMANDS]) &&
