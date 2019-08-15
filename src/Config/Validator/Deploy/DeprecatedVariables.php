@@ -99,6 +99,13 @@ class DeprecatedVariables implements ValidatorInterface
             );
         }
 
+        if (!$config[DeployInterface::VAR_STATIC_CONTENT_SYMLINK]) {
+            $errors[] = sprintf(
+                'The %s variable is deprecated and its behavior will not be supported in the future.',
+                DeployInterface::VAR_STATIC_CONTENT_SYMLINK
+            );
+        }
+
         if ($errors) {
             return $this->resultFactory->error(
                 'The configuration contains deprecated variables or values',
