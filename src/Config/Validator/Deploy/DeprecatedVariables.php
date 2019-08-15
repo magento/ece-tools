@@ -71,7 +71,9 @@ class DeprecatedVariables implements ValidatorInterface
         }
 
         // default value for SCD_EXCLUDE_THEMES is an empty string
-        if ($config[DeployInterface::VAR_SCD_EXCLUDE_THEMES] !== '') {
+        if (isset($config[DeployInterface::VAR_SCD_EXCLUDE_THEMES])
+            && $config[DeployInterface::VAR_SCD_EXCLUDE_THEMES] !== ''
+        ) {
             $errors[] = sprintf(
                 'The %s variable is deprecated. Use %s instead.',
                 DeployInterface::VAR_SCD_EXCLUDE_THEMES,
@@ -99,7 +101,9 @@ class DeprecatedVariables implements ValidatorInterface
             );
         }
 
-        if (!$config[DeployInterface::VAR_STATIC_CONTENT_SYMLINK]) {
+        if (isset($config[DeployInterface::VAR_STATIC_CONTENT_SYMLINK])
+            && $config[DeployInterface::VAR_STATIC_CONTENT_SYMLINK] === false
+        ) {
             $errors[] = sprintf(
                 'The %s variable is deprecated and its behavior will not be supported in the future.',
                 DeployInterface::VAR_STATIC_CONTENT_SYMLINK
