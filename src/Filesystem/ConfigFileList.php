@@ -49,6 +49,7 @@ class ConfigFileList
 
     /**
      * @return string
+     * @deprecated File build_options.ini is unsupported, this method only uses in the validator class
      */
     public function getBuildConfig(): string
     {

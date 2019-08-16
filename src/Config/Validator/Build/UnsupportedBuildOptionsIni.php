@@ -3,18 +3,20 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 
 /**
- *  Writes warning message about deprecation if file build_options.ini exists.
+ *  Writes critical message if file build_options.ini exists.
  */
-class DeprecatedBuildOptionsIni implements ValidatorInterface
+class UnsupportedBuildOptionsIni implements ValidatorInterface
 {
     /**
      * @var File
@@ -52,7 +54,7 @@ class DeprecatedBuildOptionsIni implements ValidatorInterface
     {
         if ($this->file->isExists($this->fileList->getBuildConfig())) {
             return $this->resultFactory->error(
-                sprintf('The %s file has been deprecated', basename($this->fileList->getBuildConfig())),
+                sprintf('The %s file is not supported.', basename($this->fileList->getBuildConfig())),
                 sprintf(
                     'Modify your configuration to use the %s file',
                     basename($this->fileList->getEnvConfig())

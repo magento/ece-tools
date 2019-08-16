@@ -3,11 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
-use Magento\MagentoCloud\Config\Validator\Build\DeprecatedBuildOptionsIni;
+use Magento\MagentoCloud\Config\Validator\Build\UnsupportedBuildOptionsIni;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
-use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\TestCase;
@@ -16,10 +17,10 @@ use PHPUnit_Framework_MockObject_MockObject as Mock;
 /**
  * @inheritdoc
  */
-class DeprecatedBuildOptionsIniTest extends TestCase
+class UnsupportedBuildOptionsIniTest extends TestCase
 {
     /**
-     * @var DeprecatedBuildOptionsIni
+     * @var UnsupportedBuildOptionsIni
      */
     private $validator;
 
@@ -47,7 +48,7 @@ class DeprecatedBuildOptionsIniTest extends TestCase
         $this->fileListMock = $this->createMock(FileList::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
-        $this->validator = new DeprecatedBuildOptionsIni(
+        $this->validator = new UnsupportedBuildOptionsIni(
             $this->fileMock,
             $this->fileListMock,
             $this->resultFactoryMock
@@ -88,7 +89,7 @@ class DeprecatedBuildOptionsIniTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'The build_options.ini file has been deprecated',
+                'The build_options.ini file is not supported.',
                 'Modify your configuration to use the magento.env.yaml file'
             );
 
