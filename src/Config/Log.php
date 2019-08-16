@@ -96,7 +96,7 @@ class Log
             $this->config = array_replace_recursive(
                 [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['stream' => $this->fileList->getCloudLog()],
+                    HandlerFactory::HANDLER_FILE => ['file' => $this->fileList->getCloudLog()],
                 ],
                 $this->reader->read()[static::SECTION_CONFIG] ?? []
             );
