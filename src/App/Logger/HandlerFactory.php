@@ -14,7 +14,6 @@ use Monolog\Handler\SlackHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogHandler;
 use Monolog\Handler\SyslogUdpHandler;
-use Monolog\Logger;
 
 /**
  * The handler factory.
@@ -81,8 +80,13 @@ class HandlerFactory
         $minLevel = $this->levelResolver->resolve($configuration->get('min_level', $defaultLevel));
 
         switch ($handler) {
-            case static::HANDLER_STREAM:
             case static::HANDLER_FILE:
+                $handlerInstance = new StreamHandler(
+                    $configuration->get('file'),
+                    $this->levelResolver->resolve($configuration->get('min_level', LogConfig::LEVEL_DEBUG))
+                );
+                break;
+            case static::HANDLER_STREAM:
                 $defaultLevelStream = $levelOverride ?: LogConfig::LEVEL_INFO;
                 $handlerInstance = new StreamHandler(
                     $configuration->get('stream'),
