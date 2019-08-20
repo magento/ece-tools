@@ -22,15 +22,24 @@ class AcceptanceCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function _before(\CliTester $I)
+    {
+        parent::_before($I);
+        $I->cloneTemplate();
+        $I->addEceComposerRepo();
+        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+    }
+
+    /**
+     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider defaultDataProvider
      */
     public function testDefault(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand(
@@ -141,10 +150,11 @@ class AcceptanceCest extends AbstractCest
                     ],
                 ],
             ],
-            'test cron_consumers_runner with wrong array' => [
+            'test cron_consumers_runner with wrong array, there is MAGENTO_CLOUD_LOCKS_DIR, LOCK_PROVIDER is db' => [
                 'cloudVariables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
+                        'LOCK_PROVIDER' => 'db',
                         'CRON_CONSUMERS_RUNNER' => [
                             'cron_run' => 'true',
                             'max_messages' => 5000,
@@ -152,7 +162,9 @@ class AcceptanceCest extends AbstractCest
                         ],
                     ],
                 ],
-                'rawVariables' => [],
+                'rawVariables' => [
+                    'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
+                ],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
@@ -161,6 +173,12 @@ class AcceptanceCest extends AbstractCest
                     ],
                     'directories' => [
                         'document_root_is_pub' => true,
+                    ],
+                    'lock' => [
+                        'provider' => 'db',
+                        'config' => [
+                            'prefix' => null,
+                        ],
                     ],
                 ],
             ],
@@ -231,8 +249,6 @@ class AcceptanceCest extends AbstractCest
      */
     public function testWithSplitBuildCommand(\CliTester $I)
     {
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build:generate', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build:transfer', Docker::BUILD_CONTAINER));
         $I->startEnvironment();
@@ -251,8 +267,6 @@ class AcceptanceCest extends AbstractCest
     {
         $tmpConfig = sys_get_temp_dir() . '/app/etc/config.php';
         $I->startEnvironment();
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
@@ -270,7 +284,7 @@ class AcceptanceCest extends AbstractCest
         $I->assertTrue($I->cleanUpEnvironment());
 
         $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->addEceComposerRepo());
         $I->assertTrue($I->uploadToContainer($tmpConfig, '/app/etc/config.php', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));

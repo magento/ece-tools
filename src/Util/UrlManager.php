@@ -7,7 +7,8 @@ namespace Magento\MagentoCloud\Util;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\MagentoShell;
+use Magento\MagentoCloud\Shell\ShellFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -41,28 +42,28 @@ class UrlManager
     private $storeBaseUrls = [];
 
     /**
-     * @var null
+     * @var string
      */
-    private $baseUrl = null;
+    private $baseUrl;
 
     /**
-     * @var ShellInterface
+     * @var MagentoShell
      */
-    private $shell;
+    private $magentoShell;
 
     /**
      * @param Environment $environment
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
+     * @param ShellFactory $shellFactory
      */
     public function __construct(
         Environment $environment,
         LoggerInterface $logger,
-        ShellInterface $shell
+        ShellFactory $shellFactory
     ) {
         $this->environment = $environment;
         $this->logger = $logger;
-        $this->shell = $shell;
+        $this->magentoShell = $shellFactory->createMagento();
     }
 
     /**
@@ -154,12 +155,18 @@ class UrlManager
     {
         if ($this->baseUrl === null) {
             try {
-                $process = $this->shell->execute('php bin/magento config:show:store-url default');
+                $process = $this->magentoShell->execute('config:show:default-url');
 
                 $this->baseUrl = $process->getOutput();
             } catch (ShellException $e) {
-                $this->logger->error('Can\'t fetch base url. ' . $e->getMessage());
-                $this->baseUrl = $this->getSecureUrls()[''];
+                $this->logger->error(
+                    'Cannot fetch base URL using the config:show:default-url command. ' .
+                    'Instead, using the URL from the MAGENTO_CLOUD_ROUTES variable.'
+                );
+                $this->logger->debug($e->getMessage());
+
+                $urls = $this->getSecureUrls() ?? $this->getUnSecureUrls();
+                $this->baseUrl = $urls[''] ?? reset($urls);
             }
         }
 
@@ -185,7 +192,7 @@ class UrlManager
     {
         if (!$this->storeBaseUrls) {
             try {
-                $process = $this->shell->execute('php bin/magento config:show:store-url');
+                $process = $this->magentoShell->execute('config:show:store-url');
 
                 $baseUrls = json_decode($process->getOutput(), true);
 

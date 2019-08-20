@@ -33,7 +33,19 @@ class ServiceFactory
             'image' => 'magento/magento-cloud-docker-php:%s-fpm'
         ],
         self::SERVICE_DB => [
-            'image' => 'mariadb:%s'
+            'image' => 'mariadb:%s',
+            'config' => [
+                'volumes' => [
+                    '/var/lib/mysql',
+                    './.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
+                ],
+                'environment' => [
+                    'MYSQL_ROOT_PASSWORD=magento2',
+                    'MYSQL_DATABASE=magento2',
+                    'MYSQL_USER=magento2',
+                    'MYSQL_PASSWORD=magento2',
+                ]
+            ]
         ],
         self::SERVICE_NGINX => [
             'image' => 'magento/magento-cloud-docker-nginx:%s'

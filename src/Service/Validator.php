@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Service;
 
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 
 /**
@@ -23,34 +22,37 @@ class Validator
      * and value of its element is the service version constraint
      */
     const MAGENTO_SUPPORTED_SERVICE_VERSIONS = [
-        Service::NAME_PHP => [
+        ServiceInterface::NAME_PHP => [
             '<=2.2.4' => '>=7.0 <7.2',        //'7.0.2|7.0.4|~7.0.6|~7.1.0',
-            '>=2.2.5 <2.3.0' => '>=7.0 <7.2', //'~7.0.13|~7.1.0',
-            '>=2.3.0' => '>=7.1 <7.3',        //'~7.1.3 || ~7.2.0',
+            '>=2.2.5 <2.2.10' => '>=7.0 <7.2', //'~7.0.13|~7.1.0',
+            '>=2.2.10 <2.3.0' => '>=7.1 <7.3', //'~7.1.0|~7.2.0',
+            '>=2.3.0 <2.3.3' => '>=7.1 <7.3',   //'~7.1.3 || ~7.2.0',
+            '>=2.3.3' => '>=7.1 <7.4',       //  '~7.1.3||~7.2.0||~7.3.0'
         ],
-        Service::NAME_DB => [
+        ServiceInterface::NAME_DB => [
             '*' => '>=10.0 <10.3',
         ],
-        Service::NAME_NGINX => [
+        ServiceInterface::NAME_NGINX => [
             '*' => '^1.9.0',
         ],
-        Service::NAME_VARNISH=> [
+        ServiceInterface::NAME_VARNISH=> [
             '<2.2.0' => '~3.5.0 || ^4.0',
-            '>=2.2.0' => '^4.0 || ^5.0',
+            '>=2.2.0 <2.3.3'=> '^4.0 || ^5.0',
+            '>=2.3.3' => '^4.0 || ^5.0 || ^6.2',
         ],
-        Service::NAME_REDIS => [
+        ServiceInterface::NAME_REDIS => [
             '*' => '~3.2.0 || ~4.0.0 || ~5.0.0',
         ],
-        Service::NAME_ELASTICSEARCH => [
+        ServiceInterface::NAME_ELASTICSEARCH => [
             '<2.2.0' => '~1.7.0 || ~2.4.0',
             '>=2.2.0 <2.2.8 || 2.3.0' => '~1.7.0 || ~2.4.0 || ~5.2.0',
             '>=2.2.8 <2.3.0 || >=2.3.1' => '~1.7.0 || ~2.4.0 || ~5.2.0 || ~6.5.0',
         ],
-        Service::NAME_RABBITMQ => [
+        ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
             '>=2.3.0' => '~3.5.0 || ~3.7.0',
         ],
-        Service::NAME_NODE => [
+        ServiceInterface::NAME_NODE => [
             '*' => '^6 || ^8 || ^10 || ^11',
         ]
     ];
@@ -92,7 +94,7 @@ class Validator
      * @param array $serviceVersions List of services and their names which should be validates.
      * @return array List of warning messages. One message for one unsupported service.
      *
-     * @throws ConfigurationMismatchException
+     * @throws ServiceMismatchException
      * @throws UndefinedPackageException
      */
     public function validateVersions(array $serviceVersions): array
@@ -113,7 +115,7 @@ class Validator
      * @param string $version Service version for validation
      * @return string Failed validation message
      *
-     * @throws ConfigurationMismatchException
+     * @throws ServiceMismatchException
      * @throws UndefinedPackageException
      */
     public function validateService(string $serviceName, string $version): string
@@ -147,7 +149,7 @@ class Validator
      *
      * @return array
      *
-     * @throws ConfigurationMismatchException
+     * @throws ServiceMismatchException
      * @throws UndefinedPackageException
      */
     private function getSupportedVersions(): array
@@ -161,7 +163,7 @@ class Validator
                     }
                 }
                 if (!$this->supportedVersionList[$serviceName]) {
-                    throw new ConfigurationMismatchException(sprintf(
+                    throw new ServiceMismatchException(sprintf(
                         'Service "%s" does not have defined configurations for "%s" Magento version',
                         $serviceName,
                         $this->magentoVersion->getVersion()

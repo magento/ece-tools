@@ -6,9 +6,9 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config;
+use Magento\MagentoCloud\Service\RabbitMq;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
@@ -23,9 +23,9 @@ class ConfigTest extends TestCase
     protected $config;
 
     /**
-     * @var Environment|Mock
+     * @var RabbitMq|Mock
      */
-    protected $environmentMock;
+    protected $rabbitMq;
 
     /**
      * @var DeployInterface|Mock
@@ -37,11 +37,11 @@ class ConfigTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->rabbitMq = $this->createMock(RabbitMq::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->config = new Config(
-            $this->environmentMock,
+            $this->rabbitMq,
             $this->stageConfigMock,
             new ConfigMerger()
         );
@@ -49,24 +49,23 @@ class ConfigTest extends TestCase
 
     /**
      * @param array $customQueueConfig
-     * @param array $magentoRelationShipsQueueConfig
+     * @param array $amqpServiceConfig
      * @param array $expectedQueueConfig
      * @dataProvider getDataProvider
      * @return void
      */
     public function testGet(
         $customQueueConfig,
-        $magentoRelationShipsQueueConfig,
+        $amqpServiceConfig,
         $expectedQueueConfig
     ) {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_QUEUE_CONFIGURATION)
             ->willReturn($customQueueConfig);
-        $this->environmentMock->expects($this->exactly(3))
-            ->method('getRelationship')
-            ->withConsecutive(['rabbitmq'], ['mq'], ['amqp'])
-            ->willReturnOnConsecutiveCalls([], [], $magentoRelationShipsQueueConfig);
+        $this->rabbitMq->expects($this->once())
+            ->method('getConfiguration')
+            ->willReturn($amqpServiceConfig);
 
         $this->assertEquals($expectedQueueConfig, $this->config->get());
     }
@@ -80,7 +79,7 @@ class ConfigTest extends TestCase
         return [
             'queue configuration does not exist' => [
                 'customQueueConfig' => [],
-                'magentoRelationShipsQueueConfig' => [],
+                'amqpServiceConfig' => [],
                 'expectedQueueConfig' => [],
             ],
             'only custom queue configuration exists' => [
@@ -93,7 +92,7 @@ class ConfigTest extends TestCase
                         'virtualhost' => 'custom_vhost',
                     ],
                 ],
-                'magentoRelationShipsQueueConfig' => [],
+                'amqpServiceConfig' => [],
                 'expectedQueueConfig' => [
                     'amqp' => [
                         'host' => 'custom_host',
@@ -114,14 +113,12 @@ class ConfigTest extends TestCase
                         'virtualhost' => 'custom_vhost',
                     ],
                 ],
-                'magentoRelationShipsQueueConfig' => [
-                    0 => [
-                        'host' => 'localhost',
-                        'port' => 5538,
-                        'username' => 'johndoe',
-                        'password' => 'qwerty',
-                        'vhost' => '/'
-                    ]
+                'amqpServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 5538,
+                    'username' => 'johndoe',
+                    'password' => 'qwerty',
+                    'vhost' => '/'
                 ],
                 'expectedQueueConfig' => [
                     'amqp' => [
@@ -142,14 +139,12 @@ class ConfigTest extends TestCase
                     ],
                     '_merge' => true,
                 ],
-                'magentoRelationShipsQueueConfig' => [
-                    0 => [
-                        'host' => 'localhost',
-                        'port' => 5538,
-                        'username' => 'johndoe',
-                        'password' => 'qwerty',
-                        'vhost' => '/'
-                    ]
+                'amqpServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 5538,
+                    'username' => 'johndoe',
+                    'password' => 'qwerty',
+                    'vhost' => '/'
                 ],
                 'expectedQueueConfig' => [
                     'amqp' => [
@@ -163,14 +158,12 @@ class ConfigTest extends TestCase
             ],
             'only relationships queue configuration exists' => [
                 'customQueueConfig' => [],
-                'magentoRelationShipsQueueConfig' => [
-                    0 => [
-                        'host' => 'localhost',
-                        'port' => 5538,
-                        'username' => 'johndoe',
-                        'password' => 'qwerty',
-                        'vhost' => '/'
-                    ]
+                'amqpServiceConfig' => [
+                    'host' => 'localhost',
+                    'port' => 5538,
+                    'username' => 'johndoe',
+                    'password' => 'qwerty',
+                    'vhost' => '/'
                 ],
                 'expectedQueueConfig' => [
                     'amqp' => [

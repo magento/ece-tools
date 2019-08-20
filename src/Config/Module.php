@@ -6,8 +6,9 @@
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\ShellFactory;
 
 /**
  * Performs module management operations.
@@ -20,38 +21,41 @@ class Module
     private $config;
 
     /**
-     * @var ShellInterface
+     * @var MagentoShell
      */
-    private $shell;
+    private $magentoShell;
 
     /**
      * @param ConfigInterface $config
-     * @param ShellInterface $shell
+     * @param ShellFactory $shellFactory
      */
-    public function __construct(ConfigInterface $config, ShellInterface $shell)
+    public function __construct(ConfigInterface $config, ShellFactory $shellFactory)
     {
         $this->config = $config;
-        $this->shell = $shell;
+        $this->magentoShell = $shellFactory->createMagento();
     }
 
     /**
      * Reconciling installed modules with shared config.
+     * Returns list of new enabled modules or an empty array if no modules were enabled.
      *
      * @throws ShellException
      * @throws FileSystemException
      */
-    public function refresh()
+    public function refresh(): array
     {
         $moduleConfig = (array)$this->config->get('modules');
 
-        if (!$moduleConfig) {
-            $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
-            $this->config->reset();
+        $this->magentoShell->execute('module:enable --all');
 
-            return;
+        $this->config->reset();
+
+        $updatedModuleConfig = (array)$this->config->get('modules');
+
+        if ($moduleConfig) {
+            $this->config->update(['modules' => $moduleConfig]);
         }
 
-        $this->shell->execute('php ./bin/magento module:enable --all --ansi --no-interaction');
-        $this->config->update(['modules' => $moduleConfig]);
+        return array_keys(array_diff_key($updatedModuleConfig, $moduleConfig));
     }
 }

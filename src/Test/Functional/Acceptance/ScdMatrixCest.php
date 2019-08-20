@@ -16,14 +16,23 @@ class ScdMatrixCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function _before(\CliTester $I)
+    {
+        parent::_before($I);
+        $I->cloneTemplate();
+        $I->addEceComposerRepo();
+    }
+
+    /**
+     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider scdOnDeployDataProvider
      */
     public function testScdOnDeploy(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->composerInstall());
         $I->assertTrue($I->uploadToContainer($data['env_yaml'], '/.magento.env.yaml', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->startEnvironment();

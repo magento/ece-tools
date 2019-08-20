@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command\Docker\Build;
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Command\Docker\Build\Writer;
 use Magento\MagentoCloud\Docker\ComposeInterface;
-use Magento\MagentoCloud\Docker\Config\DistGenerator;
+use Magento\MagentoCloud\Docker\Config\Dist\Generator;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
@@ -31,7 +31,7 @@ class WriterTest extends TestCase
     private $fileMock;
 
     /**
-     * @var DistGenerator|MockObject
+     * @var Generator|MockObject
      */
     private $distGeneratorMock;
 
@@ -41,7 +41,7 @@ class WriterTest extends TestCase
     protected function setUp()
     {
         $this->fileMock = $this->createMock(File::class);
-        $this->distGeneratorMock = $this->createMock(DistGenerator::class);
+        $this->distGeneratorMock = $this->createMock(Generator::class);
 
         $this->writer = new Writer($this->fileMock, $this->distGeneratorMock);
     }

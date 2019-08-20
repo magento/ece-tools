@@ -12,7 +12,6 @@ use Magento\MagentoCloud\Command\ConfigDump\Generate;
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -38,7 +37,7 @@ class ConfigDump extends Command
     private $shell;
 
     /**
-     * @var ProcessInterface
+     * @var Generate
      */
     private $generate;
 
@@ -118,7 +117,7 @@ class ConfigDump extends Command
             if (!$this->magentoVersion->isGreaterOrEqual('2.2')) {
                 $this->logger->info('Dump completed.');
 
-                return;
+                return 0;
             }
 
             $this->shell->execute('app:config:import');

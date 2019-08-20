@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\App;
 use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Command\ModuleRefresh;
 use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\Database\ConfigInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
@@ -263,6 +264,7 @@ class Container implements ContainerInterface
                                     $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
                                     $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
                                     $this->container->make(ConfigValidator\Deploy\JsonFormatVariable::class),
+                                    $this->container->make(ConfigValidator\Deploy\ServiceVersion::class),
                                 ],
                             ],
                         ]),
@@ -389,9 +391,9 @@ class Container implements ContainerInterface
         $this->container->when(CronKill::class)
             ->needs(ProcessInterface::class)
             ->give(DeployProcess\CronProcessKill::class);
-        $this->container->when(PostDeployProcess\WarmUp\UrlsPattern::class)
-            ->needs(\Magento\MagentoCloud\Shell\ShellInterface::class)
-            ->give(\Magento\MagentoCloud\Shell\MagentoShell::class);
+        $this->container->when(ModuleRefresh::class)
+            ->needs(ProcessInterface::class)
+            ->give(BuildProcess\RefreshModules::class);
 
         $this->container->singleton(ConfigInterface::class, MergedConfig::class);
     }

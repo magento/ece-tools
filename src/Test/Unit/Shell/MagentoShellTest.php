@@ -48,4 +48,16 @@ class MagentoShellTest extends TestCase
             ['arg1']
         );
     }
+
+    public function testExecuteWithEmptyArgument()
+    {
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php ./bin/magento some:command --ansi --no-interaction', ['arg1']);
+
+        $this->magentoShell->execute(
+            'some:command',
+            ['arg1', '', null]
+        );
+    }
 }

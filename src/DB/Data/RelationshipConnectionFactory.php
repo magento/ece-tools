@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\DB\Data;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Service\Database;
 
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
@@ -16,16 +16,16 @@ class RelationshipConnectionFactory
     const CONNECTION_SLAVE = 'slave';
 
     /**
-     * @var Environment
+     * @var Database
      */
-    private $environment;
+    private $database;
 
     /**
-     * @param Environment $environment
+     * @param Database $database
      */
-    public function __construct(Environment $environment)
+    public function __construct(Database $database)
     {
-        $this->environment = $environment;
+        $this->database = $database;
     }
 
     /**
@@ -39,12 +39,10 @@ class RelationshipConnectionFactory
     {
         switch ($connectionType) {
             case self::CONNECTION_MAIN:
-                $connection = new RelationshipConnection($this->environment->getRelationship('database')[0] ?? []);
+                $connection = new RelationshipConnection($this->database->getConfiguration());
                 break;
             case self::CONNECTION_SLAVE:
-                $connection = new RelationshipConnection(
-                    $this->environment->getRelationship('database-slave')[0] ?? []
-                );
+                $connection = new RelationshipConnection($this->database->getSlaveConfiguration());
                 break;
             default:
                 throw new \RuntimeException(

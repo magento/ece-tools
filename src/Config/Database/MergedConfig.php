@@ -115,7 +115,6 @@ class MergedConfig implements ConfigInterface
     /**
      * Generates database configuration from environment relationships.
      *
-     * @param array envDbConfig
      * @return array
      */
     private function generateDbConfig(): array

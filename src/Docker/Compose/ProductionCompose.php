@@ -10,11 +10,12 @@ namespace Magento\MagentoCloud\Docker\Compose;
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Docker\Service\Config;
 use Magento\MagentoCloud\Docker\ComposeInterface;
-use Magento\MagentoCloud\Docker\Config\Converter;
+use Magento\MagentoCloud\Docker\Config\Environment\Converter;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Docker\Service\ServiceFactory;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Service\Service;
+use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Docker\Config\Environment\Reader;
 
 /**
  * Production compose configuration.
@@ -57,24 +58,32 @@ class ProductionCompose implements ComposeInterface
     private $phpExtension;
 
     /**
+     * @var Reader
+     */
+    private $reader;
+
+    /**
      * @param ServiceFactory $serviceFactory
      * @param FileList $fileList
      * @param Config $config
      * @param Converter $converter
      * @param PhpExtension $phpExtension
+     * @param Reader $reader
      */
     public function __construct(
         ServiceFactory $serviceFactory,
         FileList $fileList,
         Config $config,
         Converter $converter,
-        PhpExtension $phpExtension
+        PhpExtension $phpExtension,
+        Reader $reader
     ) {
         $this->serviceFactory = $serviceFactory;
         $this->fileList = $fileList;
         $this->config = $config;
         $this->converter = $converter;
         $this->phpExtension = $phpExtension;
+        $this->reader = $reader;
     }
 
     /**
@@ -86,30 +95,19 @@ class ProductionCompose implements ComposeInterface
      */
     public function build(Repository $config): array
     {
-        $phpVersion = $config->get(Service::NAME_PHP, '') ?: $this->getPhpVersion();
-        $dbVersion = $config->get(Service::NAME_DB, '') ?: $this->getServiceVersion(Service::NAME_DB);
+        $phpVersion = $config->get(ServiceInterface::NAME_PHP, '') ?: $this->getPhpVersion();
+        $dbVersion = $config->get(ServiceInterface::NAME_DB, '') ?: $this->getServiceVersion(ServiceInterface::NAME_DB);
 
         $services = [
             'db' => $this->serviceFactory->create(
                 ServiceFactory::SERVICE_DB,
                 $dbVersion,
-                [
-                    'ports' => [3306],
-                    'volumes' => [
-                        '/var/lib/mysql',
-                        './.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d',
-                    ],
-                    'environment' => [
-                        'MYSQL_ROOT_PASSWORD=magento2',
-                        'MYSQL_DATABASE=magento2',
-                        'MYSQL_USER=magento2',
-                        'MYSQL_PASSWORD=magento2',
-                    ],
-                ]
+                ['ports' => [3306]]
             )
         ];
 
-        $redisVersion = $config->get(Service::NAME_REDIS) ?: $this->getServiceVersion(Service::NAME_REDIS);
+        $redisVersion = $config->get(ServiceInterface::NAME_REDIS) ?:
+            $this->getServiceVersion(ServiceInterface::NAME_REDIS);
 
         if ($redisVersion) {
             $services['redis'] = $this->serviceFactory->create(
@@ -118,8 +116,8 @@ class ProductionCompose implements ComposeInterface
             );
         }
 
-        $esVersion = $config->get(Service::NAME_ELASTICSEARCH)
-            ?: $this->getServiceVersion(Service::NAME_ELASTICSEARCH);
+        $esVersion = $config->get(ServiceInterface::NAME_ELASTICSEARCH)
+            ?: $this->getServiceVersion(ServiceInterface::NAME_ELASTICSEARCH);
 
         if ($esVersion) {
             $services['elasticsearch'] = $this->serviceFactory->create(
@@ -128,7 +126,7 @@ class ProductionCompose implements ComposeInterface
             );
         }
 
-        $nodeVersion = $config->get(Service::NAME_NODE);
+        $nodeVersion = $config->get(ServiceInterface::NAME_NODE);
 
         if ($nodeVersion) {
             $services['node'] = $this->serviceFactory->create(
@@ -138,8 +136,8 @@ class ProductionCompose implements ComposeInterface
             );
         }
 
-        $rabbitMQVersion = $config->get(Service::NAME_RABBITMQ)
-            ?: $this->getServiceVersion(Service::NAME_RABBITMQ);
+        $rabbitMQVersion = $config->get(ServiceInterface::NAME_RABBITMQ)
+            ?: $this->getServiceVersion(ServiceInterface::NAME_RABBITMQ);
 
         if ($rabbitMQVersion) {
             $services['rabbitmq'] = $this->serviceFactory->create(
@@ -180,7 +178,7 @@ class ProductionCompose implements ComposeInterface
         $services['deploy'] = $this->getCliService($phpVersion, true, $cliDepends, 'deploy.magento2.docker');
         $services['web'] = $this->serviceFactory->create(
             ServiceFactory::SERVICE_NGINX,
-            $config->get(Service::NAME_NGINX, self::DEFAULT_NGINX_VERSION),
+            $config->get(ServiceInterface::NAME_NGINX, self::DEFAULT_NGINX_VERSION),
             [
                 'hostname' => 'web.magento2.docker',
                 'depends_on' => ['fpm'],
@@ -205,9 +203,6 @@ class ProductionCompose implements ComposeInterface
                 $this->getVariables(),
                 ['PHP_EXTENSIONS' => implode(' ', $phpExtensions)]
             )),
-            'env_file' => [
-                './.docker/config.env',
-            ],
         ];
 
         if (static::CRON_ENABLED) {
@@ -368,10 +363,12 @@ class ProductionCompose implements ComposeInterface
 
     /**
      * @return array
+     *
+     * @throws ConfigurationMismatchException
      */
     protected function getVariables(): array
     {
-        return [
+        return array_merge([
             'PHP_MEMORY_LIMIT' => '2048M',
             'UPLOAD_MAX_FILESIZE' => '64M',
             'MAGENTO_ROOT' => self::DIR_MAGENTO,
@@ -379,7 +376,7 @@ class ProductionCompose implements ComposeInterface
             'PHP_IDE_CONFIG' => 'serverName=magento_cloud_docker',
             # Docker host for developer environments, can be different for your OS
             'XDEBUG_CONFIG' => 'remote_host=host.docker.internal',
-        ];
+        ], $this->reader->read());
     }
 
     /**
@@ -396,7 +393,7 @@ class ProductionCompose implements ComposeInterface
      * @return string
      * @throws ConfigurationMismatchException
      */
-    protected function getPhpVersion()
+    protected function getPhpVersion(): string
     {
         return $this->config->getPhpVersion();
     }

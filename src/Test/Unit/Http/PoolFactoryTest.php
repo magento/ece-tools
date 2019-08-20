@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Http;
 
-use GuzzleHttp\ClientInterface;
+use GuzzleHttp\Client;
 use GuzzleHttp\Pool;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Http\ClientFactory;
@@ -68,7 +68,7 @@ class PoolFactoryTest extends TestCase
 
     public function testCreate()
     {
-        $clientMock = $this->createMock(ClientInterface::class);
+        $clientMock = $this->createMock(Client::class);
         $poolMock = $this->createMock(Pool::class);
         $requestMock = $this->createMock(RequestInterface::class);
 

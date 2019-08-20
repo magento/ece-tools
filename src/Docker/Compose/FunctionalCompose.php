@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Docker\Compose;
 
-use Magento\MagentoCloud\Service\Service;
+use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Illuminate\Contracts\Config\Repository;
 
@@ -35,8 +35,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @param bool $isReadOnly
-     * @return array
+     * @inheritDoc
      */
     protected function getMagentoVolumes(bool $isReadOnly): array
     {
@@ -53,8 +52,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @param bool $isReadOnly
-     * @return array
+     * @inheritDoc
      */
     protected function getMagentoBuildVolumes(bool $isReadOnly): array
     {
@@ -67,7 +65,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @return array
+     * @inheritDoc
      */
     protected function getVariables(): array
     {
@@ -82,19 +80,19 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     protected function getServiceVersion(string $serviceName)
     {
         $mapDefaultVersion = [
-            Service::NAME_DB => '10.2',
-            Service::NAME_PHP => '7.2',
-            Service::NAME_NGINX => self::DEFAULT_NGINX_VERSION,
-            Service::NAME_VARNISH => self::DEFAULT_VARNISH_VERSION,
-            Service::NAME_ELASTICSEARCH => null,
-            Service::NAME_NODE => null,
-            Service::NAME_RABBITMQ => null,
-            Service::NAME_REDIS => null,
+            ServiceInterface::NAME_DB => '10.2',
+            ServiceInterface::NAME_PHP => '7.2',
+            ServiceInterface::NAME_NGINX => self::DEFAULT_NGINX_VERSION,
+            ServiceInterface::NAME_VARNISH => self::DEFAULT_VARNISH_VERSION,
+            ServiceInterface::NAME_ELASTICSEARCH => null,
+            ServiceInterface::NAME_NODE => null,
+            ServiceInterface::NAME_RABBITMQ => null,
+            ServiceInterface::NAME_REDIS => null,
         ];
 
         if (!array_key_exists($serviceName, $mapDefaultVersion)) {
@@ -105,15 +103,15 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
-    protected function getPhpVersion()
+    protected function getPhpVersion(): string
     {
-        return $this->getServiceVersion(Service::NAME_PHP);
+        return $this->getServiceVersion(ServiceInterface::NAME_PHP);
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function getPath(): string
     {
@@ -121,8 +119,7 @@ class FunctionalCompose extends ProductionCompose
     }
 
     /**
-     * @param string $phpVersion
-     * @return array
+     * @inheritDoc
      */
     protected function getPhpExtensions(string $phpVersion): array
     {

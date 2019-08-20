@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Service\RabbitMq;
 
 /**
  * Returns queue configuration.
@@ -15,9 +15,9 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 class Config
 {
     /**
-     * @var Environment
+     * @var RabbitMq
      */
-    private $environment;
+    private $rabbitMQ;
 
     /**
      * @var DeployInterface
@@ -25,28 +25,21 @@ class Config
     private $stageConfig;
 
     /**
-     * Possible names for amqp relationship
-     *
-     * @var array
-     */
-    private $possibleRelationshipNames = ['rabbitmq', 'mq', 'amqp'];
-
-    /**
      * @var ConfigMerger
      */
     private $configMerger;
 
     /**
-     * @param Environment $environment
+     * @param RabbitMq $rabbitMQ
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
      */
     public function __construct(
-        Environment $environment,
+        RabbitMq $rabbitMQ,
         DeployInterface $stageConfig,
         ConfigMerger $configMerger
     ) {
-        $this->environment = $environment;
+        $this->rabbitMQ = $rabbitMQ;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
     }
@@ -73,27 +66,22 @@ class Config
     }
 
     /**
-     * Finds if configuration exists for one of possible amqp relationship names and return first match,
-     * amqp relationship can have different name on different environment.
+     * Convert amqp service configuration to magento format.
      *
      * @return array
      */
     private function getAmqpConfig(): array
     {
-        foreach ($this->possibleRelationshipNames as $relationshipName) {
-            $mqConfig = $this->environment->getRelationship($relationshipName);
-            if (count($mqConfig)) {
-                $amqpConfig = $mqConfig[0];
-                return [
-                    'amqp' => [
-                        'host' => $amqpConfig['host'],
-                        'port' => $amqpConfig['port'],
-                        'user' => $amqpConfig['username'],
-                        'password' => $amqpConfig['password'],
-                        'virtualhost' => isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/',
-                    ]
-                ];
-            }
+        if ($amqpConfig = $this->rabbitMQ->getConfiguration()) {
+            return [
+                'amqp' => [
+                    'host' => $amqpConfig['host'],
+                    'port' => $amqpConfig['port'],
+                    'user' => $amqpConfig['username'],
+                    'password' => $amqpConfig['password'],
+                    'virtualhost' => isset($amqpConfig['vhost']) ? $amqpConfig['vhost'] : '/',
+                ]
+            ];
         }
 
         return [];

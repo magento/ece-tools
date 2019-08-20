@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Config\System\Variables;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
@@ -118,5 +119,18 @@ class VariablesTest extends TestCase
             ->willReturn([]);
 
         $this->config->get('NOT_EXISTS_VALUE');
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage some error message
+     */
+    public function testGetWithFileSystemException()
+    {
+        $this->environmentReaderMock->expects($this->any())
+            ->method('read')
+            ->willThrowException(new FileSystemException('some error message'));
+
+        $this->config->get(SystemConfigInterface::VAR_ENV_ROUTES);
     }
 }

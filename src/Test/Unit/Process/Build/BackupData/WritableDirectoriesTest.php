@@ -5,14 +5,14 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build\BackupData;
 
+use Magento\MagentoCloud\App\Logger;
+use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Process\Build\BackupData\WritableDirectories;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 
 /**
  * @inheritdoc
@@ -40,7 +40,7 @@ class WritableDirectoriesTest extends TestCase
     private $globalConfigMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var Logger|Mock
      */
     private $loggerMock;
 
@@ -77,9 +77,7 @@ class WritableDirectoriesTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->setMethods(['setHandlers'])
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->createMock(Logger::class);
         $this->loggerPoolMock = $this->createMock(LoggerPool::class);
 
         $this->process = new WritableDirectories(

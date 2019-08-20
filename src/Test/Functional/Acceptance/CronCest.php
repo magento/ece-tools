@@ -24,7 +24,7 @@ class CronCest extends AbstractCest
     public function testCron(\CliTester $I, \Codeception\Example $data)
     {
         $I->assertTrue($I->cloneTemplate($data['version']));
-        $I->assertTrue($I->composerInstall());
+        $I->assertTrue($I->addEceComposerRepo());
         $I->createDirectory('/app/code/Magento/CronTest', Docker::BUILD_CONTAINER);
         $I->uploadToContainer('modules/Magento/CronTest/.', '/app/code/Magento/CronTest', Docker::BUILD_CONTAINER);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
