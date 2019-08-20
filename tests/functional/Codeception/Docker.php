@@ -49,6 +49,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
         'repo_branch' => '',
         'system_ece_tools_dir' => '',
         'system_magento_dir' => '',
+        'prerelease_magento' => '2.3.3',
         'env_base_url' => '',
         'env_secure_base_url' => '',
         'volumes' => [],
@@ -259,6 +260,10 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function addEceComposerRepo(): bool
     {
+        if (PHP_MAJOR_VERSION === 7 && PHP_MINOR_VERSION === 3) {
+            $this->usePrereleaseMagento();
+        }
+
         $eceToolsVersion = '2002.0.999';
         $repoConfig = [
             'type' => 'package',
@@ -287,6 +292,46 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->exec($composerConfig . ' && ' . $composerRequire)
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
+    }
+
+    /**
+     * Add access to connect20 repo.
+     *
+     * @return bool
+     * @throws \Robo\Exception\TaskException
+     */
+    public function usePrereleaseMagento(): bool
+    {
+        $addRepo = $this->taskComposerConfig('composer')
+            ->repository('connect20', 'https://connect20-qa01.magedevteam.com', 'composer')
+            ->noInteraction()
+            ->getCommand();
+        $addAuth = $this->taskComposerConfig('composer')
+            ->arg('http-basic.connect20-qa01.magedevteam.com')
+            ->arg('$COMPOSER_CONNECT20_USERNAME')
+            ->arg('$COMPOSER_CONNECT20_PASSWORD')
+            ->noInteraction()
+            ->getCommand();
+        $delComposerLock = 'rm composer.lock';
+        $removeMetaPackage = $this->taskComposerRemove('composer')
+            ->arg('magento/magento-cloud-metapackage')
+            ->noUpdate()
+            ->noInteraction()
+            ->getCommand();
+        $requirePackages = $this->taskComposerRequire('composer')
+            ->dependency('magento/product-enterprise-edition', $this->_getConfig('prerelease_magento'))
+            ->noInteraction()
+            ->getCommand();
+
+        $result = $this->taskBash(self::BUILD_CONTAINER)
+            ->workingDir($this->_getConfig('system_magento_dir'))
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->exec(implode(' && ', [$addRepo, $addAuth, $removeMetaPackage, $delComposerLock, $requirePackages]))
             ->run();
 
         $this->output = $result->getMessage();
