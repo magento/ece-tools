@@ -89,8 +89,8 @@ class UnsupportedBuildOptionsIniTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'The build_options.ini file is not supported.',
-                'Modify your configuration to use the magento.env.yaml file'
+                'The build_options.ini file is no longer supported.',
+                'Modify your configuration to specify build options in the magento.env.yaml file'
             );
 
         $this->validator->validate();

@@ -54,9 +54,9 @@ class UnsupportedBuildOptionsIni implements ValidatorInterface
     {
         if ($this->file->isExists($this->fileList->getBuildConfig())) {
             return $this->resultFactory->error(
-                sprintf('The %s file is not supported.', basename($this->fileList->getBuildConfig())),
+                sprintf('The %s file is no longer supported.', basename($this->fileList->getBuildConfig())),
                 sprintf(
-                    'Modify your configuration to use the %s file',
+                    'Modify your configuration to specify build options in the %s file',
                     basename($this->fileList->getEnvConfig())
                 )
             );
