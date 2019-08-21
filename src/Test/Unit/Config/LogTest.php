@@ -92,28 +92,28 @@ class LogTest extends TestCase
                 'config' => [],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
                 ]
             ],
             [
                 'config' => ['someConfig' => ['someConfig']],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
                 ],
             ],
             [
                 'config' => ['log' => []],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath']
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath']
                 ],
             ],
             [
                 'config' => ['log' => ['SomeHandler' => ['SomeConfig']]],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath'],
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
                     'SomeHandler' => ['SomeConfig']
                 ],
             ],
@@ -121,7 +121,7 @@ class LogTest extends TestCase
                 'config' => ['log' => ['SomeHandler' => ['SomeConfig']], 'someConfig' => ['someConfig']],
                 'expectedResult' => [
                     HandlerFactory::HANDLER_STREAM => ['stream' => 'php://stdout'],
-                    HandlerFactory::HANDLER_FILE => ['stream' => 'somePath'],
+                    HandlerFactory::HANDLER_FILE => ['file' => 'somePath'],
                     'SomeHandler' => ['SomeConfig']
                 ],
             ],
