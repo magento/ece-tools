@@ -8,6 +8,7 @@ namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Service\RabbitMq;
+use Magento\MagentoCloud\Package\MagentoVersion;
 
 /**
  * Returns queue configuration.
@@ -30,26 +31,53 @@ class Config
     private $configMerger;
 
     /**
+     * @var MagentoVersion
+     */
+    private $magentoVersion;
+
+    /**
      * @param RabbitMq $rabbitMQ
      * @param DeployInterface $stageConfig
      * @param ConfigMerger $configMerger
+     * @param MagentoVersion $magentoVersion
      */
     public function __construct(
         RabbitMq $rabbitMQ,
         DeployInterface $stageConfig,
-        ConfigMerger $configMerger
+        ConfigMerger $configMerger,
+        MagentoVersion $magentoVersion
     ) {
         $this->rabbitMQ = $rabbitMQ;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
+        $this->magentoVersion = $magentoVersion;
     }
 
     /**
      * Returns queue configuration
      *
      * @return array
+     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
      */
     public function get(): array
+    {
+        $config = $this->getConfig();
+
+        if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
+            $config['consumers_wait_for_messages'] = $this->stageConfig->get(
+                DeployInterface::VAR_CONSUMERS_WAIT_MAX_MESSAGES
+            ) ? 1 : 0;
+        }
+
+        return $config;
+    }
+
+    /**
+     * Returns merged queue configuration
+     *
+     * @return array
+     */
+    private function getConfig(): array
     {
         $envQueueConfig = $this->stageConfig->get(DeployInterface::VAR_QUEUE_CONFIGURATION);
         $mqConfig = $this->getAmqpConfig();
