@@ -51,7 +51,8 @@ class ResultFactory
      */
     public function success(): Success
     {
-        return $this->container->create(Success::class);
+        return new Success();
+//        return $this->container->create(Success::class);
     }
 
     /**
@@ -61,9 +62,10 @@ class ResultFactory
      */
     public function error(string $message, string $suggestion = ''): Error
     {
-        return $this->container->create(Error::class, [
-            'message' => $message,
-            'suggestion' => $suggestion,
-        ]);
+        return new Error($message, $suggestion);
+//        return $this->container->create(Error::class, [
+//            'message' => $message,
+//            'suggestion' => $suggestion,
+//        ]);
     }
 }

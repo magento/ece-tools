@@ -36,6 +36,13 @@ class ProcessFactory
      */
     public function create(array $params): ProcessInterface
     {
-        return $this->container->create(Process::class, $params);
+//        return $this->container->create(Process::class, $params);
+        return new Process(
+            $params['commandline'],
+            $params['cwd'],
+            null,
+            null,
+            $params['timeout']
+        );
     }
 }

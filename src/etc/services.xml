@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <services>
+        <defaults autowire="true" autoconfigure="true" public="true"/>
+        <!-- ... -->
+        <prototype namespace="Magento\MagentoCloud\" resource="../../src/*" exclude="../../src/{Test}"/>
+
+        <service id="Composer\Package\Version\VersionParser" autowire="false" />
+        <service id="Magento\MagentoCloud\Filesystem\SystemList" autowire="false" />
+        <service id="Magento\MagentoCloud\Command\Build\Transfer" autowire="false" />
+        <service id="Magento\MagentoCloud\Command\CronKill" autowire="false" />
+        <service id="Magento\MagentoCloud\Command\Deploy" autowire="false" />
+        <service id="Magento\MagentoCloud\Command\ModuleRefresh" autowire="false" />
+        <service id="Magento\MagentoCloud\Command\PostDeploy" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\Build\DeployStaticContent" autowire="false" />
+        <service id="Magento\MagentoCloud\App\Container" autowire="false" />
+        <service id="Magento\MagentoCloud\App\GenericException" autowire="false" />
+        <service id="Magento\MagentoCloud\App\Logger\Gelf\Handler" autowire="false" />
+        <service id="Magento\MagentoCloud\App\SymfonyContainer" autowire="false" />
+        <service id="Magento\MagentoCloud\Config\Validator\Result\Error" autowire="false" />
+        <service id="Magento\MagentoCloud\DB\Data\Connection" autowire="false" />
+        <service id="Magento\MagentoCloud\DB\Data\RelationshipConnection" autowire="false" />
+        <service id="Magento\MagentoCloud\DB\PDOException" autowire="false" />
+        <service id="Magento\MagentoCloud\Docker\ConfigurationMismatchException" autowire="false" />
+        <service id="Magento\MagentoCloud\Filesystem\FileSystemException" autowire="false" />
+        <service id="Magento\MagentoCloud\Package\UndefinedPackageException" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\Deploy\DeployCompletion" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\Deploy\DeployStaticContent" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\Deploy\PreDeploy" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\ProcessComposite" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\ProcessException" autowire="false" />
+        <service id="Magento\MagentoCloud\Process\ValidateConfiguration" autowire="false" />
+        <service id="Magento\MagentoCloud\Service\ServiceMismatchException" autowire="false" />
+        <service id="Magento\MagentoCloud\Shell\Process" autowire="false" />
+        <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />
+
+        <service id="Magento\MagentoCloud\Filesystem\Flag\Pool">
+            <argument type="collection">
+                <argument key="regenerate">var/.regenerate</argument>
+                <argument key="scd_in_build">.static_content_deploy</argument>
+                <argument key="deploy_is_failed">var/.deploy_is_failed</argument>
+            </argument>
+        </service>
+        <service id="Composer\Package\Version\VersionParser"/>
+        <service id="Composer\Semver\VersionParser"/>
+        <service id="Composer\Semver\Semver"/>
+        <service id="Composer\Semver\Comparator"/>
+        <service id="Psr\Log\LoggerInterface" alias="Magento\MagentoCloud\App\Logger" />
+        <service id="Magento\MagentoCloud\App\ContainerInterface" alias="container" />
+        <service id="Magento\MagentoCloud\Shell\ShellInterface" alias="Magento\MagentoCloud\Shell\Shell" />
+    </services>
+</container>

@@ -56,7 +56,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\Build::class),
                 $this->container->create(Command\Build\Generate::class),
                 $this->container->create(Command\Build\Transfer::class),
-                $this->container->create(Command\Deploy::class),
+            /*  $this->container->create(Command\Deploy::class),
                 $this->container->create(Command\ConfigDump::class),
                 $this->container->create(Command\DbDump::class),
                 $this->container->create(Command\PostDeploy::class),
@@ -74,7 +74,7 @@ class Application extends \Symfony\Component\Console\Application
                 $this->container->create(Command\Docker\Build::class),
                 $this->container->create(Command\Docker\GenerateDist::class),
                 $this->container->create(Command\CronKill::class),
-                $this->container->create(Command\ConfigShow::class),
+                $this->container->create(Command\ConfigShow::class),*/
             ]
         );
     }
