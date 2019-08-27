@@ -433,7 +433,7 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
             ],
-            DeployInterface::VAR_CONSUMERS_WAIT_MAX_MESSAGES => [
+            DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
                     StageConfigInterface::STAGE_GLOBAL,

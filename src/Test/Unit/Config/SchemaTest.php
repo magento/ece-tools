@@ -79,7 +79,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_SCD_MATRIX => [],
                 DeployInterface::VAR_RESOURCE_CONFIGURATION => [],
                 DeployInterface::VAR_LOCK_PROVIDER => 'file',
-                DeployInterface::VAR_CONSUMERS_WAIT_MAX_MESSAGES => false,
+                DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => false,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );

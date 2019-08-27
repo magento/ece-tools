@@ -76,7 +76,7 @@ class ConfigTest extends TestCase
             ->method('get')
             ->withConsecutive(
                 [DeployInterface::VAR_QUEUE_CONFIGURATION],
-                [DeployInterface::VAR_CONSUMERS_WAIT_MAX_MESSAGES]
+                [DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES]
             )
             ->willReturnOnConsecutiveCalls($customQueueConfig, $consumersWaitMaxMessages);
         $this->rabbitMq->expects($this->once())

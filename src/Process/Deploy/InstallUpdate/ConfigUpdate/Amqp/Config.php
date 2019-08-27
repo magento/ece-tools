@@ -65,7 +65,7 @@ class Config
 
         if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
             $config['consumers_wait_for_messages'] = $this->stageConfig->get(
-                DeployInterface::VAR_CONSUMERS_WAIT_MAX_MESSAGES
+                DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES
             ) ? 1 : 0;
         }
 
