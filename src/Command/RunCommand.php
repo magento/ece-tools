@@ -3,20 +3,25 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Processor;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Performs post-deploy operations.
+ * Execute given scenarios.
  */
-class PostDeploy extends Command
+class RunCommand extends Command
 {
-    const NAME = 'post-deploy';
+    const NAME = 'run';
+
+    const ARG_SCENARIO = 'scenario';
 
     /**
      * @var Processor
@@ -30,29 +35,33 @@ class PostDeploy extends Command
     {
         $this->processor = $processor;
 
-        parent::__construct();
+        parent::__construct(self::NAME);
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     protected function configure()
     {
-        $this->setName(static::NAME)
-            ->setDescription('Performs after deploy operations.');
+        $this->setDescription('Execute scenario(s)')
+            ->addArgument(
+                self::ARG_SCENARIO,
+                InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+                'Scenario(s)'
+            );
 
         parent::configure();
     }
 
     /**
-     * {@inheritdoc}
+     * {@inheritDoc}
      *
      * @throws ProcessorException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->processor->execute([
-            'scenario/post-deploy.xml'
-        ]);
+        $this->processor->execute(
+            (array)$input->getArgument(self::ARG_SCENARIO)
+        );
     }
 }

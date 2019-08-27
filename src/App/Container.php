@@ -11,7 +11,6 @@ use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ModuleRefresh;
-use Magento\MagentoCloud\Command\PostDeploy;
 use Magento\MagentoCloud\Config\Database\ConfigInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Schema;
@@ -364,26 +363,6 @@ class Container implements ContainerInterface
                 return $this->container->makeWith(ProcessComposite::class, [
                     'processes' => [
                         $this->get(DeployProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
-        $this->container->when(PostDeploy::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->make(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
-                            'validators' => [
-                                ValidatorInterface::LEVEL_WARNING => [
-                                    $this->container->make(ConfigValidator\Deploy\DebugLogging::class),
-                                ],
-                            ],
-                        ]),
-                        $this->container->make(PostDeployProcess\EnableCron::class),
-                        $this->container->make(PostDeployProcess\Backup::class),
-                        $this->container->make(PostDeployProcess\CleanCache::class),
-                        $this->container->make(PostDeployProcess\WarmUp::class),
-                        $this->container->make(PostDeployProcess\TimeToFirstByte::class),
                     ],
                 ]);
             });
