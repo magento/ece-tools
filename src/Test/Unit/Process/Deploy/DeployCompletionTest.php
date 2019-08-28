@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Application\HookChecker;
 use Magento\MagentoCloud\Process\Deploy\DeployCompletion;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -38,7 +39,7 @@ class DeployCompletionTest extends TestCase
     private $processMock;
 
     /**
-     * Setup the test environment.
+     * @inheritDoc
      */
     protected function setUp()
     {
@@ -49,10 +50,13 @@ class DeployCompletionTest extends TestCase
         $this->process = new DeployCompletion(
             $this->loggerMock,
             $this->hookChecker,
-            $this->processMock
+            [$this->processMock]
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteHookEnabled()
     {
         $this->hookChecker->expects($this->once())
@@ -66,6 +70,9 @@ class DeployCompletionTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteHookNotConfigured()
     {
         $this->hookChecker->expects($this->once())
