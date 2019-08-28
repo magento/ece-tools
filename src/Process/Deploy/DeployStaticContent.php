@@ -18,11 +18,6 @@ use Magento\MagentoCloud\Util\StaticContentCleaner;
 class DeployStaticContent implements ProcessInterface
 {
     /**
-     * @var ProcessInterface
-     */
-    private $process;
-
-    /**
      * @var FlagManager
      */
     private $flagManager;
@@ -48,27 +43,32 @@ class DeployStaticContent implements ProcessInterface
     private $staticContentCleaner;
 
     /**
-     * @param ProcessInterface $process
+     * @var ProcessInterface[]
+     */
+    private $processes;
+
+    /**
      * @param FlagManager $flagManager
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
      * @param GlobalConfig $globalConfig
      * @param StaticContentCleaner $staticContentCleaner
+     * @param array $processes
      */
     public function __construct(
-        ProcessInterface $process,
         FlagManager $flagManager,
         LoggerInterface $logger,
         DeployInterface $stageConfig,
         GlobalConfig $globalConfig,
-        StaticContentCleaner $staticContentCleaner
+        StaticContentCleaner $staticContentCleaner,
+        array $processes
     ) {
-        $this->process = $process;
         $this->flagManager = $flagManager;
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
         $this->globalConfig = $globalConfig;
         $this->staticContentCleaner = $staticContentCleaner;
+        $this->processes = $processes;
     }
 
     /**
@@ -98,7 +98,11 @@ class DeployStaticContent implements ProcessInterface
         }
 
         $this->logger->notice('Generating fresh static content');
-        $this->process->execute();
+
+        foreach ($this->processes as $process) {
+            $process->execute();
+        }
+
         $this->logger->notice('End of generating fresh static content');
     }
 }

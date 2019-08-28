@@ -92,9 +92,7 @@ class Merger
         $data = [];
 
         foreach ($scenarios as $scenario) {
-            $scenario = $this->collectScenario(
-                $this->systemList->getRoot() . '/' . $scenario
-            );
+            $scenario = $this->collectScenario($scenario);
 
             foreach ($scenario['step'] ?? [] as $step) {
                 if ($missedArgs = array_diff(self::$stepRequiredArgs, array_keys($step))) {
@@ -140,7 +138,6 @@ class Merger
 
             $arguments[] = [
                 'name' => $argument['@name'],
-                'conditional' => $argument['@conditional'] ?? false,
                 'xsi:type' => $argument['@xsi:type'],
                 'items' => $this->collectItems(
                     $argument['item'] ?: []
@@ -168,7 +165,13 @@ class Merger
      */
     private function collectScenario(string $scenario): array
     {
-        if (!$this->file->isExists($scenario)) {
+        $scenarioPath = $this->systemList->getRoot() . '/' . $scenario;
+
+        if (!$this->file->isExists($scenarioPath)) {
+            $scenarioPath = $this->systemList->getMagentoRoot() . '/' . $scenario;
+        }
+
+        if (!$this->file->isExists($scenarioPath)) {
             throw new ValidationException(sprintf(
                 'Scenario %s does not exist',
                 $scenario
@@ -177,7 +180,7 @@ class Merger
 
         try {
             return $this->encoder->decode(
-                $this->file->fileGetContents($scenario),
+                $this->file->fileGetContents($scenarioPath),
                 XmlEncoder::FORMAT,
                 [
                     XmlEncoder::AS_COLLECTION => true,

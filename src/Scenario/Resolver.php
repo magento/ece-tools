@@ -41,7 +41,7 @@ class Resolver
         foreach ($scenarios as $step) {
             $instance = $this->container->create(
                 $step['type'],
-                $this->resolveParams($step)
+                $this->resolveParams($step['arguments'] ?? [])
             );
 
             if (!$instance instanceof ProcessInterface) {
@@ -59,48 +59,30 @@ class Resolver
     }
 
     /**
-     * @param array $step
+     * @param array $data
      * @return array
      * @throws ValidationException
      */
-    private function resolveParams(array $step): array
+    private function resolveParams(array $data): array
     {
-        $params = [];
+        $newData = [];
 
-        foreach ($step['arguments'] ?? [] as $data) {
-            $argName = $data['name'];
-
-            $params[$argName] = [];
-
-            foreach ($data['items'] as $itemData) {
-                $params[$argName][$itemData['name']] = [];
-
-                foreach ($itemData['items'] as $itemBData) {
-                    $params[$argName][$itemData['name']][] = $this->resolveParam(
-                        $itemBData['xsi:type'], $itemBData['#']
-                    );
-                }
+        foreach ($data as $item) {
+            switch ($item['xsi:type']) {
+                case Merger::XSI_TYPE_OBJECT:
+                    $newData[$item['name']] = $this->container->create($item['#']);
+                    break;
+                case Merger::XSI_TYPE_STRING:
+                    $newData[$item['name']] = $data['#'];
+                    break;
+                case Merger::XSI_TYPE_ARRAY:
+                    $newData[$item['name']] = $this->resolveParams($item['items']);
+                    break;
+                default:
+                    throw new ValidationException('Unknown xsi:type ' . $item['xsi:type']);
             }
         }
 
-        return $params;
-    }
-
-    /**
-     * @param string $type
-     * @param string $value
-     * @return object|string
-     * @throws ValidationException
-     */
-    private function resolveParam(string $type, string $value)
-    {
-        switch ($type) {
-            case Merger::XSI_TYPE_OBJECT:
-                return $this->container->create($value);
-            case Merger::XSI_TYPE_STRING:
-                return $value;
-            default:
-                throw new ValidationException('Unknown xsi:type ' . $type);
-        }
+        return $newData;
     }
 }

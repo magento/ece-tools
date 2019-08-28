@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Scenario;
 
 use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Psr\Log\LoggerInterface;
@@ -28,13 +29,20 @@ class Processor
     private $logger;
 
     /**
+     * @var Manager
+     */
+    private $manager;
+
+    /**
      * @param Merger $merger
      * @param LoggerInterface $logger
+     * @param Manager $manager
      */
-    public function __construct(Merger $merger, LoggerInterface $logger)
+    public function __construct(Merger $merger, LoggerInterface $logger, Manager $manager)
     {
         $this->merger = $merger;
         $this->logger = $logger;
+        $this->manager = $manager;
     }
 
     /**
@@ -44,8 +52,9 @@ class Processor
     public function execute(array $scenarios)
     {
         $this->logger->info(sprintf(
-            'Starting scenarios: %s',
-            implode(', ', $scenarios)
+            'Starting scenario(s): %s %s',
+            implode(', ', $scenarios),
+            $this->manager->getPrettyInfo()
         ));
 
         try {
@@ -68,6 +77,6 @@ class Processor
             );
         }
 
-        $this->logger->info('Scenarios finished');
+        $this->logger->info('Scenario(s) finished');
     }
 }

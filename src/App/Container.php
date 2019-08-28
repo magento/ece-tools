@@ -7,15 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App;
 
-use Magento\MagentoCloud\Command\Build;
 use Magento\MagentoCloud\Command\CronKill;
-use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Command\ModuleRefresh;
 use Magento\MagentoCloud\Config\Database\ConfigInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Schema;
-use Magento\MagentoCloud\Config\Validator as ConfigValidator;
-use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryCopier;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -23,10 +19,8 @@ use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Process\Build as BuildProcess;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
-use Magento\MagentoCloud\Process\PostDeploy as PostDeployProcess;
 use Magento\MagentoCloud\Process\ProcessComposite;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Process\SetProductionMode;
 
 /**
  * @inheritdoc
@@ -149,149 +143,7 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\PlatformVariable\DecoderInterface::class,
             \Magento\MagentoCloud\PlatformVariable\Decoder::class
         );
-        /**
-         * Contextual binding.
-         */
-        $this->container->when(Build::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->get('buildGenerateProcess'),
-                        $this->container->get('buildTransferProcess'),
-                    ],
-                ]);
-            });
-        $this->container->when(Build\Generate::class)
-            ->needs(ProcessInterface::class)
-            ->give('buildGenerateProcess');
-        $this->container->when(Build\Transfer::class)
-            ->needs(ProcessInterface::class)
-            ->give('buildTransferProcess');
-        $this->container->bind(
-            'buildGenerateProcess',
-            function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(BuildProcess\PreBuild::class),
-                        $this->container->make(SetProductionMode::class),
-                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
-                            'validators' => [
-                                ValidatorInterface::LEVEL_CRITICAL => [
-                                    $this->container->make(ConfigValidator\Build\ComposerFile::class),
-                                    $this->container->make(ConfigValidator\Build\StageConfig::class),
-                                    $this->container->make(ConfigValidator\Build\BuildOptionsIni::class),
-                                ],
-                                ValidatorInterface::LEVEL_WARNING => [
-                                    $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
-                                    $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
-                                    $this->container->make(ConfigValidator\Build\StageConfigDeprecatedVariables::class),
-                                    $this->container->make(ConfigValidator\Build\ModulesExists::class),
-                                    $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
-                                    $this->container->make(ConfigValidator\Build\ScdOptionsIgnorance::class),
-                                    $this->container->make(ConfigValidator\IdealState::class),
-                                ],
-                            ],
-                        ]),
-                        $this->container->make(BuildProcess\RefreshModules::class),
-                        $this->container->make(BuildProcess\ApplyPatches::class),
-                        $this->container->make(BuildProcess\MarshallFiles::class),
-                        $this->container->make(BuildProcess\CopySampleData::class),
-                        $this->container->make(BuildProcess\CompileDi::class),
-                        $this->container->make(BuildProcess\ComposerDumpAutoload::class),
-                        $this->container->make(BuildProcess\DeployStaticContent::class),
-                    ],
-                ]);
-            }
-        );
-        $this->container->bind(
-            'buildTransferProcess',
-            function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(BuildProcess\CompressStaticContent::class),
-                        $this->container->make(BuildProcess\ClearInitDirectory::class),
-                        $this->container->make(BuildProcess\BackupData::class),
-                    ],
-                ]);
-            }
-        );
-        $this->container->when(BuildProcess\DeployStaticContent::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(BuildProcess\DeployStaticContent\Generate::class),
-                    ],
-                ]);
-            });
-        $this->container->when(BuildProcess\BackupData::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(BuildProcess\BackupData\StaticContent::class),
-                        $this->get(BuildProcess\BackupData\WritableDirectories::class),
-                    ],
-                ]);
-            });
-        $this->container->when(Deploy::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\PreDeploy::class),
-                        $this->container->make(DeployProcess\DisableCron::class),
-                        $this->container->make(\Magento\MagentoCloud\Process\ValidateConfiguration::class, [
-                            'validators' => [
-                                ValidatorInterface::LEVEL_CRITICAL => [
-                                    $this->container->make(ConfigValidator\Deploy\DatabaseConfiguration::class),
-                                    $this->container->make(ConfigValidator\Deploy\SearchConfiguration::class),
-                                    $this->container->make(ConfigValidator\Deploy\ResourceConfiguration::class),
-                                    $this->container->make(ConfigValidator\Deploy\SessionConfiguration::class),
-                                    $this->container->make(ConfigValidator\Deploy\ElasticSuiteIntegrity::class),
-                                ],
-                                ValidatorInterface::LEVEL_WARNING => [
-                                    $this->container->make(ConfigValidator\Deploy\AdminData::class),
-                                    $this->container->make(ConfigValidator\Deploy\PhpVersion::class),
-                                    $this->container->make(ConfigValidator\Deploy\SolrIntegrity::class),
-                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchUsage::class),
-                                    $this->container->make(ConfigValidator\Deploy\ElasticSearchVersion::class),
-                                    $this->container->make(ConfigValidator\Deploy\AppropriateVersion::class),
-                                    $this->container->make(ConfigValidator\Deploy\ScdOptionsIgnorance::class),
-                                    $this->container->make(ConfigValidator\Deploy\DeprecatedVariables::class),
-                                    $this->container->make(ConfigValidator\Deploy\RawEnvVariable::class),
-                                    $this->container->make(ConfigValidator\Deploy\MagentoCloudVariables::class),
-                                    $this->container->make(ConfigValidator\Deploy\JsonFormatVariable::class),
-                                    $this->container->make(ConfigValidator\Deploy\ServiceVersion::class),
-                                ],
-                            ],
-                        ]),
-                        $this->container->make(DeployProcess\UnlockCronJobs::class),
-                        $this->container->make(DeployProcess\SetCryptKey::class),
-                        $this->container->make(DeployProcess\InstallUpdate::class),
-                        $this->container->make(DeployProcess\DeployStaticContent::class),
-                        $this->container->make(DeployProcess\CompressStaticContent::class),
-                        $this->container->make(DeployProcess\DisableGoogleAnalytics::class),
 
-                        /**
-                         * This process runs processes if only post_deploy hook is not configured.
-                         */
-                        $this->container->make(DeployProcess\DeployCompletion::class),
-                    ],
-                ]);
-            });
-        $this->container->when(DeployProcess\DeployCompletion::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(PostDeployProcess\EnableCron::class),
-                        $this->container->make(PostDeployProcess\Backup::class),
-                        $this->container->make(PostDeployProcess\CleanCache::class),
-                    ],
-                ]);
-            });
         $this->container->when(DeployProcess\InstallUpdate\Install::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
@@ -339,30 +191,6 @@ class Container implements ContainerInterface
                     'processes' => [
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Database::class),
                         $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Environment::class),
-                    ],
-                ]);
-            });
-        $this->container->when(DeployProcess\PreDeploy::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\PreDeploy\ConfigUpdate\Cache::class),
-                        $this->container->make(DeployProcess\PreDeploy\CleanStaticContent::class),
-                        $this->container->make(DeployProcess\PreDeploy\CleanViewPreprocessed::class),
-                        $this->container->make(DeployProcess\PreDeploy\CleanRedisCache::class),
-                        $this->container->make(DeployProcess\PreDeploy\CleanFileCache::class),
-                        $this->container->make(DeployProcess\PreDeploy\RestoreWritableDirectories::class),
-                        $this->container->make(SetProductionMode::class),
-                    ],
-                ]);
-            });
-        $this->container->when(DeployProcess\DeployStaticContent::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->get(DeployProcess\DeployStaticContent\Generate::class),
                     ],
                 ]);
             });

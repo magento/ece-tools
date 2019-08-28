@@ -5,8 +5,8 @@
  * See COPYING.txt for license details.
  */
 -->
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/scenario.xsd" >
-    <step name="is-deploy-failed" type="Magento\MagentoCloud\Process\PostDeploy\DeployFailed" />
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/scenario.xsd">
+    <step name="is-deploy-failed" type="Magento\MagentoCloud\Process\PostDeploy\DeployFailed"/>
     <step name="validate-config" type="Magento\MagentoCloud\Process\ValidateConfiguration">
         <arguments>
             <argument name="validators" xsi:type="array">

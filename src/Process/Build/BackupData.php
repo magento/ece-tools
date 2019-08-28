@@ -21,15 +21,15 @@ class BackupData implements ProcessInterface
     private $logger;
 
     /**
-     * @var ProcessInterface
+     * @var ProcessInterface[]
      */
     private $processes;
 
     /**
      * @param LoggerInterface $logger
-     * @param ProcessInterface $processes
+     * @param array $processes
      */
-    public function __construct(LoggerInterface $logger, ProcessInterface $processes)
+    public function __construct(LoggerInterface $logger, array $processes)
     {
         $this->logger = $logger;
         $this->processes = $processes;
@@ -41,7 +41,11 @@ class BackupData implements ProcessInterface
     public function execute()
     {
         $this->logger->notice('Copying data to the ./init directory');
-        $this->processes->execute();
+
+        foreach ($this->processes as $process) {
+            $process->execute();
+        }
+
         $this->logger->notice('End of copying data to the ./init directory');
     }
 }
