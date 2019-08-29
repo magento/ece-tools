@@ -51,7 +51,21 @@
     </step>
     <step name="unlock-cron-jobs" type="Magento\MagentoCloud\Process\Deploy\UnlockCronJobs"/>
     <step name="set-crypt-key" type="Magento\MagentoCloud\Process\Deploy\SetCryptKey"/>
-    <step name="install-update" type="Magento\MagentoCloud\Process\Deploy\InstallUpdate"/>
+    <step name="install-update" type="Magento\MagentoCloud\Process\Deploy\InstallUpdate">
+        <arguments>
+            <argument name="installProcesses" xsi:type="array">
+                <item name="setup" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup</item>
+                <item name="config-update" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate</item>
+                <item name="config-import" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ConfigImport</item>
+                <item name="reset-password" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ResetPassword</item>
+            </argument>
+            <argument name="updateProcesses" xsi:type="array">
+                <item name="config-update" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate</item>
+                <item name="set-admin-url" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\SetAdminUrl</item>
+                <item name="setup" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup</item>
+            </argument>
+        </arguments>
+    </step>
     <step name="deploy-static-content" type="Magento\MagentoCloud\Process\Deploy\DeployStaticContent">
         <arguments>
             <argument name="processes" xsi:type="array">
