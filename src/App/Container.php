@@ -122,23 +122,6 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Database\MergedConfig::class
         );
 
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate::class)
-            ->needs(ProcessInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\PrepareConfig::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\CronConsumersRunner::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DbConnection::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Amqp::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Session::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\SearchEngine::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\DocumentRoot::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Lock::class),
-                    ],
-                ]);
-            });
         $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
             ->needs(ProcessInterface::class)
             ->give(function () {
