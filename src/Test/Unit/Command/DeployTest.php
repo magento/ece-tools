@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\Deploy;
+use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Scenario\Processor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -27,18 +28,25 @@ class DeployTest extends TestCase
     private $processorMock;
 
     /**
+     * @var Manager|MockObject
+     */
+    private $flagManagerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->processorMock = $this->createMock(Processor::class);
+        $this->flagManagerMock = $this->createMock(Manager::class);
 
         $this->command = new Deploy(
-            $this->processorMock
+            $this->processorMock,
+            $this->flagManagerMock
         );
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $this->processorMock->expects($this->once())
             ->method('execute')

@@ -5,12 +5,13 @@
  */
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
+use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Processor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 
 /**
  * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
@@ -25,15 +26,15 @@ class Deploy extends Command
     private $processor;
 
     /**
-     * @var FlagManager
+     * @var Manager
      */
     private $flagManager;
 
     /**
      * @param Processor $processor
-     * @param FlagManager $flagManager
+     * @param Manager $flagManager
      */
-    public function __construct(Processor $processor, FlagManager $flagManager)
+    public function __construct(Processor $processor, Manager $flagManager)
     {
         $this->processor = $processor;
         $this->flagManager = $flagManager;
@@ -58,6 +59,7 @@ class Deploy extends Command
      * {@inheritdoc}
      *
      * @throws ProcessorException
+     * @throws ConfigurationMismatchException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -66,7 +68,7 @@ class Deploy extends Command
                 'scenario/deploy.xml'
             ]);
         } catch (ProcessorException $e) {
-            $this->flagManager->set(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
+            $this->flagManager->set(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
             throw $e;
         }
     }
