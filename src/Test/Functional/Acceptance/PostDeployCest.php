@@ -70,7 +70,7 @@ class PostDeployCest extends AbstractCest
         $I->startEnvironment();
         $I->assertFalse($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->seeInOutput('Variable DATABASE_CONFIGURATION is not configured properly');
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertFalse($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains('Fix configuration with given suggestions', $log);
         $I->assertContains('Post-deploy is skipped because deploy was failed.', $log);

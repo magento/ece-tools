@@ -10,6 +10,7 @@ use Magento\MagentoCloud\Scenario\Processor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 
 /**
  * CLI command for deploy hook. Responsible for installing/updating/configuring Magento
@@ -24,11 +25,18 @@ class Deploy extends Command
     private $processor;
 
     /**
-     * @param Processor $processor
+     * @var FlagManager
      */
-    public function __construct(Processor $processor)
+    private $flagManager;
+
+    /**
+     * @param Processor $processor
+     * @param FlagManager $flagManager
+     */
+    public function __construct(Processor $processor, FlagManager $flagManager)
     {
         $this->processor = $processor;
+        $this->flagManager = $flagManager;
 
         parent::__construct();
     }
@@ -53,8 +61,13 @@ class Deploy extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->processor->execute([
-            'scenario/deploy.xml'
-        ]);
+        try {
+            $this->processor->execute([
+                'scenario/deploy.xml'
+            ]);
+        } catch (ProcessorException $e) {
+            $this->flagManager->set(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED);
+            throw $e;
+        }
     }
 }
