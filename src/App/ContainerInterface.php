@@ -27,5 +27,5 @@ interface ContainerInterface extends \Psr\Container\ContainerInterface
      * @param bool $shared
      * @return void
      */
-    public function set(string $abstract, $concrete, bool $shared = true);
+    public function set(string $abstract, $concrete, bool $shared = true): void;
 }
