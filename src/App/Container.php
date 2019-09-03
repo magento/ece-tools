@@ -75,6 +75,18 @@ class Container implements ContainerInterface
         });
 
         /**
+         * Singletons.
+         */
+        $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
+        $this->container->singleton(\Magento\MagentoCloud\App\Logger\Pool::class);
+        $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
+        $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
+        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\PostDeploy::class);
+
+        /**
          * Interface to implementation binding.
          */
         $this->container->singleton(
