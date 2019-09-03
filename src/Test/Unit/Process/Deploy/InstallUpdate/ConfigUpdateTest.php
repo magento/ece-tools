@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
+use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -22,7 +22,7 @@ class ConfigUpdateTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ProcessInterface|Mock
+     * @var StepInterface|Mock
      */
     private $processMock;
 
@@ -36,7 +36,7 @@ class ConfigUpdateTest extends TestCase
      */
     protected function setUp()
     {
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processMock = $this->getMockForAbstractClass(StepInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->process = new ConfigUpdate(

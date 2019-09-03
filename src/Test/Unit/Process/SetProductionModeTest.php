@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process;
 
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Process\SetProductionMode;
+use Magento\MagentoCloud\Step\SetProductionMode;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -59,7 +59,7 @@ class SetProductionModeTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage can't update file
      */
     public function testExecuteWitException()

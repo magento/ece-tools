@@ -7,9 +7,9 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate;
-use Magento\MagentoCloud\Process\ProcessException;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate;
+use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
 class InstallUpdateTest extends TestCase
 {
     /**
-     * @var ProcessInterface
+     * @var StepInterface
      */
     private $process;
 
@@ -35,12 +35,12 @@ class InstallUpdateTest extends TestCase
     private $stateMock;
 
     /**
-     * @var ProcessInterface|MockObject
+     * @var StepInterface|MockObject
      */
     private $processInstallMock;
 
     /**
-     * @var ProcessInterface|MockObject
+     * @var StepInterface|MockObject
      */
     private $processUpdateMock;
 
@@ -51,8 +51,8 @@ class InstallUpdateTest extends TestCase
     {
         $this->stateMock = $this->createMock(State::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->processInstallMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $this->processUpdateMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processInstallMock = $this->getMockForAbstractClass(StepInterface::class);
+        $this->processUpdateMock = $this->getMockForAbstractClass(StepInterface::class);
 
         $this->process = new InstallUpdate(
             $this->loggerMock,
@@ -109,7 +109,7 @@ class InstallUpdateTest extends TestCase
 
     /**
      * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      *
      * @throws ProcessException
      */

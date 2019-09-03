@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Process\Build\ComposerDumpAutoload;
+use Magento\MagentoCloud\Step\Build\ComposerDumpAutoload;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\TestCase;
@@ -48,7 +48,7 @@ class ComposerDumpAutoloadTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage something went wrong
      */
     public function testExecuteWithException()

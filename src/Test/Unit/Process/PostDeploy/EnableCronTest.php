@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
-use Magento\MagentoCloud\Process\PostDeploy\EnableCron;
+use Magento\MagentoCloud\Step\PostDeploy\EnableCron;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;

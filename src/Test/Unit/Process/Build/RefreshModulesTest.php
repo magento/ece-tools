@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Config\Module;
-use Magento\MagentoCloud\Process\Build\RefreshModules;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\Build\RefreshModules;
+use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 class RefreshModulesTest extends TestCase
 {
     /**
-     * @var ProcessInterface
+     * @var StepInterface
      */
     private $process;
 
@@ -84,7 +84,7 @@ class RefreshModulesTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage some error
      */
     public function testExecuteWithException()

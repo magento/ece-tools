@@ -8,8 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -89,7 +89,7 @@ class SetupTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage script error
      */
     public function testExecuteWithException()

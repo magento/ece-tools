@@ -8,12 +8,12 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Process\ProcessException;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
+use Magento\MagentoCloud\Step\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
 use Psr\Log\LoggerInterface;
 
@@ -43,7 +43,7 @@ class DeployStaticContentTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ProcessInterface|MockObject
+     * @var StepInterface|MockObject
      */
     private $processMock;
 
@@ -70,7 +70,7 @@ class DeployStaticContentTest extends TestCase
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processMock = $this->getMockForAbstractClass(StepInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->globalConfigMock = $this->createMock(GlobalConfig::class);
         $this->staticContentCleanerMock = $this->createMock(StaticContentCleaner::class);

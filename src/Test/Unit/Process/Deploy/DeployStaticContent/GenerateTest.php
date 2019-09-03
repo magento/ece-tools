@@ -8,8 +8,8 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate;
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\Deploy\DeployStaticContent\Generate;
+use Magento\MagentoCloud\Step\ProcessException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
@@ -120,7 +120,7 @@ class GenerateTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage Cannot update deployed version.
      * @throws ProcessException
      */

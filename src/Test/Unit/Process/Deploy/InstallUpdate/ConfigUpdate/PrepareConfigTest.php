@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
+use Magento\MagentoCloud\Step\ProcessException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
@@ -123,7 +123,7 @@ class PrepareConfigTest extends TestCase
      * @throws ProcessException
      *
      * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      */
     public function testExecuteWithException(
         bool $scdOnDemand,

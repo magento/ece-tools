@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Process\Deploy\PreDeploy;
-use Magento\MagentoCloud\Process\ProcessException;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\Deploy\PreDeploy;
+use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -28,7 +28,7 @@ class PreDeployTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ProcessInterface|MockObject
+     * @var StepInterface|MockObject
      */
     private $processMock;
 
@@ -38,7 +38,7 @@ class PreDeployTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processMock = $this->getMockForAbstractClass(StepInterface::class);
 
         $this->process = new PreDeploy(
             $this->loggerMock,

@@ -7,7 +7,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Process\Build\CopySampleData;
+use Magento\MagentoCloud\Step\Build\CopySampleData;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 

@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Process\Build\CompressStaticContent;
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\Build\CompressStaticContent;
+use Magento\MagentoCloud\Step\ProcessException;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use PHPUnit\Framework\MockObject\MockObject;

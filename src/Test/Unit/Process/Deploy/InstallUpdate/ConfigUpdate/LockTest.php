@@ -5,10 +5,10 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Lock;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Lock\Config as LockConfig;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock\Config as LockConfig;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;

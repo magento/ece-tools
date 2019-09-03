@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Process\Build\BackupData;
-use Magento\MagentoCloud\Process\ProcessException;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\Build\BackupData;
+use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -24,7 +24,7 @@ class BackupDataTest extends TestCase
     private $process;
 
     /**
-     * @var ProcessInterface|MockObject
+     * @var StepInterface|MockObject
      */
     private $processMock;
 
@@ -39,7 +39,7 @@ class BackupDataTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processMock = $this->getMockForAbstractClass(StepInterface::class);
 
         $this->process = new BackupData(
             $this->loggerMock,

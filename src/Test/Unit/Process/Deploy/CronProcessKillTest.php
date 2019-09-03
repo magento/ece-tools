@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Process\Deploy\CronProcessKill;
+use Magento\MagentoCloud\Step\Deploy\CronStepKill;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
@@ -18,7 +18,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 class CronProcessKillTest extends TestCase
 {
     /**
-     * @var CronProcessKill
+     * @var CronStepKill
      */
     private $process;
 
@@ -40,7 +40,7 @@ class CronProcessKillTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->shellMock = $this->createMock(ShellInterface::class);
 
-        $this->process = new CronProcessKill(
+        $this->process = new CronStepKill(
             $this->loggerMock,
             $this->shellMock
         );

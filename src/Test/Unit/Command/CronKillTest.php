@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\CronKill;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -24,9 +24,9 @@ class CronKillTest extends TestCase
     private $command;
 
     /**
-     * @var ProcessInterface|MockObject
+     * @var StepInterface|MockObject
      */
-    private $processMock;
+    private $stepMock;
 
     /**
      * @var LoggerInterface|MockObject
@@ -38,11 +38,11 @@ class CronKillTest extends TestCase
      */
     protected function setUp()
     {
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->stepMock = $this->getMockForAbstractClass(StepInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
 
         $this->command = new CronKill(
-            $this->processMock,
+            $this->stepMock,
             $this->loggerMock
         );
     }
@@ -57,7 +57,7 @@ class CronKillTest extends TestCase
         /** @var OutputInterface|MockObject $outputMock */
         $outputMock = $this->createMock(OutputInterface::class);
 
-        $this->processMock->expects($this->once())
+        $this->stepMock->expects($this->once())
             ->method('execute');
 
         $this->command->execute($inputMock, $outputMock);
@@ -76,7 +76,7 @@ class CronKillTest extends TestCase
         /** @var OutputInterface|MockObject $outputMock */
         $outputMock = $this->createMock(OutputInterface::class);
 
-        $this->processMock->expects($this->once())
+        $this->stepMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new \Exception('Some error'));
 

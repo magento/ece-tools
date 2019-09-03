@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\CloudPatches\Config\Config;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;

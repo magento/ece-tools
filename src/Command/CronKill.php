@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,9 +19,9 @@ class CronKill extends Command
     const NAME = 'cron:kill';
 
     /**
-     * @var ProcessInterface
+     * @var StepInterface
      */
-    private $process;
+    private $step;
 
     /**
      * @var LoggerInterface
@@ -29,14 +29,14 @@ class CronKill extends Command
     private $logger;
 
     /**
-     * @param ProcessInterface $process
+     * @param StepInterface $step
      * @param LoggerInterface $logger
      */
     public function __construct(
-        ProcessInterface $process,
+        StepInterface $step,
         LoggerInterface $logger
     ) {
-        $this->process = $process;
+        $this->step = $step;
         $this->logger = $logger;
 
         parent::__construct();
@@ -63,7 +63,7 @@ class CronKill extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->process->execute();
+            $this->step->execute();
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 

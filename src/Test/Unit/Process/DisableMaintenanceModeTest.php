@@ -8,8 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Process;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Process\DisableMaintenanceMode;
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\DisableMaintenanceMode;
+use Magento\MagentoCloud\Step\ProcessException;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -54,7 +54,7 @@ class DisableMaintenanceModeTest extends TestCase
 
     /**
      * @throws ProcessException
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage Some error
      */
     public function testExecuteWithException(): void

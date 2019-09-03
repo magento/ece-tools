@@ -5,8 +5,8 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process;
 
-use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Process\ProcessComposite;
+use Magento\MagentoCloud\Step\StepInterface;
+use Magento\MagentoCloud\Step\StepComposite;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,14 +16,14 @@ class ProcessCompositeTest extends TestCase
 {
     public function testExecute()
     {
-        /** @var ProcessInterface|\PHPUnit_Framework_MockObject_MockObject $processMock */
-        $processMock = $this->getMockBuilder(ProcessInterface::class)
+        /** @var StepInterface|\PHPUnit_Framework_MockObject_MockObject $processMock */
+        $processMock = $this->getMockBuilder(StepInterface::class)
             ->getMockForAbstractClass();
         $processAMock = clone $processMock;
         $processBMock = clone $processMock;
         $processCMock = clone $processMock;
 
-        $processPool = new ProcessComposite([
+        $processPool = new StepComposite([
             $processBMock,
             $processAMock,
             $processCMock,

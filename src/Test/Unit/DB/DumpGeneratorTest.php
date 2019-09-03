@@ -162,7 +162,7 @@ class DumpGeneratorTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Process\ProcessException
+     * @throws \Magento\MagentoCloud\Step\ProcessException
      */
     public function testCreateWithException()
     {
@@ -228,7 +228,7 @@ class DumpGeneratorTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Process\ProcessException
+     * @throws \Magento\MagentoCloud\Step\ProcessException
      */
     public function testCreateWithErrors()
     {

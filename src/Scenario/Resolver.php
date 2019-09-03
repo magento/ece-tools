@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Scenario;
 
 use Magento\MagentoCloud\App\ContainerInterface;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 
 /**
@@ -31,7 +31,7 @@ class Resolver
 
     /**
      * @param array $scenarios
-     * @return ProcessInterface[]
+     * @return StepInterface[]
      * @throws ValidationException
      */
     public function resolve(array $scenarios): array
@@ -44,11 +44,11 @@ class Resolver
                 $this->resolveParams($step['arguments'] ?? [])
             );
 
-            if (!$instance instanceof ProcessInterface) {
+            if (!$instance instanceof StepInterface) {
                 throw new ValidationException(sprintf(
                     '%s is not instance of %s',
                     get_class($instance),
-                    ProcessInterface::class
+                    StepInterface::class
                 ));
             }
 

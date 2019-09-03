@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
-use Magento\MagentoCloud\Process\PostDeploy\Backup;
+use Magento\MagentoCloud\Step\PostDeploy\Backup;
 use Magento\MagentoCloud\Filesystem\BackupList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;

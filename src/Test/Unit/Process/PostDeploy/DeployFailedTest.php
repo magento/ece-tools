@@ -8,8 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
-use Magento\MagentoCloud\Process\PostDeploy\DeployFailed;
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\PostDeploy\DeployFailed;
+use Magento\MagentoCloud\Step\ProcessException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -50,7 +50,7 @@ class DeployFailedTest extends TestCase
 
     /**
      * @throws ProcessException
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage Post-deploy is skipped because deploy was failed.
      */
     public function testExecuteToBeFailed(): void

@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process;
 use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Process\ValidateConfiguration;
+use Magento\MagentoCloud\Step\ValidateConfiguration;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -29,7 +29,7 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Process\ProcessException
+     * @throws \Magento\MagentoCloud\Step\ProcessException
      */
     public function testExecuteWithoutValidators()
     {
@@ -51,7 +51,7 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage Fix configuration with given suggestions
      */
     public function testExecuteWithCriticalError()
@@ -81,7 +81,7 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Process\ProcessException
+     * @throws \Magento\MagentoCloud\Step\ProcessException
      */
     public function testExecuteWithWarningMessage()
     {
@@ -111,7 +111,7 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage Fix configuration with given suggestions
      */
     public function testExecuteWithWarningAndCriticalMessage()

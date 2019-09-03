@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Package\MagentoVersion;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ConfigImport;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ConfigImport;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use PHPUnit\Framework\MockObject\MockObject;

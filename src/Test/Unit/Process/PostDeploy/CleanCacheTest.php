@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Process\PostDeploy\CleanCache;
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\PostDeploy\CleanCache;
+use Magento\MagentoCloud\Step\ProcessException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
@@ -70,7 +70,7 @@ class CleanCacheTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      * @expectedExceptionMessage Some error
      *
      * @throws ProcessException

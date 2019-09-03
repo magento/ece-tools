@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\Update;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\SetAdminUrl;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;

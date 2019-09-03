@@ -6,13 +6,15 @@
  */
 -->
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../config/scenario.xsd">
-    <step name="compress-static-content" type="Magento\MagentoCloud\Process\Build\CompressStaticContent"/>
-    <step name="clear-init-directory" type="Magento\MagentoCloud\Process\Build\ClearInitDirectory"/>
-    <step name="backup-data" type="Magento\MagentoCloud\Process\Build\BackupData">
+    <step name="compress-static-content" type="Magento\MagentoCloud\Step\Build\CompressStaticContent"/>
+    <step name="clear-init-directory" type="Magento\MagentoCloud\Step\Build\ClearInitDirectory"/>
+    <step name="backup-data" type="Magento\MagentoCloud\Step\Build\BackupData">
         <arguments>
             <argument name="processes" xsi:type="array">
-                <item name="static-content" xsi:type="object">Magento\MagentoCloud\Process\Build\BackupData\StaticContent</item>
-                <item name="writable-dirs" xsi:type="object">Magento\MagentoCloud\Process\Build\BackupData\WritableDirectories</item>
+                <item name="static-content" xsi:type="object">Magento\MagentoCloud\Step\Build\BackupData\StaticContent</item>
+                <item name="writable-dirs" xsi:type="object">
+                    Magento\MagentoCloud\Step\Build\BackupData\WritableDirectories
+                </item>
             </argument>
         </arguments>
     </step>

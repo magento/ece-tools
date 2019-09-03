@@ -7,10 +7,10 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpda
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -29,7 +29,7 @@ class UrlsTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var ProcessInterface|Mock
+     * @var StepInterface|Mock
      */
     private $processMock;
 
@@ -49,7 +49,7 @@ class UrlsTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processMock = $this->getMockForAbstractClass(StepInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 

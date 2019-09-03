@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Process\Build\BackupData\StaticContent;
+use Magento\MagentoCloud\Step\Build\BackupData\StaticContent;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**

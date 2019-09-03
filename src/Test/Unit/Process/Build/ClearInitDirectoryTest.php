@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Process\Build\ClearInitDirectory;
+use Magento\MagentoCloud\Step\Build\ClearInitDirectory;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;

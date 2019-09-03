@@ -15,8 +15,8 @@ use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\SearchEngine;
+use Magento\MagentoCloud\Step\ProcessException;
 use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -291,7 +291,7 @@ class SearchEngineTest extends TestCase
      * @throws ProcessException
      *
      * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      */
     public function testExecuteWithException()
     {
@@ -328,7 +328,7 @@ class SearchEngineTest extends TestCase
      * @throws ProcessException
      *
      * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      */
     public function testExecuteWithPackageException()
     {
@@ -358,7 +358,7 @@ class SearchEngineTest extends TestCase
      * @throws ProcessException
      *
      * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\ProcessException
      */
     public function testExecuteWithConfigException()
     {

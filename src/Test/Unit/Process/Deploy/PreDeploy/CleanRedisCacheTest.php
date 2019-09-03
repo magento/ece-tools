@@ -7,7 +7,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanRedisCache;
+use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanRedisCache;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Config\Factory\Cache as СacheConfig;
 use PHPUnit\Framework\TestCase;

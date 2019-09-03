@@ -10,9 +10,9 @@ namespace Magento\MagentoCloud\App;
 use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\SystemList;
-use Magento\MagentoCloud\Process\Deploy as DeployProcess;
-use Magento\MagentoCloud\Process\ProcessComposite;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\Deploy as DeployStep;
+use Magento\MagentoCloud\Step\StepComposite;
+use Magento\MagentoCloud\Step\StepInterface;
 use Composer;
 
 /**
@@ -132,20 +132,20 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Database\MergedConfig::class
         );
 
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
-            ->needs(ProcessInterface::class)
+        $this->container->when(DeployStep\InstallUpdate\ConfigUpdate\Urls::class)
+            ->needs(StepInterface::class)
             ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
+                return $this->container->makeWith(StepComposite::class, [
                     'processes' => [
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Database::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Environment::class),
+                        $this->container->make(DeployStep\InstallUpdate\ConfigUpdate\Urls\Database::class),
+                        $this->container->make(DeployStep\InstallUpdate\ConfigUpdate\Urls\Environment::class),
                     ],
                 ]);
             });
 
         $this->container->when(CronKill::class)
-            ->needs(ProcessInterface::class)
-            ->give(DeployProcess\CronProcessKill::class);
+            ->needs(StepInterface::class)
+            ->give(DeployStep\CronStepKill::class);
     }
 
     /**

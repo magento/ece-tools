@@ -8,8 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
-use Magento\MagentoCloud\Process\Deploy\RemoveDeployFailedFlag;
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag;
+use Magento\MagentoCloud\Step\ProcessException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

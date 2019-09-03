@@ -9,7 +9,7 @@ use Magento\MagentoCloud\View\RendererInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ResetPassword;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ResetPassword;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Filesystem\Driver\File;

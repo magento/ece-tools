@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\InstallUpdate\ConfigUpdate\Lock;
 
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Lock\Config;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock\Config;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use PHPUnit\Framework\TestCase;

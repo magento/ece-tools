@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 use Magento\MagentoCloud\Command\Deploy;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanStaticContent;
+use Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;

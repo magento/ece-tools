@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Patch\Manager;
-use Magento\MagentoCloud\Process\Build\ApplyPatches;
+use Magento\MagentoCloud\Step\Build\ApplyPatches;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;

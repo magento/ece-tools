@@ -6,8 +6,8 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy\WarmUp;
 
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
-use Magento\MagentoCloud\Process\PostDeploy\WarmUp\Urls;
-use Magento\MagentoCloud\Process\PostDeploy\WarmUp\UrlsPattern;
+use Magento\MagentoCloud\Step\PostDeploy\WarmUp\Urls;
+use Magento\MagentoCloud\Step\PostDeploy\WarmUp\UrlsPattern;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

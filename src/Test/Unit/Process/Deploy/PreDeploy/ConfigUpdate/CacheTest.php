@@ -8,7 +8,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy\ConfigUpdate;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheFactory;
-use Magento\MagentoCloud\Process\Deploy\PreDeploy\ConfigUpdate\Cache;
+use Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

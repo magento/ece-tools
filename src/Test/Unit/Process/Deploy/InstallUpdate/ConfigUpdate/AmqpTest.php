@@ -9,9 +9,9 @@ use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config as AmqpConfig;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp\Config as AmqpConfig;
 
 /**
  * @inheritdoc
