@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Process\PostDeploy;
 
-use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 
@@ -17,14 +17,14 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 class DeployFailed implements ProcessInterface
 {
     /**
-     * @var FlagManager
+     * @var Manager
      */
     private $flagManager;
 
     /**
-     * @param FlagManager $flagManager
+     * @param Manager $flagManager
      */
-    public function __construct(FlagManager $flagManager)
+    public function __construct(Manager $flagManager)
     {
         $this->flagManager = $flagManager;
     }
@@ -34,7 +34,7 @@ class DeployFailed implements ProcessInterface
      */
     public function execute()
     {
-        if ($this->flagManager->exists(FlagManager::FLAG_DEPLOY_HOOK_IS_FAILED)) {
+        if ($this->flagManager->exists(Manager::FLAG_DEPLOY_HOOK_IS_FAILED)) {
             throw new ProcessException('Post-deploy is skipped because deploy was failed.');
         }
     }

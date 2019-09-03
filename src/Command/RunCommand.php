@@ -19,9 +19,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class RunCommand extends Command
 {
-    const NAME = 'run';
-
-    const ARG_SCENARIO = 'scenario';
+    public const NAME = 'run';
+    public const ARG_SCENARIO = 'scenario';
 
     /**
      * @var Processor
@@ -58,7 +57,7 @@ class RunCommand extends Command
      *
      * @throws ProcessorException
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->processor->execute(
             (array)$input->getArgument(self::ARG_SCENARIO)

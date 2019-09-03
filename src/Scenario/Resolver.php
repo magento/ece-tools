@@ -68,18 +68,28 @@ class Resolver
         $newData = [];
 
         foreach ($data as $item) {
-            switch ($item['xsi:type']) {
+            $type = $item['xsi:type'] ?? null;
+            $name = $item['name'] ?? null;
+
+            if (!$name) {
+                throw new ValidationException('Empty parameter name');
+            }
+
+            switch ($type) {
                 case Merger::XSI_TYPE_OBJECT:
-                    $newData[$item['name']] = $this->container->create($item['#']);
+                    $newData[$name] = $this->container->create($item['#']);
                     break;
                 case Merger::XSI_TYPE_STRING:
-                    $newData[$item['name']] = $data['#'];
+                    $newData[$name] = $item['#'];
                     break;
                 case Merger::XSI_TYPE_ARRAY:
-                    $newData[$item['name']] = $this->resolveParams($item['items']);
+                    $newData[$name] = $this->resolveParams($item['items']);
                     break;
                 default:
-                    throw new ValidationException('Unknown xsi:type ' . $item['xsi:type']);
+                    throw new ValidationException(sprintf(
+                        'Unknown xsi:type "%s"',
+                        $type
+                    ));
             }
         }
 

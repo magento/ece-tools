@@ -15,6 +15,8 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 
 /**
  * Merge given scenarios.
+ *
+ * @codeCoverageIgnore
  */
 class Merger
 {
