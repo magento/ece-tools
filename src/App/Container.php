@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Command\CronKill;
-use Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ProcessComposite;
@@ -52,7 +51,7 @@ class Container implements ContainerInterface
          * Binding.
          */
         $this->container->singleton(Composer\Composer::class, static function () use ($systemList) {
-            $composerFactory = new \Composer\Factory();
+            $composerFactory = new Composer\Factory();
             $composerFile = file_exists($systemList->getMagentoRoot() . '/composer.json')
                 ? $systemList->getMagentoRoot() . '/composer.json'
                 : $systemList->getRoot() . '/composer.json';
@@ -63,13 +62,6 @@ class Container implements ContainerInterface
                 false,
                 $systemList->getMagentoRoot()
             );
-        });
-        $this->container->singleton(Flag\Pool::class, static function () {
-            return new Flag\Pool([
-                Flag\Manager::FLAG_REGENERATE => 'var/.regenerate',
-                Flag\Manager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD => '.static_content_deploy',
-                Flag\Manager::FLAG_DEPLOY_HOOK_IS_FAILED => 'var/.deploy_is_failed',
-            ]);
         });
 
         /**

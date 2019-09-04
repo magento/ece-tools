@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Filesystem\Flag;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -150,9 +149,10 @@ class Manager
         $flag = $this->pool->get($key);
 
         if (!$flag) {
-            throw new ConfigurationMismatchException(
-                sprintf('Flag with key %s is not registered in pool', $key)
-            );
+            throw new ConfigurationMismatchException(sprintf(
+                'Flag with key %s is not registered in pool',
+                $key
+            ));
         }
 
         return $flag;
