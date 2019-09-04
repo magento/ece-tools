@@ -8,7 +8,6 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Filesystem\Flag\Pool;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -38,7 +37,7 @@ class ManagerTest extends TestCase
     /**
      * @var Pool|MockObject
      */
-    private $flagPool;
+    private $pool;
 
     /**
      * @var Manager
@@ -63,7 +62,7 @@ class ManagerTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagPool = $this->createMock(Pool::class);
+        $this->pool = $this->createMock(Pool::class);
 
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn($this->magentoRoot);
@@ -73,7 +72,7 @@ class ManagerTest extends TestCase
         $this->manager = new Manager(
             $this->loggerMock,
             $this->fileMock,
-            $this->flagPool,
+            $this->pool,
             $this->directoryListMock
         );
 
@@ -85,7 +84,7 @@ class ManagerTest extends TestCase
      */
     public function testGetFlag(): void
     {
-        $this->flagPool->expects($this->once())
+        $this->pool->expects($this->once())
             ->method('get')
             ->with('some_flag')
             ->willReturn('flag/path');
@@ -100,11 +99,11 @@ class ManagerTest extends TestCase
      * @throws ConfigurationMismatchException
      *
      * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
-     * @expectedExceptionMessage Flag with key some_flag is not registered in flagPool
+     * @expectedExceptionMessage Flag with key some_flag is not registered in pool
      */
     public function testGetFlagWithException(): void
     {
-        $this->flagPool->expects($this->once())
+        $this->pool->expects($this->once())
             ->method('get')
             ->with('some_flag')
             ->willReturn(null);
@@ -112,6 +111,9 @@ class ManagerTest extends TestCase
         $this->manager->getFlagPath('some_flag');
     }
 
+    /**
+     * @return array
+     */
     public function flagDataProvider(): array
     {
         return [
@@ -130,7 +132,7 @@ class ManagerTest extends TestCase
      */
     public function testExists(string $key, string $path, bool $flagState)
     {
-        $this->flagPool->expects($this->once())
+        $this->pool->expects($this->once())
             ->method('get')
             ->with($key)
             ->willReturn($path);
@@ -155,7 +157,7 @@ class ManagerTest extends TestCase
      */
     public function testSet(string $key, string $path, bool $flagState): void
     {
-        $this->flagPool->expects($this->once())
+        $this->pool->expects($this->once())
             ->method('get')
             ->with($key)
             ->willReturn($path);
@@ -197,7 +199,7 @@ class ManagerTest extends TestCase
         array $logs,
         bool $result
     ): void {
-        $this->flagPool->expects($this->any())
+        $this->pool->expects($this->any())
             ->method('get')
             ->with($key)
             ->willReturn($path);
@@ -228,6 +230,9 @@ class ManagerTest extends TestCase
         );
     }
 
+    /**
+     * @return array
+     */
     public function deleteDataProvider(): array
     {
         return [
@@ -261,33 +266,10 @@ class ManagerTest extends TestCase
     /**
      * @throws ConfigurationMismatchException
      */
-    public function testExistsWithFileSystemException(): void
-    {
-        $path = 'path/that/doesnt/exist';
-        $this->flagPool->expects($this->any())
-            ->method('get')
-            ->with('some_key')
-            ->willReturn($path);
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn($this->magentoRoot);
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->willThrowException(new FileSystemException('Error occurred during execution'));
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Error occurred during execution');
-
-        $this->assertFalse($this->manager->exists('some_key'));
-    }
-
-    /**
-     * @throws ConfigurationMismatchException
-     */
     public function testSetWithFileSystemException(): void
     {
         $path = 'path/that/doesnt/exist';
-        $this->flagPool->expects($this->any())
+        $this->pool->expects($this->any())
             ->method('get')
             ->with('some_key')
             ->willReturn($path);
