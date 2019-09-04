@@ -74,9 +74,7 @@ class DeprecatedVariables implements ValidatorInterface
         }
 
         // default value for SCD_EXCLUDE_THEMES is an empty string
-        if (isset($config[DeployInterface::VAR_SCD_EXCLUDE_THEMES])
-            && $config[DeployInterface::VAR_SCD_EXCLUDE_THEMES] !== ''
-        ) {
+        if (!empty($config[DeployInterface::VAR_SCD_EXCLUDE_THEMES])) {
             $errors[] = sprintf(
                 'The %s variable is deprecated. Use %s instead.',
                 DeployInterface::VAR_SCD_EXCLUDE_THEMES,

@@ -146,7 +146,19 @@ class DeprecatedVariablesTest extends TestCase
                 [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => false],
                 [],
                 Error::class,
-            ]
+            ],
+            [
+                [],
+                [DeployInterface::VAR_SCD_EXCLUDE_THEMES => ''],
+                [],
+                Success::class,
+            ],
+            [
+                [],
+                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => true],
+                [],
+                Success::class,
+            ],
         ];
     }
 
