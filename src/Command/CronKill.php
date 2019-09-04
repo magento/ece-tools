@@ -5,8 +5,7 @@
  */
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Config\BackgroundProcess;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,28 +15,19 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CronKill extends Command
 {
-    const NAME = 'cron:kill';
+    public const NAME = 'cron:kill';
 
     /**
-     * @var ProcessInterface
+     * @var BackgroundProcess
      */
-    private $process;
+    private $backgroundProcess;
 
     /**
-     * @var LoggerInterface
+     * @param BackgroundProcess $backgroundProcess
      */
-    private $logger;
-
-    /**
-     * @param ProcessInterface $process
-     * @param LoggerInterface $logger
-     */
-    public function __construct(
-        ProcessInterface $process,
-        LoggerInterface $logger
-    ) {
-        $this->process = $process;
-        $this->logger = $logger;
+    public function __construct(BackgroundProcess $backgroundProcess)
+    {
+        $this->backgroundProcess = $backgroundProcess;
 
         parent::__construct();
     }
@@ -57,17 +47,9 @@ class CronKill extends Command
      * Runs process which finds all running Magento cron processes and kills them
      *
      * {@inheritdoc}
-     *
-     * @throws \Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
-            $this->process->execute();
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            throw $exception;
-        }
+        $this->backgroundProcess->kill();
     }
 }

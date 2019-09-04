@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App;
 
-use Magento\MagentoCloud\Command\CronKill;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Magento\MagentoCloud\Process\Deploy as DeployProcess;
 use Magento\MagentoCloud\Process\ProcessComposite;
@@ -134,10 +133,6 @@ class Container implements ContainerInterface
                     ],
                 ]);
             });
-
-        $this->container->when(CronKill::class)
-            ->needs(ProcessInterface::class)
-            ->give(DeployProcess\CronProcessKill::class);
     }
 
     /**
