@@ -68,10 +68,6 @@ class GenerateTest extends TestCase
         $this->sharedConfigMock = $this->createMock(SharedConfig::class);
         $this->formatterMock = $this->createMock(PhpFormatter::class);
 
-        $dateMock = $this->getFunctionMock('Magento\MagentoCloud\Process\ConfigDump', 'date');
-        $dateMock->expects($this->any())
-            ->willReturn($this->timeStamp);
-
         $this->process = new Generate(
             $this->connectionMock,
             $this->fileMock,

@@ -79,15 +79,15 @@ class CacheTest extends TestCase
         );
 
         $this->socketCreateMock = $this->getFunctionMock(
-            'Magento\MagentoCloud\Process\Deploy\PreDeploy\ConfigUpdate',
+            'Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate',
             'socket_create'
         );
         $this->socketConnectMock = $this->getFunctionMock(
-            'Magento\MagentoCloud\Process\Deploy\PreDeploy\ConfigUpdate',
+            'Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate',
             'socket_connect'
         );
         $this->socketCloseMock = $this->getFunctionMock(
-            'Magento\MagentoCloud\Process\Deploy\PreDeploy\ConfigUpdate',
+            'Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate',
             'socket_close'
         );
     }

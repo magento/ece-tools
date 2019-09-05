@@ -76,7 +76,7 @@ class ResetPasswordTest extends TestCase
         $this->rendererMock = $this->getMockForAbstractClass(RendererInterface::class);
 
         $this->mailFunctionMock = $this->getFunctionMock(
-            'Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install',
+            'Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install',
             'mail'
         );
 
