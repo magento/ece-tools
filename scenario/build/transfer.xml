@@ -10,11 +10,9 @@
     <step name="clear-init-directory" type="Magento\MagentoCloud\Step\Build\ClearInitDirectory"/>
     <step name="backup-data" type="Magento\MagentoCloud\Step\Build\BackupData">
         <arguments>
-            <argument name="processes" xsi:type="array">
+            <argument name="steps" xsi:type="array">
                 <item name="static-content" xsi:type="object">Magento\MagentoCloud\Step\Build\BackupData\StaticContent</item>
-                <item name="writable-dirs" xsi:type="object">
-                    Magento\MagentoCloud\Step\Build\BackupData\WritableDirectories
-                </item>
+                <item name="writable-dirs" xsi:type="object">Magento\MagentoCloud\Step\Build\BackupData\WritableDirectories</item>
             </argument>
         </arguments>
     </step>

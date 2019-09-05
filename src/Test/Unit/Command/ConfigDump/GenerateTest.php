@@ -53,11 +53,6 @@ class GenerateTest extends TestCase
     private $formatterMock;
 
     /**
-     * @var string
-     */
-    private $timeStamp = '2018-01-19T18:33:42+00:00';
-
-    /**
      * @inheritdoc
      */
     protected function setUp()

@@ -127,7 +127,7 @@ class Container implements ContainerInterface
             ->needs(StepInterface::class)
             ->give(function () {
                 return $this->container->makeWith(StepComposite::class, [
-                    'processes' => [
+                    'steps' => [
                         $this->container->make(DeployStep\InstallUpdate\ConfigUpdate\Urls\Database::class),
                         $this->container->make(DeployStep\InstallUpdate\ConfigUpdate\Urls\Environment::class),
                     ],

@@ -36,7 +36,7 @@
     <step name="sump-autoload" type="Magento\MagentoCloud\Step\Build\ComposerDumpAutoload"/>
     <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Build\DeployStaticContent">
         <arguments>
-            <argument name="processes" xsi:type="array">
+            <argument name="steps" xsi:type="array">
                 <item name="generate" xsi:type="object">Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate</item>
             </argument>
         </arguments>
