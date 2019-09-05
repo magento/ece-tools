@@ -17,7 +17,7 @@ class DisableCron implements StepInterface
     /**
      * @var CronStepKill
      */
-    private $cronProcessKill;
+    private $cronStepKill;
 
     /**
      * @var Writer
@@ -30,16 +30,16 @@ class DisableCron implements StepInterface
     private $logger;
 
     /**
-     * @param CronStepKill $cronProcessKill
+     * @param CronStepKill $cronStepKill
      * @param LoggerInterface $logger
      * @param Writer $deployConfigWriter
      */
     public function __construct(
-        CronStepKill $cronProcessKill,
+        CronStepKill $cronStepKill,
         LoggerInterface $logger,
         Writer $deployConfigWriter
     ) {
-        $this->cronProcessKill = $cronProcessKill;
+        $this->cronStepKill = $cronStepKill;
         $this->logger = $logger;
         $this->writer = $deployConfigWriter;
     }
@@ -55,6 +55,6 @@ class DisableCron implements StepInterface
         $this->logger->info('Disable cron');
         $this->writer->update(['cron' => ['enabled' => 0]]);
 
-        $this->cronProcessKill->execute();
+        $this->cronStepKill->execute();
     }
 }
