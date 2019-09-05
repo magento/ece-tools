@@ -6,7 +6,7 @@
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\Config\Deploy\Writer;
-use Magento\MagentoCloud\Step\Deploy\CronStepKill;
+use Magento\MagentoCloud\Step\Deploy\BackgroundProcessKill;
 use Magento\MagentoCloud\Step\Deploy\DisableCron;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -33,9 +33,9 @@ class DisableCronTest extends TestCase
     private $writerMock;
 
     /**
-     * @var CronStepKill|MockObject
+     * @var BackgroundProcessKill|MockObject
      */
-    private $cronStepKillMock;
+    private $backgroundProcessKillMock;
 
     /**
      * Setup the test environment.
@@ -43,11 +43,11 @@ class DisableCronTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->cronStepKillMock = $this->createMock(CronStepKill::class);
+        $this->backgroundProcessKillMock = $this->createMock(BackgroundProcessKill::class);
         $this->writerMock = $this->createMock(Writer::class);
 
         $this->step = new DisableCron(
-            $this->cronStepKillMock,
+            $this->backgroundProcessKillMock,
             $this->loggerMock,
             $this->writerMock
         );
@@ -62,7 +62,7 @@ class DisableCronTest extends TestCase
         $this->writerMock->expects($this->once())
             ->method('update')
             ->with($config);
-        $this->cronStepKillMock->expects($this->once())
+        $this->backgroundProcessKillMock->expects($this->once())
             ->method('execute');
         $this->step->execute();
     }

@@ -20,11 +20,11 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
  */
 class Merger
 {
-    const ROOT_NODE = 'scenario';
+    private const ROOT_NODE = 'scenario';
 
-    const XSI_TYPE_STRING = 'string';
-    const XSI_TYPE_OBJECT = 'object';
-    const XSI_TYPE_ARRAY = 'array';
+    public const XSI_TYPE_STRING = 'string';
+    public const XSI_TYPE_OBJECT = 'object';
+    public const XSI_TYPE_ARRAY = 'array';
 
     /**
      * @var File

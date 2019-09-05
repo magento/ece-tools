@@ -40,8 +40,13 @@ class PostDeployCest extends AbstractCest
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains('NOTICE: Starting post-deploy.', $log);
-        $I->assertContains('NOTICE: Post-deploy is complete.', $log);
+        $I->assertContains('INFO: Starting scenario(s): scenario/post-deploy.xml', $log);
+        $I->assertContains('DEBUG: Running step: is-deploy-failed', $log);
+        $I->assertContains('DEBUG: Running step: validate-config', $log);
+        $I->assertContains('DEBUG: Running step: enable-cron', $log);
+        $I->assertContains('DEBUG: Running step: clean-cache', $log);
+        $I->assertContains('DEBUG: Running step: warm-up', $log);
+        $I->assertContains('DEBUG: Running step: time-to-first-byte', $log);
     }
 
     /**

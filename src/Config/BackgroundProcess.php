@@ -3,16 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Step\Deploy;
+declare(strict_types=1);
 
-use Magento\MagentoCloud\Step\StepInterface;
+namespace Magento\MagentoCloud\Config;
+
+use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * Kills all running Magento cron processes
+ * Kills all running Magento cron and consumers processes
  */
-class CronStepKill implements StepInterface
+class BackgroundProcess
 {
     /**
      * @var LoggerInterface
@@ -37,27 +39,27 @@ class CronStepKill implements StepInterface
     }
 
     /**
-     * Kills all running Magento cron jobs.
+     * Kills all running Magento cron jobs and consumers processes.
      *
      * @return void
      */
-    public function execute()
+    public function kill():void
     {
         try {
-            $this->logger->info('Trying to kill running cron jobs');
+            $this->logger->info('Trying to kill running cron jobs and consumers processes');
 
-            $process = $this->shell->execute('pgrep -U "$(id -u)" -f "bin/magento cron:run"');
+            $process = $this->shell->execute('pgrep -U "$(id -u)" -f "bin/magento +(cron:run|queue:consumers:start)"');
 
             $cronPids = array_filter(explode(PHP_EOL, $process->getOutput()));
             foreach ($cronPids as $pid) {
                 $this->killProcess($pid);
             }
-        } catch (\RuntimeException $e) {
+        } catch (ShellException $e) {
             // pgrep returns 1 when no processes matched. Returns 2 and 3 in case of error
             if ($e->getCode() === 1) {
-                $this->logger->info('Running Magento cron processes were not found.');
+                $this->logger->info('Running Magento cron and consumers processes were not found.');
             } else {
-                $this->logger->warning('Error happening during kill cron: ' . $e->getMessage());
+                $this->logger->warning('Error happening during kill cron or consumers processes: ' . $e->getMessage());
             }
         }
     }
@@ -69,11 +71,11 @@ class CronStepKill implements StepInterface
      * @param string $pid
      * @return void
      */
-    private function killProcess($pid)
+    private function killProcess($pid): void
     {
         try {
             $this->shell->execute("kill $pid");
-        } catch (\RuntimeException $e) {
+        } catch (ShellException $e) {
             $this->logger->info(sprintf('Couldn\'t kill process #%d it may be already finished', $pid));
             $this->logger->debug($e->getMessage());
         }
