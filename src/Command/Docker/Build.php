@@ -95,12 +95,12 @@ class Build extends Command
                 self::OPTION_MODE,
                 'm',
                 InputOption::VALUE_REQUIRED,
-                sprintf('Mode of environment')
+                'Mode of environment'
             )->addOption(
                 self::OPTION_SYNC_ENGINE,
                 null,
                 InputOption::VALUE_REQUIRED,
-                sprintf('File sync engine. Works only with developer mode.')
+                'File sync engine. Works only with developer mode'
             );
 
         parent::configure();
