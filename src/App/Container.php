@@ -390,7 +390,7 @@ class Container implements ContainerInterface
 
         $this->container->when(CronKill::class)
             ->needs(ProcessInterface::class)
-            ->give(DeployProcess\CronProcessKill::class);
+            ->give(DeployProcess\BackgroundProcessKill::class);
         $this->container->when(ModuleRefresh::class)
             ->needs(ProcessInterface::class)
             ->give(BuildProcess\RefreshModules::class);
