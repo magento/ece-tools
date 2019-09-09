@@ -15,9 +15,9 @@ use Psr\Log\LoggerInterface;
 class DisableCron implements ProcessInterface
 {
     /**
-     * @var CronProcessKill
+     * @var BackgroundProcessKill
      */
-    private $cronProcessKill;
+    private $backgroundProcessKill;
 
     /**
      * @var Writer
@@ -30,16 +30,16 @@ class DisableCron implements ProcessInterface
     private $logger;
 
     /**
-     * @param CronProcessKill $cronProcessKill
+     * @param BackgroundProcessKill $backgroundProcessKill
      * @param LoggerInterface $logger
      * @param Writer $deployConfigWriter
      */
     public function __construct(
-        CronProcessKill $cronProcessKill,
+        BackgroundProcessKill $backgroundProcessKill,
         LoggerInterface $logger,
         Writer $deployConfigWriter
     ) {
-        $this->cronProcessKill = $cronProcessKill;
+        $this->backgroundProcessKill = $backgroundProcessKill;
         $this->logger = $logger;
         $this->writer = $deployConfigWriter;
     }
@@ -55,6 +55,6 @@ class DisableCron implements ProcessInterface
         $this->logger->info('Disable cron');
         $this->writer->update(['cron' => ['enabled' => 0]]);
 
-        $this->cronProcessKill->execute();
+        $this->backgroundProcessKill->execute();
     }
 }
