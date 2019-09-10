@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Psr\Log\LoggerInterface;
 
 /**
- * Process given scenarios.
+ * Processing given scenarios.
  */
 class Processor
 {
@@ -31,7 +31,7 @@ class Processor
     /**
      * @var Manager
      */
-    private $manager;
+    private $packageManager;
 
     /**
      * @param Merger $merger
@@ -42,7 +42,7 @@ class Processor
     {
         $this->merger = $merger;
         $this->logger = $logger;
-        $this->manager = $manager;
+        $this->packageManager = $manager;
     }
 
     /**
@@ -54,7 +54,7 @@ class Processor
         $this->logger->info(sprintf(
             'Starting scenario(s): %s %s',
             implode(', ', $scenarios),
-            $this->manager->getPrettyInfo()
+            $this->packageManager->getPrettyInfo()
         ));
 
         try {

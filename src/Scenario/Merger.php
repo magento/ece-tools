@@ -126,7 +126,7 @@ class Merger
         foreach ($step['arguments'][0]['argument'] ?? [] as $argument) {
             if ($missedArgs = array_diff(self::$argumentRequiredArgs, array_keys($argument))) {
                 throw new ValidationException(sprintf(
-                    'Arguments %s are missed from argument',
+                    'Argument(s) %s are missed from argument',
                     implode(', ', $missedArgs)
                 ));
             }
@@ -152,10 +152,6 @@ class Merger
             'type' => $step['@type'],
             'arguments' => $arguments
         ];
-
-        if (isset($step['@remove'])) {
-            $stepData['remove'] = $step['@remove'];
-        }
 
         return $stepData;
     }

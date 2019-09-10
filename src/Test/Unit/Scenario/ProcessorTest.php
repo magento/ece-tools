@@ -39,7 +39,7 @@ class ProcessorTest extends TestCase
     /**
      * @var Manager|MockObject
      */
-    private $managerMock;
+    private $packageManagerMock;
 
     /**
      * @inheritDoc
@@ -48,12 +48,12 @@ class ProcessorTest extends TestCase
     {
         $this->mergerMock = $this->createMock(Merger::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->managerMock = $this->createMock(Manager::class);
+        $this->packageManagerMock = $this->createMock(Manager::class);
 
         $this->processor = new Processor(
             $this->mergerMock,
             $this->loggerMock,
-            $this->managerMock
+            $this->packageManagerMock
         );
     }
 
@@ -79,7 +79,7 @@ class ProcessorTest extends TestCase
             'step2' => $step2
         ];
 
-        $this->managerMock->expects($this->once())
+        $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('1.0.0');
         $this->mergerMock->expects($this->once())
@@ -129,7 +129,7 @@ class ProcessorTest extends TestCase
             'step1' => $step1
         ];
 
-        $this->managerMock->expects($this->once())
+        $this->packageManagerMock->expects($this->once())
             ->method('getPrettyInfo')
             ->willReturn('1.0.0');
         $this->mergerMock->expects($this->once())

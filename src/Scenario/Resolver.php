@@ -41,7 +41,7 @@ class Resolver
         foreach ($scenarios as $step) {
             $instance = $this->container->create(
                 $step['type'],
-                $this->resolveParams($step['arguments'] ?? [])
+                $this->resolveParams($step['arguments'] ?? [], $step['name'])
             );
 
             if (!$instance instanceof ProcessInterface) {
@@ -60,10 +60,11 @@ class Resolver
 
     /**
      * @param array $data
+     * @param string $stepName
      * @return array
      * @throws ValidationException
      */
-    private function resolveParams(array $data): array
+    private function resolveParams(array $data, string $stepName): array
     {
         $newData = [];
 
@@ -72,7 +73,10 @@ class Resolver
             $name = $item['name'] ?? null;
 
             if (!$name) {
-                throw new ValidationException('Empty parameter name');
+                throw new ValidationException(sprintf(
+                    'Empty parameter name in step "%s"',
+                    $stepName
+                ));
             }
 
             switch ($type) {
@@ -83,7 +87,7 @@ class Resolver
                     $newData[$name] = $item['#'];
                     break;
                 case Merger::XSI_TYPE_ARRAY:
-                    $newData[$name] = $this->resolveParams($item['items']);
+                    $newData[$name] = $this->resolveParams($item['items'], $stepName);
                     break;
                 default:
                     throw new ValidationException(sprintf(
