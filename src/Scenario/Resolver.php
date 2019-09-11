@@ -30,6 +30,8 @@ class Resolver
     }
 
     /**
+     * Resolve scenarios by their step arguments
+     *
      * @param array $scenarios
      * @return ProcessInterface[]
      * @throws ValidationException
@@ -59,6 +61,8 @@ class Resolver
     }
 
     /**
+     * Resolve arguments depending on the type
+     *
      * @param array $data
      * @param string $stepName
      * @return array
@@ -91,8 +95,9 @@ class Resolver
                     break;
                 default:
                     throw new ValidationException(sprintf(
-                        'Unknown xsi:type "%s"',
-                        $type
+                        'Unknown xsi:type "%s" in step "%s"',
+                        $type,
+                        $stepName
                     ));
             }
         }

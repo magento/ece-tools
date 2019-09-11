@@ -14,7 +14,6 @@
                 <item name="500" xsi:type="array">
                     <item name="composer" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ComposerFile</item>
                     <item name="stage-config" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\StageConfig</item>
-                    <item name="build-options" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\BuildOptionsIni</item>
                 </item>
                 <item name="300" xsi:type="array">
                     <item name="config-file-exists" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ConfigFileExists</item>
