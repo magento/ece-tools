@@ -18,7 +18,7 @@
                 </item>
                 <item name="300" xsi:type="array">
                     <item name="config-file-exists" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ConfigFileExists</item>
-                    <item name="deprecated-ini" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\DeprecatedBuildOptionsIni</item>
+                    <item name="deprecated-ini" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\UnsupportedBuildOptionsIni</item>
                     <item name="stage-config-deprecated-variables" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\StageConfigDeprecatedVariables</item>
                     <item name="modules-exists" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ModulesExists</item>
                     <item name="appropriate-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\AppropriateVersion</item>
