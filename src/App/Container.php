@@ -122,7 +122,6 @@ class Container implements ContainerInterface
         $this->container->singleton(DirectoryCopier\CopySubFolderStrategy::class);
         $this->container->singleton(DirectoryCopier\SymlinkStrategy::class);
         $this->container->singleton(DirectoryCopier\StrategyFactory::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Build\Reader::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Environment\Reader::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
         $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
@@ -181,11 +180,10 @@ class Container implements ContainerInterface
                                 ValidatorInterface::LEVEL_CRITICAL => [
                                     $this->container->make(ConfigValidator\Build\ComposerFile::class),
                                     $this->container->make(ConfigValidator\Build\StageConfig::class),
-                                    $this->container->make(ConfigValidator\Build\BuildOptionsIni::class),
+                                    $this->container->make(ConfigValidator\Build\UnsupportedBuildOptionsIni::class),
                                 ],
                                 ValidatorInterface::LEVEL_WARNING => [
                                     $this->container->make(ConfigValidator\Build\ConfigFileExists::class),
-                                    $this->container->make(ConfigValidator\Build\DeprecatedBuildOptionsIni::class),
                                     $this->container->make(ConfigValidator\Build\StageConfigDeprecatedVariables::class),
                                     $this->container->make(ConfigValidator\Build\ModulesExists::class),
                                     $this->container->make(ConfigValidator\Build\AppropriateVersion::class),
