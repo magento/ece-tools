@@ -5,9 +5,9 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 
-use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Filesystem\Flag\Pool;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -98,7 +98,7 @@ class ManagerTest extends TestCase
     /**
      * @throws ConfigurationMismatchException
      *
-     * @expectedException \Magento\MagentoCloud\Docker\ConfigurationMismatchException
+     * @expectedException \Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException
      * @expectedExceptionMessage Flag with key some_flag is not registered in pool
      */
     public function testGetFlagWithException(): void

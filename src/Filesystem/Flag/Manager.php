@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Filesystem\Flag;
 
-use Magento\MagentoCloud\Docker\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Psr\Log\LoggerInterface;
