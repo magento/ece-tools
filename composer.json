@@ -23,11 +23,6 @@
     "illuminate/container": "^5.6",
     "illuminate/contracts": "^5.6",
     "magento/magento-cloud-components": "^1.0.1",
-    "illuminate/config": "^5.5",
-    "illuminate/container": "^5.5",
-    "illuminate/contracts": "^5.5",
-    "magento/magento-cloud-components": "^1.0.1",
-    "magento/magento-cloud-docker": "^1.0",
     "monolog/monolog": "^1.16",
     "psr/container": "^1.0",
     "psr/log": "^1.0",
@@ -36,6 +31,9 @@
     "symfony/serializer": "^4.2",
     "symfony/yaml": "^4.0",
     "twig/twig": "^2.0"
+  },
+  "suggest": {
+    "magento/magento-cloud-docker": "^1.0"
   },
   "require-dev": {
     "codeception/codeception": "^2.5.3",
