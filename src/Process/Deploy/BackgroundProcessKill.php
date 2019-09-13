@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\Config\BackgroundProcess;
+use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Process\ProcessInterface;
 
 /**

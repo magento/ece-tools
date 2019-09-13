@@ -27,7 +27,7 @@ class BackupData implements ProcessInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param array $processes
+     * @param ProcessInterface[] $processes
      */
     public function __construct(LoggerInterface $logger, array $processes)
     {

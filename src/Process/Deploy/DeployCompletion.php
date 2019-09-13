@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Application\HookChecker;
@@ -32,7 +34,7 @@ class DeployCompletion implements ProcessInterface
     /**
      * @param LoggerInterface $logger
      * @param HookChecker $hookChecker
-     * @param array $processes
+     * @param ProcessInterface[] $processes
      */
     public function __construct(
         LoggerInterface $logger,

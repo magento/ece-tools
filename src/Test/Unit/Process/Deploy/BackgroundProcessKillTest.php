@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Config\BackgroundProcess;
+use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Process\Deploy\BackgroundProcessKill;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
