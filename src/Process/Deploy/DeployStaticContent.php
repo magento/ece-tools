@@ -53,7 +53,7 @@ class DeployStaticContent implements ProcessInterface
      * @param DeployInterface $stageConfig
      * @param GlobalConfig $globalConfig
      * @param StaticContentCleaner $staticContentCleaner
-     * @param array $processes
+     * @param ProcessInterface[] $processes
      */
     public function __construct(
         FlagManager $flagManager,

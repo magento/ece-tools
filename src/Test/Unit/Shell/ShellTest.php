@@ -88,6 +88,7 @@ class ShellTest extends TestCase
             ->method('create')
             ->with([
                 'command' => $commandWithArgs,
+                'commandline' => $commandWithArgs,
                 'cwd' => $magentoRoot,
                 'timeout' => null
             ])
@@ -138,6 +139,7 @@ class ShellTest extends TestCase
             ->method('create')
             ->with([
                 'command' => $command,
+                'commandline' => $command,
                 'cwd' => $magentoRoot,
                 'timeout' => 0
             ])
@@ -176,6 +178,7 @@ class ShellTest extends TestCase
             ->method('create')
             ->with([
                 'command' => $command,
+                'commandline' => $command,
                 'cwd' => $magentoRoot,
                 'timeout' => 0
             ])
@@ -208,6 +211,7 @@ class ShellTest extends TestCase
             ->method('create')
             ->with([
                 'command' => "ls -al 'arg1' 'arg2'",
+                'commandline' => "ls -al 'arg1' 'arg2'",
                 'cwd' => $magentoRoot,
                 'timeout' => 0
             ])

@@ -39,8 +39,8 @@ class InstallUpdate implements ProcessInterface
     /**
      * @param LoggerInterface $logger
      * @param State $state
-     * @param array $installProcesses
-     * @param array $updateProcesses
+     * @param ProcessInterface[] $installProcesses
+     * @param ProcessInterface[] $updateProcesses
      */
     public function __construct(
         LoggerInterface $logger,

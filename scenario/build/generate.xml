@@ -6,7 +6,7 @@
  */
 -->
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../config/scenario.xsd" >
-    <step name="pre-build" type="\Magento\MagentoCloud\Process\Build\PreBuild"/>
+    <step name="pre-build" type="Magento\MagentoCloud\Process\Build\PreBuild"/>
     <step name="set-production-mode" type="Magento\MagentoCloud\Process\SetProductionMode"/>
     <step name="validate-configuration" type="Magento\MagentoCloud\Process\ValidateConfiguration">
         <arguments>
@@ -32,7 +32,7 @@
     <step name="marshall-files" type="Magento\MagentoCloud\Process\Build\MarshallFiles"/>
     <step name="copy-sample-data" type="Magento\MagentoCloud\Process\Build\CopySampleData"/>
     <step name="compile-di" type="Magento\MagentoCloud\Process\Build\CompileDi"/>
-    <step name="sump-autoload" type="Magento\MagentoCloud\Process\Build\ComposerDumpAutoload"/>
+    <step name="dump-autoload" type="Magento\MagentoCloud\Process\Build\ComposerDumpAutoload"/>
     <step name="deploy-static-content" type="Magento\MagentoCloud\Process\Build\DeployStaticContent">
         <arguments>
             <argument name="processes" xsi:type="array">

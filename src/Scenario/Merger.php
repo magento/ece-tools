@@ -21,6 +21,7 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 class Merger
 {
     private const ROOT_NODE = 'scenario';
+    private const NODE_VALUE = '#';
 
     public const XSI_TYPE_STRING = 'string';
     public const XSI_TYPE_OBJECT = 'object';
@@ -234,8 +235,8 @@ class Merger
                 'xsi:type' => $item['@xsi:type'],
             ];
 
-            if (isset($item['#'])) {
-                $newItem['#'] = $item['#'];
+            if (isset($item[self::NODE_VALUE])) {
+                $newItem[self::NODE_VALUE] = $item[self::NODE_VALUE];
             } elseif (isset($item['item'])) {
                 $newItem['items'] = $this->collectItems($item['item']);
             }
