@@ -84,6 +84,9 @@ class CronUnlockCest extends AbstractCest
         );
     }
 
+    /**
+     * @return array
+     */
     protected function getSampleData() : array
     {
         return [
