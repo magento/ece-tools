@@ -17,8 +17,8 @@ services:
     volumes:
       - /var/lib/mysql
       - './.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d'
-      - './.docker/mnt:/mnt'
-      - './.docker/tmp:/tmp'
+#      - './.docker/mnt:/mnt'
+#      - './.docker/tmp:/tmp'
   fpm:
     image: 'magento/magento-cloud-docker-php:7.2-fpm-1.0'
     ports:
