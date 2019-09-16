@@ -10,6 +10,9 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 use phpDocumentor\Reflection\Types\Void_;
 
+/**
+ * Test for cron:unlock.
+ */
 class CronUnlockCest extends AbstractCest
 {
     /**
@@ -37,7 +40,7 @@ class CronUnlockCest extends AbstractCest
         $sampleData = $this->getSampleData();
         $scheduleIds = [];
 
-        foreach($sampleData as $row) {
+        foreach ($sampleData as $row) {
             $scheduleIds[] = $I->haveInDatabase('cron_schedule', $row);
         }
         $I->seeInDatabase('cron_schedule', ['status' => 'pending']);
@@ -49,18 +52,26 @@ class CronUnlockCest extends AbstractCest
 
         $I->assertTrue($I->runEceToolsCommand('cron:unlock', Docker::DEPLOY_CONTAINER));
         $I->seeInDatabase('cron_schedule', ['status' => 'error']);
-        foreach(array_slice($scheduleIds, 0, 3) as $scheduleId) {
+        foreach (array_slice($scheduleIds, 0, 3) as $scheduleId) {
             $I->seeInDatabase('cron_schedule', ['schedule_id' => $scheduleId, 'status' => 'error']);
         }
 
-        foreach(array_slice($scheduleIds, 3, 3) as $scheduleId) {
+        foreach (array_slice($scheduleIds, 3, 3) as $scheduleId) {
             $this->updateScheduleInDb($I, $scheduleId, 'running');
         }
         $I->seeInDatabase('cron_schedule', ['status' => 'running']);
 
-        $I->assertTrue($I->runEceToolsCommand(
-            sprintf('cron:unlock --job-code=%s --job-code=%s', 'catalog_product_frontend_actions_flush', 'catalog_product_outdated_price_values_cleanup'),
-            Docker::DEPLOY_CONTAINER));
+        $I->assertTrue(
+            $I->runEceToolsCommand(
+                sprintf(
+                    'cron:unlock --job-code=%s --job-code=%s',
+                    'catalog_product_frontend_actions_flush',
+                    'catalog_product_outdated_price_values_cleanup'
+                ),
+                Docker::DEPLOY_CONTAINER
+            )
+        );
+
         $I->seeInDatabase('cron_schedule', ['schedule_id' => $scheduleIds[3], 'status' => 'error']);
         $I->seeInDatabase('cron_schedule', ['schedule_id' => $scheduleIds[4], 'status' => 'error']);
         $I->seeInDatabase('cron_schedule', ['schedule_id' => $scheduleIds[5], 'status' => 'running']);
