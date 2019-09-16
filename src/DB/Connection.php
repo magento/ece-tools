@@ -208,12 +208,11 @@ class Connection implements ConnectionInterface
         }
 
         $connectionData = $this->connectionFactory->create(ConnectionFactory::CONNECTION_MAIN);
+        $dsn = sprintf('mysql:dbname=%s;host=%s', $connectionData->getDbName(), $connectionData->getHost());
+        $this->logger->debug('DB connection: ' . $dsn);
+
         $this->pdo = new \PDO(
-            sprintf(
-                'mysql:dbname=%s;host=%s',
-                $connectionData->getDbName(),
-                $connectionData->getHost()
-            ),
+            $dsn,
             $connectionData->getUser(),
             $connectionData->getPassword(),
             [
