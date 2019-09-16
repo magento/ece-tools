@@ -2,7 +2,7 @@ Magento:
   docker:
     settings:
       db:
-        host: 'db'
+        host: 'db.magento2.docker'
         port: '3306'
         username: 'magento2'
         password: 'magento2'
