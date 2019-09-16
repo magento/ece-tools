@@ -49,6 +49,10 @@ matrix:
     - php: '7.2'
       env: TEST_SUITE=functional
 
+before_install:
+  - sudo apt update -y
+  - sudo apt install --only-upgrade docker-ce -y
+
 install:
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer remove magento/magento-cloud-components --no-update; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer config --unset repositories.repo.magento.com; fi;
@@ -59,6 +63,8 @@ install:
   - composer update -n --no-suggest
 
 before_script:
+  - docker --version
+  - docker-compose --version
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
