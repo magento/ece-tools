@@ -5,6 +5,10 @@
   "version": "2002.0.21",
   "license": "OSL-3.0",
   "repositories": {
+    "docker": {
+      "type": "vcs",
+      "url": "https://github.com/magento/magento-cloud-docker.git"
+    },
     "repo.magento.com": {
       "type": "composer",
       "url": "https://repo.magento.com/"
@@ -23,7 +27,7 @@
     "illuminate/container": "^5.5",
     "illuminate/contracts": "^5.5",
     "magento/magento-cloud-components": "^1.0.1",
-    "magento/magento-cloud-docker": "^1.0",
+    "magento/magento-cloud-docker": "dev-MAGECLOUD-4242 as 1.0.2",
     "monolog/monolog": "^1.16",
     "psr/container": "^1.0",
     "psr/log": "^1.0",
