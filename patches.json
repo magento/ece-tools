@@ -180,6 +180,18 @@
     "Re-work consumers to terminate as soon as there is nothing left to process": {
       "2.2.0 - 2.3.1": "MAGECLOUD-4071__terminate_consumers_if_the_queue_is_empty__2.2.0.patch",
       "2.3.2 - 2.3.3": "MAGECLOUD-4071__terminate_consumers_if_the_queue_is_empty__2.3.2.patch"
+    },
+    "Reduce q-ty of error report files": {
+      "2.1.4 - 2.1.7": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.1.4.patch",
+      "2.1.8 - 2.1.16": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.1.8.patch",
+      "2.1.17 - 2.1.18": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.1.17.patch",
+      "2.2.0 - 2.2.4": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.2.0.patch",
+      "2.2.5": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.2.5.patch",
+      "2.2.6 - 2.2.7": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.2.6.patch",
+      "2.2.8 - 2.2.10": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.2.8.patch",
+      "2.3.0": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.3.0.patch",
+      "2.3.1": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.3.1.patch",
+      "2.3.2 - 2.3.3": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.3.2.patch"
     }
   },
   "monolog/monolog": {
