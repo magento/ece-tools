@@ -53,8 +53,8 @@ services:
       - 'magento-build-static:/app/pub/static:delegated'
       - 'magento-build-media:/app/pub/media:delegated'
       - '~/.composer/cache:/app/.composer/cache:delegated'
-      - './.docker/mnt:/mnt'
-      - './.docker/tmp:/tmp'
+#      - './.docker/mnt:/mnt'
+#      - './.docker/tmp:/tmp'
     networks:
       magento:
         aliases:
@@ -75,8 +75,8 @@ services:
       - 'magento-static:/app/pub/static:delegated'
       - 'magento-media:/app/pub/media:delegated'
       - '~/.composer/cache:/app/.composer/cache:delegated'
-      - './.docker/mnt:/mnt'
-      - './.docker/tmp:/tmp'
+#      - './.docker/mnt:/mnt'
+#      - './.docker/tmp:/tmp'
     networks:
       magento:
         aliases:
