@@ -4,6 +4,7 @@ sudo: required
 addons:
   hosts:
     - magento2.docker
+    - db.magento2.docker
 
 git:
   depth: false
