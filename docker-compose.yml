@@ -10,10 +10,10 @@ services:
     hostname: db.magento2.docker
     ports:
       - '3306:3306'
-#    networks:
-#      magento:
-#        aliases:
-#          - db.magento2.docker
+    networks:
+      magento:
+        aliases:
+          - db.magento2.docker
     volumes:
       - /var/lib/mysql
       - './.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d'
@@ -35,8 +35,8 @@ services:
       - 'magento-etc:/app/app/etc:delegated'
       - 'magento-static:/app/pub/static:delegated'
       - 'magento-media:/app/pub/media:delegated'
-#    networks:
-#      - magento
+    networks:
+      - magento
   build:
     image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
     hostname: build.magento2.docker
@@ -55,10 +55,10 @@ services:
       - '~/.composer/cache:/app/.composer/cache:delegated'
 #      - './.docker/mnt:/mnt'
 #      - './.docker/tmp:/tmp'
-#    networks:
-#      magento:
-#        aliases:
-#          - web.magento2.docker
+    networks:
+      magento:
+        aliases:
+          - web.magento2.docker
   deploy:
     image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
     hostname: deploy.magento2.docker
@@ -77,10 +77,10 @@ services:
       - '~/.composer/cache:/app/.composer/cache:delegated'
 #      - './.docker/mnt:/mnt'
 #      - './.docker/tmp:/tmp'
-#    networks:
-#      magento:
-#        aliases:
-#          - deploy.magento2.docker
+    networks:
+      magento:
+        aliases:
+          - deploy.magento2.docker
   web:
     image: 'magento/magento-cloud-docker-nginx:latest-1.0'
     hostname: web.magento2.docker
@@ -96,10 +96,10 @@ services:
       - 'magento-etc:/app/app/etc:delegated'
       - 'magento-static:/app/pub/static:delegated'
       - 'magento-media:/app/pub/media:delegated'
-#    networks:
-#      magento:
-#        aliases:
-#          - web.magento2.docker
+    networks:
+      magento:
+        aliases:
+          - web.magento2.docker
   varnish:
     image: 'magento/magento-cloud-docker-varnish:latest-1.0'
     environment:
@@ -110,10 +110,10 @@ services:
       - '80:80'
     depends_on:
       - web
-#    networks:
-#      magento:
-#        aliases:
-#          - magento2.docker
+    networks:
+      magento:
+        aliases:
+          - magento2.docker
   tls:
     image: 'magento/magento-cloud-docker-tls:latest-1.0'
     ports:
@@ -122,8 +122,8 @@ services:
       - 'varnish:varnish'
     depends_on:
       - varnish
-#    networks:
-#      - magento
+    networks:
+      - magento
   generic:
     image: alpine
     environment:
@@ -148,6 +148,6 @@ volumes:
   magento-build-etc: {  }
   magento-build-static: {  }
   magento-build-media: {  }
-#networks:
-#  magento:
-#    driver: bridge
+networks:
+  magento:
+    driver: bridge
