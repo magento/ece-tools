@@ -4,7 +4,7 @@ sudo: required
 addons:
   hosts:
     - magento2.docker
-    - db.magento2.docker
+#    - db.magento2.docker
 
 git:
   depth: false
@@ -77,10 +77,11 @@ before_script:
   - ./tests/travis/prepare_functional_parallel.sh
 
 script:
-  - docker-compose up -d
-  - sleep 20s
-  - docker-compose run deploy bash -c "mysql -hdb.magento2.docker -umagento2 -pmagento2"
-  - docker-compose run deploy bash -c "mysql -hdb -umagento2 -pmagento2"
+  - ./vendor/bin/codecept run Acceptance AcceptanceCest::testWithSplitBuildCommand
+#  - docker-compose up -d
+#  - sleep 20s
+#  - docker-compose run deploy bash -c "mysql -hdb.magento2.docker -umagento2 -pmagento2"
+#  - docker-compose run deploy bash -c "mysql -hdb -umagento2 -pmagento2"
 #  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
 #  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
 #  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;

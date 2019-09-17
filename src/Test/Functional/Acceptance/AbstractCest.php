@@ -17,7 +17,7 @@ abstract class AbstractCest
      */
     public function _before(\CliTester $I)
     {
-        $I->generateDockerCompose();
+        //$I->generateDockerCompose();
         $I->cleanUpEnvironment();
     }
 
@@ -27,6 +27,6 @@ abstract class AbstractCest
     public function _after(\CliTester $I)
     {
         $I->stopEnvironment();
-        $I->removeDockerCompose();
+        //$I->removeDockerCompose();
     }
 }
