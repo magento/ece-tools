@@ -261,10 +261,12 @@ class AcceptanceCest extends AbstractCest
 
     /**
      * @param \CliTester $I
+     * @param \Codeception\Scenario $scenario
      * @throws \Robo\Exception\TaskException
      */
-    public function testDeployInBuild(\CliTester $I)
+    public function testDeployInBuild(\CliTester $I, \Codeception\Scenario $scenario)
     {
+        $scenario->skip('Test skipped... See MAGECLOUD-4284');
         $tmpConfig = sys_get_temp_dir() . '/app/etc/config.php';
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
