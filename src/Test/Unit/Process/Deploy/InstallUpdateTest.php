@@ -9,8 +9,9 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Process\Deploy\InstallUpdate;
 use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Process\ProcessInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,42 +20,45 @@ use Psr\Log\LoggerInterface;
 class InstallUpdateTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
+     * @var ProcessInterface
+     */
+    private $process;
+
+    /**
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var State|Mock
+     * @var State|MockObject
      */
     private $stateMock;
 
     /**
-     * @var InstallUpdate\Install|Mock
+     * @var ProcessInterface|MockObject
      */
-    private $installProcessMock;
+    private $processInstallMock;
 
     /**
-     * @var InstallUpdate\Update|Mock
+     * @var ProcessInterface|MockObject
      */
-    private $updateProcessMock;
+    private $processUpdateMock;
 
     /**
-     * @var InstallUpdate
+     * @inheritDoc
      */
-    private $process;
-
     protected function setUp()
     {
-        $this->installProcessMock = $this->createMock(InstallUpdate\Install::class);
-        $this->updateProcessMock = $this->createMock(InstallUpdate\Update::class);
         $this->stateMock = $this->createMock(State::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->processInstallMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processUpdateMock = $this->getMockForAbstractClass(ProcessInterface::class);
 
         $this->process = new InstallUpdate(
             $this->loggerMock,
             $this->stateMock,
-            $this->installProcessMock,
-            $this->updateProcessMock
+            [$this->processInstallMock],
+            [$this->processUpdateMock]
         );
     }
 
@@ -72,9 +76,10 @@ class InstallUpdateTest extends TestCase
                 ['Starting install.'],
                 ['End of install.']
             );
-        $this->installProcessMock->expects($this->once())
+
+        $this->processInstallMock->expects($this->once())
             ->method('execute');
-        $this->updateProcessMock->expects($this->never())
+        $this->processUpdateMock->expects($this->never())
             ->method('execute');
 
         $this->process->execute();
@@ -94,9 +99,9 @@ class InstallUpdateTest extends TestCase
                 ['Starting update.'],
                 ['End of update.']
             );
-        $this->installProcessMock->expects($this->never())
+        $this->processInstallMock->expects($this->never())
             ->method('execute');
-        $this->updateProcessMock->expects($this->once())
+        $this->processUpdateMock->expects($this->once())
             ->method('execute');
 
         $this->process->execute();

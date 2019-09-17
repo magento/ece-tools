@@ -9,11 +9,11 @@ use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Process\Build\DeployStaticContent;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,22 +26,22 @@ class DeployStaticContentTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ProcessInterface|Mock
+     * @var ProcessInterface|MockObject
      */
     private $processMock;
 
     /**
-     * @var FlagManager|Mock
+     * @var FlagManager|MockObject
      */
     private $flagManagerMock;
 
     /**
-     * @var ScdOnBuild|Mock
+     * @var ScdOnBuild|MockObject
      */
     private $scdOnBuildMock;
 
@@ -52,18 +52,20 @@ class DeployStaticContentTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $this->configFileStructureMock = $this->createMock(ConfigFileStructure::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->scdOnBuildMock = $this->createMock(ScdOnBuild::class);
 
         $this->process = new DeployStaticContent(
             $this->loggerMock,
-            $this->processMock,
             $this->flagManagerMock,
-            $this->scdOnBuildMock
+            $this->scdOnBuildMock,
+            [$this->processMock]
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecute()
     {
         $this->flagManagerMock->expects($this->once())
@@ -81,6 +83,9 @@ class DeployStaticContentTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteWithError()
     {
         $this->flagManagerMock->expects($this->once())
