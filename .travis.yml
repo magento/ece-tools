@@ -79,6 +79,7 @@ before_script:
 script:
   - docker-compose up -d
   - docker-compose run deploy bash -c "mysql -hdb.magento2.docker -umagento2 -pmagento2"
+  - docker-compose run deploy bash -c "mysql -hdb -umagento2 -pmagento2"
 #  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
 #  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
 #  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;
