@@ -4,7 +4,6 @@ sudo: required
 addons:
   hosts:
     - magento2.docker
-#    - db.magento2.docker
 
 git:
   depth: false
@@ -14,49 +13,41 @@ services:
 
 language: php
 php:
-#  - '7.0'
-#  - '7.1'
+  - '7.0'
+  - '7.1'
   - '7.2'
 
 env:
   matrix:
-#    - TEST_SUITE=static-unit XDEBUG=true
-#    - TEST_SUITE=integration
-#    - TEST_SUITE=functional
-#    - TEST_SUITE=functional FUNCTIONAL_INDEX=1
-#    - TEST_SUITE=functional FUNCTIONAL_INDEX=2
+    - TEST_SUITE=static-unit XDEBUG=true
+    - TEST_SUITE=integration
+    - TEST_SUITE=functional
+    - TEST_SUITE=functional FUNCTIONAL_INDEX=1
+    - TEST_SUITE=functional FUNCTIONAL_INDEX=2
     - TEST_SUITE=functional FUNCTIONAL_INDEX=3
 
-#matrix:
-#  exclude:
-#    - php: '7.0'
-#      env: TEST_SUITE=integration
-#    - php: '7.0'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
-#    - php: '7.0'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
-#    - php: '7.0'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
-#
-#    - php: '7.1'
-#      env: TEST_SUITE=integration
-#    - php: '7.1'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
-#    - php: '7.1'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
-#    - php: '7.1'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
-#
-#    - php: '7.2'
-#      env: TEST_SUITE=functional
+matrix:
+  exclude:
+    - php: '7.0'
+      env: TEST_SUITE=integration
+    - php: '7.0'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
+    - php: '7.0'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
+    - php: '7.0'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
 
-#before_install:
-#  - sudo apt update -y
-#  - sudo apt install --only-upgrade docker-ce -y
-#  - sudo rm -f /usr/local/bin/docker-compose
-#  - curl -L https://github.com/docker/compose/releases/download/1.24.1/docker-compose-`uname -s`-`uname -m` > docker-compose
-#  - chmod +x docker-compose
-#  - sudo mv docker-compose /usr/local/bin
+    - php: '7.1'
+      env: TEST_SUITE=integration
+    - php: '7.1'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
+    - php: '7.1'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
+    - php: '7.1'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
+
+    - php: '7.2'
+      env: TEST_SUITE=functional
 
 install:
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer remove magento/magento-cloud-components --no-update; fi;
@@ -68,8 +59,6 @@ install:
   - composer update -n --no-suggest
 
 before_script:
-  - docker --version
-  - docker-compose --version
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
@@ -77,13 +66,8 @@ before_script:
   - ./tests/travis/prepare_functional_parallel.sh
 
 script:
-  - ./vendor/bin/codecept run Acceptance AcceptanceCest::testWithSplitBuildCommand
-#  - docker-compose up -d
-#  - sleep 20s
-#  - docker-compose run deploy bash -c "mysql -hdb.magento2.docker -umagento2 -pmagento2"
-#  - docker-compose run deploy bash -c "mysql -hdb -umagento2 -pmagento2"
-#  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
-#  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
-#  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;
+  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
+  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
+  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;
 
 after_failure: docker ps -s
