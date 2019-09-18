@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
-use phpDocumentor\Reflection\Types\Void_;
 
 /**
  * Test for cron:unlock.
