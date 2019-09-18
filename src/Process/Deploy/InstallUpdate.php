@@ -7,8 +7,6 @@ namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update;
 use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
@@ -29,30 +27,31 @@ class InstallUpdate implements ProcessInterface
     private $deployConfig;
 
     /**
-     * @var Install
+     * @var ProcessInterface[]
      */
-    private $installProcess;
+    private $installProcesses;
+
     /**
-     * @var Update
+     * @var ProcessInterface[]
      */
-    private $updateProcess;
+    private $updateProcesses;
 
     /**
      * @param LoggerInterface $logger
      * @param State $state
-     * @param Install $installProcess
-     * @param Update $updateProcess
+     * @param ProcessInterface[] $installProcesses
+     * @param ProcessInterface[] $updateProcesses
      */
     public function __construct(
         LoggerInterface $logger,
         State $state,
-        Install $installProcess,
-        Update $updateProcess
+        array $installProcesses,
+        array $updateProcesses
     ) {
         $this->logger = $logger;
         $this->deployConfig = $state;
-        $this->installProcess = $installProcess;
-        $this->updateProcess = $updateProcess;
+        $this->installProcesses = $installProcesses;
+        $this->updateProcesses = $updateProcesses;
     }
 
     public function execute()
@@ -60,11 +59,19 @@ class InstallUpdate implements ProcessInterface
         try {
             if (!$this->deployConfig->isInstalled()) {
                 $this->logger->notice('Starting install.');
-                $this->installProcess->execute();
+
+                foreach ($this->installProcesses as $process) {
+                    $process->execute();
+                }
+
                 $this->logger->notice('End of install.');
             } else {
                 $this->logger->notice('Starting update.');
-                $this->updateProcess->execute();
+
+                foreach ($this->updateProcesses as $process) {
+                    $process->execute();
+                }
+
                 $this->logger->notice('End of update.');
             }
         } catch (GenericException $exception) {

@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Process\Deploy;
 
 use Magento\MagentoCloud\Config\Application\HookChecker;
@@ -25,23 +27,23 @@ class DeployCompletion implements ProcessInterface
     private $logger;
 
     /**
-     * @var ProcessInterface
+     * @var ProcessInterface[]
      */
-    private $process;
+    private $processes;
 
     /**
      * @param LoggerInterface $logger
      * @param HookChecker $hookChecker
-     * @param ProcessInterface $process
+     * @param ProcessInterface[] $processes
      */
     public function __construct(
         LoggerInterface $logger,
         HookChecker $hookChecker,
-        ProcessInterface $process
+        array $processes
     ) {
         $this->logger = $logger;
         $this->hookChecker = $hookChecker;
-        $this->process = $process;
+        $this->processes = $processes;
     }
 
     /**
@@ -58,6 +60,8 @@ class DeployCompletion implements ProcessInterface
             return;
         }
 
-        $this->process->execute();
+        foreach ($this->processes as $process) {
+            $process->execute();
+        }
     }
 }
