@@ -6,9 +6,11 @@
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Process\Build\BackupData;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,14 +24,14 @@ class BackupDataTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var ProcessInterface|MockObject
      */
-    private $loggerMock;
+    private $processMock;
 
     /**
-     * @var ProcessInterface|Mock
+     * @var LoggerInterface|MockObject
      */
-    private $processesMock;
+    private $loggerMock;
 
     /**
      * @inheritdoc
@@ -37,14 +39,17 @@ class BackupDataTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->processesMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
 
         $this->process = new BackupData(
             $this->loggerMock,
-            $this->processesMock
+            [$this->processMock]
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecute()
     {
         $this->loggerMock->expects($this->exactly(2))
@@ -53,8 +58,7 @@ class BackupDataTest extends TestCase
                 ['Copying data to the ./init directory'],
                 ['End of copying data to the ./init directory']
             );
-
-        $this->processesMock->expects($this->once())
+        $this->processMock->expects($this->once())
             ->method('execute');
 
         $this->process->execute();
