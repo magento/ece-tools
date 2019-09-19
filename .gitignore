@@ -5,4 +5,4 @@
 /composer.lock
 /sandbox
 /docker-compose.yml
-auth.json
+/auth.json
