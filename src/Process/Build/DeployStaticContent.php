@@ -22,11 +22,6 @@ class DeployStaticContent implements ProcessInterface
     private $logger;
 
     /**
-     * @var ProcessInterface
-     */
-    private $process;
-
-    /**
      * @var FlagManager
      */
     private $flagManager;
@@ -37,21 +32,26 @@ class DeployStaticContent implements ProcessInterface
     private $scdOnBuild;
 
     /**
+     * @var ProcessInterface[]
+     */
+    private $processes;
+
+    /**
      * @param LoggerInterface $logger
-     * @param ProcessInterface $process
      * @param FlagManager $flagManager
      * @param ScdOnBuild $scdOnBuild
+     * @param ProcessInterface[] $processes
      */
     public function __construct(
         LoggerInterface $logger,
-        ProcessInterface $process,
         FlagManager $flagManager,
-        ScdOnBuild $scdOnBuild
+        ScdOnBuild $scdOnBuild,
+        array $processes
     ) {
         $this->logger = $logger;
-        $this->process = $process;
         $this->flagManager = $flagManager;
         $this->scdOnBuild = $scdOnBuild;
+        $this->processes = $processes;
     }
 
     /**
@@ -70,7 +70,11 @@ class DeployStaticContent implements ProcessInterface
         }
 
         $this->logger->notice('Generating fresh static content');
-        $this->process->execute();
+
+        foreach ($this->processes as $process) {
+            $process->execute();
+        }
+
         $this->flagManager->set(FlagManager::FLAG_STATIC_CONTENT_DEPLOY_IN_BUILD);
         $this->logger->notice('End of generating fresh static content');
     }

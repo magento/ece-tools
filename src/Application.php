@@ -50,32 +50,30 @@ class Application extends \Symfony\Component\Console\Application
      */
     protected function getDefaultCommands()
     {
-        return array_merge(
-            parent::getDefaultCommands(),
-            [
-                $this->container->create(Command\Build::class),
-                $this->container->create(Command\Build\Generate::class),
-                $this->container->create(Command\Build\Transfer::class),
-                $this->container->create(Command\Deploy::class),
-                $this->container->create(Command\ConfigDump::class),
-                $this->container->create(Command\DbDump::class),
-                $this->container->create(Command\PostDeploy::class),
-                $this->container->create(Command\CronUnlock::class),
-                $this->container->create(Command\BackupRestore::class),
-                $this->container->create(Command\BackupList::class),
-                $this->container->create(Command\ApplyPatches::class),
-                $this->container->create(Command\Dev\UpdateComposer::class),
-                $this->container->create(Command\Wizard\ScdOnDemand::class),
-                $this->container->create(Command\Wizard\ScdOnBuild::class),
-                $this->container->create(Command\Wizard\ScdOnDeploy::class),
-                $this->container->create(Command\ModuleRefresh::class),
-                $this->container->create(Command\Wizard\IdealState::class),
-                $this->container->create(Command\Wizard\MasterSlave::class),
-                $this->container->create(Command\Docker\Build::class),
-                $this->container->create(Command\Docker\GenerateDist::class),
-                $this->container->create(Command\CronKill::class),
-                $this->container->create(Command\ConfigShow::class),
-            ]
-        );
+        return array_merge(parent::getDefaultCommands(), [
+            $this->container->create(Command\Build::class),
+            $this->container->create(Command\Build\Generate::class),
+            $this->container->create(Command\Build\Transfer::class),
+            $this->container->create(Command\Deploy::class),
+            $this->container->create(Command\ConfigDump::class),
+            $this->container->create(Command\DbDump::class),
+            $this->container->create(Command\PostDeploy::class),
+            $this->container->create(Command\CronUnlock::class),
+            $this->container->create(Command\BackupRestore::class),
+            $this->container->create(Command\BackupList::class),
+            $this->container->create(Command\ApplyPatches::class),
+            $this->container->create(Command\Dev\UpdateComposer::class),
+            $this->container->create(Command\Wizard\ScdOnDemand::class),
+            $this->container->create(Command\Wizard\ScdOnBuild::class),
+            $this->container->create(Command\Wizard\ScdOnDeploy::class),
+            $this->container->create(Command\ModuleRefresh::class),
+            $this->container->create(Command\Wizard\IdealState::class),
+            $this->container->create(Command\Wizard\MasterSlave::class),
+            $this->container->create(Command\Docker\Build::class),
+            $this->container->create(Command\Docker\GenerateDist::class),
+            $this->container->create(Command\CronKill::class),
+            $this->container->create(Command\ConfigShow::class),
+            $this->container->create(Command\RunCommand::class),
+        ]);
     }
 }

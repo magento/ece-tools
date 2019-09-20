@@ -5,7 +5,6 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
@@ -38,11 +37,6 @@ class MergedConfigTest extends TestCase
     private $environmentConfigMock;
 
     /**
-     * @var Environment|MockObject
-     */
-    private $environmentMock;
-
-    /**
      * @var Schema|MockObject
      */
     private $schemaMock;
@@ -52,13 +46,11 @@ class MergedConfigTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);
         $this->schemaMock = $this->createMock(Schema::class);
 
         $this->mergedConfig = new MergedConfig(
-            $this->environmentMock,
             $this->environmentReaderMock,
             $this->environmentConfigMock,
             $this->schemaMock

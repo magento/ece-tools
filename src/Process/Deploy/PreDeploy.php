@@ -5,9 +5,7 @@
  */
 namespace Magento\MagentoCloud\Process\Deploy;
 
-use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
-use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -21,28 +19,20 @@ class PreDeploy implements ProcessInterface
     private $logger;
 
     /**
-     * @var ProcessInterface
+     * @var ProcessInterface[]
      */
-    private $process;
-
-    /**
-     * @var MaintenanceModeSwitcher
-     */
-    private $maintenanceModeSwitcher;
+    private $processes;
 
     /**
      * @param LoggerInterface $logger
-     * @param ProcessInterface $process
-     * @param MaintenanceModeSwitcher $maintenanceModeSwitcher
+     * @param ProcessInterface[] $processes
      */
     public function __construct(
         LoggerInterface $logger,
-        ProcessInterface $process,
-        MaintenanceModeSwitcher $maintenanceModeSwitcher
+        array $processes
     ) {
         $this->logger = $logger;
-        $this->process = $process;
-        $this->maintenanceModeSwitcher = $maintenanceModeSwitcher;
+        $this->processes = $processes;
     }
 
     /**
@@ -57,13 +47,11 @@ class PreDeploy implements ProcessInterface
     public function execute()
     {
         $this->logger->notice('Starting pre-deploy.');
-        $this->process->execute();
 
-        try {
-            $this->maintenanceModeSwitcher->enable();
-        } catch (\RuntimeException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        foreach ($this->processes as $process) {
+            $process->execute();
         }
+
         $this->logger->notice('End of pre-deploy.');
     }
 }

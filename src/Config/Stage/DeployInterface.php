@@ -20,10 +20,15 @@ interface DeployInterface extends StageConfigInterface
     const VAR_DATABASE_CONFIGURATION = 'DATABASE_CONFIGURATION';
     const VAR_RESOURCE_CONFIGURATION = 'RESOURCE_CONFIGURATION';
     const VAR_CRON_CONSUMERS_RUNNER = 'CRON_CONSUMERS_RUNNER';
+    const VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES = 'CONSUMERS_WAIT_FOR_MAX_MESSAGES';
     const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
-    const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
     const VAR_UPDATE_URLS = 'UPDATE_URLS';
     const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
+
+    /**
+     * @deprecated will not be supported in the future
+     */
+    const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
 
     /**
      * The variable responsible to set lock provider for Magento 2.2.5 and higher.

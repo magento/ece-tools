@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/scenario.xsd">
+    <step name="is-deploy-failed" type="Magento\MagentoCloud\Process\PostDeploy\DeployFailed"/>
+    <step name="validate-config" type="Magento\MagentoCloud\Process\ValidateConfiguration">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <item name="300" xsi:type="array">
+                    <item name="debug-logging" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\DebugLogging</item>
+                </item>
+            </argument>
+        </arguments>
+    </step>
+    <step name="enable-cron" type="Magento\MagentoCloud\Process\PostDeploy\EnableCron"/>
+    <step name="backup" type="Magento\MagentoCloud\Process\PostDeploy\Backup"/>
+    <step name="clean-cache" type="Magento\MagentoCloud\Process\PostDeploy\CleanCache"/>
+    <step name="warm-up" type="Magento\MagentoCloud\Process\PostDeploy\WarmUp"/>
+    <step name="time-to-first-byte" type="Magento\MagentoCloud\Process\PostDeploy\TimeToFirstByte"/>
+</scenario>
