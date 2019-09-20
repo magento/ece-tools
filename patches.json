@@ -209,7 +209,22 @@
       ">=1.0.3 <1.0.6": "MSI-GH-2350__avoid_quering_inventory_default_stock_view_in_storefront__1.0.3.patch"
     },
     "Avoid group concat from source item indexer": {
-      ">=1.0.3 <1.0.6": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__1.0.3.patch"
+      ">=1.0.3 <1.0.6": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__indexer__1.0.3.patch"
+    }
+  },
+  "magento/module-inventory-reservations": {
+    "Avoid group concat from source item indexer": {
+      ">=1.0.3 <1.0.6": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__reservations__1.0.3.patch"
+    }
+  },
+  "magento/module-inventory-configurable-product-indexer": {
+    "Avoid group concat from source item indexer": {
+      ">=1.0.3 <1.0.6": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__configurable-product-indexer__1.0.3.patch"
+    }
+  },
+  "magento/module-inventory-grouped-product-indexer": {
+    "Avoid group concat from source item indexer": {
+      ">=1.0.3 <1.0.6": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__grouped-product-indexer__1.0.3.patch"
     }
   }
 }
