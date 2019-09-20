@@ -259,6 +259,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function addEceComposerRepo(): bool
     {
+        $commands = [];
         $eceToolsVersion = '2002.0.999';
         $repoConfig = [
             'type' => 'package',
@@ -273,11 +274,21 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ],
         ];
 
-        $composerConfig = $this->taskComposerConfig('composer')
+        // Temporary fix until 2.3.3 is fully published
+        if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
+            $commands[] = 'rm composer.lock';
+            $commands[] = $this->taskComposerRequire('composer')
+                ->dependency('magento/magento-cloud-metapackage', '2.3.3')
+                ->noInteraction()
+                ->option('--no-update')
+                ->getCommand();
+        }
+
+        $commands[] = $this->taskComposerConfig('composer')
             ->set('repositories.ece-tools', addslashes(json_encode($repoConfig, JSON_UNESCAPED_SLASHES)))
             ->noInteraction()
             ->getCommand();
-        $composerRequire = $this->taskComposerRequire('composer')
+        $commands[] = $this->taskComposerRequire('composer')
             ->dependency('magento/ece-tools', $eceToolsVersion)
             ->noInteraction()
             ->getCommand();
@@ -286,7 +297,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->workingDir($this->_getConfig('system_magento_dir'))
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
-            ->exec($composerConfig . ' && ' . $composerRequire)
+            ->exec(implode(' && ', $commands))
             ->run();
 
         $this->output = $result->getMessage();

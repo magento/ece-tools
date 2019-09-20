@@ -28,8 +28,8 @@
     "psr/log": "^1.0",
     "symfony/console": "^2.3||^4.0",
     "symfony/process": "^2.1||^4.1",
-    "symfony/yaml": "^4.0",
     "symfony/serializer": "^4.2",
+    "symfony/yaml": "^4.0",
     "twig/twig": "^1.0||^2.0"
   },
   "suggest": {
