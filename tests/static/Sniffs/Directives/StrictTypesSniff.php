@@ -9,8 +9,7 @@ use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Files\File;
 
 /**
- * Class StrictTypesSniff
- * @package Magento\MagentoCloud\Test\Sniffs\Directives
+ * Sniffer to check if the strict_types declaration is included and add it if not.
  */
 class StrictTypesSniff implements Sniff
 {
@@ -63,6 +62,8 @@ class StrictTypesSniff implements Sniff
     }
 
     /**
+     * Fixer to add the strict_types declaration.
+     *
      * @param File $phpcsFile
      * @param int $position
      */
@@ -79,6 +80,8 @@ class StrictTypesSniff implements Sniff
     }
 
     /**
+     * Recursive method to scan declare statements for strict_types.
+     *
      * @param File $phpcsFile
      * @param array $tokens
      * @param int $position
