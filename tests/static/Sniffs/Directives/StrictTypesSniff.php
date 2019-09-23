@@ -63,8 +63,8 @@ class StrictTypesSniff implements Sniff
     }
 
     /**
-     * @param $phpcsFile
-     * @param $position
+     * @param File $phpcsFile
+     * @param int $position
      */
     private function fix(File $phpcsFile, int $position)
     {
@@ -79,9 +79,9 @@ class StrictTypesSniff implements Sniff
     }
 
     /**
-     * @param $phpcsFile
-     * @param $tokens
-     * @param $position
+     * @param File $phpcsFile
+     * @param array $tokens
+     * @param int $position
      * @return bool
      */
     private function scan(File $phpcsFile, array $tokens, int $position) : bool
