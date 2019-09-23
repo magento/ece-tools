@@ -8,10 +8,11 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Process\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Process\Deploy\DeployStaticContent;
 use Magento\MagentoCloud\Util\StaticContentCleaner;
 use Psr\Log\LoggerInterface;
@@ -27,37 +28,37 @@ class DeployStaticContentTest extends TestCase
     private $process;
 
     /**
-     * @var FlagManager|Mock
+     * @var FlagManager|MockObject
      */
     private $flagManagerMock;
 
     /**
-     * @var ShellInterface|Mock
+     * @var ShellInterface|MockObject
      */
     private $shellMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ProcessInterface|Mock
+     * @var ProcessInterface|MockObject
      */
     private $processMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
 
     /**
-     * @var GlobalConfig|Mock
+     * @var GlobalConfig|MockObject
      */
     private $globalConfigMock;
 
     /**
-     * @var StaticContentCleaner|Mock
+     * @var StaticContentCleaner|MockObject
      */
     private $staticContentCleanerMock;
 
@@ -75,15 +76,18 @@ class DeployStaticContentTest extends TestCase
         $this->staticContentCleanerMock = $this->createMock(StaticContentCleaner::class);
 
         $this->process = new DeployStaticContent(
-            $this->processMock,
             $this->flagManagerMock,
             $this->loggerMock,
             $this->stageConfigMock,
             $this->globalConfigMock,
-            $this->staticContentCleanerMock
+            $this->staticContentCleanerMock,
+            [$this->processMock]
         );
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteOnRemoteInDeploy()
     {
         $this->globalConfigMock->expects($this->once())
@@ -100,8 +104,7 @@ class DeployStaticContentTest extends TestCase
                 ['Generating fresh static content'],
                 ['End of generating fresh static content']
             );
-        $this->stageConfigMock->expects($this->any())
-            ->method('get')
+        $this->stageConfigMock->method('get')
             ->willReturnMap([
                 [DeployInterface::VAR_CLEAN_STATIC_FILES, true],
                 [DeployInterface::VAR_SKIP_SCD, false],
@@ -114,6 +117,9 @@ class DeployStaticContentTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteOnRemoteWithoutCleaning()
     {
         $this->globalConfigMock->expects($this->once())
@@ -144,6 +150,9 @@ class DeployStaticContentTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteOnRemoteDoNotDeploy()
     {
         $this->globalConfigMock->expects($this->once())
@@ -160,6 +169,9 @@ class DeployStaticContentTest extends TestCase
         $this->process->execute();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecuteScdOnDemandInProduction()
     {
         $this->globalConfigMock->expects($this->once())

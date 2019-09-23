@@ -3,7 +3,7 @@ sudo: required
 
 addons:
   hosts:
-    - web
+    - magento2.docker
 
 git:
   depth: false
@@ -13,7 +13,6 @@ services:
 
 language: php
 php:
-  - '7.0'
   - '7.1'
   - '7.2'
 
@@ -28,15 +27,6 @@ env:
 
 matrix:
   exclude:
-    - php: '7.0'
-      env: TEST_SUITE=integration
-    - php: '7.0'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
-    - php: '7.0'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
-    - php: '7.0'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
-
     - php: '7.1'
       env: TEST_SUITE=integration
     - php: '7.1'

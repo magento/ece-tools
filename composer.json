@@ -11,36 +11,39 @@
     }
   },
   "require": {
-    "php": "^7.0",
+    "php": "^7.1.3",
     "ext-PDO": "*",
     "ext-json": "*",
     "ext-sockets": "*",
-    "composer/composer": "@stable",
+    "composer/composer": "^1.4",
     "composer/semver": "^1.4",
     "graylog2/gelf-php": "^1.4.2",
     "guzzlehttp/guzzle": "^6.2",
-    "illuminate/config": "^5.5",
-    "illuminate/container": "^5.5",
-    "illuminate/contracts": "^5.5",
+    "illuminate/config": "^5.6",
+    "illuminate/container": "^5.6",
+    "illuminate/contracts": "^5.6",
     "magento/magento-cloud-components": "^1.0.1",
-    "magento/magento-cloud-docker": "^1.0",
     "monolog/monolog": "^1.16",
     "psr/container": "^1.0",
     "psr/log": "^1.0",
-    "symfony/console": "^2.6||^4.0",
-    "symfony/process": "~2.1||~4.1.0",
-    "symfony/yaml": "^3.3||^4.0",
+    "symfony/console": "^2.3||^4.0",
+    "symfony/process": "^2.1||^4.1",
+    "symfony/serializer": "^4.2",
+    "symfony/yaml": "^4.0",
     "twig/twig": "^1.0||^2.0"
   },
+  "suggest": {
+    "magento/magento-cloud-docker": "^1.0"
+  },
   "require-dev": {
-    "php-mock/php-mock-phpunit": "^2.0",
-    "phpmd/phpmd": "@stable",
-    "phpunit/php-code-coverage": "^5.2",
-    "phpunit/phpunit": "^6.2",
-    "squizlabs/php_codesniffer": "^3.0",
     "codeception/codeception": "^2.5.3",
     "consolidation/robo": "^1.2",
-    "phpstan/phpstan": "@stable"
+    "php-mock/php-mock-phpunit": "^2.0",
+    "phpmd/phpmd": "@stable",
+    "phpstan/phpstan": "^0.11",
+    "phpunit/php-code-coverage": "^5.2",
+    "phpunit/phpunit": "^6.2",
+    "squizlabs/php_codesniffer": "^3.0"
   },
   "conflict": {
     "nesbot/carbon": ">=1.38 <2.0"
@@ -75,15 +78,7 @@
       "@phpunit",
       "@coverage"
     ],
-    "test7.0": [
-      "@phpstan7.0",
-      "@phpcs",
-      "@phpmd",
-      "@phpunit",
-      "@coverage"
-    ],
     "phpstan": "phpstan analyse -c tests/static/phpstan.neon",
-    "phpstan7.0": "phpstan analyse -l 1 -c tests/static/phpstan7.0.neon src",
     "phpcs": "phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n",
     "phpmd": "phpmd src xml tests/static/phpmd-ruleset.xml",
     "phpunit": "phpunit --configuration tests/unit",

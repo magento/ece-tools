@@ -5,9 +5,8 @@
  */
 namespace Magento\MagentoCloud\Command\Build;
 
-use Magento\MagentoCloud\Package\Manager as PackageManager;
-use Magento\MagentoCloud\Process\ProcessInterface;
-use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
+use Magento\MagentoCloud\Scenario\Processor;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -21,33 +20,16 @@ class Generate extends Command
     const NAME = 'build:generate';
 
     /**
-     * @var ProcessInterface
+     * @var Processor
      */
-    private $process;
+    private $processor;
 
     /**
-     * @var LoggerInterface
+     * @param Processor $processor
      */
-    private $logger;
-
-    /**
-     * @var PackageManager
-     */
-    private $packageManager;
-
-    /**
-     * @param ProcessInterface $process
-     * @param LoggerInterface $logger
-     * @param PackageManager $packageManager
-     */
-    public function __construct(
-        ProcessInterface $process,
-        LoggerInterface $logger,
-        PackageManager $packageManager
-    ) {
-        $this->process = $process;
-        $this->logger = $logger;
-        $this->packageManager = $packageManager;
+    public function __construct(Processor $processor)
+    {
+        $this->processor = $processor;
 
         parent::__construct();
     }
@@ -66,18 +48,12 @@ class Generate extends Command
     /**
      * {@inheritdoc}
      *
-     * @throws \Throwable
+     * @throws ProcessorException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
-            $this->logger->notice('Starting generate command. ' . $this->packageManager->getPrettyInfo());
-            $this->process->execute();
-            $this->logger->notice('Generate command completed.');
-        } catch (\Throwable $e) {
-            $this->logger->critical($e->getMessage());
-
-            throw $e;
-        }
+        $this->processor->execute([
+            'scenario/build/generate.xml'
+        ]);
     }
 }
