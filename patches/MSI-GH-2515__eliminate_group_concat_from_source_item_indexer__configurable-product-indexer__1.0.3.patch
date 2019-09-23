@@ -37,7 +37,7 @@ diff -Nuar a/vendor/magento/module-inventory-configurable-product-indexer/Indexe
 @@ -91,15 +84,13 @@ public function execute(array $sourceItemIds): array
 
          $metadata = $this->metadataPool->getMetadata(ProductInterface::class);
-         $linkField = $metadata->getIdentifierField();
+         $linkField = $metadata->getLinkField();
 +        $items = [];
 
          $select = $connection
