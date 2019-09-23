@@ -97,15 +97,3 @@ diff -Nuar a/vendor/magento/module-inventory-indexer/etc/di.xml b/vendor/magento
      <type name="Magento\InventoryIndexer\Model\ResourceModel\GetProductIdsBySourceItemIds">
          <arguments>
              <argument name="productTableName" xsi:type="string">catalog_product_entity</argument>
-diff -Nuar a/vendor/magento/module-inventory-reservations/etc/di.xml b/vendor/magento/module-inventory-reservations/etc/di.xml
---- a/vendor/magento/module-inventory-reservations/etc/di.xml
-+++ b/vendor/magento/module-inventory-reservations/etc/di.xml
-@@ -13,7 +13,7 @@
-     <preference for="Magento\InventoryReservationsApi\Model\GetReservationsQuantityInterface" type="Magento\InventoryReservations\Model\ResourceModel\GetReservationsQuantity"/>
-     <type name="Magento\InventoryReservations\Model\ResourceModel\CleanupReservations">
-         <arguments>
--            <argument name="groupConcatMaxLen" xsi:type="number">2000</argument>
-+            <argument name="groupConcatMaxLen" xsi:type="number">32768</argument>
-         </arguments>
-     </type>
- </config>
