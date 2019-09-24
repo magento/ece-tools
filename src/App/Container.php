@@ -111,10 +111,6 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Stage\PostDeploy::class
         );
         $this->container->singleton(
-            \Magento\MagentoCloud\View\RendererInterface::class,
-            \Magento\MagentoCloud\View\TwigRenderer::class
-        );
-        $this->container->singleton(
             \Magento\MagentoCloud\PlatformVariable\DecoderInterface::class,
             \Magento\MagentoCloud\PlatformVariable\Decoder::class
         );

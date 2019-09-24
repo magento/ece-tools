@@ -3,13 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
+declare(strict_types=1);
+
+namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\ProcessException;
-use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\View\RendererInterface;
+use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -20,7 +21,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
  *
  * {@inheritdoc}
  */
-class ResetPassword implements StepInterface
+class ResetPassword implements ProcessInterface
 {
     /**
      * @var File
@@ -48,32 +49,24 @@ class ResetPassword implements StepInterface
     private $urlManager;
 
     /**
-     * @var RendererInterface
-     */
-    private $renderer;
-
-    /**
      * @param LoggerInterface $logger
      * @param Environment $environment
      * @param UrlManager $urlManager
      * @param File $file
      * @param DirectoryList $directoryList
-     * @param RendererInterface $renderer
      */
     public function __construct(
         LoggerInterface $logger,
         Environment $environment,
         UrlManager $urlManager,
         File $file,
-        DirectoryList $directoryList,
-        RendererInterface $renderer
+        DirectoryList $directoryList
     ) {
         $this->logger = $logger;
         $this->environment = $environment;
         $this->urlManager = $urlManager;
         $this->file = $file;
         $this->directoryList = $directoryList;
-        $this->renderer = $renderer;
     }
 
     /**
@@ -86,17 +79,27 @@ class ResetPassword implements StepInterface
         }
 
         $credentialsFile = $this->directoryList->getMagentoRoot() . '/var/credentials_email.txt';
-        $urls = $this->urlManager->getUrls();
-        $adminUrl = $urls['secure'][''] . ($this->environment->getAdminUrl() ?: Environment::DEFAULT_ADMIN_URL);
+        $templateFile = $this->directoryList->getViews() . '/reset_password.html';
+
         $adminEmail = $this->environment->getAdminEmail();
         $adminUsername = $this->environment->getAdminUsername() ?: Environment::DEFAULT_ADMIN_NAME;
         $adminName = $this->environment->getAdminFirstname();
 
-        $emailContent = $this->renderer->render('reset_password.html.twig', [
-            'admin_url' => $adminUrl,
-            'admin_email' => $adminEmail,
-            'admin_name' => $adminName ?: $adminUsername,
-        ]);
+        $adminUrl = $this->urlManager->getUrls()['secure']['']
+            . ($this->environment->getAdminUrl() ?: Environment::DEFAULT_ADMIN_URL);
+
+        try {
+            $emailContent = strtr(
+                $this->file->fileGetContents($templateFile),
+                [
+                    '{{ admin_url }}' => $adminUrl,
+                    '{{ admin_email }}' => $adminEmail,
+                    '{{ admin_name }}' => $adminName ?: $adminUsername,
+                ]
+            );
+        } catch (FileSystemException $exception) {
+            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+        }
 
         $this->logger->info('Emailing admin URL to admin user ' . $adminUsername . ' at ' . $adminEmail);
 

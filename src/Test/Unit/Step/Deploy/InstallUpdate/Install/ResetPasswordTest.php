@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install;
 
-use Magento\MagentoCloud\View\RendererInterface;
+use Magento\MagentoCloud\Process\ProcessException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
+use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 
 /**
  * @inheritdoc
@@ -59,11 +59,6 @@ class ResetPasswordTest extends TestCase
     private $resetPassword;
 
     /**
-     * @var RendererInterface|MockObject
-     */
-    private $rendererMock;
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -73,7 +68,6 @@ class ResetPasswordTest extends TestCase
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->rendererMock = $this->getMockForAbstractClass(RendererInterface::class);
 
         $this->mailFunctionMock = $this->getFunctionMock(
             'Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install',
@@ -85,23 +79,24 @@ class ResetPasswordTest extends TestCase
             $this->environmentMock,
             $this->urlManagerMock,
             $this->fileMock,
-            $this->directoryListMock,
-            $this->rendererMock
+            $this->directoryListMock
         );
     }
 
     /**
-     * @param InvokedCountMatcher $expectsAdminEmail
+     * @param InvokedCount $expectsAdminEmail
      * @param string $dataAdminPassword
      * @param string $dataAdminEmail
      * @return void
+     * @throws ProcessException
+     *
      * @dataProvider executeWithPasswordSetOrAdminEmailNotSetDataProvider
      */
     public function testExecuteWithPasswordSetOrAdminEmailNotSet(
         $expectsAdminEmail,
         $dataAdminPassword,
         $dataAdminEmail
-    ) {
+    ): void {
         $this->environmentMock->expects($this->once())
             ->method('getAdminPassword')
             ->willReturn($dataAdminPassword);
@@ -148,13 +143,17 @@ class ResetPasswordTest extends TestCase
      * @param string $adminUrl
      * @param string $adminUsername
      * @param string $expectedAdminUsername
+     * @param string $expectedContent
+     * @throws ProcessException
+     *
      * @dataProvider executeDataProvider
      */
     public function testExecute(
-        $adminUrl,
-        $adminUsername,
-        $expectedAdminUsername
-    ) {
+        string $adminUrl,
+        string $adminUsername,
+        string $expectedAdminUsername,
+        string $expectedContent
+    ): void {
         $adminEmail = 'admin@example.com';
         $url = 'https://localhost/';
         $dir = '/root';
@@ -183,21 +182,21 @@ class ResetPasswordTest extends TestCase
                 ['Emailing admin URL to admin user ' . $expectedAdminUsername . ' at ' . $adminEmail],
                 ['Saving email with admin URL: ' . $file]
             );
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willReturn('Hello {{ admin_url }} {{ admin_email }} {{ admin_name }}');
         $this->mailFunctionMock->expects($this->once())
             ->with(
                 $this->stringContains($adminEmail),
                 $this->anything(),
-                'Some content'
+                $expectedContent
             );
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
             ->with(
                 $file,
-                'Some content'
+                $expectedContent
             );
-        $this->rendererMock->expects($this->once())
-            ->method('render')
-            ->willReturn('Some content');
 
         $this->resetPassword->execute();
     }
@@ -208,8 +207,14 @@ class ResetPasswordTest extends TestCase
     public function executeDataProvider(): array
     {
         return [
-            ['', '', Environment::DEFAULT_ADMIN_URL, Environment::DEFAULT_ADMIN_NAME],
-            ['admin', 'root', 'root'],
+            [
+                '',
+                Environment::DEFAULT_ADMIN_URL,
+                Environment::DEFAULT_ADMIN_NAME,
+                'Hello https://localhost/admin admin@example.com admin'
+            ],
+            ['admin', 'root', 'root', 'Hello https://localhost/admin admin@example.com root'],
+            ['admin2', 'root', 'root', 'Hello https://localhost/admin2 admin@example.com root'],
         ];
     }
 }
