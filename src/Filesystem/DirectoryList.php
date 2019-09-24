@@ -18,20 +18,20 @@ class DirectoryList
     /**
      * Keys of directory configuration.
      */
-    const PATH = 'path';
+    private const PATH = 'path';
 
     /**
      * Directory codes.
      */
-    const DIR_INIT = 'init';
-    const DIR_VAR = 'var';
-    const DIR_LOG = 'log';
-    const DIR_GENERATED_CODE = 'code';
-    const DIR_GENERATED_METADATA = 'metadata';
-    const DIR_ETC = 'etc';
-    const DIR_MEDIA = 'media';
-    const DIR_VIEW_PREPROCESSED = 'view-preprocessed';
-    const DIR_STATIC = 'static';
+    public const DIR_INIT = 'init';
+    public const DIR_VAR = 'var';
+    public const DIR_LOG = 'log';
+    public const DIR_GENERATED_CODE = 'code';
+    public const DIR_GENERATED_METADATA = 'metadata';
+    public const DIR_ETC = 'etc';
+    public const DIR_MEDIA = 'media';
+    public const DIR_VIEW_PREPROCESSED = 'view-preprocessed';
+    public const DIR_STATIC = 'static';
 
     /**
      * @var string

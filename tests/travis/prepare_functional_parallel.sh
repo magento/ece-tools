@@ -6,7 +6,7 @@
 set -e
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
-test_set_list=$(grep -Rc 'php70\|php71' src/Test/Functional/Acceptance | grep ':0$' | sed 's/..$//' | sort)
+test_set_list=$(grep -RL 'php70\|php71' src/Test/Functional/Acceptance | sort)
 test_set_count=$(printf "$test_set_list" | wc -l)
 let "test_set_count++"
 
@@ -17,13 +17,13 @@ echo "Total = ${test_set_count}; Batch #1 = ${test_set_size[1]}; Batch #2 = ${te
 
 cp codeception.dist.yml codeception.yml
 echo "groups:" >> codeception.yml
-echo "  php72parallel_*: tests/functional/_data/php72parallel_*" >> codeception.yml
+echo "  parallel_*: tests/functional/_data/parallel_*" >> codeception.yml
 
 group_id=1
 i=1
 for test_file in $test_set_list
 do
-    group_file="tests/functional/_data/php72parallel_$group_id.yml"
+    group_file="tests/functional/_data/parallel_$group_id.yml"
     echo "$test_file" >> "$group_file"
 
     if [ $i -lt ${test_set_size[$group_id]} ]
