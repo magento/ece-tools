@@ -5,12 +5,12 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install;
+namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Process\ProcessException;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -21,7 +21,7 @@ use Magento\MagentoCloud\Filesystem\DirectoryList;
  *
  * {@inheritdoc}
  */
-class ResetPassword implements ProcessInterface
+class ResetPassword implements StepInterface
 {
     /**
      * @var File
