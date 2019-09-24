@@ -94,7 +94,7 @@ CODE;
         $this->file->filePutContents($clearModulesFilePath, $clearModulesCode);
 
         $gitIgnore = $this->file->fileGetContents($rootDirectory . '/.gitignore');
-        if (strpos($gitIgnore, self::SCRIPT_PATH) === false) {
+        if (strpos($gitIgnore ?? '', self::SCRIPT_PATH) === false) {
             $this->file->filePutContents(
                 $rootDirectory . '/.gitignore',
                 '!/' . self::SCRIPT_PATH . PHP_EOL,

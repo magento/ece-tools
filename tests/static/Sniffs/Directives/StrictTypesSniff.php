@@ -3,6 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Sniffs\Directives;
 
 use PHP_CodeSniffer\Sniffs\Sniff;
@@ -10,6 +13,8 @@ use PHP_CodeSniffer\Files\File;
 
 /**
  * Sniffer to check if the strict_types declaration is included and add it if not.
+ *
+ * @package Magento\MagentoCloud\Test\Sniffs\Directives
  */
 class StrictTypesSniff implements Sniff
 {
@@ -17,7 +22,7 @@ class StrictTypesSniff implements Sniff
     private $fixed = false;
 
     /**
-     * @return array|mixed[]
+     * @return array
      */
     public function register()
     {
@@ -67,7 +72,7 @@ class StrictTypesSniff implements Sniff
      * @param File $phpcsFile
      * @param int $position
      */
-    private function fix(File $phpcsFile, int $position)
+    private function fix(File $phpcsFile, int $position) : void
     {
         // Get the fixer.
         $fixer = $phpcsFile->fixer;
@@ -90,12 +95,13 @@ class StrictTypesSniff implements Sniff
     private function scan(File $phpcsFile, array $tokens, int $position) : bool
     {
         // Exit statement, if the beginning of the file has been reached.
-        if($tokens[$position]['code'] === T_OPEN_TAG || $position === 0)
+        if($tokens[$position]['code'] === T_OPEN_TAG || $position === 0) {
             return false;
+        }
 
         if(!$phpcsFile->findNext([T_STRING], $position)) {
             // If there isn't a T_STRING token for the declare directive, continue scan.
-            $this->scan($phpcsFile, $tokens, $phpcsFile->findPrevious([T_DECLARE], $position - 1));
+            return $this->scan($phpcsFile, $tokens, $phpcsFile->findPrevious([T_DECLARE], $position - 1));
         } else {
             // Checking specifically for strict_types.
             $temp = $phpcsFile->findNext([T_STRING], $position);

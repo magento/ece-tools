@@ -66,6 +66,6 @@ class HandlerFactory
      */
     private function increaseSocketTimeout()
     {
-        ini_set('default_socket_timeout', 3600);
+        ini_set('default_socket_timeout', '3600');
     }
 }

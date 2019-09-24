@@ -66,7 +66,7 @@ class IdealState extends Command
             $message = $result->getError();
 
             foreach ($this->validator->getErrors() as $error) {
-                $this->outputFormatter->writeItem($output, $error);
+                $this->outputFormatter->writeItem($output, $error->getError());
             }
         }
 

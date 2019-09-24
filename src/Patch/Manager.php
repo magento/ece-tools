@@ -127,7 +127,7 @@ class Manager
     private function applyComposerPatches()
     {
         $patches = json_decode(
-            $this->file->fileGetContents($this->fileList->getPatches()),
+            $this->file->fileGetContents($this->fileList->getPatches()) ?? '',
             true
         );
 
