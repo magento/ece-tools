@@ -66,7 +66,8 @@ class SetErrorReportDirNestingLevel implements ProcessInterface
             if ($this->file->isExists($errorReportConfigFile)) {
                 $this->logger->notice(
                     sprintf(
-                        'Error reports configuration file \'%s exists\'. Value of the property \'%s\' of .magento.env.yaml be ignored',
+                        'Error reports configuration file \'%s exists\'.'
+                        .'Value of the property \'%s\' of .magento.env.yaml be ignored',
                         $errorReportConfigFile,
                         BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL
                     )

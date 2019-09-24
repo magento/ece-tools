@@ -14,7 +14,7 @@ use Psr\Log\LoggerInterface;
 /**
  * @inheritdoc
  */
-class CheckEvnVariableMageErrorReportDirNestingLevel implements ProcessInterface
+class CheckEnvVarMageErrorReportDirNestingLevel implements ProcessInterface
 {
     const ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL = 'MAGE_ERROR_REPORT_DIR_NESTING_LEVEL';
 
@@ -32,7 +32,6 @@ class CheckEvnVariableMageErrorReportDirNestingLevel implements ProcessInterface
      * @var ConfigFileList
      */
     private $configFileList;
-
 
     /**
      * @param LoggerInterface $logger
@@ -55,15 +54,15 @@ class CheckEvnVariableMageErrorReportDirNestingLevel implements ProcessInterface
     public function execute()
     {
         try {
-            $envMageErrorReportDirNestingLevel = $this->environment->getEnv(self::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL);
-            if ($envMageErrorReportDirNestingLevel) {
+            $envReportDirNestingLevel = $this->environment->getEnv(self::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL);
+            if ($envReportDirNestingLevel) {
                 $this->logger->notice(
                     sprintf(
                         '%s environment variable detected. %s: %s. '
                         .'Value of the property \'config.report.dir_nesting_level\' from \'%s\' file be ignored',
                         self::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
                         self::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
-                        $envMageErrorReportDirNestingLevel,
+                        $envReportDirNestingLevel,
                         $this->configFileList->getErrorReportConfig()
                     )
                 );
