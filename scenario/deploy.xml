@@ -6,6 +6,7 @@
  */
 -->
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/scenario.xsd">
+    <step name="check-evn-variable-mage-error-report-dir-nesting-level" type="Magento\MagentoCloud\Process\Deploy\CheckEvnVariableMageErrorReportDirNestingLevel"/>
     <step name="remove-deploy-failed-flag" type="Magento\MagentoCloud\Process\Deploy\RemoveDeployFailedFlag"/>
     <step name="pre-deploy" type="Magento\MagentoCloud\Process\Deploy\PreDeploy">
         <arguments>
