@@ -368,7 +368,7 @@ class File
      */
     public function touch($path, $time = null): bool
     {
-        return @touch($path, $time);
+        return @touch($path, $time ?? time());
     }
 
     /**
@@ -382,7 +382,7 @@ class File
      */
     public function filePutContents($path, $content, $mode = null)
     {
-        $result = @file_put_contents($path, $content, $mode);
+        $result = @file_put_contents($path, $content, $mode ?? 0);
         if (!$result) {
             $this->fileSystemException(
                 'The specified "%1" file could not be written %2',

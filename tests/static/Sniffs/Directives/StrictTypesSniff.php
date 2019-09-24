@@ -14,7 +14,7 @@ use PHP_CodeSniffer\Files\File;
 /**
  * Sniffer to check if the strict_types declaration is included and add it if not.
  *
- * @package Magento\MagentoCloud\Test\Sniffs\Directives
+ * Class StrictTypesSniff
  */
 class StrictTypesSniff implements Sniff
 {
