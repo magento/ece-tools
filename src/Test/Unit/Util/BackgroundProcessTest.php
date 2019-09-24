@@ -5,9 +5,9 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Config;
+namespace Magento\MagentoCloud\Test\Unit\Util;
 
-use Magento\MagentoCloud\Config\BackgroundProcess;
+use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;

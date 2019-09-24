@@ -27,7 +27,7 @@ class BackupData implements StepInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param array $steps
+     * @param StepInterface[] $steps
      */
     public function __construct(LoggerInterface $logger, array $steps)
     {

@@ -39,8 +39,8 @@ class InstallUpdate implements StepInterface
     /**
      * @param LoggerInterface $logger
      * @param State $state
-     * @param array $installSteps
-     * @param array $updateSteps
+     * @param StepInterface[] $installSteps
+     * @param StepInterface[] $updateSteps
      */
     public function __construct(
         LoggerInterface $logger,

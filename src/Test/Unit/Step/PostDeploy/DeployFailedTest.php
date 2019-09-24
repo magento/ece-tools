@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
+namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Step\PostDeploy\DeployFailed;
@@ -21,7 +21,7 @@ class DeployFailedTest extends TestCase
     /**
      * @var DeployFailed
      */
-    private $step;
+    private $process;
 
     /**
      * @var Manager|MockObject
@@ -35,7 +35,7 @@ class DeployFailedTest extends TestCase
     {
         $this->flagManagerMock = $this->createMock(Manager::class);
 
-        $this->step = new DeployFailed(
+        $this->process = new DeployFailed(
             $this->flagManagerMock
         );
     }
@@ -45,7 +45,7 @@ class DeployFailedTest extends TestCase
      */
     public function testExecute(): void
     {
-        $this->step->execute();
+        $this->process->execute();
     }
 
     /**
@@ -60,6 +60,6 @@ class DeployFailedTest extends TestCase
             ->with(Manager::FLAG_DEPLOY_HOOK_IS_FAILED)
             ->willReturn(true);
 
-        $this->step->execute();
+        $this->process->execute();
     }
 }

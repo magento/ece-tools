@@ -148,7 +148,7 @@ class ResolverTest extends TestCase
     /**
      * @throws ValidationException
      * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Empty parameter name
+     * @expectedExceptionMessage Empty parameter name in step "step1"
      */
     public function testResolveWrongName(): void
     {

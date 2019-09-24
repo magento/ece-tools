@@ -55,10 +55,7 @@
     <xs:simpleType name="phpClassName">
         <xs:annotation>
             <xs:documentation>
-                A string that matches a Fully Qualified Class Name from PHP, especially not starting
-                with a backslash as this is an invalid character to start a class name with but a
-                somewhat common mistake so this simple type can be used to validate against it
-                already
+                A string that matches a Fully Qualified Class Name from PHP, without any leading backslash
             </xs:documentation>
         </xs:annotation>
         <xs:restriction base="xs:string">

@@ -53,7 +53,7 @@ class DeployStaticContent implements StepInterface
      * @param DeployInterface $stageConfig
      * @param GlobalConfig $globalConfig
      * @param StaticContentCleaner $staticContentCleaner
-     * @param array $steps
+     * @param StepInterface[] $steps
      */
     public function __construct(
         FlagManager $flagManager,

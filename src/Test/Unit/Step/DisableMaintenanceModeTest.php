@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Step;
+namespace Magento\MagentoCloud\Test\Unit\Process;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Step\DisableMaintenanceMode;
@@ -22,7 +22,7 @@ class DisableMaintenanceModeTest extends TestCase
     /**
      * @var DisableMaintenanceMode
      */
-    private $step;
+    private $process;
 
     /**
      * @var MaintenanceModeSwitcher|MockObject
@@ -36,7 +36,7 @@ class DisableMaintenanceModeTest extends TestCase
     {
         $this->switcherMock = $this->createMock(MaintenanceModeSwitcher::class);
 
-        $this->step = new DisableMaintenanceMode(
+        $this->process = new DisableMaintenanceMode(
             $this->switcherMock
         );
     }
@@ -49,7 +49,7 @@ class DisableMaintenanceModeTest extends TestCase
         $this->switcherMock->expects($this->once())
             ->method('disable');
 
-        $this->step->execute();
+        $this->process->execute();
     }
 
     /**
@@ -63,6 +63,6 @@ class DisableMaintenanceModeTest extends TestCase
             ->method('disable')
             ->willThrowException(new GenericException('Some error'));
 
-        $this->step->execute();
+        $this->process->execute();
     }
 }

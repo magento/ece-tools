@@ -6,6 +6,7 @@
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -29,14 +30,22 @@ class DeprecatedVariables implements ValidatorInterface
     private $environment;
 
     /**
+     * @var MergedConfig
+     */
+    private $config;
+
+    /**
      * @param Environment $environment
+     * @param MergedConfig $config
      * @param ResultFactory $resultFactory
      */
     public function __construct(
         Environment $environment,
+        MergedConfig $config,
         ResultFactory $resultFactory
     ) {
         $this->environment = $environment;
+        $this->config = $config;
         $this->resultFactory = $resultFactory;
     }
 
@@ -44,10 +53,14 @@ class DeprecatedVariables implements ValidatorInterface
      * Validates configuration on using deprecated variables or values.
      *
      * {@inheritdoc}
+     * Despite PHPMD warnings, this method is ultimately very linear: 1) Check condition; 2) Append error; etc.
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function validate(): Validator\ResultInterface
     {
         $variables = $this->environment->getVariables();
+        $config = $this->config->get();
         $errors = [];
 
         if (isset($variables[DeployInterface::VAR_VERBOSE_COMMANDS]) &&
@@ -60,7 +73,8 @@ class DeprecatedVariables implements ValidatorInterface
             );
         }
 
-        if (isset($variables[DeployInterface::VAR_SCD_EXCLUDE_THEMES])) {
+        // default value for SCD_EXCLUDE_THEMES is an empty string
+        if (!empty($config[DeployInterface::VAR_SCD_EXCLUDE_THEMES])) {
             $errors[] = sprintf(
                 'The %s variable is deprecated. Use %s instead.',
                 DeployInterface::VAR_SCD_EXCLUDE_THEMES,
@@ -85,6 +99,15 @@ class DeprecatedVariables implements ValidatorInterface
                 'The %s variable is deprecated. Use %s instead.',
                 DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT,
                 DeployInterface::VAR_SKIP_SCD
+            );
+        }
+
+        if (isset($config[DeployInterface::VAR_STATIC_CONTENT_SYMLINK])
+            && $config[DeployInterface::VAR_STATIC_CONTENT_SYMLINK] === false
+        ) {
+            $errors[] = sprintf(
+                'The %s variable is deprecated and its behavior will not be supported in the future.',
+                DeployInterface::VAR_STATIC_CONTENT_SYMLINK
             );
         }
 

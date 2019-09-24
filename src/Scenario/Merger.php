@@ -21,6 +21,7 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 class Merger
 {
     private const ROOT_NODE = 'scenario';
+    private const NODE_VALUE = '#';
 
     public const XSI_TYPE_STRING = 'string';
     public const XSI_TYPE_OBJECT = 'object';
@@ -85,6 +86,8 @@ class Merger
     }
 
     /**
+     * Merge an array of scenarios
+     *
      * @param array $scenarios
      * @return array
      * @throws ValidationException
@@ -99,7 +102,7 @@ class Merger
             foreach ($scenario['step'] ?? [] as $step) {
                 if ($missedArgs = array_diff(self::$stepRequiredArgs, array_keys($step))) {
                     throw new ValidationException(sprintf(
-                        'Arguments %s are missed from step',
+                        'Argument(s) "%s" are missed from step',
                         implode(', ', $missedArgs)
                     ));
                 }
@@ -115,32 +118,41 @@ class Merger
     }
 
     /**
+     * Collect step data including child items
+     *
      * @param array $step
      * @return array
      * @throws ValidationException
      */
     private function collectStep(array $step): array
     {
+        $stepName = $step['@name'];
+
         $arguments = [];
 
         foreach ($step['arguments'][0]['argument'] ?? [] as $argument) {
             if ($missedArgs = array_diff(self::$argumentRequiredArgs, array_keys($argument))) {
                 throw new ValidationException(sprintf(
-                    'Arguments %s are missed from argument',
-                    implode(', ', $missedArgs)
+                    'Argument(s) "%s" are missed from argument in step "%s"',
+                    implode(', ', $missedArgs),
+                    $stepName
                 ));
             }
 
-            if ($argument['@xsi:type'] !== self::XSI_TYPE_ARRAY) {
+            $argumentName = $argument['@name'];
+            $argumentType = $argument['@xsi:type'];
+
+            if ($argumentType !== self::XSI_TYPE_ARRAY) {
                 throw new ValidationException(sprintf(
-                    'xsi:type %s not allowed in argument',
-                    $argument['@xsi:type']
+                    'xsi:type "%s" not allowed in argument "%s"',
+                    $argumentType,
+                    $argumentName
                 ));
             }
 
             $arguments[] = [
-                'name' => $argument['@name'],
-                'xsi:type' => $argument['@xsi:type'],
+                'name' => $argumentName,
+                'xsi:type' => $argumentType,
                 'items' => $this->collectItems(
                     $argument['item'] ?: []
                 )
@@ -148,19 +160,17 @@ class Merger
         }
 
         $stepData = [
-            'name' => $step['@name'],
+            'name' => $stepName,
             'type' => $step['@type'],
             'arguments' => $arguments
         ];
-
-        if (isset($step['@remove'])) {
-            $stepData['remove'] = $step['@remove'];
-        }
 
         return $stepData;
     }
 
     /**
+     * Collect scenario data
+     *
      * @param string $scenario
      * @return array
      * @throws ValidationException
@@ -195,7 +205,7 @@ class Merger
     }
 
     /**
-     * Recursively collect items.
+     * Recursively collect items
      *
      * @param array $items
      * @return array
@@ -206,20 +216,27 @@ class Merger
         $newItems = [];
 
         foreach ($items as $item) {
+            if (!is_array($item)) {
+                throw new ValidationException('Wrong formatted item provided');
+            }
+
+            $itemName = $item['@name'] ?? '';
+
             if ($missedArgs = array_diff(self::$itemRequiredArgs, array_keys($item))) {
                 throw new ValidationException(sprintf(
-                    'Arguments %s are missed from item',
-                    implode(', ', $missedArgs)
+                    'Argument(s) "%s" are missed from item "%s"',
+                    implode(', ', $missedArgs),
+                    $itemName
                 ));
             }
 
             $newItem = [
-                'name' => $item['@name'],
+                'name' => $itemName,
                 'xsi:type' => $item['@xsi:type'],
             ];
 
-            if (isset($item['#'])) {
-                $newItem['#'] = $item['#'];
+            if (isset($item[self::NODE_VALUE])) {
+                $newItem[self::NODE_VALUE] = $item[self::NODE_VALUE];
             } elseif (isset($item['item'])) {
                 $newItem['items'] = $this->collectItems($item['item']);
             }

@@ -40,7 +40,7 @@ class DeployStaticContent implements StepInterface
      * @param LoggerInterface $logger
      * @param FlagManager $flagManager
      * @param ScdOnBuild $scdOnBuild
-     * @param array $steps
+     * @param StepInterface[] $steps
      */
     public function __construct(
         LoggerInterface $logger,
