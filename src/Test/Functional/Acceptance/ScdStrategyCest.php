@@ -43,9 +43,7 @@ class ScdStrategyCest extends AbstractCest
         $I->see('CMS homepage content goes here.');
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains($data['strategy'], $log);
-
-        }
-
+    }
 
     /**
      * @return array
