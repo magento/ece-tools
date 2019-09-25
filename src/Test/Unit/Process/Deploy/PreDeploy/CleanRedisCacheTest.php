@@ -4,6 +4,8 @@
  * See COPYING.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy\PreDeploy;
 
 use Magento\MagentoCloud\Config\Environment;
