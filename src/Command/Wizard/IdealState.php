@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command\Wizard;
 
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
@@ -64,7 +66,7 @@ class IdealState extends Command
             $message = $result->getError();
 
             foreach ($this->validator->getErrors() as $error) {
-                $this->outputFormatter->writeItem($output, $error);
+                $this->outputFormatter->writeItem($output, $error->getError());
             }
         }
 

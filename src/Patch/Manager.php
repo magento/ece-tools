@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Patch;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
@@ -125,7 +127,7 @@ class Manager
     private function applyComposerPatches()
     {
         $patches = json_decode(
-            $this->file->fileGetContents($this->fileList->getPatches()),
+            $this->file->fileGetContents($this->fileList->getPatches()) ?? '',
             true
         );
 
