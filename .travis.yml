@@ -15,6 +15,7 @@ language: php
 php:
   - '7.1'
   - '7.2'
+  - '7.3'
 
 env:
   matrix:
@@ -37,6 +38,9 @@ matrix:
       env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
 
     - php: '7.2'
+      env: TEST_SUITE=functional
+
+    - php: '7.3'
       env: TEST_SUITE=functional
 
 install:
