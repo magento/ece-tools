@@ -18,7 +18,11 @@ use PHP_CodeSniffer\Files\File;
  */
 class StrictTypesSniff implements Sniff
 {
-    // Flag to keep track of whether the file has been fixed.
+    /**
+     * Flag to keep track of whether the file has been fixed.
+     *
+     * @var bool
+     */
     private $fixed = false;
 
     /**
