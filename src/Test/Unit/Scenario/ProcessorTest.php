@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Scenario;
 
 use Magento\MagentoCloud\Package\Manager;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Magento\MagentoCloud\Scenario\Merger;
 use Magento\MagentoCloud\Scenario\Processor;
@@ -66,8 +66,8 @@ class ProcessorTest extends TestCase
             'some/scenario.xml'
         ];
 
-        $step1 = $this->getMockForAbstractClass(ProcessInterface::class);
-        $step2 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $step1 = $this->getMockForAbstractClass(StepInterface::class);
+        $step2 = $this->getMockForAbstractClass(StepInterface::class);
 
         $step1->expects($this->once())
             ->method('execute');
@@ -119,7 +119,7 @@ class ProcessorTest extends TestCase
             'some/scenario.xml'
         ];
 
-        $step1 = $this->getMockForAbstractClass(ProcessInterface::class);
+        $step1 = $this->getMockForAbstractClass(StepInterface::class);
 
         $step1->expects($this->once())
             ->method('execute')

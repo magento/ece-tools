@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Command\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
@@ -53,11 +55,6 @@ class GenerateTest extends TestCase
     private $formatterMock;
 
     /**
-     * @var string
-     */
-    private $timeStamp = '2018-01-19T18:33:42+00:00';
-
-    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -67,10 +64,6 @@ class GenerateTest extends TestCase
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->sharedConfigMock = $this->createMock(SharedConfig::class);
         $this->formatterMock = $this->createMock(PhpFormatter::class);
-
-        $dateMock = $this->getFunctionMock('Magento\MagentoCloud\Process\ConfigDump', 'date');
-        $dateMock->expects($this->any())
-            ->willReturn($this->timeStamp);
 
         $this->process = new Generate(
             $this->connectionMock,

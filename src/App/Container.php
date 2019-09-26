@@ -8,9 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App;
 
 use Magento\MagentoCloud\Filesystem\SystemList;
-use Magento\MagentoCloud\Process\Deploy as DeployProcess;
-use Magento\MagentoCloud\Process\ProcessComposite;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\Deploy as DeployStep;
+use Magento\MagentoCloud\Step\StepComposite;
+use Magento\MagentoCloud\Step\StepInterface;
 use Composer;
 
 /**
@@ -111,10 +111,6 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Stage\PostDeploy::class
         );
         $this->container->singleton(
-            \Magento\MagentoCloud\View\RendererInterface::class,
-            \Magento\MagentoCloud\View\TwigRenderer::class
-        );
-        $this->container->singleton(
             \Magento\MagentoCloud\PlatformVariable\DecoderInterface::class,
             \Magento\MagentoCloud\PlatformVariable\Decoder::class
         );
@@ -123,13 +119,13 @@ class Container implements ContainerInterface
             \Magento\MagentoCloud\Config\Database\MergedConfig::class
         );
 
-        $this->container->when(DeployProcess\InstallUpdate\ConfigUpdate\Urls::class)
-            ->needs(ProcessInterface::class)
+        $this->container->when(DeployStep\InstallUpdate\ConfigUpdate\Urls::class)
+            ->needs(StepInterface::class)
             ->give(function () {
-                return $this->container->makeWith(ProcessComposite::class, [
-                    'processes' => [
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Database::class),
-                        $this->container->make(DeployProcess\InstallUpdate\ConfigUpdate\Urls\Environment::class),
+                return $this->container->makeWith(StepComposite::class, [
+                    'steps' => [
+                        $this->container->make(DeployStep\InstallUpdate\ConfigUpdate\Urls\Database::class),
+                        $this->container->make(DeployStep\InstallUpdate\ConfigUpdate\Urls\Environment::class),
                     ],
                 ]);
             });

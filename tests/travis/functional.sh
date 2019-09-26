@@ -11,6 +11,9 @@ case $TRAVIS_PHP_VERSION in
         ./vendor/bin/codecept run -g php71 --steps
         ;;
     7.2)
-        ./vendor/bin/codecept run -g php72parallel_"$FUNCTIONAL_INDEX" --steps
+        ./vendor/bin/codecept run -g parallel_"$FUNCTIONAL_INDEX" --steps
+        ;;
+    7.3)
+        ./vendor/bin/codecept run -g parallel_"$FUNCTIONAL_INDEX" -x php72 --steps
         ;;
 esac
