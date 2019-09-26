@@ -17,7 +17,8 @@ services:
     volumes:
       - /var/lib/mysql
   fpm:
-    image: 'magento/magento-cloud-docker-php:7.2-fpm-1.0'
+    build:
+      context: 'https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-fpm'
     extends: generic
     ports:
       - 9000
@@ -35,7 +36,8 @@ services:
     networks:
       - magento
   build:
-    image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
+    build:
+      context: 'https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-cli'
     extends: generic
     hostname: build.magento2.docker
     depends_on:
@@ -55,7 +57,8 @@ services:
         aliases:
           - web.magento2.docker
   deploy:
-    image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
+    build:
+      context: 'https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-cli'
     extends: generic
     hostname: deploy.magento2.docker
     depends_on:
@@ -75,7 +78,8 @@ services:
         aliases:
           - deploy.magento2.docker
   web:
-    image: 'magento/magento-cloud-docker-nginx:latest-1.0'
+    build:
+      context: 'https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/nginx/1.9'
     extends: generic
     hostname: web.magento2.docker
     depends_on:
