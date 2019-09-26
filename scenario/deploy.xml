@@ -6,23 +6,23 @@
  */
 -->
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/scenario.xsd">
-    <step name="remove-deploy-failed-flag" type="Magento\MagentoCloud\Process\Deploy\RemoveDeployFailedFlag"/>
-    <step name="pre-deploy" type="Magento\MagentoCloud\Process\Deploy\PreDeploy">
+    <step name="remove-deploy-failed-flag" type="Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag"/>
+    <step name="pre-deploy" type="Magento\MagentoCloud\Step\Deploy\PreDeploy">
         <arguments>
-            <argument name="processes" xsi:type="array">
-                <item name="cache" xsi:type="object">Magento\MagentoCloud\Process\Deploy\PreDeploy\ConfigUpdate\Cache</item>
-                <item name="clean-static-content" xsi:type="object">Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanStaticContent</item>
-                <item name="clean-view-preprocessed" xsi:type="object">Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanViewPreprocessed</item>
-                <item name="clean-redis-cache" xsi:type="object">Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanRedisCache</item>
-                <item name="clean-file-cache" xsi:type="object">Magento\MagentoCloud\Process\Deploy\PreDeploy\CleanFileCache</item>
-                <item name="restore-writable-dirs" xsi:type="object">Magento\MagentoCloud\Process\Deploy\PreDeploy\RestoreWritableDirectories</item>
-                <item name="set-production-mode" xsi:type="object">Magento\MagentoCloud\Process\SetProductionMode</item>
+            <argument name="steps" xsi:type="array">
+                <item name="cache" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache</item>
+                <item name="clean-static-content" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent</item>
+                <item name="clean-view-preprocessed" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanViewPreprocessed</item>
+                <item name="clean-redis-cache" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanRedisCache</item>
+                <item name="clean-file-cache" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanFileCache</item>
+                <item name="restore-writable-dirs" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\RestoreWritableDirectories</item>
+                <item name="set-production-mode" xsi:type="object">Magento\MagentoCloud\Step\SetProductionMode</item>
             </argument>
         </arguments>
     </step>
-    <step name="enable-maintenance-mode" type="Magento\MagentoCloud\Process\EnableMaintenanceMode"/>
-    <step name="disable-cron" type="Magento\MagentoCloud\Process\Deploy\DisableCron"/>
-    <step name="validate-config" type="Magento\MagentoCloud\Process\ValidateConfiguration">
+    <step name="enable-maintenance-mode" type="Magento\MagentoCloud\Step\EnableMaintenanceMode"/>
+    <step name="disable-cron" type="Magento\MagentoCloud\Step\Deploy\DisableCron"/>
+    <step name="validate-config" type="Magento\MagentoCloud\Step\ValidateConfiguration">
         <arguments>
             <argument name="validators" xsi:type="array">
                 <item name="500" xsi:type="array">
@@ -49,61 +49,61 @@
             </argument>
         </arguments>
     </step>
-    <step name="unlock-cron-jobs" type="Magento\MagentoCloud\Process\Deploy\UnlockCronJobs"/>
-    <step name="set-crypt-key" type="Magento\MagentoCloud\Process\Deploy\SetCryptKey"/>
-    <step name="install-update" type="Magento\MagentoCloud\Process\Deploy\InstallUpdate">
+    <step name="unlock-cron-jobs" type="Magento\MagentoCloud\Step\Deploy\UnlockCronJobs"/>
+    <step name="set-crypt-key" type="Magento\MagentoCloud\Step\Deploy\SetCryptKey"/>
+    <step name="install-update" type="Magento\MagentoCloud\Step\Deploy\InstallUpdate">
         <arguments>
-            <argument name="installProcesses" xsi:type="array">
-                <item name="setup" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\Setup</item>
+            <argument name="installSteps" xsi:type="array">
+                <item name="setup" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup</item>
                 <!-- Config update start -->
-                <item name="prepare-config" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig</item>
-                <item name="cron-consumer-runner" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner</item>
-                <item name="db-connection" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\DbConnection</item>
-                <item name="amqp" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp</item>
-                <item name="session" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session</item>
-                <item name="search-engine" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine</item>
-                <item name="urls" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls</item>
-                <item name="document-root" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot</item>
-                <item name="lock" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Lock</item>
+                <item name="prepare-config" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig</item>
+                <item name="cron-consumer-runner" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner</item>
+                <item name="db-connection" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DbConnection</item>
+                <item name="amqp" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp</item>
+                <item name="session" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session</item>
+                <item name="search-engine" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\SearchEngine</item>
+                <item name="urls" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls</item>
+                <item name="document-root" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot</item>
+                <item name="lock" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock</item>
                 <!-- Config update end -->
-                <item name="config-import" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ConfigImport</item>
-                <item name="reset-password" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Install\ResetPassword</item>
+                <item name="config-import" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ConfigImport</item>
+                <item name="reset-password" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ResetPassword</item>
             </argument>
-            <argument name="updateProcesses" xsi:type="array">
+            <argument name="updateSteps" xsi:type="array">
                 <!-- Config update start -->
-                <item name="prepare-config" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig</item>
-                <item name="cron-consumer-runner" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner</item>
-                <item name="db-connection" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\DbConnection</item>
-                <item name="amqp" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Amqp</item>
-                <item name="session" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session</item>
-                <item name="search-engine" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\SearchEngine</item>
-                <item name="urls" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Urls</item>
-                <item name="document-root" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot</item>
-                <item name="lock" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Lock</item>
+                <item name="prepare-config" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig</item>
+                <item name="cron-consumer-runner" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\CronConsumersRunner</item>
+                <item name="db-connection" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DbConnection</item>
+                <item name="amqp" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Amqp</item>
+                <item name="session" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session</item>
+                <item name="search-engine" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\SearchEngine</item>
+                <item name="urls" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls</item>
+                <item name="document-root" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot</item>
+                <item name="lock" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock</item>
                 <!-- Config update end -->
-                <item name="set-admin-url" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\SetAdminUrl</item>
-                <item name="setup" xsi:type="object">Magento\MagentoCloud\Process\Deploy\InstallUpdate\Update\Setup</item>
+                <item name="set-admin-url" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl</item>
+                <item name="setup" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup</item>
             </argument>
         </arguments>
     </step>
-    <step name="deploy-static-content" type="Magento\MagentoCloud\Process\Deploy\DeployStaticContent">
+    <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Deploy\DeployStaticContent">
         <arguments>
-            <argument name="processes" xsi:type="array">
-                <item name="generate" xsi:type="object">Magento\MagentoCloud\Process\Deploy\DeployStaticContent\Generate</item>
+            <argument name="steps" xsi:type="array">
+                <item name="generate" xsi:type="object">Magento\MagentoCloud\Step\Deploy\DeployStaticContent\Generate</item>
             </argument>
         </arguments>
     </step>
-    <step name="compress-static-content" type="Magento\MagentoCloud\Process\Deploy\CompressStaticContent"/>
-    <step name="disable-google-analytics" type="Magento\MagentoCloud\Process\Deploy\DisableGoogleAnalytics"/>
+    <step name="compress-static-content" type="Magento\MagentoCloud\Step\Deploy\CompressStaticContent"/>
+    <step name="disable-google-analytics" type="Magento\MagentoCloud\Step\Deploy\DisableGoogleAnalytics"/>
     <!-- This process runs processes if only post_deploy hook is not configured -->
-    <step name="deploy-complete" type="Magento\MagentoCloud\Process\Deploy\DeployCompletion">
+    <step name="deploy-complete" type="Magento\MagentoCloud\Step\Deploy\DeployCompletion">
         <arguments>
-            <argument name="processes" xsi:type="array">
-                <item name="enable-cron" xsi:type="object">Magento\MagentoCloud\Process\PostDeploy\EnableCron</item>
-                <item name="backup" xsi:type="object">Magento\MagentoCloud\Process\PostDeploy\Backup</item>
-                <item name="clean-cache" xsi:type="object">Magento\MagentoCloud\Process\PostDeploy\CleanCache</item>
+            <argument name="steps" xsi:type="array">
+                <item name="enable-cron" xsi:type="object">Magento\MagentoCloud\Step\PostDeploy\EnableCron</item>
+                <item name="backup" xsi:type="object">Magento\MagentoCloud\Step\PostDeploy\Backup</item>
+                <item name="clean-cache" xsi:type="object">Magento\MagentoCloud\Step\PostDeploy\CleanCache</item>
             </argument>
         </arguments>
     </step>
-    <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Process\DisableMaintenanceMode"/>
+    <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Step\DisableMaintenanceMode"/>
 </scenario>

@@ -9,12 +9,12 @@ namespace Magento\MagentoCloud\Scenario;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Package\Manager;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ProcessorException;
 use Psr\Log\LoggerInterface;
 
 /**
- * Processing given scenarios.
+ * Process given scenarios.
  */
 class Processor
 {
@@ -60,7 +60,7 @@ class Processor
         try {
             $steps = $this->merger->merge($scenarios);
 
-            array_walk($steps, function (ProcessInterface $step, string $name) {
+            array_walk($steps, function (StepInterface $step, string $name) {
                 $this->logger->debug('Running step: ' . $name);
 
                 $step->execute();
