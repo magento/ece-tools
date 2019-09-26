@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;

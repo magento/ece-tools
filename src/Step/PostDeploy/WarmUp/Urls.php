@@ -70,7 +70,7 @@ class Urls
                 $patternUrls = $this->urlsPattern->get($page);
                 $this->logger->info(sprintf('Found %d urls for pattern "%s"', count($patternUrls), $page));
                 $urls = array_merge($urls, $patternUrls);
-            } else if (strpos($page, 'http') === 0) {
+            } elseif (strpos($page, 'http') === 0) {
                 if (!$this->urlManager->isRelatedDomain($page)) {
                     $this->logger->error(
                         sprintf(
@@ -82,7 +82,7 @@ class Urls
                 } else {
                     $urls[] = $page;
                 }
-            } else if (strpos($page, ':') !== false) {
+            } elseif (strpos($page, ':') !== false) {
                 $this->logger->error(sprintf('Page "%s" isn\'t correct and can\'t be warmed-up', $page));
             } else {
                 $urls[] = $baseUrl . '/' . $page;

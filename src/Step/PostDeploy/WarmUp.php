@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Step\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
@@ -69,7 +71,7 @@ class WarmUp implements StepInterface
                     'error' => $exception->getResponse()->getReasonPhrase(),
                     'code' => $exception->getResponse()->getStatusCode(),
                 ];
-            } else if ($exception->getHandlerContext()) {
+            } elseif ($exception->getHandlerContext()) {
                 $context = [
                     'error' => $exception->getHandlerContext()['error'] ?? '',
                     'errno' => $exception->getHandlerContext()['errno'] ?? '',
