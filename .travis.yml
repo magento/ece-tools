@@ -10,6 +10,10 @@ git:
 services:
   - docker
 
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
 language: php
 php:
 #  - '7.1'
@@ -19,11 +23,11 @@ php:
 env:
   matrix:
     - TEST_SUITE=static-unit XDEBUG=true
-    - TEST_SUITE=integration
-    - TEST_SUITE=functional
-    - TEST_SUITE=functional FUNCTIONAL_INDEX=1
-    - TEST_SUITE=functional FUNCTIONAL_INDEX=2
-    - TEST_SUITE=functional FUNCTIONAL_INDEX=3
+#    - TEST_SUITE=integration
+#    - TEST_SUITE=functional
+#    - TEST_SUITE=functional FUNCTIONAL_INDEX=1
+#    - TEST_SUITE=functional FUNCTIONAL_INDEX=2
+#    - TEST_SUITE=functional FUNCTIONAL_INDEX=3
 
 matrix:
   exclude:
@@ -52,17 +56,16 @@ install:
   - composer update -n --no-suggest
 
 before_script:
-  - whoami
-  - echo ~
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
-#  - sudo /etc/init.d/mysql stop
   - ./tests/travis/prepare_functional_parallel.sh
 
 script:
   - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
   - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;
+  - docker-compose up -d
+  - docker-compose run build bash -c "ls -la /app/.composer/cache"
 
 after_failure: docker ps -s
