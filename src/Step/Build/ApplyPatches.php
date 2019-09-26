@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Patch\Manager;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -50,7 +50,7 @@ class ApplyPatches implements StepInterface
         try {
             $this->manager->applyAll();
         } catch (GenericException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
         $this->logger->notice('End of applying patches.');
     }

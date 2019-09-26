@@ -12,7 +12,7 @@ use GuzzleHttp\Pool;
 use GuzzleHttp\Promise\PromiseInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Step\PostDeploy\WarmUp;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\RequestInterface;
@@ -142,7 +142,7 @@ class WarmUpTest extends TestCase
             ->method('wait')
             ->willThrowException(new \Exception('some error'));
 
-        $this->expectException(ProcessException::class);
+        $this->expectException(StepException::class);
         $this->expectExceptionMessage('some error');
 
         $this->step->execute();

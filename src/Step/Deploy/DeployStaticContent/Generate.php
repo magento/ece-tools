@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -92,7 +92,7 @@ class Generate implements StepInterface
     public function execute()
     {
         if (!$this->file->touch($this->directoryList->getMagentoRoot() . '/pub/static/deployed_version.txt')) {
-            throw new ProcessException('Cannot update deployed version.');
+            throw new StepException('Cannot update deployed version.');
         }
 
         $this->logger->info('Extracting locales');
@@ -113,7 +113,7 @@ class Generate implements StepInterface
                 $this->shell->execute($command);
             }
         } catch (ShellException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

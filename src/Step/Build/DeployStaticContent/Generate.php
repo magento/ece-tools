@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -98,7 +98,7 @@ class Generate implements StepInterface
                 $this->shell->execute($command);
             }
         } catch (ShellException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

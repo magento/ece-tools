@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Build;
 
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -38,7 +38,7 @@ class ComposerDumpAutoload implements StepInterface
         try {
             $this->shell->execute('composer dump-autoload -o --ansi --no-interaction');
         } catch (ShellException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

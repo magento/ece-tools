@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\Writer\WriterInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Config\SearchEngine as SearchEngineConfig;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -93,7 +93,7 @@ class SearchEngine implements StepInterface
      * Executes the process.
      *
      * @return void
-     * @throws ProcessException
+     * @throws StepException
      */
     public function execute()
     {
@@ -113,7 +113,7 @@ class SearchEngine implements StepInterface
                 $this->updateSearchConfiguration($config, $this->envReader, $this->envWriter);
             }
         } catch (GenericException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 

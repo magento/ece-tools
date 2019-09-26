@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
 use Magento\MagentoCloud\Step\Build\BackupData;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -50,7 +50,7 @@ class BackupDataTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute()
     {

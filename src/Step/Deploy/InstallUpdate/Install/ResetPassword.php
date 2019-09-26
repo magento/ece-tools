@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -98,7 +98,7 @@ class ResetPassword implements StepInterface
                 ]
             );
         } catch (FileSystemException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         $this->logger->info('Emailing admin URL to admin user ' . $adminUsername . ' at ' . $adminEmail);
@@ -118,7 +118,7 @@ class ResetPassword implements StepInterface
         try {
             $this->file->filePutContents($credentialsFile, $emailContent);
         } catch (FileSystemException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

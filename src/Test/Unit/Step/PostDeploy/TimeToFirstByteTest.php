@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Http\TransferStatsHandler;
 use Magento\MagentoCloud\Step\PostDeploy\TimeToFirstByte;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -132,7 +132,7 @@ class TimeToFirstByteTest extends TestCase
             ->method('wait')
             ->willThrowException(new \Exception('Promise exception'));
 
-        $this->expectException(ProcessException::class);
+        $this->expectException(StepException::class);
         $this->expectExceptionMessage('Promise exception');
 
         $this->step->execute();

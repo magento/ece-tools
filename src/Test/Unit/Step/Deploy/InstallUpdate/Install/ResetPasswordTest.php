@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install;
 
-use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment;
@@ -90,7 +90,7 @@ class ResetPasswordTest extends TestCase
      * @param string $dataAdminPassword
      * @param string $dataAdminEmail
      * @return void
-     * @throws ProcessException
+     * @throws StepException
      *
      * @dataProvider executeWithPasswordSetOrAdminEmailNotSetDataProvider
      */
@@ -146,7 +146,7 @@ class ResetPasswordTest extends TestCase
      * @param string $adminUsername
      * @param string $expectedAdminUsername
      * @param string $expectedContent
-     * @throws ProcessException
+     * @throws StepException
      *
      * @dataProvider executeDataProvider
      */

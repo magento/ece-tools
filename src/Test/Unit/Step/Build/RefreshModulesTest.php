@@ -86,7 +86,7 @@ class RefreshModulesTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage some error
      */
     public function testExecuteWithException()

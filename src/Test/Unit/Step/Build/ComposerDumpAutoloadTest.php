@@ -50,7 +50,7 @@ class ComposerDumpAutoloadTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage something went wrong
      */
     public function testExecuteWithException()

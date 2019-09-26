@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -65,7 +65,7 @@ class InstallUpdateTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteInstall()
     {
@@ -88,7 +88,7 @@ class InstallUpdateTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteUpdate()
     {
@@ -111,9 +111,9 @@ class InstallUpdateTest extends TestCase
 
     /**
      * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      *
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteWithException()
     {

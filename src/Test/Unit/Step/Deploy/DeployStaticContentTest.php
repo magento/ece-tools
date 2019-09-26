@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -88,7 +88,7 @@ class DeployStaticContentTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteOnRemoteInDeploy()
     {
@@ -120,7 +120,7 @@ class DeployStaticContentTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteOnRemoteWithoutCleaning()
     {
@@ -153,7 +153,7 @@ class DeployStaticContentTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteOnRemoteDoNotDeploy()
     {
@@ -172,7 +172,7 @@ class DeployStaticContentTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteScdOnDemandInProduction()
     {

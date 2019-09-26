@@ -31,7 +31,7 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Step\ProcessException
+     * @throws \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithoutValidators()
     {
@@ -53,7 +53,7 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage Fix configuration with given suggestions
      */
     public function testExecuteWithCriticalError()
@@ -83,7 +83,7 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Step\ProcessException
+     * @throws \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithWarningMessage()
     {
@@ -113,7 +113,7 @@ class ValidateConfigurationTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage Fix configuration with given suggestions
      */
     public function testExecuteWithWarningAndCriticalMessage()

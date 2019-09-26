@@ -52,7 +52,7 @@ class ValidateConfiguration implements StepInterface
             $error = 'Fix configuration with given suggestions:' . PHP_EOL . implode(PHP_EOL, $levelMessages);
 
             if ($level >= ValidatorInterface::LEVEL_CRITICAL) {
-                throw new ProcessException(
+                throw new StepException(
                     $error
                 );
             }

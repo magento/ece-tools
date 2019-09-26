@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process\PostDeploy;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Step\PostDeploy\DeployFailed;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -41,7 +41,7 @@ class DeployFailedTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute(): void
     {
@@ -49,8 +49,8 @@ class DeployFailedTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @throws StepException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage Post-deploy is skipped because deploy was failed.
      */
     public function testExecuteToBeFailed(): void

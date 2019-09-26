@@ -61,7 +61,7 @@ class SetProductionModeTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage can't update file
      */
     public function testExecuteWitException()

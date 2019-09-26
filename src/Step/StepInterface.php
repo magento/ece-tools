@@ -19,7 +19,7 @@ interface StepInterface
      * Executes the step.
      *
      * @return void
-     * @throws ProcessException
+     * @throws StepException
      */
     public function execute();
 }

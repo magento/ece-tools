@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\Step\Deploy\PreDeploy;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -49,7 +49,7 @@ class PreDeployTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute()
     {

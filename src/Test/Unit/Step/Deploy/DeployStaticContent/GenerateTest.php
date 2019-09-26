@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Step\Deploy\DeployStaticContent\Generate;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Deploy\Option;
 use Magento\MagentoCloud\StaticContent\CommandFactory;
@@ -89,7 +89,7 @@ class GenerateTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute()
     {
@@ -122,9 +122,9 @@ class GenerateTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage Cannot update deployed version.
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteWithFlagSetError()
     {

@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -41,7 +41,7 @@ class RemoveDeployFailedFlagTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute(): void
     {

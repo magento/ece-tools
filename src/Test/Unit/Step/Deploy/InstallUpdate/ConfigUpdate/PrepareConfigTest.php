@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\PrepareConfig;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
@@ -63,7 +63,7 @@ class PrepareConfigTest extends TestCase
      * @param null|string $xFrameOptions
      * @param array $expectedResult
      * @dataProvider executeDataProvider
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute(
         bool $scdOnDemand,
@@ -122,10 +122,10 @@ class PrepareConfigTest extends TestCase
      * @param null|string $xFrameOptions
      * @param array $expectedResult
      * @dataProvider executeDataProvider
-     * @throws ProcessException
+     * @throws StepException
      *
      * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithException(
         bool $scdOnDemand,

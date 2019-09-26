@@ -36,7 +36,7 @@ class DisableMaintenanceMode implements StepInterface
         try {
             $this->switcher->disable();
         } catch (GenericException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

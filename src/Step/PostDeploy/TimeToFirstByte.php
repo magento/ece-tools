@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Http\TransferStatsHandler;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
@@ -70,7 +70,7 @@ class TimeToFirstByte implements StepInterface
     /**
      * Run time to first byte tests.
      *
-     * @throws ProcessException
+     * @throws StepException
      */
     public function execute()
     {
@@ -84,7 +84,7 @@ class TimeToFirstByte implements StepInterface
 
             $pool->promise()->wait();
         } catch (\Throwable $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 

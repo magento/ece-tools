@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build\DeployStaticContent;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\StaticContent\Build\Option;
@@ -74,7 +74,7 @@ class GenerateTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute()
     {
@@ -111,10 +111,10 @@ class GenerateTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage Some error
      *
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteWithException()
     {

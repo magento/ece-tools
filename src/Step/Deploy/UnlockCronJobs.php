@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Step\Deploy;
 use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -68,7 +68,7 @@ class UnlockCronJobs implements StepInterface
                 return;
             }
         } catch (UndefinedPackageException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
 
         $updatedJobsCount = $this->jobUnlocker->unlockAll();

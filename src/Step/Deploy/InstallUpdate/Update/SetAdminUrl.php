@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
@@ -68,7 +68,7 @@ class SetAdminUrl implements StepInterface
         try {
             $this->configWriter->update($config);
         } catch (FileSystemException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

@@ -11,7 +11,7 @@ use Magento\MagentoCloud\App\Logger\Pool as LoggerPool;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\App\Logger;
 
@@ -110,7 +110,7 @@ class WritableDirectories implements StepInterface
         try {
             $this->backupLogDir($magentoRoot . $logDir, $rootInitDir . $logDir);
         } catch (\Exception $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 

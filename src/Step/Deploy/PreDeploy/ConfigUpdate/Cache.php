@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate;
 use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
 use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheFactory;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -98,7 +98,7 @@ class Cache implements StepInterface
     private function testRedisConnection(array $backendOptions): bool
     {
         if (!isset($backendOptions['server']) || !isset($backendOptions['port'])) {
-            throw new ProcessException('Missing required Redis configuration!');
+            throw new StepException('Missing required Redis configuration!');
         }
 
         $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);

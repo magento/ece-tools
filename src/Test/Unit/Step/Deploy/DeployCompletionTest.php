@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\Config\Application\HookChecker;
 use Magento\MagentoCloud\Step\Deploy\DeployCompletion;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -57,7 +57,7 @@ class DeployCompletionTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteHookEnabled()
     {
@@ -73,7 +73,7 @@ class DeployCompletionTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteHookNotConfigured()
     {

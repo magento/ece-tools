@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Process;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Step\EnableMaintenanceMode;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -42,7 +42,7 @@ class EnableMaintenanceModeTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute(): void
     {
@@ -53,8 +53,8 @@ class EnableMaintenanceModeTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @throws StepException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage Some error
      */
     public function testExecuteWithException(): void

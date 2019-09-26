@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\State;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -77,7 +77,7 @@ class InstallUpdate implements StepInterface
                 $this->logger->notice('End of update.');
             }
         } catch (GenericException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

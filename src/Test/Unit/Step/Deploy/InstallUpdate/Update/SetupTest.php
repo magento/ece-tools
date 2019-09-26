@@ -12,7 +12,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -89,7 +89,7 @@ class SetupTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute()
     {
@@ -123,7 +123,7 @@ class SetupTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage Error during command execution
      */
     public function testExecuteWithException()

@@ -12,6 +12,6 @@ use Magento\MagentoCloud\App\GenericException;
 /**
  * General process exception.
  */
-class ProcessException extends GenericException
+class StepException extends GenericException
 {
 }

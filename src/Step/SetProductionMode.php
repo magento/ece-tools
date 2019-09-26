@@ -50,7 +50,7 @@ class SetProductionMode implements StepInterface
         try {
             $this->writer->update(['MAGE_MODE' => 'production']);
         } catch (FileSystemException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

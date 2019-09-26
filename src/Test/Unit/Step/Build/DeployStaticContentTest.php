@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Build\DeployStaticContent;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -66,7 +66,7 @@ class DeployStaticContentTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute()
     {
@@ -86,7 +86,7 @@ class DeployStaticContentTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteWithError()
     {

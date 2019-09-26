@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -75,7 +75,7 @@ class Setup implements StepInterface
                 $installUpgradeLog
             ));
         } catch (ShellException $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

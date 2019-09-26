@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Step\PostDeploy;
 use GuzzleHttp\Exception\RequestException;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Step\PostDeploy\WarmUp\Urls;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -87,7 +87,7 @@ class WarmUp implements StepInterface
 
             $pool->promise()->wait();
         } catch (\Throwable $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

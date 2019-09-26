@@ -89,7 +89,7 @@ class SetupTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage script error
      */
     public function testExecuteWithException()

@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Step\PostDeploy\CleanCache;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
@@ -56,7 +56,7 @@ class CleanCacheTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute()
     {
@@ -72,10 +72,10 @@ class CleanCacheTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\ProcessException
+     * @expectedException \Magento\MagentoCloud\Step\StepException
      * @expectedExceptionMessage Some error
      *
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteWithException()
     {
@@ -91,7 +91,7 @@ class CleanCacheTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteWithPostDeployHook()
     {
@@ -107,7 +107,7 @@ class CleanCacheTest extends TestCase
     }
 
     /**
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteNoVerbosity()
     {

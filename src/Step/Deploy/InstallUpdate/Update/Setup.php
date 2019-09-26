@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -107,7 +107,7 @@ class Setup implements StepInterface
             ));
         } catch (\RuntimeException $exception) {
             //Rollback required by database
-            throw new ProcessException($exception->getMessage(), 6, $exception);
+            throw new StepException($exception->getMessage(), 6, $exception);
         }
 
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);

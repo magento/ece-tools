@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\Config\Module;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -54,7 +54,7 @@ class RefreshModules implements StepInterface
                     'No modules were changed.'
             );
         } catch (\Exception $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
         $this->logger->notice('End of reconciling modules.');
     }

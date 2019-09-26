@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\Build\CompressStaticContent;
-use Magento\MagentoCloud\Step\ProcessException;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\StaticContentCompressor;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -67,7 +67,7 @@ class CompressStaticContentTest extends TestCase
     /**
      * Test build-time compression.
      *
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecute()
     {
@@ -93,7 +93,7 @@ class CompressStaticContentTest extends TestCase
     /**
      * Test that build-time compression will fail appropriately.
      *
-     * @throws ProcessException
+     * @throws StepException
      */
     public function testExecuteNoCompress()
     {
