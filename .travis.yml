@@ -70,6 +70,6 @@ script:
   - docker-compose run build bash -c "composer require composer/composer:^1.4"
   - docker-compose run build bash -c "ls -la /app"
   - docker-compose run build bash -c "ls -la /app/.composer"
-  - docker-compose run build bash -c "chown -R www:www /app && ls -la /app/.composer/cache"
+  - docker-compose run build bash -c "chown -R www:www /app/.composer && ls -la /app/.composer/cache"
 
 after_failure: docker ps -s
