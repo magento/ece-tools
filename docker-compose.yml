@@ -16,7 +16,6 @@ services:
           - db.magento2.docker
     volumes:
       - /var/lib/mysql
-      - 'db-entrypoint:/docker-entrypoint-initdb.d'
   fpm:
     image: 'magento/magento-cloud-docker-php:7.2-fpm-1.0'
     extends: generic
@@ -138,11 +137,6 @@ volumes:
   magento-etc: {  }
   magento-static: {  }
   magento-media: {  }
-  db-entrypoint:
-    driver_opts:
-      type: none
-      device: '${PWD}/.docker/mysql/docker-entrypoint-initdb.d'
-      o: bind
   magento-build-var: {  }
   magento-build-etc: {  }
   magento-build-static: {  }
