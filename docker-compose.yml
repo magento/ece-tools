@@ -16,24 +16,24 @@ services:
           - db.magento2.docker
     volumes:
       - /var/lib/mysql
-  fpm:
-    image: 'test/php:7.2-fpm'
-    extends: generic
-    ports:
-      - 9000
-    depends_on:
-      - db
-    volumes:
-      - '.:/ece-tools'
-      - 'magento:/app:ro'
-      - 'magento-vendor:/app/vendor:ro'
-      - 'magento-generated:/app/generated:ro'
-      - 'magento-var:/app/var:delegated'
-      - 'magento-etc:/app/app/etc:delegated'
-      - 'magento-static:/app/pub/static:delegated'
-      - 'magento-media:/app/pub/media:delegated'
-    networks:
-      - magento
+#  fpm:
+#    image: 'test/php:7.2-fpm'
+#    extends: generic
+#    ports:
+#      - 9000
+#    depends_on:
+#      - db
+#    volumes:
+#      - '.:/ece-tools'
+#      - 'magento:/app:ro'
+#      - 'magento-vendor:/app/vendor:ro'
+#      - 'magento-generated:/app/generated:ro'
+#      - 'magento-var:/app/var:delegated'
+#      - 'magento-etc:/app/app/etc:delegated'
+#      - 'magento-static:/app/pub/static:delegated'
+#      - 'magento-media:/app/pub/media:delegated'
+#    networks:
+#      - magento
   build:
     image: 'test/php:7.2-cli'
     extends: generic
@@ -54,69 +54,69 @@ services:
       magento:
         aliases:
           - web.magento2.docker
-  deploy:
-    image: 'test/php:7.2-cli'
-    extends: generic
-    hostname: deploy.magento2.docker
-    depends_on:
-      - db
-    volumes:
-      - '.:/ece-tools'
-      - 'magento:/app:ro'
-      - 'magento-vendor:/app/vendor:ro'
-      - 'magento-generated:/app/generated:ro'
-      - 'magento-var:/app/var:delegated'
-      - 'magento-etc:/app/app/etc:delegated'
-      - 'magento-static:/app/pub/static:delegated'
-      - 'magento-media:/app/pub/media:delegated'
-      - '~/.composer:/app/.composer:delegated'
-    networks:
-      magento:
-        aliases:
-          - deploy.magento2.docker
-  web:
-    image: 'test/nginx:1.9'
-    extends: generic
-    hostname: web.magento2.docker
-    depends_on:
-      - fpm
-    volumes:
-      - '.:/ece-tools'
-      - 'magento:/app:ro'
-      - 'magento-vendor:/app/vendor:ro'
-      - 'magento-generated:/app/generated:ro'
-      - 'magento-var:/app/var:delegated'
-      - 'magento-etc:/app/app/etc:delegated'
-      - 'magento-static:/app/pub/static:delegated'
-      - 'magento-media:/app/pub/media:delegated'
-    networks:
-      magento:
-        aliases:
-          - web.magento2.docker
-  varnish:
-    image: 'magento/magento-cloud-docker-varnish:latest-1.0'
-    environment:
-      - VIRTUAL_HOST=magento2.docker
-      - VIRTUAL_PORT=80
-      - HTTPS_METHOD=noredirect
-    ports:
-      - '80:80'
-    depends_on:
-      - web
-    networks:
-      magento:
-        aliases:
-          - magento2.docker
-  tls:
-    image: 'magento/magento-cloud-docker-tls:latest-1.0'
-    ports:
-      - '443:443'
-    external_links:
-      - 'varnish:varnish'
-    depends_on:
-      - varnish
-    networks:
-      - magento
+#  deploy:
+#    image: 'test/php:7.2-cli'
+#    extends: generic
+#    hostname: deploy.magento2.docker
+#    depends_on:
+#      - db
+#    volumes:
+#      - '.:/ece-tools'
+#      - 'magento:/app:ro'
+#      - 'magento-vendor:/app/vendor:ro'
+#      - 'magento-generated:/app/generated:ro'
+#      - 'magento-var:/app/var:delegated'
+#      - 'magento-etc:/app/app/etc:delegated'
+#      - 'magento-static:/app/pub/static:delegated'
+#      - 'magento-media:/app/pub/media:delegated'
+#      - '~/.composer:/app/.composer:delegated'
+#    networks:
+#      magento:
+#        aliases:
+#          - deploy.magento2.docker
+#  web:
+#    image: 'test/nginx:1.9'
+#    extends: generic
+#    hostname: web.magento2.docker
+#    depends_on:
+#      - fpm
+#    volumes:
+#      - '.:/ece-tools'
+#      - 'magento:/app:ro'
+#      - 'magento-vendor:/app/vendor:ro'
+#      - 'magento-generated:/app/generated:ro'
+#      - 'magento-var:/app/var:delegated'
+#      - 'magento-etc:/app/app/etc:delegated'
+#      - 'magento-static:/app/pub/static:delegated'
+#      - 'magento-media:/app/pub/media:delegated'
+#    networks:
+#      magento:
+#        aliases:
+#          - web.magento2.docker
+#  varnish:
+#    image: 'magento/magento-cloud-docker-varnish:latest-1.0'
+#    environment:
+#      - VIRTUAL_HOST=magento2.docker
+#      - VIRTUAL_PORT=80
+#      - HTTPS_METHOD=noredirect
+#    ports:
+#      - '80:80'
+#    depends_on:
+#      - web
+#    networks:
+#      magento:
+#        aliases:
+#          - magento2.docker
+#  tls:
+#    image: 'magento/magento-cloud-docker-tls:latest-1.0'
+#    ports:
+#      - '443:443'
+#    external_links:
+#      - 'varnish:varnish'
+#    depends_on:
+#      - varnish
+#    networks:
+#      - magento
   generic:
     image: alpine
     environment:

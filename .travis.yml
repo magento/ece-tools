@@ -67,8 +67,8 @@ script:
 #  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;
   - touch ~/.composer/cache/test.f
   - docker build -t test/php:7.2-cli https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-cli
-  - docker build -t test/php:7.2-fpm https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-fpm
-  - docker build -t test/nginx:1.9 https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/nginx/1.9
+#  - docker build -t test/php:7.2-fpm https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-fpm
+#  - docker build -t test/nginx:1.9 https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/nginx/1.9
   - docker-compose up -d
   - docker-compose run build bash -c "composer require composer/composer:^1.4"
   - docker-compose run build bash -c "ls -la /app"
