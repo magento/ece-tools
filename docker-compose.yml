@@ -17,8 +17,7 @@ services:
     volumes:
       - /var/lib/mysql
   fpm:
-    build:
-      context: 'https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-fpm'
+    image: 'test/php:7.2-fpm'
     extends: generic
     ports:
       - 9000
@@ -36,8 +35,7 @@ services:
     networks:
       - magento
   build:
-    build:
-      context: 'https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-cli'
+    image: 'test/php:7.2-cli'
     extends: generic
     hostname: build.magento2.docker
     depends_on:
@@ -57,8 +55,7 @@ services:
         aliases:
           - web.magento2.docker
   deploy:
-    build:
-      context: 'https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/php/7.2-cli'
+    image: 'test/php:7.2-cli'
     extends: generic
     hostname: deploy.magento2.docker
     depends_on:
@@ -78,8 +75,7 @@ services:
         aliases:
           - deploy.magento2.docker
   web:
-    build:
-      context: 'https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292:images/nginx/1.9'
+    image: 'test/nginx:1.9'
     extends: generic
     hostname: web.magento2.docker
     depends_on:
@@ -130,6 +126,7 @@ services:
       - ENABLE_SENDMAIL=false
       - UPLOAD_MAX_FILESIZE=64M
       - MAGENTO_ROOT=/app
+      - UPDATE_UID_GID=true
       - 'PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl redis'
     env_file:
       - ./.docker/composer.env
