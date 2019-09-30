@@ -48,6 +48,7 @@ class SubSymlinkStrategy implements StrategyInterface
      */
     public function copy(string $fromDirectory, string $toDirectory): bool
     {
+        $this->logger->info(shell_exec('ls -la ' . $toDirectory));
         $fromDirectory = $this->file->getRealPath($fromDirectory);
 
         if (!$this->file->isExists($fromDirectory)) {
