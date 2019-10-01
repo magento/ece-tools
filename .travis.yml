@@ -44,7 +44,6 @@ env:
 
 install:
   - id
-  - whoami
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer remove magento/magento-cloud-components --no-update; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer config --unset repositories.repo.magento.com; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}; fi;
@@ -60,6 +59,9 @@ before_script:
   - ./tests/travis/prepare_functional_parallel.sh
 
 script:
+  - docker build -t test/php:7.2-cli https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292-1:images/php/7.2-cli
+  - docker build -t test/php:7.2-fpm https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292-1:images/php/7.2-fpm
+  - docker build -t test/nginx:1.9 https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292-1:images/nginx/1.9
   - docker-compose up -d
   - docker-compose run build bash -c "ls -la /app"
   - docker-compose down -v

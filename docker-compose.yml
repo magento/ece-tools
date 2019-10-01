@@ -22,7 +22,7 @@ services:
     networks:
       - magento
   fpm:
-    image: 'magento/magento-cloud-docker-php:7.2-fpm-1.0'
+    image: 'test/php:7.2-fpm'
     ports:
       - 9000
     depends_on:
@@ -40,7 +40,7 @@ services:
     networks:
       - magento
   build:
-    image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
+    image: 'test/php:7.2-cli '
     hostname: build.magento2.docker
     depends_on:
       - db
@@ -61,7 +61,7 @@ services:
         aliases:
           - web.magento2.docker
   deploy:
-    image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
+    image: 'test/php:7.2-cli '
     hostname: deploy.magento2.docker
     depends_on:
       - db
@@ -82,7 +82,7 @@ services:
         aliases:
           - deploy.magento2.docker
   web:
-    image: 'magento/magento-cloud-docker-nginx:latest-1.0'
+    image: 'test/nginx:1.9'
     hostname: web.magento2.docker
     depends_on:
       - fpm
