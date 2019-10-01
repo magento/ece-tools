@@ -18,11 +18,11 @@ services:
       - /var/lib/mysql
       - './.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d'
   elasticsearch:
-    image: 'magento/magento-cloud-docker-elasticsearch:6.5-1.0'
+    image: 'magento/magento-cloud-docker-elasticsearch:5.2-1.0'
     networks:
       - magento
   fpm:
-    image: 'magento/magento-cloud-docker-php:7.1-fpm-1.0'
+    image: 'magento/magento-cloud-docker-php:7.2-fpm-1.0'
     ports:
       - 9000
     depends_on:
@@ -40,7 +40,7 @@ services:
     networks:
       - magento
   build:
-    image: 'magento/magento-cloud-docker-php:7.1-cli-1.0'
+    image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
     hostname: build.magento2.docker
     depends_on:
       - db
@@ -61,7 +61,7 @@ services:
         aliases:
           - web.magento2.docker
   deploy:
-    image: 'magento/magento-cloud-docker-php:7.1-cli-1.0'
+    image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
     hostname: deploy.magento2.docker
     depends_on:
       - db
@@ -127,7 +127,7 @@ services:
   generic:
     image: alpine
     environment:
-      - 'PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl redis mcrypt'
+      - 'PHP_EXTENSIONS=bcmath bz2 calendar exif gd gettext intl mysqli pcntl pdo_mysql soap sockets sysvmsg sysvsem sysvshm opcache zip xsl redis'
     env_file:
       - ./.docker/composer.env
       - ./.docker/global.env

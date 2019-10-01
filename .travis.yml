@@ -13,8 +13,8 @@ services:
 language: php
 php:
   - '7.1'
-  - '7.2'
-  - '7.3'
+#  - '7.2'
+#  - '7.3'
 
 env:
   matrix:
@@ -61,7 +61,7 @@ before_script:
 
 script:
   - docker-compose up -d
-  - docker-compose run bash -c "ls -la /app"
+  - docker-compose run build bash -c "ls -la /app"
   - docker-compose down -v
 #  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
 #  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
