@@ -55,7 +55,7 @@ services:
       - 'magento-build-etc:/app/app/etc:delegated'
       - 'magento-build-static:/app/pub/static:delegated'
       - 'magento-build-media:/app/pub/media:delegated'
-      - '/app/.composer:delegated'
+      - '/app/.composer'
     networks:
       magento:
         aliases:
@@ -76,7 +76,7 @@ services:
       - 'magento-etc:/app/app/etc:delegated'
       - 'magento-static:/app/pub/static:delegated'
       - 'magento-media:/app/pub/media:delegated'
-      - '/app/.composer:delegated'
+      - '/app/.composer'
     networks:
       magento:
         aliases:
