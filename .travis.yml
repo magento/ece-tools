@@ -16,32 +16,32 @@ cache:
 
 language: php
 php:
-#  - '7.1'
-#  - '7.2'
+  - '7.1'
+  - '7.2'
   - '7.3'
 
 env:
   matrix:
     - TEST_SUITE=static-unit XDEBUG=true
-#    - TEST_SUITE=integration
-#    - TEST_SUITE=functional
-#    - TEST_SUITE=functional FUNCTIONAL_INDEX=1
-#    - TEST_SUITE=functional FUNCTIONAL_INDEX=2
-#    - TEST_SUITE=functional FUNCTIONAL_INDEX=3
+    - TEST_SUITE=integration
+    - TEST_SUITE=functional
+    - TEST_SUITE=functional FUNCTIONAL_INDEX=1
+    - TEST_SUITE=functional FUNCTIONAL_INDEX=2
+    - TEST_SUITE=functional FUNCTIONAL_INDEX=3
 
 matrix:
   exclude:
-#    - php: '7.1'
-#      env: TEST_SUITE=integration
-#    - php: '7.1'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
-#    - php: '7.1'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
-#    - php: '7.1'
-#      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
-#
-#    - php: '7.2'
-#      env: TEST_SUITE=functional
+    - php: '7.1'
+      env: TEST_SUITE=integration
+    - php: '7.1'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
+    - php: '7.1'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
+    - php: '7.1'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
+
+    - php: '7.2'
+      env: TEST_SUITE=functional
 
     - php: '7.3'
       env: TEST_SUITE=functional
@@ -62,13 +62,8 @@ before_script:
   - ./tests/travis/prepare_functional_parallel.sh
 
 script:
-#  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
-#  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
-#  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;
-  - touch ~/.composer/cache/test.f
-  - docker-compose up -d
-  - docker-compose run build bash -c "composer require composer/composer:^1.4"
-  - docker-compose run build bash -c "ls -la /app"
-  - docker-compose run build bash -c "ls -la /app/.composer"
+  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
+  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
+  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;
 
 after_failure: docker ps -s
