@@ -3,20 +3,22 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-namespace Magento\MagentoCloud\Process\Build;
+declare(strict_types=1);
+
+namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Process\ProcessException;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Step\StepException;
+use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
 /**
  * Creates the error handling configuration file `<magento_root>/pub/errors/local.xml`
  * with the configuration of the nesting level of directories for error reporting
  */
-class SetReportDirNestingLevel implements ProcessInterface
+class SetReportDirNestingLevel implements StepInterface
 {
     /**
      * @var LoggerInterface
@@ -61,7 +63,7 @@ class SetReportDirNestingLevel implements ProcessInterface
      */
     public function execute()
     {
-        $this->logger->info('Configuring directory nesting for saving error reports');
+        $this->logger->info('Configuring directories nesting level for saving error reports');
         try {
             $errorReportConfigFile = $this->configFileList->getErrorReportConfig();
             if ($this->file->isExists($errorReportConfigFile)) {
@@ -95,7 +97,7 @@ XML
                 )
             );
         } catch (\Exception $exception) {
-            throw new ProcessException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
 }

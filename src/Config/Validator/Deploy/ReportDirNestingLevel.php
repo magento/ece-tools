@@ -3,8 +3,9 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Process\Deploy;
+namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -64,8 +65,7 @@ class ReportDirNestingLevel implements ValidatorInterface
         File $file,
         XmlEncoder $encoder,
         ResultFactory $resultFactory
-    )
-    {
+    ) {
         $this->environment = $environment;
         $this->configFileList = $configFileList;
         $this->file = $file;
@@ -114,11 +114,11 @@ class ReportDirNestingLevel implements ValidatorInterface
             }
         } catch (FileSystemException $exception) {
             $msg = $exception->getMessage();
-            $msg .= $envVarReportDirNestingLevelMsg ? ' '.$envVarReportDirNestingLevelMsg: '';
+            $msg .= $envVarReportDirNestingLevelMsg ? ' ' . $envVarReportDirNestingLevelMsg : '';
             return $this->resultFactory->error($msg);
         } catch (NotEncodableValueException $exception) {
             $msg = $exception->getMessage();
-            $msg .= $envVarReportDirNestingLevelMsg ? ' '.$envVarReportDirNestingLevelMsg: '';
+            $msg .= $envVarReportDirNestingLevelMsg ? ' ' . $envVarReportDirNestingLevelMsg : '';
             return $this->resultFactory->error($msg);
         }
     }
