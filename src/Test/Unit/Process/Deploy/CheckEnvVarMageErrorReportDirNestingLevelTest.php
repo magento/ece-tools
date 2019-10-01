@@ -5,7 +5,7 @@
  */
 namespace Magento\MagentoCloud\Test\Unit\Process\Deploy;
 
-use Magento\MagentoCloud\Process\Deploy\CheckEnvVarMageErrorReportDirNestingLevel;
+use Magento\MagentoCloud\Process\Deploy\ReportDirNestingLevel;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Magento\MagentoCloud\Config\Environment;
@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 class CheckEnvVarMageErrorReportDirNestingLevelTest extends TestCase
 {
     /**
-     * @var CheckEnvVarMageErrorReportDirNestingLevel
+     * @var ReportDirNestingLevel
      */
     private $processor;
 
@@ -43,7 +43,7 @@ class CheckEnvVarMageErrorReportDirNestingLevelTest extends TestCase
         $this->environmentMock = $this->createMock(Environment::class);
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
 
-        $this->processor = new CheckEnvVarMageErrorReportDirNestingLevel(
+        $this->processor = new ReportDirNestingLevel(
             $this->loggerMock,
             $this->environmentMock,
             $this->configFileListMock
@@ -55,7 +55,7 @@ class CheckEnvVarMageErrorReportDirNestingLevelTest extends TestCase
         $errorReportConfigFile = 'magento_root/pub/errors/local.xml';
         $this->environmentMock->expects($this->once())
             ->method('getEnv')
-            ->with(CheckEnvVarMageErrorReportDirNestingLevel::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL)
+            ->with(ReportDirNestingLevel::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL)
             ->willReturn(5);
         $this->configFileListMock->expects($this->once())
             ->method('getErrorReportConfig')
@@ -66,8 +66,8 @@ class CheckEnvVarMageErrorReportDirNestingLevelTest extends TestCase
                 sprintf(
                     '%s environment variable detected. %s: %s. '
                     . 'Value of the property \'config.report.dir_nesting_level\' from \'%s\' file be ignored',
-                    CheckEnvVarMageErrorReportDirNestingLevel::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
-                    CheckEnvVarMageErrorReportDirNestingLevel::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
+                    ReportDirNestingLevel::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
+                    ReportDirNestingLevel::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
                     5,
                     $errorReportConfigFile
                 )
@@ -79,7 +79,7 @@ class CheckEnvVarMageErrorReportDirNestingLevelTest extends TestCase
     {
         $this->environmentMock->expects($this->once())
             ->method('getEnv')
-            ->with(CheckEnvVarMageErrorReportDirNestingLevel::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL)
+            ->with(ReportDirNestingLevel::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL)
             ->willReturn(null);
         $this->configFileListMock->expects($this->never())
             ->method('getErrorReportConfig');

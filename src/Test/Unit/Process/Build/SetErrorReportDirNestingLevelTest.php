@@ -6,7 +6,7 @@
 
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Process\Build\SetErrorReportDirNestingLevel;
+use Magento\MagentoCloud\Process\Build\SetReportDirNestingLevel;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
 class SetErrorReportDirNestingLevelTest extends TestCase
 {
     /**
-     * @var SetErrorReportDirNestingLevel
+     * @var SetReportDirNestingLevel
      */
     private $processor;
 
@@ -51,7 +51,7 @@ class SetErrorReportDirNestingLevelTest extends TestCase
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
         $this->fileMock = $this->createMock(File::class);
 
-        $this->processor = new SetErrorReportDirNestingLevel(
+        $this->processor = new SetReportDirNestingLevel(
             $this->loggerMock,
             $this->configFileListMock,
             $this->stageConfigMock,

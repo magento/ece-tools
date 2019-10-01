@@ -15,7 +15,7 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 interface BuildInterface extends StageConfigInterface
 {
     /**
-     * The number of subdirectories that will be created to save the report
+     * Subdirectory nesting level
      */
     const VAR_ERROR_REPORT_DIR_NESTING_LEVEL = 'ERROR_REPORT_DIR_NESTING_LEVEL';
 }

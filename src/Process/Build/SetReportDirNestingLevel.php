@@ -13,9 +13,10 @@ use Magento\MagentoCloud\Process\ProcessInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @inheritdoc
+ * Creates the error handling configuration file `<magento_root>/pub/errors/local.xml`
+ * with the configuration of the nesting level of directories for error reporting
  */
-class SetErrorReportDirNestingLevel implements ProcessInterface
+class SetReportDirNestingLevel implements ProcessInterface
 {
     /**
      * @var LoggerInterface
@@ -66,8 +67,8 @@ class SetErrorReportDirNestingLevel implements ProcessInterface
             if ($this->file->isExists($errorReportConfigFile)) {
                 $this->logger->notice(
                     sprintf(
-                        'Error reports configuration file \'%s exists\'.'
-                        .'Value of the property \'%s\' of .magento.env.yaml be ignored',
+                        'Error reports configuration file `%s` exists.'
+                        .'Value of the property `%s` of .magento.env.yaml will be ignored',
                         $errorReportConfigFile,
                         BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL
                     )
@@ -88,7 +89,7 @@ XML
             );
             $this->logger->notice(
                 sprintf(
-                    'The file %s with property \'config.report.dir_nesting_level\': %s was created.',
+                    'The file %s with property `config.report.dir_nesting_level`: `%s` was created.',
                     $errorReportConfigFile,
                     $errorReportDirNestingLevel
                 )
