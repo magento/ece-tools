@@ -37,6 +37,7 @@ services:
       - 'magento-etc:/app/app/etc:delegated'
       - 'magento-static:/app/pub/static:delegated'
       - 'magento-media:/app/pub/media:delegated'
+      - '~/.composer:/app/.composer:delegated'
     networks:
       - magento
   build:
