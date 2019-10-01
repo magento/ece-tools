@@ -40,7 +40,7 @@ services:
     networks:
       - magento
   build:
-    image: 'test/php:7.2-cli '
+    image: 'test/php:7.2-cli'
     hostname: build.magento2.docker
     depends_on:
       - db
@@ -61,7 +61,7 @@ services:
         aliases:
           - web.magento2.docker
   deploy:
-    image: 'test/php:7.2-cli '
+    image: 'test/php:7.2-cli'
     hostname: deploy.magento2.docker
     depends_on:
       - db
