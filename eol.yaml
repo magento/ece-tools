@@ -1,0 +1,30 @@
+# Service EOLs.
+php:
+  - version: '7.1'
+    eol: 12/31/2019
+  - version: '7.2'
+    eol: 12/31/2020
+  - version: '7.3'
+    eol: 12/31/2021
+mysql:
+  - version: '10.1'
+    eol: 10/31/2020
+  - version: '10.2'
+    eol: 05/31/2022
+  - version: '10.3'
+    eol: 05/31/2023
+elasticsearch:
+  - version: '6.5'
+    eol: 05/31/2020
+  - version: '7.0'
+    eol: 10/31/2020
+rabbitmq:
+  - version: '3.7'
+    eol: 06/30/2020
+redis:
+  - version: '5.0'
+    eol:
+  - version: '5.2'
+    eol:
+
+

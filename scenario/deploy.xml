@@ -45,6 +45,7 @@
                     <item name="cloud-variables" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\MagentoCloudVariables</item>
                     <item name="json-format-variable " xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\JsonFormatVariable</item>
                     <item name="service-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ServiceVersion</item>
+                    <item name="service-eol" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol</item>
                 </item>
             </argument>
         </arguments>
