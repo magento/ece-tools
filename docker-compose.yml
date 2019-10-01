@@ -35,7 +35,7 @@ services:
 #    networks:
 #      - magento
   build:
-    image: 'test/php:7.2-cli'
+    image: 'magento/magento-cloud-docker-php:7.2-cli-1.0'
     extends: generic
     hostname: build.magento2.docker
     depends_on:
