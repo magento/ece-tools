@@ -1,4 +1,4 @@
-dist: bionic
+dist: xenial
 
 addons:
   hosts:
@@ -9,10 +9,6 @@ git:
 
 services:
   - docker
-
-cache:
-  directories:
-    - $HOME/.composer/cache/files
 
 language: php
 php:
