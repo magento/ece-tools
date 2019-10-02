@@ -4,6 +4,7 @@
  * See COPYING.txt for license details.
  */
 $magentoRoot = $_ENV['MAGENTO_ROOT'] ?? __DIR__ . '/../../../';
+$magentoRoot = '/u02/cloud/oleksandr-shmyheliuk-qa';
 
 define('ECE_BP', __DIR__);
 

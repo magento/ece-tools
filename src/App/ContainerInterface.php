@@ -24,10 +24,9 @@ interface ContainerInterface extends \Psr\Container\ContainerInterface
     /**
      * Register a binding with the container.
      *
-     * @param string $abstract
-     * @param string|\Closure $concrete
-     * @param bool $shared
+     * @param string $id
+     * @param $service
      * @return void
      */
-    public function set(string $abstract, $concrete, bool $shared = true): void;
+    public function set(string $id, $service): void;
 }

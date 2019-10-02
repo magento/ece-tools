@@ -54,9 +54,7 @@ class StaticContentCleaner
         $this->logger->info('Clearing pub/static');
         $dirStaticPath = $this->directoryList->getPath(DirectoryList::DIR_STATIC);
         $this->file->backgroundClearDirectory($dirStaticPath, [$dirStaticPath . DIRECTORY_SEPARATOR . '.htaccess']);
-        $this->logger->info(shell_exec('ls -la ' . $dirStaticPath));
         $this->logger->info('Clearing var/view_preprocessed');
         $this->file->backgroundClearDirectory($this->directoryList->getPath(DirectoryList::DIR_VIEW_PREPROCESSED));
-        $this->logger->info(shell_exec('ls -la ' . $dirStaticPath));
     }
 }

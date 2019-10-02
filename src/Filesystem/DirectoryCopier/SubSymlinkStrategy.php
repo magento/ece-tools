@@ -48,17 +48,16 @@ class SubSymlinkStrategy implements StrategyInterface
      */
     public function copy(string $fromDirectory, string $toDirectory): bool
     {
-        $this->logger->info(shell_exec('ls -la ' . $toDirectory));
         $fromDirectory = $this->file->getRealPath($fromDirectory);
 
-        if (!$this->file->isExists($fromDirectory)) {
+        if ($fromDirectory === false || !$this->file->isExists($fromDirectory)) {
             throw new FileSystemException(
-                sprintf('Can\'t copy directory %s. Directory does not exist.', $fromDirectory)
+                sprintf('Can\'t copy directory "%s". Directory does not exist.', $fromDirectory)
             );
         }
 
         if ($this->file->isEmptyDirectory($fromDirectory)) {
-            $this->logger->info(sprintf("%s is empty. Nothing to restore", $fromDirectory));
+            $this->logger->info(sprintf('Directory "%s" is empty. Nothing to restore', $fromDirectory));
             return false;
         }
 
