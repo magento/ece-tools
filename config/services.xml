@@ -6,7 +6,7 @@
     <services>
         <defaults autowire="true" autoconfigure="true" public="true"/>
         <!-- ... -->
-        <prototype namespace="Magento\MagentoCloud\" resource="../../src/*" exclude="../../src/{Test}"/>
+        <prototype namespace="Magento\MagentoCloud\" resource="../src/*" exclude="../src/{Test}"/>
 
         <service id="Composer\Package\Version\VersionParser" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\SystemList" autowire="false" />

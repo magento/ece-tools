@@ -25,7 +25,7 @@ interface ContainerInterface extends \Psr\Container\ContainerInterface
      * Register a binding with the container.
      *
      * @param string $id
-     * @param $service
+     * @param object $service
      * @return void
      */
     public function set(string $id, $service): void;
