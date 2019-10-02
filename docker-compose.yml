@@ -42,7 +42,6 @@ services:
       - magento
   build:
     image: 'test/php:7.2-cli'
-    user: 'root'
     hostname: build.magento2.docker
     depends_on:
       - db
@@ -64,7 +63,6 @@ services:
           - web.magento2.docker
   deploy:
     image: 'test/php:7.2-cli'
-    user: 'root'
     hostname: deploy.magento2.docker
     depends_on:
       - db
