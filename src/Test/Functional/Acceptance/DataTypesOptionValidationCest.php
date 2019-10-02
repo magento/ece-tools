@@ -4,6 +4,7 @@
  * See COPYING.txt for license details.
  */
 declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
@@ -55,7 +56,7 @@ class DataTypesOptionValidationCest extends AbstractCest
                         'SCD_THREADS' => 'one',
                     ],
                 ],
-                'expectedError' => 'wrong value',
+                'expectedError' => 'SCD_THREADS has wrong value',
             ],
             'integer_instead_boolean' => [
                 'cloudVariables' => [
@@ -63,7 +64,7 @@ class DataTypesOptionValidationCest extends AbstractCest
                         'STATIC_CONTENT_SYMLINK' => 1,
                     ],
                 ],
-                'expectedError' => 'wrong value',
+                'expectedError' => 'STATIC_CONTENT_SYMLINK has wrong value',
             ],
         ];
     }
