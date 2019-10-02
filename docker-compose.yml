@@ -37,10 +37,12 @@ services:
       - 'magento-etc:/app/app/etc:delegated'
       - 'magento-static:/app/pub/static:delegated'
       - 'magento-media:/app/pub/media:delegated'
+      - '~/.composer:/app/.composer:delegated'
     networks:
       - magento
   build:
     image: 'test/php:7.2-cli'
+    user: 'root'
     hostname: build.magento2.docker
     depends_on:
       - db
@@ -55,13 +57,14 @@ services:
       - 'magento-build-etc:/app/app/etc:delegated'
       - 'magento-build-static:/app/pub/static:delegated'
       - 'magento-build-media:/app/pub/media:delegated'
-      - '/app/.composer'
+      - '~/.composer:/app/.composer:delegated'
     networks:
       magento:
         aliases:
           - web.magento2.docker
   deploy:
     image: 'test/php:7.2-cli'
+    user: 'root'
     hostname: deploy.magento2.docker
     depends_on:
       - db
@@ -76,7 +79,7 @@ services:
       - 'magento-etc:/app/app/etc:delegated'
       - 'magento-static:/app/pub/static:delegated'
       - 'magento-media:/app/pub/media:delegated'
-      - '/app/.composer'
+      - '~/.composer:/app/.composer:delegated'
     networks:
       magento:
         aliases:
