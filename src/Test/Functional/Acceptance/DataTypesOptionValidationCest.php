@@ -1,0 +1,70 @@
+<?php
+/**
+ * Copyright © Magento, Inc. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+declare(strict_types=1);
+namespace Magento\MagentoCloud\Test\Functional\Acceptance;
+use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
+/**
+ * This test runs on the latest version of PHP
+ */
+class datatypesValidationCest extends AbstractCest
+{
+    /**
+     * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function _before(\CliTester $I)
+    {
+        parent::_before($I);
+        $I->cloneTemplate();
+        $I->addEceComposerRepo();
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param \Codeception\Example $data
+     * @throws \Robo\Exception\TaskException
+     * @dataProvider DataTypesDataProvider
+     */
+    public function dataTypesValidationOnDeploy(\CliTester $I, \Codeception\Example $data)
+    {
+      //  $I->assertTrue($I->uploadToContainer($data['app_yaml'], '/.magento.app.yaml', Docker::BUILD_CONTAINER));
+        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->startEnvironment();
+        $I->assertTrue($I->runEceToolsCommand(
+            'deploy',
+            Docker::DEPLOY_CONTAINER,
+            $data['cloudVariables']
+        ));
+        $log = $I->grabFileContent('/var/log/cloud.log');
+        $I->assertContains($data['expectedError'], $log);
+    }
+
+    /**
+     * @return array
+     */
+    protected function DataTypesDataProvider(): array
+    {
+        return [
+            'string_instead_integer' => [
+                'cloudVariables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'SCD_THREADS' => 'one',
+                    ],
+                ],
+                'expectedError' => 'wrong value',
+            ],
+            'integer_instead_boolean' => [
+                'cloudVariables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'STATIC_CONTENT_SYMLINK' => 1,
+                    ],
+                ],
+                'expectedError' => 'wrong value',
+            ],
+        ];
+
+    }
+}
