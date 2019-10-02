@@ -32,7 +32,6 @@ class DataTypesOptionValidationCest extends AbstractCest
      */
     public function dataTypesValidationOnDeploy(\CliTester $I, \Codeception\Example $data)
     {
-      //  $I->assertTrue($I->uploadToContainer($data['app_yaml'], '/.magento.app.yaml', Docker::BUILD_CONTAINER));
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand(
