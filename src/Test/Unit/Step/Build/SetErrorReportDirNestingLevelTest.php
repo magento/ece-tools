@@ -3,10 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
-use Magento\MagentoCloud\Process\Build\SetReportDirNestingLevel;
+use Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
@@ -44,6 +45,15 @@ class SetErrorReportDirNestingLevelTest extends TestCase
      */
     private $fileMock;
 
+    /**
+     * The path to the error report configuration file
+     * @var string
+     */
+    private $errorReportConfigFile = 'magento_root/pub/errors/local.xml';
+
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
@@ -57,44 +67,43 @@ class SetErrorReportDirNestingLevelTest extends TestCase
             $this->stageConfigMock,
             $this->fileMock
         );
-    }
 
-    public function testExecuteLocalXmlExists()
-    {
-        $errorReportConfigFile = 'magento_root/pub/errors/local.xml';
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('Configuring directory nesting for saving error reports');
+            ->with('Configuring directories nesting level for saving error reports');
         $this->configFileListMock->expects($this->once())
             ->method('getErrorReportConfig')
-            ->willReturn($errorReportConfigFile);
+            ->willReturn($this->errorReportConfigFile);
+    }
+
+    /**
+     * The case the file <magento_root>/errors/local.xml exists
+     */
+    public function testExecuteLocalXmlExists()
+    {
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with($errorReportConfigFile)
+            ->with($this->errorReportConfigFile)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with(sprintf(
-                'Error reports configuration file \'%s exists\'.'
-                . 'Value of the property \'%s\' of .magento.env.yaml be ignored',
-                $errorReportConfigFile,
+                'The error reports configuration file `%s` exists.'
+                . 'Value of the property `%s` of .magento.env.yaml will be ignored',
+                $this->errorReportConfigFile,
                 BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL
             ));
         $this->processor->execute();
     }
 
+    /**
+     * The case the file <magento_root>/errors/local.xml not exist
+     */
     public function testExecuteLocalXmlNotExist()
     {
-        $errorReportConfigFile = 'magento_root/pub/errors/local.xml';
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Configuring directory nesting for saving error reports');
-        $this->configFileListMock->expects($this->once())
-            ->method('getErrorReportConfig')
-            ->willReturn($errorReportConfigFile);
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with($errorReportConfigFile)
+            ->with($this->errorReportConfigFile)
             ->willReturn(false);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
@@ -103,7 +112,7 @@ class SetErrorReportDirNestingLevelTest extends TestCase
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
             ->with(
-                $errorReportConfigFile,
+                $this->errorReportConfigFile,
                 <<<XML
 <?xml version="1.0"?>
 <config>
@@ -117,9 +126,8 @@ XML
             ->method('notice')
             ->with(
                 sprintf(
-                    'The file %s with property \'config.report.dir_nesting_level\': %s was created.',
-                    $errorReportConfigFile,
-                    4
+                    'The file %s with property `config.report.dir_nesting_level`: `4` was created.',
+                    $this->errorReportConfigFile
                 )
             );
         $this->processor->execute();

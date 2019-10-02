@@ -69,7 +69,7 @@ class SetReportDirNestingLevel implements StepInterface
             if ($this->file->isExists($errorReportConfigFile)) {
                 $this->logger->notice(
                     sprintf(
-                        'Error reports configuration file `%s` exists.'
+                        'The error reports configuration file `%s` exists.'
                         .'Value of the property `%s` of .magento.env.yaml will be ignored',
                         $errorReportConfigFile,
                         BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL

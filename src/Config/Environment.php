@@ -37,6 +37,11 @@ class Environment
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
+     * The environment variable for controlling the directories nesting level for error reporting
+     */
+    const ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL = 'MAGE_ERROR_REPORT_DIR_NESTING_LEVEL';
+
+    /**
      * @var DecoderInterface
      */
     private $decoder;
@@ -111,6 +116,16 @@ class Environment
     public function getEnvVarName(string $name): string
     {
         return $this->systemConfig->get($name);
+    }
+
+    /**
+     * Get a value of the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL.
+     *
+     * @return int|null|string
+     */
+    public function getEnvVarMageErrorReportDirNestingLevel()
+    {
+        return $this->getEnv(self::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL);
     }
 
     /**
