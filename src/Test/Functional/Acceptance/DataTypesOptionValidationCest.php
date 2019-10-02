@@ -5,11 +5,13 @@
  */
 declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
+
 use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
+
 /**
  * This test runs on the latest version of PHP
  */
-class datatypesValidationCest extends AbstractCest
+class DataTypesOptionValidationCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
@@ -26,7 +28,7 @@ class datatypesValidationCest extends AbstractCest
      * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
-     * @dataProvider DataTypesDataProvider
+     * @dataProvider dataTypesDataProvider
      */
     public function dataTypesValidationOnDeploy(\CliTester $I, \Codeception\Example $data)
     {
@@ -45,7 +47,7 @@ class datatypesValidationCest extends AbstractCest
     /**
      * @return array
      */
-    protected function DataTypesDataProvider(): array
+    protected function dataTypesDataProvider(): array
     {
         return [
             'string_instead_integer' => [
@@ -65,6 +67,5 @@ class datatypesValidationCest extends AbstractCest
                 'expectedError' => 'wrong value',
             ],
         ];
-
     }
 }
