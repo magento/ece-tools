@@ -17,10 +17,6 @@ services:
     volumes:
       - /var/lib/mysql
       - './.docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d'
-  elasticsearch:
-    image: 'magento/magento-cloud-docker-elasticsearch:5.2-1.0'
-    networks:
-      - magento
   fpm:
     image: 'test/php:7.2-fpm'
     ports:
@@ -37,7 +33,6 @@ services:
       - 'magento-etc:/app/app/etc:delegated'
       - 'magento-static:/app/pub/static:delegated'
       - 'magento-media:/app/pub/media:delegated'
-      - '~/.composer:/app/.composer:delegated'
     networks:
       - magento
   build:
@@ -45,7 +40,6 @@ services:
     hostname: build.magento2.docker
     depends_on:
       - db
-      - elasticsearch
     extends: generic
     volumes:
       - '.:/ece-tools'
@@ -66,7 +60,6 @@ services:
     hostname: deploy.magento2.docker
     depends_on:
       - db
-      - elasticsearch
     extends: generic
     volumes:
       - '.:/ece-tools'
