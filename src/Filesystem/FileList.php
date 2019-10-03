@@ -115,6 +115,6 @@ class FileList extends ConfigFileList
      */
     public function getServiceEolsConfig() : string
     {
-        return $this->directoryList->getRoot() . '/eol.yaml';
+        return $this->directoryList->getRoot() . '/config/eol.yaml';
     }
 }

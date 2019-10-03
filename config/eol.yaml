@@ -8,7 +8,7 @@ php:
     eol: 12/31/2021
 mysql:
   - version: '10.1'
-    eol: 10/31/2018
+    eol: 10/31/2020
   - version: '10.2'
     eol: 05/31/2022
   - version: '10.3'
