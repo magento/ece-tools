@@ -64,6 +64,7 @@ script:
   - docker build -t test/nginx:1.9 https://github.com/magento/magento-cloud-docker.git#MAGECLOUD-4292-1:images/nginx/1.9
   - docker-compose up -d
   - docker-compose run build bash -c "ls -la /app"
+  - docker-compose run build bash -c "id"
   - docker-compose down -v
 #  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
 #  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
