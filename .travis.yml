@@ -10,11 +10,15 @@ git:
 services:
   - docker
 
+cache:
+  directories:
+    - $HOME/.composer/cache/files
+
 language: php
 php:
-  - '7.1'
+#  - '7.1'
   - '7.2'
-  - '7.3'
+#  - '7.3'
 
 env:
   matrix:
