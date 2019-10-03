@@ -31,11 +31,6 @@ class UrlsTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var StepInterface|MockObject
-     */
-    private $stepMock;
-
-    /**
      * @var LoggerInterface|MockObject
      */
     private $loggerMock;
