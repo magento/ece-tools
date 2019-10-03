@@ -28,7 +28,6 @@ class Warnings implements ValidatorInterface
 
     /**
      * ServiceEol constructor.
-     * @param Validator\ResultFactory $resultFactory
      * @param EOLValidator $eolValidator
      */
     public function __construct(EOLValidator $eolValidator)

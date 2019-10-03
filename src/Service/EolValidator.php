@@ -33,15 +33,15 @@ class EolValidator
     /**
      * @var string
      */
-    private $service = '';
+    private $service;
 
     /**
      * @var string
      */
-    private $version = '';
+    private $version;
 
     /**
-     * @var int
+     * @var integer
      */
     private $errorLevel;
 
@@ -51,9 +51,8 @@ class EolValidator
      * @param FileList $fileList
      * @param Validator\ResultFactory $resultFactory
      */
-    public function __construct(FileList $fileList,
-        Validator\ResultFactory $resultFactory
-    ) {
+    public function __construct(FileList $fileList, Validator\ResultFactory $resultFactory)
+    {
         $this->fileList = $fileList;
         $this->resultFactory = $resultFactory;
     }
@@ -91,8 +90,7 @@ class EolValidator
                     implode(PHP_EOL, $errors)
                 );
             }
-        }
-        catch (GenericException $ex) {
+        } catch (GenericException $ex) {
             return $this->resultFactory->error('Can\'t validate EOLs of some services: ' . $ex->getMessage());
         }
 
@@ -122,7 +120,7 @@ class EolValidator
         $serviceConfigs = $this->getServiceEolConfigs();
 
         // Check if configurations exist for the current service and version.
-        $versionConfigs = array_filter($serviceConfigs, function($v) {
+        $versionConfigs = array_filter($serviceConfigs, function ($v) {
             return $v['version'] == $this->version;
         });
 
@@ -130,9 +128,10 @@ class EolValidator
         // return a message with details.
         if (!$versionConfigs) {
             return sprintf(
-                'Could not validate EOL for service %s and version %s.',
+                'Could not validate EOL for %s %s',
                 $this->service,
-                $this->version);
+                $this->version
+            );
         }
 
         // Get the EOL date from the configs.
@@ -154,7 +153,7 @@ class EolValidator
     protected function getServiceEolConfigs() : array
     {
         // Check if the the configuration yaml file exists, and retrieve it's path.
-        if(file_exists($this->fileList->getServiceEolsConfig() ?? '')) {
+        if (file_exists($this->fileList->getServiceEolsConfig() ?? '')) {
             $configs = Yaml::parseFile($this->fileList->getServiceEolsConfig() ?? '');
             // Return the configurations for the specific service.
             return $configs[$this->service];
@@ -167,13 +166,12 @@ class EolValidator
      * Gets the service notifications by error level.
      *
      * @param \DateTime $eolDate
-     * @param int $errorLevel
      * @param \DateInterval $interval
      * @return string
      */
     protected function getServiceEolNotifications(\DateTime $eolDate, \DateInterval $interval) : string
     {
-        switch($this->errorLevel) {
+        switch ($this->errorLevel) {
             case ValidatorInterface::LEVEL_WARNING:
                 // If the EOL date is in the past, issue a warning.
                 if ($interval->invert === 0) {
@@ -203,4 +201,3 @@ class EolValidator
         return '';
     }
 }
-
