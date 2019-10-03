@@ -40,7 +40,7 @@ class Urls implements StepInterface
     private $databaseUrl;
 
     /**
-     * @var Environment
+     * @var EnvironmentUrl
      */
     private $environmentUrl;
 
@@ -49,7 +49,7 @@ class Urls implements StepInterface
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
      * @param Database $databaseUrl
-     * @param Environment $environmentUrl
+     * @param EnvironmentUrl $environmentUrl
      */
     public function __construct(
         Environment $environment,

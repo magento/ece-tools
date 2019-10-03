@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\App;
 
 use Composer\Composer;
+use Composer\Factory;
+use Composer\IO\BufferIO;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -48,11 +50,6 @@ class Container implements ContainerInterface
         $containerBuilder->set(Composer::class, $this->createComposerInstance($systemList));
         $containerBuilder->setDefinition(Composer::class, new Definition(Composer::class));
 
-        $definition = new Definition();
-        $definition->setPublic(true);
-        $definition->setAutowired(true);
-        $definition->setAutoconfigured(true);
-
         $loader = new XmlFileLoader($containerBuilder, new FileLocator($toolsBasePath . '/config/'));
         $loader->load('services.xml');
         $containerBuilder->compile();
@@ -66,13 +63,13 @@ class Container implements ContainerInterface
      */
     private function createComposerInstance(SystemList $systemList): Composer
     {
-        $composerFactory = new \Composer\Factory();
+        $composerFactory = new Factory();
         $composerFile = file_exists($systemList->getMagentoRoot() . '/composer.json')
             ? $systemList->getMagentoRoot() . '/composer.json'
             : $systemList->getRoot() . '/composer.json';
 
         $composer = $composerFactory->createComposer(
-            new \Composer\IO\BufferIO(),
+            new BufferIO(),
             $composerFile,
             false,
             $systemList->getMagentoRoot()
