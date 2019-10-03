@@ -10,10 +10,6 @@ git:
 services:
   - docker
 
-cache:
-  directories:
-    - $HOME/.composer/cache/files
-
 language: php
 php:
 #  - '7.1'
@@ -47,7 +43,6 @@ matrix:
       env: TEST_SUITE=functional
 
 install:
-  - id
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer remove magento/magento-cloud-components --no-update; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer config --unset repositories.repo.magento.com; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}; fi;

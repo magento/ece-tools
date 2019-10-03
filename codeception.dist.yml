@@ -27,7 +27,7 @@ modules:
       env_base_url: "%Magento.docker.settings.env.url.base%"
       env_secure_base_url: "%Magento.docker.settings.env.url.secure_base%"
       volumes: []
-      printOutput: true
+      printOutput: false
     PhpBrowser:
       url: "%Magento.docker.settings.env.url.base%"
     Magento\MagentoCloud\Test\Functional\Codeception\MagentoDb:
