@@ -13,7 +13,6 @@ use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Step\StepInterface;
 
 /**
  * @inheritdoc
