@@ -55,8 +55,6 @@ class Container implements ContainerInterface
 
         $loader = new XmlFileLoader($containerBuilder, new FileLocator($toolsBasePath . '/config/'));
         $loader->load('services.xml');
-        //$loader->load('services/build/generate.xml');
-        //$loader->load('services/build/transfer.xml');
         $containerBuilder->compile();
 
         $this->container = $containerBuilder;

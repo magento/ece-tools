@@ -10,10 +10,10 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Step\StepInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,24 +26,34 @@ class UrlsTest extends TestCase
     private $step;
 
     /**
-     * @var Environment|Mock
+     * @var Environment|MockObject
      */
     private $environmentMock;
 
     /**
-     * @var StepInterface|Mock
+     * @var StepInterface|MockObject
      */
     private $stepMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var DeployInterface|Mock
+     * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
+
+    /**
+     * @var Urls\Environment|MockObject
+     */
+    private $environmentUrlMock;
+
+    /**
+     * @var Urls\Database|MockObject
+     */
+    private $databaseUrlMock;
 
     /**
      * @inheritdoc
@@ -51,15 +61,17 @@ class UrlsTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createMock(Environment::class);
-        $this->stepMock = $this->getMockForAbstractClass(StepInterface::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->databaseUrlMock = $this->createMock(Urls\Database::class);
+        $this->environmentUrlMock = $this->createMock(Urls\Environment::class);
 
         $this->step = new Urls(
             $this->environmentMock,
-            $this->stepMock,
             $this->loggerMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->databaseUrlMock,
+            $this->environmentUrlMock
         );
     }
 
@@ -78,7 +90,9 @@ class UrlsTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating secure and unsecure URLs');
-        $this->stepMock->expects($this->once())
+        $this->databaseUrlMock->expects($this->once())
+            ->method('execute');
+        $this->environmentUrlMock->expects($this->once())
             ->method('execute');
 
         $this->step->execute();
@@ -95,7 +109,9 @@ class UrlsTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating secure and unsecure URLs');
-        $this->stepMock->expects($this->once())
+        $this->databaseUrlMock->expects($this->once())
+            ->method('execute');
+        $this->environmentUrlMock->expects($this->once())
             ->method('execute');
 
         $this->step->execute();
@@ -113,7 +129,9 @@ class UrlsTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($this->stringContains('Skipping URL updates because we are deploying to a Production or Staging'));
-        $this->stepMock->expects($this->never())
+        $this->databaseUrlMock->expects($this->never())
+            ->method('execute');
+        $this->environmentUrlMock->expects($this->never())
             ->method('execute');
 
         $this->step->execute();
@@ -134,7 +152,9 @@ class UrlsTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with($this->stringContains('Skipping URL updates because the URL_UPDATES variable is set to false.'));
-        $this->stepMock->expects($this->never())
+        $this->databaseUrlMock->expects($this->never())
+            ->method('execute');
+        $this->environmentUrlMock->expects($this->never())
             ->method('execute');
 
         $this->step->execute();

@@ -59,19 +59,5 @@
         <service id="Magento\MagentoCloud\Shell\ShellInterface" alias="Magento\MagentoCloud\Shell\Shell" />
         <service id="Magento\MagentoCloud\Config\Stage\DeployInterface" alias="Magento\MagentoCloud\Config\Stage\Deploy" />
         <service id="Magento\MagentoCloud\Config\Stage\BuildInterface" alias="Magento\MagentoCloud\Config\Stage\Build" />
-
-        <service id="scenario.deploy.configUpdate.urls" class="Magento\MagentoCloud\Step\StepComposite">
-            <argument type="collection">
-                <argument type="service" id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Database" />
-                <argument type="service" id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment" />
-            </argument>
-        </service>
-
-        <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls">
-            <argument type="service" id="Magento\MagentoCloud\Config\Environment" />
-            <argument type="service" id="scenario.deploy.configUpdate.urls" />
-            <argument type="service" id="Psr\Log\LoggerInterface" />
-            <argument type="service" id="Magento\MagentoCloud\Config\Stage\DeployInterface" />
-        </service>
     </services>
 </container>
