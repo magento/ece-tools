@@ -31,6 +31,11 @@ class EolValidator
     private $resultFactory;
 
     /**
+     * @var ServiceFactory
+     */
+    private $serviceFactory;
+
+    /**
      * @var string
      */
     private $service;
@@ -50,11 +55,16 @@ class EolValidator
      *
      * @param FileList $fileList
      * @param Validator\ResultFactory $resultFactory
+     * @param ServiceFactory $serviceFactory
      */
-    public function __construct(FileList $fileList, Validator\ResultFactory $resultFactory)
-    {
+    public function __construct(
+        FileList $fileList,
+        Validator\ResultFactory $resultFactory,
+        ServiceFactory $serviceFactory
+    ) {
         $this->fileList = $fileList;
         $this->resultFactory = $resultFactory;
+        $this->serviceFactory = $serviceFactory;
     }
 
     /**
@@ -68,16 +78,23 @@ class EolValidator
     {
         try {
             $this->errorLevel = $errorLevel;
-
-            // Get all services and their versions for validation.
-            $services = $this->getServices();
-
             $errors = [];
 
-            // Validate EOL for each service.
-            foreach ($services as $service) {
-                $this->service = array_key_first($service);
-                $this->version = $service[$this->service];
+            // Get all services and their versions for validation.
+            $services = [
+                ServiceInterface::NAME_RABBITMQ,
+                ServiceInterface::NAME_REDIS,
+                ServiceInterface::NAME_DB
+            ];
+
+            foreach ($services as $serviceName) {
+                $service = $this->serviceFactory->create($serviceName);
+                $serviceVersion = $service->getVersion();
+
+                $this->service = $serviceName;
+                $this->version = $serviceVersion;
+
+                // Validate EOL for each service.
                 if ($validationResult = $this->validateService()) {
                     $errors[] = $validationResult;
                 }
@@ -98,17 +115,6 @@ class EolValidator
     }
 
     /**
-     * Get all services and versions.
-     *
-     * @return array
-     */
-    protected function getServices() : array
-    {
-        $services = [['php' => '7.1'], ['mysql' => '10.1']];
-        return $services;
-    }
-
-    /**
      * Validates a given service and version.
      *
      * @return string
@@ -125,23 +131,20 @@ class EolValidator
         });
 
         // If there are no configurations found for the current service and version,
-        // return a message with details.
-        if (!$versionConfigs) {
+        // or if an EOL is not defined or is invalid, return a message with details.
+        if (!$versionConfigs || !$versionConfigs[array_key_first($versionConfigs)]['eol']
+            || !$eolDate = date_create($versionConfigs[array_key_first($versionConfigs)]['eol'])) {
             return sprintf(
-                'Could not validate EOL for %s %s',
+                'Unknown or invalid EOL defined for %s %s',
                 $this->service,
                 $this->version
             );
         }
 
-        // Get the EOL date from the configs.
-        $configDate = $versionConfigs[array_key_first($versionConfigs)]['eol'];
-        $eolDate = new \DateTime($configDate);
+        $interval = date_diff($eolDate, date_create('now'));
 
         // If the EOL is in the past, issue a warning.
         // If the EOL is in the future, but within a three month period, issue a notice.
-        $interval = date_diff($eolDate, new \DateTime());
-
         return $this->getServiceEolNotifications($eolDate, $interval);
     }
 
@@ -176,7 +179,7 @@ class EolValidator
                 // If the EOL date is in the past, issue a warning.
                 if ($interval->invert === 0) {
                     return sprintf(
-                        '%s %s has passed its EOL (%s).',
+                        '%s %s has passed EOL (%s).',
                         $this->service,
                         $this->version,
                         date_format($eolDate, 'Y-m-d')
