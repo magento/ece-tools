@@ -16,7 +16,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Creates the error handling configuration file `<magento_root>/pub/errors/local.xml`
- * with the configuration of the nesting level of directories for error reporting
+ * that specifies the directory nesting level configuration for error reporting
  */
 class SetReportDirNestingLevel implements StepInterface
 {
@@ -63,37 +63,37 @@ class SetReportDirNestingLevel implements StepInterface
      */
     public function execute()
     {
-        $this->logger->info('Configuring directories nesting level for saving error reports');
+        $this->logger->info('Configuring directory nesting level for saving error reports');
         try {
-            $errorReportConfigFile = $this->configFileList->getErrorReportConfig();
-            if ($this->file->isExists($errorReportConfigFile)) {
+            $configFile = $this->configFileList->getErrorReportConfig();
+            if ($this->file->isExists($configFile)) {
                 $this->logger->notice(
                     sprintf(
                         'The error reports configuration file `%s` exists.'
-                        .'Value of the property `%s` of .magento.env.yaml will be ignored',
-                        $errorReportConfigFile,
+                        .' Value of the property `%s` of .magento.env.yaml will be ignored',
+                        $configFile,
                         BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL
                     )
                 );
                 return;
             }
-            $errorReportDirNestingLevel = $this->stageConfig->get(BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL);
+            $envVarValue = $this->stageConfig->get(BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL);
             $this->file->filePutContents(
-                $errorReportConfigFile,
+                $configFile,
                 <<<XML
 <?xml version="1.0"?>
 <config>
     <report>
-        <dir_nesting_level>{$errorReportDirNestingLevel}</dir_nesting_level>
+        <dir_nesting_level>{$envVarValue}</dir_nesting_level>
     </report>
 </config> 
 XML
             );
             $this->logger->notice(
                 sprintf(
-                    'The file %s with property `config.report.dir_nesting_level`: `%s` was created.',
-                    $errorReportConfigFile,
-                    $errorReportDirNestingLevel
+                    'The file %s with the `config.report.dir_nesting_level` property: `%s` was created.',
+                    $configFile,
+                    $envVarValue
                 )
             );
         } catch (\Exception $exception) {

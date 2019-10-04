@@ -37,7 +37,7 @@ class Environment
     const DEFAULT_ADMIN_LASTNAME = 'Username';
 
     /**
-     * The environment variable for controlling the directories nesting level for error reporting
+     * The environment variable for controlling the directory nesting level for error reporting
      */
     const ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL = 'MAGE_ERROR_REPORT_DIR_NESTING_LEVEL';
 

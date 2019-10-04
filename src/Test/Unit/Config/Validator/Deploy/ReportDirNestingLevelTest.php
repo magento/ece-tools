@@ -62,6 +62,12 @@ class ReportDirNestingLevelTest extends TestCase
     private $resultFactoryMock;
 
     /**
+     * Path to error report config file
+     * @var string
+     */
+    private $reportConfigFile = '<magento_root>/pub/errors/local.xml';
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -69,6 +75,9 @@ class ReportDirNestingLevelTest extends TestCase
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
+        $this->configFileListMock->expects($this->once())
+            ->method('getErrorReportConfig')
+            ->willReturn($this->reportConfigFile);
         $this->fileMock = $this->createMock(File::class);
         $this->encoderMock = $this->createMock(XmlEncoder::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
@@ -84,28 +93,25 @@ class ReportDirNestingLevelTest extends TestCase
     }
 
     /**
-     * The case when the value of the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL is valid
-     *
-     * @param string|int $envVarValue
-     * @dataProvider dataProviderValidateWithValidEnvVar
+     * The case when the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL exists
      */
-    public function testValidateWithValidEnvVar($envVarValue)
+    public function testValidateWithEnvVar()
     {
+        $someValue = 'some value';
         $this->environmentMock->expects($this->once())
             ->method('getEnvVarMageErrorReportDirNestingLevel')
-            ->willReturn($envVarValue);
-        $this->configFileListMock->expects($this->once())
-            ->method('getErrorReportConfig')
-            ->willReturn('<magento_root>/errors/local.xml');
+            ->willReturn($someValue);
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with(
                 sprintf(
-                    'The environment variable `MAGE_ERROR_REPORT_DIR_NESTING_LEVEL` with the value `%s`'
-                    . ' is used to configure the directories nesting level for error reporting. The environment'
-                    . ' variable has a higher priority.  Value of the property `config.report.dir_nesting_level` in'
-                    . ' the file <magento_root>/errors/local.xml will be ignored.',
-                    $envVarValue
+                    'The `%s` environment variable with the value `%s` specifies a custom value for'
+                    . ' the directory nesting level configured for error reporting. This value overrides'
+                    . ' the value specified in the `config.report.dir_nesting_level` property in file %s,'
+                    . ' which will be ignored.',
+                    Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
+                    $someValue,
+                    $this->reportConfigFile
                 )
             );
 
@@ -113,239 +119,44 @@ class ReportDirNestingLevelTest extends TestCase
     }
 
     /**
-     * DataProvider for testValidateWithValidEnvVar
-     *
-     * @return array
-     */
-    public function dataProviderValidateWithValidEnvVar()
-    {
-        return [
-            [0],
-            [16],
-            [32],
-            ["0"],
-            ["16"],
-            ["32"],
-        ];
-    }
-
-    /**
-     * The case when the value of the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL is invalid
-     *
-     * @param string|integer $envVarValue
-     * @dataProvider dataProviderValidateWithInvalidEnvVar
-     */
-    public function testValidateWithInvalidEnvVar($envVarValue)
-    {
-        $this->environmentMock->expects($this->once())
-            ->method('getEnvVarMageErrorReportDirNestingLevel')
-            ->willReturn($envVarValue);
-        $this->configFileListMock->expects($this->once())
-            ->method('getErrorReportConfig')
-            ->willReturn('<magento_root>/errors/local.xml');
-        $this->resultFactoryMock->expects($this->once())
-            ->method('error')
-            ->with(
-                sprintf(
-                    'The value `%s` of the environment variable `MAGE_ERROR_REPORT_DIR_NESTING_LEVEL` is invalid.',
-                    $envVarValue
-                ),
-                'The value of the environment variable `MAGE_ERROR_REPORT_DIR_NESTING_LEVEL` must be an integer'
-                . ' between 0 and 32'
-            );
-
-        $this->assertInstanceOf(Error::class, $this->validator->validate());
-    }
-
-    /**
-     * DataProvider for testValidateWithInvalidEnvVar
-     *
-     * @return array
-     */
-    public function dataProviderValidateWithInvalidEnvVar()
-    {
-        return [
-            ['invalid-value'],
-            [-1],
-            ["-1"],
-            [35],
-            ["35"],
-            ["3d"],
-            ["d3"],
-        ];
-    }
-
-    /**
      *  The case when the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL not exist
-     *  and the property config.report.dir_nesting_level of the file <magento_root>/errors/local.xml is valid
-     *
-     * @param $reportConfigDirNestingLevel
-     * @dataProvider dataProviderValidateWithoutEnvVarWithValidReportConfig
+     *  but the property config.report.dir_nesting_level of the file <magento_root>/errors/local.xml exists
      */
-    public function testValidateWithoutEnvVarAndWithValidReportConfigDirNestingLevel($reportConfigDirNestingLevel)
+    public function testValidateWithoutEnvVarAndWithConfigValue()
     {
+        $someValue = 'some value';
         $this->environmentMock->expects($this->once())
             ->method('getEnvVarMageErrorReportDirNestingLevel')
             ->willReturn(false);
-        $this->configFileListMock->expects($this->once())
-            ->method('getErrorReportConfig')
-            ->willReturn('<magento_root>/errors/local.xml');
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
             ->willReturn('valid xml');
         $this->encoderMock->expects($this->once())
             ->method('decode')
             ->with('valid xml')
-            ->willReturn(['report' => ['dir_nesting_level' => $reportConfigDirNestingLevel]]);
+            ->willReturn(['report' => ['dir_nesting_level' => $someValue]]);
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with(sprintf(
-                'The property `config.report.dir_nesting_level` defined in the file '
-                . '<magento_root>/errors/local.xml with value '
-                . '`%s` and  used to configure the directories nesting level for error reporting.',
-                $reportConfigDirNestingLevel
+                'The `config.report.dir_nesting_level` property defined in the file %s with value '
+                . '`%s` and used to configure the directories nesting level for error reporting.',
+                $this->reportConfigFile,
+                $someValue
             ));
 
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
 
     /**
-     * DataProvider for testValidateWithoutEnvVarAndWithValidReportConfigDirNestingLevel
-     *
-     * @return array
-     */
-    public function dataProviderValidateWithoutEnvVarWithValidReportConfig()
-    {
-        return [
-            [0],
-            [16],
-            [32],
-            ["0"],
-            ["16"],
-            ["32"],
-        ];
-    }
-
-    /**
-     * The case when the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL not exist
-     * and the property config.report.dir_nesting_level of the file <magento_root>/errors/local.xml is invalid
-     *
-     * @param $reportConfigDirNestingLevel
-     * @dataProvider dataProviderValidateWithoutEnvVarWithInvalidReportConfig
-     */
-    public function testValidateWithoutEnvVarWithInvalidReportConfig($reportConfigDirNestingLevel)
-    {
-        $this->environmentMock->expects($this->once())
-            ->method('getEnvVarMageErrorReportDirNestingLevel')
-            ->willReturn(false);
-        $this->configFileListMock->expects($this->once())
-            ->method('getErrorReportConfig')
-            ->willReturn('<magento_root>/errors/local.xml');
-        $this->fileMock->expects($this->once())
-            ->method('fileGetContents')
-            ->willReturn('valid xml');
-        $this->encoderMock->expects($this->once())
-            ->method('decode')
-            ->with('valid xml')
-            ->willReturn(['report' => ['dir_nesting_level' => $reportConfigDirNestingLevel]]);
-        $this->resultFactoryMock->expects($this->once())
-            ->method('error')
-            ->with(
-                sprintf(
-                    'The value `%s` of the property `config.report.dir_nesting_level` '
-                    . 'defined in <magento_root>/pub/errors/local.xml is invalid',
-                    $reportConfigDirNestingLevel
-                ),
-                'The value of the property `config.report.dir_nesting_level` must be an integer between 0 and 32'
-            );
-
-        $this->assertInstanceOf(Error::class, $this->validator->validate());
-    }
-
-    /**
-     * DataProvider for testValidateWithoutEnvVarWithInvalidReportConfig
-     *
-     * @return array
-     */
-    public function dataProviderValidateWithoutEnvVarWithInvalidReportConfig()
-    {
-        return [
-            ['invalid-value'],
-            [-1],
-            ["-1"],
-            [35],
-            ["35"],
-            ["3d"],
-            ["d3"],
-        ];
-    }
-
-    /**
-     * The case when the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL not exist
-     * and the file <magento_root>/errors/local.xml not exist too
-     */
-    public function testValidateWithoutEnvVarWithoutReportConfigFile()
-    {
-        $this->environmentMock->expects($this->once())
-            ->method('getEnvVarMageErrorReportDirNestingLevel')
-            ->willReturn(false);
-        $this->configFileListMock->expects($this->once())
-            ->method('getErrorReportConfig')
-            ->willReturn('<magento_root>/errors/local.xml');
-        $this->fileMock->expects($this->once())
-            ->method('fileGetContents')
-            ->willThrowException(new FileSystemException('File <magento_root>/errors/local.xml not found'));
-        $this->resultFactoryMock->expects($this->once())
-            ->method('error')
-            ->with('File <magento_root>/errors/local.xml not found');
-
-        $this->assertInstanceOf(Error::class, $this->validator->validate());
-    }
-
-    /**
-     * The case when the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL not exist
-     * and a content of the file <magento_root>/errors/local.xml is invalid
-     */
-    public function testValidateWithoutEnvVarWithInvalidContentReportConfigFile()
-    {
-        $this->environmentMock->expects($this->once())
-            ->method('getEnvVarMageErrorReportDirNestingLevel')
-            ->willReturn(false);
-        $this->configFileListMock->expects($this->once())
-            ->method('getErrorReportConfig')
-            ->willReturn('<magento_root>/errors/local.xml');
-        $this->fileMock->expects($this->once())
-            ->method('fileGetContents')
-            ->willReturn('invalid xml');
-        $this->encoderMock->expects($this->once())
-            ->method('decode')
-            ->with('invalid xml')
-            ->willThrowException(new NotEncodableValueException("Invalid xml"));
-        $this->resultFactoryMock->expects($this->once())
-            ->method('error')
-            ->with(
-                'Config of the file <magento_root>/errors/local.xml is invalid. Invalid xml',
-                'Fix the configuration of the directories nesting level for error reporting '
-                . 'in the file <magento_root>/errors/local.xml'
-            );
-
-        $this->assertInstanceOf(Error::class, $this->validator->validate());
-    }
-
-    /**
      * The case when the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL not exist
      * and the file <magento_root>/errors/local.xml exists,
      * but without property config.report.dir_nesting_level
-     *
      */
-    public function testValidateWithoutEnvVarWithoutReportConfigFileDirNestingLevel()
+    public function testValidateWithoutEnvVarWithoutConfigValue()
     {
         $this->environmentMock->expects($this->once())
             ->method('getEnvVarMageErrorReportDirNestingLevel')
             ->willReturn(false);
-        $this->configFileListMock->expects($this->once())
-            ->method('getErrorReportConfig')
-            ->willReturn('<magento_root>/errors/local.xml');
         $this->fileMock->expects($this->once())
             ->method('fileGetContents')
             ->willReturn('valid xml');
@@ -357,10 +168,57 @@ class ReportDirNestingLevelTest extends TestCase
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
-                'The directories nesting level for error reporting not set.',
-                'For set the directories nesting level use setting '
-                . '`config.report.dir_nesting_level` in the file <magento_root>/errors/local.xml'
+                'The directory nesting level value for error reporting has not been configured.',
+                'You can configure the setting using the `config.report.dir_nesting_level`'
+                . ' in the file ' . $this->reportConfigFile
             );
+
+        $this->assertInstanceOf(Error::class, $this->validator->validate());
+    }
+
+    /**
+     * The case when the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL not exist
+     * and a content of the file <magento_root>/errors/local.xml is invalid
+     */
+    public function testValidateWithoutEnvVarWithInvalidConfigFile()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getEnvVarMageErrorReportDirNestingLevel')
+            ->willReturn(false);
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willReturn('invalid xml');
+        $this->encoderMock->expects($this->once())
+            ->method('decode')
+            ->with('invalid xml')
+            ->willThrowException(new NotEncodableValueException("Invalid xml"));
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with(
+                sprintf('Config of the file %s is invalid. Invalid xml', $this->reportConfigFile),
+                'Fix the directory nesting level configuration for error reporting in the file '
+                . $this->reportConfigFile
+            );
+
+        $this->assertInstanceOf(Error::class, $this->validator->validate());
+    }
+
+    /**
+     * The case when the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL not exist
+     * and the file <magento_root>/errors/local.xml not exist too
+     */
+    public function testValidateWithoutEnvVarWithoutConfigFile()
+    {
+        $message = sprintf('File %s not found', $this->reportConfigFile);
+        $this->environmentMock->expects($this->once())
+            ->method('getEnvVarMageErrorReportDirNestingLevel')
+            ->willReturn(false);
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willThrowException(new FileSystemException($message));
+        $this->resultFactoryMock->expects($this->once())
+            ->method('error')
+            ->with($message);
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());
     }

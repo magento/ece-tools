@@ -14,13 +14,12 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Magento\MagentoCloud\Config\Validator;
-use Magento\MagentoCloud\Config\Validator\ValidatorException;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use Psr\Log\LoggerInterface;
 
 /**
- * Validates a value of the directories nesting level for error reporting
+ * Validates the value specified for the directory nesting level conifgured for error reporting
  */
 class ReportDirNestingLevel implements ValidatorInterface
 {
@@ -83,39 +82,38 @@ class ReportDirNestingLevel implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $envVarReportDirNestingLevel = $this->environment->getEnvVarMageErrorReportDirNestingLevel();
+        $envVarValue = $this->environment->getEnvVarMageErrorReportDirNestingLevel();
         $reportConfigFile = $this->configFileList->getErrorReportConfig();
 
         try {
-            if (false !== $envVarReportDirNestingLevel) {
-                $this->validateEnvVarReportDirNestingLevel($envVarReportDirNestingLevel);
+            if (false !== $envVarValue) {
                 $this->logger->notice(sprintf(
-                    'The environment variable `%s` with the value `%s` is used to configure the directories'
-                    . ' nesting level for error reporting. The environment variable has a higher priority.  Value of'
-                    . ' the property `config.report.dir_nesting_level` in the file %s will be ignored.',
+                    'The `%s` environment variable with the value `%s` specifies a custom value for'
+                    . ' the directory nesting level configured for error reporting. This value overrides'
+                    . ' the value specified in the `config.report.dir_nesting_level` property in file %s,'
+                    . ' which will be ignored.',
                     Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
-                    $envVarReportDirNestingLevel,
+                    $envVarValue,
                     $reportConfigFile
                 ));
                 return $this->resultFactory->success();
             }
 
-            $reportConfigDirNestingLevel = $this->getReportConfigDirNestingLevel($reportConfigFile);
-            if (null !== $reportConfigDirNestingLevel) {
-                $this->validateReportConfigDirNestingLevel($reportConfigDirNestingLevel);
+            $configValue = $this->getConfigValue($reportConfigFile);
+            if (null !== $configValue) {
                 $this->logger->notice(sprintf(
-                    'The property `config.report.dir_nesting_level` defined in the file %s with value '
-                    . '`%s` and  used to configure the directories nesting level for error reporting.',
+                    'The `config.report.dir_nesting_level` property defined in the file %s with value '
+                    . '`%s` and used to configure the directories nesting level for error reporting.',
                     $reportConfigFile,
-                    $reportConfigDirNestingLevel
+                    $configValue
                 ));
                 return $this->resultFactory->success();
             }
 
             return $this->resultFactory->error(
-                'The directories nesting level for error reporting not set.',
-                'For set the directories nesting level use setting '
-                . '`config.report.dir_nesting_level` in the file ' . $reportConfigFile
+                'The directory nesting level value for error reporting has not been configured.',
+                'You can configure the setting using the `config.report.dir_nesting_level`'
+                . ' in the file ' . $reportConfigFile
             );
         } catch (FileSystemException $exception) {
             return $this->resultFactory->error($exception->getMessage());
@@ -124,86 +122,24 @@ class ReportDirNestingLevel implements ValidatorInterface
             $message .= $exception->getMessage();
             return $this->resultFactory->error(
                 $message,
-                'Fix the configuration of the directories nesting level for error reporting '
-                . 'in the file ' . $reportConfigFile
+                'Fix the directory nesting level configuration for error reporting in the file '
+                . $reportConfigFile
             );
-        } catch (ValidatorException $exception) {
-            return $this->resultFactory->error($exception->getMessage(), $exception->getSuggestion());
         }
-    }
-
-    /**
-     * Validates a value of the env variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL
-     *
-     * @param string|int $envVarReportDirNestingLevel
-     * @throws ValidatorException
-     * @return void
-     */
-    private function validateEnvVarReportDirNestingLevel($envVarReportDirNestingLevel)
-    {
-        if ($this->validateReportDirNestingLevel($envVarReportDirNestingLevel)) {
-            return;
-        }
-        throw new ValidatorException(
-            sprintf(
-                'The value `%s` of the environment variable `%s` is invalid.',
-                $envVarReportDirNestingLevel,
-                Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL
-            ),
-            sprintf(
-                'The value of the environment variable `%s` must be an integer between 0 and 32',
-                Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL
-            )
-        );
-    }
-
-    /**
-     * Validates a value of the property `config.report.dir_nesting_level`
-     * from the file <magento_root>/pub/errors/local.xml
-     *
-     * @param string|int $reportConfigDirNestingLevel
-     * @throws ValidatorException
-     * @return void
-     */
-    private function validateReportConfigDirNestingLevel($reportConfigDirNestingLevel)
-    {
-        if ($this->validateReportDirNestingLevel($reportConfigDirNestingLevel)) {
-            return;
-        }
-        throw new ValidatorException(
-            sprintf(
-                'The value `%s` of the property `config.report.dir_nesting_level` '
-                . 'defined in <magento_root>/pub/errors/local.xml is invalid',
-                $reportConfigDirNestingLevel
-            ),
-            'The value of the property `config.report.dir_nesting_level` must be an integer between 0 and 32'
-        );
-    }
-
-    /**
-     * Validates a value of the directories nesting level
-     *
-     * @param string|int $value
-     * @return bool
-     */
-    private function validateReportDirNestingLevel($value)
-    {
-        $valueInt = (int)$value;
-        return (bool)preg_match('/^([0-9]{1,2})$/', (string)$value) && (0 <= $valueInt) && (32 >= $valueInt);
     }
 
     /**
      * Returns a value of the property `config.report.dir_nesting_level`
      * from the file  <magento_root>/pub/errors/local.xml
      *
-     * @param string $reportConfigFile
-     * @return string|null
+     * @param string $file
+     * @return int|string|null
      * @throws FileSystemException | NotEncodableValueException
      */
-    private function getReportConfigDirNestingLevel($reportConfigFile)
+    private function getConfigValue(string $file)
     {
         $errorReportConfig = $this->encoder->decode(
-            $this->file->fileGetContents($reportConfigFile),
+            $this->file->fileGetContents($file),
             XmlEncoder::FORMAT
         ) ?: [];
         return $errorReportConfig['report']['dir_nesting_level'] ?? null;
