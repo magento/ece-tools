@@ -29,7 +29,6 @@
         <service id="Magento\MagentoCloud\Step\Deploy\DeployStaticContent" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate" autowire="false" />
-        <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\PreDeploy" autowire="false" />
