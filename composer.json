@@ -8,6 +8,10 @@
     "repo.magento.com": {
       "type": "composer",
       "url": "https://repo.magento.com/"
+    },
+    "mccd": {
+      "type": "git",
+      "url": "git@github.com:magento/magento-cloud-docker.git"
     }
   },
   "require": {
@@ -22,7 +26,8 @@
     "illuminate/config": "^5.6",
     "illuminate/container": "^5.6",
     "illuminate/contracts": "^5.6",
-    "magento/magento-cloud-components": "^1.0.1",
+    "magento/magento-cloud-components": "^1.0",
+    "magento/magento-cloud-docker": "dev-MAGECLOUD-4292-2",
     "monolog/monolog": "^1.16",
     "psr/container": "^1.0",
     "psr/log": "^1.0",
@@ -32,7 +37,6 @@
     "symfony/yaml": "^4.0"
   },
   "suggest": {
-    "magento/magento-cloud-docker": "^1.0"
   },
   "require-dev": {
     "codeception/codeception": "^2.5.3",
