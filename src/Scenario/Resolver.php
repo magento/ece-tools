@@ -8,8 +8,11 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Scenario;
 
 use Magento\MagentoCloud\App\ContainerInterface;
+use Magento\MagentoCloud\Scenario\Collector\Step;
+use Magento\MagentoCloud\Step\DummyStep;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Resolve step arguments.
@@ -22,11 +25,18 @@ class Resolver
     private $container;
 
     /**
-     * @param ContainerInterface $container
+     * @var Sorter
      */
-    public function __construct(ContainerInterface $container)
+    private $sorter;
+
+    /**
+     * @param ContainerInterface $container
+     * @param Sorter $sorter
+     */
+    public function __construct(ContainerInterface $container, Sorter $sorter)
     {
         $this->container = $container;
+        $this->sorter = $sorter;
     }
 
     /**
@@ -40,11 +50,20 @@ class Resolver
     {
         $instances = [];
 
+        $this->sorter->sortScenarios($scenarios);
+
         foreach ($scenarios as $step) {
-            $instance = $this->container->create(
-                $step['type'],
-                $this->resolveParams($step['arguments'] ?? [], $step['name'])
-            );
+            if (!$step['type']) {
+                $instance = $this->container->create(DummyStep::class, [
+                    $this->container->get(LoggerInterface::class),
+                    $step['name']
+                ]);
+            } else {
+                $instance = $this->container->create(
+                    $step['type'],
+                    $this->resolveParams($step['arguments'] ?? [], $step['name'])
+                );
+            }
 
             if (!$instance instanceof StepInterface) {
                 throw new ValidationException(sprintf(
@@ -84,13 +103,18 @@ class Resolver
             }
 
             switch ($type) {
-                case Merger::XSI_TYPE_OBJECT:
-                    $newData[$name] = $this->container->create($item[Merger::NODE_VALUE]);
+                case Step::XSI_TYPE_OBJECT:
+                    $newData[$name] = $item[Step::NODE_VALUE] ?
+                        $this->container->create($item[Step::NODE_VALUE]) :
+                        $this->container->create(DummyStep::class, [
+                            $this->container->get(LoggerInterface::class),
+                            $name
+                        ]);
                     break;
-                case Merger::XSI_TYPE_STRING:
-                    $newData[$name] = $item[Merger::NODE_VALUE];
+                case Step::XSI_TYPE_STRING:
+                    $newData[$name] = $item[Step::NODE_VALUE];
                     break;
-                case Merger::XSI_TYPE_ARRAY:
+                case Step::XSI_TYPE_ARRAY:
                     $newData[$name] = $this->resolveParams($item['items'], $stepName);
                     break;
                 default:

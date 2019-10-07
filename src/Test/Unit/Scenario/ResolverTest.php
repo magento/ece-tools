@@ -8,9 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Scenario;
 
 use Magento\MagentoCloud\App\ContainerInterface;
+use Magento\MagentoCloud\Scenario\Collector\Step;
+use Magento\MagentoCloud\Scenario\Sorter;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
-use Magento\MagentoCloud\Scenario\Merger;
 use Magento\MagentoCloud\Scenario\Resolver;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -32,14 +33,21 @@ class ResolverTest extends TestCase
     private $containerMock;
 
     /**
+     * @var Sorter|MockObject
+     */
+    private $sorterMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
     {
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
+        $this->sorterMock = $this->createMock(Sorter::class);
 
         $this->resolver = new Resolver(
-            $this->containerMock
+            $this->containerMock,
+            $this->sorterMock
         );
     }
 
@@ -55,21 +63,21 @@ class ResolverTest extends TestCase
                 'arguments' => [
                     'arg1' => [
                         'name' => 'arg1',
-                        'xsi:type' => Merger::XSI_TYPE_STRING,
+                        'xsi:type' => Step::XSI_TYPE_STRING,
                         '#' => 'Some string',
                     ],
                     'arg2' => [
                         'name' => 'arg2',
-                        'xsi:type' => Merger::XSI_TYPE_OBJECT,
+                        'xsi:type' => Step::XSI_TYPE_OBJECT,
                         '#' => ShellInterface::class
                     ],
                     'arg3' => [
                         'name' => 'arg3',
-                        'xsi:type' => Merger::XSI_TYPE_ARRAY,
+                        'xsi:type' => Step::XSI_TYPE_ARRAY,
                         'items' => [
                             'arg31' => [
                                 'name' => 'arg31',
-                                'xsi:type' => Merger::XSI_TYPE_STRING,
+                                'xsi:type' => Step::XSI_TYPE_STRING,
                                 '#' => 'Some string 2'
                             ]
                         ]
@@ -158,7 +166,7 @@ class ResolverTest extends TestCase
                 'type' => StepInterface::class,
                 'arguments' => [
                     'arg1' => [
-                        'xsi:type' => Merger::XSI_TYPE_STRING,
+                        'xsi:type' => Step::XSI_TYPE_STRING,
                         '#' => 'Some string',
                     ],
                 ]

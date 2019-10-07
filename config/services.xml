@@ -32,6 +32,7 @@
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\PreDeploy" autowire="false" />
+        <service id="Magento\MagentoCloud\Step\DummyStep" autowire="false" />
         <service id="Magento\MagentoCloud\Step\StepComposite" autowire="false" />
         <service id="Magento\MagentoCloud\Step\StepException" autowire="false" />
         <service id="Magento\MagentoCloud\Step\ValidateConfiguration" autowire="false" />

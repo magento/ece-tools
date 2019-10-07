@@ -6,24 +6,24 @@
  */
 -->
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/scenario.xsd">
-    <step name="remove-deploy-failed-flag" type="Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag"/>
-    <step name="pre-deploy" type="Magento\MagentoCloud\Step\Deploy\PreDeploy">
+    <step name="remove-deploy-failed-flag" type="Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag" priority="100"/>
+    <step name="pre-deploy" type="Magento\MagentoCloud\Step\Deploy\PreDeploy" priority="200">
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="steps" xsi:type="array">
-                <item name="cache" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache</item>
-                <item name="clean-static-content" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent</item>
-                <item name="clean-view-preprocessed" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanViewPreprocessed</item>
-                <item name="clean-redis-cache" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanRedisCache</item>
-                <item name="clean-file-cache" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanFileCache</item>
-                <item name="restore-writable-dirs" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\RestoreWritableDirectories</item>
+                <item name="cache" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache</item>
+                <item name="clean-static-content" xsi:type="object" priority="200">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent</item>
+                <item name="clean-view-preprocessed" xsi:type="object" priority="300">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanViewPreprocessed</item>
+                <item name="clean-redis-cache" xsi:type="object" priority="400">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanRedisCache</item>
+                <item name="clean-file-cache" xsi:type="object" priority="500">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanFileCache</item>
+                <item name="restore-writable-dirs" xsi:type="object" priority="600">Magento\MagentoCloud\Step\Deploy\PreDeploy\RestoreWritableDirectories</item>
                 <item name="set-production-mode" xsi:type="object">Magento\MagentoCloud\Step\SetProductionMode</item>
             </argument>
         </arguments>
     </step>
-    <step name="enable-maintenance-mode" type="Magento\MagentoCloud\Step\EnableMaintenanceMode"/>
-    <step name="disable-cron" type="Magento\MagentoCloud\Step\Deploy\DisableCron"/>
-    <step name="validate-config" type="Magento\MagentoCloud\Step\ValidateConfiguration">
+    <step name="enable-maintenance-mode" type="Magento\MagentoCloud\Step\EnableMaintenanceMode" priority="300"/>
+    <step name="disable-cron" type="Magento\MagentoCloud\Step\Deploy\DisableCron" priority="400"/>
+    <step name="validate-config" type="Magento\MagentoCloud\Step\ValidateConfiguration" priority="500">
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="validators" xsi:type="array">
@@ -51,9 +51,9 @@
             </argument>
         </arguments>
     </step>
-    <step name="unlock-cron-jobs" type="Magento\MagentoCloud\Step\Deploy\UnlockCronJobs"/>
-    <step name="set-crypt-key" type="Magento\MagentoCloud\Step\Deploy\SetCryptKey"/>
-    <step name="install-update" type="Magento\MagentoCloud\Step\Deploy\InstallUpdate">
+    <step name="unlock-cron-jobs" type="Magento\MagentoCloud\Step\Deploy\UnlockCronJobs" priority="600"/>
+    <step name="set-crypt-key" type="Magento\MagentoCloud\Step\Deploy\SetCryptKey" priority="700"/>
+    <step name="install-update" type="Magento\MagentoCloud\Step\Deploy\InstallUpdate" priority="800">
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="state" xsi:type="object">Magento\MagentoCloud\Config\State</argument>
@@ -90,7 +90,7 @@
             </argument>
         </arguments>
     </step>
-    <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Deploy\DeployStaticContent">
+    <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Deploy\DeployStaticContent" priority="900">
         <arguments>
             <argument name="flag-manager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
@@ -102,10 +102,10 @@
             </argument>
         </arguments>
     </step>
-    <step name="compress-static-content" type="Magento\MagentoCloud\Step\Deploy\CompressStaticContent"/>
-    <step name="disable-google-analytics" type="Magento\MagentoCloud\Step\Deploy\DisableGoogleAnalytics"/>
+    <step name="compress-static-content" type="Magento\MagentoCloud\Step\Deploy\CompressStaticContent" priority="1000"/>
+    <step name="disable-google-analytics" type="Magento\MagentoCloud\Step\Deploy\DisableGoogleAnalytics" priority="1100"/>
     <!-- This process runs processes if only post_deploy hook is not configured -->
-    <step name="deploy-complete" type="Magento\MagentoCloud\Step\Deploy\DeployCompletion">
+    <step name="deploy-complete" type="Magento\MagentoCloud\Step\Deploy\DeployCompletion" priority="1200">
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="hook-checker" xsi:type="object">Magento\MagentoCloud\Config\Application\HookChecker</argument>
@@ -116,5 +116,5 @@
             </argument>
         </arguments>
     </step>
-    <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Step\DisableMaintenanceMode"/>
+    <step name="disable-maintenance-mode" type="Magento\MagentoCloud\Step\DisableMaintenanceMode" priority="1300"/>
 </scenario>
