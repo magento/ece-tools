@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Scenario\Exception\ValidationException;
  */
 class Step
 {
-    private const DEFAULT_PRIORITY = 100000;
+    public const DEFAULT_PRIORITY = 10000;
     public const NODE_VALUE = '#';
     public const XSI_TYPE_STRING = 'string';
     public const XSI_TYPE_OBJECT = 'object';

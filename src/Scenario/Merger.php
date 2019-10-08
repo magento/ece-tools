@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Scenario;
 
 use Magento\MagentoCloud\Scenario\Collector\Scenario;
+use Magento\MagentoCloud\Scenario\Collector\Step;
 use Magento\MagentoCloud\Scenario\Collector\Step as StepCollector;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 
@@ -78,6 +79,10 @@ class Merger
                     $data[$step['@name']] ?? [],
                     $this->stepCollector->collect($step)
                 );
+
+                if (!isset($data[$step['@name']]['priority'])) {
+                    $data[$step['@name']]['priority'] = Step::DEFAULT_PRIORITY;
+                }
             }
         }
 
