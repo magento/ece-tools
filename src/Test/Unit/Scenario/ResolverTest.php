@@ -10,12 +10,14 @@ namespace Magento\MagentoCloud\Test\Unit\Scenario;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Scenario\Collector\Step;
 use Magento\MagentoCloud\Scenario\Sorter;
+use Magento\MagentoCloud\Step\DummyStep;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\Resolver;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * @inheritDoc
@@ -38,12 +40,18 @@ class ResolverTest extends TestCase
     private $sorterMock;
 
     /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
     {
         $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
         $this->sorterMock = $this->createMock(Sorter::class);
+        $this->loggerMock = $this->createMock(LoggerInterface::class);
 
         $this->resolver = new Resolver(
             $this->containerMock,
@@ -79,28 +87,62 @@ class ResolverTest extends TestCase
                                 'name' => 'arg31',
                                 'xsi:type' => Step::XSI_TYPE_STRING,
                                 '#' => 'Some string 2'
-                            ]
+                            ],
+                            'arg32' => [
+                                'name' => 'arg32',
+                                'xsi:type' => Step::XSI_TYPE_OBJECT,
+                                '#' => ''
+                            ],
                         ]
                     ]
                 ]
+            ],
+            [
+                'name' => 'step2',
+                'type' => '',
+                'arguments' => []
             ]
         ];
 
         $step1Mock = $this->getMockForAbstractClass(StepInterface::class);
+        $dummyStepMock = $this->getMockForAbstractClass(StepInterface::class);
         $arg2Mock = $this->getMockForAbstractClass(ShellInterface::class);
 
         $instances = [
-            'step1' => $step1Mock
+            'step1' => $step1Mock,
+            'step2' => $dummyStepMock
         ];
+
+        $this->containerMock->method('get')
+            ->with(LoggerInterface::class)
+            ->willReturn($this->loggerMock);
 
         $this->containerMock->method('create')
             ->willReturnMap([
                 [
                     StepInterface::class,
-                    ['arg1' => 'Some string', 'arg2' => $arg2Mock, 'arg3' => ['arg31' => 'Some string 2']],
+                    [
+                        'arg1' => 'Some string',
+                        'arg2' => $arg2Mock,
+                        'arg3' => ['arg31' => 'Some string 2', 'arg32' => $dummyStepMock]
+                    ],
                     $step1Mock
                 ],
-                [ShellInterface::class, [], $arg2Mock]
+                [
+                    ShellInterface::class,
+                    [],
+                    $arg2Mock
+                ],
+                [
+                    DummyStep::class,
+                    [$this->loggerMock, 'arg32'],
+                    $dummyStepMock
+                ],
+                [
+                    DummyStep::class,
+                    [$this->loggerMock, 'step2'],
+                    $dummyStepMock
+                ]
             ]);
 
         $this->assertSame(
