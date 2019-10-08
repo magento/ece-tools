@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\App;
 use Composer\Composer;
 use Composer\Factory;
 use Composer\IO\BufferIO;
+use Magento\MagentoCloud\ExtensionRegistrar;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -52,6 +53,14 @@ class Container implements ContainerInterface
 
         $loader = new XmlFileLoader($containerBuilder, new FileLocator($toolsBasePath . '/config/'));
         $loader->load('services.xml');
+
+        foreach (ExtensionRegistrar::getPaths() as $extensionPath) {
+            if (file_exists($extensionPath . '/config/services.xml')) {
+                $loader = new XmlFileLoader($containerBuilder, new FileLocator($extensionPath . '/config/'));
+                $loader->load('services.xml');
+            }
+        }
+
         $containerBuilder->compile();
 
         $this->container = $containerBuilder;
