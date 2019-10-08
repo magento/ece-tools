@@ -121,7 +121,7 @@ class Environment
     /**
      * Get a value of the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL.
      *
-     * @return int|null|string
+     * @return array|string|int|null|bool
      */
     public function getEnvVarMageErrorReportDirNestingLevel()
     {
