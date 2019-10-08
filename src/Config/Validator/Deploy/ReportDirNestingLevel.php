@@ -101,12 +101,6 @@ class ReportDirNestingLevel implements ValidatorInterface
 
             $configValue = $this->getConfigValue($reportConfigFile);
             if (null !== $configValue) {
-                $this->logger->notice(sprintf(
-                    'The `config.report.dir_nesting_level` property defined in the file %s with value '
-                    . '`%s` and used to configure the directories nesting level for error reporting.',
-                    $reportConfigFile,
-                    $configValue
-                ));
                 return $this->resultFactory->success();
             }
 
@@ -134,7 +128,8 @@ class ReportDirNestingLevel implements ValidatorInterface
      *
      * @param string $file
      * @return int|string|null
-     * @throws FileSystemException | NotEncodableValueException
+     * @throws FileSystemException
+     * @throws NotEncodableValueException
      */
     private function getConfigValue(string $file)
     {

@@ -135,14 +135,6 @@ class ReportDirNestingLevelTest extends TestCase
             ->method('decode')
             ->with('valid xml')
             ->willReturn(['report' => ['dir_nesting_level' => $someValue]]);
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with(sprintf(
-                'The `config.report.dir_nesting_level` property defined in the file %s with value '
-                . '`%s` and used to configure the directories nesting level for error reporting.',
-                $this->reportConfigFile,
-                $someValue
-            ));
 
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }

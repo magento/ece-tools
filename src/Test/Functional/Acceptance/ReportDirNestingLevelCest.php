@@ -57,14 +57,6 @@ class ReportDirNestingLevelCest extends AbstractCest
             ),
             $log
         );
-        $I->assertContains(
-            sprintf(
-                'NOTICE: The `config.report.dir_nesting_level` property defined in the file %s with value '
-                . '`1` and used to configure the directories nesting level for error reporting.',
-                $this->expectedPathLocalXml
-            ),
-            $log
-        );
     }
 
     /**
@@ -93,14 +85,6 @@ class ReportDirNestingLevelCest extends AbstractCest
         $I->assertContains(
             sprintf(
                 'NOTICE: The file %s with the `config.report.dir_nesting_level` property: `3` was created.',
-                $this->expectedPathLocalXml
-            ),
-            $log
-        );
-        $I->assertContains(
-            sprintf(
-                'NOTICE: The `config.report.dir_nesting_level` property defined in the file %s with value '
-                . '`3` and used to configure the directories nesting level for error reporting.',
                 $this->expectedPathLocalXml
             ),
             $log
@@ -137,14 +121,6 @@ class ReportDirNestingLevelCest extends AbstractCest
                 . ' Value of the property `%s` of .magento.env.yaml will be ignored',
                 $this->expectedPathLocalXml,
                 BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL
-            ),
-            $log
-        );
-        $I->assertContains(
-            sprintf(
-                'NOTICE: The `config.report.dir_nesting_level` property defined in the file %s with value'
-                . ' `5` and used to configure the directories nesting level for error reporting.',
-                $this->expectedPathLocalXml
             ),
             $log
         );
