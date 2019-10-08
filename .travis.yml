@@ -1,5 +1,4 @@
-dist: trusty
-sudo: required
+dist: xenial
 
 addons:
   hosts:
@@ -56,7 +55,6 @@ before_script:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
-  - sudo /etc/init.d/mysql stop
   - ./tests/travis/prepare_functional_parallel.sh
 
 script:
