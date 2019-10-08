@@ -5,7 +5,7 @@
  * See COPYING.txt for license details.
  */
 -->
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
     <step name="remove-deploy-failed-flag" type="Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag"/>
     <step name="pre-deploy" type="Magento\MagentoCloud\Step\Deploy\PreDeploy">
         <arguments>
