@@ -85,10 +85,10 @@ class Resolver
 
             switch ($type) {
                 case Merger::XSI_TYPE_OBJECT:
-                    $newData[$name] = $this->container->create($item['#']);
+                    $newData[$name] = $this->container->create($item[Merger::NODE_VALUE]);
                     break;
                 case Merger::XSI_TYPE_STRING:
-                    $newData[$name] = $item['#'];
+                    $newData[$name] = $item[Merger::NODE_VALUE];
                     break;
                 case Merger::XSI_TYPE_ARRAY:
                     $newData[$name] = $this->resolveParams($item['items'], $stepName);

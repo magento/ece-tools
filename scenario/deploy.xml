@@ -9,6 +9,7 @@
     <step name="remove-deploy-failed-flag" type="Magento\MagentoCloud\Step\Deploy\RemoveDeployFailedFlag"/>
     <step name="pre-deploy" type="Magento\MagentoCloud\Step\Deploy\PreDeploy">
         <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="steps" xsi:type="array">
                 <item name="cache" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache</item>
                 <item name="clean-static-content" xsi:type="object">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanStaticContent</item>
@@ -24,6 +25,7 @@
     <step name="disable-cron" type="Magento\MagentoCloud\Step\Deploy\DisableCron"/>
     <step name="validate-config" type="Magento\MagentoCloud\Step\ValidateConfiguration">
         <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="validators" xsi:type="array">
                 <item name="500" xsi:type="array">
                     <item name="database-configuration" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration</item>
@@ -54,6 +56,8 @@
     <step name="set-crypt-key" type="Magento\MagentoCloud\Step\Deploy\SetCryptKey"/>
     <step name="install-update" type="Magento\MagentoCloud\Step\Deploy\InstallUpdate">
         <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="state" xsi:type="object">Magento\MagentoCloud\Config\State</argument>
             <argument name="installSteps" xsi:type="array">
                 <item name="setup" xsi:type="object">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup</item>
                 <!-- Config update start -->
@@ -89,6 +93,11 @@
     </step>
     <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Deploy\DeployStaticContent">
         <arguments>
+            <argument name="flag-manager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="deploy" xsi:type="object">Magento\MagentoCloud\Config\Stage\DeployInterface</argument>
+            <argument name="global-section" xsi:type="object">Magento\MagentoCloud\Config\GlobalSection</argument>
+            <argument name="static-content-cleaner" xsi:type="object">Magento\MagentoCloud\Util\StaticContentCleaner</argument>
             <argument name="steps" xsi:type="array">
                 <item name="generate" xsi:type="object">Magento\MagentoCloud\Step\Deploy\DeployStaticContent\Generate</item>
             </argument>
@@ -99,6 +108,8 @@
     <!-- This process runs processes if only post_deploy hook is not configured -->
     <step name="deploy-complete" type="Magento\MagentoCloud\Step\Deploy\DeployCompletion">
         <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="hook-checker" xsi:type="object">Magento\MagentoCloud\Config\Application\HookChecker</argument>
             <argument name="steps" xsi:type="array">
                 <item name="enable-cron" xsi:type="object">Magento\MagentoCloud\Step\PostDeploy\EnableCron</item>
                 <item name="backup" xsi:type="object">Magento\MagentoCloud\Step\PostDeploy\Backup</item>

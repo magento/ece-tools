@@ -21,8 +21,8 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 class Merger
 {
     private const ROOT_NODE = 'scenario';
-    private const NODE_VALUE = '#';
 
+    public const NODE_VALUE = '#';
     public const XSI_TYPE_STRING = 'string';
     public const XSI_TYPE_OBJECT = 'object';
     public const XSI_TYPE_ARRAY = 'array';
@@ -142,21 +142,31 @@ class Merger
             $argumentName = $argument['@name'];
             $argumentType = $argument['@xsi:type'];
 
-            if ($argumentType !== self::XSI_TYPE_ARRAY) {
-                throw new ValidationException(sprintf(
-                    'xsi:type "%s" not allowed in argument "%s"',
-                    $argumentType,
-                    $argumentName
-                ));
+            switch ($argumentType) {
+                case self::XSI_TYPE_ARRAY:
+                    $arguments[] = [
+                        'name' => $argumentName,
+                        'xsi:type' => $argumentType,
+                        'items' => $this->collectItems(
+                            $argument['item'] ?: []
+                        )
+                    ];
+                    break;
+                case self::XSI_TYPE_OBJECT:
+                case self::XSI_TYPE_STRING:
+                    $arguments[] = [
+                        'name' => $argumentName,
+                        'xsi:type' => $argumentType,
+                        self::NODE_VALUE => $argument[self::NODE_VALUE]
+                    ];
+                    break;
+                default:
+                    throw new ValidationException(sprintf(
+                        'xsi:type "%s" not allowed in argument "%s"',
+                        $argumentType,
+                        $argumentName
+                    ));
             }
-
-            $arguments[] = [
-                'name' => $argumentName,
-                'xsi:type' => $argumentType,
-                'items' => $this->collectItems(
-                    $argument['item'] ?: []
-                )
-            ];
         }
 
         $stepData = [

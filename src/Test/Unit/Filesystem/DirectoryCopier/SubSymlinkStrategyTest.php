@@ -79,7 +79,7 @@ class SubSymlinkStrategyTest extends TestCase
 
     /**
      * @expectedException \Magento\MagentoCloud\Filesystem\FileSystemException
-     * @expectedExceptionMessage Can't copy directory realFromDir. Directory does not exist.
+     * @expectedExceptionMessage Can't copy directory "realFromDir". Directory does not exist.
      */
     public function testCopyFromDirNotExists()
     {
@@ -200,7 +200,7 @@ class SubSymlinkStrategyTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('info')
-            ->with('realFromDir is empty. Nothing to restore');
+            ->with('Directory "realFromDir" is empty. Nothing to restore');
 
         $this->assertFalse($this->subSymlinkStrategy->copy('fromDir', 'toDir'));
     }

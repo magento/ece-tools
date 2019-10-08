@@ -75,8 +75,6 @@ class Shell implements ShellInterface
 
             $process = $this->processFactory->create([
                 'command' => $command,
-                // Compatibility for <4.1 version of Symfony/Process
-                'commandline' => $command,
                 'cwd' => $this->systemList->getMagentoRoot(),
                 'timeout' => null
             ]);

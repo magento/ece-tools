@@ -10,6 +10,7 @@
     <step name="set-production-mode" type="Magento\MagentoCloud\Step\SetProductionMode"/>
     <step name="validate-configuration" type="Magento\MagentoCloud\Step\ValidateConfiguration">
         <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="validators" xsi:type="array">
                 <item name="500" xsi:type="array">
                     <item name="composer" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ComposerFile</item>
@@ -36,6 +37,9 @@
     <step name="dump-autoload" type="Magento\MagentoCloud\Step\Build\ComposerDumpAutoload"/>
     <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Build\DeployStaticContent">
         <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="flag-manager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>
+            <argument name="scd-on-build" xsi:type="object">Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild</argument>
             <argument name="steps" xsi:type="array">
                 <item name="generate" xsi:type="object">Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate</item>
             </argument>
