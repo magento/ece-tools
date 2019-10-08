@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
 use Magento\MagentoCloud\App\Logger\Sanitizer;
@@ -87,7 +89,7 @@ class ShellTest extends TestCase
         $this->processFactoryMock->expects($this->once())
             ->method('create')
             ->with([
-                'commandline' => $commandWithArgs,
+                'command' => $commandWithArgs,
                 'cwd' => $magentoRoot,
                 'timeout' => null
             ])
@@ -137,7 +139,7 @@ class ShellTest extends TestCase
         $this->processFactoryMock->expects($this->once())
             ->method('create')
             ->with([
-                'commandline' => $command,
+                'command' => $command,
                 'cwd' => $magentoRoot,
                 'timeout' => 0
             ])
@@ -175,7 +177,7 @@ class ShellTest extends TestCase
         $this->processFactoryMock->expects($this->once())
             ->method('create')
             ->with([
-                'commandline' => $command,
+                'command' => $command,
                 'cwd' => $magentoRoot,
                 'timeout' => 0
             ])
@@ -207,7 +209,7 @@ class ShellTest extends TestCase
         $this->processFactoryMock->expects($this->once())
             ->method('create')
             ->with([
-                'commandline' => "ls -al 'arg1' 'arg2'",
+                'command' => "ls -al 'arg1' 'arg2'",
                 'cwd' => $magentoRoot,
                 'timeout' => 0
             ])

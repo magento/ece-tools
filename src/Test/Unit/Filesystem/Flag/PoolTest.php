@@ -3,8 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 
+use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Filesystem\Flag\Pool;
 use PHPUnit\Framework\TestCase;
 
@@ -18,25 +21,20 @@ class PoolTest extends TestCase
      */
     private $pool;
 
+    /**
+     * @inheritDoc
+     */
     protected function setUp()
     {
-        $this->pool = new Pool([
-            'key1' => 'path1',
-            'key2' => 'path2'
-        ]);
+        $this->pool = new Pool();
     }
 
-    public function testGetFlagOne()
+    public function testGetFlagOne(): void
     {
-        $this->assertEquals('path1', $this->pool->get('key1'));
+        $this->assertEquals('var/.regenerate', $this->pool->get(Manager::FLAG_REGENERATE));
     }
 
-    public function testGetFlagTwo()
-    {
-        $this->assertEquals('path2', $this->pool->get('key2'));
-    }
-
-    public function testGetFlagNotExists()
+    public function testGetFlagNotExists(): void
     {
         $flagPath = $this->pool->get('key3');
 

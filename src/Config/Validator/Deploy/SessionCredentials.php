@@ -3,11 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Process\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Session\Config;
 
 /**
  * Validates session configuration.

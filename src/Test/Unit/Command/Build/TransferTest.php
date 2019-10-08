@@ -3,13 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Command\Build;
 
 use Magento\MagentoCloud\Command\Build\Transfer;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Scenario\Processor;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -23,41 +24,27 @@ class TransferTest extends TestCase
     private $command;
 
     /**
-     * @var LoggerInterface|MockObject
+     * @var Processor|MockObject
      */
-    private $loggerMock;
-
-    /**
-     * @var ProcessInterface|MockObject
-     */
-    private $processMock;
+    private $processorMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
-        $this->processMock = $this->getMockBuilder(ProcessInterface::class)
-            ->getMockForAbstractClass();
+        $this->processorMock = $this->createMock(Processor::class);
 
         $this->command = new Transfer(
-            $this->processMock,
-            $this->loggerMock
+            $this->processorMock
         );
     }
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('notice')
-            ->withConsecutive(
-                ['Starting transfer files.'],
-                ['Transfer completed.']
-            );
-        $this->processMock->expects($this->once())
-            ->method('execute');
+        $this->processorMock->expects($this->once())
+            ->method('execute')
+            ->with(['scenario/build/transfer.xml']);
 
         $tester = new CommandTester(
             $this->command
@@ -65,27 +52,5 @@ class TransferTest extends TestCase
         $tester->execute([]);
 
         $this->assertSame(0, $tester->getStatusCode());
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
-    public function testExecuteWithException()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Starting transfer files.');
-        $this->loggerMock->expects($this->once())
-            ->method('critical')
-            ->with('Some error');
-        $this->processMock->expects($this->once())
-            ->method('execute')
-            ->willThrowException(new \Exception('Some error'));
-
-        $tester = new CommandTester(
-            $this->command
-        );
-        $tester->execute([]);
     }
 }

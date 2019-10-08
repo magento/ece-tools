@@ -78,6 +78,7 @@ class ApplicationTest extends TestCase
         Command\Docker\GenerateDist::NAME => Command\Docker\GenerateDist::class,
         Command\CronKill::NAME => Command\CronKill::class,
         Command\ConfigShow::NAME => Command\ConfigShow::class,
+        Command\RunCommand::NAME => Command\RunCommand::class,
     ];
 
     /**

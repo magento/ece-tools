@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -48,14 +50,14 @@ class SubSymlinkStrategy implements StrategyInterface
     {
         $fromDirectory = $this->file->getRealPath($fromDirectory);
 
-        if (!$this->file->isExists($fromDirectory)) {
+        if ($fromDirectory === false || !$this->file->isExists($fromDirectory)) {
             throw new FileSystemException(
-                sprintf('Can\'t copy directory %s. Directory does not exist.', $fromDirectory)
+                sprintf('Can\'t copy directory "%s". Directory does not exist.', $fromDirectory)
             );
         }
 
         if ($this->file->isEmptyDirectory($fromDirectory)) {
-            $this->logger->info(sprintf("%s is empty. Nothing to restore", $fromDirectory));
+            $this->logger->info(sprintf('Directory "%s" is empty. Nothing to restore', $fromDirectory));
             return false;
         }
 

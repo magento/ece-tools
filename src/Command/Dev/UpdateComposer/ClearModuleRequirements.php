@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command\Dev\UpdateComposer;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
@@ -92,7 +94,7 @@ CODE;
         $this->file->filePutContents($clearModulesFilePath, $clearModulesCode);
 
         $gitIgnore = $this->file->fileGetContents($rootDirectory . '/.gitignore');
-        if (strpos($gitIgnore, self::SCRIPT_PATH) === false) {
+        if (strpos($gitIgnore ?? '', self::SCRIPT_PATH) === false) {
             $this->file->filePutContents(
                 $rootDirectory . '/.gitignore',
                 '!/' . self::SCRIPT_PATH . PHP_EOL,

@@ -3,8 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Util;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
@@ -74,7 +77,7 @@ class MaintenanceModeSwitcher
      * Enables maintenance mode
      *
      * @return void
-     * @throws \RuntimeException
+     * @throws GenericException
      */
     public function enable()
     {
@@ -96,7 +99,7 @@ class MaintenanceModeSwitcher
      * Disable maintenance mode
      *
      * @return void
-     * @throws \RuntimeException In case when maintenance:disable finished with an error
+     * @throws GenericException In case when maintenance:disable finished with an error
      */
     public function disable()
     {
@@ -106,7 +109,7 @@ class MaintenanceModeSwitcher
                 [$this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS)]
             );
         } catch (ShellException $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
+            throw new GenericException($e->getMessage(), $e->getCode(), $e);
         }
         $this->logger->notice('Maintenance mode is disabled.');
     }
@@ -115,14 +118,14 @@ class MaintenanceModeSwitcher
      * Returns path to maintenance flag file
      *
      * @return string
-     * @throws \RuntimeException if DirectoryList class can't get magento package version
+     * @throws GenericException if DirectoryList class can't get magento package version
      */
     private function getMaintenanceFlagPath()
     {
         try {
             return $this->directoryList->getVar() . '/' . self::FLAG_FILENAME;
         } catch (UndefinedPackageException $e) {
-            throw new \RuntimeException($e->getMessage(), $e->getCode(), $e);
+            throw new GenericException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }

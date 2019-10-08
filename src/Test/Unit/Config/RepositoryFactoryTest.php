@@ -3,61 +3,32 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Illuminate\Config\Repository;
-use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
  */
 class RepositoryFactoryTest extends TestCase
 {
-    /**
-     * @var RepositoryFactory
-     */
-    private $factory;
-
-    /**
-     * @var ContainerInterface|Mock
-     */
-    private $containerMock;
-
-    /**
-     * @var Repository|Mock
-     */
-    private $repositoryMock;
-
-    /**
-     * @inheritdoc
-     */
-    protected function setUp()
-    {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
-        $this->repositoryMock = $this->createMock(Repository::class);
-
-        $this->factory = new RepositoryFactory(
-            $this->containerMock
-        );
-    }
-
     public function testCreate()
     {
+        $factory = new RepositoryFactory();
+
         $items = [
-            'some_item' => 1,
+            'some_item' => 123,
+            'some_item2' => 456,
         ];
 
-        $this->containerMock->expects($this->once())
-            ->method('create')
-            ->with(Repository::class, ['items' => $items])
-            ->willReturn($this->repositoryMock);
+        $repository = $factory->create($items);
 
-        $this->assertSame(
-            $this->repositoryMock,
-            $this->factory->create($items)
-        );
+        $this->assertInstanceOf(Repository::class, $repository);
+        $this->assertEquals($repository->get('some_item'), 123);
+        $this->assertEquals($repository->get('some_item2'), 456);
     }
 }

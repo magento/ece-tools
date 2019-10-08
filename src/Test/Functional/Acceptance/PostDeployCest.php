@@ -40,8 +40,13 @@ class PostDeployCest extends AbstractCest
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
 
         $log = $I->grabFileContent('/var/log/cloud.log');
-        $I->assertContains('NOTICE: Starting post-deploy.', $log);
-        $I->assertContains('NOTICE: Post-deploy is complete.', $log);
+        $I->assertContains('INFO: Starting scenario(s): scenario/post-deploy.xml', $log);
+        $I->assertContains('DEBUG: Running step: is-deploy-failed', $log);
+        $I->assertContains('DEBUG: Running step: validate-config', $log);
+        $I->assertContains('DEBUG: Running step: enable-cron', $log);
+        $I->assertContains('DEBUG: Running step: clean-cache', $log);
+        $I->assertContains('DEBUG: Running step: warm-up', $log);
+        $I->assertContains('DEBUG: Running step: time-to-first-byte', $log);
     }
 
     /**
@@ -70,7 +75,7 @@ class PostDeployCest extends AbstractCest
         $I->startEnvironment();
         $I->assertFalse($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
         $I->seeInOutput('Variable DATABASE_CONFIGURATION is not configured properly');
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertFalse($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains('Fix configuration with given suggestions', $log);
         $I->assertContains('Post-deploy is skipped because deploy was failed.', $log);
