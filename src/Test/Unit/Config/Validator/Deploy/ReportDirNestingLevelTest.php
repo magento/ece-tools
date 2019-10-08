@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
-use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -30,11 +29,6 @@ class ReportDirNestingLevelTest extends TestCase
      * @var ReportDirNestingLevel
      */
     private $validator;
-
-    /**
-     * @var LoggerInterface|MockObject
-     */
-    private $loggerMock;
 
     /**
      * @var Environment|MockObject
@@ -72,7 +66,6 @@ class ReportDirNestingLevelTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->environmentMock = $this->createMock(Environment::class);
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
         $this->configFileListMock->expects($this->once())
@@ -83,7 +76,6 @@ class ReportDirNestingLevelTest extends TestCase
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
 
         $this->validator = new ReportDirNestingLevel(
-            $this->loggerMock,
             $this->environmentMock,
             $this->configFileListMock,
             $this->fileMock,
@@ -101,19 +93,6 @@ class ReportDirNestingLevelTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getEnvVarMageErrorReportDirNestingLevel')
             ->willReturn($someValue);
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with(
-                sprintf(
-                    'The `%s` environment variable with the value `%s` specifies a custom value for'
-                    . ' the directory nesting level configured for error reporting. This value overrides'
-                    . ' the value specified in the `config.report.dir_nesting_level` property in file %s,'
-                    . ' which will be ignored.',
-                    Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
-                    $someValue,
-                    $this->reportConfigFile
-                )
-            );
 
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }

@@ -16,18 +16,12 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
-use Psr\Log\LoggerInterface;
 
 /**
  * Validates the value specified for the directory nesting level conifgured for error reporting
  */
 class ReportDirNestingLevel implements ValidatorInterface
 {
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
     /**
      * @var Environment
      */
@@ -54,7 +48,6 @@ class ReportDirNestingLevel implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @param LoggerInterface $logger
      * @param Environment $environment
      * @param ConfigFileList $configFileList
      * @param File $file
@@ -62,14 +55,12 @@ class ReportDirNestingLevel implements ValidatorInterface
      * @param ResultFactory $resultFactory
      */
     public function __construct(
-        LoggerInterface $logger,
         Environment $environment,
         ConfigFileList $configFileList,
         File $file,
         XmlEncoder $encoder,
         ResultFactory $resultFactory
     ) {
-        $this->logger = $logger;
         $this->environment = $environment;
         $this->configFileList = $configFileList;
         $this->file = $file;
@@ -86,21 +77,8 @@ class ReportDirNestingLevel implements ValidatorInterface
         $reportConfigFile = $this->configFileList->getErrorReportConfig();
 
         try {
-            if (false !== $envVarValue) {
-                $this->logger->notice(sprintf(
-                    'The `%s` environment variable with the value `%s` specifies a custom value for'
-                    . ' the directory nesting level configured for error reporting. This value overrides'
-                    . ' the value specified in the `config.report.dir_nesting_level` property in file %s,'
-                    . ' which will be ignored.',
-                    Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
-                    $envVarValue,
-                    $reportConfigFile
-                ));
-                return $this->resultFactory->success();
-            }
-
             $configValue = $this->getConfigValue($reportConfigFile);
-            if (null !== $configValue) {
+            if (null !== $configValue || false !== $envVarValue) {
                 return $this->resultFactory->success();
             }
 

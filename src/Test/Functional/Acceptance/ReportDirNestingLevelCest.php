@@ -164,17 +164,6 @@ class ReportDirNestingLevelCest extends AbstractCest
             ),
             $log
         );
-        $I->assertContains(
-            sprintf(
-                'NOTICE: The `%s` environment variable with the value `7` specifies a custom value for'
-                . ' the directory nesting level configured for error reporting. This value overrides'
-                . ' the value specified in the `config.report.dir_nesting_level` property in file %s,'
-                . ' which will be ignored.',
-                Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL,
-                $this->expectedPathLocalXml
-            ),
-            $log
-        );
     }
 
     /**
