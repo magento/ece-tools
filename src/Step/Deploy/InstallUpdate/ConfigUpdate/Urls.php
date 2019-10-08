@@ -9,6 +9,8 @@ namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Database;
+use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment as EnvironmentUrl;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -23,11 +25,6 @@ class Urls implements StepInterface
     private $environment;
 
     /**
-     * @var StepInterface
-     */
-    private $steps;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
@@ -38,21 +35,34 @@ class Urls implements StepInterface
     private $stageConfig;
 
     /**
+     * @var Database
+     */
+    private $databaseUrl;
+
+    /**
+     * @var EnvironmentUrl
+     */
+    private $environmentUrl;
+
+    /**
      * @param Environment $environment
-     * @param StepInterface $steps
      * @param LoggerInterface $logger
      * @param DeployInterface $stageConfig
+     * @param Database $databaseUrl
+     * @param EnvironmentUrl $environmentUrl
      */
     public function __construct(
         Environment $environment,
-        StepInterface $steps,
         LoggerInterface $logger,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        Database $databaseUrl,
+        EnvironmentUrl $environmentUrl
     ) {
         $this->environment = $environment;
-        $this->steps = $steps;
         $this->logger = $logger;
         $this->stageConfig = $stageConfig;
+        $this->databaseUrl = $databaseUrl;
+        $this->environmentUrl = $environmentUrl;
     }
 
     /**
@@ -81,6 +91,7 @@ class Urls implements StepInterface
 
         $this->logger->info('Updating secure and unsecure URLs');
 
-        $this->steps->execute();
+        $this->databaseUrl->execute();
+        $this->environmentUrl->execute();
     }
 }
