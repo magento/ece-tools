@@ -25,7 +25,7 @@ class Step
      */
     private static $argumentRequiredArgs = [
         '@name',
-        '@xsi:type'
+        '@xsi:type',
     ];
 
     /**
@@ -33,7 +33,7 @@ class Step
      */
     private static $itemRequiredArgs = [
         '@name',
-        '@xsi:type'
+        '@xsi:type',
     ];
 
     /**

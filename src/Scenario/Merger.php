@@ -14,8 +14,6 @@ use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 
 /**
  * Merge given scenarios.
- *
- * @codeCoverageIgnore
  */
 class Merger
 {
@@ -39,6 +37,7 @@ class Merger
      */
     private static $stepRequiredArgs = [
         '@name',
+        '@priority'
     ];
 
     /**
@@ -65,9 +64,9 @@ class Merger
         $data = [];
 
         foreach ($scenarios as $scenario) {
-            $scenario = $this->scenarioCollector->collect($scenario);
+            $scenarioData = $this->scenarioCollector->collect($scenario);
 
-            foreach ($scenario['step'] ?? [] as $step) {
+            foreach ($scenarioData['step'] ?? [] as $step) {
                 if ($missedArgs = array_diff(self::$stepRequiredArgs, array_keys($step))) {
                     throw new ValidationException(sprintf(
                         'Argument(s) "%s" are missed from step',
@@ -79,10 +78,6 @@ class Merger
                     $data[$step['@name']] ?? [],
                     $this->stepCollector->collect($step)
                 );
-
-                if (!isset($data[$step['@name']]['priority'])) {
-                    $data[$step['@name']]['priority'] = Step::DEFAULT_PRIORITY;
-                }
             }
         }
 

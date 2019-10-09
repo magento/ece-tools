@@ -6,41 +6,41 @@
  */
 -->
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../config/scenario.xsd" >
-    <step name="pre-build" type="Magento\MagentoCloud\Step\Build\PreBuild"/>
-    <step name="set-production-mode" type="Magento\MagentoCloud\Step\SetProductionMode"/>
-    <step name="validate-configuration" type="Magento\MagentoCloud\Step\ValidateConfiguration">
+    <step name="pre-build" type="Magento\MagentoCloud\Step\Build\PreBuild" priority="100"/>
+    <step name="set-production-mode" type="Magento\MagentoCloud\Step\SetProductionMode" priority="200"/>
+    <step name="validate-configuration" type="Magento\MagentoCloud\Step\ValidateConfiguration" priority="300">
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="validators" xsi:type="array">
                 <item name="500" xsi:type="array">
-                    <item name="composer" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ComposerFile</item>
-                    <item name="stage-config" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\StageConfig</item>
+                    <item name="composer" xsi:type="object" priority="100">Magento\MagentoCloud\Config\Validator\Build\ComposerFile</item>
+                    <item name="stage-config" xsi:type="object" priority="200">Magento\MagentoCloud\Config\Validator\Build\StageConfig</item>
                 </item>
                 <item name="300" xsi:type="array">
-                    <item name="config-file-exists" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ConfigFileExists</item>
-                    <item name="deprecated-ini" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\UnsupportedBuildOptionsIni</item>
-                    <item name="stage-config-deprecated-variables" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\StageConfigDeprecatedVariables</item>
-                    <item name="modules-exists" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ModulesExists</item>
-                    <item name="appropriate-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\AppropriateVersion</item>
-                    <item name="scd-options-ignorance" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\ScdOptionsIgnorance</item>
-                    <item name="ideal-state" xsi:type="object">Magento\MagentoCloud\Config\Validator\IdealState</item>
+                    <item name="config-file-exists" xsi:type="object" priority="100">Magento\MagentoCloud\Config\Validator\Build\ConfigFileExists</item>
+                    <item name="deprecated-ini" xsi:type="object" priority="200">Magento\MagentoCloud\Config\Validator\Build\UnsupportedBuildOptionsIni</item>
+                    <item name="stage-config-deprecated-variables" xsi:type="object" priority="300">Magento\MagentoCloud\Config\Validator\Build\StageConfigDeprecatedVariables</item>
+                    <item name="modules-exists" xsi:type="object" priority="400">Magento\MagentoCloud\Config\Validator\Build\ModulesExists</item>
+                    <item name="appropriate-version" xsi:type="object" priority="500">Magento\MagentoCloud\Config\Validator\Build\AppropriateVersion</item>
+                    <item name="scd-options-ignorance" xsi:type="object" priority="600">Magento\MagentoCloud\Config\Validator\Build\ScdOptionsIgnorance</item>
+                    <item name="ideal-state" xsi:type="object" priority="700">Magento\MagentoCloud\Config\Validator\IdealState</item>
                 </item>
             </argument>
         </arguments>
     </step>
-    <step name="refresh-modules" type="Magento\MagentoCloud\Step\Build\RefreshModules"/>
-    <step name="apply-patches" type="Magento\MagentoCloud\Step\Build\ApplyPatches"/>
-    <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles"/>
-    <step name="copy-sample-data" type="Magento\MagentoCloud\Step\Build\CopySampleData"/>
-    <step name="compile-di" type="Magento\MagentoCloud\Step\Build\CompileDi"/>
-    <step name="dump-autoload" type="Magento\MagentoCloud\Step\Build\ComposerDumpAutoload"/>
-    <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Build\DeployStaticContent">
+    <step name="refresh-modules" type="Magento\MagentoCloud\Step\Build\RefreshModules" priority="400"/>
+    <step name="apply-patches" type="Magento\MagentoCloud\Step\Build\ApplyPatches" priority="500"/>
+    <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles" priority="600"/>
+    <step name="copy-sample-data" type="Magento\MagentoCloud\Step\Build\CopySampleData" priority="700"/>
+    <step name="compile-di" type="Magento\MagentoCloud\Step\Build\CompileDi" priority="800"/>
+    <step name="dump-autoload" type="Magento\MagentoCloud\Step\Build\ComposerDumpAutoload" priority="900"/>
+    <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Build\DeployStaticContent" priority="1000">
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="flag-manager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>
             <argument name="scd-on-build" xsi:type="object">Magento\MagentoCloud\Config\Validator\GlobalStage\ScdOnBuild</argument>
             <argument name="steps" xsi:type="array">
-                <item name="generate" xsi:type="object">Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate</item>
+                <item name="generate" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate</item>
             </argument>
         </arguments>
     </step>
