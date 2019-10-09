@@ -1,0 +1,106 @@
+diff -Nuar a/vendor/magento/module-inventory-grouped-product-indexer/Indexer/SourceItem/SiblingSkuListInStockProvider.php b/vendor/magento/module-inventory-grouped-product-indexer/Indexer/SourceItem/SiblingSkuListInStockProvider.php
+--- a/vendor/magento/module-inventory-grouped-product-indexer/Indexer/SourceItem/SiblingSkuListInStockProvider.php
++++ b/vendor/magento/module-inventory-grouped-product-indexer/Indexer/SourceItem/SiblingSkuListInStockProvider.php
+@@ -32,10 +32,6 @@ class SiblingSkuListInStockProvider
+      */
+     private $skuListInStockFactory;
+
+-    /**
+-     * @var int
+-     */
+-    private $groupConcatMaxLen;
+     /**
+      * @var MetadataPool
+      */
+@@ -52,12 +48,9 @@ class SiblingSkuListInStockProvider
+     private $tableNameStockSourceLink;
+
+     /**
+-     * GetSkuListInStock constructor.
+-     *
+      * @param ResourceConnection $resourceConnection
+      * @param SkuListInStockFactory $skuListInStockFactory
+      * @param MetadataPool $metadataPool
+-     * @param int $groupConcatMaxLen
+      * @param string $tableNameSourceItem
+      * @param string $tableNameStockSourceLink
+      */
+@@ -65,13 +58,11 @@ public function __construct(
+         ResourceConnection $resourceConnection,
+         SkuListInStockFactory $skuListInStockFactory,
+         MetadataPool $metadataPool,
+-        int $groupConcatMaxLen,
+         $tableNameSourceItem,
+         $tableNameStockSourceLink
+     ) {
+         $this->resourceConnection = $resourceConnection;
+         $this->skuListInStockFactory = $skuListInStockFactory;
+-        $this->groupConcatMaxLen = $groupConcatMaxLen;
+         $this->metadataPool = $metadataPool;
+         $this->tableNameSourceItem = $tableNameSourceItem;
+         $this->tableNameStockSourceLink = $tableNameStockSourceLink;
+@@ -92,15 +83,13 @@ public function execute(array $sourceItemIds): array
+
+         $metadata = $this->metadataPool->getMetadata(ProductInterface::class);
+         $linkField = $metadata->getLinkField();
++        $items = [];
+
+         $select = $connection
+             ->select()
+             ->from(
+                 ['source_item' => $sourceItemTable],
+-                [
+-                    SourceItemInterface::SKU =>
+-                        "GROUP_CONCAT(DISTINCT sibling_product_entity." . SourceItemInterface::SKU . " SEPARATOR ',')"
+-                ]
++                [SourceItemInterface::SKU => 'sibling_product_entity.' . SourceItemInterface::SKU]
+             )->joinInner(
+                 ['stock_source_link' => $sourceStockLinkTable],
+                 sprintf(
+@@ -127,11 +116,16 @@ public function execute(array $sourceItemIds): array
+                 ['sibling_product_entity' => $this->resourceConnection->getTableName('catalog_product_entity')],
+                 'sibling_product_entity.' . $linkField . ' = sibling_link.linked_product_id',
+                 []
+-            )->where('source_item.source_item_id IN (?)', $sourceItemIds)
+-            ->group(['stock_source_link.' . StockSourceLinkInterface::STOCK_ID]);
++            )->where(
++                'source_item.source_item_id IN (?)',
++                $sourceItemIds
++            );
+
+-        $connection->query('SET group_concat_max_len = ' . $this->groupConcatMaxLen);
+-        $items = $connection->fetchAll($select);
++        $dbStatement = $connection->query($select);
++        while ($item = $dbStatement->fetch()) {
++            $items[$item[StockSourceLinkInterface::STOCK_ID]][$item[SourceItemInterface::SKU]] =
++                $item[SourceItemInterface::SKU];
++        }
+
+         return $this->getStockIdToSkuList($items);
+     }
+@@ -145,11 +139,11 @@ public function execute(array $sourceItemIds): array
+     private function getStockIdToSkuList(array $items): array
+     {
+         $skuListInStockList = [];
+-        foreach ($items as $item) {
++        foreach ($items as $stockId => $skuList) {
+             /** @var SkuListInStock $skuListInStock */
+             $skuListInStock = $this->skuListInStockFactory->create();
+-            $skuListInStock->setStockId((int)$item[StockSourceLinkInterface::STOCK_ID]);
+-            $skuListInStock->setSkuList(explode(',', $item[SourceItemInterface::SKU]));
++            $skuListInStock->setStockId((int)$stockId);
++            $skuListInStock->setSkuList($skuList);
+             $skuListInStockList[] = $skuListInStock;
+         }
+         return $skuListInStockList;
+diff -Nuar a/vendor/magento/module-inventory-grouped-product-indexer/etc/di.xml b/vendor/magento/module-inventory-grouped-product-indexer/etc/di.xml
+--- a/vendor/magento/module-inventory-grouped-product-indexer/etc/di.xml
++++ b/vendor/magento/module-inventory-grouped-product-indexer/etc/di.xml
+@@ -27,7 +27,6 @@
+     </type>
+     <type name="Magento\InventoryGroupedProductIndexer\Indexer\SourceItem\SiblingSkuListInStockProvider">
+         <arguments>
+-            <argument name="groupConcatMaxLen" xsi:type="number">2000</argument>
+             <argument name="tableNameSourceItem" xsi:type="const">Magento\Inventory\Model\ResourceModel\SourceItem::TABLE_NAME_SOURCE_ITEM</argument>
+             <argument name="tableNameStockSourceLink" xsi:type="const">Magento\Inventory\Model\ResourceModel\StockSourceLink::TABLE_NAME_STOCK_SOURCE_LINK</argument>
+         </arguments>
