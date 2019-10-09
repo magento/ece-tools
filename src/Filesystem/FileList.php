@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Filesystem;
 
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+
 /**
  * Resolver of file configurations.
  */
@@ -30,6 +32,7 @@ class FileList extends ConfigFileList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getCloudLog(): string
     {
@@ -38,6 +41,7 @@ class FileList extends ConfigFileList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getTtfbLog(): string
     {
@@ -46,6 +50,7 @@ class FileList extends ConfigFileList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getInitCloudLog(): string
     {
@@ -54,6 +59,7 @@ class FileList extends ConfigFileList
 
     /**
      * @return string
+     * @throws UndefinedPackageException
      */
     public function getInstallUpgradeLog(): string
     {

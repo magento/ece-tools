@@ -5,7 +5,7 @@
  * See COPYING.txt for license details.
  */
 -->
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../config/scenario.xsd" >
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
     <step name="pre-build" type="Magento\MagentoCloud\Step\Build\PreBuild" priority="100"/>
     <step name="set-production-mode" type="Magento\MagentoCloud\Step\SetProductionMode" priority="200"/>
     <step name="validate-configuration" type="Magento\MagentoCloud\Step\ValidateConfiguration" priority="300">
