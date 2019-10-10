@@ -67,7 +67,7 @@ class Cache implements StepInterface
 
         if (isset($cacheConfig['frontend'])) {
             $cacheConfig['frontend'] = array_filter($cacheConfig['frontend'], function ($cacheFrontend) {
-                return $cacheFrontend['backend'] != 'Cm_Cache_Backend_Redis'
+                return $cacheFrontend['backend'] !== 'Cm_Cache_Backend_Redis'
                     || $this->testRedisConnection($cacheFrontend['backend_options']);
             });
         }
@@ -94,15 +94,20 @@ class Cache implements StepInterface
      * @param array $backendOptions
      *
      * @return bool
+     * @throws StepException
      */
     private function testRedisConnection(array $backendOptions): bool
     {
-        if (!isset($backendOptions['server']) || !isset($backendOptions['port'])) {
+        if (!isset($backendOptions['server'], $backendOptions['port'])) {
             throw new StepException('Missing required Redis configuration!');
         }
 
         $sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-        $connected = @socket_connect($sock, $backendOptions['server'], $backendOptions['port']);
+        $connected = @socket_connect(
+            $sock,
+            (string)$backendOptions['server'],
+            (int)$backendOptions['port']
+        );
         socket_close($sock);
 
         return $connected;

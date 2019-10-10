@@ -5,11 +5,12 @@
  * See COPYING.txt for license details.
  */
 -->
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../config/scenario.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
     <step name="compress-static-content" type="Magento\MagentoCloud\Step\Build\CompressStaticContent"/>
     <step name="clear-init-directory" type="Magento\MagentoCloud\Step\Build\ClearInitDirectory"/>
     <step name="backup-data" type="Magento\MagentoCloud\Step\Build\BackupData">
         <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="steps" xsi:type="array">
                 <item name="static-content" xsi:type="object">Magento\MagentoCloud\Step\Build\BackupData\StaticContent</item>
                 <item name="writable-dirs" xsi:type="object">Magento\MagentoCloud\Step\Build\BackupData\WritableDirectories</item>
