@@ -185,6 +185,25 @@ class StepTest extends TestCase
                                     '@priority' => 200,
                                     '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
                                 ],
+                                [
+                                    '@name' => '500',
+                                    '@xsi:type' => 'array',
+                                    '@priority' => 300,
+                                    'item' => [
+                                        [
+                                            '@name' => 'sub-item',
+                                            '@xsi:type' => 'object',
+                                            '@priority' => 100,
+                                            '#' => 'SubItemObject',
+                                        ],
+                                        [
+                                            '@name' => 'sub-item2',
+                                            '@xsi:type' => 'object',
+                                            '@priority' => 200,
+                                            '#' => 'SubItemObject2',
+                                        ]
+                                    ]
+                                ],
                             ],
                         ],
                     ],
@@ -216,7 +235,26 @@ class StepTest extends TestCase
                             'xsi:type' => 'object',
                             '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
                             'priority' => 200,
-                        ]
+                        ],
+                        [
+                            'name' => '500',
+                            'xsi:type' => 'array',
+                            'priority' => 300,
+                            'items' => [
+                                [
+                                    'name' => 'sub-item',
+                                    'xsi:type' => 'object',
+                                    'priority' => 100,
+                                    '#' => 'SubItemObject',
+                                ],
+                                [
+                                    'name' => 'sub-item2',
+                                    'xsi:type' => 'object',
+                                    'priority' => 200,
+                                    '#' => 'SubItemObject2',
+                                ],
+                            ],
+                        ],
                     ],
                 ],
             ],
