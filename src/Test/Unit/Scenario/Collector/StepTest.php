@@ -91,7 +91,7 @@ class StepTest extends TestCase
 
     /**
      * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Argument(s) "@name" are missed from argument in step "backup-data"
+     * @expectedExceptionMessage Argument(s) "@name" are missed from item
      */
     public function testMissedItemArgumentsException()
     {
@@ -103,14 +103,15 @@ class StepTest extends TestCase
                 [
                     'argument' => [
                         [
+                            '@name' => 'logger',
                             '@xsi:type' => 'object',
                             '#' => 'Psr\Log\LoggerInterface',
                         ],
                         [
+                            '@name' => 'validator',
                             '@xsi:type' => 'array',
                             'item' => [
                                 [
-                                    '@name' => 'static-content',
                                     '@xsi:type' => 'object',
                                     '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
                                 ],
