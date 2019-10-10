@@ -16,6 +16,8 @@ mysql:
 elasticsearch:
   - version: '6.5'
     eol: 05/31/2020
+  - version: '6.8'
+    eol: 11/30/2020
   - version: '7.0'
     eol: 10/31/2020
 rabbitmq:

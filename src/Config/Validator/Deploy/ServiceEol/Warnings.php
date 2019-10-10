@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Service\EolValidator as EOLValidator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\App\GenericException;
 
 /**
  * Class to check if services have passed their EOLs.
@@ -22,16 +23,25 @@ class Warnings implements ValidatorInterface
     const ERROR_LEVEL = ValidatorInterface::LEVEL_WARNING;
 
     /**
+     * @var Validator\ResultFactory
+     */
+    private $resultFactory;
+
+    /**
      * @var EOLValidator
      */
     private $eolValidator;
 
     /**
-     * ServiceEol constructor.
+     * Warnings constructor.
+     * @param Validator\ResultFactory $resultFactory
      * @param EOLValidator $eolValidator
      */
-    public function __construct(EOLValidator $eolValidator)
-    {
+    public function __construct(
+        Validator\ResultFactory $resultFactory,
+        EOLValidator $eolValidator
+    ) {
+        $this->resultFactory = $resultFactory;
         $this->eolValidator = $eolValidator;
     }
 
@@ -43,6 +53,19 @@ class Warnings implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        return $this->eolValidator->validateServiceEol(self::ERROR_LEVEL);
+        try {
+            $errors = $this->eolValidator->validateServiceEol(self::ERROR_LEVEL);
+
+            if ($errors) {
+                return $this->resultFactory->error(
+                    'Some services have passed EOL or is not defined.',
+                    implode(PHP_EOL, $errors)
+                );
+            }
+        } catch (GenericException $e) {
+            return $this->resultFactory->error('Can\'t validate version of some services: ' . $e->getMessage());
+        }
+
+        return $this->resultFactory->success();
     }
 }

@@ -7,11 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Service;
 
-use Magento\MagentoCloud\App\GenericException;
+use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Symfony\Component\Yaml\Yaml;
-use Magento\MagentoCloud\Config\Validator;
 
 /**
  * Service EOL validator.
@@ -26,14 +25,14 @@ class EolValidator
     private $fileList;
 
     /**
-     * @var Validator\ResultFactory
-     */
-    private $resultFactory;
-
-    /**
      * @var ServiceFactory
      */
     private $serviceFactory;
+
+    /**
+     * @var ElasticSearch
+     */
+    private $elasticSearch;
 
     /**
      * @var string
@@ -54,64 +53,78 @@ class EolValidator
      * EolValidator constructor.
      *
      * @param FileList $fileList
-     * @param Validator\ResultFactory $resultFactory
      * @param ServiceFactory $serviceFactory
+     * @param ElasticSearch $elasticSearch
      */
     public function __construct(
         FileList $fileList,
-        Validator\ResultFactory $resultFactory,
-        ServiceFactory $serviceFactory
+        ServiceFactory $serviceFactory,
+        ElasticSearch $elasticSearch
     ) {
         $this->fileList = $fileList;
-        $this->resultFactory = $resultFactory;
         $this->serviceFactory = $serviceFactory;
+        $this->elasticSearch = $elasticSearch;
     }
 
     /**
      * Validate the EOL of a given service and version by error level.
      *
      * @param int $errorLevel
-     * @return Validator\ResultInterface
-     * @throws \Exception
+     * @return array
+     * @throws ServiceMismatchException
      */
-    public function validateServiceEol(int $errorLevel): Validator\ResultInterface
+    public function validateServiceEol(int $errorLevel): array
     {
-        try {
-            $this->errorLevel = $errorLevel;
-            $errors = [];
+        $this->errorLevel = $errorLevel;
+        $errors = [];
 
-            // Get all services and their versions for validation.
-            $services = [
-                ServiceInterface::NAME_RABBITMQ,
-                ServiceInterface::NAME_REDIS,
-                ServiceInterface::NAME_DB
-            ];
+        // Get all services and their versions for validation.
+        $services = [
+            ServiceInterface::NAME_PHP,
+            ServiceInterface::NAME_ELASTICSEARCH,
+            ServiceInterface::NAME_RABBITMQ,
+            ServiceInterface::NAME_REDIS,
+            ServiceInterface::NAME_DB
+        ];
 
-            foreach ($services as $serviceName) {
-                $service = $this->serviceFactory->create($serviceName);
-                $serviceVersion = $service->getVersion();
+        foreach ($services as $serviceName) {
+            $serviceVersion = $this->getServiceVersion($serviceName);
 
-                $this->service = $serviceName;
-                $this->version = $serviceVersion;
+            $this->service = $serviceName;
+            $this->version = $serviceVersion;
 
-                // Validate EOL for each service.
-                if ($validationResult = $this->validateService()) {
-                    $errors[] = $validationResult;
-                }
+            // Validate EOL for each service.
+            if ($validationResult = $this->validateService()) {
+                $errors[] = $validationResult;
             }
-
-            if ($errors) {
-                return $this->resultFactory->error(
-                    ($errorLevel === ValidatorInterface::LEVEL_NOTICE ?
-                    'Some services are approaching their EOL.' : 'Some services have passed their EOL.'),
-                    implode(PHP_EOL, $errors)
-                );
-            }
-        } catch (GenericException $ex) {
-            return $this->resultFactory->error('Can\'t validate EOLs of some services: ' . $ex->getMessage());
         }
 
-        return $this->resultFactory->success();
+        return $errors;
+    }
+
+    /**
+     * Gets the version of a given service.
+     *
+     * @param string $serviceName
+     * @return string
+     * @throws ServiceMismatchException
+     */
+    protected function getServiceVersion(string $serviceName) : string
+    {
+        switch ($serviceName) {
+            case 'php':
+                $serviceVersion = PHP_VERSION;
+                break;
+            case 'elasticsearch':
+                $serviceVersion = $this->elasticSearch->getVersion();
+                break;
+            default:
+                $service = $this->serviceFactory->create($serviceName);
+                $serviceVersion = $service->getVersion();
+                break;
+        }
+
+        return $serviceVersion;
     }
 
     /**
@@ -127,18 +140,18 @@ class EolValidator
 
         // Check if configurations exist for the current service and version.
         $versionConfigs = array_filter($serviceConfigs, function ($v) {
-            return $v['version'] == $this->version;
+            return Semver::satisfies($this->version, sprintf('%s.x', $v['version']));
         });
 
         // If there are no configurations found for the current service and version,
         // or if an EOL is not defined or is invalid, return a message with details.
         if (!$versionConfigs || !$versionConfigs[array_key_first($versionConfigs)]['eol']
             || !$eolDate = date_create($versionConfigs[array_key_first($versionConfigs)]['eol'])) {
-            return sprintf(
+            return $this->errorLevel === ValidatorInterface::LEVEL_WARNING ? sprintf(
                 'Unknown or invalid EOL defined for %s %s',
                 $this->service,
                 $this->version
-            );
+            ) : '';
         }
 
         $interval = date_diff($eolDate, date_create('now'));
