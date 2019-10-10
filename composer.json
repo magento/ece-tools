@@ -28,8 +28,8 @@
     "symfony/config": "^3.4||^4.3",
     "symfony/dependency-injection": "^3.4||^4.3",
     "symfony/process": "^2.1||^4.1",
-    "symfony/serializer": "^4.2",
-    "symfony/yaml": "^4.0"
+    "symfony/serializer": "^3.3",
+    "symfony/yaml": "^3.3||^4.0"
   },
   "suggest": {
     "magento/magento-cloud-docker": "^1.0"

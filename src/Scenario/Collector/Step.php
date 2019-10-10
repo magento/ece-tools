@@ -49,7 +49,7 @@ class Step
 
         $arguments = [];
 
-        foreach ($step['arguments'][0]['argument'] ?? [] as $argument) {
+        foreach ($step['arguments']['argument'] ?? [] as $argument) {
             if ($missedArgs = array_diff(self::$argumentRequiredArgs, array_keys($argument))) {
                 throw new ValidationException(sprintf(
                     'Argument(s) "%s" are missed from argument in step "%s"',
@@ -67,7 +67,7 @@ class Step
                         'name' => $argumentName,
                         'xsi:type' => $argumentType,
                         'items' => $this->collectItems(
-                            $argument['item'] ?: []
+                            is_array(reset($argument['item'])) ? $argument['item'] : [$argument['item']]
                         ),
                     ];
                     break;
@@ -113,10 +113,6 @@ class Step
         $newItems = [];
 
         foreach ($items as $item) {
-            if (!is_array($item)) {
-                throw new ValidationException('Wrong formatted item provided');
-            }
-
             $itemName = $item['@name'] ?? '';
 
             if ($missedArgs = array_diff(self::$itemRequiredArgs, array_keys($item))) {
@@ -139,7 +135,7 @@ class Step
                 $newItem['items'] = $this->collectItems($item['item']);
             }
 
-            $newItems[] = $newItem;
+            $newItems[$itemName] = $newItem;
         }
 
         return $newItems;

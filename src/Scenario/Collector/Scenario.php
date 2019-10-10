@@ -18,8 +18,6 @@ use Symfony\Component\Serializer\Encoder\XmlEncoder;
  */
 class Scenario
 {
-    private const ROOT_NODE = 'scenario';
-
     /**
      * @var File
      */
@@ -61,11 +59,7 @@ class Scenario
 
             return $this->encoder->decode(
                 $this->file->fileGetContents($scenarioPath),
-                XmlEncoder::FORMAT,
-                [
-                    XmlEncoder::AS_COLLECTION => true,
-                    XmlEncoder::ROOT_NODE_NAME => self::ROOT_NODE,
-                ]
+                XmlEncoder::FORMAT
             ) ?: [];
         } catch (FileSystemException $exception) {
             throw new ValidationException($exception->getMessage(), $exception->getCode(), $exception);

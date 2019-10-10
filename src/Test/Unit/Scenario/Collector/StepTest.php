@@ -39,18 +39,16 @@ class StepTest extends TestCase
             '@type' => 'Magento\MagentoCloud\Step\Build\BackupData',
             '@priority' => 300,
             'arguments' => [
-                [
-                    'argument' => [
-                        [
-                            '@name' => 'logger',
-                            '#' => 'Psr\Log\LoggerInterface',
-                        ],
-                        [
-                            '@name' => 'steps',
-                            '@xsi:type' => '[',
-                            'item' => []
-                        ]
+                'argument' => [
+                    [
+                        '@name' => 'logger',
+                        '#' => 'Psr\Log\LoggerInterface',
                     ],
+                    [
+                        '@name' => 'steps',
+                        '@xsi:type' => '[',
+                        'item' => []
+                    ]
                 ],
             ],
         ];
@@ -69,19 +67,17 @@ class StepTest extends TestCase
             '@type' => 'Magento\MagentoCloud\Step\Build\BackupData',
             '@priority' => 300,
             'arguments' => [
-                [
-                    'argument' => [
-                        [
-                            '@name' => 'logger',
-                            '@xsi:type' => 'wrong-type',
-                            '#' => 'Psr\Log\LoggerInterface',
-                        ],
-                        [
-                            '@name' => 'steps',
-                            '@xsi:type' => '[',
-                            'item' => []
-                        ]
+                'argument' => [
+                    [
+                        '@name' => 'logger',
+                        '@xsi:type' => 'wrong-type',
+                        '#' => 'Psr\Log\LoggerInterface',
                     ],
+                    [
+                        '@name' => 'steps',
+                        '@xsi:type' => '[',
+                        'item' => []
+                    ]
                 ],
             ],
         ];
@@ -100,49 +96,19 @@ class StepTest extends TestCase
             '@type' => 'Magento\MagentoCloud\Step\Build\BackupData',
             '@priority' => 300,
             'arguments' => [
-                [
-                    'argument' => [
-                        [
-                            '@name' => 'logger',
-                            '@xsi:type' => 'object',
-                            '#' => 'Psr\Log\LoggerInterface',
-                        ],
-                        [
-                            '@name' => 'validator',
-                            '@xsi:type' => 'array',
-                            'item' => [
-                                [
-                                    '@xsi:type' => 'object',
-                                    '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
-                                ],
-                            ],
-                        ],
+                'argument' => [
+                    [
+                        '@name' => 'logger',
+                        '@xsi:type' => 'object',
+                        '#' => 'Psr\Log\LoggerInterface',
                     ],
-                ],
-            ],
-        ];
-
-        $this->stepCollector->collect($step);
-    }
-
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Wrong formatted item provided
-     */
-    public function testWrongFormattedItemException()
-    {
-        $step = [
-            '@name' => 'backup-data',
-            '@type' => 'Magento\MagentoCloud\Step\Build\BackupData',
-            '@priority' => 300,
-            'arguments' => [
-                [
-                    'argument' => [
-                        [
-                            '@name' => 'steps',
-                            '@xsi:type' => 'array',
-                            'item' => [
-                                'wrong-formatted-item'
+                    [
+                        '@name' => 'validator',
+                        '@xsi:type' => 'array',
+                        'item' => [
+                            [
+                                '@xsi:type' => 'object',
+                                '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
                             ],
                         ],
                     ],
@@ -164,48 +130,46 @@ class StepTest extends TestCase
             '@type' => 'Magento\MagentoCloud\Step\Build\BackupData',
             '@priority' => 300,
             'arguments' => [
-                [
-                    'argument' => [
-                        [
-                            '@name' => 'logger',
-                            '@xsi:type' => 'object',
-                            '#' => 'Psr\Log\LoggerInterface',
-                        ],
-                        [
-                            '@name' => 'steps',
-                            '@xsi:type' => 'array',
-                            'item' => [
-                                [
-                                    '@name' => 'static-content',
-                                    '@xsi:type' => 'object',
-                                    '@priority' => 100,
-                                    '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
-                                ],
-                                [
-                                    '@name' => 'non-static-content',
-                                    '@xsi:type' => 'object',
-                                    '@priority' => 200,
-                                    '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
-                                ],
-                                [
-                                    '@name' => '500',
-                                    '@xsi:type' => 'array',
-                                    '@priority' => 300,
-                                    'item' => [
-                                        [
-                                            '@name' => 'sub-item',
-                                            '@xsi:type' => 'object',
-                                            '@priority' => 100,
-                                            '#' => 'SubItemObject',
-                                        ],
-                                        [
-                                            '@name' => 'sub-item2',
-                                            '@xsi:type' => 'object',
-                                            '@priority' => 200,
-                                            '#' => 'SubItemObject2',
-                                        ]
+                'argument' => [
+                    [
+                        '@name' => 'logger',
+                        '@xsi:type' => 'object',
+                        '#' => 'Psr\Log\LoggerInterface',
+                    ],
+                    [
+                        '@name' => 'steps',
+                        '@xsi:type' => 'array',
+                        'item' => [
+                            [
+                                '@name' => 'static-content',
+                                '@xsi:type' => 'object',
+                                '@priority' => 100,
+                                '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
+                            ],
+                            [
+                                '@name' => 'non-static-content',
+                                '@xsi:type' => 'object',
+                                '@priority' => 200,
+                                '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
+                            ],
+                            [
+                                '@name' => '500',
+                                '@xsi:type' => 'array',
+                                '@priority' => 300,
+                                'item' => [
+                                    [
+                                        '@name' => 'sub-item',
+                                        '@xsi:type' => 'object',
+                                        '@priority' => 100,
+                                        '#' => 'SubItemObject',
+                                    ],
+                                    [
+                                        '@name' => 'sub-item2',
+                                        '@xsi:type' => 'object',
+                                        '@priority' => 200,
+                                        '#' => 'SubItemObject2',
                                     ]
-                                ],
+                                ]
                             ],
                         ],
                     ],
@@ -226,30 +190,30 @@ class StepTest extends TestCase
                     'name' => 'steps',
                     'xsi:type' => 'array',
                     'items' => [
-                        [
+                        'static-content' => [
                             'name' => 'static-content',
                             'xsi:type' => 'object',
                             '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
                             'priority' => 100,
                         ],
-                        [
+                        'non-static-content' => [
                             'name' => 'non-static-content',
                             'xsi:type' => 'object',
                             '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
                             'priority' => 200,
                         ],
-                        [
+                        500 => [
                             'name' => '500',
                             'xsi:type' => 'array',
                             'priority' => 300,
                             'items' => [
-                                [
+                                'sub-item' => [
                                     'name' => 'sub-item',
                                     'xsi:type' => 'object',
                                     'priority' => 100,
                                     '#' => 'SubItemObject',
                                 ],
-                                [
+                                'sub-item2' => [
                                     'name' => 'sub-item2',
                                     'xsi:type' => 'object',
                                     'priority' => 200,

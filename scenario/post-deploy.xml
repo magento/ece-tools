@@ -1,10 +1,4 @@
 <?xml version="1.0"?>
-<!--
-/**
- * Copyright © Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
- */
--->
 <scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
     <step name="is-deploy-failed" type="Magento\MagentoCloud\Step\PostDeploy\DeployFailed" priority="100"/>
     <step name="validate-config" type="Magento\MagentoCloud\Step\ValidateConfiguration" priority="200">
