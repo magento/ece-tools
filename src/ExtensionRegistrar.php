@@ -25,7 +25,7 @@ class ExtensionRegistrar
      * @throws \LogicException
      * @return void
      */
-    public static function register($componentName, $path)
+    public static function register($componentName, $path): void
     {
         if (isset(self::$paths[$componentName])) {
             throw new \LogicException(sprintf(
@@ -40,17 +40,22 @@ class ExtensionRegistrar
     }
 
     /**
-     * {@inheritdoc}
+     * Returns array of registered extensions
+     *
+     * @return array
      */
-    public static function getPaths()
+    public static function getPaths(): array
     {
         return self::$paths;
     }
 
     /**
-     * {@inheritdoc}
+     * Returns extension path by given extension name
+     *
+     * @param string $componentName
+     * @return string|null
      */
-    public static function getPath($componentName)
+    public static function getPath(string $componentName): ?string
     {
         return self::$paths[$componentName] ?? null;
     }

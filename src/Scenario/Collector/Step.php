@@ -66,9 +66,7 @@ class Step
                     $arguments[] = [
                         'name' => $argumentName,
                         'xsi:type' => $argumentType,
-                        'items' => $this->collectItems(
-                            is_array(reset($argument['item'])) ? $argument['item'] : [$argument['item']]
-                        ),
+                        'items' => $this->collectItems($this->prepareItem($argument['item'])),
                     ];
                     break;
                 case self::XSI_TYPE_OBJECT:
@@ -132,12 +130,23 @@ class Step
             if (isset($item[self::NODE_VALUE])) {
                 $newItem[self::NODE_VALUE] = $item[self::NODE_VALUE];
             } elseif (isset($item['item'])) {
-                $newItem['items'] = $this->collectItems($item['item']);
+                $newItem['items'] = $this->collectItems($this->prepareItem($item['item']));
             }
 
             $newItems[$itemName] = $newItem;
         }
 
         return $newItems;
+    }
+
+    /**
+     * Convert item to array of item
+     *
+     * @param array $item
+     * @return array
+     */
+    private function prepareItem(array $item): array
+    {
+        return is_array(reset($item)) ? $item : [$item];
     }
 }
