@@ -89,7 +89,7 @@ class Config
         }
 
         if ($this->configMerger->isMergeRequired($envQueueConfig)) {
-            return $this->configMerger->mergeConfigs($mqConfig, $envQueueConfig);
+            return $this->configMerger->merge($mqConfig, $envQueueConfig);
         }
 
         return $this->configMerger->clear($envQueueConfig);

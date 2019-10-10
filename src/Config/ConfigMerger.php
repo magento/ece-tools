@@ -57,13 +57,46 @@ class ConfigMerger
      * Merge two configs if merging is required, otherwise return $baseConfig without changes.
      *
      * @param array $baseConfig
-     * @param array $configToMerge
+     * @param array $customConfig
      * @return array
      */
-    public function mergeConfigs(array $baseConfig, array $configToMerge): array
+    public function merge(array $baseConfig, array $customConfig): array
     {
-        if ($this->isMergeRequired($configToMerge)) {
-            return array_replace_recursive($baseConfig, $this->clear($configToMerge));
+        if ($this->isMergeRequired($customConfig)) {
+            return array_replace_recursive($baseConfig, $this->clear($customConfig));
+        }
+
+        return $baseConfig;
+    }
+
+    /**
+     * Merges two configs according to rules.
+     *
+     * 1. If merge is required - merge configs
+     * 2. If specific key is required in $customConfig and present - merge configs
+     * 3. If no specific key is required and $customConfig not empty - merge configs
+     * 4. Otherwise return $baseConfig
+     *
+     * @param array $baseConfig
+     * @param array $customConfig
+     * @param string|null $key
+     * @return array
+     */
+    public function mergeIf(array $baseConfig, array $customConfig, string $key = null): array
+    {
+        $cleanedCustomConfig = $this->clear($customConfig);
+        $isMergeRequired = $this->isMergeRequired($customConfig);
+
+        if ($isMergeRequired) {
+            return $this->merge($baseConfig, $customConfig);
+        }
+
+        if ($key !== null && isset($cleanedCustomConfig[$key])) {
+            return $cleanedCustomConfig;
+        }
+
+        if ($key === null && $cleanedCustomConfig) {
+            return $cleanedCustomConfig;
         }
 
         return $baseConfig;

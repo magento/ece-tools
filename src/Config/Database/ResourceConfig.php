@@ -74,6 +74,6 @@ class ResourceConfig implements ConfigInterface
             return $this->mergedConfig = $this->configMerger->clear($envRsConfig);
         }
 
-        return $this->mergedConfig = $this->configMerger->mergeConfigs($this->rsConfig, $envRsConfig);
+        return $this->mergedConfig = $this->configMerger->merge($this->rsConfig, $envRsConfig);
     }
 }

@@ -34,7 +34,7 @@ class ConfigMergerTest extends TestCase
      * @param bool $expected
      * @dataProvider isEmptyDataProvider
      */
-    public function testIsEmpty(array $config, bool $expected)
+    public function testIsEmpty(array $config, bool $expected): void
     {
         $this->assertEquals($expected, $this->configMerger->isEmpty($config));
     }
@@ -67,7 +67,7 @@ class ConfigMergerTest extends TestCase
         ];
     }
 
-    public function testClear()
+    public function testClear(): void
     {
         $this->assertSame(
             ['key' => 'value'],
@@ -83,7 +83,7 @@ class ConfigMergerTest extends TestCase
      * @param bool $expected
      * @dataProvider isMergeRequiredDataProvider
      */
-    public function testIsMergeRequired(array $config, bool $expected)
+    public function testIsMergeRequired(array $config, bool $expected): void
     {
         $this->assertEquals($expected, $this->configMerger->isMergeRequired($config));
     }
@@ -127,20 +127,20 @@ class ConfigMergerTest extends TestCase
      * @param array $baseConfig
      * @param array $configToMerge
      * @param array $expected
-     * @dataProvider mergeConfigsDataProvider
+     * @dataProvider mergeDataProvider
      */
-    public function testMergeConfigs(array $baseConfig, array $configToMerge, array $expected)
+    public function testMerge(array $baseConfig, array $configToMerge, array $expected): void
     {
         $this->assertEquals(
             $expected,
-            $this->configMerger->mergeConfigs($baseConfig, $configToMerge)
+            $this->configMerger->merge($baseConfig, $configToMerge)
         );
     }
 
     /**
      * @return array
      */
-    public function mergeConfigsDataProvider(): array
+    public function mergeDataProvider(): array
     {
         return [
             [
@@ -194,6 +194,86 @@ class ConfigMergerTest extends TestCase
                 [
                     'key' => 'value2',
                     'key2' => 'value2',
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array $baseConfig
+     * @param array $customConfig
+     * @param string|null $key
+     * @param array $expected
+     * @dataProvider mergeIfDataProvider
+     */
+    public function testMergeIf(array $baseConfig, array $customConfig, $key, array $expected): void
+    {
+        $this->assertEquals(
+            $expected,
+            $this->configMerger->mergeIf($baseConfig, $customConfig, $key)
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function mergeIfDataProvider(): array
+    {
+        return [
+            [
+                [],
+                [],
+                null,
+                [],
+            ],
+            [
+                [
+                    'test1' => 'test1'
+                ],
+                [
+                    'test2' => 'test2'
+                ],
+                null,
+                [
+                    'test2' => 'test2'
+                ],
+            ],
+            [
+                [
+                    'test1' => 'test1'
+                ],
+                [
+                    'test2' => 'test2',
+                    StageConfigInterface::OPTION_MERGE => true
+                ],
+                null,
+                [
+                    'test1' => 'test1',
+                    'test2' => 'test2',
+                ],
+            ],
+            [
+                [
+                    'test1' => 'test1'
+                ],
+                [
+                    'test2' => 'test2',
+                ],
+                'test3',
+                [
+                    'test1' => 'test1',
+                ],
+            ],
+            [
+                [
+                    'test1' => 'test1'
+                ],
+                [
+                    'test2' => 'test2',
+                ],
+                'test2',
+                [
+                    'test2' => 'test2',
                 ],
             ],
         ];
