@@ -154,6 +154,7 @@ class StepTest extends TestCase
     }
 
     /**
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      * @throws \Magento\MagentoCloud\Scenario\Exception\ValidationException
      */
     public function testCollect()
