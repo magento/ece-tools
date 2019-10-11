@@ -77,10 +77,6 @@ class EnvironmentConfigTest extends TestCase
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => Environment::VAL_DISABLED]
             ],
             [
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => false],
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => Environment::VAL_DISABLED]
-            ],
-            [
                 [DeployInterface::VAR_UPDATE_URLS => false],
                 [DeployInterface::VAR_UPDATE_URLS => Environment::VAL_DISABLED]
             ],

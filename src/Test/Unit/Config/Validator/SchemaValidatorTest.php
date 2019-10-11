@@ -83,8 +83,6 @@ class SchemaValidatorTest extends TestCase
             [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, false, null],
             [DeployInterface::VAR_UPDATE_URLS, true, null],
             [DeployInterface::VAR_UPDATE_URLS, false, null],
-            [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, true, null],
-            [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, false, null],
             [DeployInterface::VAR_CLEAN_STATIC_FILES, true, null],
             [DeployInterface::VAR_CLEAN_STATIC_FILES, false, null],
             [DeployInterface::VAR_SEARCH_CONFIGURATION, ['someOptions' => 'someValue'], null],
@@ -199,12 +197,6 @@ class SchemaValidatorTest extends TestCase
                 DeployInterface::VAR_UPDATE_URLS,
                 0,
                 'The UPDATE_URLS variable contains an invalid value of type integer. ' .
-                'Use the following types: boolean.'
-            ],
-            [
-                DeployInterface::VAR_STATIC_CONTENT_SYMLINK,
-                0,
-                'The STATIC_CONTENT_SYMLINK variable contains an invalid value of type integer. ' .
                 'Use the following types: boolean.'
             ],
             [

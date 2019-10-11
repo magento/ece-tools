@@ -153,11 +153,6 @@ class MagentoCloudVariablesTest extends TestCase
                 'The variable CLEAN_STATIC_FILES has wrong value: "1" and will be ignored, use only disabled or enabled'
             ],
             [
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => '1'],
-                ResultInterface::ERROR,
-                'The variable STATIC_CONTENT_SYMLINK has wrong value: "1" and will be ignored'
-            ],
-            [
                 [DeployInterface::VAR_UPDATE_URLS => '1'],
                 ResultInterface::ERROR,
                 'The variable UPDATE_URLS has wrong value: "1" and will be ignored, use only disabled or enabled'
@@ -176,10 +171,6 @@ class MagentoCloudVariablesTest extends TestCase
             ],
             [
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => 'enabled'],
-                ResultInterface::SUCCESS,
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => 'enabled'],
                 ResultInterface::SUCCESS,
             ],
             [

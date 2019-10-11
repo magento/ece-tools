@@ -28,11 +28,6 @@ interface DeployInterface extends StageConfigInterface
     const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
 
     /**
-     * @deprecated will not be supported in the future
-     */
-    const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
-
-    /**
      * The variable responsible to set lock provider for Magento 2.2.5 and higher.
      */
     const VAR_LOCK_PROVIDER = 'LOCK_PROVIDER';

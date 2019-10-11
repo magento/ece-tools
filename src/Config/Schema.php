@@ -323,16 +323,6 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => false,
                 ],
             ],
-            DeployInterface::VAR_STATIC_CONTENT_SYMLINK => [
-                self::SCHEMA_TYPE => ['boolean'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_DEPLOY => true,
-                ],
-            ],
             DeployInterface::VAR_CLEAN_STATIC_FILES => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
