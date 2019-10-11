@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<config>
+    <report>
+        <dir_nesting_level>5</dir_nesting_level>
+    </report>
+</config>

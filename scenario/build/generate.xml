@@ -30,6 +30,7 @@
     </step>
     <step name="refresh-modules" type="Magento\MagentoCloud\Step\Build\RefreshModules"/>
     <step name="apply-patches" type="Magento\MagentoCloud\Step\Build\ApplyPatches"/>
+    <step name="set-report-dir-nesting-level" type="Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel"/>
     <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles"/>
     <step name="copy-sample-data" type="Magento\MagentoCloud\Step\Build\CopySampleData"/>
     <step name="compile-di" type="Magento\MagentoCloud\Step\Build\CompileDi"/>
