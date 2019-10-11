@@ -68,4 +68,9 @@ class ConfigFileListTest extends TestCase
     {
         $this->assertSame('magento_root/.magento.env.yaml', $this->configFileList->getEnvConfig());
     }
+
+    public function testGetErrorReportConfig()
+    {
+        $this->assertSame('magento_root/pub/errors/local.xml', $this->configFileList->getErrorReportConfig());
+    }
 }
