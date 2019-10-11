@@ -51,7 +51,7 @@ class DatabaseConfigurationCest extends AbstractCest
     protected function databaseConfigurationDataProvider(): array
     {
         return [
-            '_merge1' => [
+            'singleConfig' => [
                 'cloudVariables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'DATABASE_CONFIGURATION'=>['some_config' => 'value', '_merge' => true],
@@ -60,8 +60,7 @@ class DatabaseConfigurationCest extends AbstractCest
                 'mergedConfig' => 'some_config',
                 'defaultConfig' => 'db.magento2.docker',
             ],
-
-            '_merge2' => [
+            'multiConfig' => [
                 'cloudVariables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'DATABASE_CONFIGURATION'=>[
