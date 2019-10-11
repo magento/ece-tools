@@ -172,7 +172,9 @@ class EolValidator
         if (file_exists($this->fileList->getServiceEolsConfig() ?? '')) {
             $configs = Yaml::parseFile($this->fileList->getServiceEolsConfig() ?? '');
             // Return the configurations for the specific service.
-            return $configs[$this->service];
+            if (array_key_exists($this->service, $configs)) {
+                return $configs[$this->service];
+            }
         }
 
         return array();
