@@ -24,12 +24,12 @@
     </step>
     <step name="refresh-modules" type="Magento\MagentoCloud\Step\Build\RefreshModules" priority="400"/>
     <step name="apply-patches" type="Magento\MagentoCloud\Step\Build\ApplyPatches" priority="500"/>
-    <step name="set-report-dir-nesting-level" type="Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel"/>
-    <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles" priority="600"/>
-    <step name="copy-sample-data" type="Magento\MagentoCloud\Step\Build\CopySampleData" priority="700"/>
-    <step name="compile-di" type="Magento\MagentoCloud\Step\Build\CompileDi" priority="800"/>
-    <step name="dump-autoload" type="Magento\MagentoCloud\Step\Build\ComposerDumpAutoload" priority="900"/>
-    <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Build\DeployStaticContent" priority="1000">
+    <step name="set-report-dir-nesting-level" type="Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel" priority="600"/>
+    <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles" priority="700"/>
+    <step name="copy-sample-data" type="Magento\MagentoCloud\Step\Build\CopySampleData" priority="800"/>
+    <step name="compile-di" type="Magento\MagentoCloud\Step\Build\CompileDi" priority="900"/>
+    <step name="dump-autoload" type="Magento\MagentoCloud\Step\Build\ComposerDumpAutoload" priority="1000"/>
+    <step name="deploy-static-content" type="Magento\MagentoCloud\Step\Build\DeployStaticContent" priority="1100">
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="flag-manager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>

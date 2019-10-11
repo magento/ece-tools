@@ -11,7 +11,7 @@
                 <item name="clean-redis-cache" xsi:type="object" priority="400">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanRedisCache</item>
                 <item name="clean-file-cache" xsi:type="object" priority="500">Magento\MagentoCloud\Step\Deploy\PreDeploy\CleanFileCache</item>
                 <item name="restore-writable-dirs" xsi:type="object" priority="600">Magento\MagentoCloud\Step\Deploy\PreDeploy\RestoreWritableDirectories</item>
-                <item name="set-production-mode" xsi:type="object">Magento\MagentoCloud\Step\SetProductionMode</item>
+                <item name="set-production-mode" xsi:type="object" priority="700">Magento\MagentoCloud\Step\SetProductionMode</item>
             </argument>
         </arguments>
     </step>
