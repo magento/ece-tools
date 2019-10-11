@@ -65,7 +65,6 @@ class SchemaValidatorTest extends TestCase
             [StageConfigInterface::VAR_SCD_STRATEGY, 'compact', null],
             [StageConfigInterface::VAR_SCD_STRATEGY, 'standard', null],
             [StageConfigInterface::VAR_SCD_THREADS, 3, null],
-            [StageConfigInterface::VAR_SCD_EXCLUDE_THEMES, 'someTheme', null],
             [StageConfigInterface::VAR_SKIP_SCD, true, null],
             [StageConfigInterface::VAR_SKIP_SCD, false, null],
             [StageConfigInterface::VAR_SKIP_HTML_MINIFICATION, true, null, StageConfigInterface::STAGE_GLOBAL],
@@ -139,12 +138,6 @@ class SchemaValidatorTest extends TestCase
                 StageConfigInterface::VAR_SCD_THREADS,
                 'test',
                 'The SCD_THREADS variable contains an invalid value of type string. Use the following types: integer.'
-            ],
-            [
-                StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
-                123,
-                'The SCD_EXCLUDE_THEMES variable contains an invalid value of type integer. ' .
-                'Use the following types: string.'
             ],
             [
                 StageConfigInterface::VAR_SKIP_SCD,

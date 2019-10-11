@@ -42,7 +42,6 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_SCD_COMPRESSION_LEVEL => 6,
                 BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT => 600,
                 BuildInterface::VAR_SCD_THREADS => -1,
-                BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
                 BuildInterface::VAR_SCD_MAX_EXEC_TIME => null
@@ -74,7 +73,6 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_SKIP_SCD => false,
                 DeployInterface::VAR_SCD_THREADS => -1,
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK => true,
-                DeployInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => false,
@@ -135,7 +133,6 @@ class SchemaTest extends TestCase
             StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
             StageConfigInterface::VAR_SCD_STRATEGY,
             StageConfigInterface::VAR_SCD_THREADS,
-            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
             StageConfigInterface::VAR_SKIP_SCD,
             StageConfigInterface::VAR_VERBOSE_COMMANDS,
             StageConfigInterface::VAR_SCD_ON_DEMAND,

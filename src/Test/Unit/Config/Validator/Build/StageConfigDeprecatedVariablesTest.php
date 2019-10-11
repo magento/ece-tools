@@ -64,26 +64,4 @@ class StageConfigDeprecatedVariablesTest extends TestCase
 
         $this->assertInstanceOf(Success::class, $this->validator->validate());
     }
-
-    public function testValidateScdExcludeThemesIsDeprecated()
-    {
-        $this->environmentReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([
-                StageConfigInterface::SECTION_STAGE => [
-                    StageConfigInterface::STAGE_DEPLOY => [
-                        StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => 'theme1'
-                    ],
-                ],
-            ]);
-        $this->resultFactoryMock->expects($this->once())
-            ->method('create')
-            ->with('error', [
-                'error' => 'Some configurations in your .magento.env.yaml file is deprecated.',
-                'suggestion' => 'The SCD_EXCLUDE_THEMES variable is deprecated. Use SCD_MATRIX instead.'
-            ])
-            ->willReturn($this->createMock(Error::class));
-
-        $this->assertInstanceOf(Error::class, $this->validator->validate());
-    }
 }

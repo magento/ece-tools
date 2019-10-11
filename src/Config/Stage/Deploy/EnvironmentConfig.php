@@ -41,11 +41,6 @@ class EnvironmentConfig
         $variables = $this->convertEnabledDisabledVariables($this->environment->getVariables());
         $variables = $this->convertIntegerVariables($variables);
 
-        if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
-            $variables[DeployInterface::VAR_SCD_EXCLUDE_THEMES] = $variables['STATIC_CONTENT_EXCLUDE_THEMES'];
-            unset($variables['STATIC_CONTENT_EXCLUDE_THEMES']);
-        }
-
         if (isset($variables[DeployInterface::VAR_VERBOSE_COMMANDS]) &&
             !in_array($variables[DeployInterface::VAR_VERBOSE_COMMANDS], ['-v', '-vv', '-vvv'])
         ) {

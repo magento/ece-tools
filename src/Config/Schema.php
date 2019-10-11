@@ -135,18 +135,6 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE,
                 ],
             ],
-            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => '',
-                    StageConfigInterface::STAGE_DEPLOY => '',
-                ],
-            ],
             StageConfigInterface::VAR_SCD_MAX_EXEC_TIME => [
                 self::SCHEMA_TYPE => ['integer'],
                 self::SCHEMA_STAGE => [
@@ -504,10 +492,6 @@ class Schema
      */
     public function getDeprecatedSchema()
     {
-        return [
-            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
-                self::SCHEMA_REPLACEMENT => StageConfigInterface::VAR_SCD_MATRIX,
-            ],
-        ];
+        return [];
     }
 }

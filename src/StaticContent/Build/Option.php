@@ -97,16 +97,6 @@ class Option implements OptionInterface
     /**
      * @inheritdoc
      */
-    public function getExcludedThemes(): array
-    {
-        $themes = preg_split('/[,]+/', $this->stageConfig->get(BuildInterface::VAR_SCD_EXCLUDE_THEMES));
-
-        return array_filter(array_map('trim', $themes));
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function getStrategy(): string
     {
         return $this->stageConfig->get(BuildInterface::VAR_SCD_STRATEGY);

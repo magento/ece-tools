@@ -89,10 +89,6 @@ class EnvironmentConfigTest extends TestCase
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK => Environment::VAL_DISABLED]
             ],
             [
-                [DeployInterface::VAR_SCD_EXCLUDE_THEMES => 'theme'],
-                ['STATIC_CONTENT_EXCLUDE_THEMES' => 'theme']
-            ],
-            [
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => 3],
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '3']
             ],

@@ -41,11 +41,6 @@ interface StageConfigInterface
     const VAR_X_FRAME_CONFIGURATION = 'X_FRAME_CONFIGURATION';
 
     /**
-     * @deprecated use SCD_MATRIX instead.
-     */
-    const VAR_SCD_EXCLUDE_THEMES = 'SCD_EXCLUDE_THEMES';
-
-    /**
      * Environment variables.
      */
     const VAR_ENV_RELATIONSHIPS = 'ENV_RELATIONSHIPS';
