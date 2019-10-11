@@ -182,4 +182,21 @@ class MergerTest extends TestCase
 
         $this->merger->merge(['scenario1.xml']);
     }
+
+    /**
+     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
+     * @expectedExceptionMessage Steps aren't exist in "scenario1.xml" file
+     */
+    public function testNoStepsInScenarioException()
+    {
+        $this->scenarioCollectorMock->expects($this->once())
+            ->method('collect')
+            ->with('scenario1.xml')
+            ->willReturn([
+                '@xmlns:xsi' => 'http://www.w3.org/2001/XMLSchema-instance',
+                '@xsi:noNamespaceSchemaLocation' => '../../config/scenario.xsd',
+            ]);
+
+        $this->merger->merge(['scenario1.xml']);
+    }
 }

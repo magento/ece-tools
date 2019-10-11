@@ -74,7 +74,7 @@ class Step
                     $arguments[] = [
                         'name' => $argumentName,
                         'xsi:type' => $argumentType,
-                        self::NODE_VALUE => $argument[self::NODE_VALUE]
+                        self::NODE_VALUE => $argument[self::NODE_VALUE],
                     ];
                     break;
                 default:
@@ -89,7 +89,8 @@ class Step
         $stepData = [
             'name' => $stepName,
             'type' => $step['@type'] ?? '',
-            'arguments' => $arguments
+            'arguments' => $arguments,
+            'skip' => isset($step['@skip']) && $step['@skip'] === 'true'
         ];
 
         if (isset($step['@priority'])) {
@@ -125,6 +126,7 @@ class Step
                 'name' => $itemName,
                 'xsi:type' => $item['@xsi:type'],
                 'priority' => $item['@priority'] ?? self::DEFAULT_PRIORITY,
+                'skip' => isset($item['@skip']) && $item['@skip'] === 'true'
             ];
 
             if (isset($item[self::NODE_VALUE])) {

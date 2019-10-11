@@ -9,6 +9,7 @@
     <xs:complexType name="argumentType" abstract="true" mixed="true">
         <xs:attribute name="name" use="required"/>
         <xs:attribute name="priority" type="xs:integer"/>
+        <xs:attribute name="skip" type="xs:boolean"/>
     </xs:complexType>
 
     <xs:element name="scenario">
@@ -52,6 +53,7 @@
         <xs:attribute name="name" type="xs:string" use="required"/>
         <xs:attribute name="type" type="phpClassName"/>
         <xs:attribute name="priority" type="xs:integer"/>
+        <xs:attribute name="skip" type="xs:boolean"/>
     </xs:complexType>
 
     <xs:simpleType name="phpClassName">

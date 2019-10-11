@@ -167,6 +167,7 @@ class StepTest extends TestCase
                                         '@name' => 'sub-item2',
                                         '@xsi:type' => 'object',
                                         '@priority' => 200,
+                                        '@skip' => 'true',
                                         '#' => 'SubItemObject2',
                                     ]
                                 ]
@@ -180,6 +181,7 @@ class StepTest extends TestCase
         $expectedResult = [
             'name' => 'backup-data',
             'type' => 'Magento\MagentoCloud\Step\Build\BackupData',
+            'skip' => false,
             'arguments' => [
                 [
                     'name' => 'logger',
@@ -195,29 +197,34 @@ class StepTest extends TestCase
                             'xsi:type' => 'object',
                             '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
                             'priority' => 100,
+                            'skip' => false,
                         ],
                         'non-static-content' => [
                             'name' => 'non-static-content',
                             'xsi:type' => 'object',
                             '#' => 'Magento\MagentoCloud\Step\Build\BackupData\StaticContent',
                             'priority' => 200,
+                            'skip' => false,
                         ],
                         500 => [
                             'name' => '500',
                             'xsi:type' => 'array',
                             'priority' => 300,
+                            'skip' => false,
                             'items' => [
                                 'sub-item' => [
                                     'name' => 'sub-item',
                                     'xsi:type' => 'object',
                                     'priority' => 100,
                                     '#' => 'SubItemObject',
+                                    'skip' => false,
                                 ],
                                 'sub-item2' => [
                                     'name' => 'sub-item2',
                                     'xsi:type' => 'object',
                                     'priority' => 200,
                                     '#' => 'SubItemObject2',
+                                    'skip' => true,
                                 ],
                             ],
                         ],

@@ -37,7 +37,8 @@ class Merger
      */
     private static $stepRequiredArgs = [
         '@name',
-        '@priority'
+        '@priority',
+        '@type'
     ];
 
     /**
@@ -65,14 +66,14 @@ class Merger
 
         foreach ($scenarios as $scenario) {
             $scenarioData = $this->scenarioCollector->collect($scenario);
+            if (!isset($scenarioData['step'])) {
+                throw new ValidationException(sprintf('Steps aren\'t exist in "%s" file', $scenario));
+            }
 
-            foreach ($scenarioData['step'] ?? [] as $step) {
-                if ($missedArgs = array_diff(self::$stepRequiredArgs, array_keys($step))) {
-                    throw new ValidationException(sprintf(
-                        'Argument(s) "%s" are missed from step',
-                        implode(', ', $missedArgs)
-                    ));
-                }
+            $steps = is_array(reset($scenarioData['step'])) ? $scenarioData['step'] : [$scenarioData['step']];
+
+            foreach ($steps as $step) {
+                $this->validateStep($step);
 
                 $data[$step['@name']] = array_replace_recursive(
                     $data[$step['@name']] ?? [],
@@ -82,5 +83,26 @@ class Merger
         }
 
         return $this->resolver->resolve($data);
+    }
+
+    /**
+     * Validates if exists all required attributes.
+     *
+     * @param array $step
+     * @throws ValidationException
+     * @return void
+     */
+    private function validateStep(array $step): void
+    {
+        $isSkipped = isset($step['@skip']) && $step['@skip'] === 'true';
+
+        $requiredAttributes = $isSkipped ? ['@name'] : self::$stepRequiredArgs;
+
+        if ($missedArgs = array_diff($requiredAttributes, array_keys($step))) {
+            throw new ValidationException(sprintf(
+                'Argument(s) "%s" are missed from step',
+                implode(', ', $missedArgs)
+            ));
+        }
     }
 }

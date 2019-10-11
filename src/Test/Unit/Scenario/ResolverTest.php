@@ -68,6 +68,7 @@ class ResolverTest extends TestCase
             [
                 'name' => 'step1',
                 'type' => StepInterface::class,
+                'skip' => false,
                 'arguments' => [
                     'arg1' => [
                         'name' => 'arg1',
@@ -86,12 +87,14 @@ class ResolverTest extends TestCase
                             'arg31' => [
                                 'name' => 'arg31',
                                 'xsi:type' => Step::XSI_TYPE_STRING,
-                                '#' => 'Some string 2'
+                                '#' => 'Some string 2',
+                                'skip' => false,
                             ],
                             'arg32' => [
                                 'name' => 'arg32',
                                 'xsi:type' => Step::XSI_TYPE_OBJECT,
-                                '#' => ''
+                                '#' => 'Object',
+                                'skip' => true,
                             ],
                         ]
                     ]
@@ -99,8 +102,9 @@ class ResolverTest extends TestCase
             ],
             [
                 'name' => 'step2',
-                'type' => '',
-                'arguments' => []
+                'type' => 'someType',
+                'arguments' => [],
+                'skip' => true,
             ]
         ];
 
@@ -179,7 +183,8 @@ class ResolverTest extends TestCase
                         'xsi:type' => 'Some type',
                         '#' => 'Some string',
                     ],
-                ]
+                ],
+                'skip' => false,
             ]
         ];
 
@@ -211,7 +216,8 @@ class ResolverTest extends TestCase
                         'xsi:type' => Step::XSI_TYPE_STRING,
                         '#' => 'Some string',
                     ],
-                ]
+                ],
+                'skip' => false,
             ]
         ];
 
@@ -238,7 +244,8 @@ class ResolverTest extends TestCase
             [
                 'name' => 'step1',
                 'type' => ShellInterface::class,
-                'arguments' => []
+                'arguments' => [],
+                'skip' => false,
             ]
         ];
 

@@ -53,7 +53,7 @@ class Resolver
         $this->sorter->sortScenarios($scenarios);
 
         foreach ($scenarios as $step) {
-            if (!$step['type']) {
+            if ($step['skip']) {
                 $instance = $this->container->create(DummyStep::class, [
                     $this->container->get(LoggerInterface::class),
                     $step['name']
@@ -104,12 +104,12 @@ class Resolver
 
             switch ($type) {
                 case Step::XSI_TYPE_OBJECT:
-                    $newData[$name] = $item[Step::NODE_VALUE] ?
-                        $this->container->create($item[Step::NODE_VALUE]) :
+                    $newData[$name] = isset($item['skip']) && $item['skip'] ?
                         $this->container->create(DummyStep::class, [
                             $this->container->get(LoggerInterface::class),
                             $name
-                        ]);
+                        ]) :
+                        $this->container->create($item[Step::NODE_VALUE]);
                     break;
                 case Step::XSI_TYPE_STRING:
                     $newData[$name] = $item[Step::NODE_VALUE];
