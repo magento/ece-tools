@@ -65,4 +65,12 @@ class ConfigFileList
     {
         return $this->systemList->getMagentoRoot() . '/.magento.env.yaml';
     }
+
+    /**
+     * @return string
+     */
+    public function getErrorReportConfig(): string
+    {
+        return $this->systemList->getMagentoRoot() . '/pub/errors/local.xml';
+    }
 }
