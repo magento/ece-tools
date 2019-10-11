@@ -112,10 +112,10 @@ class EolValidator
     protected function getServiceVersion(string $serviceName) : string
     {
         switch ($serviceName) {
-            case 'php':
+            case ServiceInterface::NAME_PHP:
                 $serviceVersion = PHP_VERSION;
                 break;
-            case 'elasticsearch':
+            case ServiceInterface::NAME_ELASTICSEARCH:
                 $serviceVersion = $this->elasticSearch->getVersion();
                 break;
             default:
@@ -145,8 +145,7 @@ class EolValidator
 
         // If there are no configurations found for the current service and version,
         // or if an EOL is not defined or is invalid, return a message with details.
-        if (!$versionConfigs || !$versionConfigs[array_key_first($versionConfigs)]['eol']
-            || !$eolDate = date_create($versionConfigs[array_key_first($versionConfigs)]['eol'])) {
+        if (!$versionConfigs || $versionConfigs[array_key_first($versionConfigs)]['eol'] === null) {
             return $this->errorLevel === ValidatorInterface::LEVEL_WARNING ? sprintf(
                 'Unknown or invalid EOL defined for %s %s',
                 $this->service,
@@ -154,10 +153,11 @@ class EolValidator
             ) : '';
         }
 
-        $interval = date_diff($eolDate, date_create('now'));
-
         // If the EOL is in the past, issue a warning.
         // If the EOL is in the future, but within a three month period, issue a notice.
+        $eolDate = date_create('now');
+        date_timestamp_set($eolDate, $versionConfigs[array_key_first($versionConfigs)]['eol']);
+        $interval = date_diff($eolDate, date_create('now'));
         return $this->getServiceEolNotifications($eolDate, $interval);
     }
 

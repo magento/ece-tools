@@ -58,7 +58,7 @@ class Warnings implements ValidatorInterface
 
             if ($errors) {
                 return $this->resultFactory->error(
-                    'Some services have passed EOL or is not defined.',
+                    'Some services have their passed EOL or is not defined.',
                     implode(PHP_EOL, $errors)
                 );
             }
