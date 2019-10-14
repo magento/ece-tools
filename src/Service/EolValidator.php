@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Service;
 
+use Carbon\Carbon;
 use Composer\Semver\Semver;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
@@ -19,6 +20,11 @@ use Symfony\Component\Yaml\Yaml;
  */
 class EolValidator
 {
+    /**
+     * Set the notification period.
+     */
+    private const NOTIFICATION_PERIOD = 3;
+
     /**
      * @var FileList
      */
@@ -35,19 +41,15 @@ class EolValidator
     private $elasticSearch;
 
     /**
-     * @var string
+     * @var array
      */
-    private $service;
-
-    /**
-     * @var string
-     */
-    private $version;
-
-    /**
-     * @var integer
-     */
-    private $errorLevel;
+    private $services = [
+        ServiceInterface::NAME_PHP,
+        ServiceInterface::NAME_ELASTICSEARCH,
+        ServiceInterface::NAME_RABBITMQ,
+        ServiceInterface::NAME_REDIS,
+        ServiceInterface::NAME_DB
+    ];
 
     /**
      * EolValidator constructor.
@@ -75,26 +77,13 @@ class EolValidator
      */
     public function validateServiceEol(int $errorLevel): array
     {
-        $this->errorLevel = $errorLevel;
         $errors = [];
 
-        // Get all services and their versions for validation.
-        $services = [
-            ServiceInterface::NAME_PHP,
-            ServiceInterface::NAME_ELASTICSEARCH,
-            ServiceInterface::NAME_RABBITMQ,
-            ServiceInterface::NAME_REDIS,
-            ServiceInterface::NAME_DB
-        ];
-
-        foreach ($services as $serviceName) {
+        foreach ($this->services as $serviceName) {
             $serviceVersion = $this->getServiceVersion($serviceName);
 
-            $this->service = $serviceName;
-            $this->version = $serviceVersion;
-
             // Validate EOL for each service.
-            if ($validationResult = $this->validateService()) {
+            if ($validationResult = $this->validateService($serviceName, $serviceVersion, $errorLevel)) {
                 $errors[] = $validationResult;
             }
         }
@@ -109,7 +98,7 @@ class EolValidator
      * @return string
      * @throws ServiceMismatchException
      */
-    protected function getServiceVersion(string $serviceName) : string
+    private function getServiceVersion(string $serviceName) : string
     {
         switch ($serviceName) {
             case ServiceInterface::NAME_PHP:
@@ -130,84 +119,92 @@ class EolValidator
     /**
      * Validates a given service and version.
      *
+     * @param string $serviceName
+     * @param string $serviceVersion
+     * @param int $errorLevel
      * @return string
-     * @throws \Exception
      */
-    protected function validateService() : string
+    private function validateService(string $serviceName, string $serviceVersion, int $errorLevel) : string
     {
         // Get the EOL configurations for the current service.
-        $serviceConfigs = $this->getServiceEolConfigs();
+        $serviceConfigs = $this->getServiceEolConfigs($serviceName);
 
         // Check if configurations exist for the current service and version.
-        $versionConfigs = array_filter($serviceConfigs, function ($v) {
-            return Semver::satisfies($this->version, sprintf('%s.x', $v['version']));
+        $versionConfigs = array_filter($serviceConfigs, function ($v) use ($serviceVersion) {
+            return Semver::satisfies($serviceVersion, sprintf('%s.x', $v['version']));
         });
 
         // If there are no configurations found for the current service and version,
         // or if an EOL is not defined or is invalid, return a message with details.
         if (!$versionConfigs || $versionConfigs[array_key_first($versionConfigs)]['eol'] === null) {
-            return $this->errorLevel === ValidatorInterface::LEVEL_WARNING ? sprintf(
+            return $errorLevel === ValidatorInterface::LEVEL_WARNING ? sprintf(
                 'Unknown or invalid EOL defined for %s %s',
-                $this->service,
-                $this->version
+                $serviceName,
+                $serviceVersion
             ) : '';
         }
 
+        $eolDate = Carbon::createFromTimestamp($versionConfigs[array_key_first($versionConfigs)]['eol']);
+
         // If the EOL is in the past, issue a warning.
         // If the EOL is in the future, but within a three month period, issue a notice.
-        $eolDate = date_create('now');
-        date_timestamp_set($eolDate, $versionConfigs[array_key_first($versionConfigs)]['eol']);
-        $interval = date_diff($eolDate, date_create('now'));
-        return $this->getServiceEolNotifications($eolDate, $interval);
+        return $this->getServiceEolNotifications($eolDate, $errorLevel, $serviceName, $serviceVersion);
     }
 
     /**
      * Gets the EOL configurations for the current service from eol.yaml.
      *
+     * @param string $serviceName
      * @return array
      */
-    protected function getServiceEolConfigs() : array
+    private function getServiceEolConfigs(string $serviceName) : array
     {
         // Check if the the configuration yaml file exists, and retrieve it's path.
-        if (file_exists($this->fileList->getServiceEolsConfig() ?? '')) {
-            $configs = Yaml::parseFile($this->fileList->getServiceEolsConfig() ?? '');
+        if (file_exists($this->fileList->getServiceEolsConfig())) {
+            $configs = Yaml::parseFile($this->fileList->getServiceEolsConfig());
             // Return the configurations for the specific service.
-            if (array_key_exists($this->service, $configs)) {
-                return $configs[$this->service];
+            if (array_key_exists($serviceName, $configs)) {
+                return $configs[$serviceName];
             }
         }
 
-        return array();
+        return [];
     }
 
     /**
      * Gets the service notifications by error level.
      *
-     * @param \DateTime $eolDate
-     * @param \DateInterval $interval
+     * @param Carbon $eolDate
+     * @param int $errorLevel
+     * @param string $serviceName
+     * @param string $version
      * @return string
      */
-    protected function getServiceEolNotifications(\DateTime $eolDate, \DateInterval $interval) : string
-    {
-        switch ($this->errorLevel) {
+    private function getServiceEolNotifications(
+        Carbon $eolDate,
+        int $errorLevel,
+        string $serviceName,
+        string $version
+    ) : string {
+        switch ($errorLevel) {
             case ValidatorInterface::LEVEL_WARNING:
                 // If the EOL date is in the past, issue a warning.
-                if ($interval->invert === 0) {
+                if (!$eolDate->isFuture()) {
                     return sprintf(
                         '%s %s has passed EOL (%s).',
-                        $this->service,
-                        $this->version,
+                        $serviceName,
+                        $version,
                         date_format($eolDate, 'Y-m-d')
                     );
                 }
                 break;
             case ValidatorInterface::LEVEL_NOTICE:
                 // If the EOL date is within 3 months in the future, issue a notice.
-                if ($interval->invert === 1 && $interval->y == 0 && $interval->m <= 3) {
+                if ($eolDate->isFuture() && $eolDate->diffInMonths(Carbon::now()) <= self::NOTIFICATION_PERIOD) {
                     return sprintf(
                         '%s %s is approaching EOL (%s).',
-                        $this->service,
-                        $this->version,
+                        $serviceName,
+                        $version,
                         date_format($eolDate, 'Y-m-d')
                     );
                 }

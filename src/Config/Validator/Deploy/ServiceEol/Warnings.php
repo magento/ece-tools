@@ -20,7 +20,7 @@ class Warnings implements ValidatorInterface
     /**
      * Define validation level.
      */
-    const ERROR_LEVEL = ValidatorInterface::LEVEL_WARNING;
+    private const ERROR_LEVEL = ValidatorInterface::LEVEL_WARNING;
 
     /**
      * @var Validator\ResultFactory

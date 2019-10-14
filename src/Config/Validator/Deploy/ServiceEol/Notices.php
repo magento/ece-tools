@@ -20,7 +20,7 @@ class Notices implements ValidatorInterface
     /**
      * Define validation level.
      */
-    const ERROR_LEVEL = ValidatorInterface::LEVEL_NOTICE;
+    private const ERROR_LEVEL = ValidatorInterface::LEVEL_NOTICE;
 
     /**
      * @var Validator\ResultFactory
