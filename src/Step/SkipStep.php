@@ -10,14 +10,16 @@ namespace Magento\MagentoCloud\Step;
 use Psr\Log\LoggerInterface;
 
 /**
- * Dummy class for skipped tests.
+ * Class for skipped tests.
+ * Logs the information about skipped tests.
  */
-class DummyStep implements StepInterface
+class SkipStep implements StepInterface
 {
     /**
      * @var LoggerInterface
      */
     private $logger;
+
     /**
      * @var string
      */

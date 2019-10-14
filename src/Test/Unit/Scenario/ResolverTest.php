@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Scenario;
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Scenario\Collector\Step;
 use Magento\MagentoCloud\Scenario\Sorter;
-use Magento\MagentoCloud\Step\DummyStep;
+use Magento\MagentoCloud\Step\SkipStep;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\Resolver;
@@ -109,12 +109,12 @@ class ResolverTest extends TestCase
         ];
 
         $step1Mock = $this->getMockForAbstractClass(StepInterface::class);
-        $dummyStepMock = $this->getMockForAbstractClass(StepInterface::class);
+        $skipStepMock = $this->getMockForAbstractClass(StepInterface::class);
         $arg2Mock = $this->getMockForAbstractClass(ShellInterface::class);
 
         $instances = [
             'step1' => $step1Mock,
-            'step2' => $dummyStepMock
+            'step2' => $skipStepMock
         ];
 
         $this->containerMock->method('get')
@@ -128,7 +128,7 @@ class ResolverTest extends TestCase
                     [
                         'arg1' => 'Some string',
                         'arg2' => $arg2Mock,
-                        'arg3' => ['arg31' => 'Some string 2', 'arg32' => $dummyStepMock]
+                        'arg3' => ['arg31' => 'Some string 2', 'arg32' => $skipStepMock]
                     ],
                     $step1Mock
                 ],
@@ -138,14 +138,14 @@ class ResolverTest extends TestCase
                     $arg2Mock
                 ],
                 [
-                    DummyStep::class,
+                    SkipStep::class,
                     [$this->loggerMock, 'arg32'],
-                    $dummyStepMock
+                    $skipStepMock
                 ],
                 [
-                    DummyStep::class,
+                    SkipStep::class,
                     [$this->loggerMock, 'step2'],
-                    $dummyStepMock
+                    $skipStepMock
                 ]
             ]);
 

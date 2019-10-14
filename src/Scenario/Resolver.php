@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Scenario;
 
 use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Scenario\Collector\Step;
-use Magento\MagentoCloud\Step\DummyStep;
+use Magento\MagentoCloud\Step\SkipStep;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Psr\Log\LoggerInterface;
@@ -54,7 +54,7 @@ class Resolver
 
         foreach ($scenarios as $step) {
             if ($step['skip']) {
-                $instance = $this->container->create(DummyStep::class, [
+                $instance = $this->container->create(SkipStep::class, [
                     $this->container->get(LoggerInterface::class),
                     $step['name']
                 ]);
@@ -105,7 +105,7 @@ class Resolver
             switch ($type) {
                 case Step::XSI_TYPE_OBJECT:
                     $newData[$name] = isset($item['skip']) && $item['skip'] ?
-                        $this->container->create(DummyStep::class, [
+                        $this->container->create(SkipStep::class, [
                             $this->container->get(LoggerInterface::class),
                             $name
                         ]) :
