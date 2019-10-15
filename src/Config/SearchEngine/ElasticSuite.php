@@ -66,7 +66,7 @@ class ElasticSuite
     {
         $envConfig = (array)$this->stageConfig->get(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION);
 
-        if ($envConfig && !$this->configMerger->isMergeRequired($envConfig)) {
+        if (!$this->configMerger->isEmpty($envConfig) && !$this->configMerger->isMergeRequired($envConfig)) {
             return $this->configMerger->clear($envConfig);
         }
 
