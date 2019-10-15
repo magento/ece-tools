@@ -110,7 +110,7 @@ class Config
             $defaultConfig['redis']['disable_locking'] = $disableLocking;
         }
 
-        return $this->configMerger->mergeConfigs($defaultConfig, $envSessionConfiguration);
+        return $this->configMerger->merge($defaultConfig, $envSessionConfiguration);
     }
 
     /**
