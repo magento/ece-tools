@@ -180,6 +180,12 @@
     "Re-work consumers to terminate as soon as there is nothing left to process": {
       "2.2.0 - 2.3.1": "MAGECLOUD-4071__terminate_consumers_if_the_queue_is_empty__2.2.0.patch",
       "2.3.2 - 2.3.3": "MAGECLOUD-4071__terminate_consumers_if_the_queue_is_empty__2.3.2.patch"
+    },
+    "Catalog Product pagination does not work on Elasticsearch 6.x": {
+      "2.3.3": "MC-21696__fix_broken_pagination_on_ES6__2.3.3.patch"
+    },
+    "Catalog Product collection method chaining is broken": {
+      "2.3.3": "MC-21820__fix_broken_method_chaining__2.3.3.patch"
     }
   },
   "monolog/monolog": {
