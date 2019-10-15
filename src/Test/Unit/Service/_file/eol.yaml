@@ -1,0 +1,38 @@
+# Service EOLs (YYYY-MM-DD).
+php:
+  - version: '7.0'
+    eol:
+  - version: '7.1'
+    eol:
+  - version: '7.2'
+    eol:
+mariadb:
+  - version: '10.0'
+    eol:
+  - version: '10.1'
+    eol:
+  - version: '10.2'
+    eol:
+elasticsearch:
+  - version: '1.7'
+    eol:
+  - version: '2.4'
+    eol:
+  - version: '5.2'
+    eol:
+  - version: '6.5'
+    eol:
+rabbitmq:
+  - version: '3.5'
+    eol:
+  - version: '3.7'
+    eol:
+redis:
+  - version: '3.2'
+    eol:
+  - version: '4.0'
+    eol:
+  - version: '5.0'
+    eol:
+  - version: '5.2'
+    eol:

@@ -92,31 +92,6 @@ class EolValidator
     }
 
     /**
-     * Gets the version of a given service.
-     *
-     * @param string $serviceName
-     * @return string
-     * @throws ServiceMismatchException
-     */
-    private function getServiceVersion(string $serviceName) : string
-    {
-        switch ($serviceName) {
-            case ServiceInterface::NAME_PHP:
-                $serviceVersion = PHP_VERSION;
-                break;
-            case ServiceInterface::NAME_ELASTICSEARCH:
-                $serviceVersion = $this->elasticSearch->getVersion();
-                break;
-            default:
-                $service = $this->serviceFactory->create($serviceName);
-                $serviceVersion = $service->getVersion();
-                break;
-        }
-
-        return $serviceVersion;
-    }
-
-    /**
      * Validates a given service and version.
      *
      * @param string $serviceName
@@ -124,7 +99,7 @@ class EolValidator
      * @param int $errorLevel
      * @return string
      */
-    private function validateService(string $serviceName, string $serviceVersion, int $errorLevel) : string
+    public function validateService(string $serviceName, string $serviceVersion, int $errorLevel) : string
     {
         // Get the EOL configurations for the current service.
         $serviceConfigs = $this->getServiceEolConfigs($serviceName);
@@ -149,6 +124,31 @@ class EolValidator
         // If the EOL is in the past, issue a warning.
         // If the EOL is in the future, but within a three month period, issue a notice.
         return $this->getServiceEolNotifications($eolDate, $errorLevel, $serviceName, $serviceVersion);
+    }
+
+    /**
+     * Gets the version of a given service.
+     *
+     * @param string $serviceName
+     * @return string
+     * @throws ServiceMismatchException
+     */
+    private function getServiceVersion(string $serviceName) : string
+    {
+        switch ($serviceName) {
+            case ServiceInterface::NAME_PHP:
+                $serviceVersion = PHP_VERSION;
+                break;
+            case ServiceInterface::NAME_ELASTICSEARCH:
+                $serviceVersion = $this->elasticSearch->getVersion();
+                break;
+            default:
+                $service = $this->serviceFactory->create($serviceName);
+                $serviceVersion = $service->getVersion();
+                break;
+        }
+
+        return $serviceVersion;
     }
 
     /**

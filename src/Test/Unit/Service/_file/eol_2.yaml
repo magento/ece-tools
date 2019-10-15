@@ -1,0 +1,8 @@
+php:
+  - version: '7.0'
+    eol: 2018-12-01
+  - version: '7.1'
+    eol: 2019-12-01
+elasticsearch:
+    - version: '6.5'
+      eol: 2020-05-14
