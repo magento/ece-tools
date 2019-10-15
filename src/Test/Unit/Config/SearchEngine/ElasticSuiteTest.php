@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\SearchEngine;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Package\Manager;
 use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
@@ -63,15 +64,14 @@ class ElasticSuiteTest extends TestCase
         );
     }
 
-    public function testGetNoES()
+    public function testGetNoES(): void
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION)
             ->willReturn(['some' => 'value']);
-        $this->elasticSearchMock->expects($this->once())
-            ->method('getConfiguration')
-            ->willReturn([]);
+        $this->elasticSearchMock->expects($this->never())
+            ->method('getConfiguration');
 
         $this->assertSame(
             ['some' => 'value'],
@@ -84,7 +84,7 @@ class ElasticSuiteTest extends TestCase
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION)
-            ->willReturn(['some' => 'value']);
+            ->willReturn([]);
         $this->elasticSearchMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn([
@@ -105,7 +105,16 @@ class ElasticSuiteTest extends TestCase
             ]);
 
         $this->assertSame(
-            ['some' => 'value'],
+            [
+                'es_client' => [
+                    'servers' => '127.0.0.1:1234',
+                    'indices_alias' => 'magento2'
+                ],
+                'indices_settings' => [
+                    'number_of_shards' => 1,
+                    'number_of_replicas' => 2
+                ]
+            ],
             $this->elasticSuite->get()
         );
     }
@@ -115,7 +124,7 @@ class ElasticSuiteTest extends TestCase
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION)
-            ->willReturn(['some' => 'value']);
+            ->willReturn(['some' => 'value', StageConfigInterface::OPTION_MERGE => true]);
         $this->elasticSearchMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn([
@@ -134,7 +143,16 @@ class ElasticSuiteTest extends TestCase
             ]);
 
         $this->assertSame(
-            ['some' => 'value'],
+            [
+                'es_client' => [
+                    'servers' => '127.0.0.1:1234',
+                    'indices_alias' => 'magento2'
+                ],
+                'indices_settings' => [
+                    'number_of_replicas' => 2
+                ],
+                'some' => 'value'
+            ],
             $this->elasticSuite->get()
         );
     }
@@ -144,7 +162,7 @@ class ElasticSuiteTest extends TestCase
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION)
-            ->willReturn(['some' => 'value']);
+            ->willReturn(['some' => 'value', StageConfigInterface::OPTION_MERGE => true]);
         $this->elasticSearchMock->expects($this->once())
             ->method('getConfiguration')
             ->willReturn([
@@ -163,7 +181,16 @@ class ElasticSuiteTest extends TestCase
             ]);
 
         $this->assertSame(
-            ['some' => 'value'],
+            [
+                'es_client' => [
+                    'servers' => '127.0.0.1:1234',
+                    'indices_alias' => 'magento2'
+                ],
+                'indices_settings' => [
+                    'number_of_shards' => 1
+                ],
+                'some' => 'value'
+            ],
             $this->elasticSuite->get()
         );
     }
