@@ -274,6 +274,11 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ],
         ];
 
+        $commands[] = $this->taskComposerRequire('composer')
+            ->dependency('hirak/prestissimo', '*')
+            ->noInteraction()
+            ->getCommand();
+
         // Temporary fix until 2.3.3 is fully published
         if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
             $commands[] = 'rm composer.lock';
@@ -292,9 +297,42 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->dependency('magento/ece-tools', $eceToolsVersion)
             ->noInteraction()
             ->getCommand();
+        $result = $this->taskBash(self::BUILD_CONTAINER)
+            ->workingDir((string)$this->_getConfig('system_magento_dir'))
+            ->printOutput($this->_getConfig('printOutput'))
+            ->interactive(false)
+            ->exec(implode(' && ', $commands))
+            ->run();
+
+        $this->output = $result->getMessage();
+        return $result->wasSuccessful();
+    }
+
+    /**
+     * Add ece-tools extend package
+     *
+     * @return bool
+     * @throws \Robo\Exception\TaskException
+     */
+    public function addEceExtendComposerRepo(): bool
+    {
+        $commands = [];
+        $repoConfig = [
+            'type' => 'path',
+            'url' => $this->_getConfig('system_ece_tools_dir') . '/tests/functional/_data/packages/ece-tools-extend'
+        ];
+
+        $commands[] = $this->taskComposerConfig('composer')
+            ->set('repositories.ece-tools-extend', addslashes(json_encode($repoConfig, JSON_UNESCAPED_SLASHES)))
+            ->noInteraction()
+            ->getCommand();
+        $commands[] = $this->taskComposerRequire('composer')
+            ->dependency('magento/ece-tools-extend', '*')
+            ->noInteraction()
+            ->getCommand();
 
         $result = $this->taskBash(self::BUILD_CONTAINER)
-            ->workingDir($this->_getConfig('system_magento_dir'))
+            ->workingDir((string)$this->_getConfig('system_ece_tools_dir'))
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->exec(implode(' && ', $commands))
