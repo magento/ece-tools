@@ -38,5 +38,3 @@ redis:
     eol:
   - version: '5.2'
     eol:
-
-

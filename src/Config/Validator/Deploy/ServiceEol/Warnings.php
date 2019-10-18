@@ -33,7 +33,6 @@ class Warnings implements ValidatorInterface
     private $eolValidator;
 
     /**
-     * Warnings constructor.
      * @param Validator\ResultFactory $resultFactory
      * @param EOLValidator $eolValidator
      */
@@ -54,12 +53,12 @@ class Warnings implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
-            $errors = $this->eolValidator->validateServiceEol(self::ERROR_LEVEL);
+            $errors = $this->eolValidator->validateServiceEol();
 
-            if ($errors) {
+            if ($errors && array_key_exists(self::ERROR_LEVEL, $errors)) {
                 return $this->resultFactory->error(
-                    'Some services have their passed EOL or is not defined.',
-                    implode(PHP_EOL, $errors)
+                    'Some services are approaching EOL.',
+                    implode(PHP_EOL, $errors[self::ERROR_LEVEL])
                 );
             }
         } catch (GenericException $e) {

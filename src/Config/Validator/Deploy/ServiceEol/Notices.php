@@ -33,8 +33,6 @@ class Notices implements ValidatorInterface
     private $eolValidator;
 
     /**
-     * ServiceEol constructor.
-     *
      * @param EOLValidator $eolValidator
      */
     public function __construct(
@@ -54,12 +52,12 @@ class Notices implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         try {
-            $errors = $this->eolValidator->validateServiceEol(self::ERROR_LEVEL);
+            $errors = $this->eolValidator->validateServiceEol();
 
-            if ($errors) {
+            if ($errors && array_key_exists(self::ERROR_LEVEL, $errors)) {
                 return $this->resultFactory->error(
                     'Some services are approaching EOL.',
-                    implode(PHP_EOL, $errors)
+                    implode(PHP_EOL, $errors[self::ERROR_LEVEL])
                 );
             }
         } catch (GenericException $e) {
