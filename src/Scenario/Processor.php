@@ -65,7 +65,7 @@ class Processor
 
                 $step->execute();
 
-                $this->logger->debug('Step finished');
+                $this->logger->debug(sprintf('Step "%s" finished', $name));
             });
         } catch (GenericException $exception) {
             $this->logger->error($exception->getMessage());
