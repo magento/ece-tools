@@ -44,16 +44,32 @@ class ScenarioExtensibilityCest extends AbstractCest
             './vendor/magento/ece-tools-extend/scenario/extend-build-transfer.xml',
         ];
 
-        $I->assertTrue($I->runEceToolsCommand(sprintf('run %s', implode(' ', $generateScenarios)), Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand(sprintf('run %s', implode(' ', $transferScenarios)), Docker::BUILD_CONTAINER));
+        $I->assertTrue(
+            $I->runEceToolsCommand(sprintf('run %s', implode(' ', $generateScenarios)), Docker::BUILD_CONTAINER)
+        );
+        $I->assertTrue(
+            $I->runEceToolsCommand(sprintf('run %s', implode(' ', $transferScenarios)), Docker::BUILD_CONTAINER)
+        );
         $I->startEnvironment();
 
         $cloudLog = $I->grabFileContent('/var/log/cloud.log', Docker::BUILD_CONTAINER);
 
-        $I->assertContains('Step "copy-sample-data" was skipped', $cloudLog, 'Checks that step copy-sample-data was skipped');
+        $I->assertContains(
+            'Step "copy-sample-data" was skipped',
+            $cloudLog,
+            'Checks that step copy-sample-data was skipped'
+        );
         $I->assertContains('Step "compile-di" was skipped', $cloudLog, 'Checks that step compile-di was skipped');
-        $I->assertContains('Doing some actions after static content generation', $cloudLog, 'Checks that new step update-static-content was added');
-        $I->assertContains('Customized step for enabling production mode', $cloudLog, 'Checks that step set-production-mode was customized');
+        $I->assertContains(
+            'Doing some actions after static content generation',
+            $cloudLog,
+            'Checks that new step update-static-content was added'
+        );
+        $I->assertContains(
+            'Customized step for enabling production mode',
+            $cloudLog,
+            'Checks that step set-production-mode was customized'
+        );
 
         $cloudLog = str_replace(PHP_EOL, " ", $cloudLog);
         $I->assertRegExp(
@@ -69,7 +85,8 @@ class ScenarioExtensibilityCest extends AbstractCest
         $I->assertNotRegExp(
             '/(compress-static-content).*?(clear-init-directory)/i',
             $cloudLog,
-            'Checks that priority for step clear-init-directory and compress-static-content is different then in default scenario'
+            'Checks that priority for step clear-init-directory and compress-static-content is different then in '
+            . ' default scenario'
         );
     }
 }
