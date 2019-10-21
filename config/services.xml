@@ -4,7 +4,9 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
-        <defaults autowire="true" autoconfigure="true" public="true"/>
+        <defaults autowire="true" autoconfigure="true" public="true">
+            <bind key="int $errorLevel">300</bind>
+        </defaults>
         <!-- ... -->
         <prototype namespace="Magento\MagentoCloud\" resource="../src/*" exclude="../src/{Test}"/>
 
@@ -19,7 +21,6 @@
         <service id="Magento\MagentoCloud\DB\Data\Connection" autowire="false" />
         <service id="Magento\MagentoCloud\DB\Data\RelationshipConnection" autowire="false" />
         <service id="Magento\MagentoCloud\DB\PDOException" autowire="false" />
-        <service id="Magento\MagentoCloud\Docker\ConfigurationMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Scenario\Exception\ProcessorException" autowire="false" />
         <service id="Magento\MagentoCloud\Scenario\Exception\ValidationException" autowire="false" />
@@ -29,10 +30,7 @@
         <service id="Magento\MagentoCloud\Step\Deploy\DeployStaticContent" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate" autowire="false" />
-        <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install" autowire="false" />
-        <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\PreDeploy" autowire="false" />
-        <service id="Magento\MagentoCloud\Step\StepComposite" autowire="false" />
         <service id="Magento\MagentoCloud\Step\StepException" autowire="false" />
         <service id="Magento\MagentoCloud\Step\ValidateConfiguration" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Build\BackupData" autowire="false" />
@@ -45,6 +43,10 @@
                 <argument key="scd_in_build">.static_content_deploy</argument>
                 <argument key="deploy_is_failed">var/.deploy_is_failed</argument>
             </argument>
+        </service>
+        <service id="ServiceEol.Warnings" class="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol" />
+        <service id="ServiceEol.Notices" class="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol">
+            <bind key="int $errorLevel">250</bind>
         </service>
         <service id="Composer\Package\Version\VersionParser"/>
         <service id="Composer\Semver\VersionParser"/>
