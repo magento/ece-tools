@@ -84,7 +84,8 @@ class EolValidator
         $errors = [];
 
         foreach ($this->services as $serviceName) {
-            $serviceVersion = $this->getServiceVersion($serviceName);
+            $service = $this->serviceFactory->create($serviceName);
+            $serviceVersion = $service->getVersion();
 
             if ($validationResult = $this->validateService($serviceName, $serviceVersion)) {
                 $key = array_key_first($validationResult);
