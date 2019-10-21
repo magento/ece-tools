@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Service\EolValidator as EOLValidator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Service\ServiceMismatchException;
 
 /**
  * Class to check if services have passed their EOLs.
@@ -48,7 +48,6 @@ class Warnings implements ValidatorInterface
      * Get the defined services and versions and check for their EOLs by error level.
      *
      * @return Validator\ResultInterface
-     * @throws \Exception
      */
     public function validate(): Validator\ResultInterface
     {
@@ -61,7 +60,7 @@ class Warnings implements ValidatorInterface
                     implode(PHP_EOL, $errors[self::ERROR_LEVEL])
                 );
             }
-        } catch (GenericException $e) {
+        } catch (ServiceMismatchException $e) {
             return $this->resultFactory->error('Can\'t validate version of some services: ' . $e->getMessage());
         }
 
