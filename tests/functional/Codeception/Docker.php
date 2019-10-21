@@ -274,11 +274,6 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ],
         ];
 
-        $commands[] = $this->taskComposerRequire('composer')
-            ->dependency('hirak/prestissimo', '*')
-            ->noInteraction()
-            ->getCommand();
-
         // Temporary fix until 2.3.3 is fully published
         if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
             $commands[] = 'rm composer.lock';
