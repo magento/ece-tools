@@ -68,11 +68,6 @@ class FileListTest extends TestCase
         $this->assertSame('magento_root/init/var/log/cloud.log', $this->fileList->getInitCloudLog());
     }
 
-    public function testGetPatches()
-    {
-        $this->assertSame('root/patches.json', $this->fileList->getPatches());
-    }
-
     public function testGetInstallUpgradeLog()
     {
         $this->assertSame('magento_root/var/log/install_upgrade.log', $this->fileList->getInstallUpgradeLog());

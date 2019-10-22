@@ -165,18 +165,6 @@ class DirectoryListTest extends TestCase
      * @param DirectoryList $directoryList
      * @dataProvider getDirectoryLists
      */
-    public function testGetPatches(DirectoryList $directoryList)
-    {
-        $this->assertSame(
-            __DIR__ . '/_files/bp/patches',
-            $directoryList->getPatches()
-        );
-    }
-
-    /**
-     * @param DirectoryList $directoryList
-     * @dataProvider getDirectoryLists
-     */
     public function testGetViews(DirectoryList $directoryList)
     {
         $this->assertSame(
