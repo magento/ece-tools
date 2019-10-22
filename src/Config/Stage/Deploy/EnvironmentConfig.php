@@ -31,9 +31,6 @@ class EnvironmentConfig
     /**
      * Resolves environment values with and adds custom mappings.
      *
-     * STATIC_CONTENT_THREADS from MAGENTO_CLOUD_VARIABLES has higher priority then $_ENV['STATIC_CONTENT_THREADS']
-     * Raw $_ENV['STATIC_CONTENT_THREADS'] is deprecated.
-     *
      * @return array
      */
     public function getAll(): array
