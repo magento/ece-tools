@@ -48,11 +48,6 @@ interface DeployInterface extends StageConfigInterface
     const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';
 
     /**
-     * @deprecated use SKIP_SCD instead
-     */
-    const VAR_DO_DEPLOY_STATIC_CONTENT = 'DO_DEPLOY_STATIC_CONTENT';
-
-    /**
      * The variable responsible for enabling google analytics in environments other than prod.
      */
     const VAR_ENABLE_GOOGLE_ANALYTICS = 'ENABLE_GOOGLE_ANALYTICS';

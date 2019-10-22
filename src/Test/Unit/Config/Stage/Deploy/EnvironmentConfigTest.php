@@ -101,14 +101,6 @@ class EnvironmentConfigTest extends TestCase
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '10']
             ],
             [
-                [DeployInterface::VAR_SKIP_SCD => true],
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => Environment::VAL_DISABLED]
-            ],
-            [
-                [DeployInterface::VAR_SKIP_SCD => false],
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 0]
-            ],
-            [
                 [],
                 [DeployInterface::VAR_VERBOSE_COMMANDS => 'wrong_value']
             ]

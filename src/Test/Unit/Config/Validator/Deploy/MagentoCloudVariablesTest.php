@@ -152,12 +152,6 @@ class MagentoCloudVariablesTest extends TestCase
                 ' use only disabled or enabled'
             ],
             [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => '1'],
-                ResultInterface::ERROR,
-                'The variable DO_DEPLOY_STATIC_CONTENT has wrong value: "1" and will be ignored,' .
-                ' use only disabled or enable'
-            ],
-            [
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => 'enabled'],
                 ResultInterface::SUCCESS,
             ],
@@ -167,10 +161,6 @@ class MagentoCloudVariablesTest extends TestCase
             ],
             [
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK => 'enabled'],
-                ResultInterface::SUCCESS,
-            ],
-            [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 'enabled'],
                 ResultInterface::SUCCESS,
             ],
             [

@@ -98,16 +98,6 @@ class DeprecatedVariablesTest extends TestCase
                 [],
                 Error::class,
             ],
-            [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 1],
-                [],
-                Error::class,
-            ],
-            [
-                [],
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 1],
-                Error::class,
-            ],
         ];
     }
 

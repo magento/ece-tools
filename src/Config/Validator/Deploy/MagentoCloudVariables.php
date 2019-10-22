@@ -125,7 +125,6 @@ class MagentoCloudVariables implements ValidatorInterface
             DeployInterface::VAR_CLEAN_STATIC_FILES,
             DeployInterface::VAR_UPDATE_URLS,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
-            DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT
         ];
 
         $possibleValues = [Environment::VAL_DISABLED, Environment::VAL_ENABLED];

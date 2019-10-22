@@ -76,12 +76,6 @@ class EnvironmentConfig
             }
         }
 
-        if (isset($variables[DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT])) {
-            $variables[DeployInterface::VAR_SKIP_SCD] =
-                $variables[DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT] === Environment::VAL_DISABLED;
-            unset($variables[DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT]);
-        }
-
         return $variables;
     }
 
