@@ -11,12 +11,10 @@ use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Process\ProcessException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\Setup\Console\Command\DbStatusCommand;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,6 +23,11 @@ use Psr\Log\LoggerInterface;
  */
 class Setup implements StepInterface
 {
+    /**
+     * Code for error when application upgrade is required.
+     */
+    const EXIT_CODE_UPGRADE_REQUIRED = 2;
+
     /**
      * @var LoggerInterface
      */
@@ -95,24 +98,26 @@ class Setup implements StepInterface
     {
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
         $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
+        $skipUpgrade = $this->stageConfig->get(DeployInterface::VAR_SKIP_UPGRADE_UNLESS_REQUIRED);
         $installUpgradeLog = $this->fileList->getInstallUpgradeLog();
 
-        $outdated = false;
-        try {
-            $this->logger->info('Checking if setup:upgrade is required');
+        $outdated = true;
 
-            $this->shell->execute('php ./bin/magento setup:db:status --ansi --no-interaction ');
+        if ($skipUpgrade == 'true') {
+            try {
+                $this->logger->info('Checking if setup:upgrade is required');
 
-            $this->logger->info('Upgrade check complete');
-        } catch (\RuntimeException $exception) {
-            if ($exception->getCode() == DbStatusCommand::EXIT_CODE_UPGRADE_REQUIRED) {
-                $outdated = true;
-            } else {
-                throw new ProcessException($exception->getMessage(), 6, $exception);
+                $this->shell->execute('php ./bin/magento setup:db:status --ansi --no-interaction ');
+
+                $outdated = false;
+            } catch (\RuntimeException $exception) {
+                if ($exception->getCode() != self::EXIT_CODE_UPGRADE_REQUIRED) {
+                    throw new StepException($exception->getMessage(), 6, $exception);
+                }
             }
         }
 
-        if ($outdated) {
+        if ($outdated && $skipUpgrade != 'force') {
             try {
                 $this->logger->info('Running setup upgrade.');
 
@@ -124,10 +129,9 @@ class Setup implements StepInterface
                         $installUpgradeLog
                     )
                 );
-                $this->logger->info('Completed setup upgrade.');
             } catch (\RuntimeException $exception) {
                 //Rollback required by database
-                throw new ProcessException($exception->getMessage(), 6, $exception);
+                throw new StepException($exception->getMessage(), 6, $exception);
             }
         }
 

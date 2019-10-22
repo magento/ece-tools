@@ -26,6 +26,7 @@ interface DeployInterface extends StageConfigInterface
     const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
     const VAR_UPDATE_URLS = 'UPDATE_URLS';
     const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
+    const VAR_SKIP_UPGRADE_UNLESS_REQUIRED = 'SKIP_UPGRADE_UNLESS_REQUIRED';
 
     /**
      * @deprecated will not be supported in the future
