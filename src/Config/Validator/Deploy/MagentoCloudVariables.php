@@ -81,7 +81,6 @@ class MagentoCloudVariables implements ValidatorInterface
         $errors = [];
 
         $intVariables = [
-            DeployInterface::VAR_STATIC_CONTENT_THREADS,
             DeployInterface::VAR_SCD_THREADS,
         ];
 

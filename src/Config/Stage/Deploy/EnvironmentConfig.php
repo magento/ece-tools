@@ -95,17 +95,6 @@ class EnvironmentConfig
      */
     private function convertIntegerVariables(array $variables): array
     {
-        if (isset($variables[DeployInterface::VAR_STATIC_CONTENT_THREADS])) {
-            $envScdThreads = $variables[DeployInterface::VAR_STATIC_CONTENT_THREADS];
-            unset($variables[DeployInterface::VAR_STATIC_CONTENT_THREADS]);
-        } else {
-            $envScdThreads = $this->environment->getEnv(DeployInterface::VAR_STATIC_CONTENT_THREADS);
-        }
-
-        if (ctype_digit($envScdThreads)) {
-            $variables[DeployInterface::VAR_SCD_THREADS] = (int)$envScdThreads;
-        }
-
         foreach ([DeployInterface::VAR_SCD_THREADS, DeployInterface::VAR_SCD_COMPRESSION_LEVEL] as $varName) {
             if (isset($variables[$varName])) {
                 if (!is_int($variables[$varName]) && !ctype_digit($variables[$varName])) {

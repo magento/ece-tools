@@ -81,18 +81,6 @@ class MagentoCloudVariablesTest extends TestCase
     {
         return [
             [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3'],
-                ResultInterface::SUCCESS
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 3],
-                ResultInterface::SUCCESS
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3a'],
-                ResultInterface::ERROR
-            ],
-            [
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '3'],
                 ResultInterface::SUCCESS
             ],
