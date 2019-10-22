@@ -6,22 +6,19 @@
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Patch\Manager;
-use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\Shell\ShellException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @inheritdoc
+ *
+ * @deprecated
  */
 class ApplyPatches extends Command
 {
     const NAME = 'patch';
-
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
 
     /**
      * @var Manager
@@ -29,14 +26,10 @@ class ApplyPatches extends Command
     private $manager;
 
     /**
-     * @param LoggerInterface $logger
      * @param Manager $manager
      */
-    public function __construct(
-        LoggerInterface $logger,
-        Manager $manager
-    ) {
-        $this->logger = $logger;
+    public function __construct(Manager $manager)
+    {
         $this->manager = $manager;
 
         parent::__construct();
@@ -47,25 +40,19 @@ class ApplyPatches extends Command
      */
     protected function configure()
     {
-        $this->setName(static::NAME)
+        $this->setName(self::NAME)
             ->setDescription('Applies custom patches');
 
         parent::configure();
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws ShellException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        try {
-            $this->logger->info('Patching started.');
-            $this->manager->applyAll();
-            $this->logger->info('Patching finished.');
-        } catch (\Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-
-            throw $exception;
-        }
+        $this->manager->apply();
     }
 }
