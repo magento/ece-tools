@@ -127,7 +127,7 @@ class Cache
             }
         }
 
-        return $this->configMerger->mergeConfigs([
+        return $this->configMerger->merge([
             'frontend' => [
                 'default' => array_replace_recursive(
                     $redisCache,

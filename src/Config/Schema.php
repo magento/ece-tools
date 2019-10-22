@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 
@@ -271,6 +272,15 @@ class Schema
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_GLOBAL => '',
                 ],
+            ],
+            BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => [
+                self::SCHEMA_TYPE => ['integer'],
+                self::SCHEMA_VALUE_VALIDATION => range(0, 32),
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_BUILD,
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [StageConfigInterface::STAGE_BUILD => 1]
             ],
             DeployInterface::VAR_LOCK_PROVIDER => [
                 self::SCHEMA_TYPE => ['string'],

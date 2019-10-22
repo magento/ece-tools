@@ -79,8 +79,7 @@ class CopyToDocker extends BaseTask implements CommandInterface
      */
     public function getCommand(): string
     {
-        $command = 'docker cp [source] "$(docker-compose ps -q [container])":[destination]'
-            . ' && docker-compose run -uroot [container] bash -c "chown -R www:www [destination]"';
+        $command = 'docker cp [source] "$(docker-compose ps -q [container])":[destination]';
         return strtr(
             $command,
             [

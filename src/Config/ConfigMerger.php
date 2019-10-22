@@ -57,13 +57,13 @@ class ConfigMerger
      * Merge two configs if merging is required, otherwise return $baseConfig without changes.
      *
      * @param array $baseConfig
-     * @param array $configToMerge
+     * @param array $customConfig
      * @return array
      */
-    public function mergeConfigs(array $baseConfig, array $configToMerge): array
+    public function merge(array $baseConfig, array $customConfig): array
     {
-        if ($this->isMergeRequired($configToMerge)) {
-            return array_replace_recursive($baseConfig, $this->clear($configToMerge));
+        if ($this->isMergeRequired($customConfig)) {
+            return array_replace_recursive($baseConfig, $this->clear($customConfig));
         }
 
         return $baseConfig;

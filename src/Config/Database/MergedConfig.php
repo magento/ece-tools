@@ -111,7 +111,7 @@ class MergedConfig implements ConfigInterface
             $dbConfig = $this->getDbConfigFromEnvFile();
         }
 
-        return $this->mergedConfig = $this->configMerger->mergeConfigs($dbConfig, $envDbConfig);
+        return $this->mergedConfig = $this->configMerger->merge($dbConfig, $envDbConfig);
     }
 
     /**

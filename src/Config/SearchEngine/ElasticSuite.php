@@ -17,7 +17,7 @@ use Magento\MagentoCloud\Service\ElasticSearch;
  */
 class ElasticSuite
 {
-    const ENGINE_NAME = 'elasticsuite';
+    public const ENGINE_NAME = 'elasticsuite';
 
     /**
      * @var Manager
@@ -66,7 +66,11 @@ class ElasticSuite
     {
         $envConfig = (array)$this->stageConfig->get(DeployInterface::VAR_ELASTICSUITE_CONFIGURATION);
 
-        return $this->configMerger->mergeConfigs($this->getConfig(), $envConfig);
+        if (!$this->configMerger->isEmpty($envConfig) && !$this->configMerger->isMergeRequired($envConfig)) {
+            return $this->configMerger->clear($envConfig);
+        }
+
+        return $this->configMerger->merge($this->getConfig(), $envConfig);
     }
 
     /**

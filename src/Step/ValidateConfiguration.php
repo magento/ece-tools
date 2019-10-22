@@ -74,7 +74,12 @@ class ValidateConfiguration implements StepInterface
 
         /* @var $validators ValidatorInterface[] */
         foreach ($this->validators as $level => $validators) {
-            foreach ($validators as $validator) {
+            foreach ($validators as $name => $validator) {
+                if (!$validator instanceof ValidatorInterface) {
+                    $this->logger->info(sprintf('Validator "%s" was skipped', $name));
+                    continue;
+                }
+
                 $result = $validator->validate();
 
                 if ($result instanceof Error) {

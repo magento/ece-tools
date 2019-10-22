@@ -7,82 +7,50 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Scenario;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Filesystem\SystemList;
+use Magento\MagentoCloud\Scenario\Collector\Scenario;
+use Magento\MagentoCloud\Scenario\Collector\Step;
+use Magento\MagentoCloud\Scenario\Collector\Step as StepCollector;
 use Magento\MagentoCloud\Scenario\Exception\ValidationException;
-use Symfony\Component\Serializer\Encoder\XmlEncoder;
 
 /**
  * Merge given scenarios.
- *
- * @codeCoverageIgnore
  */
 class Merger
 {
-    private const ROOT_NODE = 'scenario';
-
-    public const NODE_VALUE = '#';
-    public const XSI_TYPE_STRING = 'string';
-    public const XSI_TYPE_OBJECT = 'object';
-    public const XSI_TYPE_ARRAY = 'array';
-
-    /**
-     * @var File
-     */
-    private $file;
-
-    /**
-     * @var XmlEncoder
-     */
-    private $encoder;
-
-    /**
-     * @var SystemList
-     */
-    private $systemList;
-
     /**
      * @var Resolver
      */
     private $resolver;
 
     /**
+     * @var StepCollector
+     */
+    private $stepCollector;
+
+    /**
+     * @var Scenario
+     */
+    private $scenarioCollector;
+
+    /**
      * @var array
      */
     private static $stepRequiredArgs = [
         '@name',
-        '@type',
+        '@priority',
+        '@type'
     ];
 
     /**
-     * @var array
-     */
-    private static $argumentRequiredArgs = [
-        '@name',
-        '@xsi:type'
-    ];
-
-    /**
-     * @var array
-     */
-    private static $itemRequiredArgs = [
-        '@name',
-        '@xsi:type'
-    ];
-
-    /**
-     * @param File $file
-     * @param XmlEncoder $encoder
-     * @param SystemList $systemList
      * @param Resolver $resolver
+     * @param StepCollector $stepCollector
+     * @param Scenario $scenarioCollector
      */
-    public function __construct(File $file, XmlEncoder $encoder, SystemList $systemList, Resolver $resolver)
+    public function __construct(Resolver $resolver, StepCollector $stepCollector, Scenario $scenarioCollector)
     {
-        $this->file = $file;
-        $this->encoder = $encoder;
-        $this->systemList = $systemList;
         $this->resolver = $resolver;
+        $this->stepCollector = $stepCollector;
+        $this->scenarioCollector = $scenarioCollector;
     }
 
     /**
@@ -97,19 +65,19 @@ class Merger
         $data = [];
 
         foreach ($scenarios as $scenario) {
-            $scenario = $this->collectScenario($scenario);
+            $scenarioData = $this->scenarioCollector->collect($scenario);
+            if (!isset($scenarioData['step'])) {
+                throw new ValidationException(sprintf('Steps aren\'t exist in "%s" file', $scenario));
+            }
 
-            foreach ($scenario['step'] ?? [] as $step) {
-                if ($missedArgs = array_diff(self::$stepRequiredArgs, array_keys($step))) {
-                    throw new ValidationException(sprintf(
-                        'Argument(s) "%s" are missed from step',
-                        implode(', ', $missedArgs)
-                    ));
-                }
+            $steps = is_array(reset($scenarioData['step'])) ? $scenarioData['step'] : [$scenarioData['step']];
+
+            foreach ($steps as $step) {
+                $this->validateStep($step);
 
                 $data[$step['@name']] = array_replace_recursive(
                     $data[$step['@name']] ?? [],
-                    $this->collectStep($step)
+                    $this->stepCollector->collect($step)
                 );
             }
         }
@@ -118,142 +86,23 @@ class Merger
     }
 
     /**
-     * Collect step data including child items
+     * Validates if exists all required attributes.
      *
      * @param array $step
-     * @return array
      * @throws ValidationException
+     * @return void
      */
-    private function collectStep(array $step): array
+    private function validateStep(array $step): void
     {
-        $stepName = $step['@name'];
+        $isSkipped = isset($step['@skip']) && $step['@skip'] === 'true';
 
-        $arguments = [];
+        $requiredAttributes = $isSkipped ? ['@name'] : self::$stepRequiredArgs;
 
-        foreach ($step['arguments'][0]['argument'] ?? [] as $argument) {
-            if ($missedArgs = array_diff(self::$argumentRequiredArgs, array_keys($argument))) {
-                throw new ValidationException(sprintf(
-                    'Argument(s) "%s" are missed from argument in step "%s"',
-                    implode(', ', $missedArgs),
-                    $stepName
-                ));
-            }
-
-            $argumentName = $argument['@name'];
-            $argumentType = $argument['@xsi:type'];
-
-            switch ($argumentType) {
-                case self::XSI_TYPE_ARRAY:
-                    $arguments[] = [
-                        'name' => $argumentName,
-                        'xsi:type' => $argumentType,
-                        'items' => $this->collectItems(
-                            $argument['item'] ?: []
-                        )
-                    ];
-                    break;
-                case self::XSI_TYPE_OBJECT:
-                case self::XSI_TYPE_STRING:
-                    $arguments[] = [
-                        'name' => $argumentName,
-                        'xsi:type' => $argumentType,
-                        self::NODE_VALUE => $argument[self::NODE_VALUE]
-                    ];
-                    break;
-                default:
-                    throw new ValidationException(sprintf(
-                        'xsi:type "%s" not allowed in argument "%s"',
-                        $argumentType,
-                        $argumentName
-                    ));
-            }
-        }
-
-        $stepData = [
-            'name' => $stepName,
-            'type' => $step['@type'],
-            'arguments' => $arguments
-        ];
-
-        return $stepData;
-    }
-
-    /**
-     * Collect scenario data
-     *
-     * @param string $scenario
-     * @return array
-     * @throws ValidationException
-     */
-    private function collectScenario(string $scenario): array
-    {
-        $scenarioPath = $this->systemList->getRoot() . '/' . $scenario;
-
-        if (!$this->file->isExists($scenarioPath)) {
-            $scenarioPath = $this->systemList->getMagentoRoot() . '/' . $scenario;
-        }
-
-        if (!$this->file->isExists($scenarioPath)) {
+        if ($missedArgs = array_diff($requiredAttributes, array_keys($step))) {
             throw new ValidationException(sprintf(
-                'Scenario %s does not exist',
-                $scenario
+                'Argument(s) "%s" are missed from step',
+                implode(', ', $missedArgs)
             ));
         }
-
-        try {
-            return $this->encoder->decode(
-                $this->file->fileGetContents($scenarioPath),
-                XmlEncoder::FORMAT,
-                [
-                    XmlEncoder::AS_COLLECTION => true,
-                    XmlEncoder::ROOT_NODE_NAME => self::ROOT_NODE,
-                ]
-            ) ?: [];
-        } catch (FileSystemException $exception) {
-            throw new ValidationException($exception->getMessage(), $exception->getCode(), $exception);
-        }
-    }
-
-    /**
-     * Recursively collect items
-     *
-     * @param array $items
-     * @return array
-     * @throws ValidationException
-     */
-    private function collectItems(array $items): array
-    {
-        $newItems = [];
-
-        foreach ($items as $item) {
-            if (!is_array($item)) {
-                throw new ValidationException('Wrong formatted item provided');
-            }
-
-            $itemName = $item['@name'] ?? '';
-
-            if ($missedArgs = array_diff(self::$itemRequiredArgs, array_keys($item))) {
-                throw new ValidationException(sprintf(
-                    'Argument(s) "%s" are missed from item "%s"',
-                    implode(', ', $missedArgs),
-                    $itemName
-                ));
-            }
-
-            $newItem = [
-                'name' => $itemName,
-                'xsi:type' => $item['@xsi:type'],
-            ];
-
-            if (isset($item[self::NODE_VALUE])) {
-                $newItem[self::NODE_VALUE] = $item[self::NODE_VALUE];
-            } elseif (isset($item['item'])) {
-                $newItem['items'] = $this->collectItems($item['item']);
-            }
-
-            $newItems[] = $newItem;
-        }
-
-        return $newItems;
     }
 }
