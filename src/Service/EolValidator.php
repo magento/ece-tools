@@ -88,8 +88,8 @@ class EolValidator
             $serviceVersion = $service->getVersion();
 
             if ($validationResult = $this->validateService($serviceName, $serviceVersion)) {
-                $key = array_key_first($validationResult);
-                $errors[$key][] = $validationResult[$key];
+                $errorLevel = array_key_first($validationResult);
+                $errors[$errorLevel][] = $validationResult[$errorLevel];
             }
         }
         return $errors;
@@ -105,7 +105,7 @@ class EolValidator
      */
     public function validateService(string $serviceName, string $serviceVersion) : array
     {
-        $serviceConfigs = $this->getServiceEolConfigs($serviceName);
+        $serviceConfigs = $this->getServiceConfigs($serviceName);
 
         $versionConfigs = array_filter($serviceConfigs, function ($v) use ($serviceVersion) {
             return Semver::satisfies($serviceVersion, sprintf('%s.x', $v['version']));
@@ -142,35 +142,13 @@ class EolValidator
     }
 
     /**
-     * Gets the version of a given service.
-     *
-     * @param string $serviceName
-     * @return string
-     * @throws ServiceMismatchException
-     */
-    private function getServiceVersion(string $serviceName) : string
-    {
-        switch ($serviceName) {
-            case ServiceInterface::NAME_PHP:
-                $serviceVersion = PHP_VERSION;
-                break;
-            default:
-                $service = $this->serviceFactory->create($serviceName);
-                $serviceVersion = $service->getVersion();
-                break;
-        }
-
-        return $serviceVersion;
-    }
-
-    /**
      * Gets the EOL configurations for the current service from eol.yaml.
      *
      * @param string $serviceName
      * @return array
      * @throws FileSystemException
      */
-    private function getServiceEolConfigs(string $serviceName) : array
+    private function getServiceConfigs(string $serviceName) : array
     {
         if ($this->eolConfigs === null) {
             $this->eolConfigs = [];

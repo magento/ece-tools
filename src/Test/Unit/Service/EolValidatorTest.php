@@ -9,34 +9,21 @@ namespace Magento\MagentoCloud\Test\Unit\Service;
 
 use Carbon\Carbon;
 use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Service\ElasticSearch;
 use Magento\MagentoCloud\Service\EolValidator;
-use Magento\MagentoCloud\Service\ServiceInterface;
 use Magento\MagentoCloud\Service\ServiceFactory;
-use Magento\MagentoCloud\Service\Validator;
+use Magento\MagentoCloud\Service\ServiceInterface;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * @inheritDoc
  */
 class EolValidatorTest extends TestCase
 {
-    /**
-     * @var ServiceFactory
-     */
-    private $serviceFactory;
-
-    /**
-     * @var ElasticSearch|MockObject
-     */
-    private $elasticSearchMock;
-
-    /**
-     * @var FileList|MockObject
-     */
-    private $fileListMock;
+    use PHPMock;
 
     /**
      * @var EolValidator
@@ -44,85 +31,158 @@ class EolValidatorTest extends TestCase
     private $validator;
 
     /**
-     * @inheritdoc
+     * @var FileList|MockObject
+     */
+    private $fileListMock;
+
+    /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
+     * @var ServiceFactory|MockObject
+     */
+    private $serviceFactoryMock;
+
+    /**
+     * @inheritDoc
      */
     protected function setUp()
     {
-        $this->serviceFactory = $this->createMock(ServiceFactory::class);
-        $this->fileListMock = $this->createMock((FileList::class));
-        $this->elasticSearchMock = $this->createMock(ElasticSearch::class);
+        self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_get_contents');
+        self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_exists');
+
+        $this->fileListMock = $this->createMock(FileList::class);
+        $this->fileMock = $this->createPartialMock(File::class, ['isExists']);
+        $this->serviceFactoryMock = $this->createMock(ServiceFactory::class);
 
         $this->validator = new EolValidator(
             $this->fileListMock,
-            $this->serviceFactory,
-            $this->elasticSearchMock
+            $this->fileMock,
+            $this->serviceFactoryMock
         );
     }
 
     /**
-     * @throws \Magento\MagentoCloud\Service\ServiceMismatchException
-     */
-    public function testValidateServiceEol()
-    {
-        $baseDir = __DIR__ . '/_file/';
-
-        $this->fileListMock->expects($this->any())
-            ->method('getServiceEolsConfig')
-            ->willReturn($baseDir . '/eol.yaml');
-
-        $this->elasticSearchMock->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('5.2');
-
-        $service1 = $this->createMock(ServiceInterface::class);
-        $service1->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('3.5');
-        $service2 = $this->createMock(ServiceInterface::class);
-        $service2->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('3.2');
-        $service3 = $this->createMock(ServiceInterface::class);
-        $service3->expects($this->once())
-            ->method('getVersion')
-            ->willReturn('10.2');
-        $this->serviceFactory->expects($this->exactly(3))
-            ->method('create')
-            ->willReturnOnConsecutiveCalls($service1, $service2, $service3);
-
-        $this->assertEquals(5, count($this->validator->validateServiceEol(ValidatorInterface::LEVEL_WARNING)));
-    }
-
-    /**
-     * Test compatible service/version.
+     * Test compatible version.
      */
     public function testCompatibleVersion()
     {
-        $baseDir = __DIR__ . '/_file/';
+        $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
-        $this->fileListMock->expects($this->any())
+        $this->fileListMock->expects($this->once())
             ->method('getServiceEolsConfig')
-            ->willReturn($baseDir . '/eol_2.yaml');
+            ->willReturn($configsPath);
+
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($configsPath)
+            ->willReturn(true);
 
         $serviceName = ServiceInterface::NAME_ELASTICSEARCH;
         $serviceVersion = '6.5';
 
+        $this->assertEquals([], $this->validator->validateService($serviceName, $serviceVersion));
+    }
+
+    /**
+     * Test validation with no configurations provided.
+     */
+    public function testValidateServiceWithoutConfigs()
+    {
+        $configsPath = __DIR__ . '/_file/eol_2.yaml';
+
+        $this->fileListMock->expects($this->once())
+            ->method('getServiceEolsConfig')
+            ->willReturn($configsPath);
+
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($configsPath)
+            ->willReturn(true);
+
+        $serviceName = ServiceInterface::NAME_RABBITMQ;
+        $serviceVersion = '3.5';
+
         $this->assertEquals(
-            '',
-            $this->validator->validateService($serviceName, $serviceVersion, ValidatorInterface::LEVEL_NOTICE)
+            [ValidatorInterface::LEVEL_WARNING => sprintf(
+                'Unknown or invalid EOL defined for %s %s',
+                $serviceName,
+                $serviceVersion
+            )],
+            $this->validator->validateService($serviceName, $serviceVersion)
         );
     }
 
     /**
-     * Test service/version approaching EOL.
+     * Test service validation.
+     */
+    public function testValidateServiceEol()
+    {
+        $configsPath = __DIR__ . '/_file/eol.yaml';
+
+        $this->fileListMock->expects($this->once())
+            ->method('getServiceEolsConfig')
+            ->willReturn($configsPath);
+
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($configsPath)
+            ->willReturn(true);
+
+        $service1 = $this->createMock(ServiceInterface::class);
+        $service1->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('7.1');
+        $service2 = $this->createMock(ServiceInterface::class);
+        $service2->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('5.2');
+        $service3 = $this->createMock(ServiceInterface::class);
+        $service3->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('3.5');
+        $service4 = $this->createMock(ServiceInterface::class);
+        $service4->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('3.2');
+        $service5 = $this->createMock(ServiceInterface::class);
+        $service5->expects($this->once())
+            ->method('getVersion')
+            ->willReturn('10.2');
+
+        $this->serviceFactoryMock->expects($this->exactly(5))
+            ->method('create')
+            ->willReturnOnConsecutiveCalls(
+                $service1,
+                $service2,
+                $service3,
+                $service4,
+                $service5
+            );
+
+        $this->assertEquals(
+            5,
+            count($this->validator->validateServiceEol()[ValidatorInterface::LEVEL_WARNING])
+        );
+    }
+
+    /**
+     * Test service approaching EOL.
      */
     public function testValidateNoticeMessage()
     {
-        $baseDir = __DIR__ . '/_file/';
+        $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
-        $this->fileListMock->expects($this->any())
+        $this->fileListMock->expects($this->once())
             ->method('getServiceEolsConfig')
-            ->willReturn($baseDir . '/eol_2.yaml');
+            ->willReturn($configsPath);
+
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($configsPath)
+            ->willReturn(true);
 
         $serviceName = ServiceInterface::NAME_PHP;
         $serviceVersion = '7.1.30';
@@ -135,21 +195,26 @@ class EolValidatorTest extends TestCase
         );
 
         $this->assertEquals(
-            $message,
-            $this->validator->validateService($serviceName, $serviceVersion, ValidatorInterface::LEVEL_NOTICE)
+            [ValidatorInterface::LEVEL_NOTICE => $message],
+            $this->validator->validateService($serviceName, $serviceVersion)
         );
     }
 
     /**
-     * Test service/version passed EOL.
+     * Test service passed EOL.
      */
     public function testValidateWarningMessage()
     {
-        $baseDir = __DIR__ . '/_file/';
+        $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
-        $this->fileListMock->expects($this->any())
+        $this->fileListMock->expects($this->once())
             ->method('getServiceEolsConfig')
-            ->willReturn($baseDir . '/eol_2.yaml');
+            ->willReturn($configsPath);
+
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with($configsPath)
+            ->willReturn(true);
 
         $serviceName = ServiceInterface::NAME_PHP;
         $serviceVersion = '7.0';
@@ -162,8 +227,8 @@ class EolValidatorTest extends TestCase
         );
 
         $this->assertEquals(
-            $message,
-            $this->validator->validateService($serviceName, $serviceVersion, ValidatorInterface::LEVEL_WARNING)
+            [ValidatorInterface::LEVEL_WARNING => $message],
+            $this->validator->validateService($serviceName, $serviceVersion)
         );
     }
 }

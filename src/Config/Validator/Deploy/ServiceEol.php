@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Service\EolValidator as EOLValidator;
@@ -20,7 +19,7 @@ use Magento\MagentoCloud\Service\ServiceMismatchException;
 class ServiceEol implements ValidatorInterface
 {
     /**
-     * @var int
+     * @var integer
      */
     private $errorLevel;
 

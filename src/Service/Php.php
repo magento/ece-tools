@@ -38,7 +38,7 @@ class Php implements ServiceInterface
             $this->version = '0';
 
             $phpConfigs = $this->getConfiguration();
-            if(isset($phpConfigs['version'])) {
+            if (isset($phpConfigs['version'])) {
                 $this->version = $phpConfigs['version'];
             }
         }
