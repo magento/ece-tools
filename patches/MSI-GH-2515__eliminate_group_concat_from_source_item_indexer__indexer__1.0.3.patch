@@ -1,0 +1,99 @@
+diff -Nuar a/vendor/magento/module-inventory-indexer/Indexer/SourceItem/GetSkuListInStock.php b/vendor/magento/module-inventory-indexer/Indexer/SourceItem/GetSkuListInStock.php
+--- a/vendor/magento/module-inventory-indexer/Indexer/SourceItem/GetSkuListInStock.php
++++ b/vendor/magento/module-inventory-indexer/Indexer/SourceItem/GetSkuListInStock.php
+@@ -29,25 +29,15 @@ class GetSkuListInStock
+     private $skuListInStockFactory;
+
+     /**
+-     * @var int
+-     */
+-    private $groupConcatMaxLen;
+-
+-    /**
+-     * GetSkuListInStock constructor.
+-     *
+      * @param ResourceConnection $resourceConnection
+      * @param SkuListInStockFactory $skuListInStockFactory
+-     * @param int $groupConcatMaxLen
+      */
+     public function __construct(
+         ResourceConnection $resourceConnection,
+-        SkuListInStockFactory $skuListInStockFactory,
+-        int $groupConcatMaxLen
++        SkuListInStockFactory $skuListInStockFactory
+     ) {
+         $this->resourceConnection = $resourceConnection;
+         $this->skuListInStockFactory = $skuListInStockFactory;
+-        $this->groupConcatMaxLen = $groupConcatMaxLen;
+     }
+
+     /**
+@@ -65,15 +55,13 @@ public function execute(array $sourceItemIds): array
+         $sourceItemTable = $this->resourceConnection->getTableName(
+             SourceItemResourceModel::TABLE_NAME_SOURCE_ITEM
+         );
++        $items = [];
+
+         $select = $connection
+             ->select()
+             ->from(
+                 ['source_item' => $sourceItemTable],
+-                [
+-                    SourceItemInterface::SKU =>
+-                        sprintf("GROUP_CONCAT(DISTINCT %s SEPARATOR ',')", 'source_item.' . SourceItemInterface::SKU)
+-                ]
++                [SourceItemInterface::SKU => 'source_item.' . SourceItemInterface::SKU]
+             )->joinInner(
+                 ['stock_source_link' => $sourceStockLinkTable],
+                 sprintf(
+@@ -82,11 +70,16 @@ public function execute(array $sourceItemIds): array
+                     StockSourceLink::SOURCE_CODE
+                 ),
+                 [StockSourceLink::STOCK_ID]
+-            )->where('source_item.source_item_id IN (?)', $sourceItemIds)
+-            ->group(['stock_source_link.' . StockSourceLink::STOCK_ID]);
++            )->where(
++                'source_item.source_item_id IN (?)',
++                $sourceItemIds
++            );
++
++        $dbStatement = $connection->query($select);
++        while ($item = $dbStatement->fetch()) {
++            $items[$item[StockSourceLink::STOCK_ID]][$item[SourceItemInterface::SKU]] = $item[SourceItemInterface::SKU];
++        }
+
+-        $connection->query('SET group_concat_max_len = ' . $this->groupConcatMaxLen);
+-        $items = $connection->fetchAll($select);
+         return $this->getStockIdToSkuList($items);
+     }
+
+@@ -99,11 +92,11 @@ public function execute(array $sourceItemIds): array
+     private function getStockIdToSkuList(array $items): array
+     {
+         $skuListInStockList = [];
+-        foreach ($items as $item) {
++        foreach ($items as $stockId => $skuList) {
+             /** @var SkuListInStock $skuListInStock */
+             $skuListInStock = $this->skuListInStockFactory->create();
+-            $skuListInStock->setStockId((int)$item[StockSourceLink::STOCK_ID]);
+-            $skuListInStock->setSkuList(explode(',', $item[SourceItemInterface::SKU]));
++            $skuListInStock->setStockId((int)$stockId);
++            $skuListInStock->setSkuList($skuList);
+             $skuListInStockList[] = $skuListInStock;
+         }
+         return $skuListInStockList;
+diff -Nuar a/vendor/magento/module-inventory-indexer/etc/di.xml b/vendor/magento/module-inventory-indexer/etc/di.xml
+--- a/vendor/magento/module-inventory-indexer/etc/di.xml
++++ b/vendor/magento/module-inventory-indexer/etc/di.xml
+@@ -25,11 +25,6 @@
+             <argument name="indexHandler" xsi:type="object">Magento\InventoryIndexer\Indexer\IndexHandler</argument>
+         </arguments>
+     </type>
+-    <type name="Magento\InventoryIndexer\Indexer\SourceItem\GetSkuListInStock">
+-        <arguments>
+-            <argument name="groupConcatMaxLen" xsi:type="number">2000</argument>
+-        </arguments>
+-    </type>
+     <type name="Magento\InventoryIndexer\Model\ResourceModel\GetProductIdsBySourceItemIds">
+         <arguments>
+             <argument name="productTableName" xsi:type="string">catalog_product_entity</argument>

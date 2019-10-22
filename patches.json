@@ -180,6 +180,18 @@
     "Re-work consumers to terminate as soon as there is nothing left to process": {
       "2.2.0 - 2.3.1": "MAGECLOUD-4071__terminate_consumers_if_the_queue_is_empty__2.2.0.patch",
       "2.3.2 - 2.3.3": "MAGECLOUD-4071__terminate_consumers_if_the_queue_is_empty__2.3.2.patch"
+    },
+    "Reduce q-ty of error report files": {
+      "2.1.4 - 2.1.7": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.1.4.patch",
+      "2.1.8 - 2.1.16": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.1.8.patch",
+      "~2.1.17": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.1.17.patch",
+      "2.2.0 - 2.2.4": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.2.0.patch",
+      "2.2.5": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.2.5.patch",
+      "2.2.6 - 2.2.7": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.2.6.patch",
+      "~2.2.8": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.2.8.patch",
+      "2.3.0": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.3.0.patch",
+      "2.3.1": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.3.1.patch",
+      "2.3.2 - 2.3.3": "MAGECLOUD-3392__reduce_q-ty_of_error_report_files__2.3.2.patch"
     }
   },
   "monolog/monolog": {
@@ -197,6 +209,34 @@
   "colinmollenhour/credis": {
     "Fix credis pipeline issue": {
       "1.6": "MAGETWO-67097__fix_credis_pipeline_bug__2.1.4.patch"
+    }
+  },
+  "magento/module-inventory-catalog": {
+    "Price indexer fails with large catalogs": {
+      ">=1.0.3 <1.0.6": "MSI-2210__price_indexer_fails_with_large_catalogs__1.0.3.patch"
+    }
+  },
+  "magento/module-inventory-indexer": {
+    "Avoid quering inventory default stock view in storefront": {
+      ">=1.0.3 <1.0.6": "MSI-GH-2350__avoid_quering_inventory_default_stock_view_in_storefront__1.0.3.patch"
+    },
+    "Avoid group concat from source item indexer": {
+      ">=1.0.3 <1.0.6": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__indexer__1.0.3.patch"
+    }
+  },
+  "magento/module-inventory-reservations": {
+    "Avoid group concat from source item indexer": {
+      ">=1.0.3 <1.0.6": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__reservations__1.0.3.patch"
+    }
+  },
+  "magento/module-inventory-configurable-product-indexer": {
+    "Avoid group concat from source item indexer": {
+      ">=1.0.3 <1.0.5": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__configurable-product-indexer__1.0.3.patch"
+    }
+  },
+  "magento/module-inventory-grouped-product-indexer": {
+    "Avoid group concat from source item indexer": {
+      ">=1.0.3 <1.0.5": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__grouped-product-indexer__1.0.3.patch"
     }
   }
 }

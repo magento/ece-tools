@@ -19,37 +19,18 @@ use PHPUnit\Framework\TestCase;
  */
 class ProcessFactoryTest extends TestCase
 {
-    /**
-     * @var ProcessFactory
-     */
-    private $processFactory;
-
-    /**
-     * @var ContainerInterface|MockObject
-     */
-    private $containerMock;
-
-    /**
-     * @inheritdoc
-     */
-    protected function setUp()
-    {
-        $this->containerMock = $this->getMockForAbstractClass(ContainerInterface::class);
-
-        $this->processFactory = new ProcessFactory($this->containerMock);
-    }
-
     public function testCreate()
     {
+        $processFactory = new ProcessFactory();
         /** @var ProcessInterface|MockObject $processMock */
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $params = ['option' => 'value'];
+        $params = [
+            'command' => 'ls -la',
+            'cwd' => '/home/',
+            'timeout' => 0,
+        ];
 
-        $this->containerMock->expects($this->once())
-            ->method('create')
-            ->with(Process::class, $params)
-            ->willReturn($processMock);
+        $process = $processFactory->create($params);
 
-        $this->processFactory->create($params);
+        $this->assertInstanceOf(Process::class, $process);
     }
 }

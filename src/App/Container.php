@@ -7,11 +7,15 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\App;
 
+use Composer\Composer;
+use Composer\Factory;
+use Composer\IO\BufferIO;
+use Magento\MagentoCloud\ExtensionRegistrar;
 use Magento\MagentoCloud\Filesystem\SystemList;
-use Magento\MagentoCloud\Step\Deploy as DeployStep;
-use Magento\MagentoCloud\Step\StepComposite;
-use Magento\MagentoCloud\Step\StepInterface;
-use Composer;
+use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 /**
  * @inheritdoc
@@ -21,7 +25,7 @@ use Composer;
 class Container implements ContainerInterface
 {
     /**
-     * @var \Illuminate\Container\Container
+     * @var \Symfony\Component\DependencyInjection\Container
      */
     private $container;
 
@@ -30,105 +34,57 @@ class Container implements ContainerInterface
      * @param string $magentoBasePath
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @throws \Exception
      */
     public function __construct(string $toolsBasePath, string $magentoBasePath)
     {
-        /**
-         * Creating concrete container.
-         */
-        $this->container = new \Illuminate\Container\Container();
+        $containerBuilder = new ContainerBuilder();
+        $containerBuilder->set('container', $containerBuilder);
+        $containerBuilder->setDefinition('container', new Definition(Container::class))
+            ->setArguments([$toolsBasePath, $magentoBasePath]);
 
         $systemList = new SystemList($toolsBasePath, $magentoBasePath);
 
-        /**
-         * Instance configuration.
-         */
-        $this->container->instance(ContainerInterface::class, $this);
-        $this->container->instance(SystemList::class, $systemList);
+        $containerBuilder->set(SystemList::class, $systemList);
+        $containerBuilder->setDefinition(SystemList::class, new Definition(SystemList::class));
 
-        /**
-         * Binding.
-         */
-        $this->container->singleton(Composer\Composer::class, static function () use ($systemList) {
-            $composerFactory = new Composer\Factory();
-            $composerFile = file_exists($systemList->getMagentoRoot() . '/composer.json')
-                ? $systemList->getMagentoRoot() . '/composer.json'
-                : $systemList->getRoot() . '/composer.json';
+        $containerBuilder->set(Composer::class, $this->createComposerInstance($systemList));
+        $containerBuilder->setDefinition(Composer::class, new Definition(Composer::class));
 
-            return $composerFactory->createComposer(
-                new Composer\IO\BufferIO(),
-                $composerFile,
-                false,
-                $systemList->getMagentoRoot()
-            );
-        });
+        $loader = new XmlFileLoader($containerBuilder, new FileLocator($toolsBasePath . '/config/'));
+        $loader->load('services.xml');
 
-        /**
-         * Singletons.
-         */
-        $this->container->singleton(\Magento\MagentoCloud\Config\Environment::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\State::class);
-        $this->container->singleton(\Magento\MagentoCloud\App\Logger\Pool::class);
-        $this->container->singleton(\Magento\MagentoCloud\Package\Manager::class);
-        $this->container->singleton(\Magento\MagentoCloud\Package\MagentoVersion::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Build::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\Deploy::class);
-        $this->container->singleton(\Magento\MagentoCloud\Config\Stage\PostDeploy::class);
+        foreach (ExtensionRegistrar::getPaths() as $extensionPath) {
+            if (file_exists($extensionPath . '/config/services.xml')) {
+                $loader = new XmlFileLoader($containerBuilder, new FileLocator($extensionPath . '/config/'));
+                $loader->load('services.xml');
+            }
+        }
 
-        /**
-         * Interface to implementation binding.
-         */
-        $this->container->singleton(
-            \Magento\MagentoCloud\Config\ConfigInterface::class,
-            \Magento\MagentoCloud\Config\Shared::class
-        );
-        $this->container->singleton(
-            \Magento\MagentoCloud\Shell\ShellInterface::class,
-            \Magento\MagentoCloud\Shell\Shell::class
-        );
-        $this->container->singleton(
-            \Magento\MagentoCloud\DB\DumpInterface::class,
-            \Magento\MagentoCloud\DB\Dump::class
-        );
-        $this->container->singleton(
-            \Psr\Log\LoggerInterface::class,
-            \Magento\MagentoCloud\App\Logger::class
-        );
-        $this->container->singleton(
-            \Magento\MagentoCloud\DB\ConnectionInterface::class,
-            \Magento\MagentoCloud\DB\Connection::class
-        );
-        $this->container->singleton(
-            \Magento\MagentoCloud\Config\Stage\BuildInterface::class,
-            \Magento\MagentoCloud\Config\Stage\Build::class
-        );
-        $this->container->singleton(
-            \Magento\MagentoCloud\Config\Stage\DeployInterface::class,
-            \Magento\MagentoCloud\Config\Stage\Deploy::class
-        );
-        $this->container->singleton(
-            \Magento\MagentoCloud\Config\Stage\PostDeployInterface::class,
-            \Magento\MagentoCloud\Config\Stage\PostDeploy::class
-        );
-        $this->container->singleton(
-            \Magento\MagentoCloud\PlatformVariable\DecoderInterface::class,
-            \Magento\MagentoCloud\PlatformVariable\Decoder::class
-        );
-        $this->container->singleton(
-            \Magento\MagentoCloud\Config\Database\ConfigInterface::class,
-            \Magento\MagentoCloud\Config\Database\MergedConfig::class
+        $containerBuilder->compile();
+
+        $this->container = $containerBuilder;
+    }
+
+    /**
+     * @param SystemList $systemList
+     * @return Composer
+     */
+    private function createComposerInstance(SystemList $systemList): Composer
+    {
+        $composerFactory = new Factory();
+        $composerFile = file_exists($systemList->getMagentoRoot() . '/composer.json')
+            ? $systemList->getMagentoRoot() . '/composer.json'
+            : $systemList->getRoot() . '/composer.json';
+
+        $composer = $composerFactory->createComposer(
+            new BufferIO(),
+            $composerFile,
+            false,
+            $systemList->getMagentoRoot()
         );
 
-        $this->container->when(DeployStep\InstallUpdate\ConfigUpdate\Urls::class)
-            ->needs(StepInterface::class)
-            ->give(function () {
-                return $this->container->makeWith(StepComposite::class, [
-                    'steps' => [
-                        $this->container->make(DeployStep\InstallUpdate\ConfigUpdate\Urls\Database::class),
-                        $this->container->make(DeployStep\InstallUpdate\ConfigUpdate\Urls\Environment::class),
-                    ],
-                ]);
-            });
+        return $composer;
     }
 
     /**
@@ -138,7 +94,7 @@ class Container implements ContainerInterface
      */
     public function get($id)
     {
-        return $this->container->make($id);
+        return $this->container->get($id);
     }
 
     /**
@@ -152,10 +108,9 @@ class Container implements ContainerInterface
     /**
      * @inheritdoc
      */
-    public function set(string $abstract, $concrete, bool $shared = true): void
+    public function set(string $id, $service): void
     {
-        $this->container->forgetInstance($abstract);
-        $this->container->bind($abstract, $concrete, $shared);
+        $this->container->set($id, $service);
     }
 
     /**
@@ -163,6 +118,10 @@ class Container implements ContainerInterface
      */
     public function create(string $abstract, array $params = [])
     {
-        return $this->container->make($abstract, $params);
+        if (empty($params) && $this->has($abstract)) {
+            return $this->get($abstract);
+        }
+
+        return new $abstract(...array_values($params));
     }
 }

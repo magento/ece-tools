@@ -100,9 +100,9 @@ class ProcessorTest extends TestCase
         $this->loggerMock->method('debug')
             ->withConsecutive(
                 ['Running step: step1'],
-                ['Step finished'],
+                ['Step "step1" finished'],
                 ['Running step: step2'],
-                ['Step finished']
+                ['Step "step2" finished']
             );
 
         $this->processor->execute($scenarios);
