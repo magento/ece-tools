@@ -128,8 +128,9 @@ class EolValidator
                 $serviceVersion,
                 date_format($eolDate, 'Y-m-d')
             )];
-        } else if ($eolDate->isFuture()
-        && $eolDate->diffInMonths(Carbon::now()) <= self::NOTIFICATION_PERIOD) {
+        } elseif ($eolDate->isFuture()
+            && $eolDate->diffInMonths(Carbon::now()) <= self::NOTIFICATION_PERIOD
+        ) {
             return [ValidatorInterface::LEVEL_NOTICE => sprintf(
                 '%s %s is approaching EOL (%s).',
                 $serviceName,
@@ -158,6 +159,6 @@ class EolValidator
             }
         }
 
-        return array_key_exists($serviceName, $this->eolConfigs) ? $this->eolConfigs[$serviceName] : [];
+        return $this->eolConfigs[$serviceName] ?? [];
     }
 }
