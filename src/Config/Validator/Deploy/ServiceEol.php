@@ -59,11 +59,10 @@ class ServiceEol implements ValidatorInterface
         try {
             $errors = $this->eolValidator->validateServiceEol();
 
-            $message = $this->errorLevel == ValidatorInterface::LEVEL_WARNING ?
-                'Some services have passed EOL.' :
-                'Some services are approaching EOL.';
-
-            if ($errors && array_key_exists($this->errorLevel, $errors)) {
+            if (isset($errors[$this->errorLevel])) {
+                $message = $this->errorLevel == ValidatorInterface::LEVEL_WARNING ?
+                    'Some services have passed EOL.' :
+                    'Some services are approaching EOL.';
                 return $this->resultFactory->error(
                     $message,
                     implode(PHP_EOL, $errors[$this->errorLevel])
