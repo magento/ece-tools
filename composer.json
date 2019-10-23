@@ -8,6 +8,10 @@
     "repo.magento.com": {
       "type": "composer",
       "url": "https://repo.magento.com/"
+    },
+    "mcp": {
+      "type": "vcs",
+      "url": "git@github.com:magento/magento-cloud-patches.git"
     }
   },
   "require": {
