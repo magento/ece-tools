@@ -484,14 +484,4 @@ class Schema
             ]
         ];
     }
-
-    /**
-     * Returns array of deprecated variables.
-     *
-     * @return array
-     */
-    public function getDeprecatedSchema()
-    {
-        return [];
-    }
 }
