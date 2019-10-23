@@ -29,7 +29,6 @@ class ScenarioExtensibilityCest extends AbstractCest
 
     /**
      * @param \CliTester $I
-     * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      */
     public function testScenarioExtensibilityAndPriority(\CliTester $I)
