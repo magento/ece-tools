@@ -92,8 +92,16 @@ class Manager
             $command .= ' --git-installation 1';
         }
 
+        try {
+            $output = $this->shell->execute($command)->getOutput();
+        } catch (ShellException $exception) {
+            $this->logger->error($exception->getMessage());
+
+            throw  $exception;
+        }
+
         $this->logger->info(
-            "Patching log: \n" . $this->shell->execute($command)->getOutput()
+            "Patching log: \n" . $output
         );
 
         $this->logger->notice('End of applying patches');
