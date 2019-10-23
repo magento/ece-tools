@@ -31,6 +31,7 @@
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\PreDeploy" autowire="false" />
+        <service id="Magento\MagentoCloud\Step\SkipStep" autowire="false" />
         <service id="Magento\MagentoCloud\Step\StepException" autowire="false" />
         <service id="Magento\MagentoCloud\Step\ValidateConfiguration" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Build\BackupData" autowire="false" />
