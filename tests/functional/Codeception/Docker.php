@@ -261,16 +261,8 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     {
         $eceToolsVersion = '2002.0.999';
         $repoConfig = [
-            'type' => 'package',
-            'package' => [
-                'name' => 'magento/ece-tools',
-                'version' => $eceToolsVersion,
-                'source' => [
-                    'type' => 'git',
-                    'url' => $this->_getConfig('system_ece_tools_dir'),
-                    'reference' => exec('git rev-parse HEAD'),
-                ],
-            ],
+            'type' => 'vcs',
+            'url' => $this->_getConfig('system_ece_tools_dir')
         ];
 
         $composerConfig = $this->taskComposerConfig('composer')
@@ -278,8 +270,11 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->noInteraction()
             ->getCommand();
         $composerRequire = $this->taskComposerRequire('composer')
-            ->dependency('magento/ece-tools', $eceToolsVersion)
-            ->noInteraction()
+            ->dependency('magento/ece-tools', sprintf(
+                '%s as %s',
+                exec('git branch --show-current'),
+                $eceToolsVersion
+            ))->noInteraction()
             ->getCommand();
 
         $result = $this->taskBash(self::BUILD_CONTAINER)
