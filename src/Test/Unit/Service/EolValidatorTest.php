@@ -106,11 +106,7 @@ class EolValidatorTest extends TestCase
         $serviceVersion = '3.5';
 
         $this->assertEquals(
-            [ValidatorInterface::LEVEL_WARNING => sprintf(
-                'Unknown or invalid EOL defined for %s %s',
-                $serviceName,
-                $serviceVersion
-            )],
+            [],
             $this->validator->validateService($serviceName, $serviceVersion)
         );
     }
@@ -163,8 +159,8 @@ class EolValidatorTest extends TestCase
             );
 
         $this->assertEquals(
-            5,
-            count($this->validator->validateServiceEol()[ValidatorInterface::LEVEL_WARNING])
+            [],
+            $this->validator->validateServiceEol()
         );
     }
 

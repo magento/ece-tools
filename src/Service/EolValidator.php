@@ -111,12 +111,8 @@ class EolValidator
             return Semver::satisfies($serviceVersion, sprintf('%s.x', $v['version']));
         });
 
-        if (!$versionConfigs || $versionConfigs[array_key_first($versionConfigs)]['eol'] === null) {
-            return [ValidatorInterface::LEVEL_WARNING => sprintf(
-                'Unknown or invalid EOL defined for %s %s',
-                $serviceName,
-                $serviceVersion
-            )];
+        if (!isset($versionConfigs[array_key_first($versionConfigs)]['eol'])) {
+            return [];
         }
 
         $eolDate = Carbon::createFromTimestamp($versionConfigs[array_key_first($versionConfigs)]['eol']);
