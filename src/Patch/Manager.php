@@ -93,16 +93,12 @@ class Manager
         }
 
         try {
-            $output = $this->shell->execute($command)->getOutput();
+            $this->shell->execute($command)->getOutput();
         } catch (ShellException $exception) {
             $this->logger->error($exception->getMessage());
 
             throw  $exception;
         }
-
-        $this->logger->info(
-            "Patching log: \n" . $output
-        );
 
         $this->logger->notice('End of applying patches');
     }

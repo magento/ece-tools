@@ -107,8 +107,7 @@ class ManagerTest extends TestCase
             ->willReturn($processMock);
         $this->loggerMock->method('info')
             ->withConsecutive(
-                ['File static.php was copied'],
-                ["Patching log: \nSome patch applied"]
+                ['File static.php was copied']
             );
         $this->loggerMock->method('notice')
             ->withConsecutive(
@@ -138,10 +137,6 @@ class ManagerTest extends TestCase
             ->method('execute')
             ->with('php ./vendor/bin/ece-patches apply --git-installation 1')
             ->willReturn($processMock);
-        $this->loggerMock->method('info')
-            ->withConsecutive(
-                ["Patching log: \nSome patch applied"]
-            );
         $this->loggerMock->method('notice')
             ->withConsecutive(
                 ['File static.php was not found'],
