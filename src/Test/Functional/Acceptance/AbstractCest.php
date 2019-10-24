@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
  * General Cest
+ * @SuppressWarnings(PHPMD.NumberOfChildren)
  */
 abstract class AbstractCest
 {
