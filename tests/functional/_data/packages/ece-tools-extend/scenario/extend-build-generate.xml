@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
+    <!-- Skip step "copy-sample-data" -->
+    <step name="copy-sample-data" skip="true"/>
+
+    <!-- Replace "set-production-mode" step with own implementation -->
+    <step name="set-production-mode" type="Magento\EceToolExtend\Step\Build\SetProductionMode" priority="200"/>
+
+    <!-- Add new step into the end of build:generate scenario -->
+    <step name="update-static-content" type="Magento\EceToolExtend\Step\Build\StaticContentUpdate" priority="1200"/>
+</scenario>

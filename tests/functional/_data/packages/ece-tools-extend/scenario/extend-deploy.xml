@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
+    <!-- Replace remove-deploy-failed-flag step with custom step -->
+    <step name="remove-deploy-failed-flag" type="Magento\EceToolExtend\Step\Deploy\RemoveDeployFailedFlag" priority="100"/>
+
+    <!-- Skip "clean-redis-cache" sub-step in pre-deploy step -->
+    <step name="pre-deploy" type="Magento\MagentoCloud\Step\Deploy\PreDeploy" priority="200">
+        <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="steps" xsi:type="array">
+                <item name="clean-redis-cache" xsi:type="object" skip="true"/>
+            </argument>
+        </arguments>
+    </step>
+
+    <!-- Skip step "unlock-cron-jobs" -->
+    <step name="unlock-cron-jobs" skip="true"/>
+
+    <!-- Skip critical validators -->
+    <step name="validate-config" type="Magento\MagentoCloud\Step\ValidateConfiguration" priority="300">
+        <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="validators" xsi:type="array">
+                <item name="500" xsi:type="array">
+                    <item name="database-configuration" xsi:type="object" skip="true"/>
+                    <item name="search-configuration" xsi:type="object" skip="true"/>
+                    <item name="resource-configuration" xsi:type="object" skip="true"/>
+                    <item name="session-configuration" xsi:type="object" skip="true"/>
+                    <item name="elasticsuite-integrity" xsi:type="object" skip="true"/>
+                </item>
+            </argument>
+        </arguments>
+    </step>
+
+    <!-- Add new step into the beginning of deploy scenario -->
+    <step name="new-pre-deploy-step" type="Magento\EceToolExtend\Step\Deploy\PreDeploy" priority="10"/>
+</scenario>
