@@ -1,0 +1,381 @@
+diff --git a/vendor/magento/module-email/Model/Transport.php b/vendor/magento/module-email/Model/Transport.php
+index cbce1682cb5..79ceb56a883 100644
+--- a/vendor/magento/module-email/Model/Transport.php
++++ b/vendor/magento/module-email/Model/Transport.php
+@@ -9,7 +9,6 @@ namespace Magento\Email\Model;
+ 
+ use Magento\Framework\App\Config\ScopeConfigInterface;
+ use Magento\Framework\Exception\MailException;
+-use Magento\Framework\Mail\EmailMessageInterface;
+ use Magento\Framework\Mail\MessageInterface;
+ use Magento\Framework\Mail\TransportInterface;
+ use Magento\Framework\Phrase;
+@@ -62,12 +61,12 @@ class Transport implements TransportInterface
+     private $message;
+ 
+     /**
+-     * @param EmailMessageInterface $message Email message object
++     * @param MessageInterface $message Email message object
+      * @param ScopeConfigInterface $scopeConfig Core store config
+      * @param null|string|array|\Traversable $parameters Config options for sendmail parameters
+      */
+     public function __construct(
+-        EmailMessageInterface $message,
++        MessageInterface $message,
+         ScopeConfigInterface $scopeConfig,
+         $parameters = null
+     ) {
+diff --git a/dev/tests/integration/testsuite/Magento/Customer/Controller/AccountTest.php b/dev/tests/integration/testsuite/Magento/Customer/Controller/AccountTest.php
+index 32f12dada57..4210312c55a 100644
+--- a/dev/tests/integration/testsuite/Magento/Customer/Controller/AccountTest.php
++++ b/dev/tests/integration/testsuite/Magento/Customer/Controller/AccountTest.php
+@@ -769,7 +769,7 @@ class AccountTest extends \Magento\TestFramework\TestCase\AbstractController
+         $message = $this->transportBuilderMock->getSentMessage();
+         $rawMessage = $message->getRawMessage();
+ 
+-        $this->assertContains('To: John Smith <' . $email . '>', $rawMessage);
++        $this->assertContains('To: =?utf-8?Q?John=20Smith?= <' . $email . '>', $rawMessage);
+ 
+         $content = $message->getBody()->getParts()[0]->getRawContent();
+         $confirmationUrl = $this->getConfirmationUrlFromMessageContent($content);
+diff --git a/dev/tests/integration/testsuite/Magento/Framework/Mail/EmailMessageTest.php b/dev/tests/integration/testsuite/Magento/Framework/Mail/EmailMessageTest.php
+index 10a54b4e1b8..186c3e2796c 100644
+--- a/dev/tests/integration/testsuite/Magento/Framework/Mail/EmailMessageTest.php
++++ b/dev/tests/integration/testsuite/Magento/Framework/Mail/EmailMessageTest.php
+@@ -14,6 +14,7 @@ use PHPUnit\Framework\TestCase;
+ 
+ /**
+  * Class EmailMessageTest
++ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+  */
+ class EmailMessageTest extends TestCase
+ {
+@@ -164,23 +165,42 @@ class EmailMessageTest extends TestCase
+             'cc' => $cc,
+             'replyTo' => $replyTo,
+             'bcc' => $bcc,
+-            'sender' => $sender
++            'sender' => $sender,
+         ];
+         $message = $this->messageFactory->create($data);
+ 
+         $this->assertContains($content, $message->toString());
+         $this->assertContains('Content-Type: ' . $type, $message->toString());
+-        $senderString = 'Sender: ' . $sender->getName() . ' <' . $sender->getEmail() . '>';
++        $senderString = 'Sender: =?utf-8?Q?'
++            . str_replace(' ', '=20', $sender->getName())
++            . '?= <'
++            . $sender->getEmail()
++            . '>';
+         $this->assertContains($senderString, $message->toString());
+         $this->assertContains('From: ' . $from[0]->getEmail(), $message->toString());
+-        $replyToString = 'Reply-To: ' . $replyTo[0]->getName() . ' <' . $replyTo[0]->getEmail() . '>';
++        $replyToString = 'Reply-To: =?utf-8?Q?'
++            . str_replace(' ', '=20', $replyTo[0]->getName())
++            . '?= <'
++            . $replyTo[0]->getEmail()
++            . '>';
+         $this->assertContains($replyToString, $message->toString());
+-        $toString = 'To: ' . $to[0]->getName() . ' <' . $to[0]->getEmail() . '>';
++        $toString = 'To: =?utf-8?Q?'
++            . str_replace(' ', '=20', $to[0]->getName())
++            . '?= <'
++            . $to[0]->getEmail()
++            . '>';
+         $this->assertContains($toString, $message->toString());
+-        $ccString = 'Cc: ' . $cc[0]->getName() . ' <' . $cc[0]->getEmail() . '>';
++        $ccString = 'Cc: =?utf-8?Q?'
++            . str_replace(' ', '=20', $cc[0]->getName())
++            . '?= <'
++            . $cc[0]->getEmail()
++            . '>';
+         $this->assertContains($ccString, $message->toString());
+         $this->assertContains('Bcc: ' . $bcc[0]->getEmail(), $message->toString());
+-        $this->assertContains('Content-Description: ' . $this->description, $message->toString());
++        $contentDescription = 'Content-Description: =?utf-8?Q?'
++            . str_replace(' ', '=20', $this->description)
++            . '?=';
++        $this->assertContains($contentDescription, $message->toString());
+         $this->assertContains('Subject: ' . $this->subject, $message->toString());
+         $this->assertContains($content, $message->toString());
+         //tests address factory
+@@ -235,6 +255,7 @@ class EmailMessageTest extends TestCase
+             'body' => $mimeMessage,
+             'subject' => $this->subject,
+             'to' => [$addressTo],
++            'encoding' => '',
+         ];
+         $message = $this->messageFactory->create($data);
+ 
+diff --git a/vendor/magento/framework/Mail/EmailMessage.php b/vendor/magento/framework/Mail/EmailMessage.php
+index aaef9750751..02c75977cd0 100644
+--- a/vendor/magento/framework/Mail/EmailMessage.php
++++ b/vendor/magento/framework/Mail/EmailMessage.php
+@@ -10,19 +10,13 @@ namespace Magento\Framework\Mail;
+ use Magento\Framework\Mail\Exception\InvalidArgumentException;
+ use Zend\Mail\Address as ZendAddress;
+ use Zend\Mail\AddressList;
+-use Zend\Mail\Message as ZendMessage;
+ use Zend\Mime\Message as ZendMimeMessage;
+ 
+ /**
+- * Class EmailMessage
++ * Email message
+  */
+-class EmailMessage implements EmailMessageInterface
++class EmailMessage extends Message implements EmailMessageInterface
+ {
+-    /**
+-     * @var ZendMessage
+-     */
+-    private $message;
+-
+     /**
+      * @var MimeMessageInterfaceFactory
+      */
+@@ -64,38 +58,35 @@ class EmailMessage implements EmailMessageInterface
+         ?array $replyTo = null,
+         ?Address $sender = null,
+         ?string $subject = '',
+-        ?string $encoding = ''
++        ?string $encoding = 'utf-8'
+     ) {
+-        $this->message = new ZendMessage();
++        parent::__construct($encoding);
+         $mimeMessage = new ZendMimeMessage();
+         $mimeMessage->setParts($body->getParts());
+-        $this->message->setBody($mimeMessage);
+-        if ($encoding) {
+-            $this->message->setEncoding($encoding);
+-        }
++        $this->zendMessage->setBody($mimeMessage);
+         if ($subject) {
+-            $this->message->setSubject($subject);
++            $this->zendMessage->setSubject($subject);
+         }
+         if ($sender) {
+-            $this->message->setSender($sender->getEmail(), $sender->getName());
++            $this->zendMessage->setSender($sender->getEmail(), $sender->getName());
+         }
+         if (count($to) < 1) {
+             throw new InvalidArgumentException('Email message must have at list one addressee');
+         }
+         if ($to) {
+-            $this->message->setTo($this->convertAddressArrayToAddressList($to));
++            $this->zendMessage->setTo($this->convertAddressArrayToAddressList($to));
+         }
+         if ($replyTo) {
+-            $this->message->setReplyTo($this->convertAddressArrayToAddressList($replyTo));
++            $this->zendMessage->setReplyTo($this->convertAddressArrayToAddressList($replyTo));
+         }
+         if ($from) {
+-            $this->message->setFrom($this->convertAddressArrayToAddressList($from));
++            $this->zendMessage->setFrom($this->convertAddressArrayToAddressList($from));
+         }
+         if ($cc) {
+-            $this->message->setCc($this->convertAddressArrayToAddressList($cc));
++            $this->zendMessage->setCc($this->convertAddressArrayToAddressList($cc));
+         }
+         if ($bcc) {
+-            $this->message->setBcc($this->convertAddressArrayToAddressList($bcc));
++            $this->zendMessage->setBcc($this->convertAddressArrayToAddressList($bcc));
+         }
+         $this->mimeMessageFactory = $mimeMessageFactory;
+         $this->addressFactory = $addressFactory;
+@@ -106,7 +97,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function getEncoding(): string
+     {
+-        return $this->message->getEncoding();
++        return $this->zendMessage->getEncoding();
+     }
+ 
+     /**
+@@ -114,7 +105,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function getHeaders(): array
+     {
+-        return $this->message->getHeaders()->toArray();
++        return $this->zendMessage->getHeaders()->toArray();
+     }
+ 
+     /**
+@@ -122,7 +113,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function getFrom(): ?array
+     {
+-        return $this->convertAddressListToAddressArray($this->message->getFrom());
++        return $this->convertAddressListToAddressArray($this->zendMessage->getFrom());
+     }
+ 
+     /**
+@@ -130,7 +121,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function getTo(): array
+     {
+-        return $this->convertAddressListToAddressArray($this->message->getTo());
++        return $this->convertAddressListToAddressArray($this->zendMessage->getTo());
+     }
+ 
+     /**
+@@ -138,7 +129,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function getCc(): ?array
+     {
+-        return $this->convertAddressListToAddressArray($this->message->getCc());
++        return $this->convertAddressListToAddressArray($this->zendMessage->getCc());
+     }
+ 
+     /**
+@@ -146,7 +137,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function getBcc(): ?array
+     {
+-        return $this->convertAddressListToAddressArray($this->message->getBcc());
++        return $this->convertAddressListToAddressArray($this->zendMessage->getBcc());
+     }
+ 
+     /**
+@@ -154,7 +145,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function getReplyTo(): ?array
+     {
+-        return $this->convertAddressListToAddressArray($this->message->getReplyTo());
++        return $this->convertAddressListToAddressArray($this->zendMessage->getReplyTo());
+     }
+ 
+     /**
+@@ -163,7 +154,7 @@ class EmailMessage implements EmailMessageInterface
+     public function getSender(): ?Address
+     {
+         /** @var ZendAddress $zendSender */
+-        if (!$zendSender = $this->message->getSender()) {
++        if (!$zendSender = $this->zendMessage->getSender()) {
+             return null;
+         }
+ 
+@@ -178,18 +169,10 @@ class EmailMessage implements EmailMessageInterface
+     /**
+      * @inheritDoc
+      */
+-    public function getSubject(): ?string
+-    {
+-        return $this->message->getSubject();
+-    }
+-
+-    /**
+-     * @inheritDoc
+-     */
+-    public function getBody(): MimeMessageInterface
++    public function getMessageBody(): MimeMessageInterface
+     {
+         return $this->mimeMessageFactory->create(
+-            ['parts' => $this->message->getBody()->getParts()]
++            ['parts' => $this->zendMessage->getBody()->getParts()]
+         );
+     }
+ 
+@@ -198,15 +181,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function getBodyText(): string
+     {
+-        return $this->message->getBodyText();
+-    }
+-
+-    /**
+-     * @inheritdoc
+-     */
+-    public function getRawMessage(): string
+-    {
+-        return $this->toString();
++        return $this->zendMessage->getBodyText();
+     }
+ 
+     /**
+@@ -214,7 +189,7 @@ class EmailMessage implements EmailMessageInterface
+      */
+     public function toString(): string
+     {
+-        return $this->message->toString();
++        return $this->zendMessage->toString();
+     }
+ 
+     /**
+diff --git a/vendor/magento/framework/Mail/EmailMessageInterface.php b/vendor/magento/framework/Mail/EmailMessageInterface.php
+index 95f83ff679c..93eaa4acde3 100644
+--- a/vendor/magento/framework/Mail/EmailMessageInterface.php
++++ b/vendor/magento/framework/Mail/EmailMessageInterface.php
+@@ -9,7 +9,7 @@ namespace Magento\Framework\Mail;
+ /**
+  * Interface EmailMessageInterface
+  */
+-interface EmailMessageInterface
++interface EmailMessageInterface extends MailMessageInterface
+ {
+     /**
+      * Get the message encoding
+@@ -72,14 +72,14 @@ interface EmailMessageInterface
+      *
+      * @return null|string
+      */
+-    public function getSubject(): ?string;
++    public function getSubject();
+ 
+     /**
+      * Return the currently set message body
+      *
+      * @return MimeMessageInterface
+      */
+-    public function getBody(): MimeMessageInterface;
++    public function getMessageBody(): MimeMessageInterface;
+ 
+     /**
+      * Get the string-serialized message body text
+diff --git a/vendor/magento/framework/Mail/MailMessageInterface.php b/vendor/magento/framework/Mail/MailMessageInterface.php
+index da010be2702..5179e6057c4 100644
+--- a/vendor/magento/framework/Mail/MailMessageInterface.php
++++ b/vendor/magento/framework/Mail/MailMessageInterface.php
+@@ -10,6 +10,8 @@ namespace Magento\Framework\Mail;
+  *
+  * @api
+  * @since 101.0.8
++ * @deprecated
++ * @see \Magento\Framework\Mail\EmailMessageInterface
+  */
+ interface MailMessageInterface extends MessageInterface
+ {
+diff --git a/vendor/magento/framework/Mail/Message.php b/vendor/magento/framework/Mail/Message.php
+index b15b75ca9ac..1f423e80108 100644
+--- a/vendor/magento/framework/Mail/Message.php
++++ b/vendor/magento/framework/Mail/Message.php
+@@ -10,13 +10,16 @@ use Zend\Mime\Part;
+ 
+ /**
+  * Class Message for email transportation
++ *
++ * @deprecated
++ * @see \Magento\Framework\Mail\EmailMessage
+  */
+ class Message implements MailMessageInterface
+ {
+     /**
+      * @var \Zend\Mail\Message
+      */
+-    private $zendMessage;
++    protected $zendMessage;
+ 
+     /**
+      * Message type
+diff --git a/vendor/magento/framework/Mail/Template/TransportBuilder.php b/vendor/magento/framework/Mail/Template/TransportBuilder.php
+index 4a8d6572faa..2d28e2f560a 100644
+--- a/vendor/magento/framework/Mail/Template/TransportBuilder.php
++++ b/vendor/magento/framework/Mail/Template/TransportBuilder.php
+@@ -87,7 +87,7 @@ class TransportBuilder
+     /**
+      * Message
+      *
+-     * @var EmailMessageInterface
++     * @var MessageInterface
+      */
+     protected $message;
+ 

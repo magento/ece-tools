@@ -180,6 +180,9 @@
     "Re-work consumers to terminate as soon as there is nothing left to process": {
       "2.2.0 - 2.3.1": "MAGECLOUD-4071__terminate_consumers_if_the_queue_is_empty__2.2.0.patch",
       "2.3.2 - 2.3.3": "MAGECLOUD-4071__terminate_consumers_if_the_queue_is_empty__2.3.2.patch"
+    },
+    "Backward Compatibility of new Mail Interfaces": {
+      "2.3.3": "MAGECLOUD-4442__fix_backward_compatibility_of_new_mail_interfaces__2.3.3.patch"
     }
   },
   "monolog/monolog": {
