@@ -206,7 +206,7 @@ class ElasticSearchTest extends TestCase
         );
         $clientMock->expects($this->once())
             ->method('get')
-            ->with('127.0.0.1:1234/_template')
+            ->with('127.0.0.1:1234/_template/platformsh_index_settings')
             ->willReturn($responseMock);
         $responseMock->expects($this->once())
             ->method('getBody')
@@ -255,16 +255,11 @@ class ElasticSearchTest extends TestCase
                 ]
             );
         $clientMock = $this->createPartialMock(Client::class, ['get']);
-        $responseMock = $this->createMock(Response::class);
 
         $clientMock->expects($this->once())
             ->method('get')
-            ->with('127.0.0.1:1234/_template')
+            ->with('127.0.0.1:1234/_template/platformsh_index_settings')
             ->willThrowException(new \Exception('Some error'));
-        $clientMock->expects($this->once())
-            ->method('get')
-            ->with('127.0.0.1:1234/_template')
-            ->willReturn($responseMock);
         $this->clientFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($clientMock);
