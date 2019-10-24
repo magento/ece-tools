@@ -1,0 +1,13 @@
+{
+  "name": "magento/ece-tools-extend",
+  "description": "Extension for ece-tools",
+  "type": "magento2-component",
+  "version": "1.0.0",
+  "license": "OSL-3.0",
+  "autoload": {
+    "files": [ "registration.php" ],
+    "psr-4": {
+      "Magento\\EceToolExtend\\": "src/"
+    }
+  }
+}
