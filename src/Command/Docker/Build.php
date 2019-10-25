@@ -136,37 +136,44 @@ class Build extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'PHP version'
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_NGINX,
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Nginx version'
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_DB,
                 null,
                 InputOption::VALUE_REQUIRED,
                 'DB version'
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_REDIS,
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Redis version'
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_ES,
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Elasticsearch version'
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_RABBIT_MQ,
                 null,
                 InputOption::VALUE_REQUIRED,
                 'RabbitMQ version'
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_NODE,
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Node.js version'
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_MODE,
                 'm',
                 InputOption::VALUE_REQUIRED,
@@ -182,7 +189,8 @@ class Build extends Command
                     )
                 ),
                 ComposeFactory::COMPOSE_PRODUCTION
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_SYNC_ENGINE,
                 null,
                 InputOption::VALUE_REQUIRED,

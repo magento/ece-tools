@@ -80,7 +80,8 @@ class BuildOptionsIniTest extends TestCase
                 [StageConfigInterface::VAR_SCD_STRATEGY, StageConfigInterface::STAGE_BUILD, 'quik'],
                 [StageConfigInterface::VAR_SCD_THREADS, StageConfigInterface::STAGE_BUILD, 'two'],
                 [StageConfigInterface::VAR_SCD_EXCLUDE_THEMES, StageConfigInterface::STAGE_BUILD, 'some_theme']
-            )->willReturnOnConsecutiveCalls(
+            )
+            ->willReturnOnConsecutiveCalls(
                 StageConfigInterface::VAR_SCD_STRATEGY . ' error1',
                 StageConfigInterface::VAR_SCD_THREADS . ' error2',
                 StageConfigInterface::VAR_SCD_EXCLUDE_THEMES . ' error3'
