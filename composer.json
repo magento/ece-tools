@@ -8,10 +8,6 @@
     "repo.magento.com": {
       "type": "composer",
       "url": "https://repo.magento.com/"
-    },
-    "mcp": {
-      "type": "vcs",
-      "url": "git@github.com:magento/magento-cloud-patches.git"
     }
   },
   "require": {
@@ -34,7 +30,7 @@
     "symfony/yaml": "^3.3||^4.0",
     "twig/twig": "^1.0||^2.0",
     "magento/magento-cloud-components": "^1.0.1",
-    "magento/magento-cloud-patches": "dev-MAGECLOUD-4458 as 1.0.0"
+    "magento/magento-cloud-patches": "^1.0.0"
   },
   "require-dev": {
     "php-mock/php-mock-phpunit": "^2.0",
