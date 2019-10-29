@@ -31,7 +31,7 @@ modules:
         - /var/www/magento/pub/media
         - /var/www/magento/var
         - /var/www/magento/app/etc
-      printOutput: true
+      printOutput: false
     PhpBrowser:
       url: "%Magento.docker.settings.env.url.base%"
     Magento\MagentoCloud\Test\Functional\Codeception\MagentoDb:
