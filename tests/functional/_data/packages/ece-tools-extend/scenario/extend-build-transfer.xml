@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
+    <!-- Swap priority of two steps -->
+    <step name="compress-static-content" type="Magento\MagentoCloud\Step\Build\CompressStaticContent" priority="200"/>
+    <step name="clear-init-directory" type="Magento\MagentoCloud\Step\Build\ClearInitDirectory" priority="100"/>
+</scenario>
