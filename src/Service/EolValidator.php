@@ -88,7 +88,7 @@ class EolValidator
             $serviceVersion = $service->getVersion();
 
             if ($validationResult = $this->validateService($serviceName, $serviceVersion)) {
-                $errorLevel = array_key_first($validationResult);
+                $errorLevel = current(array_keys($validationResult));
                 $errors[$errorLevel][] = $validationResult[$errorLevel];
             }
         }
@@ -111,11 +111,11 @@ class EolValidator
             return Semver::satisfies($serviceVersion, sprintf('%s.x', $v['version']));
         });
 
-        if (!isset($versionConfigs[array_key_first($versionConfigs)]['eol'])) {
+        if (!isset($versionConfigs[current(array_keys($versionConfigs))]['eol'])) {
             return [];
         }
 
-        $eolDate = Carbon::createFromTimestamp($versionConfigs[array_key_first($versionConfigs)]['eol']);
+        $eolDate = Carbon::createFromTimestamp($versionConfigs[current(array_keys($versionConfigs))]['eol']);
 
         if (!$eolDate->isFuture()) {
             return [ValidatorInterface::LEVEL_WARNING => sprintf(
