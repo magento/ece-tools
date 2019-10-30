@@ -61,14 +61,6 @@ class FileList extends ConfigFileList
     /**
      * @return string
      */
-    public function getPatches(): string
-    {
-        return $this->directoryList->getRoot() . '/patches.json';
-    }
-
-    /**
-     * @return string
-     */
     public function getMagentoComposer(): string
     {
         return $this->directoryList->getMagentoRoot() . '/composer.json';

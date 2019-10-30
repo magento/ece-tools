@@ -7,9 +7,10 @@ namespace Magento\MagentoCloud\Test\Unit\Process\Build;
 
 use Magento\MagentoCloud\Patch\Manager;
 use Magento\MagentoCloud\Process\Build\ApplyPatches;
+use Magento\MagentoCloud\Process\ProcessException;
+use Magento\MagentoCloud\Shell\ShellException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -22,12 +23,7 @@ class ApplyPatchesTest extends TestCase
     private $process;
 
     /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
-    /**
-     * @var Manager|Mock
+     * @var Manager|MockObject
      */
     private $managerMock;
 
@@ -36,28 +32,37 @@ class ApplyPatchesTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
         $this->managerMock = $this->createMock(Manager::class);
 
         $this->process = new ApplyPatches(
-            $this->loggerMock,
             $this->managerMock
         );
 
         parent::setUp();
     }
 
+    /**
+     * @throws ProcessException
+     */
     public function testExecute()
     {
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('notice')
-            ->withConsecutive(
-                ['Applying patches.'],
-                ['End of applying patches.']
-            );
         $this->managerMock->expects($this->once())
-            ->method('applyAll');
+            ->method('apply');
+
+        $this->process->execute();
+    }
+
+    /**
+     * @expectedException \Magento\MagentoCloud\Process\ProcessException
+     * @expectedExceptionMessage Some error
+     *
+     * @throws ProcessException
+     */
+    public function testExecuteWithException()
+    {
+        $this->managerMock->expects($this->once())
+            ->method('apply')
+            ->willThrowException(new ShellException('Some error'));
 
         $this->process->execute();
     }

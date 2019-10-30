@@ -5,11 +5,11 @@
  */
 namespace Magento\MagentoCloud\Patch;
 
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -18,19 +18,14 @@ use Psr\Log\LoggerInterface;
 class Manager
 {
     /**
-     * Directory for hotfixes.
-     */
-    const HOTFIXES_DIR = 'm2-hotfixes';
-
-    /**
-     * @var Applier
-     */
-    private $applier;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
+
+    /**
+     * @var ShellInterface
+     */
+    private $shell;
 
     /**
      * @var File
@@ -38,138 +33,73 @@ class Manager
     private $file;
 
     /**
-     * @var FileList
-     */
-    private $fileList;
-
-    /**
      * @var DirectoryList
      */
     private $directoryList;
 
     /**
-     * @param Applier $applier
+     * @var GlobalSection
+     */
+    private $globalSection;
+
+    /**
      * @param LoggerInterface $logger
+     * @param ShellInterface $shell
      * @param File $file
-     * @param FileList $fileList
      * @param DirectoryList $directoryList
+     * @param GlobalSection $globalSection
      */
     public function __construct(
-        Applier $applier,
         LoggerInterface $logger,
+        ShellInterface $shell,
         File $file,
-        FileList $fileList,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        GlobalSection $globalSection
     ) {
-        $this->applier = $applier;
+
         $this->logger = $logger;
+        $this->shell = $shell;
         $this->file = $file;
-        $this->fileList = $fileList;
         $this->directoryList = $directoryList;
+        $this->globalSection = $globalSection;
     }
 
     /**
      * Applies all needed patches.
      *
      * @throws ShellException
-     * @throws FileSystemException
      */
-    public function applyAll()
-    {
-        $this->copyStaticFile();
-        $this->applyComposerPatches();
-        $this->applyHotFixes();
-    }
-
-    /**
-     * Copying static file endpoint.
-     * This resolves issue MAGECLOUD-314
-     *
-     * @return void
-     */
-    private function copyStaticFile()
+    public function apply()
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
 
         if (!$this->file->isExists($magentoRoot . '/pub/static.php')) {
-            $this->logger->notice('File static.php was not found.');
+            $this->logger->notice('File static.php was not found');
+        } else {
+            $this->file->copy(
+                $magentoRoot . '/pub/static.php',
+                $magentoRoot . '/pub/front-static.php'
+            );
 
-            return;
+            $this->logger->info('File static.php was copied');
         }
 
-        $this->file->copy($magentoRoot . '/pub/static.php', $magentoRoot . '/pub/front-static.php');
-        $this->logger->info('File static.php was copied.');
-    }
+        $this->logger->notice('Applying patches');
 
-    /**
-     * Applies patches from composer.json file.
-     * Patches are applying from top to bottom of config list.
-     *
-     * ```
-     *  "colinmollenhour/credis" : {
-     *      "Fix Redis issue": {
-     *          "1.6": "patches/redis-pipeline.patch"
-     *      }
-     *  }
-     *
-     * Each patch must have corresponding constraint of target package,
-     * in one of the following format:
-     * - 1.6
-     * - 1.6.*
-     * - ^1.6
-     *
-     * @return void
-     * @throws ShellException
-     * @throws FileSystemException
-     */
-    private function applyComposerPatches()
-    {
-        $patches = json_decode(
-            $this->file->fileGetContents($this->fileList->getPatches()),
-            true
-        );
+        $command = 'php ./vendor/bin/ece-patches apply';
 
-        if (!$patches) {
-            $this->logger->notice('Patching skipped.');
-
-            return;
+        if ($this->globalSection->get(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)) {
+            $command .= ' --git-installation 1';
         }
 
-        foreach ($patches as $packageName => $patchesInfo) {
-            foreach ($patchesInfo as $patchName => $packageInfo) {
-                if (is_string($packageInfo)) {
-                    $this->applier->apply($packageInfo, $patchName, $packageName, '*');
-                } elseif (is_array($packageInfo)) {
-                    foreach ($packageInfo as $constraint => $path) {
-                        $this->applier->apply($path, $patchName, $packageName, $constraint);
-                    }
-                }
-            }
-        }
-    }
+        try {
+            $this->shell->execute($command)->getOutput();
+        } catch (ShellException $exception) {
+            $this->logger->error($exception->getMessage());
 
-    /**
-     * Applies patches from root directory m2-hotfixes.
-     *
-     * @return void
-     */
-    private function applyHotFixes()
-    {
-        $hotFixesDir = $this->directoryList->getMagentoRoot() . '/' . static::HOTFIXES_DIR;
-
-        if (!$this->file->isDirectory($hotFixesDir)) {
-            $this->logger->notice('Hot-fixes directory was not found. Skipping.');
-
-            return;
+            throw  $exception;
         }
 
-        $this->logger->info('Applying hot-fixes.');
-
-        $files = glob($hotFixesDir . '/*.patch');
-        sort($files);
-
-        foreach ($files as $file) {
-            $this->applier->apply($file, null, null, null);
-        }
+        $this->logger->notice('End of applying patches');
     }
 }

@@ -53,11 +53,14 @@ install:
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer remove magento/magento-cloud-components --no-update; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer config --unset repositories.repo.magento.com; fi;
   - if [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}; fi;
+  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then composer config github-oauth.github.com ${GITHUB_TOKEN}; fi;
+  - if [ -n "${MCP_VERSION}" ]; then composer config repositories.mcp git git@github.com:magento/magento-cloud-patches.git && composer require "magento/magento-cloud-patches:${MCP_VERSION}" --no-update; fi;
   - composer update -n --no-suggest
 
 before_script:
   - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env
   - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.docker/composer.env
+  - echo "COMPOSER_GITHUB_TOKEN=${GITHUB_TOKEN}" >> ./.docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
   - sudo /etc/init.d/mysql stop
   - ./tests/travis/prepare_functional_parallel.sh

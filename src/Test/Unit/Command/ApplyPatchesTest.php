@@ -7,9 +7,9 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\ApplyPatches;
 use Magento\MagentoCloud\Patch\Manager;
+use Magento\MagentoCloud\Shell\ShellException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -23,36 +23,23 @@ class ApplyPatchesTest extends TestCase
     private $command;
 
     /**
-     * @var Manager|Mock
+     * @var Manager|MockObject
      */
     private $managerMock;
 
-    /**
-     * @var LoggerInterface|Mock
-     */
-    private $loggerMock;
-
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->managerMock = $this->createMock(Manager::class);
 
         $this->command = new ApplyPatches(
-            $this->loggerMock,
             $this->managerMock
         );
     }
 
     public function testExecute()
     {
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Patching started.'],
-                ['Patching finished.']
-            );
         $this->managerMock->expects($this->once())
-            ->method('applyAll');
+            ->method('apply');
 
         $tester = new CommandTester(
             $this->command
@@ -63,20 +50,14 @@ class ApplyPatchesTest extends TestCase
     }
 
     /**
-     * @expectedException \Exception
+     * @expectedException \Magento\MagentoCloud\Shell\ShellException
      * @expectedExceptionMessage Some error
      */
     public function testExecuteWithException()
     {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Patching started.');
-        $this->loggerMock->expects($this->once())
-            ->method('critical')
-            ->with('Some error');
         $this->managerMock->expects($this->once())
-            ->method('applyAll')
-            ->willThrowException(new \Exception('Some error'));
+            ->method('apply')
+            ->willThrowException(new ShellException('Some error'));
 
         $tester = new CommandTester(
             $this->command
