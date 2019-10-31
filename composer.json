@@ -8,11 +8,7 @@
     "repo.magento.com": {
       "type": "composer",
       "url": "https://repo.magento.com/"
-    },
-    "docker":{
-        "type": "vcs",
-        "url": "git@github.com:magento/magento-cloud-docker.git"
-      }
+    }
   },
   "require": {
     "php": "^7.1.3",
@@ -33,8 +29,7 @@
     "symfony/dependency-injection": "^3.4||^4.3",
     "symfony/process": "^2.1||^4.1",
     "symfony/serializer": "^3.3",
-    "symfony/yaml": "^3.3||^4.0",
-    "magento/magento-cloud-docker": "develop-dev as 1.0.99"
+    "symfony/yaml": "^3.3||^4.0"
   },
   "suggest": {
     "magento/magento-cloud-docker": "^1.0"
