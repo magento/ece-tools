@@ -40,8 +40,8 @@
     "php-mock/php-mock-phpunit": "^2.0",
     "phpmd/phpmd": "@stable",
     "phpstan/phpstan": "^0.11",
-    "phpunit/php-code-coverage": "^5.2",
-    "phpunit/phpunit": "^6.2",
+    "phpunit/php-code-coverage": "^6.0",
+    "phpunit/phpunit": "^7.2",
     "squizlabs/php_codesniffer": "^3.0"
   },
   "conflict": {

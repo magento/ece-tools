@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
 use Magento\MagentoCloud\Config\Module;
 use Magento\MagentoCloud\Step\Build\RefreshModules;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Shell\ShellException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -85,12 +86,11 @@ class RefreshModulesTest extends TestCase
         $this->step->execute();
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage some error
-     */
     public function testExecuteWithException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('some error');
+
         $this->configMock->expects($this->once())
             ->method('refresh')
             ->willThrowException(new ShellException('some error'));

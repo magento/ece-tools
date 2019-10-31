@@ -108,12 +108,11 @@ class CronUnlockTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting unlocking.');

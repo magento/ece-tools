@@ -72,13 +72,13 @@ class CleanCacheTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage Some error
-     *
      * @throws StepException
      */
     public function testExecuteWithException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->stageConfig->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)

@@ -64,12 +64,10 @@ class ConnectionFactoryTest extends TestCase
         $this->factory->create(ConnectionFactory::CONNECTION_SLAVE);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Connection with type dummy doesn't exist
-     */
     public function testCreateWithException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Connection with type dummy doesn\'t exist');
         $this->factory->create('dummy');
     }
 }

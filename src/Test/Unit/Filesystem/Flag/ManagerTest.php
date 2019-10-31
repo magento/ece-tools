@@ -99,12 +99,12 @@ class ManagerTest extends TestCase
 
     /**
      * @throws ConfigurationMismatchException
-     *
-     * @expectedException \Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException
-     * @expectedExceptionMessage Flag with key some_flag is not registered in pool
      */
     public function testGetFlagWithException(): void
     {
+        $this->expectException(ConfigurationMismatchException::class);
+        $this->expectExceptionMessage('Flag with key some_flag is not registered in pool');
+
         $this->pool->expects($this->once())
             ->method('get')
             ->with('some_flag')

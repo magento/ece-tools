@@ -240,12 +240,10 @@ class ApplierTest extends TestCase
         throw new ShellException('Applying the patch has failed for some reason');
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Shell\ShellException
-     * @expectedExceptionMessage Checking the reverse of the patch has also failed for some reason
-     */
     public function testApplyPatchError()
     {
+        $this->expectException(ShellException::class);
+        $this->expectExceptionMessage('Checking the reverse of the patch has also failed for some reason');
         $path = 'path/to/patch';
         $name = 'patchName';
         $packageName = 'packageName';
