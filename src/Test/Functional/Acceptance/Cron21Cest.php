@@ -13,6 +13,14 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 class Cron21Cest extends CronCest
 {
     /**
+     * @inheritdoc
+     * @skip
+     */
+    public function testCron(\CliTester $I, \Codeception\Example $data)
+    {
+        parent::testCron($I, $data);
+    }
+    /**
      * @return array
      */
     protected function cronDataProvider(): array
