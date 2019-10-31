@@ -7,17 +7,18 @@ ECE-Tools is a set of scripts and tools designed to manage and deploy Cloud proj
 ## Contributing to ECE-Tools Code Base
 You can submit issues and pull requests to extend functionality or fix potential bugs. Improvements to ECE-Tools can include any development experience improvements, optimizations for deployment process, etc. If you find a bug or have a new suggestion, let us know by creating a Github issue.
 
-*Please note:* this repository is not an official support channel. To get project-specific help, please create support ticket through [Support Portal](https://support.magento.com). Support-related issues will be closed with the request to open a support ticket.
+**Note:** This repository is not an official support channel. To receive project-specific help, submit a support ticket using the [Magento Support Portal](https://support.magento.com). Any support-related issues opened in this repository will be closed with a request to open a support ticket.
 
-## Magento Cloud Module for Core
-The ece-tools  package uses extended core functionality that is provided by the [Magento Cloud Components](https://github.com/magento/magento-cloud-components) module. Starting with ece-tools `2002.0.20`, this module is required to support some advanced features, such as cache warm-up using regex. The [Magento Cloud Components](https://github.com/magento/magento-cloud-components) module is installed automatically when you upgrade the ece-tools package to `2002.0.20` or later.
-
-## Magento Cloud Docker for Local Development and CICD
-The ece-tools package uses images that are generated from code in the [Magento Cloud Docker](https://github.com/magento/magento-cloud-docker) repository. Magento maintains a list of images based on the list of service versions available for Magento Commerce. These images are used for building your Docker environment using the ece-tools package.
+# Magento Cloud Suite
+The Magento Cloud Suite includes a set of packages designed to deploy and manage Magento Commerce installations on the Cloud platform.
+- The [ece-tools package](https://github.com/magento/ece-tools) - A set of scripts and tools designed to manage and deploy Cloud projects
+- [Magento Cloud Components](https://github.com/magento/magento-cloud-components) package - Extended Magento Commerce core functionality for sites deployed on the Cloud platform
+- [Magento Cloud Docker](https://github.com/magento/magento-cloud-docker) package - Functionality and Docker images to deploy Magento Commerce to a local Cloud environment
+- [Magento Cloud Patches](https://github.com/magento/magento-cloud-patches) package - A set of patches which improve the integration of all Magento versions with Cloud environments
 
 ## Useful Resources
 - [Release Notes](https://github.com/magento/ece-tools/releases)
-- [Cloud DevDocs](https://devdocs.magento.com/guides/v2.2/cloud/bk-cloud.html)
+- [Magento Cloud Guide DevDocs](https://devdocs.magento.com/guides/v2.3/cloud/bk-cloud.html)
 - [Cloud Knowledge Base and Support](https://support.magento.com)
 - [Cloud Slack Channel](https://magentocommeng.slack.com) (join #cloud and #cloud-docker)
 
