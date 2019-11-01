@@ -1,5 +1,4 @@
 <?php
-//Zephyr ID MAGECLOUD-46
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
@@ -11,7 +10,8 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 
 /**
- * This test runs on the latest version of PHP
+ * This scenario checks that session can be configured through environment variable SESSION_CONFIGURATION
+ * Zephyr ID MAGECLOUD-46
  */
 class SessionConfigurationCest extends AbstractCest
 {
