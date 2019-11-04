@@ -259,8 +259,8 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function addEceComposerRepo(): bool
     {
-        $commands = [];
         $eceToolsVersion = '2002.0.999';
+
         $commands = [
             $this->taskComposerConfig('composer')
                 ->set('repositories.ece-tools', addslashes(json_encode(
@@ -284,33 +284,42 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
                 ->noInteraction()
                 ->getCommand()
         ];
+        $customDeps = [
+            'mcp' => [
+                'name' => 'magento/magento-cloud-patches',
+                'repo' => [
+                    'type' => 'vcs',
+                    'url' => 'git@github.com:magento/magento-cloud-patches.git'
+                ]
+            ]
+        ];
+        $config = json_decode(
+            file_get_contents(__DIR__ . '/../../../composer.json'),
+            true
+        );
 
-        // Temporary fix until 2.3.3 is fully published
-        if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
-            $commands[] = 'rm composer.lock';
-            $commands[] = $this->taskComposerRequire('composer')
-                ->dependency('magento/magento-cloud-metapackage', '2.3.3')
-                ->noInteraction()
-                ->option('--no-update')
-                ->getCommand();
+        foreach ($customDeps as $depName => $extra) {
+            if (isset($config['require'][$extra['name']])) {
+                $commands[] = $this->taskComposerConfig('composer')
+                    ->set('repositories.' . $depName, addslashes(json_encode($extra['repo'], JSON_UNESCAPED_SLASHES)))
+                    ->noInteraction()
+                    ->getCommand();
+                $commands[] = $this->taskComposerRequire('composer')
+                    ->dependency($extra['name'], $config['require'][$extra['name']])
+                    ->noInteraction()
+                    ->getCommand();
+            }
         }
 
-        $commands[] = $this->taskComposerConfig('composer')
-            ->set('repositories.ece-tools', addslashes(json_encode($repoConfig, JSON_UNESCAPED_SLASHES)))
-            ->noInteraction()
-            ->getCommand();
-        $commands[] = $this->taskComposerRequire('composer')
-            ->dependency('magento/ece-tools', $eceToolsVersion)
-            ->noInteraction()
-            ->getCommand();
         $result = $this->taskBash(self::BUILD_CONTAINER)
-            ->workingDir((string)$this->_getConfig('system_magento_dir'))
+            ->workingDir($this->_getConfig('system_magento_dir'))
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->exec(implode(' && ', $commands))
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
