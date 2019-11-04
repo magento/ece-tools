@@ -284,6 +284,11 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
                 ->getCommand();
         }
 
+        $commands[] = $this->taskComposerRequire('composer')
+            ->dependency('hirak/prestissimo', '*')
+            ->noInteraction()
+            ->option('--no-update')
+            ->getCommand();
         $commands[] = $this->taskComposerConfig('composer')
             ->set('repositories.ece-tools', addslashes(json_encode($repoConfig, JSON_UNESCAPED_SLASHES)))
             ->noInteraction()
