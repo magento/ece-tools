@@ -261,17 +261,28 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     {
         $commands = [];
         $eceToolsVersion = '2002.0.999';
-        $repoConfig = [
-            'type' => 'package',
-            'package' => [
-                'name' => 'magento/ece-tools',
-                'version' => $eceToolsVersion,
-                'source' => [
-                    'type' => 'git',
-                    'url' => $this->_getConfig('system_ece_tools_dir'),
-                    'reference' => exec('git rev-parse HEAD'),
-                ],
-            ],
+        $commands = [
+            $this->taskComposerConfig('composer')
+                ->set('repositories.ece-tools', addslashes(json_encode(
+                    [
+                        'type' => 'package',
+                        'package' => [
+                            'name' => 'magento/ece-tools',
+                            'version' => $eceToolsVersion,
+                            'source' => [
+                                'type' => 'git',
+                                'url' => $this->_getConfig('system_ece_tools_dir'),
+                                'reference' => exec('git rev-parse HEAD'),
+                            ],
+                        ],
+                    ],
+                    JSON_UNESCAPED_SLASHES
+                )))->noInteraction()
+                ->getCommand(),
+            $this->taskComposerRequire('composer')
+                ->dependency('magento/ece-tools', $eceToolsVersion)
+                ->noInteraction()
+                ->getCommand()
         ];
 
         // Temporary fix until 2.3.3 is fully published
@@ -378,7 +389,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      * @param string $container
      * @return bool
      */
-    public function downloadFromContainer(string $source , string $destination, string $container): bool
+    public function downloadFromContainer(string $source, string $destination, string $container): bool
     {
         /** @var Result $result */
         $result = $this->taskCopyFromDocker($container)
@@ -452,6 +463,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
     {
         $tmpFile = tempnam(sys_get_temp_dir(), md5($source));
         $this->downloadFromContainer($source, $tmpFile, $container);
+
         return file_get_contents($tmpFile);
     }
 

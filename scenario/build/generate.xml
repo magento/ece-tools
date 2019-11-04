@@ -23,6 +23,7 @@
         </arguments>
     </step>
     <step name="refresh-modules" type="Magento\MagentoCloud\Step\Build\RefreshModules" priority="400"/>
+    <step name="copy-pub-static" type="Magento\MagentoCloud\Command\CopyPubStatic" priority="450"/>
     <step name="apply-patches" type="Magento\MagentoCloud\Step\Build\ApplyPatches" priority="500"/>
     <step name="set-report-dir-nesting-level" type="Magento\MagentoCloud\Step\Build\SetReportDirNestingLevel" priority="600"/>
     <step name="marshall-files" type="Magento\MagentoCloud\Step\Build\MarshallFiles" priority="700"/>
