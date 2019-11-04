@@ -8,18 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 /**
- * @group php70
+ * @group php71
  */
 class Cron21Cest extends CronCest
 {
-    /**
-     * @inheritdoc
-     * @skip
-     */
-    public function testCron(\CliTester $I, \Codeception\Example $data)
-    {
-        parent::testCron($I, $data);
-    }
     /**
      * @return array
      */
@@ -27,43 +19,7 @@ class Cron21Cest extends CronCest
     {
         return [
             [
-                'version' => '2.1.4',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'fr_FR'
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.1.6',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'ar_KW'
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.1.11',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'fr_FR'
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.1.14',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'ar_KW'
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.1.15',
+                'version' => '2.1.16',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',

@@ -33,6 +33,7 @@ class CronCest extends AbstractCest
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
         $I->deleteFromDatabase('cron_schedule');
         $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
 
         $this->checkCronJobForLocale($I, 'cron_test_job_timeformat', 5);
         $this->checkCronJobForLocale($I, 'cron_test_job_timeformat_six', 6);
@@ -50,6 +51,7 @@ class CronCest extends AbstractCest
 
         $I->updateInDatabase('cron_schedule', ['scheduled_at' => date('Y-m-d H:i:s')], ['status' => 'pending']);
 
+        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
         $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
 
         $successfulJobs2 = $I->grabNumRecords('cron_schedule', ['job_code' => 'cron_test_job', 'status' => 'success']);
