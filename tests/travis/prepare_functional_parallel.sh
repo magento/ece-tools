@@ -28,4 +28,3 @@ do
     echo "$test_file" >> "$group_file"
   done
 done
-exit;
