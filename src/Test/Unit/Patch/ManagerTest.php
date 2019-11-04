@@ -68,8 +68,6 @@ class ManagerTest extends TestCase
             ->willReturn(false);
 
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $processMock->method('getOutput')
-            ->willReturn('Some patch applied');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./vendor/bin/ece-patches apply')
@@ -96,9 +94,6 @@ class ManagerTest extends TestCase
             ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
             ->willReturn(false);
 
-        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $processMock->method('getOutput')
-            ->willReturn('Some patch applied');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./vendor/bin/ece-patches apply')
@@ -125,8 +120,6 @@ class ManagerTest extends TestCase
             ->willReturn(true);
 
         $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $processMock->method('getOutput')
-            ->willReturn('Some patch applied');
         $this->shellMock->expects($this->once())
             ->method('execute')
             ->with('php ./vendor/bin/ece-patches apply --git-installation 1')

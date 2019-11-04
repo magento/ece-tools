@@ -63,7 +63,7 @@ class Manager
         }
 
         try {
-            $this->shell->execute($command)->getOutput();
+            $this->shell->execute($command);
         } catch (ShellException $exception) {
             $this->logger->error($exception->getMessage());
             throw  $exception;
