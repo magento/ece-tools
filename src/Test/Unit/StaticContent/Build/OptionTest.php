@@ -104,45 +104,6 @@ class OptionTest extends TestCase
     }
 
     /**
-     * @param $themes
-     * @param $expected
-     * @dataProvider excludedThemesDataProvider
-     */
-    public function testGetExcludedThemes($themes, $expected)
-    {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(BuildInterface::VAR_SCD_EXCLUDE_THEMES)
-            ->willReturn($themes);
-
-        $this->assertEquals(
-            $expected,
-            $this->option->getExcludedThemes()
-        );
-    }
-
-    /**
-     * @return array
-     */
-    public function excludedThemesDataProvider(): array
-    {
-        return [
-            [
-                '',
-                [],
-            ],
-            [
-                'theme1, theme2 ,,  theme3 ',
-                ['theme1', 'theme2', 'theme3'],
-            ],
-            [
-                'theme3,,theme4,,,,theme5',
-                ['theme3', 'theme4', 'theme5'],
-            ],
-        ];
-    }
-
-    /**
      * Test getting the SCD strategy from the strategy checker.
      */
     public function testGetStrategy()

@@ -238,5 +238,10 @@
     "Avoid group concat from source item indexer": {
       ">=1.0.3 <1.0.5": "MSI-GH-2515__eliminate_group_concat_from_source_item_indexer__grouped-product-indexer__1.0.3.patch"
     }
+  },
+  "vertex/module-tax": {
+    "Fix wrong namespace": {
+      "3.2.0": "MAGECLOUD-4407__fix_namespace_vertex_tax__3.2.0.patch"
+    }
   }
 }
