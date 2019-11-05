@@ -28,11 +28,6 @@ interface DeployInterface extends StageConfigInterface
     const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
 
     /**
-     * @deprecated will not be supported in the future
-     */
-    const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
-
-    /**
      * The variable responsible to set lock provider for Magento 2.2.5 and higher.
      */
     const VAR_LOCK_PROVIDER = 'LOCK_PROVIDER';
@@ -51,16 +46,6 @@ interface DeployInterface extends StageConfigInterface
      * @deprecated 2.1 specific variable.
      */
     const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';
-
-    /**
-     * @deprecated use SCD_THREADS instead
-     */
-    const VAR_STATIC_CONTENT_THREADS = 'STATIC_CONTENT_THREADS';
-
-    /**
-     * @deprecated use SKIP_SCD instead
-     */
-    const VAR_DO_DEPLOY_STATIC_CONTENT = 'DO_DEPLOY_STATIC_CONTENT';
 
     /**
      * The variable responsible for enabling google analytics in environments other than prod.

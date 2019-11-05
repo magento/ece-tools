@@ -136,18 +136,6 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE,
                 ],
             ],
-            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => '',
-                    StageConfigInterface::STAGE_DEPLOY => '',
-                ],
-            ],
             StageConfigInterface::VAR_SCD_MAX_EXEC_TIME => [
                 self::SCHEMA_TYPE => ['integer'],
                 self::SCHEMA_STAGE => [
@@ -345,16 +333,6 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => false,
                 ],
             ],
-            DeployInterface::VAR_STATIC_CONTENT_SYMLINK => [
-                self::SCHEMA_TYPE => ['boolean'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_DEPLOY => true,
-                ],
-            ],
             DeployInterface::VAR_CLEAN_STATIC_FILES => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
@@ -504,20 +482,6 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL => 'SAMEORIGIN'
                 ]
             ]
-        ];
-    }
-
-    /**
-     * Returns array of deprecated variables.
-     *
-     * @return array
-     */
-    public function getDeprecatedSchema()
-    {
-        return [
-            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES => [
-                self::SCHEMA_REPLACEMENT => StageConfigInterface::VAR_SCD_MATRIX,
-            ],
         ];
     }
 }

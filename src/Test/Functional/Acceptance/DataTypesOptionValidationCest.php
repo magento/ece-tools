@@ -61,10 +61,10 @@ class DataTypesOptionValidationCest extends AbstractCest
             'integer_instead_boolean' => [
                 'cloudVariables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
-                        'STATIC_CONTENT_SYMLINK' => 1,
+                        'CLEAN_STATIC_FILES' => 1,
                     ],
                 ],
-                'expectedError' => 'STATIC_CONTENT_SYMLINK has wrong value',
+                'expectedError' => 'CLEAN_STATIC_FILES has wrong value',
             ],
         ];
     }

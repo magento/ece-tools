@@ -95,14 +95,12 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
-     * @param bool $isSymlinkOn
      * @param bool $isStaticInBuild
      * @param bool $isStaticCleanFiles
      * @param array $expected
      * @dataProvider getListDataProvider22
      */
     public function testGetList22(
-        bool $isSymlinkOn,
         bool $isStaticInBuild,
         bool $isStaticCleanFiles,
         array $expected
@@ -110,7 +108,6 @@ class RecoverableDirectoryListTest extends TestCase
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
                 [DeployInterface::VAR_CLEAN_STATIC_FILES, $isStaticCleanFiles]
             ]);
 
@@ -142,7 +139,6 @@ class RecoverableDirectoryListTest extends TestCase
     {
         return [
             'symlink and static in build' => [
-                'isSymlinkOn' => true,
                 'isStaticInBuild' => true,
                 'isStaticCleanFiles' => true,
                 'expected' => [
@@ -164,31 +160,7 @@ class RecoverableDirectoryListTest extends TestCase
                     ],
                 ],
             ],
-            'no symlink and static in build' => [
-                'isSymlinkOn' => false,
-                'isStaticInBuild' => true,
-                'isStaticCleanFiles' => true,
-                'expected' => [
-                    [
-                        'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                    [
-                        'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                    [
-                        'directory' => 'var/view_preprocessed',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                    [
-                        'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                ],
-            ],
             'static in build and clean' => [
-                'isSymlinkOn' => false,
                 'isStaticInBuild' => true,
                 'isStaticCleanFiles' => false,
                 'expected' => [
@@ -206,12 +178,11 @@ class RecoverableDirectoryListTest extends TestCase
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_COPY_SUB_FOLDERS,
+                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ],
                 ],
             ],
             'symlink and no static in build' => [
-                'isSymlinkOn' => true,
                 'isStaticInBuild' => false,
                 'isStaticCleanFiles' => false,
                 'expected' => [
@@ -229,7 +200,6 @@ class RecoverableDirectoryListTest extends TestCase
     }
 
     /**
-     * @param bool $isSymlinkOn
      * @param bool $isStaticInBuild
      * @param bool $isGeneratedSymlinkOn
      * @param bool $isStaticCleanFiles
@@ -237,7 +207,6 @@ class RecoverableDirectoryListTest extends TestCase
      * @dataProvider getListDataProvider21
      */
     public function testGetList21(
-        bool $isSymlinkOn,
         bool $isGeneratedSymlinkOn,
         bool $isStaticInBuild,
         bool $isStaticCleanFiles,
@@ -246,7 +215,6 @@ class RecoverableDirectoryListTest extends TestCase
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, $isSymlinkOn],
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK, $isGeneratedSymlinkOn],
                 [DeployInterface::VAR_CLEAN_STATIC_FILES, $isStaticCleanFiles]
             ]);
@@ -279,7 +247,6 @@ class RecoverableDirectoryListTest extends TestCase
     {
         return [
             'static symlink, no generated symlink, static in build' => [
-                'isSymlinkOn' => true,
                 'isGeneratedSymlinkOn' => false,
                 'isStaticInBuild' => true,
                 'isStaticCleanFiles' => true,
@@ -310,40 +277,7 @@ class RecoverableDirectoryListTest extends TestCase
                     ],
                 ],
             ],
-            'no static symlink, no generated symlink, static in build' => [
-                'isSymlinkOn' => false,
-                'isGeneratedSymlinkOn' => false,
-                'isStaticInBuild' => true,
-                'isStaticCleanFiles' => true,
-                'expected' => [
-                    [
-                        'directory' => 'app/etc',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                    [
-                        'directory' => 'pub/media',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                    [
-                        'directory' => 'var/view_preprocessed',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                    [
-                        'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                    [
-                        'directory' => 'var/di',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                    [
-                        'directory' => 'var/generation',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
-                    ],
-                ],
-            ],
             'static symlink, no generated symlink, no static in build' => [
-                'isSymlinkOn' => true,
                 'isGeneratedSymlinkOn' => false,
                 'isStaticInBuild' => false,
                 'isStaticCleanFiles' => true,
@@ -367,7 +301,6 @@ class RecoverableDirectoryListTest extends TestCase
                 ],
             ],
             'static symlink, generated symlink, no static in build' => [
-                'isSymlinkOn' => true,
                 'isGeneratedSymlinkOn' => true,
                 'isStaticInBuild' => false,
                 'isStaticCleanFiles' => true,
@@ -407,7 +340,6 @@ class RecoverableDirectoryListTest extends TestCase
         $this->stageConfigMock->expects($this->any())
             ->method('get')
             ->willReturnMap([
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK, false],
                 [DeployInterface::VAR_SKIP_HTML_MINIFICATION, $skipCopyingViewPreprocessed],
                 [DeployInterface::VAR_CLEAN_STATIC_FILES, $isStaticCleanFiles]
             ]);
@@ -462,7 +394,7 @@ class RecoverableDirectoryListTest extends TestCase
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ]
                 ],
             ],
@@ -480,7 +412,7 @@ class RecoverableDirectoryListTest extends TestCase
                     ],
                     [
                         'directory' => 'pub/static',
-                        'strategy' => StrategyInterface::STRATEGY_COPY,
+                        'strategy' => StrategyInterface::STRATEGY_SUB_SYMLINK,
                     ]
                 ],
             ],
