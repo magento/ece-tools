@@ -274,16 +274,6 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ],
         ];
 
-        // Temporary fix until 2.3.3 is fully published
-        if (version_compare(PHP_VERSION, '7.3.0') >= 0) {
-            $commands[] = 'rm composer.lock';
-            $commands[] = $this->taskComposerRequire('composer')
-                ->dependency('magento/magento-cloud-metapackage', '2.3.3')
-                ->noInteraction()
-                ->option('--no-update')
-                ->getCommand();
-        }
-
         $commands[] = $this->taskComposerConfig('composer')
             ->set('repositories.ece-tools', addslashes(json_encode($repoConfig, JSON_UNESCAPED_SLASHES)))
             ->noInteraction()

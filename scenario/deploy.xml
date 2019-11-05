@@ -38,7 +38,6 @@
                     <item name="appropriate-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\AppropriateVersion</item>
                     <item name="scd-options-ignorance" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ScdOptionsIgnorance</item>
                     <item name="deprecated-variables" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\DeprecatedVariables</item>
-                    <item name="raw-env-variable" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\RawEnvVariable</item>
                     <item name="cloud-variables" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\MagentoCloudVariables</item>
                     <item name="json-format-variable " xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\JsonFormatVariable</item>
                     <item name="service-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ServiceVersion</item>

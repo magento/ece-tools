@@ -109,21 +109,12 @@ class ElasticSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => '2.3.0',
+                'magento' => '2.3.3',
                 'services' => [],
                 'expectedResult' => ['engine' => 'mysql'],
             ],
             [
-                'magento' => '2.3.0',
-                'services' => ['es' => '5.2'],
-                'expectedResult' => [
-                    'engine' => 'elasticsearch5',
-                    'elasticsearch5_server_hostname' => 'elasticsearch',
-                    'elasticsearch5_server_port' => '9200'
-                ],
-            ],
-            [
-                'magento' => '2.3.1',
+                'magento' => '2.3.3',
                 'services' => ['es' => '6.5'],
                 'expectedResult' => [
                     'engine' => 'elasticsearch6',
