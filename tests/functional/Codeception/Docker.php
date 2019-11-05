@@ -312,7 +312,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
         }
 
         $result = $this->taskBash(self::BUILD_CONTAINER)
-            ->workingDir($this->_getConfig('system_magento_dir'))
+            ->workingDir((string)$this->_getConfig('system_magento_dir'))
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
             ->exec(implode(' && ', $commands))

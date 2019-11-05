@@ -15,11 +15,6 @@ interface OptionInterface
     public function getThreadCount(): int;
 
     /**
-     * @return array
-     */
-    public function getExcludedThemes(): array;
-
-    /**
      * @return string
      */
     public function getStrategy(): string;

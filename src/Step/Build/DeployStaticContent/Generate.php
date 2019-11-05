@@ -73,14 +73,9 @@ class Generate implements StepInterface
     public function execute()
     {
         $locales = $this->buildOption->getLocales();
-        $excludeThemes = $this->buildOption->getExcludedThemes();
         $threadCount = $this->buildOption->getThreadCount();
 
         $logMessage = 'Generating static content for locales: ' . implode(' ', $locales);
-
-        if (count($excludeThemes)) {
-            $logMessage .= PHP_EOL . 'Excluding Themes: ' . implode(' ', $excludeThemes);
-        }
 
         if ($threadCount) {
             $logMessage .= PHP_EOL . 'Using ' . $threadCount . ' Threads';
