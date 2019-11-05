@@ -6,8 +6,8 @@
 set -e
 trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit code $?' ERR
 
-readarray -t test_set_list <<< "$(grep -RL 'php71' src/Test/Functional/Acceptance | sort -r)"
-group_count=4
+readarray -t test_set_list <<< "$(grep -RL 'php71' --exclude='*AcceptanceCest.php' src/Test/Functional/Acceptance | sort)"
+group_count=3
 element_in_group=$(printf "%.0f" "$(echo "scale=2;(${#test_set_list[@]} + ${group_count} - 1)/${group_count}" | bc)")
 
 cp codeception.dist.yml codeception.yml
@@ -15,8 +15,10 @@ echo "groups:" >> codeception.yml
 echo "  parallel_*: tests/functional/_data/parallel_*" >> codeception.yml
 
 echo "Total = ${#test_set_list[@]};"
+echo "Batch #1 = Acceptance"
+echo "src/Test/Functional/Acceptance/AcceptanceCest.php" >> "tests/functional/_data/parallel_1.yml"
 
-for((i=0, group_id=1; i < ${#test_set_list[@]}; i+=element_in_group, group_id++))
+for((i=0, group_id=2; i < ${#test_set_list[@]}; i+=element_in_group, group_id++))
 do
   test_file_group=( "${test_set_list[@]:i:element_in_group}" )
   echo "Batch #${group_id} = ${#test_file_group[@]}"
