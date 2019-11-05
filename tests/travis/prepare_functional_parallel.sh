@@ -8,7 +8,12 @@ trap '>&2 echo Error: Command \`$BASH_COMMAND\` on line $LINENO failed with exit
 
 readarray -t test_set_list <<< "$(grep -RL 'php71' --exclude='*AcceptanceCest.php' src/Test/Functional/Acceptance | sort)"
 group_count=3
-element_in_group=$(printf "%.0f" "$(echo "scale=2;(${#test_set_list[@]} + ${group_count} - 1)/${group_count}" | bc)")
+
+if [ $(( ${#test_set_list[@]} % group_count )) -eq 0 ]; then
+  element_in_group=$(printf "%.0f" "$(echo "scale=2;(${#test_set_list[@]})/${group_count}" | bc)")
+else
+  element_in_group=$(printf "%.0f" "$(echo "scale=2;(${#test_set_list[@]} + ${group_count} - 1)/${group_count}" | bc)")
+fi
 
 cp codeception.dist.yml codeception.yml
 echo "groups:" >> codeception.yml
