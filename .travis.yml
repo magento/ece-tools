@@ -24,6 +24,8 @@ env:
     - TEST_SUITE=functional FUNCTIONAL_INDEX=1
     - TEST_SUITE=functional FUNCTIONAL_INDEX=2
     - TEST_SUITE=functional FUNCTIONAL_INDEX=3
+    - TEST_SUITE=functional FUNCTIONAL_INDEX=4
+    - TEST_SUITE=functional FUNCTIONAL_INDEX=5
 
 matrix:
   exclude:
@@ -35,6 +37,10 @@ matrix:
       env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
     - php: '7.1'
       env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
+    - php: '7.1'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=4
+    - php: '7.1'
+      env: TEST_SUITE=functional FUNCTIONAL_INDEX=5
 
     - php: '7.2'
       env: TEST_SUITE=functional
