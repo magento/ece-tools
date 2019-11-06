@@ -33,15 +33,6 @@ class ElasticSearch23Php72Cest extends ElasticSearchCest
                 ],
             ],
             [
-                'magento' => '2.3.1',
-                'services' => ['es' => '6.5'],
-                'expectedResult' => [
-                    'engine' => 'elasticsearch6',
-                    'elasticsearch6_server_hostname' => 'elasticsearch',
-                    'elasticsearch6_server_port' => '9200'
-                ],
-            ],
-            [
                 'magento' => '2.3.2',
                 'services' => ['es' => '6.5'],
                 'expectedResult' => [
