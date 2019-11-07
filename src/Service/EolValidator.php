@@ -87,11 +87,8 @@ class EolValidator
             $service = $this->serviceFactory->create($serviceName);
             $serviceVersion = $service->getVersion();
 
-            /**
-             * Hack to validate the mariadb version; getting the version from relationships returns 'mysql:<version>'.
-             */
             if ($validationResult = $this->validateService(
-                $serviceName == 'mysql' ? 'mariadb' : $serviceName,
+                $this->getConvertedServiceName($serviceName),
                 $serviceVersion
             )) {
                 $errorLevel = current(array_keys($validationResult));
@@ -162,5 +159,18 @@ class EolValidator
         }
 
         return $this->eolConfigs[$serviceName] ?? [];
+    }
+
+    /**
+     * Perform service name conversions.
+     * Explicitly resetting 'mysql' to 'mariadb' for MariaDB validation; getting the version from
+     * relationship returns mysql:<version>.
+     *
+     * @param string $serviceName
+     * @return string
+     */
+    private function getConvertedServiceName(string $serviceName) : string
+    {
+        return $serviceName == 'mysql' ? 'mariadb' : $serviceName;
     }
 }
