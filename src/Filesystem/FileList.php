@@ -113,4 +113,14 @@ class FileList extends ConfigFileList
     {
         return $this->directoryList->getMagentoRoot() . '/.magento/services.yaml';
     }
+
+    /**
+     * Return the path to the service EOL configuration file.
+     *
+     * @return string
+     */
+    public function getServiceEolsConfig() : string
+    {
+        return $this->directoryList->getRoot() . '/config/eol.yaml';
+    }
 }
