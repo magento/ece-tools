@@ -8,8 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\CronDisable;
+use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\Deploy\DisableCron;
+use Magento\MagentoCloud\Util\BackgroundProcess;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -26,24 +27,34 @@ class CronDisableTest extends TestCase
     private $command;
 
     /**
-     * @var DisableCron|MockObject
-     */
-    private $disableCronMock;
-
-    /**
      * @var LoggerInterface|MockObject
      */
     private $loggerMock;
+
+    /**
+     * @var Switcher|MockObject
+     */
+    private $cronSwitcherMock;
+
+    /**
+     * @var BackgroundProcess|MockObject
+     */
+    private $backgroundProcessMock;
 
     /**
      * @inheritDoc
      */
     protected function setUp()
     {
-        $this->disableCronMock = $this->createMock(DisableCron::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->cronSwitcherMock = $this->createMock(Switcher::class);
+        $this->backgroundProcessMock = $this->createMock(BackgroundProcess::class);
 
-        $this->command = new CronDisable($this->disableCronMock, $this->loggerMock);
+        $this->command = new CronDisable(
+            $this->cronSwitcherMock,
+            $this->backgroundProcessMock,
+            $this->loggerMock
+        );
     }
 
     /**
@@ -51,10 +62,15 @@ class CronDisableTest extends TestCase
      */
     public function testExecute()
     {
-        $this->disableCronMock->expects($this->once())
-            ->method('execute');
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Disable cron');
         $this->loggerMock->expects($this->never())
             ->method('critical');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('disable');
+        $this->backgroundProcessMock->expects($this->once())
+            ->method('kill');
 
         $tester = new CommandTester($this->command);
         $tester->execute([]);
@@ -67,8 +83,8 @@ class CronDisableTest extends TestCase
      */
     public function testExecuteWithException()
     {
-        $this->disableCronMock->expects($this->once())
-            ->method('execute')
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('disable')
             ->willThrowException(new FileSystemException('save error'));
         $this->loggerMock->expects($this->once())
             ->method('critical')

@@ -8,8 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\CronEnable;
+use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Step\PostDeploy\EnableCron;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -26,24 +26,24 @@ class CronEnableTest extends TestCase
     private $command;
 
     /**
-     * @var EnableCron|MockObject
-     */
-    private $enableCronMock;
-
-    /**
      * @var LoggerInterface|MockObject
      */
     private $loggerMock;
+
+    /**
+     * @var Switcher|MockObject
+     */
+    private $cronSwitcherMock;
 
     /**
      * @inheritDoc
      */
     protected function setUp()
     {
-        $this->enableCronMock = $this->createMock(EnableCron::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->cronSwitcherMock = $this->createMock(Switcher::class);
 
-        $this->command = new CronEnable($this->enableCronMock, $this->loggerMock);
+        $this->command = new CronEnable($this->cronSwitcherMock, $this->loggerMock);
     }
 
     /**
@@ -51,8 +51,11 @@ class CronEnableTest extends TestCase
      */
     public function testExecute()
     {
-        $this->enableCronMock->expects($this->once())
-            ->method('execute');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable');
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Enable cron');
         $this->loggerMock->expects($this->never())
             ->method('critical');
 
@@ -67,8 +70,8 @@ class CronEnableTest extends TestCase
      */
     public function testExecuteWithException()
     {
-        $this->enableCronMock->expects($this->once())
-            ->method('execute')
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable')
             ->willThrowException(new FileSystemException('save error'));
         $this->loggerMock->expects($this->once())
             ->method('critical')
