@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Step\PostDeploy\EnableCron;
+use Magento\MagentoCloud\Cron\Switcher;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,9 +22,9 @@ class CronEnable extends Command
     public const NAME = 'cron:enable';
 
     /**
-     * @var EnableCron
+     * @var Switcher
      */
-    private $enableCron;
+    private $cronSwitcher;
 
     /**
      * @var LoggerInterface
@@ -32,12 +32,12 @@ class CronEnable extends Command
     private $logger;
 
     /**
-     * @param EnableCron $enableCron
+     * @param Switcher $cronSwitcher
      * @param LoggerInterface $logger
      */
-    public function __construct(EnableCron $enableCron, LoggerInterface $logger)
+    public function __construct(Switcher $cronSwitcher, LoggerInterface $logger)
     {
-        $this->enableCron = $enableCron;
+        $this->cronSwitcher = $cronSwitcher;
         $this->logger = $logger;
 
         parent::__construct();
@@ -62,7 +62,8 @@ class CronEnable extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->enableCron->execute();
+            $this->logger->info('Enable cron');
+            $this->cronSwitcher->enable();
         } catch (GenericException $e) {
             $this->logger->critical($e->getMessage());
 

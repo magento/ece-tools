@@ -8,7 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Step\Deploy\DisableCron;
+use Magento\MagentoCloud\Cron\Switcher;
+use Magento\MagentoCloud\Step\Deploy\BackgroundProcessKill;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,9 +23,14 @@ class CronDisable extends Command
     public const NAME = 'cron:disable';
 
     /**
-     * @var DisableCron
+     * @var Switcher
      */
-    private $disableCron;
+    private $cronSwitcher;
+
+    /**
+     * @var BackgroundProcessKill
+     */
+    private $backgroundProcessKill;
 
     /**
      * @var LoggerInterface
@@ -32,12 +38,17 @@ class CronDisable extends Command
     private $logger;
 
     /**
-     * @param DisableCron $disableCron
+     * @param Switcher $cronSwitcher
+     * @param BackgroundProcessKill $backgroundProcessKill
      * @param LoggerInterface $logger
      */
-    public function __construct(DisableCron $disableCron, LoggerInterface $logger)
-    {
-        $this->disableCron = $disableCron;
+    public function __construct(
+        Switcher $cronSwitcher,
+        BackgroundProcessKill $backgroundProcessKill,
+        LoggerInterface $logger
+    ) {
+        $this->cronSwitcher = $cronSwitcher;
+        $this->backgroundProcessKill = $backgroundProcessKill;
         $this->logger = $logger;
 
         parent::__construct();
@@ -62,7 +73,9 @@ class CronDisable extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         try {
-            $this->disableCron->execute();
+            $this->logger->info('Disable cron');
+            $this->cronSwitcher->disable();
+            $this->backgroundProcessKill->execute();
         } catch (GenericException $e) {
             $this->logger->critical($e->getMessage());
 
