@@ -31,7 +31,7 @@ rabbitmq:
     eol: 2020-03-31
 redis:
   - version: '3.2'
-    eol:
+    eol: 2018-10-17
   - version: '4.0'
     eol:
   - version: '5.0'
