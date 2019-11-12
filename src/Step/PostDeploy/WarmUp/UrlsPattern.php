@@ -19,6 +19,7 @@ class UrlsPattern
 {
     const ENTITY_CATEGORY = 'category';
     const ENTITY_CMS_PAGE = 'cms-page';
+    const ENTITY_PRODUCT = 'product';
 
     /**
      * @var LoggerInterface
@@ -56,15 +57,14 @@ class UrlsPattern
                 return [];
             }
 
-            list($entity, $pattern, $storeId) = explode(':', $warmUpPattern);
+            $commandBuilder = $commandBuilderFactory->create($warmUpPattern);
+
+
+            $this->buildCommandArguments($warmUpPattern);
 
             $command = 'config:show:urls';
-            $commandArguments = [sprintf('--entity-type=%s', $entity)];
-            if ($storeId && $storeId !== '*') {
-                $commandArguments [] = sprintf('--store-id=%s', $storeId);
-            }
 
-            $process = $this->magentoShell->execute($command, $commandArguments);
+            $process = $this->magentoShell->execute($command, $this->buildCommandArguments($warmUpPattern));
 
             $urls = json_decode($process->getOutput(), true);
 
@@ -103,11 +103,34 @@ class UrlsPattern
     public function isValid(string $warmUpPattern): bool
     {
         $regex = sprintf(
-            '/^(%s|%s):.{1,}:(\w+|\*)/',
+            '/^(%s|%s|%s):.{1,}:(\w+|\*)/',
             self::ENTITY_CATEGORY,
-            self::ENTITY_CMS_PAGE
+            self::ENTITY_CMS_PAGE,
+            self::ENTITY_PRODUCT
         );
 
         return (bool)preg_match($regex, $warmUpPattern);
+    }
+
+    /**
+     * @param string $warmUpPattern
+     * @return array
+     */
+    private function buildCommandArguments(string $warmUpPattern): array
+    {
+        list($entity, $pattern, $storeIds) = explode(':', $warmUpPattern);
+
+        $commandArguments = [sprintf('--entity-type=%s', $entity)];
+        if ($storeIds && $storeIds !== '*') {
+            foreach (explode('|', $storeIds) as $storeId) {
+                $commandArguments[] = sprintf('--store-id=%s', $storeId);
+            }
+        }
+
+        if ($entity === self::ENTITY_PRODUCT) {
+            $commandArguments[] = sprintf('')
+        }
+
+        return $commandArguments;
     }
 }
