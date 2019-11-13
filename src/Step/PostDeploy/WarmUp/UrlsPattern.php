@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Step\PostDeploy\WarmUp;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
+use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,6 +21,7 @@ class UrlsPattern
     const ENTITY_CATEGORY = 'category';
     const ENTITY_CMS_PAGE = 'cms-page';
     const ENTITY_PRODUCT = 'product';
+    const ENTITY_STORE_PAGE = 'store-page';
 
     private const PATTERN_DELIMITER = '|';
 
@@ -34,15 +36,23 @@ class UrlsPattern
     private $magentoShell;
 
     /**
+     * @var UrlManager
+     */
+    private $urlManager;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellFactory $shellFactory
+     * @param UrlManager $urlManager
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellFactory $shellFactory
+        ShellFactory $shellFactory,
+        UrlManager $urlManager
     ) {
         $this->logger = $logger;
         $this->magentoShell = $shellFactory->createMagento();
+        $this->urlManager = $urlManager;
     }
 
     /**
@@ -60,6 +70,10 @@ class UrlsPattern
             }
 
             list($entity, $pattern, $storeIds) = explode(':', $warmUpPattern);
+
+            if ($entity === self::ENTITY_STORE_PAGE) {
+                return $this->getStorePageUrls($pattern, $storeIds);
+            }
 
             $command = 'config:show:urls';
 
@@ -105,10 +119,11 @@ class UrlsPattern
     public function isValid(string $warmUpPattern): bool
     {
         $regex = sprintf(
-            '/^(%s|%s|%s):.{1,}:(\w+|\*)/',
+            '/^(%s|%s|%s|%s):.{1,}:(\w+|\*)/',
             self::ENTITY_CATEGORY,
             self::ENTITY_CMS_PAGE,
-            self::ENTITY_PRODUCT
+            self::ENTITY_PRODUCT,
+            self::ENTITY_STORE_PAGE
         );
 
         return (bool)preg_match($regex, $warmUpPattern);
@@ -136,10 +151,30 @@ class UrlsPattern
             }
 
             foreach (explode(self::PATTERN_DELIMITER, $pattern) as $productSku) {
-                $commandArguments[] = sprintf('--product-sku="%s"', $productSku);
+                $commandArguments[] = sprintf('--product-sku=%s', $productSku);
             }
         }
 
         return $commandArguments;
+    }
+
+    /**
+     * Get urls for store-page entity pattern type
+     *
+     * @param string $page
+     * @param string $storeIds
+     * @return array
+     */
+    private function getStorePageUrls(string $page, string $storeIds): array
+    {
+        $urls = [];
+
+        foreach (explode('|', $storeIds) as $storeId) {
+            if (!empty($storeBaseUrl = $this->urlManager->getStoreBaseUrl($storeId))) {
+                $urls[] = rtrim($storeBaseUrl, '/') . '/' . ltrim($page, '/');
+            }
+        }
+
+        return array_unique($urls);
     }
 }

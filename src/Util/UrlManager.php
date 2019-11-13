@@ -208,6 +208,32 @@ class UrlManager
     }
 
     /**
+     * Gets store base url by store id or store code.
+     * Returns an empty string if store url failed to fetch.
+     *
+     * @param string $storeId store id or store code
+     * @return string
+     */
+    public function getStoreBaseUrl(string $storeId): string
+    {
+        try {
+            $this->loadStoreBaseUrls();
+
+            if (isset($this->storeBaseUrls[$storeId])) {
+                return $this->storeBaseUrls[$storeId];
+            }
+
+            $process = $this->magentoShell->execute('config:show:store-url', [$storeId]);
+
+            return $this->storeBaseUrls[$storeId] = $process->getOutput();
+        } catch (ShellException $e) {
+            $this->logger->error(sprintf('Can\'t fetch store with store code "%s". ', $storeId) . $e->getMessage());
+
+            return '';
+        }
+    }
+
+    /**
      * Test if $url is either relative or has the same host as one of the configured base URLs.
      *
      * @param string $url
