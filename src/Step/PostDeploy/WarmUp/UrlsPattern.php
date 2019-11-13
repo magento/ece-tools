@@ -21,6 +21,8 @@ class UrlsPattern
     const ENTITY_CMS_PAGE = 'cms-page';
     const ENTITY_PRODUCT = 'product';
 
+    private const PATTERN_DELIMITER = '|';
+
     /**
      * @var LoggerInterface
      */
@@ -57,14 +59,14 @@ class UrlsPattern
                 return [];
             }
 
-            $commandBuilder = $commandBuilderFactory->create($warmUpPattern);
-
-
-            $this->buildCommandArguments($warmUpPattern);
+            list($entity, $pattern, $storeIds) = explode(':', $warmUpPattern);
 
             $command = 'config:show:urls';
 
-            $process = $this->magentoShell->execute($command, $this->buildCommandArguments($warmUpPattern));
+            $process = $this->magentoShell->execute(
+                $command,
+                $this->buildCommandArguments($entity, $pattern, $storeIds)
+            );
 
             $urls = json_decode($process->getOutput(), true);
 
@@ -77,7 +79,7 @@ class UrlsPattern
                 return [];
             }
 
-            if ($pattern === '*') {
+            if ($pattern === '*' || $entity == self::ENTITY_PRODUCT) {
                 return $urls;
             }
 
@@ -113,13 +115,13 @@ class UrlsPattern
     }
 
     /**
-     * @param string $warmUpPattern
+     * @param string $entity
+     * @param string $pattern
+     * @param string $storeIds
      * @return array
      */
-    private function buildCommandArguments(string $warmUpPattern): array
+    private function buildCommandArguments(string $entity, string $pattern, string $storeIds): array
     {
-        list($entity, $pattern, $storeIds) = explode(':', $warmUpPattern);
-
         $commandArguments = [sprintf('--entity-type=%s', $entity)];
         if ($storeIds && $storeIds !== '*') {
             foreach (explode('|', $storeIds) as $storeId) {
@@ -128,7 +130,14 @@ class UrlsPattern
         }
 
         if ($entity === self::ENTITY_PRODUCT) {
-            $commandArguments[] = sprintf('')
+            if ($pattern === '*') {
+                $this->logger->info('In case when product SKUs weren\'t provided product limits set to 100');
+                return $commandArguments;
+            }
+
+            foreach (explode(self::PATTERN_DELIMITER, $pattern) as $productSku) {
+                $commandArguments[] = sprintf('--product-sku="%s"', $productSku);
+            }
         }
 
         return $commandArguments;
