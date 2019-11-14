@@ -73,6 +73,7 @@ class SetCryptKey implements StepInterface
         $key = $this->environment->getCryptKey();
 
         if (empty($key)) {
+            $this->logger->error("Crypt key missing.");
             return;
         }
 

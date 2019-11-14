@@ -69,6 +69,9 @@ class SetCryptKeyTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('TWFnZW50byBSb3g=');
+        $this->loggerMock->expects($this->never())
+            ->method('error')
+            ->with('Crypt key missing.');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Setting encryption key');
@@ -87,6 +90,9 @@ class SetCryptKeyTest extends TestCase
         $this->environmentMock->expects($this->once())
             ->method('getCryptKey')
             ->willReturn('');
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with('Crypt key missing.');
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
@@ -102,6 +108,9 @@ class SetCryptKeyTest extends TestCase
             ->willReturn(['crypt' => ['key' => 'QmVuIHd1eiBoZXJl']]);
         $this->environmentMock->expects($this->never())
             ->method('getCryptKey');
+        $this->loggerMock->expects($this->never())
+            ->method('error')
+            ->with('Crypt key missing.');
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
