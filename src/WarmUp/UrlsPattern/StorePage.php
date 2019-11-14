@@ -48,7 +48,7 @@ class StorePage implements PatternInterface
             }
         }
 
-        return array_map(function($storeUrl) use ($page) {
+        return array_map(function ($storeUrl) use ($page) {
             return rtrim($storeUrl, '/') . '/' . ltrim($page, '/');
         }, array_unique($stores));
     }

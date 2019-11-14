@@ -16,6 +16,11 @@ use Magento\MagentoCloud\Shell\ShellFactory;
  */
 class ConfigShowUrlCommand
 {
+    /**
+     * CLI command name.
+     *
+     * @var string
+     */
     private static $commandName = 'config:show:urls';
 
     /**

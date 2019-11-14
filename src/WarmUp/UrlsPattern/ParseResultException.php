@@ -9,6 +9,9 @@ namespace Magento\MagentoCloud\WarmUp\UrlsPattern;
 
 use Magento\MagentoCloud\App\GenericException;
 
+/**
+ * Trows in case when result from config:show:urls command can't be decoded as json.
+ */
 class ParseResultException extends GenericException
 {
 }

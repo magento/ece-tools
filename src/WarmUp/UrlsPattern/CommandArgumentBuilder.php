@@ -10,6 +10,9 @@ namespace Magento\MagentoCloud\WarmUp\UrlsPattern;
 use Magento\MagentoCloud\WarmUp\UrlsPattern;
 use Psr\Log\LoggerInterface;
 
+/**
+ * Generates arguments for config:show:urls command.
+ */
 class CommandArgumentBuilder
 {
     /**
@@ -26,6 +29,8 @@ class CommandArgumentBuilder
     }
 
     /**
+     * Generates arguments for config:show:urls command.
+     *
      * @param string $entity
      * @param string $storeIds
      * @return array
@@ -43,6 +48,8 @@ class CommandArgumentBuilder
     }
 
     /**
+     * Generates arguments with product SKUs for config:show:urls command.
+     *
      * @param string $entity
      * @param string $storeIds
      * @param string $productSkus

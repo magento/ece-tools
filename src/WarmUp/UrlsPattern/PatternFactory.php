@@ -11,8 +11,16 @@ use Magento\MagentoCloud\App\ContainerInterface;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\WarmUp\UrlsPattern;
 
+/**
+ * Creates instances of PatternInterface
+ */
 class PatternFactory
 {
+    /**
+     * Mapping between entity types and represented classes.
+     *
+     * @var array
+     */
     private static $classMap = [
         UrlsPattern::ENTITY_STORE_PAGE => StorePage::class,
         UrlsPattern::ENTITY_PRODUCT => Product::class,

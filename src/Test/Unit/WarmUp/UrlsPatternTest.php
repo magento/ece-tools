@@ -5,9 +5,9 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy\WarmUp;
+namespace Magento\MagentoCloud\Test\Unit\WarmUp;
 
-use Magento\MagentoCloud\Step\PostDeploy\WarmUp\UrlsPattern;
+use Magento\MagentoCloud\WarmUp\UrlsPattern;
 use Magento\MagentoCloud\Shell\Process;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
