@@ -50,7 +50,6 @@ class BuildTest extends TestCase
                 BuildInterface::VAR_SKIP_SCD => false,
                 BuildInterface::VAR_SCD_COMPRESSION_LEVEL => 6,
                 BuildInterface::VAR_SCD_THREADS => 1,
-                BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
             ]);
@@ -110,39 +109,6 @@ class BuildTest extends TestCase
             ],
             'default strategy with parameter' => [
                 Build::VAR_SCD_STRATEGY,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_BUILD => [],
-                ],
-                '',
-            ],
-            'default exclude_themes' => [
-                Build::VAR_SCD_EXCLUDE_THEMES,
-                [],
-                '',
-            ],
-            'env configured exclude_themes' => [
-                Build::VAR_SCD_EXCLUDE_THEMES,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                    StageConfigInterface::STAGE_BUILD => [
-                        Build::VAR_SCD_EXCLUDE_THEMES => 'luma',
-                    ],
-                ],
-                'luma',
-            ],
-            'global env exclude_themes' => [
-                Build::VAR_SCD_EXCLUDE_THEMES,
-                [
-                    StageConfigInterface::STAGE_GLOBAL => [
-                        Build::VAR_SCD_EXCLUDE_THEMES => 'luma',
-                    ],
-                    StageConfigInterface::STAGE_BUILD => [],
-                ],
-                'luma',
-            ],
-            'default exclude_themes with parameter' => [
-                Build::VAR_SCD_EXCLUDE_THEMES,
                 [
                     StageConfigInterface::STAGE_GLOBAL => [],
                     StageConfigInterface::STAGE_BUILD => [],

@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\Stage\Deploy\MergedConfig;
 use Magento\MagentoCloud\Config\Validator\Deploy\DeprecatedVariables;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -33,11 +32,6 @@ class DeprecatedVariablesTest extends TestCase
     private $environmentMock;
 
     /**
-     * @var MergedConfig|MockObject
-     */
-    private $mergedConfigMock;
-
-    /**
      * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
@@ -53,7 +47,6 @@ class DeprecatedVariablesTest extends TestCase
     protected function setUp()
     {
         $this->environmentMock = $this->createPartialMock(Environment::class, ['getVariables']);
-        $this->mergedConfigMock = $this->createMock(MergedConfig::class);
         $this->resultFactoryMock = $this->createConfiguredMock(ResultFactory::class, [
             'success' => $this->createMock(Success::class),
             'error' => $this->createMock(Error::class)
@@ -63,26 +56,21 @@ class DeprecatedVariablesTest extends TestCase
 
         $this->validator = new DeprecatedVariables(
             $this->environmentMock,
-            $this->mergedConfigMock,
             $this->resultFactoryMock
         );
     }
 
     /**
      * @param array $variables
-     * @param array $config
      * @param array $env
      * @param string $expectedResultClass
      * @dataProvider executeDataProvider
      */
-    public function testValidate(array $variables, array $config, array $env, string $expectedResultClass)
+    public function testValidate(array $variables, array $env, string $expectedResultClass)
     {
         $this->environmentMock->expects($this->once())
             ->method('getVariables')
             ->willReturn($variables);
-        $this->mergedConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn($config);
 
         $_ENV = $env;
 
@@ -98,68 +86,17 @@ class DeprecatedVariablesTest extends TestCase
             [
                 [],
                 [],
-                [],
                 Success::class,
             ],
             [
                 [DeployInterface::VAR_VERBOSE_COMMANDS => '-v'],
-                [],
                 [],
                 Success::class,
             ],
             [
                 [DeployInterface::VAR_VERBOSE_COMMANDS => Environment::VAL_ENABLED],
                 [],
-                [],
                 Error::class,
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 3],
-                [],
-                [],
-                Error::class,
-            ],
-            [
-                [],
-                [],
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 3],
-                Error::class,
-            ],
-            [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 1],
-                [],
-                [],
-                Error::class,
-            ],
-            [
-                [],
-                [],
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 1],
-                Error::class,
-            ],
-            [
-                [],
-                [DeployInterface::VAR_SCD_EXCLUDE_THEMES => 'theme'],
-                [],
-                Error::class,
-            ],
-            [
-                [],
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => false],
-                [],
-                Error::class,
-            ],
-            [
-                [],
-                [DeployInterface::VAR_SCD_EXCLUDE_THEMES => ''],
-                [],
-                Success::class,
-            ],
-            [
-                [],
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => true],
-                [],
-                Success::class,
             ],
         ];
     }
