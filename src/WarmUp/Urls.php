@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Step\PostDeploy\WarmUp;
+namespace Magento\MagentoCloud\WarmUp;
 
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Util\UrlManager;
