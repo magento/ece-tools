@@ -71,7 +71,7 @@ class SetCryptKeyTest extends TestCase
             ->willReturn('TWFnZW50byBSb3g=');
         $this->loggerMock->expects($this->never())
             ->method('error')
-            ->with('Crypt key missing. Add crypt/key in app/etc/env.php or set CRYPT_KEY env. variable');
+            ->with('Crypt key missing. Add the crypt key to the `app/etc/env.php` file , or set the `CRYPT_KEY` environment variable in the Cloud Project web UI.');
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Setting encryption key');
@@ -92,7 +92,7 @@ class SetCryptKeyTest extends TestCase
             ->willReturn('');
         $this->loggerMock->expects($this->once())
             ->method('error')
-            ->with('Crypt key missing. Add crypt/key in app/etc/env.php or set CRYPT_KEY env. variable');
+            ->with('Crypt key missing. Add the crypt key to the `app/etc/env.php` file , or set the `CRYPT_KEY` environment variable in the Cloud Project web UI.');
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
@@ -110,7 +110,7 @@ class SetCryptKeyTest extends TestCase
             ->method('getCryptKey');
         $this->loggerMock->expects($this->never())
             ->method('error')
-            ->with('Crypt key missing. Add crypt/key in app/etc/env.php or set CRYPT_KEY env. variable');
+            ->with('Crypt key missing. Add the crypt key to the `app/etc/env.php` file , or set the `CRYPT_KEY` environment variable in the Cloud Project web UI.');
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->configWriterMock->expects($this->never())
