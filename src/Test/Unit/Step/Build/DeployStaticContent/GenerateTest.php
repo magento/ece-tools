@@ -111,13 +111,13 @@ class GenerateTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage Some error
-     *
      * @throws StepException
      */
     public function testExecuteWithException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $commands = [
             'setup:static-content:deploy with locales'
         ];

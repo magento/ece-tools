@@ -152,12 +152,11 @@ class MaintenanceModeSwitcherTest extends TestCase
         $this->maintenanceModeSwitcher->disable();
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\App\GenericException
-     * @expectedExceptionMessage command error
-     */
     public function testDisableCommandException()
     {
+        $this->expectException(GenericException::class);
+        $this->expectExceptionMessage('command error');
+
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)

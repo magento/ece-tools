@@ -136,12 +136,11 @@ class StaticContentCompressorTest extends TestCase
         $this->staticContentCompressor->process(0);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Utility was not found
-     */
     public function testUtilityNotFound()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Utility was not found');
+
         $this->shellMock
             ->expects($this->never())
             ->method('execute');

@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -88,12 +89,11 @@ class SetupTest extends TestCase
         $this->step->execute();
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage script error
-     */
     public function testExecuteWithException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('script error');
+
         $installUpgradeLog = '/tmp/log.log';
 
         $this->loggerMock->expects($this->once())

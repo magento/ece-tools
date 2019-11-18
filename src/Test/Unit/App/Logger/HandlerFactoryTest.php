@@ -81,12 +81,11 @@ class HandlerFactoryTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Unknown type of log handler: someHandler
-     */
     public function testCreateWithWrongHandlerFromFile()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Unknown type of log handler: someHandler');
+
         $handler = 'someHandler';
         $this->logConfigMock->expects($this->once())
             ->method('get')

@@ -141,12 +141,11 @@ class ManagerTest extends TestCase
         );
     }
 
-    /**
-     * @expectedExceptionMessage Package some_package:* was not found
-     * @expectedException \Exception
-     */
     public function testGetWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Package some_package:* was not found');
+
         $this->repositoryMock->method('findPackage')
             ->with('some_package', '*')
             ->willReturn(null);
