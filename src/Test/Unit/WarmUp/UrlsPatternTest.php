@@ -7,10 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\WarmUp;
 
-use Magento\MagentoCloud\WarmUp\UrlsPattern;
-use Magento\MagentoCloud\Shell\Process;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Shell\MagentoShell;
-use Magento\MagentoCloud\Shell\ShellFactory;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\WarmUp\UrlsPattern;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -31,9 +31,9 @@ class UrlsPatternTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var MagentoShell|MockObject
+     * @var UrlsPattern\PatternFactory|MockObject
      */
-    private $magentoShellMock;
+    private $patternFactoryMock;
 
     /**
      * @inheritdoc
@@ -41,36 +41,70 @@ class UrlsPatternTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->magentoShellMock = $this->createMock(MagentoShell::class);
-        /** @var ShellFactory|MockObject $shellFactoryMock */
-        $shellFactoryMock = $this->createMock(ShellFactory::class);
-        $shellFactoryMock->expects($this->once())
-            ->method('createMagento')
-            ->willReturn($this->magentoShellMock);
+        $this->patternFactoryMock = $this->createMock(UrlsPattern\PatternFactory::class);
 
         $this->urlsPattern = new UrlsPattern(
             $this->loggerMock,
-            $shellFactoryMock
+            $this->patternFactoryMock
         );
+    }
+
+    public function testGetWithGenericException()
+    {
+        $patternInterfaceMock = $this->getMockForAbstractClass(UrlsPattern\PatternInterface::class);
+        $patternInterfaceMock->expects($this->once())
+            ->method('getUrls')
+            ->with('product', '*', '*')
+            ->willThrowException(new GenericException('some error'));
+        $this->patternFactoryMock->expects($this->once())
+            ->method('create')
+            ->with('product')
+            ->willReturn($patternInterfaceMock);
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with('some error');
+
+        $this->urlsPattern->get('product:*:*');
+    }
+
+    public function testGetWithShellException()
+    {
+        $patternInterfaceMock = $this->getMockForAbstractClass(UrlsPattern\PatternInterface::class);
+        $patternInterfaceMock->expects($this->once())
+            ->method('getUrls')
+            ->with('product', '*', '*')
+            ->willThrowException(new ShellException('some error'));
+        $this->patternFactoryMock->expects($this->once())
+            ->method('create')
+            ->with('product')
+            ->willReturn($patternInterfaceMock);
+        $this->loggerMock->expects($this->once())
+            ->method('error')
+            ->with('Command execution failed: some error');
+
+        $this->urlsPattern->get('product:*:*');
     }
 
     /**
      * @param string $pattern
-     * @param array $commandArguments
-     * @param array $urlsFromCommand
+     * @param array $patternParts
+     * @param array $urlsFromPattern
      * @param array $expectedResult
+     * @throws \ReflectionException
      * @dataProvider getDataProvider
      */
-    public function testGet(string $pattern, array $commandArguments, array $urlsFromCommand, array $expectedResult)
+    public function testGet(string $pattern, array $patternParts, array $urlsFromPattern, array $expectedResult)
     {
-        $processMock = $this->createMock(Process::class);
-        $processMock->expects($this->once())
-            ->method('getOutput')
-            ->willReturn(json_encode($urlsFromCommand));
-        $this->magentoShellMock->expects($this->once())
-            ->method('execute')
-            ->with('config:show:urls', $commandArguments)
-            ->willReturn($processMock);
+        $patternInterfaceMock = $this->getMockForAbstractClass(UrlsPattern\PatternInterface::class);
+        $patternInterfaceMock->expects($this->once())
+            ->method('getUrls')
+            ->with(...$patternParts)
+            ->willReturn($urlsFromPattern);
+
+        $this->patternFactoryMock->expects($this->once())
+            ->method('create')
+            ->with($patternParts[0])
+            ->willReturn($patternInterfaceMock);
 
         $this->assertEquals($expectedResult, array_values($this->urlsPattern->get($pattern)));
     }
@@ -84,52 +118,30 @@ class UrlsPatternTest extends TestCase
             [
                 'category:*:1',
                 [
-                    '--entity-type=category',
-                    '--store-id=1'
+                    'category',
+                    '*',
+                    '1'
                 ],
                 [],
                 [],
             ],
             [
-                'category:*:*',
-                ['--entity-type=category'],
+                'category:/category.*?:*',
                 [
-                    'http://site1.com/category1',
-                    'http://site1.com/category2',
+                    'category',
+                    '/category.*?',
+                    '*'
                 ],
-                [
-                    'http://site1.com/category1',
-                    'http://site1.com/category2',
-                ],
-            ],
-            [
-                'category:/category.*/:*',
-                ['--entity-type=category'],
                 [
                     'http://site1.com/category1',
                     'http://site1.com/category2',
                     'http://site1.com/cat1',
-                    'http://site1.com/cat2',
+                    'http://site1.com/cat1',
                 ],
                 [
                     'http://site1.com/category1',
                     'http://site1.com/category2',
-                ],
-            ],
-            [
-                'category:cat1:*',
-                ['--entity-type=category'],
-                [
-                    'http://site1.com/category1',
                     'http://site1.com/cat1',
-                    'http://site1.com/cat2',
-                    'http://site2.com/category1',
-                    'http://site2.com/cat1',
-                    'http://site2.com/cat2',
-                ],
-                [
-                    'http://site1.com/cat1',
-                    'http://site2.com/cat1',
                 ],
             ],
         ];
@@ -140,27 +152,10 @@ class UrlsPatternTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('error')
             ->with('Warm-up pattern "wrong:pattern" isn\'t valid.');
-        $this->magentoShellMock->expects($this->never())
-            ->method('execute');
+        $this->patternFactoryMock->expects($this->never())
+            ->method('create');
 
         $this->urlsPattern->get('wrong:pattern');
-    }
-
-    public function testGetNotValidJsonReturned()
-    {
-        $processMock = $this->createMock(Process::class);
-        $processMock->expects($this->once())
-            ->method('getOutput')
-            ->willReturn('wrong_json');
-        $this->magentoShellMock->expects($this->once())
-            ->method('execute')
-            ->with('config:show:urls', ['--entity-type=category'])
-            ->willReturn($processMock);
-        $this->loggerMock->expects($this->once())
-            ->method('error')
-            ->with($this->stringStartsWith('Can\'t parse result from command config:show:urls'));
-
-        $this->urlsPattern->get('category:*:*');
     }
 
     /**
@@ -182,13 +177,16 @@ class UrlsPatternTest extends TestCase
             ['test', false],
             ['http://example.com', false],
             ['http://example.com:8000', false],
-            ['product:*:*', false],
+            ['product:*:*', true],
+            ['product:sku1|sku2:store1|store 2', true],
             ['category:*:store_fr', true],
             ['category:*:1', true],
             ['category:*:*', true],
             ['cms-page:*:1', true],
             ['cms-page:*:*', true],
             ['cms_page:*:*', false],
+            ['store-page:/url/:store1|store2', true],
+            ['store_page:/url/:store1|store2', false],
         ];
     }
 }

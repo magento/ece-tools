@@ -8,11 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\WarmUp;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
-use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\PatternFactory;
-use Magento\MagentoCloud\WarmUp\UrlsPattern\StorePage;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -34,35 +31,19 @@ class UrlsPattern
     private $logger;
 
     /**
-     * @var MagentoShell
-     */
-    private $magentoShell;
-
-    /**
-     * @var StorePage
-     */
-    private $storePage;
-    /**
      * @var PatternFactory
      */
     private $patternFactory;
 
     /**
      * @param LoggerInterface $logger
-     * @param ShellFactory $shellFactory
-     * @param StorePage $storePage
      * @param PatternFactory $patternFactory
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellFactory $shellFactory,
-        StorePage $storePage,
         PatternFactory $patternFactory
     ) {
         $this->logger = $logger;
-        $this->magentoShell = $shellFactory->createMagento();
-        $this->storePage = $storePage;
-
         $this->patternFactory = $patternFactory;
     }
 
@@ -84,7 +65,7 @@ class UrlsPattern
 
             $urlsPattern = $this->patternFactory->create($entity);
 
-            return $urlsPattern->getUrls($entity, $pattern, $storeIds);
+            return array_unique($urlsPattern->getUrls($entity, $pattern, $storeIds));
         } catch (ShellException $e) {
             $this->logger->error('Command execution failed: ' . $e->getMessage());
         } catch (GenericException $e) {
