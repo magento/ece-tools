@@ -50,11 +50,12 @@ class DeployFailedTest extends TestCase
 
     /**
      * @throws StepException
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage Post-deploy is skipped because deploy was failed.
      */
     public function testExecuteToBeFailed(): void
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Post-deploy is skipped because deploy was failed.');
+
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(Manager::FLAG_DEPLOY_HOOK_IS_FAILED)

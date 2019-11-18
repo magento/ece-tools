@@ -164,12 +164,11 @@ class UrlManagerTest extends TestCase
         $this->assertEquals($expectedResult, $this->manager->getUrls());
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Expected at least one valid unsecure or secure route. None found.
-     */
     public function testGetUrlsException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Expected at least one valid unsecure or secure route. None found.');
+
         // No Mock so we get an exception indicating no URLS present.
         $this->manager->getUrls();
     }

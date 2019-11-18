@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Scenario\Collector;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Scenario\Collector\Scenario;
+use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\PathResolver;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -81,12 +82,11 @@ class ScenarioTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage File doesn't exist
-     */
     public function testCollectWithException()
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('File doesn\'t exist');
+
         $scenario = '/path/to/scenario';
 
         $this->pathResolverMock->expects($this->once())

@@ -153,12 +153,11 @@ class DbDumpTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);

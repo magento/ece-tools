@@ -162,24 +162,22 @@ class GlobalSectionTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
-     */
     public function testNotExists()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
+
         $this->environmentReaderMock->expects($this->never())
             ->method('read');
 
         $this->config->get('NOT_EXISTS_VALUE');
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Some error
-     */
     public function testGetWithException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new \Exception('Some error'));

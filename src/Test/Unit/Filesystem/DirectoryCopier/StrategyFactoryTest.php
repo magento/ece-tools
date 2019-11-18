@@ -82,12 +82,11 @@ class StrategyFactoryTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Strategy "not_exists_strategy" doesn't exist
-     */
     public function testCopyFromDirNotExists()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Strategy "not_exists_strategy" doesn\'t exist');
+
         $this->strategyFactory->create('not_exists_strategy');
     }
 }

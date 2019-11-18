@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\Deploy\Reader;
 use Magento\MagentoCloud\Config\Deploy\Writer;
 use Magento\MagentoCloud\DB\ConnectionInterface;
@@ -95,11 +96,13 @@ class StateTest extends TestCase
 
     /**
      * @param array $tables
-     * @expectedException \Exception
      * @dataProvider tablesWithExceptionDataProvider
+     * @throws GenericException
      */
     public function testIsInstalledTablesWithException($tables)
     {
+        $this->expectException(\Exception::class);
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Checking if db exists and has tables');
