@@ -40,6 +40,7 @@ class Product implements PatternInterface
     public function getUrls(string $entity, string $pattern, string $storeIds): array
     {
         $arguments = $this->commandArgumentBuilder->generateWithProductSku($entity, $storeIds, $pattern);
+
         return $this->configShowUrlCommand->execute($arguments);
     }
 }

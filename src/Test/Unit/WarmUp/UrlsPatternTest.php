@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\WarmUp;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\WarmUp\UrlsPattern;
 use PHPUnit\Framework\MockObject\MockObject;
