@@ -61,7 +61,7 @@
         <service id="Magento\MagentoCloud\Config\Stage\DeployInterface" alias="Magento\MagentoCloud\Config\Stage\Deploy" />
         <service id="Magento\MagentoCloud\Config\Stage\BuildInterface" alias="Magento\MagentoCloud\Config\Stage\Build" />
         <service id="Magento\MagentoCloud\Config\Stage\PostDeployInterface" alias="Magento\MagentoCloud\Config\Stage\PostDeploy" />
-        <service id="Magento\MagentoCloud\Config\EnvironmentDataInterface" alias="Magento\MagentoCloud\Config\Environment" />
+        <service id="Magento\MagentoCloud\Config\EnvironmentDataInterface" alias="Magento\MagentoCloud\Config\EnvironmentData" />
         <service id="Magento\MagentoCloud\Config\AdminDataInterface" alias="Magento\MagentoCloud\Config\AdminData" />
         <service id="Magento\MagentoCloud\PlatformVariable\DecoderInterface" alias="Magento\MagentoCloud\PlatformVariable\Decoder" />
         <service id="Magento\MagentoCloud\Config\Environment\ReaderInterface" alias="Magento\MagentoCloud\Config\Environment\Reader" />

@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Config\Magento\Shared;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\Writer\WriterInterface;
 
 /**
  * @inheritdoc

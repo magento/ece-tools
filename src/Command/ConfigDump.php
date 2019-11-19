@@ -21,6 +21,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * CLI command for dumping SCD related config.
+ *
+ * @api
  */
 class ConfigDump extends Command
 {

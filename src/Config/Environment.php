@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
-use Magento\MagentoCloud\Config\System\Variables;
-
 /**
  * Contains logic for interacting with the server environment
  */
@@ -35,7 +33,6 @@ class Environment
      */
     private $environmentData;
 
-
     /**
      * Environment constructor.
      *
@@ -45,7 +42,6 @@ class Environment
     {
         $this->environmentData = $environmentData;
     }
-
 
     /**
      * 'getEnv' method is an abstraction for _ENV and getenv.
