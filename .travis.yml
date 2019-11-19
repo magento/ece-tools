@@ -34,36 +34,26 @@ stages:
 jobs:
   include:
     - stage: static-unit
-      name: "Static & Unit Tests"
       script: ./tests/travis/static-unit.sh
       env:
         - TEST_SUITE=static-unit XDEBUG=true
-    - stage: static-unit
-      name: "Static & Unit Tests"
-      script: ./tests/travis/static-unit.sh
+    - script: ./tests/travis/static-unit.sh
       php: '7.2'
       env:
         - TEST_SUITE=static-unit XDEBUG=true
-    - stage: static-unit
-      name: "Static & Unit Tests"
-      script: ./tests/travis/static-unit.sh
+    - script: ./tests/travis/static-unit.sh
       php: '7.3'
       env:
         - TEST_SUITE=static-unit XDEBUG=true
     - stage: integration
-      name: "Integration Tests"
       script: ./tests/travis/integration.sh;
       env:
         - TEST_SUITE=integration
-    - stage: integration
-      name: "Integration Tests"
-      script: ./tests/travis/integration.sh;
+    - script: ./tests/travis/integration.sh;
       php: '7.2'
       env:
         - TEST_SUITE=integration
-    - stage: integration
-      name: "Integration Tests"
-      script: ./tests/travis/integration.sh;
+    - script: ./tests/travis/integration.sh;
       php: '7.3'
       env:
         - TEST_SUITE=integration
