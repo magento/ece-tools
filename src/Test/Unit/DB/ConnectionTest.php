@@ -140,12 +140,11 @@ class ConnectionTest extends TestCase
         $this->assertSame($this->pdoMock, $this->connection->getPdo());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some exception
-     */
     public function testGetPdoWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some exception');
+
         $this->pdoMock->expects($this->once())
             ->method('query')
             ->with('SELECT 1')

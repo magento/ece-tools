@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step;
 use Magento\MagentoCloud\App\Logger;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\ValidatorInterface;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\ValidateConfiguration;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use PHPUnit\Framework\TestCase;
@@ -52,12 +53,11 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage Fix configuration with given suggestions
-     */
     public function testExecuteWithCriticalError()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Fix configuration with given suggestions');
+
         $warningValidator = $this->getMockForAbstractClass(ValidatorInterface::class);
         $warningValidator->expects($this->once())
             ->method('validate');
@@ -112,12 +112,11 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage Fix configuration with given suggestions
-     */
     public function testExecuteWithWarningAndCriticalMessage()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Fix configuration with given suggestions');
+
         $this->loggerMock->expects($this->once())
             ->method('notice')
             ->with('Validating configuration');
