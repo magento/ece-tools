@@ -36,15 +36,18 @@ jobs:
     - stage: static-unit
       script: ./tests/travis/static-unit.sh
       env:
-        - TEST_SUITE=static-unit XDEBUG=true
+        - TEST_SUITE=static-unit
+        - XDEBUG=true
     - script: ./tests/travis/static-unit.sh
       php: '7.2'
       env:
-        - TEST_SUITE=static-unit XDEBUG=true
+        - TEST_SUITE=static-unit
+        - XDEBUG=true
     - script: ./tests/travis/static-unit.sh
       php: '7.3'
       env:
-        - TEST_SUITE=static-unit XDEBUG=true
+        - TEST_SUITE=static-unit
+        - XDEBUG=true
     - stage: integration
       script: ./tests/travis/integration.sh;
       env:
