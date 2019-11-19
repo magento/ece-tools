@@ -40,9 +40,10 @@
     "php-mock/php-mock-phpunit": "^2.0",
     "phpmd/phpmd": "@stable",
     "phpstan/phpstan": "^0.11",
-    "phpunit/php-code-coverage": "^5.2",
-    "phpunit/phpunit": "^6.2",
-    "squizlabs/php_codesniffer": "^3.0"
+    "phpunit/php-code-coverage": "^6.0",
+    "phpunit/phpunit": "^7.2",
+    "squizlabs/php_codesniffer": "^3.0",
+    "funkjedi/composer-include-files": "^1.0"
   },
   "conflict": {
     "nesbot/carbon": ">=1.38 <2.0"
@@ -94,6 +95,9 @@
         "dist/.magento.env.yaml",
         ".magento.env.yaml.dist"
       ]
+    ],
+    "include_files": [
+      "vendor/codeception/phpunit-wrapper/src/phpunit7-interfaces.php"
     ]
   }
 }

@@ -289,12 +289,12 @@ class SearchEngineTest extends TestCase
 
     /**
      * @throws StepException
-     *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $config['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
 
         $this->configMock->expects($this->once())
@@ -326,12 +326,12 @@ class SearchEngineTest extends TestCase
 
     /**
      * @throws StepException
-     *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithPackageException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $config['system']['default']['catalog']['search'] = ['engine' => 'mysql'];
 
         $this->configMock->expects($this->once())
@@ -356,12 +356,12 @@ class SearchEngineTest extends TestCase
 
     /**
      * @throws StepException
-     *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithConfigException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->configMock->expects($this->once())
             ->method('getConfig')
             ->willThrowException(new UndefinedPackageException('Some error'));
