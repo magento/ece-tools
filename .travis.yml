@@ -18,8 +18,6 @@ php:
 
 env:
   matrix:
-    - TEST_SUITE=static-unit XDEBUG=true
-    - TEST_SUITE=integration
     - TEST_SUITE=functional-ce
     - TEST_SUITE=functional-ee
     - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
@@ -38,30 +36,40 @@ jobs:
     - stage: static-unit
       name: "Static & Unit Tests"
       script: ./tests/travis/static-unit.sh
+      env:
+        - TEST_SUITE=static-unit XDEBUG=true
     - stage: static-unit
       name: "Static & Unit Tests"
       script: ./tests/travis/static-unit.sh
       php: '7.2'
+      env:
+        - TEST_SUITE=static-unit XDEBUG=true
     - stage: static-unit
       name: "Static & Unit Tests"
       script: ./tests/travis/static-unit.sh
       php: '7.3'
+      env:
+        - TEST_SUITE=static-unit XDEBUG=true
     - stage: integration
       name: "Integration Tests"
       script: ./tests/travis/integration.sh;
+      env:
+        - TEST_SUITE=integration
     - stage: integration
       name: "Integration Tests"
       script: ./tests/travis/integration.sh;
       php: '7.2'
+      env:
+        - TEST_SUITE=integration
     - stage: integration
       name: "Integration Tests"
       script: ./tests/travis/integration.sh;
       php: '7.3'
+      env:
+        - TEST_SUITE=integration
 
 matrix:
   exclude:
-    - php: '7.1'
-      env: TEST_SUITE=integration
     - php: '7.1'
       env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
     - php: '7.1'
