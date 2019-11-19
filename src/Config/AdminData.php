@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 /**
- * Used for getting magento admin user data
+ * @inheritDoc
  */
 class AdminData implements AdminDataInterface
 {
@@ -18,8 +18,6 @@ class AdminData implements AdminDataInterface
     private $environmentData;
 
     /**
-     * Environment constructor.
-     *
      * @param EnvironmentDataInterface $environmentData
      */
     public function __construct(EnvironmentDataInterface $environmentData)
@@ -28,7 +26,7 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getLocale(): string
     {
@@ -36,7 +34,7 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getUsername(): string
     {
@@ -44,7 +42,7 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getFirstName(): string
     {
@@ -52,7 +50,7 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getLastName(): string
     {
@@ -60,7 +58,7 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getEmail(): string
     {
@@ -68,7 +66,7 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getPassword(): string
     {
@@ -76,7 +74,7 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getUrl(): string
     {
@@ -84,7 +82,7 @@ class AdminData implements AdminDataInterface
     }
 
     /**
-     * @return string
+     * @inheritDoc
      */
     public function getDefaultCurrency(): string
     {

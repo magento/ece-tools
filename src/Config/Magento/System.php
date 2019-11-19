@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Magento;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Shell\ShellFactory;
 
@@ -51,7 +52,7 @@ class System implements SystemInterface
             $process = $magentoShell->execute('config:show', [$key]);
 
             return $process->getOutput() ?? null;
-        } catch (\Exception $exception) {
+        } catch (GenericException $exception) {
             return null;
         }
     }
