@@ -49,6 +49,20 @@ matrix:
     - php: '7.3'
       env: TEST_SUITE=functional-ee
 
+stages:
+  - static-unit
+  - integration
+  - test
+
+jobs:
+  include:
+    - stage: static-unit
+      name: "Static & Unit Tests"
+      script: ./tests/travis/static-unit.sh
+    - stage: integration
+      name: "Integration Tests"
+      script: ./tests/travis/integration.sh;
+
 install:
   - composer config http-basic.repo.magento.com ${REPO_USERNAME_CE} ${REPO_PASSWORD_CE}
   - composer config github-oauth.github.com ${GITHUB_TOKEN}
@@ -64,7 +78,5 @@ before_script:
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
 
 script:
-  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
-  - if [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
   - if [ $TEST_SUITE == "functional-ce" ]; then ./tests/travis/functional_ce.sh; fi;
   - if [ $TEST_SUITE == "functional-ee" ] && [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then ./tests/travis/prepare_functional_parallel.sh && ./tests/travis/functional_ee.sh; fi;
