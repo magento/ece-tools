@@ -9,14 +9,15 @@ namespace Magento\MagentoCloud\Test\Functional\Codeception;
 
 use Codeception\Module;
 use Magento\MagentoCloud\Test\Functional\Robo\Tasks as MagentoCloudTasks;
+use PHPUnit\Framework\Assert;
 use Robo\LoadAllTasks as RoboTasks;
 use Robo\Result;
-use Codeception\TestInterface;
 use Codeception\Configuration;
 use Robo\Collection\CollectionBuilder;
 use Robo\Contract\BuilderAwareInterface;
 use League\Container\ContainerAwareInterface;
 use League\Container\ContainerAwareTrait;
+use Robo\Exception\TaskException;
 
 /**
  * Module for running commands on Docker environment
@@ -139,6 +140,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->stopOnFail();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -157,6 +159,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->stopOnFail();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -164,25 +167,48 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      * Clones magento cloud template from git
      *
      * @param string|null $version
+     * @param string|null $edition
      * @return bool
-     * @throws \Robo\Exception\TaskException
+     *
+     * @throws TaskException
      */
-    public function cloneTemplate(string $version = null): bool
+    public function cloneTemplate(string $version = null, string $edition = null): bool
     {
-        $gitTask = $this->taskGitStack()
+        $tasks = [];
+        $tasks[] = $this->taskGitStack()
             ->exec('git init')
             ->exec(sprintf('git remote add origin %s', $this->_getConfig('repo_url')))
             ->exec('git fetch')
-            ->checkout($version ?: $this->_getConfig('repo_branch'));
+            ->checkout($version ?: $this->_getConfig('repo_branch'))
+            ->getCommand();
+
+        if ($edition === 'CE') {
+            $tasks[] = $this->taskComposerRemove('composer')
+                ->arg('magento/magento-cloud-metapackage')
+                ->workingDir($this->_getConfig('system_magento_dir'))
+                ->noInteraction()
+                ->option('--no-update')
+                ->getCommand();
+            $tasks[] = $this->taskComposerRequire('composer')
+                ->dependency('magento/product-community-edition', $version ?? '@stable')
+                ->workingDir($this->_getConfig('system_magento_dir'))
+                ->noInteraction()
+                ->option('--no-update')
+                ->getCommand();
+            $tasks[] = $this->taskComposerUpdate('composer')
+                ->option('--quiet')
+                ->getCommand();
+        }
 
         /** @var Result $result */
         $result = $this->taskBash(self::BUILD_CONTAINER)
             ->printOutput($this->_getConfig('printOutput'))
             ->interactive(false)
-            ->exec($gitTask)
+            ->exec(implode(' && ', $tasks))
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -191,7 +217,8 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      *
      * @param string $version
      * @return bool
-     * @throws \Robo\Exception\TaskException
+     *
+     * @throws TaskException
      */
     public function composerRequireMagentoCloud(string $version): bool
     {
@@ -200,19 +227,10 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->workingDir($this->_getConfig('system_magento_dir'))
             ->noInteraction()
             ->option('--no-update');
-        /**
-         * This is temporary fix for MAGECLOUD-3714
-         */
-        $composerRequireCarbonTask = $this->taskComposerRequire('composer')
-            ->dependency('nesbot/carbon', '<1.38||^2.0')
-            ->workingDir($this->_getConfig('system_magento_dir'))
-            ->noInteraction()
-            ->option('--no-update');
         $composerUpdateTask = $this->taskComposerUpdate('composer');
 
         $tasks = [
             $composerRequireTask->getCommand(),
-            $composerRequireCarbonTask->getCommand(),
             $composerUpdateTask->getCommand()
         ];
 
@@ -224,6 +242,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -231,7 +250,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      * Runs composer install command
      *
      * @return bool
-     * @throws \Robo\Exception\TaskException
+     * @throws TaskException
      */
     public function composerInstall(): bool
     {
@@ -248,6 +267,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -255,7 +275,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      * Add local checkout of ECE Tools to composer repositories.
      *
      * @return bool
-     * @throws \Robo\Exception\TaskException
+     * @throws TaskException
      */
     public function addEceComposerRepo(): bool
     {
@@ -287,10 +307,11 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
         $customDeps = [
             'mcp' => [
                 'name' => 'magento/magento-cloud-patches',
-                'repo' => [
-                    'type' => 'vcs',
-                    'url' => 'git@github.com:magento/magento-cloud-patches.git'
-                ]
+                'repo' => null
+            ],
+            'mcc' => [
+                'name' => 'magento/magento-cloud-components',
+                'repo' => null
             ]
         ];
         $config = json_decode(
@@ -300,10 +321,15 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
 
         foreach ($customDeps as $depName => $extra) {
             if (isset($config['require'][$extra['name']])) {
-                $commands[] = $this->taskComposerConfig('composer')
-                    ->set('repositories.' . $depName, addslashes(json_encode($extra['repo'], JSON_UNESCAPED_SLASHES)))
-                    ->noInteraction()
-                    ->getCommand();
+                if (!empty($extra['repo'])) {
+                    $commands[] = $this->taskComposerConfig('composer')
+                        ->set(
+                            'repositories.' . $depName, addslashes(json_encode($extra['repo'], JSON_UNESCAPED_SLASHES))
+                        )
+                        ->noInteraction()
+                        ->getCommand();
+                }
+
                 $commands[] = $this->taskComposerRequire('composer')
                     ->dependency($extra['name'], $config['require'][$extra['name']])
                     ->noInteraction()
@@ -327,7 +353,8 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      * Add ece-tools extend package
      *
      * @return bool
-     * @throws \Robo\Exception\TaskException
+     *
+     * @throws TaskException
      */
     public function addEceExtendComposerRepo(): bool
     {
@@ -354,6 +381,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -363,7 +391,8 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      * @param string|array $path
      * @param string $container
      * @return bool
-     * @throws \Robo\Exception\TaskException
+     *
+     * @throws TaskException
      */
     public function cleanDirectories($path, string $container = self::BUILD_CONTAINER): bool
     {
@@ -371,7 +400,9 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
 
         if (is_array($path)) {
             $path = array_map(
-                function($val) use ($magentoRoot) { return $magentoRoot . $val; },
+                static function ($val) use ($magentoRoot) {
+                    return $magentoRoot . $val;
+                },
                 $path
             );
             $pathsToCleanup = implode(' ', $path);
@@ -387,6 +418,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -409,6 +441,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -418,7 +451,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      * @param string $path
      * @param string $container
      * @return bool
-     * @throws \Robo\Exception\TaskException
+     * @throws TaskException
      */
     public function createDirectory(string $path, string $container): bool
     {
@@ -430,6 +463,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -445,7 +479,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function uploadToContainer(string $source, string $destination, string $container): bool
     {
-        if (substr($source, 0, 1) != '/') {
+        if (strpos($source, '/') !== 0) {
             $source = Configuration::dataDir() . $source;
         }
 
@@ -458,6 +492,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -466,7 +501,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      *
      * @param string $source
      * @param string $container
-     * @return false|string
+     * @return string|false
      */
     public function grabFileContent(string $source, string $container = self::DEPLOY_CONTAINER)
     {
@@ -502,6 +537,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
@@ -512,7 +548,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      */
     public function seeInOutput(string $text)
     {
-        \PHPUnit\Framework\Assert::assertContains($text, $this->output);
+        Assert::assertContains($text, $this->output);
     }
 
     /**
@@ -523,7 +559,8 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
      * @param array $cloudVariables
      * @param array $rawVariables
      * @return bool
-     * @throws \Robo\Exception\TaskException
+     *
+     * @throws TaskException
      */
     public function runBinMagentoCommand(
         string $command,
@@ -541,6 +578,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             ->run();
 
         $this->output = $result->getMessage();
+
         return $result->wasSuccessful();
     }
 
