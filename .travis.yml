@@ -28,6 +28,36 @@ env:
     - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
     - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
 
+stages:
+  - static-unit
+  - integration
+  - test
+
+jobs:
+  include:
+    - stage: static-unit
+      name: "Static & Unit Tests"
+      script: ./tests/travis/static-unit.sh
+    - stage: static-unit
+      name: "Static & Unit Tests"
+      script: ./tests/travis/static-unit.sh
+      php: '7.2'
+    - stage: static-unit
+      name: "Static & Unit Tests"
+      script: ./tests/travis/static-unit.sh
+      php: '7.3'
+    - stage: integration
+      name: "Integration Tests"
+      script: ./tests/travis/integration.sh;
+    - stage: integration
+      name: "Integration Tests"
+      script: ./tests/travis/integration.sh;
+      php: '7.2'
+    - stage: integration
+      name: "Integration Tests"
+      script: ./tests/travis/integration.sh;
+      php: '7.3'
+
 matrix:
   exclude:
     - php: '7.1'
@@ -48,20 +78,6 @@ matrix:
 
     - php: '7.3'
       env: TEST_SUITE=functional-ee
-
-stages:
-  - static-unit
-  - integration
-  - test
-
-jobs:
-  include:
-    - stage: static-unit
-      name: "Static & Unit Tests"
-      script: ./tests/travis/static-unit.sh
-    - stage: integration
-      name: "Integration Tests"
-      script: ./tests/travis/integration.sh;
 
 install:
   - composer config http-basic.repo.magento.com ${REPO_USERNAME_CE} ${REPO_PASSWORD_CE}
