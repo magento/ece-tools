@@ -60,5 +60,14 @@
         <service id="Magento\MagentoCloud\Shell\ShellInterface" alias="Magento\MagentoCloud\Shell\Shell" />
         <service id="Magento\MagentoCloud\Config\Stage\DeployInterface" alias="Magento\MagentoCloud\Config\Stage\Deploy" />
         <service id="Magento\MagentoCloud\Config\Stage\BuildInterface" alias="Magento\MagentoCloud\Config\Stage\Build" />
+        <service id="Magento\MagentoCloud\Config\Stage\PostDeployInterface" alias="Magento\MagentoCloud\Config\Stage\PostDeploy" />
+        <service id="Magento\MagentoCloud\Config\EnvironmentDataInterface" alias="Magento\MagentoCloud\Config\Environment" />
+        <service id="Magento\MagentoCloud\Config\AdminDataInterface" alias="Magento\MagentoCloud\Config\AdminData" />
+        <service id="Magento\MagentoCloud\PlatformVariable\DecoderInterface" alias="Magento\MagentoCloud\PlatformVariable\Decoder" />
+        <service id="Magento\MagentoCloud\Config\Environment\ReaderInterface" alias="Magento\MagentoCloud\Config\Environment\Reader" />
+        <service id="Magento\MagentoCloud\Config\Magento\Env\ReaderInterface" alias="Magento\MagentoCloud\Config\Magento\Env\Reader" />
+        <service id="Magento\MagentoCloud\Config\Magento\Env\WriterInterface" alias="Magento\MagentoCloud\Config\Magento\Env\Writer" />
+        <service id="Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface" alias="Magento\MagentoCloud\Config\Magento\Shared\Reader" />
+        <service id="Magento\MagentoCloud\Config\Magento\Shared\WriterInterface" alias="Magento\MagentoCloud\Config\Magento\Shared\Writer" />
     </services>
 </container>

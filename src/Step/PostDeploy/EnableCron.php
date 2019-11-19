@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\PostDeploy;
 
-use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -18,16 +18,16 @@ use Psr\Log\LoggerInterface;
 class EnableCron implements StepInterface
 {
     /**
-     * Deploy Config Writer
+     * Magento environment config writer
      *
-     * @var Writer
+     * @var WriterInterface
      */
     private $writer;
 
     /**
-     * Deploy Config Reader
+     * Magento environment config reader
      *
-     * @var Reader
+     * @var ReaderInterface
      */
     private $reader;
 
@@ -38,13 +38,13 @@ class EnableCron implements StepInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param Writer $writer Deploy Config Writer
-     * @param Reader $reader Deploy Config Reader
+     * @param WriterInterface $writer
+     * @param ReaderInterface $reader
      */
     public function __construct(
         LoggerInterface $logger,
-        Writer $writer,
-        Reader $reader
+        WriterInterface $writer,
+        ReaderInterface $reader
     ) {
         $this->logger = $logger;
         $this->writer = $writer;
