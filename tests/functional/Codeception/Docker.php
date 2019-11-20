@@ -307,11 +307,17 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
         $customDeps = [
             'mcp' => [
                 'name' => 'magento/magento-cloud-patches',
-                'repo' => null
+                'repo' => [
+                    'type' => 'vcs',
+                    'url' => 'git@github.com:magento/magento-cloud-patches.git'
+                ]
             ],
             'mcc' => [
                 'name' => 'magento/magento-cloud-components',
-                'repo' => null
+                'repo' => [
+                    'type' => 'vcs',
+                    'url' => 'git@github.com:magento/magento-cloud-components.git'
+                ]
             ]
         ];
         $config = json_decode(
