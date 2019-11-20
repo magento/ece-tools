@@ -123,9 +123,6 @@ class PrepareConfigTest extends TestCase
      * @param array $expectedResult
      * @dataProvider executeDataProvider
      * @throws StepException
-     *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithException(
         bool $scdOnDemand,
@@ -133,6 +130,9 @@ class PrepareConfigTest extends TestCase
         $xFrameOptions,
         array $expectedResult
     ) {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php.');

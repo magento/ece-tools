@@ -155,12 +155,11 @@ class LogTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Configuration for SomeHandler is not found
-     */
     public function testGetWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Configuration for SomeHandler is not found');
+
         $this->fileListMock->expects($this->once())
             ->method('getCloudLog')
             ->willReturn('somePath');

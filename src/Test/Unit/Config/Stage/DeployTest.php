@@ -162,12 +162,11 @@ class DeployTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedExceptionMessage Config NO_EXISTS_CONFIG was not defined
-     * @expectedException \RuntimeException
-     */
     public function testGetConfigNotDefined()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Config NO_EXISTS_CONFIG was not defined');
+
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
             ->willReturn([]);
@@ -175,12 +174,11 @@ class DeployTest extends TestCase
         $this->deployConfig->get('NO_EXISTS_CONFIG');
     }
 
-    /**
-     * @expectedExceptionMessage Some error
-     * @expectedException \RuntimeException
-     */
     public function testGetWithMergedConfigException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
             ->willThrowException(new \RuntimeException('Some error'));

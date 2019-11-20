@@ -255,12 +255,11 @@ class BuildTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
-     */
     public function testNotExists()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
+
         $this->environmentReaderMock->expects($this->any())
             ->method('read')
             ->willReturn([]);

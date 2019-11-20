@@ -110,11 +110,12 @@ class ProcessorTest extends TestCase
 
     /**
      * @throws ProcessorException
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ProcessorException
-     * @expectedExceptionMessage Some error
      */
     public function testExeceuteWithException(): void
     {
+        $this->expectException(ProcessorException::class);
+        $this->expectExceptionMessage('Some error');
+
         $scenarios = [
             'some/scenario.xml'
         ];

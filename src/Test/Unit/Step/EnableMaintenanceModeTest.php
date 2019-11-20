@@ -54,11 +54,12 @@ class EnableMaintenanceModeTest extends TestCase
 
     /**
      * @throws StepException
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage Some error
      */
     public function testExecuteWithException(): void
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->switcherMock->expects($this->once())
             ->method('enable')
             ->willThrowException(new GenericException('Some error'));
