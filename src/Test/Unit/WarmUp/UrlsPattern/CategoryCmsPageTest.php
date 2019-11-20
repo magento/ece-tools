@@ -8,10 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\WarmUp\UrlsPattern;
 
 use Codeception\PHPUnit\TestCase;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\CategoryCmsPage;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\CommandArgumentBuilder;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\ConfigShowUrlCommand;
-use Magento\MagentoCloud\WarmUp\UrlsPattern\ParseResultException;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
@@ -49,7 +49,7 @@ class CategoryCmsPageTest extends TestCase
      * @param string $pattern
      * @param array $expectedUrls
      * @dataProvider getUrlsDataProvider
-     * @throws ParseResultException
+     * @throws GenericException
      */
     public function testGetUrls(string $pattern, array $expectedUrls)
     {

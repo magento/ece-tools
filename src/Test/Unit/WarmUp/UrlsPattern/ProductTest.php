@@ -8,9 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\WarmUp\UrlsPattern;
 
 use Codeception\PHPUnit\TestCase;
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\CommandArgumentBuilder;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\ConfigShowUrlCommand;
-use Magento\MagentoCloud\WarmUp\UrlsPattern\ParseResultException;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\Product;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -46,7 +46,7 @@ class ProductTest extends TestCase
     }
 
     /**
-     * @throws ParseResultException
+     * @throws GenericException
      */
     public function testGetUrls()
     {

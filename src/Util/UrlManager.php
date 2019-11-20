@@ -190,7 +190,7 @@ class UrlManager
     /**
      * Retrieves base urls for each store and save them into $storeBaseUrls
      */
-    private function loadStoreBaseUrls()
+    private function loadStoreBaseUrls(): void
     {
         if (!$this->storeBaseUrls) {
             try {

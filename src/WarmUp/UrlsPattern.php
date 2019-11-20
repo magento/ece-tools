@@ -13,14 +13,17 @@ use Magento\MagentoCloud\WarmUp\UrlsPattern\PatternFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * Fetch urls from config:show:urls command and filtering the by given pattern
+ * Fetch urls from config:show:urls command and filtering them by given pattern
  */
 class UrlsPattern
 {
-    const ENTITY_CATEGORY = 'category';
-    const ENTITY_CMS_PAGE = 'cms-page';
-    const ENTITY_PRODUCT = 'product';
-    const ENTITY_STORE_PAGE = 'store-page';
+    /**
+     * Possible types of warm-up patterns.
+     */
+    public const ENTITY_CATEGORY = 'category';
+    public const ENTITY_CMS_PAGE = 'cms-page';
+    public const ENTITY_PRODUCT = 'product';
+    public const ENTITY_STORE_PAGE = 'store-page';
 
     public const PATTERN_DELIMITER = '|';
     public const PATTERN_ALL = '*';
@@ -48,7 +51,7 @@ class UrlsPattern
     }
 
     /**
-     * Fetch urls from config:show:urls command and filtering the by given pattern
+     * Fetch urls from config:show:urls command and filtering them by given pattern
      *
      * @param string $warmUpPattern
      * @return array
@@ -61,7 +64,7 @@ class UrlsPattern
                 return [];
             }
 
-            list($entity, $pattern, $storeIds) = explode(':', $warmUpPattern);
+            [$entity, $pattern, $storeIds] = explode(':', $warmUpPattern);
 
             $urlsPattern = $this->patternFactory->create($entity);
 

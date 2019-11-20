@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\WarmUp\UrlsPattern;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Shell\ShellException;
 
 /**
@@ -22,7 +23,7 @@ interface PatternInterface
      * @param string $storeIds
      * @return array
      * @throws ShellException If command was executed with error
-     * @throws ParseResultException If command result was parsed with error
+     * @throws GenericException If command result was parsed with error
      */
     public function getUrls(string $entity, string $pattern, string $storeIds): array;
 }

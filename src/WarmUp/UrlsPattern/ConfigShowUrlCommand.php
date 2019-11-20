@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\WarmUp\UrlsPattern;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellFactory;
@@ -42,7 +43,7 @@ class ConfigShowUrlCommand
      * @param array $arguments
      * @return mixed
      * @throws ShellException If command was executed with error
-     * @throws ParseResultException If command result was parsed with error
+     * @throws GenericException If command result was parsed with error
      */
     public function execute(array $arguments)
     {
@@ -54,7 +55,7 @@ class ConfigShowUrlCommand
         $urls = json_decode($process->getOutput(), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new ParseResultException(sprintf(
+            throw new GenericException(sprintf(
                 'Can\'t parse result from command %s: %s',
                 self::$commandName,
                 json_last_error_msg()

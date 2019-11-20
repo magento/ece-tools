@@ -35,7 +35,7 @@ class CommandArgumentBuilder
      * @param string $storeIds
      * @return array
      */
-    public function generate(string $entity, string $storeIds)
+    public function generate(string $entity, string $storeIds): array
     {
         $commandArguments = [sprintf('--entity-type=%s', $entity)];
         if ($storeIds && $storeIds !== UrlsPattern::PATTERN_ALL) {
@@ -55,7 +55,7 @@ class CommandArgumentBuilder
      * @param string $productSkus
      * @return array
      */
-    public function generateWithProductSku(string $entity, string $storeIds, string $productSkus)
+    public function generateWithProductSku(string $entity, string $storeIds, string $productSkus): array
     {
         $commandArguments = $this->generate($entity, $storeIds);
 

@@ -7,12 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\WarmUp\UrlsPattern;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 use Magento\MagentoCloud\Shell\ShellFactory;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Magento\MagentoCloud\WarmUp\UrlsPattern\ConfigShowUrlCommand;
-use Magento\MagentoCloud\WarmUp\UrlsPattern\ParseResultException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -68,7 +68,7 @@ class ConfigShowUrlCommandTest extends TestCase
 
     public function testExecuteWithWrongJson()
     {
-        $this->expectException(ParseResultException::class);
+        $this->expectException(GenericException::class);
         $this->expectExceptionMessage('Can\'t parse result from command config:show:urls: Syntax error');
 
         $arguments = ['--some-option=2'];
