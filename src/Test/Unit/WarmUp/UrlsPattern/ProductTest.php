@@ -61,6 +61,9 @@ class ProductTest extends TestCase
             ->with($arguments)
             ->willReturn(['www.example.com']);
 
-        $this->product->getUrls('entity', '*', '*');
+        $this->assertEquals(
+            ['www.example.com'],
+            $this->product->getUrls('entity', '*', '*')
+        );
     }
 }

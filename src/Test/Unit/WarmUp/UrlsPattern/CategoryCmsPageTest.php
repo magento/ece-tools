@@ -54,10 +54,14 @@ class CategoryCmsPageTest extends TestCase
     public function testGetUrls(string $pattern, array $expectedUrls)
     {
         $urls = [
-            'http://example.com/',
-            'http://example2.com/',
-            'http://site.com/',
-            'http://test.com/'
+            'http://example1.com/cat',
+            'http://example2.com/cat',
+            'http://example1.com/about',
+            'http://example2.com/about',
+            'http://example1.com/contact-us',
+            'http://example2.com/contact-us',
+            'http://example1.com/contact',
+            'http://example2.com/contact',
         ];
 
         $this->argumentBuilderMock->expects($this->once())
@@ -84,23 +88,30 @@ class CategoryCmsPageTest extends TestCase
             [
                 '*',
                 [
-                    'http://example.com/',
-                    'http://example2.com/',
-                    'http://site.com/',
-                    'http://test.com/'
+                    'http://example1.com/cat',
+                    'http://example2.com/cat',
+                    'http://example1.com/about',
+                    'http://example2.com/about',
+                    'http://example1.com/contact-us',
+                    'http://example2.com/contact-us',
+                    'http://example1.com/contact',
+                    'http://example2.com/contact',
                 ],
             ],
             [
-                '/example/',
+                '/contact',
                 [
-                    'http://example.com/',
-                    'http://example2.com/',
+                    'http://example1.com/contact',
+                    'http://example2.com/contact',
                 ],
             ],
             [
-                '/site/',
+                '/\/contact.*/',
                 [
-                    'http://site.com/',
+                    'http://example1.com/contact-us',
+                    'http://example2.com/contact-us',
+                    'http://example1.com/contact',
+                    'http://example2.com/contact',
                 ],
             ],
         ];

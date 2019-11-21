@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\WarmUp\UrlsPattern;
 
 use Magento\MagentoCloud\Util\UrlManager;
+use Magento\MagentoCloud\WarmUp\UrlsPattern;
 
 /**
  * Gets urls for store-page entity pattern type
@@ -38,7 +39,7 @@ class StorePage implements PatternInterface
             $stores = $this->urlManager->getBaseUrls();
         } else {
             $stores = [];
-            foreach (explode('|', $storeIds) as $storeId) {
+            foreach (explode(UrlsPattern::PATTERN_DELIMITER, $storeIds) as $storeId) {
                 if ($storeBaseUrl = $this->urlManager->getStoreBaseUrl($storeId)) {
                     $stores[] = $storeBaseUrl;
                 }

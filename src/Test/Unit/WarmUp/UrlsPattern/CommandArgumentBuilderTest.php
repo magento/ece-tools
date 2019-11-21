@@ -62,6 +62,20 @@ class CommandArgumentBuilderTest extends TestCase
         return [
             [
                 'category',
+                '*',
+                [
+                    '--entity-type=category',
+                ],
+            ],
+            [
+                'cms-page',
+                '*',
+                [
+                    '--entity-type=cms-page',
+                ],
+            ],
+            [
+                'category',
                 'store_code',
                 [
                     '--entity-type=category',

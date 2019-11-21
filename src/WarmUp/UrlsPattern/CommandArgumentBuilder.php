@@ -39,7 +39,7 @@ class CommandArgumentBuilder
     {
         $commandArguments = [sprintf('--entity-type=%s', $entity)];
         if ($storeIds && $storeIds !== UrlsPattern::PATTERN_ALL) {
-            foreach (explode('|', $storeIds) as $storeId) {
+            foreach (explode(UrlsPattern::PATTERN_DELIMITER, $storeIds) as $storeId) {
                 $commandArguments[] = sprintf('--store-id=%s', $storeId);
             }
         }
