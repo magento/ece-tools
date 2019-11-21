@@ -54,8 +54,10 @@ class CategoryCmsPageTest extends TestCase
     public function testGetUrls(string $pattern, array $expectedUrls)
     {
         $urls = [
-            'http://example1.com/cat',
-            'http://example2.com/cat',
+            'http://example.com/example/',
+            'http://example.com/example1/',
+            'http://example.com/example/path',
+            'http://example.com/path/example/path',
             'http://example1.com/about',
             'http://example2.com/about',
             'http://example1.com/contact-us',
@@ -88,8 +90,10 @@ class CategoryCmsPageTest extends TestCase
             [
                 '*',
                 [
-                    'http://example1.com/cat',
-                    'http://example2.com/cat',
+                    'http://example.com/example/',
+                    'http://example.com/example1/',
+                    'http://example.com/example/path',
+                    'http://example.com/path/example/path',
                     'http://example1.com/about',
                     'http://example2.com/about',
                     'http://example1.com/contact-us',
@@ -115,13 +119,26 @@ class CategoryCmsPageTest extends TestCase
                 ],
             ],
             [
-                '/example.*/',
-                []
+                '/example',
+                [
+                    'http://example.com/example/',
+                ],
             ],
             [
-                '/http.*/',
-                []
-            ]
+                '/example.*/',
+                [
+                    'http://example.com/example/',
+                    'http://example.com/example1/',
+                    'http://example.com/example/path',
+                    'http://example.com/path/example/path',
+                ],
+            ],
+            [
+                '/example/path/',
+                [
+                    'http://example.com/example/path'
+                ],
+            ],
         ];
     }
 }
