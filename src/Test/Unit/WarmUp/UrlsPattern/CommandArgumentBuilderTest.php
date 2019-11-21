@@ -105,7 +105,8 @@ class CommandArgumentBuilderTest extends TestCase
     public function testGenerateWithProductSkus()
     {
         $this->loggerMock->expects($this->never())
-            ->method('info');
+            ->method('info')
+            ->with('In case when product SKUs weren\'t provided product limits set to 100');
 
         $this->assertEquals(
             [
