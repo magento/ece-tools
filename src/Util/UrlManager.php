@@ -212,9 +212,9 @@ class UrlManager
      * Returns an empty string if store url failed to fetch.
      *
      * @param string $storeId store id or store code
-     * @return string
+     * @return string|null
      */
-    public function getStoreBaseUrl(string $storeId): string
+    public function getStoreBaseUrl(string $storeId): ?string
     {
         try {
             $this->loadStoreBaseUrls();
@@ -229,7 +229,7 @@ class UrlManager
         } catch (ShellException $e) {
             $this->logger->error(sprintf('Can\'t fetch store with store code "%s". ', $storeId) . $e->getMessage());
 
-            return '';
+            return null;
         }
     }
 

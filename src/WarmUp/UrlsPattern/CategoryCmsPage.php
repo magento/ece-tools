@@ -37,6 +37,11 @@ class CategoryCmsPage implements PatternInterface
     }
 
     /**
+     * @param string $pattern can accept the next value types:
+     * - "*" - all pages
+     * - "regular expression" - pages will be filtered by this pattern
+     * - "/path/to/page" - exact page match
+     *
      * @inheritDoc
      */
     public function getUrls(string $entity, string $pattern, string $storeIds): array

@@ -13,7 +13,7 @@ use Magento\MagentoCloud\WarmUp\UrlsPattern\PatternFactory;
 use Psr\Log\LoggerInterface;
 
 /**
- * Fetch urls from config:show:urls command and filtering them by given pattern
+ * Fetch urls from config:show:urls command and filtering them by given pattern.
  */
 class UrlsPattern
 {
@@ -51,7 +51,18 @@ class UrlsPattern
     }
 
     /**
-     * Fetch urls from config:show:urls command and filtering them by given pattern
+     * Fetch urls from config:show:urls command and filtering them by given pattern.
+     * Format of the pattern: entity-type:pattern:store-id
+     *
+     * Example of the warm-up patterns:
+     * category:*:*   -  all category pages for all stores
+     * category:*:store_code1|store_code2 - all category pages for stores with code store_code1 and store_code2
+     * cms-page:|.*contact.*|:*  - cms pages which contains "contact" in the url
+     * store-page:/path/to/page:store1|store2 - page /path/to/page for stores with code store1 and store2
+     * store-page:/path/to/page:* - page /path/to/page for all stores
+     * product:*:* - all product pages for all stores, product page count is limited to 100
+     * product:sku1|sku2:store1|store2 - product pages for products with sku sku1 and sku2 and
+     *                                   for stores with code store1 and store2
      *
      * @param string $warmUpPattern
      * @return array

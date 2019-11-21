@@ -28,28 +28,25 @@ class StorePage implements PatternInterface
     }
 
     /**
-     * Gets urls for store-page entity pattern type
+     * @param string $pattern - page relative path, for example: "/contact-us"
      *
-     * @param string $entity
-     * @param string $page
-     * @param string $storeIds
-     * @return array
+     * @inheritDoc
      */
-    public function getUrls(string $entity, string $page, string $storeIds): array
+    public function getUrls(string $entity, string $pattern, string $storeIds): array
     {
         if ($storeIds === '*') {
             $stores = $this->urlManager->getBaseUrls();
         } else {
             $stores = [];
             foreach (explode('|', $storeIds) as $storeId) {
-                if (!empty($storeBaseUrl = $this->urlManager->getStoreBaseUrl($storeId))) {
+                if ($storeBaseUrl = $this->urlManager->getStoreBaseUrl($storeId)) {
                     $stores[] = $storeBaseUrl;
                 }
             }
         }
 
-        return array_map(function ($storeUrl) use ($page) {
-            return rtrim($storeUrl, '/') . '/' . ltrim($page, '/');
+        return array_map(function ($storeUrl) use ($pattern) {
+            return rtrim($storeUrl, '/') . '/' . ltrim($pattern, '/');
         }, array_unique($stores));
     }
 }
