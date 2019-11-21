@@ -14,5 +14,4 @@ namespace Magento\MagentoCloud\Config\Magento\Env;
  */
 interface WriterInterface extends \Magento\MagentoCloud\Filesystem\Writer\WriterInterface
 {
-
 }

@@ -12,5 +12,4 @@ namespace Magento\MagentoCloud\Config\Magento\Env;
  */
 interface ReaderInterface extends \Magento\MagentoCloud\Filesystem\Reader\ReaderInterface
 {
-
 }
