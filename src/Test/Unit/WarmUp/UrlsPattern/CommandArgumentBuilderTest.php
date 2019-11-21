@@ -130,6 +130,7 @@ class CommandArgumentBuilderTest extends TestCase
                 '--entity-type=product',
                 '--store-id=store_1',
                 '--store-id=store_2',
+                '--product-limit=100'
             ],
             $this->argumentBuilder->generateWithProductSku('product', 'store_1|store_2', '*')
         );
