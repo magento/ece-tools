@@ -40,7 +40,7 @@ class Product implements PatternInterface
      * - "product_sku1" - page for product with product_sku1 SKU
      * - "product_sku1|product_sku2" - pages for products with product_sku1 and product_sku2 SKUs
      *
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getUrls(string $entity, string $pattern, string $storeIds): array
     {

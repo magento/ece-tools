@@ -60,7 +60,12 @@ class CommandArgumentBuilder
         $commandArguments = $this->generate($entity, $storeIds);
 
         if ($productSkus === UrlsPattern::PATTERN_ALL) {
-            $this->logger->info('In case when product SKUs weren\'t provided product limits set to 100');
+            $commandArguments[] = sprintf('--product-limit=%d', UrlsPattern::PRODUCT_LIMIT);
+            $this->logger->info(sprintf(
+                'In case when product SKUs weren\'t provided product limits set to %d',
+                UrlsPattern::PRODUCT_LIMIT
+            ));
+
             return $commandArguments;
         }
 

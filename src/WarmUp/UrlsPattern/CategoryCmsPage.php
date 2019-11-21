@@ -42,7 +42,7 @@ class CategoryCmsPage implements PatternInterface
      * - "{regular expression}" - pages will be filtered by this pattern
      * - "/path/to/page" - exact page match
      *
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getUrls(string $entity, string $pattern, string $storeIds): array
     {
@@ -54,9 +54,11 @@ class CategoryCmsPage implements PatternInterface
         }
 
         $urls = array_filter($urls, function ($url) use ($pattern) {
+            $urlPath = parse_url($url, PHP_URL_PATH);
+
             return @preg_match($pattern, '') !== false ?
-                preg_match($pattern, $url) :
-                trim($pattern, '/') === trim(parse_url($url, PHP_URL_PATH), '/');
+                preg_match($pattern, $urlPath) :
+                trim($pattern, '/') === trim($urlPath, '/');
         });
 
         return $urls;

@@ -114,6 +114,14 @@ class CategoryCmsPageTest extends TestCase
                     'http://example2.com/contact',
                 ],
             ],
+            [
+                '/example.*/',
+                []
+            ],
+            [
+                '/http.*/',
+                []
+            ]
         ];
     }
 }

@@ -29,6 +29,11 @@ class UrlsPattern
     public const PATTERN_ALL = '*';
 
     /**
+     * Limit of the product per store when '*' pattern is used for Product entity type.
+     */
+    public const PRODUCT_LIMIT = 100;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;

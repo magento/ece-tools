@@ -31,7 +31,7 @@ class StorePage implements PatternInterface
     /**
      * @param string $pattern - page relative path, for example: "/contact-us"
      *
-     * @inheritDoc
+     * {@inheritDoc}
      */
     public function getUrls(string $entity, string $pattern, string $storeIds): array
     {
