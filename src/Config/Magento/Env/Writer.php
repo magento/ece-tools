@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 class Writer implements WriterInterface
 {
     /**
-     * @var Reader
+     * @var ReaderInterface
      */
     private $reader;
 
