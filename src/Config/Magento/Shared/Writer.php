@@ -16,7 +16,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
 class Writer implements WriterInterface
 {
     /**
-     * @var Reader
+     * @var ReaderInterface
      */
     private $reader;
 
@@ -31,12 +31,12 @@ class Writer implements WriterInterface
     private $fileList;
 
     /**
-     * @param Reader $reader ,
+     * @param ReaderInterface $reader
      * @param File $file
      * @param FileList $fileList
      */
     public function __construct(
-        Reader $reader,
+        ReaderInterface $reader,
         File $file,
         FileList $fileList
     ) {

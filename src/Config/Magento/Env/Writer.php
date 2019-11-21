@@ -31,12 +31,12 @@ class Writer implements WriterInterface
     private $file;
 
     /**
-     * @param Reader $reader
+     * @param ReaderInterface $reader
      * @param File $file
      * @param FileList $fileList
      */
     public function __construct(
-        Reader $reader,
+        ReaderInterface $reader,
         File $file,
         FileList $fileList
     ) {

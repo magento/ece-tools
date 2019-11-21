@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 /**

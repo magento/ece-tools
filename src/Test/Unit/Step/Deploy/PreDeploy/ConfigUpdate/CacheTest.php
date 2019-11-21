@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\PreDeploy\ConfigUpdate;
 
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheFactory;
 use Magento\MagentoCloud\Step\Deploy\PreDeploy\ConfigUpdate\Cache;
 use phpmock\phpunit\PHPMock;
@@ -29,22 +29,22 @@ class CacheTest extends TestCase
     private $step;
 
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|Mock
+     * @var ConfigWriter|MockObject
      */
     private $configWriterMock;
 
     /**
-     * @var ConfigReader|Mock
+     * @var ConfigReader|MockObject
      */
     private $configReaderMock;
 
     /**
-     * @var CacheFactory|Mock
+     * @var CacheFactory|MockObject
      */
     private $cacheConfigMock;
 

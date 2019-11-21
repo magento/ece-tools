@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Database\SlaveConfig;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
