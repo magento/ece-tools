@@ -45,9 +45,6 @@ class CommandArgumentBuilderTest extends TestCase
      */
     public function testGenerate(string $entity, string $storeIds, array $expected)
     {
-        $this->loggerMock->expects($this->never())
-            ->method('info');
-
         $this->assertEquals(
             $expected,
             $this->argumentBuilder->generate($entity, $storeIds)
