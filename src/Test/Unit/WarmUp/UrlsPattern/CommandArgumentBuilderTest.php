@@ -123,7 +123,8 @@ class CommandArgumentBuilderTest extends TestCase
     public function testGenerateWithProductSkusAll()
     {
         $this->loggerMock->expects($this->once())
-            ->method('info');
+            ->method('info')
+            ->with('In case when product SKUs weren\'t provided product limits set to 100');
 
         $this->assertEquals(
             [
