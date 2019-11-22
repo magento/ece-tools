@@ -22,6 +22,8 @@ class DbDump extends Command
 {
     const NAME = 'db-dump';
 
+    const EXIT_CODE_SUCCESS = 0;
+
     const OPTION_REMOVE_DEFINERS = 'remove-definers';
 
     /**
@@ -78,7 +80,7 @@ class DbDump extends Command
             false
         );
         if (!$helper->ask($input, $output, $question) && $input->isInteractive()) {
-            return null;
+            return self::EXIT_CODE_SUCCESS;
         }
         try {
             $this->logger->info('Starting backup.');
