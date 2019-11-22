@@ -29,6 +29,7 @@
                     <item name="elasticsuite-integrity" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ElasticSuiteIntegrity</item>
                 </item>
                 <item name="300" xsi:type="array">
+                    <item name="database-split-connection" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\DatabaseSplitConnection</item>
                     <item name="report-dir-nesting-level" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\ReportDirNestingLevel</item>
                     <item name="admin-data" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\AdminData</item>
                     <item name="php-version" xsi:type="object">Magento\MagentoCloud\Config\Validator\Deploy\PhpVersion</item>
