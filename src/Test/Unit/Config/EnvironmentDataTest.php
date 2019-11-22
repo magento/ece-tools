@@ -69,7 +69,6 @@ class EnvironmentDataTest extends TestCase
         $this->environmentData = new EnvironmentData($this->variable, $this->decoderMock);
     }
 
-
     public function testGetEnv()
     {
         $_ENV = ['some_key' => 'some_value'];
