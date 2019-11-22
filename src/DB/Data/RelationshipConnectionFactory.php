@@ -12,11 +12,8 @@ use Magento\MagentoCloud\Service\Database;
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
  */
-class RelationshipConnectionFactory
+class RelationshipConnectionFactory implements ConnectionFactoryInterface
 {
-    const CONNECTION_MAIN = 'main';
-    const CONNECTION_SLAVE = 'slave';
-
     /**
      * @var Database
      */
@@ -41,10 +38,22 @@ class RelationshipConnectionFactory
     {
         switch ($connectionType) {
             case self::CONNECTION_MAIN:
-                $connection = new RelationshipConnection($this->database->getConfiguration());
+                $configuration = $this->database->getConfiguration();
                 break;
             case self::CONNECTION_SLAVE:
-                $connection = new RelationshipConnection($this->database->getSlaveConfiguration());
+                $configuration = $this->database->getSlaveConfiguration();
+                break;
+            case self::CONNECTION_QUOTE_MAIN:
+                $configuration = $this->database->getQuoteConfiguration();
+                break;
+            case self::CONNECTION_QUOTE_SLAVE:
+                $configuration = $this->database->getQuoteSlaveConfiguration();
+                break;
+            case self::CONNECTION_SALES_MAIN:
+                $configuration = $this->database->getSalesConfiguration();
+                break;
+            case self::CONNECTION_SALES_SLAVE:
+                $configuration = $this->database->getSalesSlaveConfiguration();
                 break;
             default:
                 throw new \RuntimeException(
@@ -52,6 +61,6 @@ class RelationshipConnectionFactory
                 );
         }
 
-        return $connection;
+        return new RelationshipConnection($configuration);
     }
 }
