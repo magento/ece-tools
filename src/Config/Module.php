@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config;
 
+use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -18,22 +20,29 @@ use Magento\MagentoCloud\Shell\ShellFactory;
 class Module
 {
     /**
-     * @var ConfigInterface
-     */
-    private $config;
-
-    /**
      * @var MagentoShell
      */
     private $magentoShell;
 
     /**
-     * @param ConfigInterface $config
+     * @var ReaderInterface
+     */
+    private $reader;
+
+    /**
+     * @var WriterInterface
+     */
+    private $writer;
+
+    /**
+     * @param ReaderInterface $reader
+     * @param WriterInterface $writer
      * @param ShellFactory $shellFactory
      */
-    public function __construct(ConfigInterface $config, ShellFactory $shellFactory)
+    public function __construct(ReaderInterface $reader, WriterInterface $writer, ShellFactory $shellFactory)
     {
-        $this->config = $config;
+        $this->reader = $reader;
+        $this->writer = $writer;
         $this->magentoShell = $shellFactory->createMagento();
     }
 
@@ -46,16 +55,14 @@ class Module
      */
     public function refresh(): array
     {
-        $moduleConfig = (array)$this->config->get('modules');
+        $moduleConfig = $this->reader->read()['modules'] ?? [];
 
         $this->magentoShell->execute('module:enable --all');
 
-        $this->config->reset();
-
-        $updatedModuleConfig = (array)$this->config->get('modules');
+        $updatedModuleConfig = $this->reader->read()['modules'] ?? [];
 
         if ($moduleConfig) {
-            $this->config->update(['modules' => $moduleConfig]);
+            $this->writer->update(['modules' => $moduleConfig]);
         }
 
         return array_keys(array_diff_key($updatedModuleConfig, $moduleConfig));

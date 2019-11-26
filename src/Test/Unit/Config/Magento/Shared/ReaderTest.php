@@ -5,9 +5,9 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Config\Shared;
+namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Shared;
 
-use Magento\MagentoCloud\Config\Shared\Reader;
+use Magento\MagentoCloud\Config\Magento\Shared\Reader;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\MockObject\MockObject;

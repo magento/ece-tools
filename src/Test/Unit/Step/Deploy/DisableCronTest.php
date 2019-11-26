@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Step\Deploy\BackgroundProcessKill;
 use Magento\MagentoCloud\Step\Deploy\DisableCron;
 use Psr\Log\LoggerInterface;
@@ -30,7 +30,7 @@ class DisableCronTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Writer|MockObject
+     * @var WriterInterface|MockObject
      */
     private $writerMock;
 
@@ -46,7 +46,7 @@ class DisableCronTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->backgroundProcessKillMock = $this->createMock(BackgroundProcessKill::class);
-        $this->writerMock = $this->createMock(Writer::class);
+        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
 
         $this->step = new DisableCron(
             $this->backgroundProcessKillMock,
