@@ -9,8 +9,8 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Command\ConfigDump;
-use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
@@ -50,12 +50,12 @@ class ConfigDumpTest extends TestCase
     private $generateMock;
 
     /**
-     * @var Reader|MockObject
+     * @var ReaderInterface|MockObject
      */
     private $readerMock;
 
     /**
-     * @var Writer|MockObject
+     * @var WriterInterface|MockObject
      */
     private $writerMock;
 
@@ -73,8 +73,8 @@ class ConfigDumpTest extends TestCase
         $this->shellFactoryMock = $this->createMock(ShellFactory::class);
         $this->shellMock = $this->createMock(MagentoShell::class);
         $this->generateMock = $this->createMock(ConfigDump\Generate::class);
-        $this->readerMock = $this->createMock(Reader::class);
-        $this->writerMock = $this->createMock(Writer::class);
+        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
 
         $this->shellFactoryMock->method('createMagento')
@@ -148,12 +148,11 @@ class ConfigDumpTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
     public function testExecuteWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting dump.');

@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Service\RabbitMq;
 use Magento\MagentoCloud\Service\Redis;
 use Magento\MagentoCloud\Service\ServiceFactory;
 use Magento\MagentoCloud\Service\ServiceInterface;
+use Magento\MagentoCloud\Service\ServiceMismatchException;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
@@ -61,12 +62,11 @@ class ServiceFactoryTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Service\ServiceMismatchException
-     * @expectedExceptionMessage  Service "wrong-service-name" is not supported
-     */
     public function testServiceNotExists()
     {
+        $this->expectException(ServiceMismatchException::class);
+        $this->expectExceptionMessage('Service "wrong-service-name" is not supported');
+
         $this->containerMock->expects($this->never())
             ->method('create');
 

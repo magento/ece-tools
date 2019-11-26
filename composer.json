@@ -21,18 +21,18 @@
     "guzzlehttp/guzzle": "^6.2",
     "illuminate/config": "^5.6",
     "magento/magento-cloud-components": "^1.0.1",
+    "magento/magento-cloud-docker": "^1.0.0",
+    "magento/magento-cloud-patches": "^1.0.0",
     "monolog/monolog": "^1.16",
+    "nesbot/carbon": "^2.25",
     "psr/container": "^1.0",
     "psr/log": "^1.0",
-    "symfony/console": "^2.3||^4.0",
     "symfony/config": "^3.4||^4.3",
+    "symfony/console": "^2.3||^4.0",
     "symfony/dependency-injection": "^3.4||^4.3",
     "symfony/process": "^2.1||^4.1",
     "symfony/serializer": "^3.3",
     "symfony/yaml": "^3.3||^4.0"
-  },
-  "suggest": {
-    "magento/magento-cloud-docker": "^1.0"
   },
   "require-dev": {
     "codeception/codeception": "^2.5.3",
@@ -40,9 +40,10 @@
     "php-mock/php-mock-phpunit": "^2.0",
     "phpmd/phpmd": "@stable",
     "phpstan/phpstan": "^0.11",
-    "phpunit/php-code-coverage": "^5.2",
-    "phpunit/phpunit": "^6.2",
-    "squizlabs/php_codesniffer": "^3.0"
+    "phpunit/php-code-coverage": "^6.0",
+    "phpunit/phpunit": "^7.2",
+    "squizlabs/php_codesniffer": "^3.0",
+    "funkjedi/composer-include-files": "^1.0"
   },
   "conflict": {
     "nesbot/carbon": ">=1.38 <2.0"
@@ -94,6 +95,9 @@
         "dist/.magento.env.yaml",
         ".magento.env.yaml.dist"
       ]
+    ],
+    "include_files": [
+      "vendor/codeception/phpunit-wrapper/src/phpunit7-interfaces.php"
     ]
   }
 }

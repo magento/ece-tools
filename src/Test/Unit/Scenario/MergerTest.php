@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Scenario;
 
 use Magento\MagentoCloud\Scenario\Collector\Scenario;
 use Magento\MagentoCloud\Scenario\Collector\Step;
+use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use Magento\MagentoCloud\Scenario\Merger;
 use Magento\MagentoCloud\Scenario\Resolver;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -134,12 +135,11 @@ class MergerTest extends TestCase
         $this->merger->merge($scenarios);
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Argument(s) "@priority" are missed from step
-     */
     public function testMissedArgumentPriorityException()
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Argument(s) "@priority" are missed from step');
+
         $this->scenarioCollectorMock->expects($this->once())
             ->method('collect')
             ->with('scenario1.xml')
@@ -159,12 +159,11 @@ class MergerTest extends TestCase
         $this->merger->merge(['scenario1.xml']);
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Argument(s) "@name" are missed from step
-     */
     public function testMissedArgumentNameException()
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Argument(s) "@name" are missed from step');
+
         $this->scenarioCollectorMock->expects($this->once())
             ->method('collect')
             ->with('scenario1.xml')
@@ -183,12 +182,11 @@ class MergerTest extends TestCase
         $this->merger->merge(['scenario1.xml']);
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Steps aren't exist in "scenario1.xml" file
-     */
     public function testNoStepsInScenarioException()
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Steps aren\'t exist in "scenario1.xml" file');
+
         $this->scenarioCollectorMock->expects($this->once())
             ->method('collect')
             ->with('scenario1.xml')

@@ -11,8 +11,8 @@ use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls\Environment
 use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 
@@ -37,12 +37,12 @@ class EnvironmentTest extends TestCase
     private $urlManagerMock;
 
     /**
-     * @var Reader|Mock
+     * @var ReaderInterface|Mock
      */
     private $readerMock;
 
     /**
-     * @var Writer|Mock
+     * @var WriterInterface|Mock
      */
     private $writerMock;
 
@@ -53,8 +53,8 @@ class EnvironmentTest extends TestCase
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
-        $this->readerMock = $this->createMock(Reader::class);
-        $this->writerMock = $this->createMock(Writer::class);
+        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
 
         $this->step = new Environment(
             $this->loggerMock,

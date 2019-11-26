@@ -7,9 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step;
 
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\SetProductionMode;
+use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -30,7 +31,7 @@ class SetProductionModeTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Writer|Mock
+     * @var WriterInterface|Mock
      */
     private $writer;
 
@@ -40,7 +41,7 @@ class SetProductionModeTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->writer = $this->createMock(Writer::class);
+        $this->writer = $this->getMockForAbstractClass(WriterInterface::class);
 
         $this->step = new SetProductionMode(
             $this->loggerMock,
@@ -60,12 +61,11 @@ class SetProductionModeTest extends TestCase
         $this->step->execute();
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage can't update file
-     */
     public function testExecuteWitException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('can\'t update file');
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->willReturn("Set Magento application mode to 'production'");

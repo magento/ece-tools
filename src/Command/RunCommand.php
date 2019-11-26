@@ -16,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Execute given scenarios.
+ *
+ * @api
  */
 class RunCommand extends Command
 {

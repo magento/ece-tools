@@ -14,7 +14,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @inheritdoc
+ * Verifies master-slave configuration
+ *
+ * @api
  */
 class MasterSlave extends Command
 {

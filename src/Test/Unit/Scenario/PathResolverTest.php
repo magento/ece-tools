@@ -105,12 +105,11 @@ class PathResolverTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Scenario path/to/scenario does not exist
-     */
     public function testResolveWithException()
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Scenario path/to/scenario does not exist');
+
         $scenarioPath = 'path/to/scenario';
 
         $this->fileMock->expects($this->exactly(3))

@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\StaticContent\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -32,9 +32,9 @@ class OptionTest extends TestCase
     private $magentoVersionMock;
 
     /**
-     * @var Environment|Mock
+     * @var AdminDataInterface|Mock
      */
-    private $environmentMock;
+    private $adminDataMock;
 
     /**
      * @var Connection|Mock
@@ -58,12 +58,12 @@ class OptionTest extends TestCase
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
         $this->connectionMock = $this->createMock(Connection::class);
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
         $this->option = new Option(
-            $this->environmentMock,
+            $this->adminDataMock,
             $this->connectionMock,
             $this->magentoVersionMock,
             $this->threadCountOptimizerMock,
@@ -130,8 +130,8 @@ class OptionTest extends TestCase
         $this->connectionMock->expects($this->exactly(2))
             ->method('getTableName')
             ->willReturnArgument(0);
-        $this->environmentMock->expects($this->exactly(2))
-            ->method('getAdminLocale')
+        $this->adminDataMock->expects($this->exactly(2))
+            ->method('getLocale')
             ->willReturn('en_US');
 
         $this->assertEquals(
@@ -159,8 +159,8 @@ class OptionTest extends TestCase
         $this->connectionMock->expects($this->exactly(2))
             ->method('getTableName')
             ->willReturnArgument(0);
-        $this->environmentMock->expects($this->exactly(1))
-            ->method('getAdminLocale')
+        $this->adminDataMock->expects($this->exactly(1))
+            ->method('getLocale')
             ->willReturn('fr_FR');
 
         $this->assertEquals(

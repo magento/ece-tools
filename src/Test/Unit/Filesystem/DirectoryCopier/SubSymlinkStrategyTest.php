@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\Filesystem\DirectoryCopier\SubSymlinkStrategy;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
@@ -77,12 +78,10 @@ class SubSymlinkStrategyTest extends TestCase
         $this->assertTrue($this->subSymlinkStrategy->copy('fromDir', 'toDir'));
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Filesystem\FileSystemException
-     * @expectedExceptionMessage Can't copy directory "realFromDir". Directory does not exist.
-     */
     public function testCopyFromDirNotExists()
     {
+        $this->expectException(FileSystemException::class);
+        $this->expectExceptionMessage('Can\'t copy directory "realFromDir". Directory does not exist.');
         $this->fileMock->expects($this->once())
             ->method('isExists')
             ->with('realFromDir')

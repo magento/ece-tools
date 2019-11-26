@@ -9,6 +9,8 @@ namespace Magento\MagentoCloud\Config;
 
 /**
  * Provides access to configuration of deployment stages.
+ *
+ * @api
  */
 interface StageConfigInterface
 {
@@ -39,14 +41,6 @@ interface StageConfigInterface
     const VAR_SKIP_HTML_MINIFICATION = 'SKIP_HTML_MINIFICATION';
     const VAR_SCD_MATRIX = 'SCD_MATRIX';
     const VAR_X_FRAME_CONFIGURATION = 'X_FRAME_CONFIGURATION';
-
-    /**
-     * Environment variables.
-     */
-    const VAR_ENV_RELATIONSHIPS = 'ENV_RELATIONSHIPS';
-    const VAR_ENV_ROUTES = 'ENV_ROUTES';
-    const VAR_ENV_VARIABLES = 'ENV_VARIABLES';
-    const VAR_ENV_APPLICATION = 'ENV_APPLICATION';
 
     /**
      * Settings for deployment from git.

@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\GlobalSection as GlobalConfig;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -123,9 +123,6 @@ class PrepareConfigTest extends TestCase
      * @param array $expectedResult
      * @dataProvider executeDataProvider
      * @throws StepException
-     *
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteWithException(
         bool $scdOnDemand,
@@ -133,6 +130,9 @@ class PrepareConfigTest extends TestCase
         $xFrameOptions,
         array $expectedResult
     ) {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php.');
