@@ -33,7 +33,10 @@ class ReaderTest extends TestCase
      */
     private $reader;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
@@ -44,14 +47,14 @@ class ReaderTest extends TestCase
         );
     }
 
-    public function testRead()
+    public function testRead(): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
-            ->willReturn(__DIR__ . '/_file/app/etc/config.php');
+            ->willReturn(__DIR__ . '/_file/config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(__DIR__ . '/_file/app/etc/config.php')
+            ->with(__DIR__ . '/_file/config.php')
             ->willReturn(true);
 
         $this->assertEquals(
@@ -65,7 +68,20 @@ class ReaderTest extends TestCase
         );
     }
 
-    public function testReadFileNotExists()
+    public function testReadBroken(): void
+    {
+        $this->fileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn(__DIR__ . '/_file/config_broken.php');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with(__DIR__ . '/_file/config_broken.php')
+            ->willReturn(true);
+
+        $this->assertEquals([], $this->reader->read());
+    }
+
+    public function testReadFileNotExists(): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')

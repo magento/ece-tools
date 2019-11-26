@@ -47,6 +47,12 @@ class Reader implements ReaderInterface
             return [];
         }
 
-        return require $configPath;
+        $content = require $configPath;
+
+        if (is_array($content)) {
+            return $content;
+        }
+
+        return [];
     }
 }
