@@ -5,9 +5,9 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Config\Deploy;
+namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Env;
 
-use Magento\MagentoCloud\Config\Deploy\Reader;
+use Magento\MagentoCloud\Config\Magento\Env\Reader;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\TestCase;
@@ -48,10 +48,10 @@ class ReaderTest extends TestCase
     {
         $this->fileListMock->expects($this->once())
             ->method('getEnv')
-            ->willReturn(__DIR__ . '/../_file/Deploy/app/etc/env.php');
+            ->willReturn(__DIR__ . '/../../_file/Deploy/app/etc/env.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(__DIR__ . '/../_file/Deploy/app/etc/env.php')
+            ->with(__DIR__ . '/../../_file/Deploy/app/etc/env.php')
             ->willReturn(true);
 
         $this->assertEquals(
@@ -68,10 +68,10 @@ class ReaderTest extends TestCase
     {
         $this->fileListMock->expects($this->once())
             ->method('getEnv')
-            ->willReturn(__DIR__ . '/../_file/Deploy/app/etc/env.php');
+            ->willReturn(__DIR__ . '/../../_file/Deploy/app/etc/env.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(__DIR__ . '/../_file/Deploy/app/etc/env.php')
+            ->with(__DIR__ . '/../../_file/Deploy/app/etc/env.php')
             ->willReturn(false);
 
         $this->assertEquals(

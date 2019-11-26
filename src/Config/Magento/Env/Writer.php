@@ -5,11 +5,10 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Config\Shared;
+namespace Magento\MagentoCloud\Config\Magento\Env;
 
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\Writer\WriterInterface;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 
 /**
  * @inheritdoc
@@ -17,14 +16,9 @@ use Magento\MagentoCloud\Filesystem\Writer\WriterInterface;
 class Writer implements WriterInterface
 {
     /**
-     * @var Reader
+     * @var ReaderInterface
      */
     private $reader;
-
-    /**
-     * @var File
-     */
-    private $file;
 
     /**
      * @var FileList
@@ -32,12 +26,17 @@ class Writer implements WriterInterface
     private $fileList;
 
     /**
-     * @param Reader $reader ,
+     * @var File
+     */
+    private $file;
+
+    /**
+     * @param ReaderInterface $reader
      * @param File $file
      * @param FileList $fileList
      */
     public function __construct(
-        Reader $reader,
+        ReaderInterface $reader,
         File $file,
         FileList $fileList
     ) {
@@ -53,7 +52,7 @@ class Writer implements WriterInterface
     {
         $updatedConfig = '<?php' . PHP_EOL . 'return ' . var_export($config, true) . ';';
 
-        $this->file->filePutContents($this->fileList->getConfig(), $updatedConfig);
+        $this->file->filePutContents($this->fileList->getEnv(), $updatedConfig);
     }
 
     /**

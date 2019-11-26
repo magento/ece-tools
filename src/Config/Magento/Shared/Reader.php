@@ -5,16 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Config\Deploy;
+namespace Magento\MagentoCloud\Config\Magento\Shared;
 
-use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
+use Magento\MagentoCloud\Filesystem\FileList;
 
 /**
- * Reads configuration from /app/etc/env.php file
- *
- * {@inheritdoc}
+ * @inheritdoc
  */
 class Reader implements ReaderInterface
 {
@@ -43,7 +40,8 @@ class Reader implements ReaderInterface
      */
     public function read(): array
     {
-        $configPath = $this->fileList->getEnv();
+        $configPath = $this->fileList->getConfig();
+
         if (!$this->file->isExists($configPath)) {
             return [];
         }
