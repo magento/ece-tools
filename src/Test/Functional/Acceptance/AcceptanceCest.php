@@ -98,7 +98,7 @@ class AcceptanceCest extends AbstractInstallCest
      *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function defaultDataProvider(): array
+    protected function defaultDataProvider(): array
     {
         return [
             'default configuration' => [
