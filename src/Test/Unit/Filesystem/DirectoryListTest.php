@@ -17,12 +17,11 @@ use PHPUnit\Framework\TestCase;
  */
 class DirectoryListTest extends TestCase
 {
-    /**
-     * @expectedExceptionMessage Code some_code is not registered
-     * @expectedException \RuntimeException
-     */
     public function testGetPathWithException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Code some_code is not registered');
+
         $this->get22DirectoryList()->getPath('some_code');
     }
 

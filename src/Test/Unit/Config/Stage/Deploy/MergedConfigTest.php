@@ -173,12 +173,11 @@ class MergedConfigTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedExceptionMessage File system error
-     * @expectedException \RuntimeException
-     */
     public function testGetWithFileSystemException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('File system error');
+
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new FileSystemException('File system error'));
@@ -186,12 +185,11 @@ class MergedConfigTest extends TestCase
         $this->mergedConfig->get();
     }
 
-    /**
-     * @expectedExceptionMessage File system error
-     * @expectedException \RuntimeException
-     */
     public function testGetWithParseException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('File system error');
+
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new ParseException('File system error'));

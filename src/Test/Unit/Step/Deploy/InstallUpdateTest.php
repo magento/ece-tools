@@ -110,13 +110,13 @@ class InstallUpdateTest extends TestCase
     }
 
     /**
-     * @expectedExceptionMessage Some error
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     *
      * @throws StepException
      */
     public function testExecuteWithException()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Some error');
+
         $this->stateMock->expects($this->once())
             ->method('isInstalled')
             ->willThrowException(new GenericException('Some error'));

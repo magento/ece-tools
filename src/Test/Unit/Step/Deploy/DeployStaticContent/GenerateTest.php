@@ -122,12 +122,13 @@ class GenerateTest extends TestCase
     }
 
     /**
-     * @expectedException \Magento\MagentoCloud\Step\StepException
-     * @expectedExceptionMessage Cannot update deployed version.
      * @throws StepException
      */
     public function testExecuteWithFlagSetError()
     {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Cannot update deployed version.');
+
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
         $this->fileMock->expects($this->once())

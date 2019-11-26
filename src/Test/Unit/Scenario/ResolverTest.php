@@ -168,11 +168,12 @@ class ResolverTest extends TestCase
 
     /**
      * @throws ValidationException
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Unknown xsi:type "Some type"
      */
     public function testResolveWrongXsiType(): void
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Unknown xsi:type "Some type');
+
         $scenarios = [
             [
                 'name' => 'step1',
@@ -202,11 +203,12 @@ class ResolverTest extends TestCase
 
     /**
      * @throws ValidationException
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Empty parameter name in step "step1"
      */
     public function testResolveWrongName(): void
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Empty parameter name in step "step1"');
+
         $scenarios = [
             [
                 'name' => 'step1',
@@ -235,11 +237,12 @@ class ResolverTest extends TestCase
 
     /**
      * @throws ValidationException
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage is not instance of
      */
     public function testResolveWrongStepType(): void
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('is not instance of');
+
         $scenarios = [
             [
                 'name' => 'step1',

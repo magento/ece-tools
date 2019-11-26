@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Scenario\Collector;
 
 use Magento\MagentoCloud\Scenario\Collector\Step;
+use Magento\MagentoCloud\Scenario\Exception\ValidationException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -28,12 +29,11 @@ class StepTest extends TestCase
         $this->stepCollector = new Step();
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Argument(s) "@xsi:type" are missed from argument in step "backup-data"
-     */
     public function testMissedArgumentException()
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Argument(s) "@xsi:type" are missed from argument in step "backup-data"');
+
         $step = [
             '@name' => 'backup-data',
             '@type' => 'Magento\MagentoCloud\Step\Build\BackupData',
@@ -56,12 +56,11 @@ class StepTest extends TestCase
         $this->stepCollector->collect($step);
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage xsi:type "wrong-type" not allowed in argument "logger"
-     */
     public function testWrongArgumentTypeException()
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('xsi:type "wrong-type" not allowed in argument "logger"');
+
         $step = [
             '@name' => 'backup-data',
             '@type' => 'Magento\MagentoCloud\Step\Build\BackupData',
@@ -85,12 +84,11 @@ class StepTest extends TestCase
         $this->stepCollector->collect($step);
     }
 
-    /**
-     * @expectedException \Magento\MagentoCloud\Scenario\Exception\ValidationException
-     * @expectedExceptionMessage Argument(s) "@name" are missed from item
-     */
     public function testMissedItemArgumentsException()
     {
+        $this->expectException(ValidationException::class);
+        $this->expectExceptionMessage('Argument(s) "@name" are missed from item');
+
         $step = [
             '@name' => 'backup-data',
             '@type' => 'Magento\MagentoCloud\Step\Build\BackupData',

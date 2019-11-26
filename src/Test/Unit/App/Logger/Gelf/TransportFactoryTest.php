@@ -69,12 +69,11 @@ class TransportFactoryTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Unknown transport type:
-     */
     public function testCreateUnknownType()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Unknown transport type:');
+
         $this->transportFactory->create('unknown_type', []);
     }
 }
