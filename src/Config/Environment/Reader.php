@@ -9,13 +9,12 @@ namespace Magento\MagentoCloud\Config\Environment;
 
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Yaml\Exception\ParseException;
 
 /**
- * @inheritdoc
+ * Reads configuration from .magento.env.yaml configuration file.
  */
 class Reader implements ReaderInterface
 {

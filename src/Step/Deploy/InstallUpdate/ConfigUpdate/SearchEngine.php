@@ -8,10 +8,10 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\App\GenericException;
-use Magento\MagentoCloud\Config\Deploy\Writer as EnvWriter;
-use Magento\MagentoCloud\Config\Deploy\Reader as EnvReader;
-use Magento\MagentoCloud\Config\Shared\Writer as SharedWriter;
-use Magento\MagentoCloud\Config\Shared\Reader as SharedReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as EnvWriter;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as EnvReader;
+use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface as SharedWriter;
+use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface as SharedReader;
 use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 use Magento\MagentoCloud\Filesystem\Writer\WriterInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;

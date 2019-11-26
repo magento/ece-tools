@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
@@ -34,9 +34,9 @@ class OptionTest extends TestCase
     private $magentoVersionMock;
 
     /**
-     * @var Environment|MockObject
+     * @var AdminDataInterface|MockObject
      */
-    private $environmentMock;
+    private $adminDataMock;
 
     /**
      * @var ArrayManager|MockObject
@@ -69,7 +69,7 @@ class OptionTest extends TestCase
     protected function setUp()
     {
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
@@ -77,7 +77,7 @@ class OptionTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
 
         $this->option = new Option(
-            $this->environmentMock,
+            $this->adminDataMock,
             $this->arrayManagerMock,
             $this->magentoVersionMock,
             $this->threadCountOptimizerMock,
@@ -156,8 +156,8 @@ class OptionTest extends TestCase
                 [$flattenConfig, 'general/locale/code', true, ['fr_FR']],
                 [$flattenConfig, 'admin_user/locale/code', false, ['es_ES']],
             ]);
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminLocale')
+        $this->adminDataMock->expects($this->once())
+            ->method('getLocale')
             ->willReturn('ua_UA');
 
         $this->assertEquals(
@@ -203,8 +203,8 @@ class OptionTest extends TestCase
                 [$flattenConfig, 'general/locale/code', true, ['fr_FR']],
                 [$flattenConfig, 'admin_user/locale/code', false, ['es_ES']],
             ]);
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminLocale')
+        $this->adminDataMock->expects($this->once())
+            ->method('getLocale')
             ->willReturn('ua_UA');
 
         $this->assertEquals(

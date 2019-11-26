@@ -5,13 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Config\Shared;
+namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Env;
 
-use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Shared\Reader;
-use Magento\MagentoCloud\Config\Shared\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\Writer;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
@@ -30,7 +30,7 @@ class WriterTest extends TestCase
     private $fileListMock;
 
     /**
-     * @var Reader|Mock
+     * @var ReaderInterface|Mock
      */
     private $readerMock;
 
@@ -44,8 +44,8 @@ class WriterTest extends TestCase
      */
     protected function setUp()
     {
+        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
         $this->fileMock = $this->createMock(File::class);
-        $this->readerMock = $this->createMock(Reader::class);
         $this->fileListMock = $this->createMock(FileList::class);
 
         $this->writer = new Writer(
@@ -64,7 +64,7 @@ class WriterTest extends TestCase
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
-            ->method('getConfig')
+            ->method('getEnv')
             ->willReturn($filePath);
         $this->fileMock->expects($this->once())
             ->method('filePutContents')
@@ -76,7 +76,7 @@ class WriterTest extends TestCase
     /**
      * @return array
      */
-    public function createDataProvider(): array
+    public function createDataProvider()
     {
         return [
             [
@@ -98,13 +98,13 @@ class WriterTest extends TestCase
      * @param array $config
      * @param array $currentConfig
      * @param string $updatedConfig
-     * @dataProvider updateDataProvider
+     * @dataProvider getUpdateDataProvider
      */
-    public function testupdate(array $config, array $currentConfig, $updatedConfig)
+    public function testUpdate(array $config, array $currentConfig, $updatedConfig)
     {
         $filePath = '/path/to/file';
         $this->fileListMock->expects($this->once())
-            ->method('getConfig')
+            ->method('getEnv')
             ->willReturn($filePath);
         $this->readerMock->expects($this->once())
             ->method('read')
@@ -119,7 +119,7 @@ class WriterTest extends TestCase
     /**
      * @return array
      */
-    public function updateDataProvider(): array
+    public function getUpdateDataProvider()
     {
         return [
             [
@@ -153,6 +153,69 @@ class WriterTest extends TestCase
                 "<?php\nreturn array (\n  'key1' => \n  array (\n    'key11' => 'value1',\n" .
                 "    'key12' => 'value2new',\n    'key13' => 'value3new',\n  ),\n);"
             ],
+            [
+                [
+                    'system' => [
+                        'default' => [
+                            'catalog' => [
+                                'search' => [
+                                    'engine' => 'elasticsearch'
+                                ],
+                            ],
+                        ],
+                    ],
+                    'key1' => [
+                        'key12' => 'value2new',
+                        'key13' => 'value3new',
+                    ]
+                ],
+                [
+                    'system' => [
+                        'default' => [
+                            'category' => [
+                                'option' => 'value'
+                            ],
+                            'catalog' => [
+                                'search' => [
+                                    'engine' => 'mysql',
+                                    'host' => 'localhost',
+                                ],
+                            ],
+                        ],
+                    ],
+                    'key1' => [
+                        'key11' => 'value1',
+                        'key12' => 'value2',
+                    ]
+                ],
+                "<?php
+return array (
+  'system' => 
+  array (
+    'default' => 
+    array (
+      'category' => 
+      array (
+        'option' => 'value',
+      ),
+      'catalog' => 
+      array (
+        'search' => 
+        array (
+          'engine' => 'elasticsearch',
+          'host' => 'localhost',
+        ),
+      ),
+    ),
+  ),
+  'key1' => 
+  array (
+    'key11' => 'value1',
+    'key12' => 'value2new',
+    'key13' => 'value3new',
+  ),
+);"
+            ]
         ];
     }
 }

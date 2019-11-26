@@ -7,10 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Update;
 
+use Magento\MagentoCloud\Config\AdminDataInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -19,17 +20,17 @@ use Psr\Log\LoggerInterface;
 class SetAdminUrlTest extends TestCase
 {
     /**
-     * @var Environment|\PHPUnit_Framework_MockObject_MockObject
+     * @var AdminDataInterface|MockObject
      */
-    private $environmentMock;
+    private $adminDataMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var ConfigWriter|\PHPUnit_Framework_MockObject_MockObject
+     * @var WriterInterface|MockObject
      */
     private $configWriterMock;
 
@@ -43,13 +44,13 @@ class SetAdminUrlTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
             ->getMockForAbstractClass();
-        $this->configWriterMock = $this->createMock(ConfigWriter::class);
+        $this->configWriterMock = $this->getMockForAbstractClass(WriterInterface::class);
 
         $this->setAdminUrl = new SetAdminUrl(
-            $this->environmentMock,
+            $this->adminDataMock,
             $this->configWriterMock,
             $this->loggerMock
         );
@@ -64,8 +65,8 @@ class SetAdminUrlTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php backend front name.');
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminUrl')
+        $this->adminDataMock->expects($this->once())
+            ->method('getUrl')
             ->willReturn($frontName);
         $this->configWriterMock->expects($this->once())
             ->method('update')
@@ -79,8 +80,8 @@ class SetAdminUrlTest extends TestCase
      */
     public function testExecuteNoChange()
     {
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminUrl')
+        $this->adminDataMock->expects($this->once())
+            ->method('getUrl')
             ->willReturn('');
         $this->loggerMock->expects($this->once())
             ->method('info')

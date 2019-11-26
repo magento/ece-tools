@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DocumentRoot;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as Mock;
 

@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 
-use Magento\MagentoCloud\Command\CopyPubStatic;
+use Magento\MagentoCloud\Step\Build\CopyPubStatic;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Step\StepException;
