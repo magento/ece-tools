@@ -19,6 +19,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Update composer command for deployment from git.
+ *
+ * @api
  */
 class UpdateComposer extends Command
 {

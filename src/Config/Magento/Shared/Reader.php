@@ -5,11 +5,10 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Config\Shared;
+namespace Magento\MagentoCloud\Config\Magento\Shared;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\Reader\ReaderInterface;
 
 /**
  * @inheritdoc

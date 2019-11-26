@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\StaticContent\Build;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
@@ -22,9 +22,9 @@ use Magento\MagentoCloud\Util\ArrayManager;
 class Option implements OptionInterface
 {
     /**
-     * @var Environment
+     * @var AdminDataInterface
      */
-    private $environment;
+    private $adminData;
 
     /**
      * @var MagentoVersion
@@ -50,14 +50,13 @@ class Option implements OptionInterface
      * @var SharedConfig
      */
     private $configResolver;
-
     /**
      * @var File
      */
     private $file;
 
     /**
-     * @param Environment $environment
+     * @param AdminDataInterface $adminData
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
      * @param ThreadCountOptimizer $threadCountOptimizer
@@ -66,7 +65,7 @@ class Option implements OptionInterface
      * @param File $file
      */
     public function __construct(
-        Environment $environment,
+        AdminDataInterface $adminData,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
         ThreadCountOptimizer $threadCountOptimizer,
@@ -74,7 +73,7 @@ class Option implements OptionInterface
         SharedConfig $configResolver,
         File $file
     ) {
-        $this->environment = $environment;
+        $this->adminData = $adminData;
         $this->magentoVersion = $magentoVersion;
         $this->arrayManager = $arrayManager;
         $this->threadCountOptimizer = $threadCountOptimizer;
@@ -119,7 +118,7 @@ class Option implements OptionInterface
         $configuration = $this->file->isExists($configPath) ? $this->file->requireFile($configPath) : [];
         $flattenedConfig = $this->arrayManager->flatten($configuration);
 
-        $locales = [$this->environment->getAdminLocale()];
+        $locales = [$this->adminData->getLocale()];
         $locales = array_merge($locales, $this->arrayManager->filter($flattenedConfig, 'general/locale/code'));
         $locales = array_merge(
             $locales,

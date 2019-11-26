@@ -7,10 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ResetPassword;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Util\UrlManager;
@@ -31,9 +31,9 @@ class ResetPasswordTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Environment|MockObject
+     * @var AdminDataInterface|MockObject
      */
-    private $environmentMock;
+    private $adminDataMock;
 
     /**
      * @var UrlManager|MockObject
@@ -66,7 +66,7 @@ class ResetPasswordTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
@@ -78,7 +78,7 @@ class ResetPasswordTest extends TestCase
 
         $this->resetPassword = new ResetPassword(
             $this->loggerMock,
-            $this->environmentMock,
+            $this->adminDataMock,
             $this->urlManagerMock,
             $this->fileMock,
             $this->directoryListMock
@@ -99,20 +99,20 @@ class ResetPasswordTest extends TestCase
         $dataAdminPassword,
         $dataAdminEmail
     ): void {
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminPassword')
+        $this->adminDataMock->expects($this->once())
+            ->method('getPassword')
             ->willReturn($dataAdminPassword);
-        $this->environmentMock->expects($expectsAdminEmail)
-            ->method('getAdminEmail')
+        $this->adminDataMock->expects($expectsAdminEmail)
+            ->method('getEmail')
             ->willReturn($dataAdminEmail);
         $this->directoryListMock->expects($this->never())
             ->method('getMagentoRoot');
         $this->urlManagerMock->expects($this->never())
             ->method('getUrls');
-        $this->environmentMock->expects($this->never())
-            ->method('getAdminUrl');
-        $this->environmentMock->expects($this->never())
-            ->method('getAdminUsername');
+        $this->adminDataMock->expects($this->never())
+            ->method('getUrl');
+        $this->adminDataMock->expects($this->never())
+            ->method('getUsername');
         $this->loggerMock->expects($this->never())
             ->method('info');
         $this->mailFunctionMock->expects($this->never());
@@ -160,8 +160,8 @@ class ResetPasswordTest extends TestCase
         $url = 'https://localhost/';
         $dir = '/root';
         $file = $dir . '/var/credentials_email.txt';
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminPassword')
+        $this->adminDataMock->expects($this->once())
+            ->method('getPassword')
             ->willReturn('');
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
@@ -169,14 +169,14 @@ class ResetPasswordTest extends TestCase
         $this->urlManagerMock->expects($this->once())
             ->method('getUrls')
             ->willReturn(['secure' => ['' => $url]]);
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminUrl')
+        $this->adminDataMock->expects($this->once())
+            ->method('getUrl')
             ->willReturn($adminUrl);
-        $this->environmentMock->expects($this->exactly(2))
-            ->method('getAdminEmail')
+        $this->adminDataMock->expects($this->exactly(2))
+            ->method('getEmail')
             ->willReturn($adminEmail);
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminUsername')
+        $this->adminDataMock->expects($this->once())
+            ->method('getUsername')
             ->willReturn($adminUsername);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -211,8 +211,8 @@ class ResetPasswordTest extends TestCase
         return [
             [
                 '',
-                Environment::DEFAULT_ADMIN_URL,
-                Environment::DEFAULT_ADMIN_NAME,
+                AdminDataInterface::DEFAULT_ADMIN_URL,
+                AdminDataInterface::DEFAULT_ADMIN_NAME,
                 'Hello https://localhost/admin admin@example.com admin'
             ],
             ['admin', 'root', 'root', 'Hello https://localhost/admin admin@example.com root'],

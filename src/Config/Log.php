@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Config;
 
 use Illuminate\Contracts\Config\Repository;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Config\Environment\Reader;
+use Magento\MagentoCloud\Config\Environment\ReaderInterface;
 use Magento\MagentoCloud\App\Logger\HandlerFactory;
 
 /**
@@ -37,7 +37,7 @@ class Log
     private $fileList;
 
     /**
-     * @var Reader
+     * @var ReaderInterface
      */
     private $reader;
 
@@ -53,10 +53,10 @@ class Log
 
     /**
      * @param FileList $fileList
-     * @param Reader $reader
+     * @param ReaderInterface $reader
      * @param RepositoryFactory $repositoryFactory
      */
-    public function __construct(FileList $fileList, Reader $reader, RepositoryFactory $repositoryFactory)
+    public function __construct(FileList $fileList, ReaderInterface $reader, RepositoryFactory $repositoryFactory)
     {
         $this->fileList = $fileList;
         $this->reader = $reader;

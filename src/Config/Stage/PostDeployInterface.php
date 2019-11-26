@@ -11,6 +11,8 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
  * @inheritdoc
+ *
+ * @api
  */
 interface PostDeployInterface extends StageConfigInterface
 {

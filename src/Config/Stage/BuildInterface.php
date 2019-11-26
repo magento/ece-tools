@@ -11,6 +11,8 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
  * Provides access to configuration of build stage.
+ *
+ * @api
  */
 interface BuildInterface extends StageConfigInterface
 {

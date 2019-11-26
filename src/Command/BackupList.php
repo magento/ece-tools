@@ -15,6 +15,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * CLI command for showing the list of backup files.
+ *
+ * @api
  */
 class BackupList extends Command
 {
