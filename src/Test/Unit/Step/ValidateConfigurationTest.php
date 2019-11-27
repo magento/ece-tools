@@ -146,6 +146,48 @@ class ValidateConfigurationTest extends TestCase
         $step->execute();
     }
 
+    public function testExecuteTypeStringLevel()
+    {
+        $this->expectException(StepException::class);
+        $this->expectExceptionMessage('Fix configuration with given suggestions');
+
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Validating configuration');
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('log')
+            ->withConsecutive(
+                [
+                    Logger::NOTICE,
+                    'Fix configuration with given suggestions:'
+                    . PHP_EOL . '- some notice'
+                    . PHP_EOL . '  some notice suggestion'
+                ],
+                [
+                    Logger::WARNING,
+                    'Fix configuration with given suggestions:'
+                    . PHP_EOL . '- some warning'
+                    . PHP_EOL . '  some warning suggestion'
+                ]
+            );
+
+        $step = new ValidateConfiguration(
+            $this->loggerMock,
+            [
+                'critical' => [
+                    $this->createValidatorWithError('Critical error', 'some critical suggestion'),
+                ],
+                'warning' => [
+                    $this->createValidatorWithError('some warning', 'some warning suggestion'),
+                ],
+                'notice' => [
+                    $this->createValidatorWithError('some notice', 'some notice suggestion'),
+                ],
+            ]
+        );
+        $step->execute();
+    }
+
     /**
      * @param string $error
      * @param string $suggestion

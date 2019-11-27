@@ -5,7 +5,7 @@
         <arguments>
             <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
             <argument name="validators" xsi:type="array">
-                <item name="300" xsi:type="array">
+                <item name="warning" xsi:type="array">
                     <item name="debug-logging" xsi:type="object" priority="100">Magento\MagentoCloud\Config\Validator\Deploy\DebugLogging</item>
                 </item>
             </argument>
