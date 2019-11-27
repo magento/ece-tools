@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Cron;
 
-use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 
 /**
@@ -19,24 +19,24 @@ class Switcher
     /**
      * Deploy Config Writer
      *
-     * @var Writer
+     * @var WriterInterface
      */
     private $writer;
 
     /**
      * Deploy Config Reader
      *
-     * @var Reader
+     * @var ReaderInterface
      */
     private $reader;
 
     /**
-     * @param Writer $writer Deploy Config Writer
-     * @param Reader $reader Deploy Config Reader
+     * @param WriterInterface $writer
+     * @param ReaderInterface $reader
      */
     public function __construct(
-        Writer $writer,
-        Reader $reader
+        WriterInterface $writer,
+        ReaderInterface $reader
     ) {
         $this->writer = $writer;
         $this->reader = $reader;
