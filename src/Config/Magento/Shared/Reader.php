@@ -48,10 +48,6 @@ class Reader implements ReaderInterface
 
         $content = require $configPath;
 
-        if (is_array($content)) {
-            return $content;
-        }
-
-        return [];
+        return is_array($content) ? $content : [];
     }
 }
