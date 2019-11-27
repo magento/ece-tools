@@ -49,7 +49,7 @@ class Processor
      * @param array $scenarios
      * @throws ProcessorException
      */
-    public function execute(array $scenarios)
+    public function execute(array $scenarios): void
     {
         $this->logger->info(sprintf(
             'Starting scenario(s): %s %s',

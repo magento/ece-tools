@@ -25,7 +25,7 @@ abstract class AbstractCest
     /**
      * @param \CliTester $I
      */
-    public function _after(\CliTester $I)
+    public function _after(\CliTester $I): void
     {
         $I->stopEnvironment();
         $I->removeDockerCompose();
