@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,7 +22,7 @@ class DisableCron implements StepInterface
     private $backgroundProcessKill;
 
     /**
-     * @var Writer
+     * @var WriterInterface
      */
     private $writer;
 
@@ -34,12 +34,12 @@ class DisableCron implements StepInterface
     /**
      * @param BackgroundProcessKill $backgroundProcessKill
      * @param LoggerInterface $logger
-     * @param Writer $deployConfigWriter
+     * @param WriterInterface $deployConfigWriter
      */
     public function __construct(
         BackgroundProcessKill $backgroundProcessKill,
         LoggerInterface $logger,
-        Writer $deployConfigWriter
+        WriterInterface $deployConfigWriter
     ) {
         $this->backgroundProcessKill = $backgroundProcessKill;
         $this->logger = $logger;

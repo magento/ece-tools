@@ -16,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Verifies configuration to be properly set and ready to use SCD on build phase.
+ *
+ * @api
  */
 class ScdOnBuild extends Command
 {

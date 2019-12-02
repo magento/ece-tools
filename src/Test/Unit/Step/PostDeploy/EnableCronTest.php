@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 
-use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Step\PostDeploy\EnableCron;
 use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
@@ -30,12 +30,12 @@ class EnableCronTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Reader|MockObject
+     * @var ReaderInterface|MockObject
      */
     private $readerMock;
 
     /**
-     * @var Writer|MockObject
+     * @var WriterInterface|MockObject
      */
     private $writerMock;
 
@@ -45,8 +45,8 @@ class EnableCronTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->readerMock = $this->createMock(Reader::class);
-        $this->writerMock = $this->createMock(Writer::class);
+        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
 
         $this->step = new EnableCron(
             $this->loggerMock,

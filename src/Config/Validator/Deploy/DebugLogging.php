@@ -7,9 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Magento\SystemInterface;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 use Magento\MagentoCloud\Config\Environment;
-use Magento\MagentoCloud\Config\Magento\System;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 
@@ -21,7 +21,7 @@ class DebugLogging implements ValidatorInterface
     const CONFIG_PATH = 'dev/debug/debug_logging';
 
     /**
-     * @var System
+     * @var SystemInterface
      */
     private $config;
 
@@ -36,12 +36,12 @@ class DebugLogging implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @param System $config
+     * @param SystemInterface $config
      * @param Environment $environment
      * @param ResultFactory $resultFactory
      */
     public function __construct(
-        System $config,
+        SystemInterface $config,
         Environment $environment,
         ResultFactory $resultFactory
     ) {

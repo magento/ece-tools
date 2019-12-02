@@ -11,6 +11,8 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
  * Provides access to configuration of deploy stage.
+ *
+ * @api
  */
 interface DeployInterface extends StageConfigInterface
 {

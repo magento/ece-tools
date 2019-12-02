@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -39,9 +39,9 @@ class ResetPassword implements StepInterface
     private $logger;
 
     /**
-     * @var Environment
+     * @var AdminDataInterface
      */
-    private $environment;
+    private $adminData;
 
     /**
      * @var UrlManager
@@ -50,20 +50,20 @@ class ResetPassword implements StepInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param Environment $environment
+     * @param AdminDataInterface $adminData
      * @param UrlManager $urlManager
      * @param File $file
      * @param DirectoryList $directoryList
      */
     public function __construct(
         LoggerInterface $logger,
-        Environment $environment,
+        AdminDataInterface $adminData,
         UrlManager $urlManager,
         File $file,
         DirectoryList $directoryList
     ) {
         $this->logger = $logger;
-        $this->environment = $environment;
+        $this->adminData = $adminData;
         $this->urlManager = $urlManager;
         $this->file = $file;
         $this->directoryList = $directoryList;
@@ -74,19 +74,19 @@ class ResetPassword implements StepInterface
      */
     public function execute()
     {
-        if ($this->environment->getAdminPassword() || !$this->environment->getAdminEmail()) {
+        if ($this->adminData->getPassword() || !$this->adminData->getEmail()) {
             return;
         }
 
         $credentialsFile = $this->directoryList->getMagentoRoot() . '/var/credentials_email.txt';
         $templateFile = $this->directoryList->getViews() . '/reset_password.html';
 
-        $adminEmail = $this->environment->getAdminEmail();
-        $adminUsername = $this->environment->getAdminUsername() ?: Environment::DEFAULT_ADMIN_NAME;
-        $adminName = $this->environment->getAdminFirstname();
+        $adminEmail = $this->adminData->getEmail();
+        $adminUsername = $this->adminData->getUsername() ?: AdminDataInterface::DEFAULT_ADMIN_NAME;
+        $adminName = $this->adminData->getFirstName();
 
         $adminUrl = $this->urlManager->getUrls()['secure']['']
-            . ($this->environment->getAdminUrl() ?: Environment::DEFAULT_ADMIN_URL);
+            . ($this->adminData->getUrl() ?: AdminDataInterface::DEFAULT_ADMIN_URL);
 
         try {
             $emailContent = strtr(

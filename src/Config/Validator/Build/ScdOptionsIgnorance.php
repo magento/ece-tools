@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Config\Validator\Build;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
+use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 
 /**
  * Checks that scd configuration is really using on build phase.

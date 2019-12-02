@@ -15,7 +15,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Performs module
+ * Performs module:refresh command
+ *
+ * @api
  */
 class ModuleRefresh extends Command
 {

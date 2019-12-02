@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step;
 
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\SetProductionMode;
 use Magento\MagentoCloud\Step\StepException;
@@ -31,7 +31,7 @@ class SetProductionModeTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var Writer|Mock
+     * @var WriterInterface|Mock
      */
     private $writer;
 
@@ -41,7 +41,7 @@ class SetProductionModeTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->writer = $this->createMock(Writer::class);
+        $this->writer = $this->getMockForAbstractClass(WriterInterface::class);
 
         $this->step = new SetProductionMode(
             $this->loggerMock,
