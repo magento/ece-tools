@@ -69,6 +69,8 @@ class EolValidatorTest extends TestCase
      */
     public function testCompatibleVersion()
     {
+        Carbon::setTestNow(Carbon::create(2019, 12, 2));
+
         $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
         $this->fileListMock->expects($this->once())
@@ -84,6 +86,8 @@ class EolValidatorTest extends TestCase
         $serviceVersion = '6.5';
 
         $this->assertEquals([], $this->validator->validateService($serviceName, $serviceVersion));
+
+        Carbon::setTestNow();
     }
 
     /**
@@ -91,6 +95,8 @@ class EolValidatorTest extends TestCase
      */
     public function testValidateServiceWithoutConfigs()
     {
+        Carbon::setTestNow(Carbon::create(2019, 12, 2));
+
         $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
         $this->fileListMock->expects($this->once())
@@ -109,6 +115,8 @@ class EolValidatorTest extends TestCase
             [],
             $this->validator->validateService($serviceName, $serviceVersion)
         );
+
+        Carbon::setTestNow();
     }
 
     /**
@@ -169,6 +177,8 @@ class EolValidatorTest extends TestCase
      */
     public function testValidateNoticeMessage()
     {
+        Carbon::setTestNow(Carbon::create(2019, 11, 1));
+
         $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
         $this->fileListMock->expects($this->once())
@@ -194,6 +204,8 @@ class EolValidatorTest extends TestCase
             [ValidatorInterface::LEVEL_NOTICE => $message],
             $this->validator->validateService($serviceName, $serviceVersion)
         );
+
+        Carbon::setTestNow();
     }
 
     /**
@@ -201,6 +213,8 @@ class EolValidatorTest extends TestCase
      */
     public function testValidateWarningMessage()
     {
+        Carbon::setTestNow(Carbon::create(2019, 1, 1));
+
         $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
         $this->fileListMock->expects($this->once())
@@ -226,5 +240,7 @@ class EolValidatorTest extends TestCase
             [ValidatorInterface::LEVEL_WARNING => $message],
             $this->validator->validateService($serviceName, $serviceVersion)
         );
+
+        Carbon::setTestNow();
     }
 }
