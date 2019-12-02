@@ -104,7 +104,7 @@ class SetCryptKeyTest extends TestCase
             ->method('getCryptKey')
             ->willReturn('');
         $this->loggerMock->expects($this->once())
-            ->method('error')
+            ->method('notice')
             ->with(
                 'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
                 . 'environment variable in the Cloud Project web UI.'
@@ -128,7 +128,7 @@ class SetCryptKeyTest extends TestCase
         $this->environmentMock->expects($this->never())
             ->method('getCryptKey');
         $this->loggerMock->expects($this->never())
-            ->method('error')
+            ->method('notice')
             ->with(
                 'Crypt key missing. Add the crypt key to the "app/etc/env.php" file, or set the "CRYPT_KEY" '
                 . 'environment variable in the Cloud Project web UI.'
