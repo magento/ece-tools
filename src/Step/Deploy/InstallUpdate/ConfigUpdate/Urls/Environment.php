@@ -10,8 +10,8 @@ namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Urls;
 use Magento\MagentoCloud\Step\StepInterface;
 use Magento\MagentoCloud\Util\UrlManager;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Deploy\Reader;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 
 /**
  * Updates the base_url configuration in the <magento_root>/app/etc/env.php file
@@ -31,12 +31,12 @@ class Environment implements StepInterface
     private $urlManager;
 
     /**
-     * @var Reader
+     * @var ReaderInterface
      */
     private $reader;
 
     /**
-     * @var Writer
+     * @var WriterInterface
      */
     private $writer;
 
@@ -48,14 +48,14 @@ class Environment implements StepInterface
     /**
      * @param LoggerInterface $logger
      * @param UrlManager $urlManager
-     * @param Reader $reader
-     * @param Writer $writer
+     * @param ReaderInterface $reader
+     * @param WriterInterface $writer
      */
     public function __construct(
         LoggerInterface $logger,
         UrlManager $urlManager,
-        Reader $reader,
-        Writer $writer
+        ReaderInterface $reader,
+        WriterInterface $writer
     ) {
         $this->logger = $logger;
         $this->urlManager = $urlManager;

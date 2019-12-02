@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Step\StepException;

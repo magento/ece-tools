@@ -15,6 +15,8 @@ use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 
 /**
  * Verifies configuration to be properly set and ready to use SCD on demand.
+ *
+ * @api
  */
 class ScdOnDemand extends Command
 {

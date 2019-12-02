@@ -8,7 +8,9 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\DB;
 
 /**
- * General Connection interface.
+ * Interface for database operations.
+ *
+ * @api
  */
 interface ConnectionInterface
 {

@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\EceToolExtend\Step\Build;
 
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Config\Deploy\Writer;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 class SetProductionMode implements StepInterface
 {
     /**
-     * @var Writer
+     * @var WriterInterface
      */
     private $writer;
 
@@ -30,14 +30,14 @@ class SetProductionMode implements StepInterface
 
     /**
      * @param LoggerInterface $logger
-     * @param Writer $deployConfigWriter
+     * @param WriterInterface $writer
      */
     public function __construct(
         LoggerInterface $logger,
-        Writer $deployConfigWriter
+        WriterInterface $writer
     ) {
         $this->logger = $logger;
-        $this->writer = $deployConfigWriter;
+        $this->writer = $writer;
     }
 
     /**
