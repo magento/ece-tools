@@ -78,7 +78,8 @@ class InstallCommandFactory
         DeployInterface $stageConfig,
         ElasticSuite $elasticSuite,
         MergedConfig $mergedConfig
-    ) {
+    )
+    {
         $this->urlManager = $urlManager;
         $this->environment = $environment;
         $this->connectionFactory = $connectionFactory;
@@ -144,7 +145,7 @@ class InstallCommandFactory
             $command .= ' --db-password=' . escapeshellarg($dbPassword);
         }
 
-        if ($table_prefix = $this->mergedConfig->get()['table_prefix'] ?? '') {
+        if ($table_prefix = $this->mergedConfig->get()[MergedConfig::DB]['table_prefix'] ?? '') {
             $command .= ' --db-prefix=' . escapeshellarg($table_prefix);
         }
 
