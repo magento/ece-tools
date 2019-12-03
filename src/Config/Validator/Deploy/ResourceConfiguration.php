@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -24,20 +24,20 @@ class ResourceConfiguration implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var ResourceConfig
+     * @var MergedConfig
      */
-    private $resourceConfig;
+    private $mergedConfig;
 
     /**
      * @param ResultFactory $resultFactory
-     * @param ResourceConfig $resourceConfig
+     * @param MergedConfig $mergedConfig
      */
     public function __construct(
         ResultFactory $resultFactory,
-        ResourceConfig $resourceConfig
+        MergedConfig $mergedConfig
     ) {
         $this->resultFactory = $resultFactory;
-        $this->resourceConfig = $resourceConfig;
+        $this->mergedConfig = $mergedConfig;
     }
 
     /**
@@ -46,7 +46,8 @@ class ResourceConfiguration implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         $wrongResources = [];
-        foreach ($this->resourceConfig->get() as $resourceName => $resourceData) {
+        $resources = $this->mergedConfig->get()[MergedConfig::RESOURCE];
+        foreach ($resources as $resourceName => $resourceData) {
             if (!isset($resourceData['connection'])) {
                 $wrongResources[] = $resourceName;
             }
