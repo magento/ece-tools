@@ -9,6 +9,8 @@ namespace Magento\MagentoCloud\DB;
 
 /**
  * Interface DumpInterface for generating DB dump commands
+ *
+ * @api
  */
 interface DumpInterface
 {

@@ -7,12 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
-use Illuminate\Config\Repository;
+use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\RepositoryFactory;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;

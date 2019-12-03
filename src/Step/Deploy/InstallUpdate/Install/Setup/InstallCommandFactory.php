@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup;
 
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -27,9 +27,9 @@ class InstallCommandFactory
     private $urlManager;
 
     /**
-     * @var Environment
+     * @var AdminDataInterface
      */
-    private $environment;
+    private $adminData;
 
     /**
      * @var PasswordGenerator
@@ -55,7 +55,6 @@ class InstallCommandFactory
      * @var ElasticSuite
      */
     private $elasticSuite;
-
     /**
      * @var MergedConfig
      */
@@ -63,7 +62,7 @@ class InstallCommandFactory
 
     /**
      * @param UrlManager $urlManager
-     * @param Environment $environment
+     * @param AdminDataInterface $adminData
      * @param ConnectionFactory $connectionFactory
      * @param PasswordGenerator $passwordGenerator
      * @param DeployInterface $stageConfig
@@ -72,7 +71,7 @@ class InstallCommandFactory
      */
     public function __construct(
         UrlManager $urlManager,
-        Environment $environment,
+        AdminDataInterface $adminData,
         ConnectionFactory $connectionFactory,
         PasswordGenerator $passwordGenerator,
         DeployInterface $stageConfig,
@@ -81,7 +80,7 @@ class InstallCommandFactory
     )
     {
         $this->urlManager = $urlManager;
-        $this->environment = $environment;
+        $this->adminData = $adminData;
         $this->connectionFactory = $connectionFactory;
         $this->passwordGenerator = $passwordGenerator;
         $this->stageConfig = $stageConfig;
@@ -123,25 +122,25 @@ class InstallCommandFactory
      */
     private function getBaseCommand(): string
     {
-        $urlUnsecure = $this->urlManager->getUnSecureUrls()[''];
+        $urlUnSecure = $this->urlManager->getUnSecureUrls()[''];
         $urlSecure = $this->urlManager->getSecureUrls()[''];
-        $adminUrl = $this->environment->getAdminUrl() ?: Environment::DEFAULT_ADMIN_URL;
+        $adminUrl = $this->adminData->getUrl() ?: AdminDataInterface::DEFAULT_ADMIN_URL;
 
         $command = 'php ./bin/magento setup:install'
             . ' -n --session-save=db --cleanup-database'
             . ' --use-secure-admin=1 --use-rewrites=1 --ansi --no-interaction'
-            . ' --currency=' . escapeshellarg($this->environment->getDefaultCurrency())
-            . ' --base-url=' . escapeshellarg($urlUnsecure)
+            . ' --currency=' . escapeshellarg($this->adminData->getDefaultCurrency())
+            . ' --base-url=' . escapeshellarg($urlUnSecure)
             . ' --base-url-secure=' . escapeshellarg($urlSecure)
             . ' --backend-frontname=' . escapeshellarg($adminUrl)
-            . ' --language=' . escapeshellarg($this->environment->getAdminLocale())
+            . ' --language=' . escapeshellarg($this->adminData->getLocale())
             . ' --timezone=America/Los_Angeles'
             . ' --db-host=' . escapeshellarg($this->getConnectionData()->getHost())
             . ' --db-name=' . escapeshellarg($this->getConnectionData()->getDbName())
             . ' --db-user=' . escapeshellarg($this->getConnectionData()->getUser());
 
         $dbPassword = $this->getConnectionData()->getPassword();
-        if (strlen($dbPassword)) {
+        if (!empty($dbPassword)) {
             $command .= ' --db-password=' . escapeshellarg($dbPassword);
         }
 
@@ -149,7 +148,7 @@ class InstallCommandFactory
             $command .= ' --db-prefix=' . escapeshellarg($table_prefix);
         }
 
-        if ($this->environment->getAdminEmail()) {
+        if ($this->adminData->getEmail()) {
             $command .= $this->getAdminCredentials();
         }
 
@@ -163,14 +162,14 @@ class InstallCommandFactory
      */
     private function getAdminCredentials(): string
     {
-        return ' --admin-user=' . escapeshellarg($this->environment->getAdminUsername()
-                ?: Environment::DEFAULT_ADMIN_NAME)
-            . ' --admin-firstname=' . escapeshellarg($this->environment->getAdminFirstname()
-                ?: Environment::DEFAULT_ADMIN_FIRSTNAME)
-            . ' --admin-lastname=' . escapeshellarg($this->environment->getAdminLastname()
-                ?: Environment::DEFAULT_ADMIN_LASTNAME)
-            . ' --admin-email=' . escapeshellarg($this->environment->getAdminEmail())
-            . ' --admin-password=' . escapeshellarg($this->environment->getAdminPassword()
+        return ' --admin-user=' . escapeshellarg($this->adminData->getUsername()
+                ?: AdminDataInterface::DEFAULT_ADMIN_NAME)
+            . ' --admin-firstname=' . escapeshellarg($this->adminData->getFirstName()
+                ?: AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME)
+            . ' --admin-lastname=' . escapeshellarg($this->adminData->getLastName()
+                ?: AdminDataInterface::DEFAULT_ADMIN_LAST_NAME)
+            . ' --admin-email=' . escapeshellarg($this->adminData->getEmail())
+            . ' --admin-password=' . escapeshellarg($this->adminData->getPassword()
                 ?: $this->passwordGenerator->generateRandomPassword());
     }
 

@@ -14,9 +14,9 @@ use Magento\MagentoCloud\App\Logger;
  */
 interface ValidatorInterface
 {
-    const LEVEL_NOTICE = Logger::NOTICE;
-    const LEVEL_WARNING = Logger::WARNING;
-    const LEVEL_CRITICAL = Logger::CRITICAL;
+    public const LEVEL_NOTICE = Logger::NOTICE;
+    public const LEVEL_WARNING = Logger::WARNING;
+    public const LEVEL_CRITICAL = Logger::CRITICAL;
 
     /**
      * @return Validator\ResultInterface

@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install\Setup;
 
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
@@ -30,9 +30,9 @@ class InstallCommandFactoryTest extends TestCase
     private $installCommandFactory;
 
     /**
-     * @var Environment|MockObject
+     * @var AdminDataInterface|MockObject
      */
-    private $environmentMock;
+    private $adminDataMock;
 
     /**
      * @var UrlManager|MockObject
@@ -69,10 +69,7 @@ class InstallCommandFactoryTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->getMockBuilder(Environment::class)
-            ->setMethods(['getVerbosityLevel', 'getVariables', 'getRelationships'])
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->urlManagerMock = $this->createMock(UrlManager::class);
         $this->passwordGeneratorMock = $this->createMock(PasswordGenerator::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
@@ -87,7 +84,7 @@ class InstallCommandFactoryTest extends TestCase
 
         $this->installCommandFactory = new InstallCommandFactory(
             $this->urlManagerMock,
-            $this->environmentMock,
+            $this->adminDataMock,
             $connectionFactoryMock,
             $this->passwordGeneratorMock,
             $this->stageConfigMock,
@@ -151,17 +148,30 @@ class InstallCommandFactoryTest extends TestCase
         $this->connectionDataMock->expects($this->once())
             ->method('getUser')
             ->willReturn('user');
-        $this->environmentMock->expects($this->any())
-            ->method('getVariables')
-            ->willReturn([
-                'ADMIN_URL' => $adminUrl,
-                'ADMIN_LOCALE' => 'fr_FR',
-                'ADMIN_FIRSTNAME' => $adminFirstname,
-                'ADMIN_LASTNAME' => $adminLastname,
-                'ADMIN_EMAIL' => $adminEmail,
-                'ADMIN_PASSWORD' => $adminPassword,
-                'ADMIN_USERNAME' => $adminName,
-            ]);
+        $this->adminDataMock->expects($this->any())
+            ->method('getLocale')
+            ->willReturn('fr_FR');
+        $this->adminDataMock->expects($this->any())
+            ->method('getUrl')
+            ->willReturn($adminUrl);
+        $this->adminDataMock->expects($this->any())
+            ->method('getFirstName')
+            ->willReturn($adminFirstname);
+        $this->adminDataMock->expects($this->any())
+            ->method('getLastName')
+            ->willReturn($adminLastname);
+        $this->adminDataMock->expects($this->any())
+            ->method('getEmail')
+            ->willReturn($adminEmail);
+        $this->adminDataMock->expects($this->any())
+            ->method('getPassword')
+            ->willReturn($adminPassword);
+        $this->adminDataMock->expects($this->any())
+            ->method('getUsername')
+            ->willReturn($adminName);
+        $this->adminDataMock->expects($this->any())
+            ->method('getDefaultCurrency')
+            ->willReturn('USD');
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($mergedConfig);
@@ -241,11 +251,11 @@ class InstallCommandFactoryTest extends TestCase
                 'adminUrl' => '',
                 'adminFirstname' => '',
                 'adminLastname' => '',
-                'adminNameExpected' => Environment::DEFAULT_ADMIN_NAME,
+                'adminNameExpected' => AdminDataInterface::DEFAULT_ADMIN_NAME,
                 'adminPasswordExpected' => 'generetedPassword',
-                'adminUrlExpected' => Environment::DEFAULT_ADMIN_URL,
-                'adminFirstnameExpected' => Environment::DEFAULT_ADMIN_FIRSTNAME,
-                'adminLastnameExpected' => Environment::DEFAULT_ADMIN_LASTNAME,
+                'adminUrlExpected' => AdminDataInterface::DEFAULT_ADMIN_URL,
+                'adminFirstnameExpected' => AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME,
+                'adminLastnameExpected' => AdminDataInterface::DEFAULT_ADMIN_LAST_NAME,
                 false,
                 ['table_prefix' => 'prefix'],
             ],
@@ -271,11 +281,11 @@ class InstallCommandFactoryTest extends TestCase
                 'adminUrl' => '',
                 'adminFirstname' => '',
                 'adminLastname' => '',
-                'adminNameExpected' => Environment::DEFAULT_ADMIN_NAME,
+                'adminNameExpected' => AdminDataInterface::DEFAULT_ADMIN_NAME,
                 'adminPasswordExpected' => 'generetedPassword',
-                'adminUrlExpected' => Environment::DEFAULT_ADMIN_URL,
-                'adminFirstnameExpected' => Environment::DEFAULT_ADMIN_FIRSTNAME,
-                'adminLastnameExpected' => Environment::DEFAULT_ADMIN_LASTNAME,
+                'adminUrlExpected' => AdminDataInterface::DEFAULT_ADMIN_URL,
+                'adminFirstnameExpected' => AdminDataInterface::DEFAULT_ADMIN_FIRST_NAME,
+                'adminLastnameExpected' => AdminDataInterface::DEFAULT_ADMIN_LAST_NAME,
                 false,
                 [],
             ],

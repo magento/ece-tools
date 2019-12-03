@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
-use Magento\MagentoCloud\Config\Deploy\Writer as ConfigWriter;
+use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 
 /**
  * Sets value of property directories/document_root_is_pub in true

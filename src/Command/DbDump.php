@@ -17,6 +17,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
  * Class DbDump for safely creating backup of database
+ *
+ * @api
  */
 class DbDump extends Command
 {
