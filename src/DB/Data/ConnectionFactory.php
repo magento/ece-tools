@@ -12,15 +12,17 @@ use Magento\MagentoCloud\Config\Database\MergedConfig;
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
  */
-class ConnectionFactory
+class ConnectionFactory implements ConnectionFactoryInterface
 {
-    const CONNECTION_MAIN = 'main';
-    const CONNECTION_SLAVE = 'slave';
-
     /**
      * @var MergedConfig
      */
     private $mergedConfig;
+
+    /**
+     * @var array
+     */
+    private $config;
 
     /**
      * @param MergedConfig $mergedConfig
@@ -41,21 +43,41 @@ class ConnectionFactory
     {
         switch ($connectionType) {
             case self::CONNECTION_MAIN:
-                $connectionData = $this->mergedConfig->get()['connection']['default'] ?? [];
-                $connection = new Connection($connectionData);
-                break;
+                return $this->getConnectionData(MergedConfig::CONNECTION_DEFAULT);
             case self::CONNECTION_SLAVE:
-                $connectionData = $this->mergedConfig->get()['slave_connection']['default']
-                    ?? $this->mergedConfig->get()['connection']['default']
-                    ?? [];
-                $connection = new Connection($connectionData);
-                break;
+                return $this->getConnectionData(MergedConfig::CONNECTION_DEFAULT, false);
+            case self::CONNECTION_QUOTE_MAIN:
+                return $this->getConnectionData(MergedConfig::CONNECTION_CHECKOUT);
+            case self::CONNECTION_QUOTE_SLAVE:
+                return $this->getConnectionData(MergedConfig::CONNECTION_CHECKOUT, false);
+            case self::CONNECTION_SALES_MAIN:
+                return $this->getConnectionData(MergedConfig::CONNECTION_SALES);
+            case self::CONNECTION_SALES_SLAVE:
+                return $this->getConnectionData(MergedConfig::CONNECTION_SALES, false);
             default:
                 throw new \RuntimeException(
                     sprintf('Connection with type %s doesn\'t exist', $connectionType)
                 );
         }
+    }
 
-        return $connection;
+    private function getConnectionData($name, $isMain = true): ConnectionInterface
+    {
+        if ($isMain) {
+            $connectionConfig = $this->getConfig()[MergedConfig::CONNECTION][$name] ?? [];
+        } else {
+            $connectionConfig = $this->getConfig()[MergedConfig::SLAVE_CONNECTION][$name]
+                ?? $this->getConfig()[MergedConfig::CONNECTION][$name]
+                ?? [];
+        }
+        return new Connection($connectionConfig);
+    }
+
+    private function getConfig(): array
+    {
+        if (null === $this->config) {
+            $this->config = $this->mergedConfig->get()[MergedConfig::DB];
+        }
+        return $this->config;
     }
 }
