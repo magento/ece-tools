@@ -67,9 +67,11 @@ interface ConnectionInterface
     /**
      * Retrieve a \PDO object.
      *
+     * @param string $connection
+     *
      * @return \PDO
      */
-    public function getPdo(): \PDO;
+    public function getPdo(string $connection): \PDO;
 
     /**
      * Close connection.

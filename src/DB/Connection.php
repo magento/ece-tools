@@ -19,7 +19,7 @@ class Connection implements ConnectionInterface
     const MYSQL_ERROR_CODE_SERVER_GONE_AWAY = 2006;
 
     /**
-     * @var \PDO|null
+     * @var \PDO[]
      */
     private $pdo;
 
@@ -57,7 +57,8 @@ class Connection implements ConnectionInterface
         LoggerInterface $logger,
         ConnectionFactory $connectionFactory,
         MergedConfig $mergedConfig
-    ) {
+    )
+    {
         $this->logger = $logger;
         $this->connectionFactory = $connectionFactory;
         $this->mergedConfig = $mergedConfig;
@@ -66,10 +67,14 @@ class Connection implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function query(string $query, array $bindings = []): bool
+    public function query(
+        string $query,
+        array $bindings = [],
+        string $connection = ConnectionFactory::CONNECTION_MAIN
+    ): bool
     {
-        return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->getPdo()->prepare($query);
+        return $this->run($query, $bindings, $connection, function ($query, $bindings, $connection) {
+            $statement = $this->getPdo($connection)->prepare($query);
 
             $this->bindValues($statement, $bindings);
 
@@ -84,10 +89,14 @@ class Connection implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function affectingQuery(string $query, array $bindings = []): int
+    public function affectingQuery(
+        string $query,
+        array $bindings = [],
+        string $connection = ConnectionFactory::CONNECTION_MAIN
+    ): int
     {
-        return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->getPdo()->prepare($query);
+        return $this->run($query, $bindings, $connection, function ($query, $bindings, $connection) {
+            $statement = $this->getPdo($connection)->prepare($query);
 
             $this->bindValues($statement, $bindings);
 
@@ -100,20 +109,29 @@ class Connection implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function select(string $query, array $bindings = []): array
+    public function select(
+        string $query,
+        array $bindings = [],
+        string $connection = ConnectionFactory::CONNECTION_MAIN
+    ): array
     {
-        return $this->getFetchStatement($query, $bindings)->fetchAll();
+        return $this->getFetchStatement($query, $bindings, $connection)->fetchAll();
     }
 
     /**
      * @inheritdoc
      */
-    public function selectOne(string $query, array $bindings = []): array
+    public function selectOne(
+        string $query,
+        array $bindings = [],
+        string $connection = ConnectionFactory::CONNECTION_MAIN
+    ): array
     {
-        $result = $this->getFetchStatement($query, $bindings)->fetch(\PDO::FETCH_ASSOC);
+        $result = $this->getFetchStatement($query, $bindings, $connection)->fetch(\PDO::FETCH_ASSOC);
 
         if ($result === false) {
-            $this->logger->error('Failed to execute query: ' . var_export($this->getPdo()->errorInfo(), true));
+            $message = 'Failed to execute query: ' . var_export($this->getPdo($connection)->errorInfo(), true);
+            $this->logger->error($message);
 
             $result = [];
         }
@@ -126,12 +144,17 @@ class Connection implements ConnectionInterface
      *
      * @param string $query
      * @param array $bindings
+     * @param string $connection
      * @return \PDOStatement
      */
-    private function getFetchStatement(string $query, array $bindings = []): \PDOStatement
+    private function getFetchStatement(
+        string $query,
+        array $bindings = [],
+        string $connection = ConnectionFactory::CONNECTION_MAIN
+    ): \PDOStatement
     {
-        return $this->run($query, $bindings, function ($query, $bindings) {
-            $statement = $this->getPdo()->prepare($query);
+        return $this->run($query, $bindings, $connection, function ($query, $bindings, $connection) {
+            $statement = $this->getPdo($connection)->prepare($query);
 
             $this->bindValues($statement, $bindings);
 
@@ -145,14 +168,17 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @param string $connection
+     * @retun @array
      */
-    public function listTables(): array
+    public function listTables(string $connection = ConnectionFactory::CONNECTION_MAIN): array
     {
         $query = 'SHOW TABLES';
 
-        return $this->run($query, [], function () use ($query) {
-            $statement = $this->getPdo()->prepare($query);
+        return $this->run($query, [], $connection, function () use ($query, $connection) {
+            $statement = $this->getPdo($connection)->prepare($query);
             $statement->execute();
 
             return $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
@@ -175,42 +201,44 @@ class Connection implements ConnectionInterface
 
     /**
      * {@inheritdoc}
-     *
+     * @param string $connection
      * @throws PDOException
      * @codeCoverageIgnore
      */
-    public function getPdo(): \PDO
+    public function getPdo(string $connection): \PDO
     {
-        $this->connect();
+        $this->connect($connection);
 
         try {
-            $this->pdo->query('SELECT 1');
+            $this->pdo[$connection]->query('SELECT 1');
         } catch (\Exception $exception) {
-            if ($this->pdo->errorInfo()[1] !== self::MYSQL_ERROR_CODE_SERVER_GONE_AWAY) {
+            if ($this->pdo[$connection]->errorInfo()[1] !== self::MYSQL_ERROR_CODE_SERVER_GONE_AWAY) {
                 throw new PDOException($exception->getMessage(), $exception->getCode(), $exception);
             }
 
             $this->logger->notice('Lost connection to Mysql server. Reconnecting.');
-            $this->pdo = null;
-            $this->connect();
+            unset($this->pdo[$connection]);
+            $this->connect($connection);
         }
 
-        return $this->pdo;
+        return $this->pdo[$connection];
     }
 
     /**
      * Create PDO connection.
      *
+     * @param string $connection
+     *
      * @codeCoverageIgnore
      */
-    private function connect()
+    private function connect(string $connection)
     {
-        if ($this->pdo instanceof \PDO) {
+        if (isset($this->pdo[$connection]) && $this->pdo[$connection] instanceof \PDO) {
             return;
         }
 
-        $connectionData = $this->connectionFactory->create(ConnectionFactory::CONNECTION_MAIN);
-        $this->pdo = new \PDO(
+        $connectionData = $this->connectionFactory->create($connection);
+        $this->pdo[$connection] = new \PDO(
             sprintf(
                 'mysql:dbname=%s;host=%s',
                 $connectionData->getDbName(),
@@ -227,26 +255,30 @@ class Connection implements ConnectionInterface
     /**
      * @param string $query
      * @param array $bindings
+     * @param string $connection
      * @param \Closure $closure
      * @return mixed
      */
-    private function run(string $query, array $bindings, \Closure $closure)
+    private function run(string $query, array $bindings, string $connection, \Closure $closure)
     {
-        $this->logger->debug('Query: ' . $query);
+        $this->logger->debug("Connection: $connection. Query: $query");
 
         if ($bindings) {
-            $this->logger->debug('Query bindings: ' . var_export($bindings, true));
+            $message = "Connection: $connection. Query bindings: " . var_export($bindings, true);
+            $this->logger->debug($message);
         }
 
-        return $closure($query, $bindings);
+        return $closure($query, $bindings, $connection);
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @param string $connection
      */
-    public function close()
+    public function close(string $connection = ConnectionFactory::CONNECTION_MAIN)
     {
-        $this->pdo = null;
+        unset($this->pdo[$connection]);
     }
 
     /**
@@ -269,7 +301,7 @@ class Connection implements ConnectionInterface
     private function getTablePrefix(): string
     {
         if ($this->tablePrefix === null) {
-            $this->tablePrefix = $this->mergedConfig->get()['table_prefix'] ?? '';
+            $this->tablePrefix = $this->mergedConfig->get()[MergedConfig::DB]['table_prefix'] ?? '';
         }
 
         return $this->tablePrefix;
