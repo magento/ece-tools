@@ -43,7 +43,7 @@ class Switcher
     }
 
     /**
-     * Removes cron enabled flag from Magento configuration file.
+     * Removes cron enabled flag from Magento configuration file
      *
      * @throws FileSystemException
      */
@@ -55,7 +55,7 @@ class Switcher
     }
 
     /**
-     * Add cron enabled flag to Magento configuration file.
+     * Add cron enabled flag to Magento configuration file
      *
      * @throws FileSystemException
      */

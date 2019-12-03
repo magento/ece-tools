@@ -66,7 +66,8 @@ class CronDisable extends Command
     }
 
     /**
-     * Runs process which finds all running Magento cron processes and kills them
+     * Disable running of all Magento cron.
+     * Runs process which finds all running Magento cron processes and kills them.
      *
      * {@inheritdoc}
      */
