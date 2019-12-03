@@ -13,9 +13,9 @@ use GuzzleHttp\Promise\PromiseInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Step\PostDeploy\WarmUp;
 use Magento\MagentoCloud\Step\StepException;
-use PHPUnit\Framework\TestCase;
+use Magento\MagentoCloud\WarmUp\Urls;
 use PHPUnit\Framework\MockObject\MockObject;
-use Psr\Http\Message\RequestInterface;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
@@ -40,7 +40,7 @@ class WarmUpTest extends TestCase
     private $poolMock;
 
     /**
-     * @var WarmUp\Urls|Mock
+     * @var Urls|MockObject
      */
     private $urlsMock;
 
@@ -63,7 +63,7 @@ class WarmUpTest extends TestCase
         $this->poolMock = $this->createMock(Pool::class);
         $this->promiseMock = $this->createMock(PromiseInterface::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
-        $this->urlsMock = $this->createMock(WarmUp\Urls::class);
+        $this->urlsMock = $this->createMock(Urls::class);
 
         $this->poolMock->method('promise')
             ->willReturn($this->promiseMock);
@@ -75,6 +75,9 @@ class WarmUpTest extends TestCase
         );
     }
 
+    /**
+     * @throws StepException
+     */
     public function testExecute()
     {
         $urls = [
@@ -124,6 +127,9 @@ class WarmUpTest extends TestCase
         $this->step->execute();
     }
 
+    /**
+     * @throws StepException
+     */
     public function testExecuteWithPromiseException()
     {
         $urls = [
