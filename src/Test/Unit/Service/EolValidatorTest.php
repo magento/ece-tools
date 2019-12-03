@@ -53,6 +53,8 @@ class EolValidatorTest extends TestCase
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_get_contents');
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_exists');
 
+        Carbon::setTestNow(Carbon::create(2019, 12, 2));
+
         $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createPartialMock(File::class, ['isExists']);
         $this->serviceFactoryMock = $this->createMock(ServiceFactory::class);
@@ -65,12 +67,18 @@ class EolValidatorTest extends TestCase
     }
 
     /**
+     * @inheritDoc
+     */
+    protected function tearDown()
+    {
+        Carbon::setTestNow();
+    }
+
+    /**
      * Test compatible version.
      */
     public function testCompatibleVersion()
     {
-        Carbon::setTestNow(Carbon::create(2019, 12, 2));
-
         $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
         $this->fileListMock->expects($this->once())
@@ -86,8 +94,6 @@ class EolValidatorTest extends TestCase
         $serviceVersion = '6.5';
 
         $this->assertEquals([], $this->validator->validateService($serviceName, $serviceVersion));
-
-        Carbon::setTestNow();
     }
 
     /**
@@ -95,8 +101,6 @@ class EolValidatorTest extends TestCase
      */
     public function testValidateServiceWithoutConfigs()
     {
-        Carbon::setTestNow(Carbon::create(2019, 12, 2));
-
         $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
         $this->fileListMock->expects($this->once())
@@ -115,8 +119,6 @@ class EolValidatorTest extends TestCase
             [],
             $this->validator->validateService($serviceName, $serviceVersion)
         );
-
-        Carbon::setTestNow();
     }
 
     /**
@@ -204,8 +206,6 @@ class EolValidatorTest extends TestCase
             [ValidatorInterface::LEVEL_NOTICE => $message],
             $this->validator->validateService($serviceName, $serviceVersion)
         );
-
-        Carbon::setTestNow();
     }
 
     /**
@@ -213,8 +213,6 @@ class EolValidatorTest extends TestCase
      */
     public function testValidateWarningMessage()
     {
-        Carbon::setTestNow(Carbon::create(2019, 1, 1));
-
         $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
         $this->fileListMock->expects($this->once())
@@ -240,7 +238,5 @@ class EolValidatorTest extends TestCase
             [ValidatorInterface::LEVEL_WARNING => $message],
             $this->validator->validateService($serviceName, $serviceVersion)
         );
-
-        Carbon::setTestNow();
     }
 }
