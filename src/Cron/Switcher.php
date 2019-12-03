@@ -17,14 +17,14 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
 class Switcher
 {
     /**
-     * Deploy Config Writer
+     * Magento env config writer
      *
      * @var WriterInterface
      */
     private $writer;
 
     /**
-     * Deploy Config Reader
+     * Magento env config reader
      *
      * @var ReaderInterface
      */
@@ -43,7 +43,7 @@ class Switcher
     }
 
     /**
-     * Removes cron enabled flag from Magento configuration file
+     * Unsets flag from Magento configuration file to enable cron running
      *
      * @throws FileSystemException
      */
@@ -55,7 +55,7 @@ class Switcher
     }
 
     /**
-     * Add cron enabled flag to Magento configuration file
+     * Disable cron running by adding appropriate value to cron enable flag
      *
      * @throws FileSystemException
      */

@@ -39,7 +39,7 @@ class EnableCron implements StepInterface
     }
 
     /**
-     * Removes cron enabled flag from Magento configuration file.
+     * Enables Magento cron
      *
      * {@inheritdoc}
      */

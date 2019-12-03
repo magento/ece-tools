@@ -60,7 +60,7 @@ class CronDisable extends Command
     protected function configure()
     {
         $this->setName(static::NAME)
-            ->setDescription('Disable all Magento cron processes');
+            ->setDescription('Disable all Magento cron processes and kills currently running');
 
         parent::configure();
     }

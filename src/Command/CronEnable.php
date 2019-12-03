@@ -55,7 +55,7 @@ class CronEnable extends Command
     }
 
     /**
-     * Runs process which finds all running Magento cron processes and kills them
+     * Enables Magento cron
      *
      * {@inheritdoc}
      */
