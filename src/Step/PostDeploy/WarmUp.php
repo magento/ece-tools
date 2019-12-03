@@ -9,7 +9,7 @@ namespace Magento\MagentoCloud\Step\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
 use Magento\MagentoCloud\Http\PoolFactory;
-use Magento\MagentoCloud\Step\PostDeploy\WarmUp\Urls;
+use Magento\MagentoCloud\WarmUp\Urls;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
