@@ -64,12 +64,11 @@ class CronEnableTest extends TestCase
         $this->assertSame(0, $tester->getStatusCode());
     }
 
-    /**
-     * @expectedExceptionMessage save error
-     * @expectedException \Magento\MagentoCloud\Filesystem\FileSystemException
-     */
     public function testExecuteWithException()
     {
+        $this->expectException(FileSystemException::class);
+        $this->expectExceptionMessage('save error');
+
         $this->cronSwitcherMock->expects($this->once())
             ->method('enable')
             ->willThrowException(new FileSystemException('save error'));
