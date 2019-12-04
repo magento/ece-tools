@@ -106,10 +106,6 @@ class Generate
         $configFile = $this->resolver->getPath();
         $oldConfig = $this->resolver->read();
 
-        if (!is_array($oldConfig)) {
-            $oldConfig = [];
-        }
-
         $newConfig = [];
 
         foreach ($this->configKeys as $requiredConfigKey) {

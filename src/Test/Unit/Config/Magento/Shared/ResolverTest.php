@@ -18,7 +18,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @inheritdoc
  */
-class SharedConfigTest extends TestCase
+class ResolverTest extends TestCase
 {
     /**
      * @var Resolver
@@ -86,5 +86,80 @@ class SharedConfigTest extends TestCase
             ->willReturn(false);
 
         $this->assertSame('magento_root/app/etc/config.local.php', $this->resolver->getPath());
+    }
+
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testRead(): void
+    {
+        $this->configFileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn('magento_root/app/etc/config.php');
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/app/etc/config.php')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('requireFile')
+            ->willReturn(['some' => 'config']);
+
+        $this->assertSame(
+            ['some' => 'config'],
+            $this->resolver->read()
+        );
+    }
+
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testReadBrokenFile(): void
+    {
+        $this->configFileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn('magento_root/app/etc/config.php');
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/app/etc/config.php')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('requireFile')
+            ->willReturn('');
+
+        $this->assertSame(
+            [],
+            $this->resolver->read()
+        );
+    }
+
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testReadNotExists(): void
+    {
+        $this->configFileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn('magento_root/app/etc/config.php');
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.2')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('magento_root/app/etc/config.php')
+            ->willReturn(false);
+
+        $this->assertSame(
+            [],
+            $this->resolver->read()
+        );
     }
 }

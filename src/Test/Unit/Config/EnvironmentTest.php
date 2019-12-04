@@ -30,14 +30,14 @@ class EnvironmentTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentDataMock = $this->createMock(EnvironmentDataInterface::class);
 
         $this->environment = new Environment($this->environmentDataMock);
     }
 
-    public function testGetEnv()
+    public function testGetEnv(): void
     {
         $this->environmentDataMock->expects($this->once())
             ->method('getEnv')
@@ -52,7 +52,7 @@ class EnvironmentTest extends TestCase
      * @param string $branchName
      * @dataProvider isMasterBranchDataProvider
      */
-    public function testIsMasterBranch(bool $expectedResult, string $branchName)
+    public function testIsMasterBranch(bool $expectedResult, string $branchName): void
     {
         $this->environmentDataMock->expects($this->once())
             ->method('getBranchName')
@@ -87,5 +87,60 @@ class EnvironmentTest extends TestCase
             [true, 'production'],
             [true, 'production-lad13m'],
         ];
+    }
+
+    public function testGetCryptKey(): void
+    {
+        $this->environmentDataMock->expects($this->once())
+            ->method('getVariables')
+            ->willReturn(['CRYPT_KEY' => 'secret-key']);
+
+        $this->assertSame('secret-key', $this->environment->getCryptKey());
+    }
+
+    public function testGetApplication(): void
+    {
+        $this->environmentDataMock->expects($this->once())
+            ->method('getApplication')
+            ->willReturn(['some' => 'value']);
+
+        $this->assertSame(['some' => 'value'], $this->environment->getApplication());
+    }
+
+    public function testGetRoutes(): void
+    {
+        $this->environmentDataMock->expects($this->once())
+            ->method('getRoutes')
+            ->willReturn(['some' => 'routes']);
+
+        $this->assertSame(['some' => 'routes'], $this->environment->getRoutes());
+    }
+
+    public function testGetRelationships(): void
+    {
+        $this->environmentDataMock->expects($this->once())
+            ->method('getRelationships')
+            ->willReturn(['some' => 'relationships']);
+
+        $this->assertSame(['some' => 'relationships'], $this->environment->getRelationships());
+    }
+
+    public function testGetRelationship(): void
+    {
+        $this->environmentDataMock->expects($this->once())
+            ->method('getRelationships')
+            ->willReturn(['some' => ['relationships' => ['redis', 'mysql']]]);
+
+        $this->assertSame(['relationships' => ['redis', 'mysql']], $this->environment->getRelationship('some'));
+    }
+
+    public function testGetEnvVarMageErrorReportDirNestingLevel(): void
+    {
+        $this->environmentDataMock->expects($this->once())
+            ->method('getEnv')
+            ->with(Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL)
+            ->willReturn(1);
+
+        $this->assertSame(1, $this->environment->getEnvVarMageErrorReportDirNestingLevel());
     }
 }

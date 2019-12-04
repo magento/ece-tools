@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
@@ -50,10 +49,6 @@ class Option implements OptionInterface
      * @var Resolver
      */
     private $configResolver;
-    /**
-     * @var File
-     */
-    private $file;
 
     /**
      * @param AdminDataInterface $adminData
@@ -62,7 +57,6 @@ class Option implements OptionInterface
      * @param ThreadCountOptimizer $threadCountOptimizer
      * @param BuildInterface $stageConfig
      * @param Resolver $configResolver
-     * @param File $file
      */
     public function __construct(
         AdminDataInterface $adminData,
@@ -70,8 +64,7 @@ class Option implements OptionInterface
         MagentoVersion $magentoVersion,
         ThreadCountOptimizer $threadCountOptimizer,
         BuildInterface $stageConfig,
-        Resolver $configResolver,
-        File $file
+        Resolver $configResolver
     ) {
         $this->adminData = $adminData;
         $this->magentoVersion = $magentoVersion;
@@ -79,7 +72,6 @@ class Option implements OptionInterface
         $this->threadCountOptimizer = $threadCountOptimizer;
         $this->stageConfig = $stageConfig;
         $this->configResolver = $configResolver;
-        $this->file = $file;
     }
 
     /**

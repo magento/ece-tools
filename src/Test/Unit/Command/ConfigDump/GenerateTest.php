@@ -49,7 +49,7 @@ class GenerateTest extends TestCase
     /**
      * @var Resolver|MockObject
      */
-    private $sharedConfigMock;
+    private $resolverMock;
 
     /**
      * @var PhpFormatter|MockObject
@@ -64,7 +64,7 @@ class GenerateTest extends TestCase
         $this->connectionMock = $this->getMockForAbstractClass(ConnectionInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
-        $this->sharedConfigMock = $this->createMock(Resolver::class);
+        $this->resolverMock = $this->createMock(Resolver::class);
         $this->formatterMock = $this->createMock(PhpFormatter::class);
 
         $this->process = new Generate(
@@ -72,7 +72,7 @@ class GenerateTest extends TestCase
             $this->fileMock,
             new ArrayManager(),
             $this->magentoVersionMock,
-            $this->sharedConfigMock,
+            $this->resolverMock,
             $this->formatterMock
         );
     }
@@ -91,8 +91,11 @@ class GenerateTest extends TestCase
             ->method('isGreaterOrEqual')
             ->with('2.2')
             ->willReturn($versionGreaterTwoDotTwo);
-        $this->sharedConfigMock->method('resolve')
+        $this->resolverMock->method('getPath')
             ->willReturn(__DIR__ . '/_files/app/etc/config.php');
+        $this->resolverMock->expects($this->once())
+            ->method('read')
+            ->willReturn(require __DIR__ . '/_files/app/etc/config.php');
         $this->connectionMock->method('select')
             ->with('SELECT DISTINCT `interface_locale` FROM `admin_user`')
             ->willReturn([
