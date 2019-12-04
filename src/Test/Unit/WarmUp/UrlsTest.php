@@ -5,11 +5,11 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy\WarmUp;
+namespace Magento\MagentoCloud\Test\Unit\WarmUp;
 
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
-use Magento\MagentoCloud\Step\PostDeploy\WarmUp\Urls;
-use Magento\MagentoCloud\Step\PostDeploy\WarmUp\UrlsPattern;
+use Magento\MagentoCloud\WarmUp\Urls;
+use Magento\MagentoCloud\WarmUp\UrlsPattern;
 use Magento\MagentoCloud\Util\UrlManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
