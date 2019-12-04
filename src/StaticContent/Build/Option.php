@@ -48,7 +48,7 @@ class Option implements OptionInterface
     /**
      * @var Resolver
      */
-    private $configResolver;
+    private $resolver;
 
     /**
      * @param AdminDataInterface $adminData
@@ -56,7 +56,7 @@ class Option implements OptionInterface
      * @param MagentoVersion $magentoVersion
      * @param ThreadCountOptimizer $threadCountOptimizer
      * @param BuildInterface $stageConfig
-     * @param Resolver $configResolver
+     * @param Resolver $resolver
      */
     public function __construct(
         AdminDataInterface $adminData,
@@ -64,14 +64,14 @@ class Option implements OptionInterface
         MagentoVersion $magentoVersion,
         ThreadCountOptimizer $threadCountOptimizer,
         BuildInterface $stageConfig,
-        Resolver $configResolver
+        Resolver $resolver
     ) {
         $this->adminData = $adminData;
         $this->magentoVersion = $magentoVersion;
         $this->arrayManager = $arrayManager;
         $this->threadCountOptimizer = $threadCountOptimizer;
         $this->stageConfig = $stageConfig;
-        $this->configResolver = $configResolver;
+        $this->resolver = $resolver;
     }
 
     /**
@@ -106,7 +106,7 @@ class Option implements OptionInterface
      */
     public function getLocales(): array
     {
-        $config = $this->configResolver->read();
+        $config = $this->resolver->read();
         $flattenedConfig = $this->arrayManager->flatten($config);
 
         $locales = [$this->adminData->getLocale()];

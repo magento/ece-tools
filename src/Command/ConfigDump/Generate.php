@@ -72,7 +72,7 @@ class Generate
      * @param File $file
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
-     * @param Resolver $sharedConfig
+     * @param Resolver $resolver
      * @param PhpFormatter $phpFormatter
      */
     public function __construct(
@@ -80,13 +80,13 @@ class Generate
         File $file,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
-        Resolver $sharedConfig,
+        Resolver $resolver,
         PhpFormatter $phpFormatter
     ) {
         $this->connection = $connection;
         $this->file = $file;
         $this->arrayManager = $arrayManager;
-        $this->resolver = $sharedConfig;
+        $this->resolver = $resolver;
         $this->magentoVersion = $magentoVersion;
         $this->phpFormatter = $phpFormatter;
     }

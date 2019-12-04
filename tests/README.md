@@ -11,7 +11,7 @@ This way will run next tests:
 This is the best way to run tests locally.
 
 1. Navigate to working directory
-2. Run `composer test` and verify results
+2. Run `composer test:all` and verify results
 
 ## Unit tests
 
@@ -27,7 +27,7 @@ To run unit tests, specify the configuration file in the following command:
 ```
 ./vendor/bin/phpcs src --standard=tests/static/phpcs-ruleset.xml -p -n
 ```
-2. Run PHPMD tests withfollowing command:
+2. Run PHPMD tests with following command:
 ```
 ./vendor/bin/phpmd src xml tests/static/phpmd-ruleset.xml
 ```
@@ -36,7 +36,7 @@ To run unit tests, specify the configuration file in the following command:
 
 This test will generate a pretty report for unit test coverage.
 
-1. Run the command `composer test-coverage`
+1. Run the command `composer test:coverage`
 2. Observe result in CLI output
  - Be sure to enable [xDebug](http://devdocs.magento.com/guides/v2.2/cloud/howtos/debug.html) for this test
 
@@ -44,7 +44,7 @@ This test will generate a pretty report for unit test coverage.
 
 This test will generate a pretty report for unit test coverage.
 
-1. Run the command `composer test-coverage-generate`
+1. Run the command `composer test:coverage-generate`
 2. Navigate to `tests/unit/tmp/coverage` and open `index.html` file in browser
  - Be sure to enable [xDebug](http://devdocs.magento.com/guides/v2.2/cloud/howtos/debug.html) for this test
 

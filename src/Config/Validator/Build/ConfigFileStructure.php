@@ -39,16 +39,16 @@ class ConfigFileStructure implements ValidatorInterface
     /**
      * @param ArrayManager $arrayManager
      * @param Validator\ResultFactory $resultFactory
-     * @param Resolver $configResolver
+     * @param Resolver $resolver
      */
     public function __construct(
         ArrayManager $arrayManager,
         Validator\ResultFactory $resultFactory,
-        Resolver $configResolver
+        Resolver $resolver
     ) {
         $this->arrayManager = $arrayManager;
         $this->resultFactory = $resultFactory;
-        $this->resolver = $configResolver;
+        $this->resolver = $resolver;
     }
 
     /**
