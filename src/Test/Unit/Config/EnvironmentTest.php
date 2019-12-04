@@ -138,7 +138,7 @@ class EnvironmentTest extends TestCase
     {
         $this->environmentDataMock->expects($this->once())
             ->method('getEnv')
-            ->with(Environment::ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL)
+            ->with('MAGE_ERROR_REPORT_DIR_NESTING_LEVEL')
             ->willReturn(1);
 
         $this->assertSame(1, $this->environment->getEnvVarMageErrorReportDirNestingLevel());
