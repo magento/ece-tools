@@ -53,6 +53,8 @@ class EolValidatorTest extends TestCase
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_get_contents');
         self::defineFunctionMock('Magento\MagentoCloud\Filesystem\Driver', 'file_exists');
 
+        Carbon::setTestNow(Carbon::create(2019, 12, 2));
+
         $this->fileListMock = $this->createMock(FileList::class);
         $this->fileMock = $this->createPartialMock(File::class, ['isExists']);
         $this->serviceFactoryMock = $this->createMock(ServiceFactory::class);
@@ -62,6 +64,14 @@ class EolValidatorTest extends TestCase
             $this->fileMock,
             $this->serviceFactoryMock
         );
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function tearDown()
+    {
+        Carbon::setTestNow();
     }
 
     /**
@@ -169,7 +179,8 @@ class EolValidatorTest extends TestCase
      */
     public function testValidateNoticeMessage()
     {
-        $this->markTestIncomplete();
+        Carbon::setTestNow(Carbon::create(2019, 11, 1));
+
         $configsPath = __DIR__ . '/_file/eol_2.yaml';
 
         $this->fileListMock->expects($this->once())
@@ -183,7 +194,7 @@ class EolValidatorTest extends TestCase
 
         $serviceName = ServiceInterface::NAME_PHP;
         $serviceVersion = '7.1.30';
-        $eolDate = Carbon::tomorrow();
+        $eolDate = Carbon::create(2019, 12, 1);
         $message = sprintf(
             '%s %s is approaching EOL (%s).',
             $serviceName,
