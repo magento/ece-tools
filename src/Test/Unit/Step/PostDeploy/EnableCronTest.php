@@ -7,12 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 
-use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
-use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
+use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\Step\PostDeploy\EnableCron;
-use Psr\Log\LoggerInterface;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * Test class for Magento\MagentoCloud\Process\Deploy\EnableCron
@@ -30,14 +29,9 @@ class EnableCronTest extends TestCase
     private $loggerMock;
 
     /**
-     * @var ReaderInterface|MockObject
+     * @var Switcher|MockObject
      */
-    private $readerMock;
-
-    /**
-     * @var WriterInterface|MockObject
-     */
-    private $writerMock;
+    private $cronSwitcherMock;
 
     /**
      * Setup the test environment.
@@ -45,29 +39,22 @@ class EnableCronTest extends TestCase
     protected function setUp()
     {
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
-        $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->cronSwitcherMock = $this->createMock(Switcher::class);
 
         $this->step = new EnableCron(
             $this->loggerMock,
-            $this->writerMock,
-            $this->readerMock
+            $this->cronSwitcherMock
         );
     }
 
     public function testExecute()
     {
-        $config = ['cron' => ['enabled' => 0, 'other_cron_config' => 1], 'other_conf' => 'value'];
-        $configResult = ['cron' => ['other_cron_config' => 1], 'other_conf' => 'value'];
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Enable cron');
-        $this->readerMock->expects($this->once())
-            ->method('read')
-            ->willReturn($config);
-        $this->writerMock->expects($this->once())
-            ->method('create')
-            ->with($configResult);
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable');
+
         $this->step->execute();
     }
 }

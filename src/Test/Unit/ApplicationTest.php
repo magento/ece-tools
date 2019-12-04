@@ -75,6 +75,8 @@ class ApplicationTest extends TestCase
         Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
         Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
         Command\CronKill::NAME => Command\CronKill::class,
+        Command\CronEnable::NAME => Command\CronEnable::class,
+        Command\CronDisable::NAME => Command\CronDisable::class,
         Command\ConfigShow::NAME => Command\ConfigShow::class,
         Command\RunCommand::NAME => Command\RunCommand::class,
     ];
