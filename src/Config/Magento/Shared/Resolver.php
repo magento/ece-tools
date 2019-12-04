@@ -49,6 +49,8 @@ class Resolver
     }
 
     /**
+     * Get the resolved config path according to Magento version
+     *
      * @throws UndefinedPackageException
      */
     public function getPath(): string
@@ -59,6 +61,8 @@ class Resolver
     }
 
     /**
+     * Read the contents of resolved config according to Magento version
+     *
      * @return array
      * @throws UndefinedPackageException
      */
