@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use Magento\MagentoCloud\Filesystem\Resolver\Resolver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Util\ArrayManager;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -45,7 +45,7 @@ class ConfigFileStructureTest extends TestCase
     private $arrayManagerMock;
 
     /**
-     * @var SharedConfig|MockObject
+     * @var Resolver|MockObject
      */
     private $configResolverMock;
 
@@ -57,7 +57,7 @@ class ConfigFileStructureTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
-        $this->configResolverMock = $this->createMock(SharedConfig::class);
+        $this->configResolverMock = $this->createMock(Resolver::class);
 
         $this->configFileStructure = new ConfigFileStructure(
             $this->arrayManagerMock,

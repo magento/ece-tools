@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\StaticContent\Build;
 use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use Magento\MagentoCloud\Filesystem\Resolver\Resolver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\Build\Option;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
@@ -54,7 +54,7 @@ class OptionTest extends TestCase
     private $stageConfigMock;
 
     /**
-     * @var SharedConfig|MockObject
+     * @var Resolver|MockObject
      */
     private $configResolverMock;
 
@@ -73,7 +73,7 @@ class OptionTest extends TestCase
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
         $this->threadCountOptimizerMock = $this->createMock(ThreadCountOptimizer::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(BuildInterface::class);
-        $this->configResolverMock = $this->createMock(SharedConfig::class);
+        $this->configResolverMock = $this->createMock(Resolver::class);
         $this->fileMock = $this->createMock(File::class);
 
         $this->option = new Option(

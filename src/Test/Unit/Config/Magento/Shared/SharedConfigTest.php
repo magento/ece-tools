@@ -5,11 +5,13 @@
  */
 declare(strict_types=1);
 
-namespace Magento\MagentoCloud\Test\Unit\Filesystem\Resolver;
+namespace Magento\MagentoCloud\Test\Unit\Config\Magento\Shared;
 
+use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\Filesystem\ConfigFileList;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -19,7 +21,7 @@ use PHPUnit\Framework\TestCase;
 class SharedConfigTest extends TestCase
 {
     /**
-     * @var SharedConfig
+     * @var Resolver
      */
     private $resolver;
 
@@ -34,20 +36,30 @@ class SharedConfigTest extends TestCase
     private $magentoVersionMock;
 
     /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->configFileListMock = $this->createMock(ConfigFileList::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->fileMock = $this->createMock(File::class);
 
-        $this->resolver = new SharedConfig(
+        $this->resolver = new Resolver(
             $this->configFileListMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->fileMock
         );
     }
 
-    public function testResolve()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetPath(): void
     {
         $this->configFileListMock->expects($this->once())
             ->method('getConfig')
@@ -57,10 +69,13 @@ class SharedConfigTest extends TestCase
             ->with('2.2')
             ->willReturn(true);
 
-        $this->assertSame('magento_root/app/etc/config.php', $this->resolver->resolve());
+        $this->assertSame('magento_root/app/etc/config.php', $this->resolver->getPath());
     }
 
-    public function testResolve21()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testGetPath21(): void
     {
         $this->configFileListMock->expects($this->once())
             ->method('getConfigLocal')
@@ -70,6 +85,6 @@ class SharedConfigTest extends TestCase
             ->with('2.2')
             ->willReturn(false);
 
-        $this->assertSame('magento_root/app/etc/config.local.php', $this->resolver->resolve());
+        $this->assertSame('magento_root/app/etc/config.local.php', $this->resolver->getPath());
     }
 }

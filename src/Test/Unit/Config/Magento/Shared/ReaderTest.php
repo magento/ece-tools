@@ -51,11 +51,19 @@ class ReaderTest extends TestCase
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
-            ->willReturn(__DIR__ . '/_file/config.php');
+            ->willReturn('config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(__DIR__ . '/_file/config.php')
+            ->with('config.php')
             ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('requireFile')
+            ->willReturn([
+                'modules' => [
+                    'Some_ModuleName' => 1,
+                    'Another_Module' => 0,
+                ],
+            ]);
 
         $this->assertEquals(
             [
@@ -72,11 +80,14 @@ class ReaderTest extends TestCase
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
-            ->willReturn(__DIR__ . '/_file/config_broken.php');
+            ->willReturn('config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(__DIR__ . '/_file/config_broken.php')
+            ->with('config.php')
             ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('requireFile')
+            ->willReturn('');
 
         $this->assertEquals([], $this->reader->read());
     }
@@ -85,10 +96,10 @@ class ReaderTest extends TestCase
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
-            ->willReturn('/path/to/file');
+            ->willReturn('config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with('/path/to/file')
+            ->with('config.php')
             ->willReturn(false);
 
         $this->assertEquals(
