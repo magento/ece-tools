@@ -33,7 +33,7 @@ class SchemaTest extends TestCase
         $this->schema = new Schema();
     }
 
-    public function testGetDefaultsForBuild()
+    public function testGetDefaultsForBuild(): void
     {
         $this->assertEquals(
             [
@@ -51,7 +51,7 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetDefaultsForDeploy()
+    public function testGetDefaultsForDeploy(): void
     {
         $this->assertEquals(
             [
@@ -85,8 +85,18 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetDefaultsForPostDeploy()
+    public function testGetDefaultsForPostDeploy(): void
     {
+        $this->assertEquals(
+            [
+                PostDeployInterface::VAR_WARM_UP_PAGES => [
+                    '',
+                ],
+                PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
+            ],
+            $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
+        );
+        /** Lazy loading */
         $this->assertEquals(
             [
                 PostDeployInterface::VAR_WARM_UP_PAGES => [
@@ -98,7 +108,7 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetDefaultsForSystemVariables()
+    public function testGetDefaultsForSystemVariables(): void
     {
         $this->assertEquals(
             [
@@ -112,7 +122,7 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetDefaultsForGlobalSection()
+    public function testGetDefaultsForGlobalSection(): void
     {
         $this->assertEquals(
             [
@@ -127,7 +137,7 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetSchemaItemsExists()
+    public function testGetSchemaItemsExists(): void
     {
         $requiredItems = [
             StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,

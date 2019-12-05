@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,28 +22,28 @@ class DisableCron implements StepInterface
     private $backgroundProcessKill;
 
     /**
-     * @var WriterInterface
-     */
-    private $writer;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
+     * @var Switcher
+     */
+    private $cronSwitcher;
+
+    /**
      * @param BackgroundProcessKill $backgroundProcessKill
+     * @param Switcher $cronSwitcher
      * @param LoggerInterface $logger
-     * @param WriterInterface $deployConfigWriter
      */
     public function __construct(
         BackgroundProcessKill $backgroundProcessKill,
-        LoggerInterface $logger,
-        WriterInterface $deployConfigWriter
+        Switcher $cronSwitcher,
+        LoggerInterface $logger
     ) {
         $this->backgroundProcessKill = $backgroundProcessKill;
+        $this->cronSwitcher = $cronSwitcher;
         $this->logger = $logger;
-        $this->writer = $deployConfigWriter;
     }
 
     /**
@@ -55,7 +55,7 @@ class DisableCron implements StepInterface
     public function execute()
     {
         $this->logger->info('Disable cron');
-        $this->writer->update(['cron' => ['enabled' => 0]]);
+        $this->cronSwitcher->disable();
 
         $this->backgroundProcessKill->execute();
     }

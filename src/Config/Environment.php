@@ -26,7 +26,7 @@ class Environment
     /**
      * The environment variable for controlling the directory nesting level for error reporting
      */
-    private const ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL = 'MAGE_ERROR_REPORT_DIR_NESTING_LEVEL';
+    public const ENV_MAGE_ERROR_REPORT_DIR_NESTING_LEVEL = 'MAGE_ERROR_REPORT_DIR_NESTING_LEVEL';
 
     /**
      * @var EnvironmentDataInterface

@@ -9,8 +9,7 @@ namespace Magento\MagentoCloud\StaticContent\Build;
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\StaticContent\OptionInterface;
 use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
@@ -47,13 +46,9 @@ class Option implements OptionInterface
     private $stageConfig;
 
     /**
-     * @var SharedConfig
+     * @var Resolver
      */
-    private $configResolver;
-    /**
-     * @var File
-     */
-    private $file;
+    private $resolver;
 
     /**
      * @param AdminDataInterface $adminData
@@ -61,8 +56,7 @@ class Option implements OptionInterface
      * @param MagentoVersion $magentoVersion
      * @param ThreadCountOptimizer $threadCountOptimizer
      * @param BuildInterface $stageConfig
-     * @param SharedConfig $configResolver
-     * @param File $file
+     * @param Resolver $resolver
      */
     public function __construct(
         AdminDataInterface $adminData,
@@ -70,16 +64,14 @@ class Option implements OptionInterface
         MagentoVersion $magentoVersion,
         ThreadCountOptimizer $threadCountOptimizer,
         BuildInterface $stageConfig,
-        SharedConfig $configResolver,
-        File $file
+        Resolver $resolver
     ) {
         $this->adminData = $adminData;
         $this->magentoVersion = $magentoVersion;
         $this->arrayManager = $arrayManager;
         $this->threadCountOptimizer = $threadCountOptimizer;
         $this->stageConfig = $stageConfig;
-        $this->configResolver = $configResolver;
-        $this->file = $file;
+        $this->resolver = $resolver;
     }
 
     /**
@@ -114,9 +106,8 @@ class Option implements OptionInterface
      */
     public function getLocales(): array
     {
-        $configPath = $this->configResolver->resolve();
-        $configuration = $this->file->isExists($configPath) ? $this->file->requireFile($configPath) : [];
-        $flattenedConfig = $this->arrayManager->flatten($configuration);
+        $config = $this->resolver->read();
+        $flattenedConfig = $this->arrayManager->flatten($config);
 
         $locales = [$this->adminData->getLocale()];
         $locales = array_merge($locales, $this->arrayManager->filter($flattenedConfig, 'general/locale/code'));

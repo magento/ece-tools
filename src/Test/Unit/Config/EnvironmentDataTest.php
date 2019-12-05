@@ -42,14 +42,14 @@ class EnvironmentDataTest extends TestCase
     /**
      * @inheritDoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         /** @var MockObject|ReaderInterface $environmentReaderMock */
-        /** @var MockObject|Schema $schemaMock */
         $environmentReaderMock = $this->getMockForAbstractClass(ReaderInterface::class);
+        /** @var MockObject|Schema $schemaMock */
         $schemaMock = $this->createMock(Schema::class);
-        $schemaMock->expects($this->any())
-            ->method('getDefaults')
+
+        $schemaMock->method('getDefaults')
             ->with(SystemConfigInterface::SYSTEM_VARIABLES)
             ->willReturn([
                 SystemConfigInterface::VAR_ENV_RELATIONSHIPS => 'MAGENTO_CLOUD_RELATIONSHIPS',
@@ -69,18 +69,18 @@ class EnvironmentDataTest extends TestCase
         $this->environmentData = new EnvironmentData($this->variable, $this->decoderMock);
     }
 
-    public function testGetEnv()
+    public function testGetEnv(): void
     {
         $_ENV = ['some_key' => 'some_value'];
 
         $this->assertEquals('some_value', $this->environmentData->getEnv('some_key'));
     }
 
-    public function testGetEnvFromFunction()
+    public function testGetEnvFromFunction(): void
     {
         $_ENV = [];
-        $getenvMock = $this->getFunctionMock('Magento\MagentoCloud\Config', 'getenv');
-        $getenvMock->expects($this->any())
+        $getEnvMock = $this->getFunctionMock('Magento\MagentoCloud\Config', 'getenv');
+        $getEnvMock->expects($this->any())
             ->with('some_key')
             ->willReturn('some_value');
 
@@ -90,9 +90,10 @@ class EnvironmentDataTest extends TestCase
     /**
      * @param string $envVariableName
      * @param string $methodName
+     *
      * @dataProvider getVariablesDataProvider
      */
-    public function testGetVariables(string $envVariableName, string $methodName)
+    public function testGetVariables(string $envVariableName, string $methodName): void
     {
         $decodedValue = base64_encode(json_encode(['some_value']));
         $_ENV = [$envVariableName => $decodedValue];
@@ -103,10 +104,12 @@ class EnvironmentDataTest extends TestCase
             ->willReturn(['some_value']);
 
         $this->assertEquals(['some_value'], call_user_func([$this->environmentData, $methodName]));
+        /** Lazy loading */
+        $this->assertEquals(['some_value'], call_user_func([$this->environmentData, $methodName]));
     }
 
     /**
-     * @array
+     * @return array
      */
     public function getVariablesDataProvider(): array
     {
@@ -118,7 +121,7 @@ class EnvironmentDataTest extends TestCase
         ];
     }
 
-    public function testGetBranchName()
+    public function testGetBranchName(): void
     {
         $_ENV['MAGENTO_CLOUD_ENVIRONMENT'] = 'production';
 
