@@ -7,8 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\PostDeploy;
 
-use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
-use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
+use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -18,49 +17,35 @@ use Psr\Log\LoggerInterface;
 class EnableCron implements StepInterface
 {
     /**
-     * Magento environment config writer
-     *
-     * @var WriterInterface
-     */
-    private $writer;
-
-    /**
-     * Magento environment config reader
-     *
-     * @var ReaderInterface
-     */
-    private $reader;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
+     * @var Switcher
+     */
+    private $cronSwitcher;
+
+    /**
      * @param LoggerInterface $logger
-     * @param WriterInterface $writer
-     * @param ReaderInterface $reader
+     * @param Switcher $cronSwitcher
      */
     public function __construct(
         LoggerInterface $logger,
-        WriterInterface $writer,
-        ReaderInterface $reader
+        Switcher $cronSwitcher
     ) {
         $this->logger = $logger;
-        $this->writer = $writer;
-        $this->reader = $reader;
+        $this->cronSwitcher = $cronSwitcher;
     }
 
     /**
-     * Removes cron enabled flag from Magento configuration file.
+     * Enables Magento cron
      *
      * {@inheritdoc}
      */
     public function execute()
     {
         $this->logger->info('Enable cron');
-        $config = $this->reader->read();
-        unset($config['cron']['enabled']);
-        $this->writer->create($config);
+        $this->cronSwitcher->enable();
     }
 }
