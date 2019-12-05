@@ -33,7 +33,10 @@ class ReaderTest extends TestCase
      */
     private $reader;
 
-    protected function setUp()
+    /**
+     * @inheritDoc
+     */
+    protected function setUp(): void
     {
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
@@ -44,15 +47,23 @@ class ReaderTest extends TestCase
         );
     }
 
-    public function testRead()
+    public function testRead(): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
-            ->willReturn(__DIR__ . '/_file/app/etc/config.php');
+            ->willReturn('config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with(__DIR__ . '/_file/app/etc/config.php')
+            ->with('config.php')
             ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('requireFile')
+            ->willReturn([
+                'modules' => [
+                    'Some_ModuleName' => 1,
+                    'Another_Module' => 0,
+                ],
+            ]);
 
         $this->assertEquals(
             [
@@ -65,14 +76,30 @@ class ReaderTest extends TestCase
         );
     }
 
-    public function testReadFileNotExists()
+    public function testReadBroken(): void
     {
         $this->fileListMock->expects($this->once())
             ->method('getConfig')
-            ->willReturn('/path/to/file');
+            ->willReturn('config.php');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with('/path/to/file')
+            ->with('config.php')
+            ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('requireFile')
+            ->willReturn('');
+
+        $this->assertEquals([], $this->reader->read());
+    }
+
+    public function testReadFileNotExists(): void
+    {
+        $this->fileListMock->expects($this->once())
+            ->method('getConfig')
+            ->willReturn('config.php');
+        $this->fileMock->expects($this->once())
+            ->method('isExists')
+            ->with('config.php')
             ->willReturn(false);
 
         $this->assertEquals(

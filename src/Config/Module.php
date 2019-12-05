@@ -55,6 +55,9 @@ class Module
      */
     public function refresh(): array
     {
+        // Update initial config file to avoid broken file error.
+        $this->writer->update(['modules' => []]);
+
         $moduleConfig = $this->reader->read()['modules'] ?? [];
 
         $this->magentoShell->execute('module:enable --all');
