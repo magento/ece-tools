@@ -135,7 +135,8 @@ class ModuleTest extends TestCase
                             'Magento_Module3' => 1,
                         ]
                     ]
-                ]);
+                ]
+            );
 
         $this->assertEquals(
             [
