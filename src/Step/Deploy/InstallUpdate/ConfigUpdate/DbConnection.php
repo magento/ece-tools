@@ -9,7 +9,6 @@ namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Database\MergedConfig;
-use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -43,11 +42,6 @@ class DbConnection implements StepInterface
     private $mergedConfig;
 
     /**
-     * @var ResourceConfig
-     */
-    private $resourceConfig;
-
-    /**
      * @var DeployInterface
      */
     private $stageConfig;
@@ -65,7 +59,6 @@ class DbConnection implements StepInterface
     /**
      * @param DeployInterface $stageConfig
      * @param MergedConfig $mergedConfig
-     * @param ResourceConfig $resourceConfig
      * @param ConfigWriter $configWriter
      * @param ConfigReader $configReader
      * @param ConfigMerger $configMerger
@@ -75,16 +68,15 @@ class DbConnection implements StepInterface
     public function __construct(
         DeployInterface $stageConfig,
         MergedConfig $mergedConfig,
-        ResourceConfig $resourceConfig,
         ConfigWriter $configWriter,
         ConfigReader $configReader,
         ConfigMerger $configMerger,
         RelationshipConnectionFactory $connectionFactory,
         LoggerInterface $logger
-    ) {
+    )
+    {
         $this->stageConfig = $stageConfig;
         $this->mergedConfig = $mergedConfig;
-        $this->resourceConfig = $resourceConfig;
         $this->configWriter = $configWriter;
         $this->configReader = $configReader;
         $this->configMerger = $configMerger;
@@ -100,37 +92,36 @@ class DbConnection implements StepInterface
         $config = $this->configReader->read();
 
         $this->logger->info('Updating env.php DB connection configuration.');
-        $config['db'] = $this->mergedConfig->get();
-        $config['resource'] = $this->resourceConfig->get();
-
-        $this->addLoggingAboutSlaveConnection();
+        $dbConfig = $this->mergedConfig->get();
+        $config[MergedConfig::KEY_DB] = $dbConfig[MergedConfig::KEY_DB];
+        $config[MergedConfig::KEY_RESOURCE] = $dbConfig[MergedConfig::KEY_RESOURCE];
+        $this->addLoggingAboutSlaveConnection($config[MergedConfig::KEY_DB]);
         $this->configWriter->create($config);
     }
 
     /**
      * Adds logging about slave connection.
+     * @param array $dbConfig
      */
-    private function addLoggingAboutSlaveConnection()
+    private function addLoggingAboutSlaveConnection(array $dbConfig)
     {
         $envDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
-        $connectionData = $this->connectionFactory->create(RelationshipConnectionFactory::CONNECTION_MAIN);
-
-        if (!$connectionData->getHost()
-            || !$this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
-            || (!$this->configMerger->isEmpty($envDbConfig) && !$this->configMerger->isMergeRequired($envDbConfig))
-        ) {
-            return;
-        }
-
-        if (!$this->mergedConfig->isDbConfigurationCompatibleWithSlaveConnection()) {
-            $this->logger->warning(
-                'You have changed db configuration that not compatible with default slave connection.'
-            );
-        } else {
-            $dbConfig = $this->mergedConfig->get();
-
-            if (!empty($dbConfig['slave_connection']['default'])) {
-                $this->logger->info('Set DB slave connection.');
+        $isUseSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
+        $isMergeRequired = !$this->configMerger->isEmpty($envDbConfig)
+            && !$this->configMerger->isMergeRequired($envDbConfig);
+        $connectionNames = array_keys($dbConfig[MergedConfig::KEY_CONNECTION]);
+        foreach ($connectionNames as $connectionName) {
+            $serviceConnectionName = MergedConfig::CONNECTION_MAP[MergedConfig::KEY_CONNECTION][$connectionName];
+            $serviceConnectionData = $this->connectionFactory->create($serviceConnectionName);
+            if (!$serviceConnectionData->getHost() || !$isUseSlave || $isMergeRequired) {
+                continue;
+            } elseif (!$this->mergedConfig->isDbConfigCompatibleWithSlaveConnection($connectionName)) {
+                $this->logger->warning(sprintf(
+                    'You have changed db configuration that not compatible with %s slave connection.',
+                    $connectionName
+                ));
+            } elseif (!empty($config[MergedConfig::KEY_SLAVE_CONNECTION][$connectionName])) {
+                $this->logger->info(sprintf('Set DB slave connection for %s connection.', $connectionName));
             } else {
                 $this->logger->info(
                     'Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect ' .
