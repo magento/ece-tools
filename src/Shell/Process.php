@@ -38,7 +38,7 @@ class Process extends \Symfony\Component\Process\Process implements ProcessInter
             $error = sprintf(
                 'The command "%s" failed. %s',
                 $process->getCommandLine(),
-                trim($process->getErrorOutput(), "\n")
+                trim($process->getErrorOutput() ?: $process->getOutput(), "\n")
             );
 
             throw new ProcessException($error, $process->getExitCode());
