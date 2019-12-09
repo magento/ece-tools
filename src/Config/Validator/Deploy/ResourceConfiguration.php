@@ -35,7 +35,8 @@ class ResourceConfiguration implements ValidatorInterface
     public function __construct(
         ResultFactory $resultFactory,
         MergedConfig $mergedConfig
-    ) {
+    )
+    {
         $this->resultFactory = $resultFactory;
         $this->mergedConfig = $mergedConfig;
     }
@@ -45,10 +46,11 @@ class ResourceConfiguration implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
+        $config = $this->mergedConfig->get();
         $wrongResources = [];
-        $resources = $this->mergedConfig->get()[MergedConfig::RESOURCE];
-        foreach ($resources as $resourceName => $resourceData) {
-            if (!isset($resourceData['connection'])) {
+        foreach ($config[MergedConfig::KEY_RESOURCE] as $resourceName => $resourceData) {
+            if (!isset($resourceData['connection'])
+                || !isset($config[MergedConfig::KEY_DB][MergedConfig::KEY_CONNECTION][$resourceData[MergedConfig::KEY_CONNECTION]])) {
                 $wrongResources[] = $resourceName;
             }
         }
@@ -56,7 +58,7 @@ class ResourceConfiguration implements ValidatorInterface
         if ($wrongResources) {
             return $this->resultFactory->error(
                 sprintf('Variable %s is not configured properly', DeployInterface::VAR_RESOURCE_CONFIGURATION),
-                sprintf('Add connection information to the following resources: %s', implode(', ', $wrongResources))
+                sprintf('Add correct connection information to the following resources: %s', implode(', ', $wrongResources))
             );
         }
 

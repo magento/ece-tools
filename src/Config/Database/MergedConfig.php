@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config\Database;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
@@ -18,51 +17,50 @@ use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
  */
 class MergedConfig implements ConfigInterface
 {
-    const RESOURCE = 'resource';
+    const KEY_DB = 'db';
+    const KEY_CONNECTION = 'connection';
+    const KEY_SLAVE_CONNECTION = 'slave_connection';
+    const KEY_RESOURCE = 'resource';
 
     /**
      * Names fo resources
      */
     const RESOURCE_CHECKOUT = 'checkout';
-    const RESOURCE_SALES = 'sales';
+    const RESOURCE_SALES = 'sale';
     const RESOURCE_DEFAULT_SETUP = 'default_setup';
-
-    const DB = 'db';
-    const CONNECTION = 'connection';
 
     /**
      * Names of connections
      */
-    const SLAVE_CONNECTION = 'slave_connection';
     const CONNECTION_DEFAULT = 'default';
     const CONNECTION_INDEXER = 'indexer';
     const CONNECTION_CHECKOUT = 'checkout';
-    const CONNECTION_SALES = 'sales';
+    const CONNECTION_SALE = 'sale';
 
     /**
      * Types of connections
      */
-    const CONNECTION_TYPES = [self::CONNECTION, self::SLAVE_CONNECTION];
+    const CONNECTION_TYPES = [self::KEY_CONNECTION, self::KEY_SLAVE_CONNECTION];
 
     /**
      * Split connections
      */
-    const SPLIT_CONNECTIONS = [self::CONNECTION_CHECKOUT, self::CONNECTION_SALES];
+    const SPLIT_CONNECTIONS = [self::CONNECTION_CHECKOUT, self::CONNECTION_SALE];
 
     /**
      * Connections map
      */
     const CONNECTION_MAP = [
-        self::CONNECTION => [
+        self::KEY_CONNECTION => [
             self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_MAIN,
             self::CONNECTION_INDEXER => RelationshipConnectionFactory::CONNECTION_MAIN,
             self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
-            self::CONNECTION_SALES => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
+            self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
         ],
-        self::SLAVE_CONNECTION => [
+        self::KEY_SLAVE_CONNECTION => [
             self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_SLAVE,
             self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE,
-            self::CONNECTION_SALES => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
+            self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
         ]
     ];
 
@@ -72,7 +70,7 @@ class MergedConfig implements ConfigInterface
     const RESOURCE_MAP = [
         self::CONNECTION_DEFAULT => self::RESOURCE_DEFAULT_SETUP,
         self::CONNECTION_CHECKOUT => self::RESOURCE_CHECKOUT,
-        self::CONNECTION_SALES => self::RESOURCE_SALES,
+        self::CONNECTION_SALE => self::RESOURCE_SALES,
     ];
 
     /**
@@ -148,8 +146,8 @@ class MergedConfig implements ConfigInterface
 
         $connections = $this->getConnections();
         return $this->mergedConfig = [
-            self::DB => $connections,
-            self::RESOURCE => $this->getResources(array_keys($connections[self::CONNECTION])),
+            self::KEY_DB => $connections,
+            self::KEY_RESOURCE => $this->getResources(array_keys($connections[self::KEY_CONNECTION])),
         ];
     }
 
@@ -173,21 +171,21 @@ class MergedConfig implements ConfigInterface
         $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
 
         $config = [];
-        foreach (self::CONNECTION_MAP[self::CONNECTION] as $connectionName => $serviceKey) {
+        foreach (self::CONNECTION_MAP[self::KEY_CONNECTION] as $connectionName => $serviceKey) {
             $connectionData = $this->getConnectionData($serviceKey);
             if (empty($connectionData->getHost())) {
                 continue;
             }
-            $config[self::CONNECTION][$connectionName] = $this->getConnectionConfig($connectionData);
-            if (!$useSlave && !isset(self::CONNECTION_MAP[self::SLAVE_CONNECTION][$connectionName])) {
+            $config[self::KEY_CONNECTION][$connectionName] = $this->getConnectionConfig($connectionData);
+            if (!$useSlave && !isset(self::CONNECTION_MAP[self::KEY_SLAVE_CONNECTION][$connectionName])) {
                 continue;
             }
-            $connectionData = $this->getConnectionData(self::CONNECTION_MAP[self::SLAVE_CONNECTION][$connectionName]);
+            $connectionData = $this->getConnectionData(self::CONNECTION_MAP[self::KEY_SLAVE_CONNECTION][$connectionName]);
             if (empty($connectionData->getHost())
                 || !$this->isDbConfigCompatibleWithSlaveConnection($connectionName)) {
                 continue;
             }
-            $config[self::SLAVE_CONNECTION][$connectionName] = $this->getConnectionConfig($connectionData, true);
+            $config[self::KEY_SLAVE_CONNECTION][$connectionName] = $this->getConnectionConfig($connectionData, true);
         }
 
         return $this->configMerger->merge($config, $envConfig);
@@ -217,7 +215,7 @@ class MergedConfig implements ConfigInterface
 
         foreach ($connections as $connectionName) {
             if (isset(self::RESOURCE_MAP[$connectionName])) {
-                $config[self::RESOURCE_MAP[$connectionName]][self::CONNECTION] = $connectionName;
+                $config[self::RESOURCE_MAP[$connectionName]][self::KEY_CONNECTION] = $connectionName;
             }
         }
 
@@ -238,11 +236,11 @@ class MergedConfig implements ConfigInterface
     public function isDbConfigCompatibleWithSlaveConnection(string $connectionName): bool
     {
         $config = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
-        $connectionData = $this->getConnectionData(self::CONNECTION_MAP[self::CONNECTION][$connectionName]);
-        if ((isset($config[self::CONNECTION][$connectionName]['host'])
-                && $config[self::CONNECTION][$connectionName]['host'] !== $connectionData->getHost())
-            || (isset($config[self::CONNECTION][$connectionName]['dbname'])
-                && $config[self::CONNECTION][$connectionName]['dbname'] !== $connectionData->getDbName())
+        $connectionData = $this->getConnectionData(self::CONNECTION_MAP[self::KEY_CONNECTION][$connectionName]);
+        if ((isset($config[self::KEY_CONNECTION][$connectionName]['host'])
+                && $config[self::KEY_CONNECTION][$connectionName]['host'] !== $connectionData->getHost())
+            || (isset($config[self::KEY_CONNECTION][$connectionName]['dbname'])
+                && $config[self::KEY_CONNECTION][$connectionName]['dbname'] !== $connectionData->getDbName())
         ) {
             return false;
         }

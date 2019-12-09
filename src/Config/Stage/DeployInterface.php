@@ -45,6 +45,28 @@ interface DeployInterface extends StageConfigInterface
     const VAR_MYSQL_USE_SLAVE_CONNECTION = 'MYSQL_USE_SLAVE_CONNECTION';
 
     /**
+     * The variable responsible to use split database.
+     */
+    const VAR_SPLIT_DB = 'SPLIT_DB';
+
+    /**
+     * The value of var SPLIT_DB
+     */
+    const VAL_SPLIT_DB_QUOTE = 'quote';
+    /**
+     * The value of var SPLIT_DB
+     */
+    const VAL_SPLIT_DB_SALES = 'sales';
+
+    /**
+     * The possible values for var SPLIT_DB
+     */
+    const VAL_SPLIT_DB = [
+        self::VAL_SPLIT_DB_QUOTE,
+        self::VAL_SPLIT_DB_SALES
+    ];
+
+    /**
      * @deprecated 2.1 specific variable.
      */
     const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';

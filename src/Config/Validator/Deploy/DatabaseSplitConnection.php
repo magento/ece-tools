@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Database\MergedConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -17,8 +18,6 @@ use Magento\MagentoCloud\Config\ValidatorInterface;
  */
 class DatabaseSplitConnection implements ValidatorInterface
 {
-    const SPLIT_CONNECTIONS = ['sale', 'checkout'];
-
     /**
      * @var ResultFactory
      */
@@ -36,7 +35,8 @@ class DatabaseSplitConnection implements ValidatorInterface
     public function __construct(
         ResultFactory $resultFactory,
         DeployInterface $stageConfig
-    ) {
+    )
+    {
         $this->resultFactory = $resultFactory;
         $this->stageConfig = $stageConfig;
     }
@@ -49,31 +49,28 @@ class DatabaseSplitConnection implements ValidatorInterface
         $dbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
         $splitConnections = [];
 
-        foreach (array_keys($dbConfig['connection'] ?? []) as $connection) {
-            if (in_array($connection, self::SPLIT_CONNECTIONS)) {
-                $splitConnections['connection'][] = $connection;
-            }
-        }
-
-        foreach (array_keys($dbConfig['slave_connection'] ?? []) as $connection) {
-            if (in_array($connection, self::SPLIT_CONNECTIONS)) {
-                $splitConnections['slave_connection'][] = $connection;
-            }
-        }
-
-        if ($splitConnections) {
-            $messages[] = sprintf(
-                'Split database configuration was detected in the property %s'
-                . ' of the file .magento.env.yaml:',
-                DeployInterface::VAR_DATABASE_CONFIGURATION
+        foreach (MergedConfig::CONNECTION_TYPES as $connectionType) {
+            $splitConnections[$connectionType] = array_intersect(
+                MergedConfig::SPLIT_CONNECTIONS,
+                array_keys($dbConfig[$connectionType])
             );
-            foreach ($splitConnections as $type => $connections) {
-                $messages[] = "- $type: " . implode(', ', $connections);
-            }
-            $messages[] = 'Split database configuration will be ignored in during current deploy phase.';
-            $messages[] = 'Magento Cloud not support a custom split database configuration';
-            return $this->resultFactory->error(implode(PHP_EOL, $messages));
         }
-        return $this->resultFactory->success();
+
+        if (empty($splitConnections)) {
+            return $this->resultFactory->success();
+        }
+
+        $messages[] = sprintf(
+            'Split database configuration was detected in the property %s'
+            . ' of the file .magento.env.yaml:',
+            DeployInterface::VAR_DATABASE_CONFIGURATION
+        );
+        foreach ($splitConnections as $type => $connections) {
+            $messages[] = "- $type: " . implode(', ', $connections);
+        }
+        $messages[] = 'Split database configuration will be ignored in during current deploy phase.';
+        $messages[] = 'Magento Cloud not support a custom split database configuration';
+
+        return $this->resultFactory->error(implode(PHP_EOL, $messages));
     }
 }

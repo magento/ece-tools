@@ -205,7 +205,7 @@ class Connection implements ConnectionInterface
      * @throws PDOException
      * @codeCoverageIgnore
      */
-    public function getPdo(string $connection): \PDO
+    public function getPdo(string $connection = ConnectionFactory::CONNECTION_MAIN): \PDO
     {
         $this->connect($connection);
 
@@ -301,7 +301,7 @@ class Connection implements ConnectionInterface
     private function getTablePrefix(): string
     {
         if ($this->tablePrefix === null) {
-            $this->tablePrefix = $this->mergedConfig->get()[MergedConfig::DB]['table_prefix'] ?? '';
+            $this->tablePrefix = $this->mergedConfig->get()[MergedConfig::KEY_DB]['table_prefix'] ?? '';
         }
 
         return $this->tablePrefix;

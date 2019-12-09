@@ -51,9 +51,9 @@ class ConnectionFactory implements ConnectionFactoryInterface
             case self::CONNECTION_QUOTE_SLAVE:
                 return $this->getConnectionData(MergedConfig::CONNECTION_CHECKOUT, false);
             case self::CONNECTION_SALES_MAIN:
-                return $this->getConnectionData(MergedConfig::CONNECTION_SALES);
+                return $this->getConnectionData(MergedConfig::CONNECTION_SALE);
             case self::CONNECTION_SALES_SLAVE:
-                return $this->getConnectionData(MergedConfig::CONNECTION_SALES, false);
+                return $this->getConnectionData(MergedConfig::CONNECTION_SALE, false);
             default:
                 throw new \RuntimeException(
                     sprintf('Connection with type %s doesn\'t exist', $connectionType)
@@ -64,10 +64,10 @@ class ConnectionFactory implements ConnectionFactoryInterface
     private function getConnectionData($name, $isMain = true): ConnectionInterface
     {
         if ($isMain) {
-            $connectionConfig = $this->getConfig()[MergedConfig::CONNECTION][$name] ?? [];
+            $connectionConfig = $this->getConfig()[MergedConfig::KEY_CONNECTION][$name] ?? [];
         } else {
-            $connectionConfig = $this->getConfig()[MergedConfig::SLAVE_CONNECTION][$name]
-                ?? $this->getConfig()[MergedConfig::CONNECTION][$name]
+            $connectionConfig = $this->getConfig()[MergedConfig::KEY_SLAVE_CONNECTION][$name]
+                ?? $this->getConfig()[MergedConfig::KEY_CONNECTION][$name]
                 ?? [];
         }
         return new Connection($connectionConfig);
@@ -76,7 +76,7 @@ class ConnectionFactory implements ConnectionFactoryInterface
     private function getConfig(): array
     {
         if (null === $this->config) {
-            $this->config = $this->mergedConfig->get()[MergedConfig::DB];
+            $this->config = $this->mergedConfig->get()[MergedConfig::KEY_DB];
         }
         return $this->config;
     }

@@ -144,7 +144,7 @@ class InstallCommandFactory
             $command .= ' --db-password=' . escapeshellarg($dbPassword);
         }
 
-        if ($table_prefix = $this->mergedConfig->get()[MergedConfig::DB]['table_prefix'] ?? '') {
+        if ($table_prefix = $this->mergedConfig->get()[MergedConfig::KEY_DB]['table_prefix'] ?? '') {
             $command .= ' --db-prefix=' . escapeshellarg($table_prefix);
         }
 

@@ -313,6 +313,27 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => false,
                 ],
             ],
+            DeployInterface::VAR_SPLIT_DB => [
+                self::SCHEMA_TYPE => ['array'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY,
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_BUILD => [],
+                    StageConfigInterface::STAGE_DEPLOY => [],
+                ],
+                self::SCHEMA_VALUE_VALIDATION => function (string $key, $value) {
+                    if (!in_array($value, DeployInterface::VAL_SPLIT_DB)) {
+                        return sprintf(
+                            'The %s variable contains an invalid value %d. ' .
+                            'Use the next values: [%].',
+                            $key,
+                            DeployInterface::VAL_SPLIT_DB
+                        );
+                    }
+                },
+            ],
             DeployInterface::VAR_UPDATE_URLS => [
                 self::SCHEMA_TYPE => ['boolean'],
                 self::SCHEMA_STAGE => [
