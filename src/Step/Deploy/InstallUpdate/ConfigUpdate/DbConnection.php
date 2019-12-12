@@ -15,6 +15,7 @@ use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
+use Magento\MagentoCloud\Step\Deploy\EnableSplitDb;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -67,11 +68,6 @@ class DbConnection implements StepInterface
      * @var FlagManager
      */
     private $flagManager;
-
-    const SPLIT_DB_CONNECTION_MAP = [
-        DbConfig::CONNECTION_SALE => DeployInterface::VAL_SPLIT_DB_SALE,
-        DbConfig::CONNECTION_CHECKOUT => DeployInterface::VAL_SPLIT_DB_QUOTE,
-    ];
 
     /**
      * @param DeployInterface $stageConfig
@@ -185,7 +181,7 @@ class DbConnection implements StepInterface
 
         $varSplitDb = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
         foreach (array_keys($enabledSplitConnections) as $enabledSplitConnection) {
-            $type = self::SPLIT_DB_CONNECTION_MAP[$enabledSplitConnection];
+            $type = EnableSplitDb::SPLIT_DB_CONNECTION_MAP[$enabledSplitConnection];
             if (!in_array($type, $varSplitDb)) {
                 $this->logger->warning("Db $type  was split before, but SPLIT_DB does not have this info");
             }

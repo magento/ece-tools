@@ -7,7 +7,6 @@
 namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\Shell\MagentoShell;
-use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DbConnection;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
@@ -19,6 +18,12 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 
 class EnableSplitDb implements StepInterface
 {
+
+    const SPLIT_DB_CONNECTION_MAP = [
+        DbConfig::CONNECTION_SALE => DeployInterface::VAL_SPLIT_DB_SALE,
+        DbConfig::CONNECTION_CHECKOUT => DeployInterface::VAL_SPLIT_DB_QUOTE,
+    ];
+
     /**
      * @var LoggerInterface
      */
@@ -79,6 +84,7 @@ class EnableSplitDb implements StepInterface
     public function execute()
     {
         if ($this->flagManager->exists(FlagManager::FLAG_IGNORE_SPLIT_DB)) {
+            $this->flagManager->delete(FlagManager::FLAG_IGNORE_SPLIT_DB);
             return;
         }
         $valSplitDb = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
@@ -99,7 +105,7 @@ class EnableSplitDb implements StepInterface
             $config[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
             array_flip(DbConfig::SPLIT_CONNECTIONS)
         );
-        $enabledSplitTypesMap = array_intersect_key(DbConnection::SPLIT_DB_CONNECTION_MAP, $enabledSplitConnections);
+        $enabledSplitTypesMap = array_intersect_key(self::SPLIT_DB_CONNECTION_MAP, $enabledSplitConnections);
         $missedSplitTypes = array_diff($enabledSplitTypesMap, $valSplitDb);
 
         if (!empty($enabledSplitConnections) && empty($missedSplitTypes)) {
@@ -109,7 +115,7 @@ class EnableSplitDb implements StepInterface
             return;
         }
         $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
-        $splitDbTypeMap = array_flip(DbConnection::SPLIT_DB_CONNECTION_MAP);
+        $splitDbTypeMap = array_flip(self::SPLIT_DB_CONNECTION_MAP);
         foreach (array_diff($valSplitDb, $enabledSplitTypesMap) as $type) {
             $connectionName = $splitDbTypeMap[$type];
             $splitDbConfig = $dbConfig[DbConfig::KEY_CONNECTION][$connectionName];
