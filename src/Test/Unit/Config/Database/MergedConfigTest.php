@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Database\SlaveConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -48,7 +48,7 @@ class MergedConfigTest extends TestCase
     private $connectionFactoryMock;
 
     /**
-     * @var MergedConfig
+     * @var DbConfig
      */
     private $mergedConfig;
 
@@ -63,7 +63,7 @@ class MergedConfigTest extends TestCase
         $this->slaveConfigMock = $this->createMock(SlaveConfig::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
 
-        $this->mergedConfig = new MergedConfig(
+        $this->mergedConfig = new DbConfig(
             $this->connectionFactoryMock,
             $this->configReaderMock,
             $this->slaveConfigMock,

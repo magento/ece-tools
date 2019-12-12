@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\DB\Data;
 
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -23,7 +23,7 @@ class ConnectionFactoryTest extends TestCase
     private $factory;
 
     /**
-     * @var MergedConfig|MockObject
+     * @var DbConfig|MockObject
      */
     private $mergedConfigMock;
 
@@ -32,7 +32,7 @@ class ConnectionFactoryTest extends TestCase
      */
     protected function setUp()
     {
-        $this->mergedConfigMock = $this->createMock(MergedConfig::class);
+        $this->mergedConfigMock = $this->createMock(DbConfig::class);
 
         $this->factory = new ConnectionFactory($this->mergedConfigMock);
     }

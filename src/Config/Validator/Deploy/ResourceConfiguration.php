@@ -7,7 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
+use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -24,21 +25,29 @@ class ResourceConfiguration implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var MergedConfig
+     * @var DbConfig
      */
-    private $mergedConfig;
+    private $dbConfig;
+
+    /**
+     * @var ResourceConfig
+     */
+    private $resourceConfig;
 
     /**
      * @param ResultFactory $resultFactory
-     * @param MergedConfig $mergedConfig
+     * @param ResourceConfig $resourceConfig
+     * @param DbConfig $dbConfig
      */
     public function __construct(
         ResultFactory $resultFactory,
-        MergedConfig $mergedConfig
+        ResourceConfig $resourceConfig,
+        DbConfig $dbConfig
     )
     {
         $this->resultFactory = $resultFactory;
-        $this->mergedConfig = $mergedConfig;
+        $this->dbConfig = $dbConfig;
+        $this->resourceConfig = $resourceConfig;
     }
 
     /**
@@ -46,11 +55,12 @@ class ResourceConfiguration implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $config = $this->mergedConfig->get();
+        $dbConfig = $this->dbConfig->get();
+        $resourceConfig = $this->resourceConfig->get();
         $wrongResources = [];
-        foreach ($config[MergedConfig::KEY_RESOURCE] as $resourceName => $resourceData) {
-            if (!isset($resourceData['connection'])
-                || !isset($config[MergedConfig::KEY_DB][MergedConfig::KEY_CONNECTION][$resourceData[MergedConfig::KEY_CONNECTION]])) {
+        foreach ($resourceConfig as $resourceName => $resourceData) {
+            if (!isset($resourceData[ResourceConfig::KEY_CONNECTION])
+                || !isset($dbConfig[DbConfig::KEY_CONNECTION][$resourceData[ResourceConfig::KEY_CONNECTION]])) {
                 $wrongResources[] = $resourceName;
             }
         }

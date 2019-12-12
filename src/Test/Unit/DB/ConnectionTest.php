@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\DB;
 
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\DB\Connection;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -47,7 +47,7 @@ class ConnectionTest extends TestCase
     private $connectionDataMock;
 
     /**
-     * @var MergedConfig|MockObject
+     * @var DbConfig|MockObject
      */
     private $mergedConfigMock;
 
@@ -60,7 +60,7 @@ class ConnectionTest extends TestCase
     {
         $this->pdoMock = $this->createMock(\PDO::class);
         $this->statementMock = $this->createMock(\PDOStatement::class);
-        $this->mergedConfigMock = $this->createMock(MergedConfig::class);
+        $this->mergedConfigMock = $this->createMock(DbConfig::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 

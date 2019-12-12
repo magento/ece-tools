@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
@@ -49,9 +49,9 @@ class DatabaseSplitConnection implements ValidatorInterface
         $dbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
         $splitConnections = [];
 
-        foreach (MergedConfig::CONNECTION_TYPES as $connectionType) {
+        foreach (DbConfig::CONNECTION_TYPES as $connectionType) {
             $splitConnections[$connectionType] = array_intersect(
-                MergedConfig::SPLIT_CONNECTIONS,
+                DbConfig::SPLIT_CONNECTIONS,
                 array_keys($dbConfig[$connectionType])
             );
         }

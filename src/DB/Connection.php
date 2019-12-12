@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\DB;
 
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Psr\Log\LoggerInterface;
 
@@ -39,9 +39,9 @@ class Connection implements ConnectionInterface
     private $connectionFactory;
 
     /**
-     * @var MergedConfig
+     * @var DbConfig
      */
-    private $mergedConfig;
+    private $dbConfig;
 
     /**
      * @var string
@@ -51,17 +51,17 @@ class Connection implements ConnectionInterface
     /**
      * @param LoggerInterface $logger
      * @param ConnectionFactory $connectionFactory
-     * @param MergedConfig $mergedConfig
+     * @param DbConfig $dbConfig
      */
     public function __construct(
         LoggerInterface $logger,
         ConnectionFactory $connectionFactory,
-        MergedConfig $mergedConfig
+        DbConfig $dbConfig
     )
     {
         $this->logger = $logger;
         $this->connectionFactory = $connectionFactory;
-        $this->mergedConfig = $mergedConfig;
+        $this->dbConfig = $dbConfig;
     }
 
     /**
@@ -301,7 +301,7 @@ class Connection implements ConnectionInterface
     private function getTablePrefix(): string
     {
         if ($this->tablePrefix === null) {
-            $this->tablePrefix = $this->mergedConfig->get()[MergedConfig::KEY_DB]['table_prefix'] ?? '';
+            $this->tablePrefix = $this->dbConfig->get()['table_prefix'] ?? '';
         }
 
         return $this->tablePrefix;

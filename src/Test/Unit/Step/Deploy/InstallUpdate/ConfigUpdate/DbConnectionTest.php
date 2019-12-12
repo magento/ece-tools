@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\ConfigUpdate;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -46,7 +46,7 @@ class DbConnectionTest extends TestCase
     private $configReaderMock;
 
     /**
-     * @var MergedConfig|MockObject
+     * @var DbConfig|MockObject
      */
     private $mergedConfigMock;
 
@@ -76,7 +76,7 @@ class DbConnectionTest extends TestCase
     protected function setUp()
     {
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->mergedConfigMock = $this->createMock(MergedConfig::class);
+        $this->mergedConfigMock = $this->createMock(DbConfig::class);
         $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);

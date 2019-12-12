@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\DB\Data;
 
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
@@ -15,9 +15,9 @@ use Magento\MagentoCloud\Config\Database\MergedConfig;
 class ConnectionFactory implements ConnectionFactoryInterface
 {
     /**
-     * @var MergedConfig
+     * @var DbConfig
      */
-    private $mergedConfig;
+    private $dbConfig;
 
     /**
      * @var array
@@ -25,11 +25,11 @@ class ConnectionFactory implements ConnectionFactoryInterface
     private $config;
 
     /**
-     * @param MergedConfig $mergedConfig
+     * @param DbConfig $dbConfig
      */
-    public function __construct(MergedConfig $mergedConfig)
+    public function __construct(DbConfig $dbConfig)
     {
-        $this->mergedConfig = $mergedConfig;
+        $this->dbConfig = $dbConfig;
     }
 
     /**
@@ -43,17 +43,17 @@ class ConnectionFactory implements ConnectionFactoryInterface
     {
         switch ($connectionType) {
             case self::CONNECTION_MAIN:
-                return $this->getConnectionData(MergedConfig::CONNECTION_DEFAULT);
+                return $this->getConnectionData(DbConfig::CONNECTION_DEFAULT);
             case self::CONNECTION_SLAVE:
-                return $this->getConnectionData(MergedConfig::CONNECTION_DEFAULT, false);
+                return $this->getConnectionData(DbConfig::CONNECTION_DEFAULT, false);
             case self::CONNECTION_QUOTE_MAIN:
-                return $this->getConnectionData(MergedConfig::CONNECTION_CHECKOUT);
+                return $this->getConnectionData(DbConfig::CONNECTION_CHECKOUT);
             case self::CONNECTION_QUOTE_SLAVE:
-                return $this->getConnectionData(MergedConfig::CONNECTION_CHECKOUT, false);
+                return $this->getConnectionData(DbConfig::CONNECTION_CHECKOUT, false);
             case self::CONNECTION_SALES_MAIN:
-                return $this->getConnectionData(MergedConfig::CONNECTION_SALE);
+                return $this->getConnectionData(DbConfig::CONNECTION_SALE);
             case self::CONNECTION_SALES_SLAVE:
-                return $this->getConnectionData(MergedConfig::CONNECTION_SALE, false);
+                return $this->getConnectionData(DbConfig::CONNECTION_SALE, false);
             default:
                 throw new \RuntimeException(
                     sprintf('Connection with type %s doesn\'t exist', $connectionType)
@@ -64,10 +64,10 @@ class ConnectionFactory implements ConnectionFactoryInterface
     private function getConnectionData($name, $isMain = true): ConnectionInterface
     {
         if ($isMain) {
-            $connectionConfig = $this->getConfig()[MergedConfig::KEY_CONNECTION][$name] ?? [];
+            $connectionConfig = $this->getConfig()[DbConfig::KEY_CONNECTION][$name] ?? [];
         } else {
-            $connectionConfig = $this->getConfig()[MergedConfig::KEY_SLAVE_CONNECTION][$name]
-                ?? $this->getConfig()[MergedConfig::KEY_CONNECTION][$name]
+            $connectionConfig = $this->getConfig()[DbConfig::KEY_SLAVE_CONNECTION][$name]
+                ?? $this->getConfig()[DbConfig::KEY_CONNECTION][$name]
                 ?? [];
         }
         return new Connection($connectionConfig);
@@ -76,7 +76,7 @@ class ConnectionFactory implements ConnectionFactoryInterface
     private function getConfig(): array
     {
         if (null === $this->config) {
-            $this->config = $this->mergedConfig->get()[MergedConfig::KEY_DB];
+            $this->config = $this->dbConfig->get();
         }
         return $this->config;
     }
