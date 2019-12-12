@@ -1,4 +1,4 @@
-# Magento Commerce (Cloud) Deployment Tools
+# Magento Commerce Cloud Deployment Tools
 [![Build Status](https://travis-ci.com/magento/ece-tools.svg?token=NW7M5gDP5YaRMZyCvYpY&branch=develop)](https://travis-ci.com/magento/ece-tools)
 
 ## Welcome
@@ -18,7 +18,7 @@ The Magento Cloud Suite includes a set of packages designed to deploy and manage
 
 ## Useful Resources
 - [Release Notes](https://github.com/magento/ece-tools/releases)
-- [Magento Cloud Guide DevDocs](https://devdocs.magento.com/guides/v2.3/cloud/bk-cloud.html)
+- [Magento Cloud Guide DevDocs](https://devdocs.magento.com/cloud/bk-cloud.html)
 - [Cloud Knowledge Base and Support](https://support.magento.com)
 - [Cloud Slack Channel](https://magentocommeng.slack.com) (join #cloud and #cloud-docker)
 
