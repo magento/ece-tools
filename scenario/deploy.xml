@@ -86,6 +86,7 @@
                 <!-- Config update end -->
                 <item name="set-admin-url" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\SetAdminUrl</item>
                 <item name="setup" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup</item>
+                <item name="split-db" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\EnableSplitDb</item>
             </argument>
         </arguments>
     </step>

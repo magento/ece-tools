@@ -6,6 +6,7 @@
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DbConnection;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -48,13 +49,19 @@ class EnableSplitDb implements StepInterface
      */
     private $configReader;
 
+    /**
+     * @var MagentoShell
+     */
+    private $magentoShell;
+
     public function __construct(
         DeployInterface $stageConfig,
         DbConfig $dbConfig,
         ResourceConfig $resourceConfig,
         LoggerInterface $logger,
         FlagManager $flagManager,
-        ConfigReader $configReader
+        ConfigReader $configReader,
+        MagentoShell $magentoShell
     )
     {
         $this->stageConfig = $stageConfig;
@@ -63,6 +70,7 @@ class EnableSplitDb implements StepInterface
         $this->logger = $logger;
         $this->flagManager = $flagManager;
         $this->configReader = $configReader;
+        $this->magentoShell = $magentoShell;
     }
 
     /**
@@ -100,11 +108,43 @@ class EnableSplitDb implements StepInterface
             $this->logger->warning('Variable SPLIT_DB does not have data which was already split: ' . implode(',', $missedSplitTypes));
             return;
         }
-
+        $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
+        $splitDbTypeMap = array_flip(DbConnection::SPLIT_DB_CONNECTION_MAP);
         foreach (array_diff($valSplitDb, $enabledSplitTypesMap) as $type) {
-            //do Split
+            $connectionName = $splitDbTypeMap[$type];
+            $splitDbConfig = $dbConfig[DbConfig::KEY_CONNECTION][$connectionName];
+            $cmd = sprintf(
+                'setup:db-schema:split-%s --host="%s" --dbname="%s" --username="%s" --password="%s"',
+                $type,
+                $splitDbConfig['host'],
+                $splitDbConfig['dbname'],
+                $splitDbConfig['username'],
+                $splitDbConfig['password']
+            );
+            $outputCmd = $this->magentoShell->execute($cmd)->getOutput();
+            $this->logger->debug($outputCmd);
+            $this->logger->info(sprintf(
+                'Quote tables were split to DB %s in %s',
+                $splitDbConfig['dbname'],
+                $splitDbConfig['host']
+            ));
+
+            if ($useSlave) {
+                $splitDbConfigSlave = $dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$connectionName];
+                $resourceName = ResourceConfig::RESOURCE_MAP[$connectionName];
+                $cmd = sprintf(
+                    'setup:db-schema:add-slave --host="%s" --dbname="%s" --username="%s" --password="%s"'
+                    . ' --connection="%s" --resource="%s"',
+                    $splitDbConfigSlave['host'],
+                    $splitDbConfigSlave['dbname'],
+                    $splitDbConfigSlave['username'],
+                    $splitDbConfigSlave['password'],
+                    $connectionName,
+                    $resourceName
+                );
+                $outputCmd = $this->magentoShell->execute($cmd)->getOutput();
+                $this->logger->debug($outputCmd);
+            }
         }
-
     }
-
 }

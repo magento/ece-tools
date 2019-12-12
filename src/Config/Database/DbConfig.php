@@ -218,7 +218,7 @@ class DbConfig implements ConfigInterface
      * @param bool $isSlave
      * @return array
      */
-    public function getConnectionConfig(ConnectionInterface $connectionData, $isSlave = false): array
+    private function getConnectionConfig(ConnectionInterface $connectionData, $isSlave = false): array
     {
         $host = $connectionData->getHost();
 
