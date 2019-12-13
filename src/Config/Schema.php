@@ -320,16 +320,16 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY,
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => [],
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
                 self::SCHEMA_VALUE_VALIDATION => function (string $key, $value) {
                     if (!in_array($value, DeployInterface::VAL_SPLIT_DB)) {
                         return sprintf(
-                            'The %s variable contains an invalid value %d. ' .
-                            'Use the next values: [%].',
+                            'The %s variable contains the invalid value %s. ' .
+                            'Use the next values: [%s].',
                             $key,
-                            DeployInterface::VAL_SPLIT_DB
+                            $value,
+                            implode(' or/and ', DeployInterface::VAL_SPLIT_DB)
                         );
                     }
                 },

@@ -45,7 +45,7 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
                 BuildInterface::VAR_SCD_MAX_EXEC_TIME => null,
-                BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => 1
+                BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => 1,
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD)
         );
@@ -80,6 +80,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_RESOURCE_CONFIGURATION => [],
                 DeployInterface::VAR_LOCK_PROVIDER => 'file',
                 DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => false,
+                DeployInterface::VAR_SPLIT_DB => [],
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
