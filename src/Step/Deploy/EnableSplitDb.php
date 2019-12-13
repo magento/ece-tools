@@ -18,9 +18,8 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 
 class EnableSplitDb implements StepInterface
 {
-
     const SPLIT_DB_CONNECTION_MAP = [
-        DbConfig::CONNECTION_SALE => DeployInterface::VAL_SPLIT_DB_SALE,
+        DbConfig::CONNECTION_SALE => DeployInterface::VAL_SPLIT_DB_SALES,
         DbConfig::CONNECTION_CHECKOUT => DeployInterface::VAL_SPLIT_DB_QUOTE,
     ];
 
