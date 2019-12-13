@@ -128,6 +128,16 @@ class DbConnection implements StepInterface
 
         $config = $this->configReader->read();
 
+
+        $this->logger->debug(var_export([
+            $config[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
+            $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
+            array_diff_assoc(
+                $config[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
+                $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT]
+            )
+        ], true));
+
         $differentMainConnections = array_diff_assoc(
             $config[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
             $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT]
