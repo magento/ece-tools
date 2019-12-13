@@ -90,8 +90,7 @@ class DbConnection implements StepInterface
         RelationshipConnectionFactory $connectionFactory,
         LoggerInterface $logger,
         FlagManager $flagManager
-    )
-    {
+    ) {
         $this->stageConfig = $stageConfig;
         $this->dbConfig = $dbConfig;
         $this->resourceConfig = $resourceConfig;
@@ -120,23 +119,14 @@ class DbConnection implements StepInterface
             $this->logger->notice(
                 'Database relationship configuration doesn\'t exist'
                 . ' and database is not configured through .magento.env.yaml or env variable.'
-                . ' Will be applied the previous database configuration');
+                . ' Will be applied the previous database configuration'
+            );
             return;
         }
 
         $this->logger->info('Updating env.php DB connection configuration.');
 
         $config = $this->configReader->read();
-
-
-        $this->logger->debug(var_export([
-            $config[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
-            $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
-            array_diff_assoc(
-                $config[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
-                $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT]
-            )
-        ], true));
 
         $differentMainConnections = array_diff_assoc(
             $config[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
@@ -208,9 +198,9 @@ class DbConnection implements StepInterface
         $isUseSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
         $isMergeRequired = !$this->configMerger->isEmpty($envDbConfig)
             && !$this->configMerger->isMergeRequired($envDbConfig);
-        $connectionNames = array_keys($dbConfig[' connection']);
+        $connectionNames = array_keys($dbConfig[DbConfig::KEY_CONNECTION]);
         foreach ($connectionNames as $connectionName) {
-            $serviceConnectionName = DbConfig::CONNECTION_MAP['connection'][$connectionName];
+            $serviceConnectionName = DbConfig::CONNECTION_MAP[DbConfig::KEY_CONNECTION][$connectionName];
             $serviceConnectionData = $this->connectionFactory->create($serviceConnectionName);
             if (!$serviceConnectionData->getHost() || !$isUseSlave || $isMergeRequired) {
                 continue;
