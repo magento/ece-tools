@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
 /**
- * Validates the database split connections in DATABASE_CONFIGURATION variable
+ * Validates the split database connections in DATABASE_CONFIGURATION variable
  */
 class DatabaseSplitConnection implements ValidatorInterface
 {
@@ -47,13 +47,15 @@ class DatabaseSplitConnection implements ValidatorInterface
     public function validate(): Validator\ResultInterface
     {
         $dbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
-        $splitConnections = [];
 
+        $splitConnections = [];
         foreach (DbConfig::CONNECTION_TYPES as $connectionType) {
-            $splitConnections[$connectionType] = array_intersect(
-                DbConfig::SPLIT_CONNECTIONS,
-                array_keys($dbConfig[$connectionType])
-            );
+            foreach (DbConfig::SPLIT_CONNECTIONS as $splitConnection){
+                if (!isset($dbConfig[$connectionType][$splitConnection])) {
+                    continue;
+                }
+                $splitConnections[$connectionType][] = $splitConnection;
+            }
         }
 
         if (empty($splitConnections)) {
@@ -68,7 +70,7 @@ class DatabaseSplitConnection implements ValidatorInterface
         foreach ($splitConnections as $type => $connections) {
             $messages[] = "- $type: " . implode(', ', $connections);
         }
-        $messages[] = 'Split database configuration will be ignored in during current deploy phase.';
+        $messages[] = 'Custom split database configuration will be ignored in during current deploy phase.';
         $messages[] = 'Magento Cloud not support a custom split database configuration';
 
         return $this->resultFactory->error(implode(PHP_EOL, $messages));

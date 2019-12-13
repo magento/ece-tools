@@ -13,7 +13,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -52,6 +52,9 @@ class DatabaseSplitConnectionTest extends TestCase
         );
     }
 
+    /**
+     * The test of validator messages
+     */
     public function testMessageValidate()
     {
         $dbConfiguration = [
@@ -72,7 +75,7 @@ class DatabaseSplitConnectionTest extends TestCase
             . ' file .magento.env.yaml:' . PHP_EOL
             . '- connection: checkout, sale' . PHP_EOL
             . '- slave_connection: checkout, sale' . PHP_EOL
-            . 'Split database configuration will be ignored in during current deploy phase.' . PHP_EOL
+            . 'Custom split database configuration will be ignored in during current deploy phase.' . PHP_EOL
             . 'Magento Cloud not support a custom split database configuration';
         $this->stageConfigMock->expects($this->once())
             ->method('get')
