@@ -77,8 +77,7 @@ class InstallCommandFactory
         DeployInterface $stageConfig,
         ElasticSuite $elasticSuite,
         DbConfig $dbConfig
-    )
-    {
+    ) {
         $this->urlManager = $urlManager;
         $this->adminData = $adminData;
         $this->connectionFactory = $connectionFactory;

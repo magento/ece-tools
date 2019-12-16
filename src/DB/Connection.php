@@ -57,8 +57,7 @@ class Connection implements ConnectionInterface
         LoggerInterface $logger,
         ConnectionFactory $connectionFactory,
         DbConfig $dbConfig
-    )
-    {
+    ) {
         $this->logger = $logger;
         $this->connectionFactory = $connectionFactory;
         $this->dbConfig = $dbConfig;
@@ -71,8 +70,7 @@ class Connection implements ConnectionInterface
         string $query,
         array $bindings = [],
         string $connection = ConnectionFactory::CONNECTION_MAIN
-    ): bool
-    {
+    ): bool {
         return $this->run($query, $bindings, $connection, function ($query, $bindings, $connection) {
             $statement = $this->getPdo($connection)->prepare($query);
 
@@ -93,8 +91,7 @@ class Connection implements ConnectionInterface
         string $query,
         array $bindings = [],
         string $connection = ConnectionFactory::CONNECTION_MAIN
-    ): int
-    {
+    ): int {
         return $this->run($query, $bindings, $connection, function ($query, $bindings, $connection) {
             $statement = $this->getPdo($connection)->prepare($query);
 
@@ -113,8 +110,7 @@ class Connection implements ConnectionInterface
         string $query,
         array $bindings = [],
         string $connection = ConnectionFactory::CONNECTION_MAIN
-    ): array
-    {
+    ): array {
         return $this->getFetchStatement($query, $bindings, $connection)->fetchAll();
     }
 
@@ -125,8 +121,7 @@ class Connection implements ConnectionInterface
         string $query,
         array $bindings = [],
         string $connection = ConnectionFactory::CONNECTION_MAIN
-    ): array
-    {
+    ): array {
         $result = $this->getFetchStatement($query, $bindings, $connection)->fetch(\PDO::FETCH_ASSOC);
 
         if ($result === false) {
@@ -151,8 +146,7 @@ class Connection implements ConnectionInterface
         string $query,
         array $bindings = [],
         string $connection = ConnectionFactory::CONNECTION_MAIN
-    ): \PDOStatement
-    {
+    ): \PDOStatement {
         return $this->run($query, $bindings, $connection, function ($query, $bindings, $connection) {
             $statement = $this->getPdo($connection)->prepare($query);
 

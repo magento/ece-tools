@@ -10,6 +10,9 @@ namespace Magento\MagentoCloud\Config\Database;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
+/**
+ * Returns merged final resources configuration.
+ */
 class ResourceConfig implements ConfigInterface
 {
     const KEY_RESOURCE = 'resource';
@@ -77,8 +80,7 @@ class ResourceConfig implements ConfigInterface
         DbConfig $dbConfig,
         ConfigMerger $configMerger,
         DeployInterface $stageConfig
-    )
-    {
+    ) {
         $this->dbConfig = $dbConfig;
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
@@ -97,6 +99,9 @@ class ResourceConfig implements ConfigInterface
 
         $envConfig = $this->stageConfig->get(DeployInterface::VAR_RESOURCE_CONFIGURATION);
 
+        /**
+         * Ece-tools do not support custom configuration of a split database.
+         */
         foreach (self::RESOURCE_MAP as $connectionName => $resourceName) {
             if (in_array($connectionName, DbConfig::SPLIT_CONNECTIONS)
                 && isset($envConfig[$resourceName])) {

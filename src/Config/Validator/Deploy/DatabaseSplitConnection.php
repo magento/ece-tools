@@ -35,8 +35,7 @@ class DatabaseSplitConnection implements ValidatorInterface
     public function __construct(
         ResultFactory $resultFactory,
         DeployInterface $stageConfig
-    )
-    {
+    ) {
         $this->resultFactory = $resultFactory;
         $this->stageConfig = $stageConfig;
     }
@@ -50,7 +49,7 @@ class DatabaseSplitConnection implements ValidatorInterface
 
         $splitConnections = [];
         foreach (DbConfig::CONNECTION_TYPES as $connectionType) {
-            foreach (DbConfig::SPLIT_CONNECTIONS as $splitConnection){
+            foreach (DbConfig::SPLIT_CONNECTIONS as $splitConnection) {
                 if (!isset($dbConfig[$connectionType][$splitConnection])) {
                     continue;
                 }

@@ -43,8 +43,7 @@ class ResourceConfiguration implements ValidatorInterface
         ResultFactory $resultFactory,
         ResourceConfig $resourceConfig,
         DbConfig $dbConfig
-    )
-    {
+    ) {
         $this->resultFactory = $resultFactory;
         $this->dbConfig = $dbConfig;
         $this->resourceConfig = $resourceConfig;
@@ -67,8 +66,14 @@ class ResourceConfiguration implements ValidatorInterface
 
         if ($wrongResources) {
             return $this->resultFactory->error(
-                sprintf('Variable %s is not configured properly', DeployInterface::VAR_RESOURCE_CONFIGURATION),
-                sprintf('Add correct connection information to the following resources: %s', implode(', ', $wrongResources))
+                sprintf(
+                    'Variable %s is not configured properly',
+                    DeployInterface::VAR_RESOURCE_CONFIGURATION
+                ),
+                sprintf(
+                    'Add correct connection information to the following resources: %s',
+                    implode(', ', $wrongResources)
+                )
             );
         }
 

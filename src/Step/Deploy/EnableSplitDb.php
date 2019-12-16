@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
@@ -15,10 +16,15 @@ use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 
-
+/**
+ * Enables split database
+ */
 class EnableSplitDb implements StepInterface
 {
-    const SPLIT_DB_CONNECTION_MAP = [
+    /**
+     * Types of split database
+     */
+    const TYPE_MAP = [
         DbConfig::CONNECTION_SALE => DeployInterface::VAL_SPLIT_DB_SALES,
         DbConfig::CONNECTION_CHECKOUT => DeployInterface::VAL_SPLIT_DB_QUOTE,
     ];
@@ -58,6 +64,15 @@ class EnableSplitDb implements StepInterface
      */
     private $magentoShell;
 
+    /**
+     * @param DeployInterface $stageConfig
+     * @param DbConfig $dbConfig
+     * @param ResourceConfig $resourceConfig
+     * @param LoggerInterface $logger
+     * @param FlagManager $flagManager
+     * @param ConfigReader $configReader
+     * @param MagentoShell $magentoShell
+     */
     public function __construct(
         DeployInterface $stageConfig,
         DbConfig $dbConfig,
@@ -66,8 +81,7 @@ class EnableSplitDb implements StepInterface
         FlagManager $flagManager,
         ConfigReader $configReader,
         MagentoShell $magentoShell
-    )
-    {
+    ) {
         $this->stageConfig = $stageConfig;
         $this->dbConfig = $dbConfig;
         $this->resourceConfig = $resourceConfig;
@@ -104,17 +118,20 @@ class EnableSplitDb implements StepInterface
             $config[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
             array_flip(DbConfig::SPLIT_CONNECTIONS)
         );
-        $enabledSplitTypesMap = array_intersect_key(self::SPLIT_DB_CONNECTION_MAP, $enabledSplitConnections);
+        $enabledSplitTypesMap = array_intersect_key(self::TYPE_MAP, $enabledSplitConnections);
         $missedSplitTypes = array_diff($enabledSplitTypesMap, $valSplitDb);
 
         if (!empty($enabledSplitConnections) && empty($missedSplitTypes)) {
             return;
         } elseif (!empty($missedSplitTypes)) {
-            $this->logger->warning('Variable SPLIT_DB does not have data which was already split: ' . implode(',', $missedSplitTypes));
+            $this->logger->warning(
+                'Variable SPLIT_DB does not have data which was already split: '
+                . implode(',', $missedSplitTypes)
+            );
             return;
         }
         $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
-        $splitDbTypeMap = array_flip(self::SPLIT_DB_CONNECTION_MAP);
+        $splitDbTypeMap = array_flip(self::TYPE_MAP);
         foreach (array_diff($valSplitDb, $enabledSplitTypesMap) as $type) {
             $connectionName = $splitDbTypeMap[$type];
             $splitDbConfig = $dbConfig[DbConfig::KEY_CONNECTION][$connectionName];
