@@ -49,7 +49,7 @@ class ConnectionTest extends TestCase
     /**
      * @var DbConfig|MockObject
      */
-    private $mergedConfigMock;
+    private $dbConfigMock;
 
     /**
      * {@inheritdoc}
@@ -60,7 +60,7 @@ class ConnectionTest extends TestCase
     {
         $this->pdoMock = $this->createMock(\PDO::class);
         $this->statementMock = $this->createMock(\PDOStatement::class);
-        $this->mergedConfigMock = $this->createMock(DbConfig::class);
+        $this->dbConfigMock = $this->createMock(DbConfig::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 
@@ -76,7 +76,7 @@ class ConnectionTest extends TestCase
         $this->connection = new Connection(
             $this->loggerMock,
             $connectionFactoryMock,
-            $this->mergedConfigMock
+            $this->dbConfigMock
         );
 
         $reflection = new \ReflectionClass(get_class($this->connection));
@@ -162,7 +162,22 @@ class ConnectionTest extends TestCase
 
     public function testClose()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some exception');
+        $this->pdoMock->expects($this->once())
+            ->method('query')
+            ->with('SELECT 1')
+            ->willThrowException(new \Exception('Some exception'));
+        $this->pdoMock->expects($this->once())
+            ->method('errorInfo')
+            ->willReturn([
+                'HY000',
+                2000,
+                'Some message',
+            ]);
+        $this->assertSame($this->pdoMock, $this->connection->getPdo());
         $this->connection->close();
+        $this->connection->getPdo();
     }
 
     public function testAffectingQuery()
@@ -213,7 +228,7 @@ class ConnectionTest extends TestCase
      */
     public function testGetTableName(array $mergedConfig, string $tableName, string $expectedTableName)
     {
-        $this->mergedConfigMock->expects($this->once())
+        $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($mergedConfig);
 
