@@ -11,12 +11,16 @@ use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 
 /**
- * Returns merged final resources configuration.
+ * Returns resources configuration.
  */
 class ResourceConfig implements ConfigInterface
 {
+    /**#@+
+     * Keys for the description of the resource configuration
+     */
     const KEY_RESOURCE = 'resource';
     const KEY_CONNECTION = 'connection';
+    /**#@-*/
 
     /**
      * Names fo resources
@@ -51,13 +55,6 @@ class ResourceConfig implements ConfigInterface
     private $dbConfig;
 
     /**
-     * Class for configuration merging
-     *
-     * @var ConfigMerger
-     */
-    private $configMerger;
-
-    /**
      * Final configuration for deploy phase
      *
      * @var DeployInterface
@@ -65,11 +62,18 @@ class ResourceConfig implements ConfigInterface
     private $stageConfig;
 
     /**
+     * Class for configuration merging
+     *
+     * @var ConfigMerger
+     */
+    private $configMerger;
+
+    /**
      * Final database configuration after merging
      *
      * @var array
      */
-    private $mergedConfig;
+    private $resourceConfig;
 
     /**
      * @param DbConfig $dbConfig
@@ -78,8 +82,8 @@ class ResourceConfig implements ConfigInterface
      */
     public function __construct(
         DbConfig $dbConfig,
-        ConfigMerger $configMerger,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        ConfigMerger $configMerger
     ) {
         $this->dbConfig = $dbConfig;
         $this->stageConfig = $stageConfig;
@@ -93,8 +97,8 @@ class ResourceConfig implements ConfigInterface
      */
     public function get(): array
     {
-        if (null !== $this->mergedConfig) {
-            return $this->mergedConfig;
+        if (null !== $this->resourceConfig) {
+            return $this->resourceConfig;
         }
 
         $envConfig = $this->stageConfig->get(DeployInterface::VAR_RESOURCE_CONFIGURATION);
@@ -123,6 +127,6 @@ class ResourceConfig implements ConfigInterface
             }
         }
 
-        return $this->mergedConfig = $this->configMerger->merge($config, $envConfig);
+        return $this->resourceConfig = $this->configMerger->merge($config, $envConfig);
     }
 }

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Database\ResourceConfig;
@@ -18,6 +19,11 @@ use PHPUnit\Framework\TestCase;
  */
 class ResourceConfigTest extends TestCase
 {
+    /**
+     * @var DbConfig|MockObject
+     */
+    private $dbConfigMock;
+
     /**
      * @var DeployInterface|MockObject
      */
@@ -34,32 +40,50 @@ class ResourceConfigTest extends TestCase
     protected function setUp()
     {
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->resourceConfig = new ResourceConfig($this->stageConfigMock, new ConfigMerger());
+        $this->dbConfigMock = $this->createMock(DbConfig::class);
+        $this->resourceConfig = new ResourceConfig(
+            $this->dbConfigMock,
+            $this->stageConfigMock,
+            new ConfigMerger()
+        );
     }
 
     /**
-     * @param $stageConfig
+     * @param array $stageConfig
+     * @param array $dbConfig
      * @param $expectedResult
      * @dataProvider getDataProvider
      */
-    public function testGet($stageConfig, $expectedResult)
+    public function testGet($stageConfig, $dbConfig, $expectedResult)
     {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_RESOURCE_CONFIGURATION)
             ->willReturn($stageConfig);
-
+        $this->dbConfigMock->expects($this->any())
+            ->method('get')
+            ->willReturn($dbConfig);
         $this->assertSame($expectedResult, $this->resourceConfig->get());
     }
 
     /**
+     * Data provider for testGet
+     *
      * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
         return [
             'default resource config' => [
                 'stageConfig' => [],
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'indexer' => [],
+                    ]
+                ],
                 'expectedResult' => [
                     'default_setup' => [
                         'connection' => 'default',
@@ -68,6 +92,12 @@ class ResourceConfigTest extends TestCase
             ],
             'default resource config with merge' => [
                 'stageConfig' => ['_merge' => true],
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'indexer' => [],
+                    ]
+                ],
                 'expectedResult' => [
                     'default_setup' => [
                         'connection' => 'default',
@@ -79,6 +109,12 @@ class ResourceConfigTest extends TestCase
                     'some_resource' => [
                         'connection' => 'some_connection',
                     ],
+                ],
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'indexer' => [],
+                    ]
                 ],
                 'expectedResult' => [
                     'some_resource' => [
@@ -93,12 +129,84 @@ class ResourceConfigTest extends TestCase
                         'connection' => 'some_connection',
                     ],
                 ],
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'indexer' => [],
+                    ]
+                ],
                 'expectedResult' => [
                     'default_setup' => [
                         'connection' => 'default',
                     ],
                     'some_resource' => [
                         'connection' => 'some_connection',
+                    ],
+                ],
+            ],
+            'with available split db ' => [
+                'stageConfig' => [],
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'indexer' => [],
+                        'checkout' => [],
+                        'sale' => [],
+                    ]
+                ],
+                'expectedResult' => [
+                    'default_setup' => [
+                        'connection' => 'default',
+                    ],
+                    'checkout' => [
+                        'connection' => 'checkout',
+                    ],
+                    'sale' => [
+                        'connection' => 'sale',
+                    ],
+                ],
+            ],
+            'with custom resource config for split connections with merge ' => [
+                'stageConfig' => [
+                    '_merge' => true,
+                    'checkout' => [
+                        'connection' => 'checkout',
+                    ],
+                    'sale' => [
+                        'connection' => 'sale',
+                    ],
+                ],
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'indexer' => [],
+                    ]
+                ],
+                'expectedResult' => [
+                    'default_setup' => [
+                        'connection' => 'default',
+                    ],
+                ],
+            ],
+            'with custom resource config for split connections without merge ' => [
+                'stageConfig' => [
+                    '_merge' => false,
+                    'checkout' => [
+                        'connection' => 'checkout',
+                    ],
+                    'sale' => [
+                        'connection' => 'sale',
+                    ],
+                ],
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'indexer' => [],
+                    ]
+                ],
+                'expectedResult' => [
+                    'default_setup' => [
+                        'connection' => 'default',
                     ],
                 ],
             ],

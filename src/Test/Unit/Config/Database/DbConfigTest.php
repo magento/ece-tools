@@ -161,6 +161,10 @@ class DbConfigTest extends TestCase
         ];
     }
 
+    /**
+     * @param array $relationshipConnections
+     * @return array
+     */
     private function getConnectionsData(array $relationshipConnections): array
     {
         return array_intersect_key(
