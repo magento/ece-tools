@@ -82,6 +82,90 @@ class DatabaseTest extends TestCase
         );
     }
 
+    public function testGetQuoteConfiguration()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with(Database::RELATIONSHIP_QUOTE_KEY)
+            ->willReturn([
+                [
+                    'host' => '127.0.0.1',
+                    'port' => '3308',
+                ]
+            ]);
+
+        $this->assertSame(
+            [
+                'host' => '127.0.0.1',
+                'port' => '3308',
+            ],
+            $this->database->getQuoteConfiguration()
+        );
+    }
+
+    public function testGetQuoteSlaveConfiguration()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with(Database::RELATIONSHIP_QUOTE_SLAVE_KEY)
+            ->willReturn([
+                [
+                    'host' => '127.0.0.1',
+                    'port' => '3309',
+                ]
+            ]);
+
+        $this->assertSame(
+            [
+                'host' => '127.0.0.1',
+                'port' => '3309',
+            ],
+            $this->database->getQuoteSlaveConfiguration()
+        );
+    }
+
+    public function testGetSalesConfiguration()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with(Database::RELATIONSHIP_SALES_KEY)
+            ->willReturn([
+                [
+                    'host' => '127.0.0.1',
+                    'port' => '3308',
+                ]
+            ]);
+
+        $this->assertSame(
+            [
+                'host' => '127.0.0.1',
+                'port' => '3308',
+            ],
+            $this->database->getSalesConfiguration()
+        );
+    }
+
+    public function testGetSaleSlaveConfiguration()
+    {
+        $this->environmentMock->expects($this->once())
+            ->method('getRelationship')
+            ->with(Database::RELATIONSHIP_SALES_SLAVE_KEY)
+            ->willReturn([
+                [
+                    'host' => '127.0.0.1',
+                    'port' => '3309',
+                ]
+            ]);
+
+        $this->assertSame(
+            [
+                'host' => '127.0.0.1',
+                'port' => '3309',
+            ],
+            $this->database->getSalesSlaveConfiguration()
+        );
+    }
+
     public function testGetVersion()
     {
         $this->environmentMock->expects($this->once())
