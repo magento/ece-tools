@@ -162,22 +162,7 @@ class ConnectionTest extends TestCase
 
     public function testClose()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Some exception');
-        $this->pdoMock->expects($this->once())
-            ->method('query')
-            ->with('SELECT 1')
-            ->willThrowException(new \Exception('Some exception'));
-        $this->pdoMock->expects($this->once())
-            ->method('errorInfo')
-            ->willReturn([
-                'HY000',
-                2000,
-                'Some message',
-            ]);
-        $this->assertSame($this->pdoMock, $this->connection->getPdo());
         $this->connection->close();
-        $this->connection->getPdo();
     }
 
     public function testAffectingQuery()

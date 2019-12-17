@@ -25,21 +25,21 @@ class ConnectionFactoryTest extends TestCase
     /**
      * @var DbConfig|MockObject
      */
-    private $mergedConfigMock;
+    private $dbConfigMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->mergedConfigMock = $this->createMock(DbConfig::class);
+        $this->dbConfigMock = $this->createMock(DbConfig::class);
 
-        $this->factory = new ConnectionFactory($this->mergedConfigMock);
+        $this->factory = new ConnectionFactory($this->dbConfigMock);
     }
 
     public function testCreateMain()
     {
-        $this->mergedConfigMock->expects($this->once())
+        $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(['connection' => ['default' => ['test' => 'test']]]);
 
@@ -48,7 +48,7 @@ class ConnectionFactoryTest extends TestCase
 
     public function testCreateSlave()
     {
-        $this->mergedConfigMock->expects($this->once())
+        $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(['slave_connection' => ['default' => ['test' => 'test']]]);
 
@@ -57,7 +57,7 @@ class ConnectionFactoryTest extends TestCase
 
     public function testCreateSlaveAsMain()
     {
-        $this->mergedConfigMock->expects($this->exactly(2))
+        $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(['connection' => ['default' => ['test' => 'test']]]);
 
