@@ -62,7 +62,7 @@ class InstallCommandFactoryTest extends TestCase
     /**
      * @var DbConfig|MockObject
      */
-    private $mergedConfigMock;
+    private $dbConfigMock;
 
     /**
      * @inheritdoc
@@ -80,7 +80,7 @@ class InstallCommandFactoryTest extends TestCase
             ->method('create')
             ->willReturn($this->connectionDataMock);
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
-        $this->mergedConfigMock = $this->createMock(DbConfig::class);
+        $this->dbConfigMock = $this->createMock(DbConfig::class);
 
         $this->installCommandFactory = new InstallCommandFactory(
             $this->urlManagerMock,
@@ -89,7 +89,7 @@ class InstallCommandFactoryTest extends TestCase
             $this->passwordGeneratorMock,
             $this->stageConfigMock,
             $this->elasticSuiteMock,
-            $this->mergedConfigMock
+            $this->dbConfigMock
         );
     }
 
@@ -172,7 +172,7 @@ class InstallCommandFactoryTest extends TestCase
         $this->adminDataMock->expects($this->any())
             ->method('getDefaultCurrency')
             ->willReturn('USD');
-        $this->mergedConfigMock->expects($this->once())
+        $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($mergedConfig);
 
