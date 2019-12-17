@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Validator\Deploy\ResourceConfiguration as ResourceConfigurationValidator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\Result;
@@ -20,9 +21,9 @@ use PHPUnit\Framework\MockObject\Matcher\InvokedCount as InvokedCountMatcher;
  */
 class ResourceConfigurationTest extends TestCase
 {
-   /**
-    * @var ResultFactory|MockObject
-    */
+    /**
+     * @var ResultFactory|MockObject
+     */
     private $resultFactoryMock;
 
     /**
@@ -36,23 +37,35 @@ class ResourceConfigurationTest extends TestCase
     private $validator;
 
     /**
+     * @var DbConfig|MockObject
+     */
+    private $dbConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
-        $this->validator = new ResourceConfigurationValidator($this->resultFactoryMock, $this->resourceConfigMock);
+        $this->dbConfigMock = $this->createMock(DbConfig::class);
+        $this->validator = new ResourceConfigurationValidator(
+            $this->resultFactoryMock,
+            $this->resourceConfigMock,
+            $this->dbConfigMock
+        );
     }
 
     /**
      * @param array $resourcesConfig
+     * @param array $dbConfig
      * @param InvokedCountMatcher $successExpects
      * @param InvokedCountMatcher $errorExpects
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
      */
     public function testValidate(
+        array $dbConfig,
         array $resourcesConfig,
         InvokedCountMatcher $successExpects,
         InvokedCountMatcher $errorExpects,
@@ -62,6 +75,10 @@ class ResourceConfigurationTest extends TestCase
         $successMock = $this->createMock(Result\Success::class);
         /** @var Result\Error|MockObject $errorMock */
         $errorMock = $this->createMock(Result\Error::class);
+
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($dbConfig);
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($resourcesConfig);
@@ -77,18 +94,26 @@ class ResourceConfigurationTest extends TestCase
 
     /**
      * @return array
+     *
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function validateDataProvider(): array
     {
         return [
             [
-                'resourcesConfig'=> [],
+                'dbConfig' => [],
+                'resourcesConfig' => [],
                 'successExpects' => $this->once(),
                 'errorExpects' => $this->never(),
                 'expectedResult' => Result\Success::class,
             ],
             [
-                'resourcesConfig'=> [
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => []
+                    ]
+                ],
+                'resourcesConfig' => [
                     'default_setup' => [
                         'connection' => 'default',
                     ],
@@ -98,7 +123,12 @@ class ResourceConfigurationTest extends TestCase
                 'expectedResult' => Result\Success::class,
             ],
             [
-                'resourcesConfig'=> [
+                'dbConfig' => [
+                    'connection' => [
+                        'value' => []
+                    ]
+                ],
+                'resourcesConfig' => [
                     'some_setup' => [
                         'connection' => 'value',
                     ],
@@ -108,7 +138,13 @@ class ResourceConfigurationTest extends TestCase
                 'expectedResult' => Result\Success::class,
             ],
             [
-                'resourcesConfig'=> [
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'value' => []
+                    ]
+                ],
+                'resourcesConfig' => [
                     'default_setup' => [
                         'connection' => 'default',
                     ],
@@ -121,7 +157,12 @@ class ResourceConfigurationTest extends TestCase
                 'expectedResult' => Result\Success::class,
             ],
             [
-                'resourcesConfig'=> [
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                    ]
+                ],
+                'resourcesConfig' => [
                     'default_setup' => [],
                 ],
                 'successExpects' => $this->never(),
@@ -129,11 +170,36 @@ class ResourceConfigurationTest extends TestCase
                 'expectedResult' => Result\Error::class,
             ],
             [
-                'resourcesConfig'=> [
+
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                    ]
+                ],
+                'resourcesConfig' => [
                     'default_setup' => [
                         'connection' => 'default',
                     ],
                     'some_setup' => [],
+                ],
+                'successExpects' => $this->never(),
+                'errorExpects' => $this->once(),
+                'expectedResult' => Result\Error::class,
+            ],
+            [
+                'dbConfig' => [
+                    'connection' => [
+                        'default' => [],
+                        'some_connection' => [],
+                    ]
+                ],
+                'resourcesConfig' => [
+                    'default_setup' => [
+                        'connection' => 'default',
+                    ],
+                    'some_setup' => [
+                        'connection' => 'fake_connection'
+                    ],
                 ],
                 'successExpects' => $this->never(),
                 'errorExpects' => $this->once(),
