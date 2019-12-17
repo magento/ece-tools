@@ -19,7 +19,7 @@ use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 class DbConfig implements ConfigInterface
 {
     /**#@+
-     * Constants for the description of a configuration
+     * Keys for the description of the database configuration
      */
     const KEY_DB = 'db';
     const KEY_CONNECTION = 'connection';
@@ -159,23 +159,23 @@ class DbConfig implements ConfigInterface
             return $this->dbConfig;
         }
 
-        $envConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
-
-        /**
-         * Ece-tools do not support custom configuration of a split database.
-         */
-        foreach (self::SPLIT_CONNECTIONS as $connection) {
-            foreach (self::CONNECTION_TYPES as $connectionType) {
-                if (isset($envConfig[$connectionType][$connection])) {
-                    unset($envConfig[$connectionType][$connection]);
-                }
-            }
-        }
+        $envConfig = $this->getCustomDbConfig();
 
         if (!$this->configMerger->isEmpty($envConfig) && !$this->configMerger->isMergeRequired($envConfig)) {
             return $this->configMerger->clear($envConfig);
         }
 
+        return $this->dbConfig = $this->configMerger->merge($this->createDbConfig($envConfig), $envConfig);
+    }
+
+    /**
+     *  Creates Database configuration
+     *
+     * @param array $envConfig
+     * @return array
+     */
+    private function createDbConfig(array $envConfig): array
+    {
         $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
 
         $config = [];
@@ -184,9 +184,10 @@ class DbConfig implements ConfigInterface
             if (empty($connectionData->getHost())) {
                 continue;
             }
-            $config[self::KEY_CONNECTION][$connection] = in_array($connection, self::MAIN_CONNECTIONS)
-                ? $this->getConnectionConfig($connectionData)
-                : $this->getConnectionConfig($connectionData, true);
+            $config[self::KEY_CONNECTION][$connection] = $this->getConnectionConfig(
+                $connectionData,
+                !in_array($connection, self::MAIN_CONNECTIONS)
+            );
             if (!$useSlave || !isset(self::CONNECTION_MAP[self::KEY_SLAVE_CONNECTION][$connection])) {
                 continue;
             }
@@ -198,8 +199,29 @@ class DbConfig implements ConfigInterface
             }
             $config[self::KEY_SLAVE_CONNECTION][$connection] = $this->getConnectionConfig($slaveConnectionData, true);
         }
+        return $config;
+    }
 
-        return $this->dbConfig = $this->configMerger->merge($config, $envConfig);
+    /**
+     * Returns a custom database configuration from the variable DATABASE_CONFIGURATION from .magento.env.yaml
+     *
+     * @return array
+     */
+    private function getCustomDbConfig(): array
+    {
+        $envConfig = (array)$this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
+
+        /**
+         * Ece-tools do not support custom configuration of a split database.
+         */
+        foreach (self::SPLIT_CONNECTIONS as $connection) {
+            foreach (self::CONNECTION_TYPES as $connectionType) {
+                if (isset($envConfig[$connectionType][$connection])) {
+                    unset($envConfig[$connectionType][$connection]);
+                }
+            }
+        }
+        return $envConfig;
     }
 
     /**
