@@ -132,7 +132,7 @@ class ComposerGenerator
 
             $preparePackagesScripts[] = sprintf(
                 "rsync -azh --stats --exclude='app/code/Magento/' --exclude='app/i18n/' --exclude='app/design/' "
-                . "--exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' ./%s/ ./",
+                . "--exclude='dev/tests' --exclude='lib/internal/Magento' --exclude='.git' --exclude='composer*' ./%s/ ./",
                 $repoName
             );
         }
@@ -187,6 +187,9 @@ class ComposerGenerator
                     '@install-from-git',
                 ],
                 'post-install-cmd' => [
+                    '@prepare-packages',
+                ],
+                'post-update-cmd' => [
                     '@prepare-packages',
                 ],
             ],

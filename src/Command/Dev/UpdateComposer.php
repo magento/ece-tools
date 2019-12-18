@@ -110,10 +110,14 @@ class UpdateComposer extends Command
             $composer['scripts']['install-from-git'][] = 'php ' . ClearModuleRequirements::SCRIPT_PATH;
         }
 
+        $magentoComposerFile = $this->fileList->getMagentoComposer();
+        $composerContents = json_encode($composer, JSON_PRETTY_PRINT);
         $this->file->filePutContents(
-            $this->fileList->getMagentoComposer(),
-            json_encode($composer, JSON_PRETTY_PRINT)
+            $magentoComposerFile,
+            $composerContents
         );
+
+        $output->writeln("Updated '$magentoComposerFile' with \n$composerContents\n");
 
         $output->writeln('Run composer update');
         $this->shell->execute('composer update --ansi --no-interaction');
