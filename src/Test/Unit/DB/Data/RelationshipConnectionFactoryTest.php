@@ -90,7 +90,6 @@ class RelationshipConnectionFactoryTest extends TestCase
         ];
     }
 
-
     public function testCreateWithException()
     {
         $this->expectException(\RuntimeException::class);

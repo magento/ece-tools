@@ -143,9 +143,8 @@ class DbConnection implements StepInterface
         }
 
         if (empty($enabledSplitConnections) || (!empty($enabledSplitConnections) && $isDifferentDefaultConnection)) {
-            $envConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($envDbConfig, $dbConfig);
-            $envResourceConfig = $envConfig[ResourceConfig::KEY_RESOURCE];
-            $envConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig($envResourceConfig);
+            $envConfig[DbConfig::KEY_DB] = $this->getOnlyMainDbConfig($dbConfig);
+            $envConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
             $this->addLoggingAboutSlaveConnection($envConfig[DbConfig::KEY_DB]);
             $this->configWriter->create($envConfig);
             return;
@@ -168,7 +167,10 @@ class DbConnection implements StepInterface
         foreach (array_keys($enabledSplitConnections) as $connectionName) {
             $type = EnableSplitDb::TYPE_MAP[$connectionName];
             if (!in_array($type, $varSplitDb)) {
-                $this->logger->warning("Db $type  was split before, but SPLIT_DB does not have this info");
+                $this->logger->warning(sprintf(
+                    'Db %s was split before, but SPLIT_DB does not have this info',
+                    $type
+                ));
             }
         }
     }
@@ -176,37 +178,34 @@ class DbConnection implements StepInterface
     /**
      * Returns main database configuration
      *
-     * @param array $envDbConfig
      * @param array $dbConfig
      * @return array
      */
-    private function getMainDbConfig(array $envDbConfig, array $dbConfig): array
+    private function getOnlyMainDbConfig(array $dbConfig): array
     {
-        $mergedDbConfig = array_replace_recursive($envDbConfig, $dbConfig);
-        $mergedDbConfig[DbConfig::KEY_CONNECTION] = array_intersect_key(
-            $mergedDbConfig[DbConfig::KEY_CONNECTION],
+        $dbConfig[DbConfig::KEY_CONNECTION] = array_intersect_key(
+            $dbConfig[DbConfig::KEY_CONNECTION],
             array_flip(DbConfig::MAIN_CONNECTIONS)
         );
-        if (isset($mergedDbConfig[DbConfig::KEY_SLAVE_CONNECTION])) {
-            $mergedDbConfig[DbConfig::KEY_SLAVE_CONNECTION] = array_intersect_key(
-                $mergedDbConfig[DbConfig::KEY_SLAVE_CONNECTION],
+        if (isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION])) {
+            $dbConfig[DbConfig::KEY_SLAVE_CONNECTION] = array_intersect_key(
+                $dbConfig[DbConfig::KEY_SLAVE_CONNECTION],
                 array_flip(DbConfig::MAIN_CONNECTIONS)
             );
         }
 
-        return $mergedDbConfig;
+        return $dbConfig;
     }
 
     /**
      * Returns main resource configuration
      *
-     * @param array $resource
      * @return array
      */
-    private function getMainResourceConfig(array $resource): array
+    private function getMainResourceConfig(): array
     {
         return array_intersect_key(
-            array_replace_recursive($resource, $this->resourceConfig->get()),
+            $this->resourceConfig->get(),
             array_flip([ResourceConfig::RESOURCE_DEFAULT_SETUP])
         );
     }
@@ -250,13 +249,7 @@ class DbConnection implements StepInterface
      */
     private function isSameConnection(array $connection1, array $connection2): bool
     {
-        foreach (DbConfig::CONNECTION_PARAMS as $paramName) {
-            if (!(isset($connection1[$paramName]) && isset($connection2[$paramName]))
-                || !($connection1[$paramName] === $connection2[$paramName])) {
-                return false;
-            }
-        }
-        return true;
+        return $connection1[DbConfig::KEY_HOST] === $connection2[DbConfig::KEY_HOST];
     }
 
     /**
@@ -283,7 +276,7 @@ class DbConnection implements StepInterface
             );
             if (!$isDbConfigCompatibleWithSlaveConnection) {
                 $this->logger->warning(sprintf(
-                    'You have changed db configuration that not compatible with %s slave connection.',
+                    'You have changed db configuration that not compatible with % s slave connection.',
                     $connectionName
                 ));
             } elseif (!empty($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$connectionName])) {

@@ -35,20 +35,6 @@ class DbConfig implements ConfigInterface
     /**#@-*/
 
     /**
-     * Connection params
-     */
-    const CONNECTION_PARAMS = [
-        self::KEY_HOST,
-        self::KEY_USERNAME,
-        self::KEY_DBNAME,
-        self::KEY_PASSWORD,
-        self::KEY_MODEL,
-        self::KEY_ENGINE,
-        self::KEY_INIT_STATEMENTS,
-        self::KEY_ACTIVE
-    ];
-
-    /**
      * Names of connections
      */
     const CONNECTION_DEFAULT = 'default';
@@ -142,7 +128,8 @@ class DbConfig implements ConfigInterface
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
         RelationshipConnectionFactory $connectionDataFactory
-    ) {
+    )
+    {
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
         $this->connectionDataFactory = $connectionDataFactory;
@@ -241,7 +228,8 @@ class DbConfig implements ConfigInterface
         array $envDbConfig,
         string $connectionName,
         ConnectionInterface $connectionData
-    ): bool {
+    ): bool
+    {
         if ((isset($envDbConfig[self::KEY_CONNECTION][$connectionName]['host'])
                 && $envDbConfig[self::KEY_CONNECTION][$connectionName]['host'] !== $connectionData->getHost())
             || (isset($envDbConfig[self::KEY_CONNECTION][$connectionName]['dbname'])
