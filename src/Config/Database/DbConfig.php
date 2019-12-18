@@ -128,8 +128,7 @@ class DbConfig implements ConfigInterface
         DeployInterface $stageConfig,
         ConfigMerger $configMerger,
         RelationshipConnectionFactory $connectionDataFactory
-    )
-    {
+    ) {
         $this->stageConfig = $stageConfig;
         $this->configMerger = $configMerger;
         $this->connectionDataFactory = $connectionDataFactory;
@@ -228,8 +227,7 @@ class DbConfig implements ConfigInterface
         array $envDbConfig,
         string $connectionName,
         ConnectionInterface $connectionData
-    ): bool
-    {
+    ): bool {
         if ((isset($envDbConfig[self::KEY_CONNECTION][$connectionName]['host'])
                 && $envDbConfig[self::KEY_CONNECTION][$connectionName]['host'] !== $connectionData->getHost())
             || (isset($envDbConfig[self::KEY_CONNECTION][$connectionName]['dbname'])

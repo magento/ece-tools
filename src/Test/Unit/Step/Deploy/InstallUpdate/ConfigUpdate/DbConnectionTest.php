@@ -24,6 +24,8 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 
 /**
  * @inheritdoc
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class DbConnectionTest extends TestCase
 {
@@ -109,6 +111,9 @@ class DbConnectionTest extends TestCase
         );
     }
 
+    /**
+     * Case when an environment has no database configuration
+     */
     public function testExecuteWithoutDbConnectionInEnvironment()
     {
         $this->dbConfigMock->expects($this->once())
@@ -124,7 +129,10 @@ class DbConnectionTest extends TestCase
         $this->step->execute();
     }
 
-    public function testExecuteSplitDbIsDisabledSlaveIsDisabled()
+    /**
+     * Case when slave connections and split database are not used
+     */
+    public function testExecute()
     {
         $defaultConnection = [
             'host' => 'host',
@@ -175,6 +183,9 @@ class DbConnectionTest extends TestCase
         $this->step->execute();
     }
 
+    /**
+     * Case when with not compatible database settings for slave connection
+     */
     public function testExecuteWithNotCompatibleDatabaseSettingsForSlaveConnection()
     {
         $resourceConfig = [
@@ -232,6 +243,9 @@ class DbConnectionTest extends TestCase
         $this->step->execute();
     }
 
+    /**
+     * Case with slave connections
+     */
     public function testExecuteSetSlaveConnection()
     {
         $this->dbConfigMock->expects($this->once())
@@ -271,6 +285,9 @@ class DbConnectionTest extends TestCase
         $this->step->execute();
     }
 
+    /**
+     * Case with incorrect slave connections
+     */
     public function testExecuteSetSlaveConnectionHadNoEffect()
     {
         $this->dbConfigMock->expects($this->once())
@@ -320,6 +337,9 @@ class DbConnectionTest extends TestCase
         $this->step->execute();
     }
 
+    /**
+     * Case when database was split before but with custom split connections
+     */
     public function testExecuteSplitDbWasEnabledWithCustomConfiguration()
     {
         $defaultConnection = [
@@ -390,6 +410,109 @@ class DbConnectionTest extends TestCase
     }
 
     /**
+     * Case when database was split before but with custom default connections
+     */
+    public function testExecuteSplitDbWasEnabledWithDifferentMainConnection()
+    {
+        $defaultConnection = [
+            'host' => 'host',
+            'dbname' => 'dbname',
+            'password' => 'password',
+            'username' => 'username',
+        ];
+        $customDefaultConnection = [
+            'host' => 'custom.host',
+            'dbname' => 'custom.dbname',
+            'password' => 'custom.password',
+            'username' => 'custom.username',
+        ];
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'connection' => [
+                    'default' => $defaultConnection,
+                    'indexer' => $defaultConnection,
+                    'checkout' => [
+                        'host' => 'checkout.host',
+                        'dbname' => 'checkout.dbname',
+                        'password' => 'checkout.password',
+                        'username' => 'checkout.username',
+                    ],
+                    'sale' => [
+                        'host' => 'sale.host',
+                        'dbname' => 'sale.dbname',
+                        'password' => 'sale.password',
+                        'username' => 'sale.username',
+                    ],
+                ]
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating env.php DB connection configuration.');
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'db' => [
+                    'connection' => [
+                        'default' => $customDefaultConnection,
+                        'indexer' => $customDefaultConnection,
+                        'checkout' => [
+                            'host' => 'custom_checkout.host',
+                            'dbname' => 'checkout.dbname',
+                            'password' => 'checkout.password',
+                            'username' => 'checkout.username',
+                        ],
+                        'sale' => [
+                            'host' => 'custom_sale.host',
+                            'dbname' => 'sale.dbname',
+                            'password' => 'sale.password',
+                            'username' => 'sale.username',
+                        ],
+                    ]
+                ],
+                'resource' => [
+                    'default_setup' => ['connection' => 'default'],
+                    'checkout' => ['connection' => 'checkout'],
+                    'sale' => ['connection' => 'sale'],
+                ],
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Database was already split but deploy was configured with new connection.'
+                . ' The previous connection data will be ignored.');
+        $this->resourceConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'default_setup' => ['connection' => 'default'],
+                'checkout' => ['connection' => 'checkout'],
+                'sale' => ['connection' => 'sale'],
+            ]);
+        $this->stageConfigMock->expects($this->any())
+            ->method('get')
+            ->willReturnMap([
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, false],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION, []],
+            ]);
+
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'db' => [
+                    'connection' => [
+                        'default' => $defaultConnection,
+                        'indexer' => $defaultConnection,
+                    ]
+                ],
+                'resource' => [
+                    'default_setup' => ['connection' => 'default'],
+                ],
+            ]);
+
+        $this->step->execute();
+    }
+
+    /**
+     * Cases when database was split
      * @param array $varSplitDb
      * @param InvokedCount $expectsWarning
      * @param string $missedSplitConnection

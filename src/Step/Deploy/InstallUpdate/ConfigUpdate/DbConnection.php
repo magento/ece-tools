@@ -163,6 +163,14 @@ class DbConnection implements StepInterface
             return;
         }
 
+        $this->checkSplitConnections($enabledSplitConnections);
+    }
+
+    /**
+     * @param array $enabledSplitConnections
+     */
+    private function checkSplitConnections(array $enabledSplitConnections)
+    {
         $varSplitDb = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
         foreach (array_keys($enabledSplitConnections) as $connectionName) {
             $type = EnableSplitDb::TYPE_MAP[$connectionName];
@@ -171,6 +179,7 @@ class DbConnection implements StepInterface
                     'Db %s was split before, but SPLIT_DB does not have this info',
                     $type
                 ));
+                return;
             }
         }
     }
