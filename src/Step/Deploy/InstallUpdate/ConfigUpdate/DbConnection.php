@@ -272,7 +272,7 @@ class DbConnection implements StepInterface
         $isUseSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
         $isMergeRequired = !$this->configMerger->isEmpty($envDbConfig)
             && !$this->configMerger->isMergeRequired($envDbConfig);
-        $connectionMap = DbConfig::CONNECTION_MAP[DbConfig::KEY_CONNECTION];
+        $connectionMap = DbConfig::MAIN_CONNECTION_MAP;
         foreach (array_keys($dbConfig[DbConfig::KEY_CONNECTION]) as $connectionName) {
             $connectionData = $this->connectionFactory->create($connectionMap[$connectionName]);
             if (!$connectionData->getHost() || !$isUseSlave || $isMergeRequired) {

@@ -14,11 +14,13 @@ use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 
 /**
  * Returns merged database configuration from the .magento.env.yaml file
- * and environment variable MAGENTO_CLOUD_RELATIONSHIPS
+ * and environment variable MAGENTO_CLOUD_RELATIONSHIPS.
+ * Database configuration includes all all types of connections: main connection, slave connection
+ * and include split connections if they exist. Exception: custom split connections from .magento.env.yaml are ignored.
  */
 class DbConfig implements ConfigInterface
 {
-    /**#@+
+    /**
      * Keys for the description of the database configuration
      */
     const KEY_DB = 'db';
@@ -32,7 +34,6 @@ class DbConfig implements ConfigInterface
     const KEY_ENGINE = 'engine';
     const KEY_INIT_STATEMENTS = 'initStatements';
     const KEY_ACTIVE = 'active';
-    /**#@-*/
 
     /**
      * Names of connections
@@ -41,16 +42,6 @@ class DbConfig implements ConfigInterface
     const CONNECTION_INDEXER = 'indexer';
     const CONNECTION_CHECKOUT = 'checkout';
     const CONNECTION_SALE = 'sale';
-
-    /**
-     * Connection list
-     */
-    const CONNECTIONS = [
-        self::CONNECTION_DEFAULT,
-        self::CONNECTION_INDEXER,
-        self::CONNECTION_CHECKOUT,
-        self::CONNECTION_SALE,
-    ];
 
     /**
      * Types of connections
@@ -68,20 +59,22 @@ class DbConfig implements ConfigInterface
     const SPLIT_CONNECTIONS = [self::CONNECTION_CHECKOUT, self::CONNECTION_SALE];
 
     /**
-     * Connection map
+     * Main connection map with data from environment relationship connections
      */
-    const CONNECTION_MAP = [
-        self::KEY_CONNECTION => [
-            self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_MAIN,
-            self::CONNECTION_INDEXER => RelationshipConnectionFactory::CONNECTION_MAIN,
-            self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
-            self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
-        ],
-        self::KEY_SLAVE_CONNECTION => [
-            self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_SLAVE,
-            self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE,
-            self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
-        ]
+    const MAIN_CONNECTION_MAP = [
+        self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_MAIN,
+        self::CONNECTION_INDEXER => RelationshipConnectionFactory::CONNECTION_MAIN,
+        self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
+        self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
+    ];
+
+    /**
+     * Slave connection map
+     */
+    const SLAVE_CONNECTION_MAP = [
+        self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_SLAVE,
+        self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE,
+        self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
     ];
 
     /**
@@ -103,7 +96,7 @@ class DbConfig implements ConfigInterface
      *
      * @var array
      */
-    private $connectionData;
+    private $envConnectionData;
 
     /**
      * Factory for creation database configurations
@@ -135,7 +128,8 @@ class DbConfig implements ConfigInterface
     }
 
     /**
-     * Returns database configurations
+     * Returns database configurations as merge result of customer configurations from .magento.env.yaml
+     * and connection data from cloud environment
      *
      * @return array
      */
@@ -145,45 +139,42 @@ class DbConfig implements ConfigInterface
             return $this->dbConfig;
         }
 
-        $envConfig = $this->getCustomDbConfig();
+        $customConfig = $this->getCustomDbConfig();
 
-        if (!$this->configMerger->isEmpty($envConfig) && !$this->configMerger->isMergeRequired($envConfig)) {
-            return $this->configMerger->clear($envConfig);
+        if (!$this->configMerger->isEmpty($customConfig) && !$this->configMerger->isMergeRequired($customConfig)) {
+            return $this->configMerger->clear($customConfig);
         }
 
-        return $this->dbConfig = $this->configMerger->merge($this->createDbConfig($envConfig), $envConfig);
+        return $this->dbConfig = $this->configMerger->merge($this->createDbConfig($customConfig), $customConfig);
     }
 
     /**
      *  Creates Database configuration
      *
-     * @param array $envConfig
+     * @param array $customDbConfig
      * @return array
      */
-    private function createDbConfig(array $envConfig): array
+    private function createDbConfig(array $customDbConfig): array
     {
-        $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
-
         $config = [];
-        foreach (self::CONNECTION_MAP[self::KEY_CONNECTION] as $connection => $service) {
-            $connectionData = $this->getConnectionData($service);
-            if (empty($connectionData->getHost())) {
+        foreach (self::MAIN_CONNECTION_MAP as $connection => $service) {
+            $envDBConfig = $this->getEnvConnectionData($service);
+            if (empty($envDBConfig->getHost())) {
                 continue;
             }
-            $config[self::KEY_CONNECTION][$connection] = $this->getConnectionConfig(
-                $connectionData,
+            $config[self::KEY_CONNECTION][$connection] = $this->convertToMageDbConfig(
+                $envDBConfig,
                 !in_array($connection, self::MAIN_CONNECTIONS)
             );
-            if (!$useSlave || !isset(self::CONNECTION_MAP[self::KEY_SLAVE_CONNECTION][$connection])) {
+            if (!isset(self::SLAVE_CONNECTION_MAP[$connection])) {
                 continue;
             }
-            $slaveConnectionMap = self::CONNECTION_MAP[self::KEY_SLAVE_CONNECTION];
-            $slaveConnectionData = $this->getConnectionData($slaveConnectionMap[$connection]);
+            $slaveConnectionData = $this->getEnvConnectionData(self::SLAVE_CONNECTION_MAP[$connection]);
             if (empty($slaveConnectionData->getHost())
-                || !$this->isDbConfigCompatibleWithSlaveConnection($envConfig, $connection, $connectionData)) {
+                || !$this->isDbConfigCompatibleWithSlaveConnection($customDbConfig, $connection, $envDBConfig)) {
                 continue;
             }
-            $config[self::KEY_SLAVE_CONNECTION][$connection] = $this->getConnectionConfig($slaveConnectionData, true);
+            $config[self::KEY_SLAVE_CONNECTION][$connection] = $this->convertToMageDbConfig($slaveConnectionData, true);
         }
         return $config;
     }
@@ -245,24 +236,24 @@ class DbConfig implements ConfigInterface
      * @param string $service
      * @return ConnectionInterface
      */
-    private function getConnectionData(string $service): ConnectionInterface
+    private function getEnvConnectionData(string $service): ConnectionInterface
     {
-        if (!isset($this->connectionData[$service])
-            || !($this->connectionData[$service] instanceof ConnectionInterface)) {
-            $this->connectionData[$service] = $this->connectionDataFactory->create($service);
+        if (!isset($this->envConnectionData[$service])
+            || !($this->envConnectionData[$service] instanceof ConnectionInterface)) {
+            $this->envConnectionData[$service] = $this->connectionDataFactory->create($service);
         }
 
-        return $this->connectionData[$service];
+        return $this->envConnectionData[$service];
     }
 
     /**
-     * Returns configuration for connection
+     * Convert DB configuration to format which is used in Magento configuration file
      *
      * @param ConnectionInterface $connectionData
      * @param bool $additionalParams
      * @return array
      */
-    private function getConnectionConfig(ConnectionInterface $connectionData, bool $additionalParams = false): array
+    private function convertToMageDbConfig(ConnectionInterface $connectionData, bool $additionalParams = false): array
     {
         $host = $connectionData->getHost();
 
