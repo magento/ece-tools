@@ -186,19 +186,19 @@ class DbConfig implements ConfigInterface
      */
     private function getCustomDbConfig(): array
     {
-        $envConfig = (array)$this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
+        $customConfig = (array)$this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
 
         /**
          * Ece-tools do not support custom configuration of a split database.
          */
         foreach (self::SPLIT_CONNECTIONS as $connection) {
             foreach (self::CONNECTION_TYPES as $connectionType) {
-                if (isset($envConfig[$connectionType][$connection])) {
-                    unset($envConfig[$connectionType][$connection]);
+                if (isset($customConfig[$connectionType][$connection])) {
+                    unset($customConfig[$connectionType][$connection]);
                 }
             }
         }
-        return $envConfig;
+        return $customConfig;
     }
 
     /**
@@ -208,10 +208,9 @@ class DbConfig implements ConfigInterface
      * Returns true if $envDbConfig contains host or dbname for default connection
      * that doesn't match connection from relationships,
      * otherwise return false.
-     *
+     * @param array $envDbConfig database configuration from DATABASE_CONFIGURATION of .magento.env.yaml
      * @param string $connectionName
      * @param ConnectionInterface $connectionData
-     * @param array $envDbConfig database configuration from DATABASE_CONFIGURATION of .magento.env.yaml
      * @return boolean
      */
     public function isDbConfigCompatibleWithSlaveConnection(
