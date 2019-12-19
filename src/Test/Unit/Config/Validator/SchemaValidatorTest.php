@@ -235,6 +235,26 @@ class SchemaValidatorTest extends TestCase
                 'The CRON_CONSUMERS_RUNNER variable contains an invalid value of type string. ' .
                 'Use the following types: array.'
             ],
+            [DeployInterface::VAR_SPLIT_DB, [], null],
+            [DeployInterface::VAR_SPLIT_DB, [DeployInterface::VAL_SPLIT_DB_QUOTE], null],
+            [DeployInterface::VAR_SPLIT_DB, [DeployInterface::VAL_SPLIT_DB_QUOTE, DeployInterface::VAL_SPLIT_DB_SALES], null],
+            [
+                DeployInterface::VAR_SPLIT_DB,
+                DeployInterface::VAL_SPLIT_DB_QUOTE,
+                'The SPLIT_DB variable contains an invalid value of type string. Use the following types: array.'
+            ],
+            [
+                DeployInterface::VAR_SPLIT_DB,
+                ['wrong'],
+                'The SPLIT_DB variable contains the invalid value. It should be array with next available values: '
+                . '[quote, sales].'
+            ],
+            [
+                DeployInterface::VAR_SPLIT_DB,
+                ['wrong', DeployInterface::VAL_SPLIT_DB_QUOTE],
+                'The SPLIT_DB variable contains the invalid value. It should be array with next available values: '
+                . '[quote, sales].'
+            ],
         ];
     }
 }
