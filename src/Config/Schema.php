@@ -282,6 +282,14 @@ class Schema
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [StageConfigInterface::STAGE_BUILD => 1]
             ],
+            BuildInterface::VAR_SCD_USE_BALER => [
+                self::SCHEMA_TYPE => ['boolean'],
+                self::SCHEMA_STAGE => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_BUILD,
+                ],
+                self::SCHEMA_DEFAULT_VALUE => [StageConfigInterface::STAGE_BUILD => false]
+            ],
             DeployInterface::VAR_LOCK_PROVIDER => [
                 self::SCHEMA_TYPE => ['string'],
                 self::SCHEMA_STAGE => [

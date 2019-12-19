@@ -12,6 +12,7 @@
 
         <service id="Composer\Package\Version\VersionParser" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\SystemList" autowire="false" />
+        <service id="Magento\MagentoCloud\Step\Build\RunBaler" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Build\DeployStaticContent" autowire="false" />
         <service id="Magento\MagentoCloud\App\Container" autowire="false" />
         <service id="Magento\MagentoCloud\App\GenericException" autowire="false" />
@@ -55,6 +56,7 @@
         <service id="Composer\Semver\Comparator"/>
         <service id="Illuminate\Config\Repository"/>
         <service id="Symfony\Component\Serializer\Encoder\XmlEncoder"/>
+        <service id="Symfony\Component\Process\ExecutableFinder"/>
         <service id="Psr\Log\LoggerInterface" alias="Magento\MagentoCloud\App\Logger" />
         <service id="Magento\MagentoCloud\App\ContainerInterface" alias="container" />
         <service id="Magento\MagentoCloud\Shell\ShellInterface" alias="Magento\MagentoCloud\Shell\Shell" />
