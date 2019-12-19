@@ -21,6 +21,7 @@
     "guzzlehttp/guzzle": "^6.2",
     "illuminate/config": "^5.6",
     "magento/magento-cloud-components": "^1.0.1",
+    "magento/magento-cloud-docker": "^1.0.0",
     "magento/magento-cloud-patches": "^1.0.0",
     "monolog/monolog": "^1.16",
     "nesbot/carbon": "^2.25",
