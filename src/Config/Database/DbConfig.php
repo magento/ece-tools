@@ -69,7 +69,7 @@ class DbConfig implements ConfigInterface
     ];
 
     /**
-     * Slave connection map
+     * Slave connection map with data from environment relationship connections
      */
     const SLAVE_CONNECTION_MAP = [
         self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_SLAVE,
@@ -158,12 +158,12 @@ class DbConfig implements ConfigInterface
     {
         $config = [];
         foreach (self::MAIN_CONNECTION_MAP as $connection => $service) {
-            $envDBConfig = $this->getEnvConnectionData($service);
-            if (empty($envDBConfig->getHost())) {
+            $envDbConfig = $this->getEnvConnectionData($service);
+            if (empty($envDbConfig->getHost())) {
                 continue;
             }
             $config[self::KEY_CONNECTION][$connection] = $this->convertToMageDbConfig(
-                $envDBConfig,
+                $envDbConfig,
                 !in_array($connection, self::MAIN_CONNECTIONS)
             );
             if (!isset(self::SLAVE_CONNECTION_MAP[$connection])) {
@@ -171,7 +171,7 @@ class DbConfig implements ConfigInterface
             }
             $slaveConnectionData = $this->getEnvConnectionData(self::SLAVE_CONNECTION_MAP[$connection]);
             if (empty($slaveConnectionData->getHost())
-                || !$this->isDbConfigCompatibleWithSlaveConnection($customDbConfig, $connection, $envDBConfig)) {
+                || !$this->isDbConfigCompatibleWithSlaveConnection($customDbConfig, $connection, $envDbConfig)) {
                 continue;
             }
             $config[self::KEY_SLAVE_CONNECTION][$connection] = $this->convertToMageDbConfig($slaveConnectionData, true);
