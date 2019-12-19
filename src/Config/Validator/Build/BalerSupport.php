@@ -75,11 +75,11 @@ class BalerSupport implements ValidatorInterface
             }
         }
 
-        if (!empty($errors)) {
-            return $this->resultFactory->error(
+        return empty($errors)
+            ? $this->resultFactory->success()
+            : $this->resultFactory->error(
                 'Baler JS bundling cannot be used because of the following issues:',
                 implode(PHP_EOL, $errors)
             );
-        }
     }
 }
