@@ -123,12 +123,4 @@ class FileList extends ConfigFileList
     {
         return $this->directoryList->getRoot() . '/config/eol.yaml';
     }
-
-    /**
-     * @return string
-     */
-    public function getSchemaDist(): string
-    {
-        return $this->directoryList->getRoot() . '/.magento.env.yaml.md';
-    }
 }
