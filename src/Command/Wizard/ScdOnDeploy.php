@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command\Wizard;
 
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -14,6 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Verifies configuration to be properly set and ready to use SCD on deploy phase.
+ *
+ * @api
  */
 class ScdOnDeploy extends Command
 {

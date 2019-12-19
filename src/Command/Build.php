@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\Command\Build\Generate;
@@ -13,6 +15,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * CLI command for build hook. Responsible for preparing the codebase before it's moved to the server.
+ *
+ * @api
  */
 class Build extends Command
 {

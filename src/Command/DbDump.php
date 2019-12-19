@@ -3,6 +3,8 @@
  * Copyright © Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\DB\DumpGenerator;
@@ -15,6 +17,8 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
  * Class DbDump for safely creating backup of database
+ *
+ * @api
  */
 class DbDump extends Command
 {

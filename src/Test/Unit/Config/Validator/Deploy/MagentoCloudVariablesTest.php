@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -79,18 +81,6 @@ class MagentoCloudVariablesTest extends TestCase
     {
         return [
             [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3'],
-                ResultInterface::SUCCESS
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 3],
-                ResultInterface::SUCCESS
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => '3a'],
-                ResultInterface::ERROR
-            ],
-            [
                 [DeployInterface::VAR_SCD_COMPRESSION_LEVEL => '3'],
                 ResultInterface::SUCCESS
             ],
@@ -151,11 +141,6 @@ class MagentoCloudVariablesTest extends TestCase
                 'The variable CLEAN_STATIC_FILES has wrong value: "1" and will be ignored, use only disabled or enabled'
             ],
             [
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => '1'],
-                ResultInterface::ERROR,
-                'The variable STATIC_CONTENT_SYMLINK has wrong value: "1" and will be ignored'
-            ],
-            [
                 [DeployInterface::VAR_UPDATE_URLS => '1'],
                 ResultInterface::ERROR,
                 'The variable UPDATE_URLS has wrong value: "1" and will be ignored, use only disabled or enabled'
@@ -167,17 +152,7 @@ class MagentoCloudVariablesTest extends TestCase
                 ' use only disabled or enabled'
             ],
             [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => '1'],
-                ResultInterface::ERROR,
-                'The variable DO_DEPLOY_STATIC_CONTENT has wrong value: "1" and will be ignored,' .
-                ' use only disabled or enable'
-            ],
-            [
                 [DeployInterface::VAR_CLEAN_STATIC_FILES => 'enabled'],
-                ResultInterface::SUCCESS,
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_SYMLINK => 'enabled'],
                 ResultInterface::SUCCESS,
             ],
             [
@@ -186,10 +161,6 @@ class MagentoCloudVariablesTest extends TestCase
             ],
             [
                 [DeployInterface::VAR_GENERATED_CODE_SYMLINK => 'enabled'],
-                ResultInterface::SUCCESS,
-            ],
-            [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 'enabled'],
                 ResultInterface::SUCCESS,
             ],
             [

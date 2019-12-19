@@ -3,14 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\Flag;
 
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Filesystem\Flag\Pool;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
@@ -20,24 +22,24 @@ use Psr\Log\LoggerInterface;
 class ManagerTest extends TestCase
 {
     /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var File|Mock
+     * @var File|MockObject
      */
     private $fileMock;
 
     /**
-     * @var DirectoryList|Mock
+     * @var DirectoryList|MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var Pool|Mock
+     * @var Pool|MockObject
      */
-    private $flagPool;
+    private $pool;
 
     /**
      * @var Manager
@@ -59,32 +61,32 @@ class ManagerTest extends TestCase
      */
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockBuilder(LoggerInterface::class)
-            ->getMockForAbstractClass();
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->fileMock = $this->createMock(File::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->flagPool = $this->createMock(Pool::class);
+        $this->pool = $this->createMock(Pool::class);
 
-        $this->directoryListMock->expects($this->any())
-            ->method('getMagentoRoot')
+        $this->directoryListMock->method('getMagentoRoot')
             ->willReturn($this->magentoRoot);
-        $this->directoryListMock->expects($this->any())
-            ->method('getPath')
+        $this->directoryListMock->method('getPath')
             ->willReturn($this->backupRoot);
 
         $this->manager = new Manager(
             $this->loggerMock,
             $this->fileMock,
-            $this->flagPool,
+            $this->pool,
             $this->directoryListMock
         );
 
         parent::setUp();
     }
 
-    public function testGetFlag()
+    /**
+     * @throws ConfigurationMismatchException
+     */
+    public function testGetFlag(): void
     {
-        $this->flagPool->expects($this->once())
+        $this->pool->expects($this->once())
             ->method('get')
             ->with('some_flag')
             ->willReturn('flag/path');
@@ -96,12 +98,14 @@ class ManagerTest extends TestCase
     }
 
     /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Flag with key some_flag is not registered in flagPool
+     * @throws ConfigurationMismatchException
      */
-    public function testGetFlagWithException()
+    public function testGetFlagWithException(): void
     {
-        $this->flagPool->expects($this->once())
+        $this->expectException(ConfigurationMismatchException::class);
+        $this->expectExceptionMessage('Flag with key some_flag is not registered in pool');
+
+        $this->pool->expects($this->once())
             ->method('get')
             ->with('some_flag')
             ->willReturn(null);
@@ -109,7 +113,10 @@ class ManagerTest extends TestCase
         $this->manager->getFlagPath('some_flag');
     }
 
-    public function flagDataProvider()
+    /**
+     * @return array
+     */
+    public function flagDataProvider(): array
     {
         return [
             ['key' => 'key1', 'path' => '.some_flag', 'flagState' => true],
@@ -122,10 +129,12 @@ class ManagerTest extends TestCase
      * @param string $path
      * @param bool $flagState
      * @dataProvider flagDataProvider
+     *
+     * @throws ConfigurationMismatchException
      */
     public function testExists(string $key, string $path, bool $flagState)
     {
-        $this->flagPool->expects($this->once())
+        $this->pool->expects($this->once())
             ->method('get')
             ->with($key)
             ->willReturn($path);
@@ -145,10 +154,12 @@ class ManagerTest extends TestCase
      * @param string $path
      * @param bool $flagState
      * @dataProvider flagDataProvider
+     *
+     * @throws ConfigurationMismatchException
      */
-    public function testSet(string $key, string $path, bool $flagState)
+    public function testSet(string $key, string $path, bool $flagState): void
     {
-        $this->flagPool->expects($this->once())
+        $this->pool->expects($this->once())
             ->method('get')
             ->with($key)
             ->willReturn($path);
@@ -179,6 +190,8 @@ class ManagerTest extends TestCase
      * @param array $logs
      * @param bool $result
      * @dataProvider deleteDataProvider
+     *
+     * @throws ConfigurationMismatchException
      */
     public function testDelete(
         string $key,
@@ -187,8 +200,8 @@ class ManagerTest extends TestCase
         bool $deleteResult,
         array $logs,
         bool $result
-    ) {
-        $this->flagPool->expects($this->any())
+    ): void {
+        $this->pool->expects($this->any())
             ->method('get')
             ->with($key)
             ->willReturn($path);
@@ -219,7 +232,10 @@ class ManagerTest extends TestCase
         );
     }
 
-    public function deleteDataProvider()
+    /**
+     * @return array
+     */
+    public function deleteDataProvider(): array
     {
         return [
             [
@@ -249,30 +265,13 @@ class ManagerTest extends TestCase
         ];
     }
 
-    public function testExistsWithFileSystemException()
+    /**
+     * @throws ConfigurationMismatchException
+     */
+    public function testSetWithFileSystemException(): void
     {
         $path = 'path/that/doesnt/exist';
-        $this->flagPool->expects($this->any())
-            ->method('get')
-            ->with('some_key')
-            ->willReturn($path);
-        $this->directoryListMock->expects($this->once())
-            ->method('getMagentoRoot')
-            ->willReturn($this->magentoRoot);
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->willThrowException(new FileSystemException('Error occurred during execution'));
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Error occurred during execution');
-
-        $this->assertFalse($this->manager->exists('some_key'));
-    }
-
-    public function testSetWithFileSystemException()
-    {
-        $path = 'path/that/doesnt/exist';
-        $this->flagPool->expects($this->any())
+        $this->pool->expects($this->any())
             ->method('get')
             ->with('some_key')
             ->willReturn($path);
@@ -287,33 +286,5 @@ class ManagerTest extends TestCase
             ->with('Cannot create flag some_key');
 
         $this->assertFalse($this->manager->set('some_key'));
-    }
-
-    public function testDeleteWithFileSystemException()
-    {
-        $root = $this->magentoRoot;
-        $path = '.some_flag';
-        $flag = 'magento_root/.some_flag';
-        $flagState = true;
-
-        $this->flagPool->expects($this->any())
-            ->method('get')
-            ->with('some_key')
-            ->willReturn($path);
-        $this->directoryListMock->expects($this->any())
-            ->method('getMagentoRoot')
-            ->willReturn($root);
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with($flag)
-            ->willReturn($flagState);
-        $this->fileMock->expects($this->once())
-            ->method('deleteFile')
-            ->willThrowException(new FileSystemException('Error occurred during execution'));
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Error occurred during execution');
-
-        $this->assertFalse($this->manager->delete('some_key'));
     }
 }

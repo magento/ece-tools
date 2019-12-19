@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\StaticContent;
 
 use Magento\MagentoCloud\Config\GlobalSection;
@@ -68,10 +70,6 @@ class CommandFactory
     public function create(OptionInterface $option, array $excludedThemes = []): string
     {
         $command = $this->build($option);
-        $excludedThemes = array_unique(array_merge(
-            $option->getExcludedThemes(),
-            $excludedThemes
-        ));
         foreach ($excludedThemes as $key => $aTheme) {
             $excludedThemes[$key] = $this->themeResolver->resolve($aTheme);
             if ('' === $excludedThemes[$key]) {

@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -15,6 +17,8 @@ use Psr\Log\LoggerInterface;
 
 /**
  * CLI command for restoring Magento configuration files from backup.
+ *
+ * @api
  */
 class BackupRestore extends Command
 {

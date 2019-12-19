@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\DB\Data;
 
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
@@ -55,12 +57,11 @@ class RelationshipConnectionFactoryTest extends TestCase
         $this->factory->create(RelationshipConnectionFactory::CONNECTION_SLAVE);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Connection with type dummy doesn't exist
-     */
     public function testCreateWithException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Connection with type dummy doesn\'t exist');
+
         $this->factory->create('dummy');
     }
 }

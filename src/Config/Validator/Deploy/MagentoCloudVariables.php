@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -79,7 +81,6 @@ class MagentoCloudVariables implements ValidatorInterface
         $errors = [];
 
         $intVariables = [
-            DeployInterface::VAR_STATIC_CONTENT_THREADS,
             DeployInterface::VAR_SCD_THREADS,
         ];
 
@@ -122,10 +123,8 @@ class MagentoCloudVariables implements ValidatorInterface
         $errors = [];
         $enableDisableVariables = [
             DeployInterface::VAR_CLEAN_STATIC_FILES,
-            DeployInterface::VAR_STATIC_CONTENT_SYMLINK,
             DeployInterface::VAR_UPDATE_URLS,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
-            DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT
         ];
 
         $possibleValues = [Environment::VAL_DISABLED, Environment::VAL_ENABLED];

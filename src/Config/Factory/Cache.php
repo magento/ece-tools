@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Factory;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
@@ -125,7 +127,7 @@ class Cache
             }
         }
 
-        return $this->configMerger->mergeConfigs([
+        return $this->configMerger->merge([
             'frontend' => [
                 'default' => array_replace_recursive(
                     $redisCache,

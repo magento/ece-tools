@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Util;
 
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -134,12 +136,11 @@ class StaticContentCompressorTest extends TestCase
         $this->staticContentCompressor->process(0);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Utility was not found
-     */
     public function testUtilityNotFound()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Utility was not found');
+
         $this->shellMock
             ->expects($this->never())
             ->method('execute');

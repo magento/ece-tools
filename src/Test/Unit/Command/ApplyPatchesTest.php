@@ -3,14 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\ApplyPatches;
 use Magento\MagentoCloud\Patch\Manager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
-use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class ApplyPatchesTest.
@@ -23,64 +25,32 @@ class ApplyPatchesTest extends TestCase
     private $command;
 
     /**
-     * @var Manager|Mock
+     * @var Manager|MockObject
      */
     private $managerMock;
 
     /**
-     * @var LoggerInterface|Mock
+     * @inheritDoc
      */
-    private $loggerMock;
-
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->managerMock = $this->createMock(Manager::class);
 
         $this->command = new ApplyPatches(
-            $this->loggerMock,
             $this->managerMock
         );
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Patching started.'],
-                ['Patching finished.']
-            );
         $this->managerMock->expects($this->once())
-            ->method('applyAll');
+            ->method('apply');
 
-        $tester = new CommandTester(
-            $this->command
-        );
-        $tester->execute([]);
+        /** @var InputInterface|MockObject $inputMock */
+        $inputMock = $this->getMockForAbstractClass(InputInterface::class);
+        /** @var OutputInterface|MockObject $outputMock */
+        $outputMock = $this->getMockForAbstractClass(OutputInterface::class);
 
-        $this->assertSame(0, $tester->getStatusCode());
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     */
-    public function testExecuteWithException()
-    {
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Patching started.');
-        $this->loggerMock->expects($this->once())
-            ->method('critical')
-            ->with('Some error');
-        $this->managerMock->expects($this->once())
-            ->method('applyAll')
-            ->willThrowException(new \Exception('Some error'));
-
-        $tester = new CommandTester(
-            $this->command
-        );
-        $tester->execute([]);
+        $this->command->execute($inputMock, $outputMock);
     }
 }

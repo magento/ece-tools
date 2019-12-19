@@ -3,10 +3,12 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Database;
 
 use Magento\MagentoCloud\Config\ConfigMerger;
-use Magento\MagentoCloud\Config\Deploy\Reader as ConfigReader;
+use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
@@ -109,7 +111,7 @@ class MergedConfig implements ConfigInterface
             $dbConfig = $this->getDbConfigFromEnvFile();
         }
 
-        return $this->mergedConfig = $this->configMerger->mergeConfigs($dbConfig, $envDbConfig);
+        return $this->mergedConfig = $this->configMerger->merge($dbConfig, $envDbConfig);
     }
 
     /**

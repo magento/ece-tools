@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\App\Logger;
 
 use Illuminate\Config\Repository;
@@ -79,12 +81,11 @@ class HandlerFactoryTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Unknown type of log handler: someHandler
-     */
     public function testCreateWithWrongHandlerFromFile()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Unknown type of log handler: someHandler');
+
         $handler = 'someHandler';
         $this->logConfigMock->expects($this->once())
             ->method('get')

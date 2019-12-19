@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:ece-tools:config/scenario.xsd">
+    <step name="is-deploy-failed" type="Magento\MagentoCloud\Step\PostDeploy\DeployFailed" priority="100"/>
+    <step name="validate-config" type="Magento\MagentoCloud\Step\ValidateConfiguration" priority="200">
+        <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="validators" xsi:type="array">
+                <item name="warning" xsi:type="array">
+                    <item name="debug-logging" xsi:type="object" priority="100">Magento\MagentoCloud\Config\Validator\Deploy\DebugLogging</item>
+                </item>
+            </argument>
+        </arguments>
+    </step>
+    <step name="enable-cron" type="Magento\MagentoCloud\Step\PostDeploy\EnableCron" priority="300"/>
+    <step name="backup" type="Magento\MagentoCloud\Step\PostDeploy\Backup" priority="400"/>
+    <step name="clean-cache" type="Magento\MagentoCloud\Step\PostDeploy\CleanCache" priority="500"/>
+    <step name="warm-up" type="Magento\MagentoCloud\Step\PostDeploy\WarmUp" priority="600"/>
+    <step name="time-to-first-byte" type="Magento\MagentoCloud\Step\PostDeploy\TimeToFirstByte" priority="700"/>
+</scenario>

@@ -47,7 +47,7 @@ class Run extends BaseTask implements CommandInterface
      *
      * @var string
      */
-    protected $workingDir = '/var/www/magento';
+    protected $workingDir = '/app';
 
     /**
      * @param string $container

@@ -123,7 +123,7 @@ class ElasticSearch implements ServiceInterface
 
         try {
             $templates = $this->call(sprintf(
-                '%s:%s/_template',
+                '%s:%s/_template/platformsh_index_settings',
                 $config['host'],
                 $config['port']
             ));

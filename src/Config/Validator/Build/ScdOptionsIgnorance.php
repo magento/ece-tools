@@ -3,13 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use Magento\MagentoCloud\Config\Build\Reader as BuildReader;
+use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 
 /**
  * Checks that scd configuration is really using on build phase.
@@ -30,11 +31,6 @@ class ScdOptionsIgnorance implements ValidatorInterface
     private $environmentReader;
 
     /**
-     * @var BuildReader
-     */
-    private $buildReader;
-
-    /**
      * @var Validator\GlobalStage\ScdOnBuild
      */
     private $scdOnBuild;
@@ -42,18 +38,15 @@ class ScdOptionsIgnorance implements ValidatorInterface
     /**
      * @param Validator\ResultFactory $resultFactory
      * @param EnvironmentReader $environmentReader
-     * @param BuildReader $buildReader
      * @param Validator\GlobalStage\ScdOnBuild $scdOnBuild
      */
     public function __construct(
         Validator\ResultFactory $resultFactory,
         EnvironmentReader $environmentReader,
-        BuildReader $buildReader,
         Validator\GlobalStage\ScdOnBuild $scdOnBuild
     ) {
         $this->resultFactory = $resultFactory;
         $this->environmentReader = $environmentReader;
-        $this->buildReader = $buildReader;
         $this->scdOnBuild = $scdOnBuild;
     }
 
@@ -67,7 +60,6 @@ class ScdOptionsIgnorance implements ValidatorInterface
             $scdVariables = [
                 StageConfigInterface::VAR_SCD_STRATEGY,
                 StageConfigInterface::VAR_SCD_THREADS,
-                StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
             ];
             $configuredScdVariables = [];
 
@@ -99,11 +91,6 @@ class ScdOptionsIgnorance implements ValidatorInterface
     private function isVariableConfigured(string $variableName): bool
     {
         try {
-            $buildIniConfig = $this->buildReader->read();
-            if (isset($buildIniConfig[strtolower($variableName)])) {
-                return true;
-            }
-
             $stageConfig = $this->environmentReader->read()[StageConfigInterface::SECTION_STAGE] ?? [];
             $buildConfig = $stageConfig[StageConfigInterface::STAGE_BUILD] ?? [];
 

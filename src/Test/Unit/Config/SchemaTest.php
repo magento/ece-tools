@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
 use Magento\MagentoCloud\Config\Schema;
@@ -31,7 +33,7 @@ class SchemaTest extends TestCase
         $this->schema = new Schema();
     }
 
-    public function testGetDefaultsForBuild()
+    public function testGetDefaultsForBuild(): void
     {
         $this->assertEquals(
             [
@@ -40,16 +42,16 @@ class SchemaTest extends TestCase
                 BuildInterface::VAR_SCD_COMPRESSION_LEVEL => 6,
                 BuildInterface::VAR_SCD_COMPRESSION_TIMEOUT => 600,
                 BuildInterface::VAR_SCD_THREADS => -1,
-                BuildInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 BuildInterface::VAR_VERBOSE_COMMANDS => '',
                 BuildInterface::VAR_SCD_MATRIX => [],
-                BuildInterface::VAR_SCD_MAX_EXEC_TIME => null
+                BuildInterface::VAR_SCD_MAX_EXEC_TIME => null,
+                BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => 1
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_BUILD)
         );
     }
 
-    public function testGetDefaultsForDeploy()
+    public function testGetDefaultsForDeploy(): void
     {
         $this->assertEquals(
             [
@@ -66,13 +68,11 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_VERBOSE_COMMANDS => '',
                 DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [],
                 DeployInterface::VAR_CLEAN_STATIC_FILES => true,
-                DeployInterface::VAR_STATIC_CONTENT_SYMLINK => true,
                 DeployInterface::VAR_UPDATE_URLS => true,
                 DeployInterface::VAR_FORCE_UPDATE_URLS => false,
                 DeployInterface::VAR_SKIP_SCD => false,
                 DeployInterface::VAR_SCD_THREADS => -1,
                 DeployInterface::VAR_GENERATED_CODE_SYMLINK => true,
-                DeployInterface::VAR_SCD_EXCLUDE_THEMES => '',
                 DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => false,
                 DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => false,
@@ -85,8 +85,18 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetDefaultsForPostDeploy()
+    public function testGetDefaultsForPostDeploy(): void
     {
+        $this->assertEquals(
+            [
+                PostDeployInterface::VAR_WARM_UP_PAGES => [
+                    '',
+                ],
+                PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
+            ],
+            $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
+        );
+        /** Lazy loading */
         $this->assertEquals(
             [
                 PostDeployInterface::VAR_WARM_UP_PAGES => [
@@ -98,7 +108,7 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetDefaultsForSystemVariables()
+    public function testGetDefaultsForSystemVariables(): void
     {
         $this->assertEquals(
             [
@@ -112,7 +122,7 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetDefaultsForGlobalSection()
+    public function testGetDefaultsForGlobalSection(): void
     {
         $this->assertEquals(
             [
@@ -127,13 +137,12 @@ class SchemaTest extends TestCase
         );
     }
 
-    public function testGetSchemaItemsExists()
+    public function testGetSchemaItemsExists(): void
     {
         $requiredItems = [
             StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
             StageConfigInterface::VAR_SCD_STRATEGY,
             StageConfigInterface::VAR_SCD_THREADS,
-            StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
             StageConfigInterface::VAR_SKIP_SCD,
             StageConfigInterface::VAR_VERBOSE_COMMANDS,
             StageConfigInterface::VAR_SCD_ON_DEMAND,
@@ -148,7 +157,6 @@ class SchemaTest extends TestCase
             DeployInterface::VAR_DATABASE_CONFIGURATION,
             DeployInterface::VAR_CRON_CONSUMERS_RUNNER,
             DeployInterface::VAR_CLEAN_STATIC_FILES,
-            DeployInterface::VAR_STATIC_CONTENT_SYMLINK,
             DeployInterface::VAR_UPDATE_URLS,
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,

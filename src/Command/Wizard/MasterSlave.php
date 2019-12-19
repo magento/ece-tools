@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command\Wizard;
 
 use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
@@ -12,7 +14,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @inheritdoc
+ * Verifies master-slave configuration
+ *
+ * @api
  */
 class MasterSlave extends Command
 {

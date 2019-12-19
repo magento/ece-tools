@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Service;
 
 use Magento\MagentoCloud\App\ContainerInterface;
@@ -20,6 +22,7 @@ class ServiceFactory
         ServiceInterface::NAME_ELASTICSEARCH => ElasticSearch::class,
         ServiceInterface::NAME_RABBITMQ => RabbitMq::class,
         ServiceInterface::NAME_DB => Database::class,
+        ServiceInterface::NAME_PHP => Php::class
     ];
 
     /**

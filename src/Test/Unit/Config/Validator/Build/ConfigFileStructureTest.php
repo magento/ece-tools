@@ -3,16 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Build;
 
+use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\Config\Validator\Build\ConfigFileStructure;
 use Magento\MagentoCloud\Config\Validator\Result;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
-use Magento\MagentoCloud\Package\MagentoVersion;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\ArrayManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -28,11 +28,6 @@ class ConfigFileStructureTest extends TestCase
     private $configFileStructure;
 
     /**
-     * @var File|MockObject
-     */
-    private $fileMock;
-
-    /**
      * @var ResultFactory|MockObject
      */
     private $resultFactoryMock;
@@ -43,47 +38,34 @@ class ConfigFileStructureTest extends TestCase
     private $arrayManagerMock;
 
     /**
-     * @var SharedConfig|MockObject
+     * @var Resolver|MockObject
      */
     private $configResolverMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
-        $this->fileMock = $this->createMock(File::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->arrayManagerMock = $this->createMock(ArrayManager::class);
-        $this->configResolverMock = $this->createMock(SharedConfig::class);
+        $this->configResolverMock = $this->createMock(Resolver::class);
 
         $this->configFileStructure = new ConfigFileStructure(
             $this->arrayManagerMock,
-            $this->fileMock,
             $this->resultFactoryMock,
             $this->configResolverMock
         );
     }
 
-    public function testRun()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testRun(): void
     {
-
         $this->configResolverMock->expects($this->once())
-            ->method('resolve')
+            ->method('getPath')
             ->willReturn('magento_root/app/etc/config.php');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->willReturn(true);
-        $this->fileMock->expects($this->once())
-            ->method('requireFile')
-            ->with('magento_root/app/etc/config.php')
-            ->willReturn([
-                'scopes' => [
-                    'websites' => [
-                        'key' => 'value',
-                    ],
-                ],
-            ]);
         $this->arrayManagerMock->expects($this->once())
             ->method('flatten')
             ->willReturn(['scopes/websites/key' => 'value']);
@@ -107,18 +89,14 @@ class ConfigFileStructureTest extends TestCase
         $this->assertInstanceOf(Result\Success::class, $result);
     }
 
-    public function testRunScdConfigNotExists()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testRunScdConfigNotExists(): void
     {
         $this->configResolverMock->expects($this->once())
-            ->method('resolve')
+            ->method('getPath')
             ->willReturn('magento_root/app/etc/config.php');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->willReturn(true);
-        $this->fileMock->expects($this->once())
-            ->method('requireFile')
-            ->with('magento_root/app/etc/config.php')
-            ->willReturn([]);
         $this->arrayManagerMock->expects($this->once())
             ->method('flatten')
             ->with([])
@@ -148,23 +126,19 @@ class ConfigFileStructureTest extends TestCase
         $this->assertInstanceOf(Result\Error::class, $result);
     }
 
-    public function testRunScdConfigNotExistsVersion21x()
+    /**
+     * @throws UndefinedPackageException
+     */
+    public function testRunScdConfigNotExistsVersion21x(): void
     {
         $this->configResolverMock->expects($this->once())
-            ->method('resolve')
+            ->method('getPath')
             ->willReturn('magento_root/app/etc/config.local.php');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->willReturn(true);
-        $this->fileMock->expects($this->once())
-            ->method('requireFile')
-            ->with('magento_root/app/etc/config.local.php')
-            ->willReturn([]);
         $this->arrayManagerMock->expects($this->once())
             ->method('flatten')
             ->with([])
             ->willReturn([]);
-        $this->arrayManagerMock->expects($this->any())
+        $this->arrayManagerMock
             ->method('filter')
             ->with([])
             ->willReturn([]);

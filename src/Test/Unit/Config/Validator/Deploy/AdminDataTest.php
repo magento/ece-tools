@@ -3,13 +3,15 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\AdminData;
 use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseConfiguration;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\State;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -26,9 +28,9 @@ class AdminDataTest extends TestCase
     private $stateMock;
 
     /**
-     * @var Environment|MockObject
+     * @var AdminDataInterface|MockObject
      */
-    private $environmentMock;
+    private $adminDataMock;
 
     /**
      * @var ResultFactory|MockObject
@@ -51,13 +53,13 @@ class AdminDataTest extends TestCase
     protected function setUp()
     {
         $this->stateMock = $this->createMock(State::class);
-        $this->environmentMock = $this->createMock(Environment::class);
+        $this->adminDataMock = $this->getMockForAbstractClass(AdminDataInterface::class);
         $this->resultFactoryMock = $this->createMock(ResultFactory::class);
         $this->databaseConfigurationMock = $this->createMock(DatabaseConfiguration::class);
 
         $this->adminData = new AdminData(
             $this->stateMock,
-            $this->environmentMock,
+            $this->adminDataMock,
             $this->databaseConfigurationMock,
             $this->resultFactoryMock
         );
@@ -92,20 +94,20 @@ class AdminDataTest extends TestCase
         $this->databaseConfigurationMock->expects($this->once())
             ->method('validate')
             ->willReturn($this->createMock(Success::class));
-        $this->environmentMock->expects($this->atLeastOnce())
-            ->method('getAdminEmail')
+        $this->adminDataMock->expects($this->atLeastOnce())
+            ->method('getEmail')
             ->willReturn($email);
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminUsername')
+        $this->adminDataMock->expects($this->once())
+            ->method('getUsername')
             ->willReturn($login);
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminFirstname')
+        $this->adminDataMock->expects($this->once())
+            ->method('getFirstName')
             ->willReturn($firstname);
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminLastname')
+        $this->adminDataMock->expects($this->once())
+            ->method('getLastName')
             ->willReturn($lastname);
-        $this->environmentMock->expects($this->once())
-            ->method('getAdminPassword')
+        $this->adminDataMock->expects($this->once())
+            ->method('getPassword')
             ->willReturn($password);
         $this->stateMock->expects($this->once())
             ->method('isInstalled')

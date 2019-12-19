@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -78,18 +80,17 @@ class ScdOptionsIgnoranceTest extends TestCase
         $this->scdOnDeployValidator->expects($this->once())
             ->method('validate')
             ->willReturn($errorMock);
-        $this->configurationCheckerMock->expects($this->exactly(3))
+        $this->configurationCheckerMock->expects($this->exactly(2))
             ->method('isConfigured')
             ->willReturnMap([
                 [StageConfigInterface::VAR_SCD_STRATEGY, false, true],
                 [StageConfigInterface::VAR_SCD_THREADS, false, false],
-                [StageConfigInterface::VAR_SCD_EXCLUDE_THEMES, false, true],
             ]);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with(
                 'When skip reason, static content deployment does not run during the deploy phase ' .
-                'and the following variables are ignored: SCD_STRATEGY, SCD_EXCLUDE_THEMES'
+                'and the following variables are ignored: SCD_STRATEGY'
             );
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());

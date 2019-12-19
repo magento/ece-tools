@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Shell;
 
 use Magento\MagentoCloud\Shell\ProcessInterface;
@@ -61,12 +63,11 @@ class UtilityManagerTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Utility some_util not found
-     */
     public function testGetWithException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Utility some_util not found');
+
         $processMock1 = $this->getMockForAbstractClass(ProcessInterface::class);
         $processMock1->expects($this->once())
             ->method('getOutput')
@@ -88,12 +89,11 @@ class UtilityManagerTest extends TestCase
         );
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Required utility timeout was not found
-     */
     public function testGetRequiredWithException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Required utility timeout was not found');
+
         $this->shellMock->expects($this->any())
             ->method('execute')
             ->willThrowException(new \Exception('Shell error'));

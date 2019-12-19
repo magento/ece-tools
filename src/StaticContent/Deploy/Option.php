@@ -3,9 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\StaticContent\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
+use Magento\MagentoCloud\Config\AdminDataInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
@@ -18,9 +20,9 @@ use Magento\MagentoCloud\StaticContent\ThreadCountOptimizer;
 class Option implements OptionInterface
 {
     /**
-     * @var Environment
+     * @var AdminDataInterface
      */
-    private $environment;
+    private $adminData;
 
     /**
      * @var ConnectionInterface
@@ -43,20 +45,20 @@ class Option implements OptionInterface
     private $stageConfig;
 
     /**
-     * @param Environment $environment
+     * @param AdminDataInterface $adminData
      * @param ConnectionInterface $connection
      * @param MagentoVersion $magentoVersion
      * @param ThreadCountOptimizer $threadCountOptimizer
      * @param DeployInterface $stageConfig
      */
     public function __construct(
-        Environment $environment,
+        AdminDataInterface $adminData,
         ConnectionInterface $connection,
         MagentoVersion $magentoVersion,
         ThreadCountOptimizer $threadCountOptimizer,
         DeployInterface $stageConfig
     ) {
-        $this->environment = $environment;
+        $this->adminData = $adminData;
         $this->connection = $connection;
         $this->magentoVersion = $magentoVersion;
         $this->threadCountOptimizer = $threadCountOptimizer;
@@ -72,16 +74,6 @@ class Option implements OptionInterface
             $this->stageConfig->get(DeployInterface::VAR_SCD_THREADS),
             $this->stageConfig->get(DeployInterface::VAR_SCD_STRATEGY)
         );
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function getExcludedThemes(): array
-    {
-        $themes = preg_split("/[,]+/", $this->stageConfig->get(DeployInterface::VAR_SCD_EXCLUDE_THEMES));
-
-        return array_filter(array_map('trim', $themes));
     }
 
     /**
@@ -125,8 +117,8 @@ class Option implements OptionInterface
 
         $locales = array_column($output, 'value');
 
-        if (!in_array($this->environment->getAdminLocale(), $locales)) {
-            $locales[] = $this->environment->getAdminLocale();
+        if (!in_array($this->adminData->getLocale(), $locales)) {
+            $locales[] = $this->adminData->getLocale();
         }
 
         return $locales;

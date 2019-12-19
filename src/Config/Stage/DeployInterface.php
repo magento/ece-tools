@@ -3,12 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Stage;
 
 use Magento\MagentoCloud\Config\StageConfigInterface;
 
 /**
  * Provides access to configuration of deploy stage.
+ *
+ * @api
  */
 interface DeployInterface extends StageConfigInterface
 {
@@ -22,7 +26,6 @@ interface DeployInterface extends StageConfigInterface
     const VAR_CRON_CONSUMERS_RUNNER = 'CRON_CONSUMERS_RUNNER';
     const VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES = 'CONSUMERS_WAIT_FOR_MAX_MESSAGES';
     const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
-    const VAR_STATIC_CONTENT_SYMLINK = 'STATIC_CONTENT_SYMLINK';
     const VAR_UPDATE_URLS = 'UPDATE_URLS';
     const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
 
@@ -45,16 +48,6 @@ interface DeployInterface extends StageConfigInterface
      * @deprecated 2.1 specific variable.
      */
     const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';
-
-    /**
-     * @deprecated use SCD_THREADS instead
-     */
-    const VAR_STATIC_CONTENT_THREADS = 'STATIC_CONTENT_THREADS';
-
-    /**
-     * @deprecated use SKIP_SCD instead
-     */
-    const VAR_DO_DEPLOY_STATIC_CONTENT = 'DO_DEPLOY_STATIC_CONTENT';
 
     /**
      * The variable responsible for enabling google analytics in environments other than prod.

@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\DB;
 
 use Magento\MagentoCloud\Config\Database\MergedConfig;
@@ -138,12 +140,11 @@ class ConnectionTest extends TestCase
         $this->assertSame($this->pdoMock, $this->connection->getPdo());
     }
 
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some exception
-     */
     public function testGetPdoWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some exception');
+
         $this->pdoMock->expects($this->once())
             ->method('query')
             ->with('SELECT 1')

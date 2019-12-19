@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -44,54 +46,24 @@ class DeprecatedVariables implements ValidatorInterface
      * Validates configuration on using deprecated variables or values.
      *
      * {@inheritdoc}
+     * Despite PHPMD warnings, this method is ultimately very linear: 1) Check condition; 2) Append error; etc.
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     * @SuppressWarnings(PHPMD.NPathComplexity)
      */
     public function validate(): Validator\ResultInterface
     {
         $variables = $this->environment->getVariables();
-        $errors = [];
 
         if (isset($variables[DeployInterface::VAR_VERBOSE_COMMANDS]) &&
             $variables[DeployInterface::VAR_VERBOSE_COMMANDS] === Environment::VAL_ENABLED
         ) {
-            $errors[] = sprintf(
-                'The %s variable contains deprecated value. Use one of the next values: %s.',
-                DeployInterface::VAR_VERBOSE_COMMANDS,
-                implode(',', ['-v', '-vv', '-vvv'])
-            );
-        }
-
-        if (isset($variables[DeployInterface::VAR_SCD_EXCLUDE_THEMES])) {
-            $errors[] = sprintf(
-                'The %s variable is deprecated. Use %s instead.',
-                DeployInterface::VAR_SCD_EXCLUDE_THEMES,
-                DeployInterface::VAR_SCD_MATRIX
-            );
-        }
-
-        if ($this->environment->getEnv(DeployInterface::VAR_STATIC_CONTENT_THREADS)
-            || isset($variables[DeployInterface::VAR_STATIC_CONTENT_THREADS])
-        ) {
-            $errors[] = sprintf(
-                'The %s variable is deprecated. Use %s instead.',
-                DeployInterface::VAR_STATIC_CONTENT_THREADS,
-                DeployInterface::VAR_SCD_THREADS
-            );
-        }
-
-        if ($this->environment->getEnv(DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT)
-            || isset($variables[DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT])
-        ) {
-            $errors[] = sprintf(
-                'The %s variable is deprecated. Use %s instead.',
-                DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT,
-                DeployInterface::VAR_SKIP_SCD
-            );
-        }
-
-        if ($errors) {
             return $this->resultFactory->error(
                 'The configuration contains deprecated variables or values',
-                implode(PHP_EOL, $errors)
+                sprintf(
+                    'The %s variable contains deprecated value. Use one of the next values: %s.',
+                    DeployInterface::VAR_VERBOSE_COMMANDS,
+                    implode(',', ['-v', '-vv', '-vvv'])
+                )
             );
         }
 

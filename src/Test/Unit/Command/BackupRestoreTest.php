@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\BackupRestore;
@@ -101,12 +103,11 @@ class BackupRestoreTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedExceptionMessage Sorry error
-     * @expectedException \Exception
-     */
     public function testExecuteWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Sorry error');
+
         $this->helperSetMock->expects($this->never())
             ->method('get')
             ->with('question')

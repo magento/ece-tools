@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -57,7 +59,6 @@ class ScdOptionsIgnorance implements ValidatorInterface
             $scdVariables = [
                 StageConfigInterface::VAR_SCD_STRATEGY,
                 StageConfigInterface::VAR_SCD_THREADS,
-                StageConfigInterface::VAR_SCD_EXCLUDE_THEMES,
             ];
             $configuredScdVariables = [];
 

@@ -3,16 +3,17 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Patch;
 
-use Composer\Package\RootPackageInterface;
-use Magento\MagentoCloud\Filesystem\DirectoryList;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\FileList;
-use Magento\MagentoCloud\Patch\Applier;
+use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Patch\Manager;
+use Magento\MagentoCloud\Shell\ProcessInterface;
+use Magento\MagentoCloud\Shell\ShellException;
+use Magento\MagentoCloud\Shell\ShellInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -26,132 +27,109 @@ class ManagerTest extends TestCase
     private $manager;
 
     /**
-     * @var Applier|Mock
-     */
-    private $applierMock;
-
-    /**
-     * @var LoggerInterface|Mock
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 
     /**
-     * @var RootPackageInterface|Mock
+     * @var ShellInterface|MockObject
      */
-    private $composerPackageMock;
+    private $shellMock;
 
     /**
-     * @var File|Mock
+     * @var GlobalSection|MockObject
      */
-    private $fileMock;
-
-    /**
-     * @var FileList|Mock
-     */
-    private $fileListMock;
-
-    /**
-     * @var DirectoryList|Mock
-     */
-    private $directoryListMock;
+    private $globalSectionMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->applierMock = $this->createMock(Applier::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->composerPackageMock = $this->getMockForAbstractClass(RootPackageInterface::class);
-        $this->fileMock = $this->createMock(File::class);
-        $this->directoryListMock = $this->createMock(DirectoryList::class);
-        $this->fileListMock = $this->createMock(FileList::class);
+        $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
+        $this->globalSectionMock = $this->createMock(GlobalSection::class);
 
         $this->manager = new Manager(
-            $this->applierMock,
             $this->loggerMock,
-            $this->fileMock,
-            $this->fileListMock,
-            $this->directoryListMock
+            $this->shellMock,
+            $this->globalSectionMock
         );
     }
 
-    public function testExecuteCopyStaticFiles()
+    /**
+     * @throws ShellException
+     */
+    public function testApply(): void
     {
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('/pub/static.php')
-            ->willReturn(true);
-        $this->fileMock->expects($this->once())
-            ->method('copy')
-            ->with('/pub/static.php', '/pub/front-static.php')
-            ->willReturn(true);
+        $this->globalSectionMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+            ->willReturn(false);
 
-        $this->loggerMock->expects($this->once())
-            ->method('info')
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php ./vendor/bin/ece-patches apply')
+            ->willReturn($processMock);
+        $this->loggerMock->method('notice')
             ->withConsecutive(
-                ['File static.php was copied.']
+                ['Applying patches'],
+                ['End of applying patches']
             );
 
-        $this->manager->applyAll();
+        $this->manager->apply();
     }
 
-    public function testExecuteApplyComposerPatches()
+    /**
+     * @throws ShellException
+     */
+    public function testApplyWithException(): void
     {
-        $this->fileMock->expects($this->once())
-            ->method('fileGetContents')
-            ->willReturn(json_encode(
-                [
-                    'package1' => [
-                        'patchName1' => [
-                            '100' => 'patchPath1',
-                        ],
-                    ],
-                    'package2' => [
-                        'patchName2' => [
-                            '101.*' => 'patchPath2',
-                        ],
-                        'patchName3' => [
-                            '102.*' => 'patchPath3',
-                        ],
-                    ],
-                    'package3' => [
-                        'patchName4' => 'patchPath4',
-                    ],
-                ]
-            ));
-        $this->applierMock->expects($this->exactly(4))
-            ->method('apply')
-            ->withConsecutive(
-                ['patchPath1', 'patchName1', 'package1', '100'],
-                ['patchPath2', 'patchName2', 'package2', '101.*'],
-                ['patchPath3', 'patchName3', 'package2', '102.*'],
-                ['patchPath4', 'patchName4', 'package3', '*']
-            );
+        $this->expectException(ShellException::class);
+        $this->expectExceptionMessage('Some error');
 
-        $this->manager->applyAll();
-    }
+        $this->globalSectionMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+            ->willReturn(false);
 
-    public function testExecuteApplyHotFixes()
-    {
-        $this->directoryListMock->expects($this->any())
-            ->method('getMagentoRoot')
-            ->willReturn(__DIR__ . '/_files');
-        $this->fileMock->expects($this->once())
-            ->method('isDirectory')
-            ->willReturn(true);
-        $this->applierMock->expects($this->exactly(2))
-            ->method('apply')
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php ./vendor/bin/ece-patches apply')
+            ->willThrowException(new ShellException('Some error'));
+        $this->loggerMock->method('notice')
             ->withConsecutive(
-                [__DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch1.patch'],
-                [__DIR__ . '/_files/' . Manager::HOTFIXES_DIR . '/patch2.patch']
+                ['Applying patches']
             );
         $this->loggerMock->expects($this->once())
-            ->method('info')
+            ->method('error')
+            ->with('Some error');
+
+        $this->manager->apply();
+    }
+
+    /**
+     * @throws ShellException
+     */
+    public function testApplyDeployedFromGitAndNoCopy(): void
+    {
+        $this->globalSectionMock->expects($this->once())
+            ->method('get')
+            ->with(GlobalSection::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT)
+            ->willReturn(true);
+
+        $processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->shellMock->expects($this->once())
+            ->method('execute')
+            ->with('php ./vendor/bin/ece-patches apply --git-installation 1')
+            ->willReturn($processMock);
+        $this->loggerMock->method('notice')
             ->withConsecutive(
-                ['Applying hot-fixes.']
+                ['Applying patches'],
+                ['End of applying patches']
             );
 
-        $this->manager->applyAll();
+        $this->manager->apply();
     }
 }

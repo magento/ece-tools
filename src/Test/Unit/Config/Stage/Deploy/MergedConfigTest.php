@@ -3,9 +3,10 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage\Deploy;
 
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
@@ -38,11 +39,6 @@ class MergedConfigTest extends TestCase
     private $environmentConfigMock;
 
     /**
-     * @var Environment|MockObject
-     */
-    private $environmentMock;
-
-    /**
      * @var Schema|MockObject
      */
     private $schemaMock;
@@ -52,13 +48,11 @@ class MergedConfigTest extends TestCase
      */
     protected function setUp()
     {
-        $this->environmentMock = $this->createMock(Environment::class);
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->environmentConfigMock = $this->createMock(EnvironmentConfig::class);
         $this->schemaMock = $this->createMock(Schema::class);
 
         $this->mergedConfig = new MergedConfig(
-            $this->environmentMock,
             $this->environmentReaderMock,
             $this->environmentConfigMock,
             $this->schemaMock
@@ -179,12 +173,11 @@ class MergedConfigTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedExceptionMessage File system error
-     * @expectedException \RuntimeException
-     */
     public function testGetWithFileSystemException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('File system error');
+
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new FileSystemException('File system error'));
@@ -192,12 +185,11 @@ class MergedConfigTest extends TestCase
         $this->mergedConfig->get();
     }
 
-    /**
-     * @expectedExceptionMessage File system error
-     * @expectedException \RuntimeException
-     */
     public function testGetWithParseException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('File system error');
+
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
             ->willThrowException(new ParseException('File system error'));

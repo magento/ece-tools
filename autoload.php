@@ -35,4 +35,4 @@ foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/vendor/autoload.php'] as 
     }
 }
 
-throw new \RuntimeException('Required file \'autoload.php\' was not found.');
+throw new RuntimeException('Required file \'autoload.php\' was not found.');

@@ -3,14 +3,16 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\DeprecatedVariables;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
-use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -93,31 +95,6 @@ class DeprecatedVariablesTest extends TestCase
             ],
             [
                 [DeployInterface::VAR_VERBOSE_COMMANDS => Environment::VAL_ENABLED],
-                [],
-                Error::class,
-            ],
-            [
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 3],
-                [],
-                Error::class,
-            ],
-            [
-                [],
-                [DeployInterface::VAR_STATIC_CONTENT_THREADS => 3],
-                Error::class,
-            ],
-            [
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 1],
-                [],
-                Error::class,
-            ],
-            [
-                [],
-                [DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT => 1],
-                Error::class,
-            ],
-            [
-                [DeployInterface::VAR_SCD_EXCLUDE_THEMES => 'theme'],
                 [],
                 Error::class,
             ],

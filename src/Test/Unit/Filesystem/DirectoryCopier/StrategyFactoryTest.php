@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Filesystem\DirectoryCopier;
 
 use Magento\MagentoCloud\App\ContainerInterface;
@@ -80,12 +82,11 @@ class StrategyFactoryTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Strategy "not_exists_strategy" doesn't exist
-     */
     public function testCopyFromDirNotExists()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Strategy "not_exists_strategy" doesn\'t exist');
+
         $this->strategyFactory->create('not_exists_strategy');
     }
 }

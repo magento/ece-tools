@@ -3,13 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\CronKill;
-use Magento\MagentoCloud\Process\ProcessInterface;
+use Magento\MagentoCloud\Util\BackgroundProcess;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -24,32 +25,22 @@ class CronKillTest extends TestCase
     private $command;
 
     /**
-     * @var ProcessInterface|MockObject
+     * @var BackgroundProcess|MockObject
      */
-    private $processMock;
-
-    /**
-     * @var LoggerInterface|MockObject
-     */
-    private $loggerMock;
+    private $backgroundProcessMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
-        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->backgroundProcessMock = $this->createMock(BackgroundProcess::class);
 
         $this->command = new CronKill(
-            $this->processMock,
-            $this->loggerMock
+            $this->backgroundProcessMock
         );
     }
 
-    /**
-     * @throws \Exception
-     */
     public function testExecute()
     {
         /** @var InputInterface|MockObject $inputMock */
@@ -57,28 +48,8 @@ class CronKillTest extends TestCase
         /** @var OutputInterface|MockObject $outputMock */
         $outputMock = $this->createMock(OutputInterface::class);
 
-        $this->processMock->expects($this->once())
-            ->method('execute');
-
-        $this->command->execute($inputMock, $outputMock);
-    }
-
-    /**
-     * @expectedException \Exception
-     * @expectedExceptionMessage Some error
-     *
-     * @throws \Exception
-     */
-    public function testExecuteWithException()
-    {
-        /** @var InputInterface|MockObject $inputMock */
-        $inputMock = $this->createMock(InputInterface::class);
-        /** @var OutputInterface|MockObject $outputMock */
-        $outputMock = $this->createMock(OutputInterface::class);
-
-        $this->processMock->expects($this->once())
-            ->method('execute')
-            ->willThrowException(new \Exception('Some error'));
+        $this->backgroundProcessMock->expects($this->once())
+            ->method('kill');
 
         $this->command->execute($inputMock, $outputMock);
     }

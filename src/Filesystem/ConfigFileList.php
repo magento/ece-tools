@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Filesystem;
 
 /**
@@ -49,6 +51,7 @@ class ConfigFileList
 
     /**
      * @return string
+     * @deprecated File build_options.ini is unsupported, this method only uses in the validator class
      */
     public function getBuildConfig(): string
     {
@@ -61,5 +64,13 @@ class ConfigFileList
     public function getEnvConfig(): string
     {
         return $this->systemList->getMagentoRoot() . '/.magento.env.yaml';
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorReportConfig(): string
+    {
+        return $this->systemList->getMagentoRoot() . '/pub/errors/local.xml';
     }
 }

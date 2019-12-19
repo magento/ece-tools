@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Stage\Deploy;
 
 use Magento\MagentoCloud\Config\Environment;
@@ -29,20 +31,12 @@ class EnvironmentConfig
     /**
      * Resolves environment values with and adds custom mappings.
      *
-     * STATIC_CONTENT_THREADS from MAGENTO_CLOUD_VARIABLES has higher priority then $_ENV['STATIC_CONTENT_THREADS']
-     * Raw $_ENV['STATIC_CONTENT_THREADS'] is deprecated.
-     *
      * @return array
      */
     public function getAll(): array
     {
         $variables = $this->convertEnabledDisabledVariables($this->environment->getVariables());
         $variables = $this->convertIntegerVariables($variables);
-
-        if (isset($variables['STATIC_CONTENT_EXCLUDE_THEMES'])) {
-            $variables[DeployInterface::VAR_SCD_EXCLUDE_THEMES] = $variables['STATIC_CONTENT_EXCLUDE_THEMES'];
-            unset($variables['STATIC_CONTENT_EXCLUDE_THEMES']);
-        }
 
         if (isset($variables[DeployInterface::VAR_VERBOSE_COMMANDS]) &&
             !in_array($variables[DeployInterface::VAR_VERBOSE_COMMANDS], ['-v', '-vv', '-vvv'])
@@ -69,7 +63,6 @@ class EnvironmentConfig
 
         $disabledFlow = [
             DeployInterface::VAR_CLEAN_STATIC_FILES,
-            DeployInterface::VAR_STATIC_CONTENT_SYMLINK,
             DeployInterface::VAR_UPDATE_URLS,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
         ];
@@ -78,12 +71,6 @@ class EnvironmentConfig
             if (isset($variables[$disabledVar]) && $variables[$disabledVar] === Environment::VAL_DISABLED) {
                 $variables[$disabledVar] = false;
             }
-        }
-
-        if (isset($variables[DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT])) {
-            $variables[DeployInterface::VAR_SKIP_SCD] =
-                $variables[DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT] === Environment::VAL_DISABLED;
-            unset($variables[DeployInterface::VAR_DO_DEPLOY_STATIC_CONTENT]);
         }
 
         return $variables;
@@ -99,17 +86,6 @@ class EnvironmentConfig
      */
     private function convertIntegerVariables(array $variables): array
     {
-        if (isset($variables[DeployInterface::VAR_STATIC_CONTENT_THREADS])) {
-            $envScdThreads = $variables[DeployInterface::VAR_STATIC_CONTENT_THREADS];
-            unset($variables[DeployInterface::VAR_STATIC_CONTENT_THREADS]);
-        } else {
-            $envScdThreads = $this->environment->getEnv(DeployInterface::VAR_STATIC_CONTENT_THREADS);
-        }
-
-        if (ctype_digit($envScdThreads)) {
-            $variables[DeployInterface::VAR_SCD_THREADS] = (int)$envScdThreads;
-        }
-
         foreach ([DeployInterface::VAR_SCD_THREADS, DeployInterface::VAR_SCD_COMPRESSION_LEVEL] as $varName) {
             if (isset($variables[$varName])) {
                 if (!is_int($variables[$varName]) && !ctype_digit($variables[$varName])) {

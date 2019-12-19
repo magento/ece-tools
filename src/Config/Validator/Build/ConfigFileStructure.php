@@ -3,12 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Config\Validator\Build;
 
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\ValidatorInterface;
-use Magento\MagentoCloud\Filesystem\Driver\File;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\ArrayManager;
 
 /**
@@ -25,46 +27,41 @@ class ConfigFileStructure implements ValidatorInterface
     private $arrayManager;
 
     /**
-     * @var File
-     */
-    private $file;
-
-    /**
      * @var Validator\ResultFactory
      */
     private $resultFactory;
 
     /**
-     * @var SharedConfig
+     * @var Resolver
      */
-    private $configResolver;
+    private $resolver;
 
     /**
      * @param ArrayManager $arrayManager
-     * @param File $file
      * @param Validator\ResultFactory $resultFactory
-     * @param SharedConfig $configResolver
+     * @param Resolver $resolver
      */
     public function __construct(
         ArrayManager $arrayManager,
-        File $file,
         Validator\ResultFactory $resultFactory,
-        SharedConfig $configResolver
+        Resolver $resolver
     ) {
         $this->arrayManager = $arrayManager;
-        $this->file = $file;
         $this->resultFactory = $resultFactory;
-        $this->configResolver = $configResolver;
+        $this->resolver = $resolver;
     }
 
     /**
-     * @inheritdoc
+     * {@inheritdoc}
+     *
+     * @throws UndefinedPackageException
      */
     public function validate(): Validator\ResultInterface
     {
-        $configFile = $this->configResolver->resolve();
+        $configFile = $this->resolver->getPath();
+        $config = $this->resolver->read();
+
         $configFileName = basename($configFile);
-        $config = $this->file->isExists($configFile) ? $this->file->requireFile($configFile) : [];
 
         $flattenedConfig = $this->arrayManager->flatten($config);
         $websites = $this->arrayManager->filter($flattenedConfig, 'scopes/websites', false);

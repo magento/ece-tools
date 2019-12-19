@@ -1,9 +1,8 @@
-dist: trusty
-sudo: required
+dist: xenial
 
 addons:
   hosts:
-    - web
+    - magento2.docker
 
 git:
   depth: false
@@ -13,58 +12,88 @@ services:
 
 language: php
 php:
-  - '7.0'
   - '7.1'
   - '7.2'
+  - '7.3'
 
 env:
   matrix:
-    - TEST_SUITE=static-unit XDEBUG=true
-    - TEST_SUITE=integration
-    - TEST_SUITE=functional
-    - TEST_SUITE=functional FUNCTIONAL_INDEX=1
-    - TEST_SUITE=functional FUNCTIONAL_INDEX=2
-    - TEST_SUITE=functional FUNCTIONAL_INDEX=3
+    - TEST_SUITE=functional-ce
+    - TEST_SUITE=functional-ee
+    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
+    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=2
+    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=3
+    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
+    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
+
+stages:
+  - static-unit
+  - integration
+  - test
+
+jobs:
+  include:
+    - stage: static-unit
+      script: ./tests/travis/static-unit.sh
+      env:
+        - TEST_SUITE=static-unit
+        - XDEBUG=true
+    - script: ./tests/travis/static-unit.sh
+      php: '7.2'
+      env:
+        - TEST_SUITE=static-unit
+        - XDEBUG=true
+    - script: ./tests/travis/static-unit.sh
+      php: '7.3'
+      env:
+        - TEST_SUITE=static-unit
+        - XDEBUG=true
+    - stage: integration
+      script: ./tests/travis/integration.sh;
+      env:
+        - TEST_SUITE=integration
+    - script: ./tests/travis/integration.sh;
+      php: '7.2'
+      env:
+        - TEST_SUITE=integration
+    - script: ./tests/travis/integration.sh;
+      php: '7.3'
+      env:
+        - TEST_SUITE=integration
 
 matrix:
   exclude:
-    - php: '7.0'
-      env: TEST_SUITE=integration
-    - php: '7.0'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
-    - php: '7.0'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
-    - php: '7.0'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
-
     - php: '7.1'
-      env: TEST_SUITE=integration
+      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
     - php: '7.1'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=1
+      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=2
     - php: '7.1'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=2
+      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=3
     - php: '7.1'
-      env: TEST_SUITE=functional FUNCTIONAL_INDEX=3
+      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
+    - php: '7.1'
+      env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
 
     - php: '7.2'
-      env: TEST_SUITE=functional
+      env: TEST_SUITE=functional-ee
+
+    - php: '7.3'
+      env: TEST_SUITE=functional-ee
 
 install:
-  - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer remove magento/magento-cloud-components --no-update; fi;
-  - if [ $TRAVIS_SECURE_ENV_VARS != "true" ]; then composer config --unset repositories.repo.magento.com; fi;
-  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then composer config http-basic.repo.magento.com ${REPO_USERNAME} ${REPO_PASSWORD}; fi;
+  - composer config http-basic.repo.magento.com ${REPO_USERNAME_CE} ${REPO_PASSWORD_CE}
+  - composer config github-oauth.github.com ${GITHUB_TOKEN}
+  - if [ -n "${MCC_VERSION}" ]; then composer config repositories.mcc git git@github.com:magento/magento-cloud-components.git && composer require "magento/magento-cloud-components:${MCC_VERSION}" --no-update; fi;
+  - if [ -n "${MCD_VERSION}" ]; then composer config repositories.mcd git git@github.com:magento/magento-cloud-docker.git && composer require "magento/magento-cloud-docker:${MCD_VERSION}" --no-update; fi;
+  - if [ -n "${MCP_VERSION}" ]; then composer config repositories.mcp git git@github.com:magento/magento-cloud-patches.git && composer require "magento/magento-cloud-patches:${MCP_VERSION}" --no-update; fi;
   - composer update -n --no-suggest
 
 before_script:
-  - echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env
-  - echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.docker/composer.env
+  - if [ $TEST_SUITE == "functional-ce" ]; then echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME_CE}" >> ./.docker/composer.env && echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD_CE}" >> ./.docker/composer.env; fi;
+  - if [ $TEST_SUITE == "functional-ee" ]; then echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.docker/composer.env && echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.docker/composer.env; fi;
+  - echo "COMPOSER_GITHUB_TOKEN=${GITHUB_TOKEN}" >> ./.docker/composer.env
   - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
-  - sudo /etc/init.d/mysql stop
-  - ./tests/travis/prepare_functional_parallel.sh
 
 script:
-  - if [ $TEST_SUITE == "static-unit" ]; then ./tests/travis/static-unit.sh; fi
-  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "integration" ]; then ./tests/travis/integration.sh; fi;
-  - if [ $TRAVIS_SECURE_ENV_VARS == "true" ] && [ $TEST_SUITE == "functional" ]; then ./tests/travis/functional.sh; fi;
-
-after_failure: docker ps -s
+  - if [ $TEST_SUITE == "functional-ce" ]; then ./tests/travis/functional_ce.sh; fi;
+  - if [ $TEST_SUITE == "functional-ee" ] && [ $TRAVIS_SECURE_ENV_VARS == "true" ]; then ./tests/travis/prepare_functional_parallel.sh && ./tests/travis/functional_ee.sh; fi;

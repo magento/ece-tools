@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\Command\BackupList;
@@ -81,12 +83,11 @@ class BackupListTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedExceptionMessage Sorry error
-     * @expectedException \Exception
-     */
     public function testExecuteWithException()
     {
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Sorry error');
+
         $this->loggerMock->expects($this->once())
             ->method('critical')
             ->with('Sorry error');

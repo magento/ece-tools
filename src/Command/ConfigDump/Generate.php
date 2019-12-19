@@ -3,12 +3,14 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Command\ConfigDump;
 
 use Magento\MagentoCloud\DB\ConnectionInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
-use Magento\MagentoCloud\Filesystem\Resolver\SharedConfig;
+use Magento\MagentoCloud\Config\Magento\Shared\Resolver;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Util\ArrayManager;
@@ -51,9 +53,9 @@ class Generate
     private $arrayManager;
 
     /**
-     * @var SharedConfig
+     * @var Resolver
      */
-    private $sharedConfig;
+    private $resolver;
 
     /**
      * @var MagentoVersion
@@ -70,7 +72,7 @@ class Generate
      * @param File $file
      * @param ArrayManager $arrayManager
      * @param MagentoVersion $magentoVersion
-     * @param SharedConfig $sharedConfig
+     * @param Resolver $resolver
      * @param PhpFormatter $phpFormatter
      */
     public function __construct(
@@ -78,13 +80,13 @@ class Generate
         File $file,
         ArrayManager $arrayManager,
         MagentoVersion $magentoVersion,
-        SharedConfig $sharedConfig,
+        Resolver $resolver,
         PhpFormatter $phpFormatter
     ) {
         $this->connection = $connection;
         $this->file = $file;
         $this->arrayManager = $arrayManager;
-        $this->sharedConfig = $sharedConfig;
+        $this->resolver = $resolver;
         $this->magentoVersion = $magentoVersion;
         $this->phpFormatter = $phpFormatter;
     }
@@ -95,14 +97,15 @@ class Generate
      * @throws UndefinedPackageException
      * @throws FileSystemException
      */
-    public function execute()
+    public function execute(): void
     {
         if ($this->magentoVersion->isGreaterOrEqual('2.2')) {
             $this->configKeys[] = 'modules';
         }
 
-        $configFile = $this->sharedConfig->resolve();
-        $oldConfig = require $configFile;
+        $configFile = $this->resolver->getPath();
+        $oldConfig = $this->resolver->read();
+
         $newConfig = [];
 
         foreach ($this->configKeys as $requiredConfigKey) {
@@ -163,7 +166,7 @@ class Generate
      * @param string $scope Name of scope: websites or stores
      * @return array Result of config data after filtering
      */
-    private function filterSystemData($config, $scope)
+    private function filterSystemData($config, $scope): array
     {
         $scopeCodes = isset($config['system'][$scope])
             ? array_keys($config['system'][$scope])

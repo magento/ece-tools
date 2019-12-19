@@ -26,11 +26,7 @@ modules:
       system_magento_dir: "%Magento.docker.settings.system.magento_dir%"
       env_base_url: "%Magento.docker.settings.env.url.base%"
       env_secure_base_url: "%Magento.docker.settings.env.url.secure_base%"
-      volumes:
-        - /var/www/magento/pub/static
-        - /var/www/magento/pub/media
-        - /var/www/magento/var
-        - /var/www/magento/app/etc
+      volumes: []
       printOutput: false
     PhpBrowser:
       url: "%Magento.docker.settings.env.url.base%"

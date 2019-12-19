@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
 use Magento\MagentoCloud\Config\Schema;
@@ -108,12 +110,11 @@ class VariablesTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage Config NOT_EXISTS_VALUE was not defined.
-     */
     public function testNotExists()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
+
         $this->environmentReaderMock->expects($this->any())
             ->method('read')
             ->willReturn([]);
@@ -121,12 +122,11 @@ class VariablesTest extends TestCase
         $this->config->get('NOT_EXISTS_VALUE');
     }
 
-    /**
-     * @expectedException \RuntimeException
-     * @expectedExceptionMessage some error message
-     */
     public function testGetWithFileSystemException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('some error message');
+
         $this->environmentReaderMock->expects($this->any())
             ->method('read')
             ->willThrowException(new FileSystemException('some error message'));
