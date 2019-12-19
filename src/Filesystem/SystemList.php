@@ -47,4 +47,12 @@ class SystemList
     {
         return $this->magentoRoot;
     }
+
+    /**
+     * @return string
+     */
+    public function getConfig(): string
+    {
+        return $this->getRoot() . '/config';
+    }
 }

@@ -1,0 +1,128 @@
+# Environment variables
+ENV_RELATIONSHIPS:
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_RELATIONSHIPS
+
+# Stage variables
+VERBOSE_COMMANDS:
+  description: Adjust the output verbosity level of Magento commands.
+  type: string
+  allowed:
+    - ''
+    - '-v'
+    - '-vv'
+    - '-vvv'
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: ''
+    deploy: ''
+  examples:
+    - stage:
+        build:
+          VERBOSE_COMMANDS: '-vv'
+    - stage:
+        deploy:
+          VERBOSE_COMMANDS: '-vv-'
+SCD_COMPRESSION_LEVEL:
+  description: Gzip compression level (0 to 9) to use when compressing static content; 0 disables compression.
+  type: integer
+  validators:
+    - 'Magento\MagentoCloud\Config\Schema\Validation\CompressionLevel'
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: 6
+    deploy: 4
+  examples:
+    - stage:
+        build:
+          SCD_COMPRESSION_LEVEL: 8
+SCD_COMPRESSION_TIMEOUT:
+  description: The maximum time (in seconds) allowed for compressing static content.
+  type: integer
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: 600
+    deploy: 600
+  examples:
+    - stage:
+        build:
+          SCD_COMPRESSION_TIMEOUT: 900
+SCD_STRATEGY:
+  description: Customize the deployment strategy for static content. The value "standard" will deploy all static view
+    files for all packages, "quick" will minimize deployment time, and "compact" will conserve space on the server.
+    Compact is not compatible with multi-threaded deployment and will set the value of `SCD_THREADS` to 1. The default
+    value is "quick".
+  type: string
+  magento_version: ">=2.2.0"
+  allowed:
+    - compact
+    - quick
+    - standard
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: ''
+    deploy: ''
+  examples:
+    - stage:
+        build:
+          SCD_STRATEGY: compact
+SCD_THREADS:
+  description: 'The number of threads for static content deployment'
+  type: integer
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: -1
+    deploy: -1
+SCD_MAX_EXECUTION_TIME:
+  description: Allows you to increase the maximum expected execution time for the static content deploy command.
+    By default, Magento Commerce sets the maximum expected execution to 400 seconds, but in some scenarios you might
+    need more time to complete the static content deployment for a Cloud project.
+  type: integer
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: null
+    deploy: null
+SCD_MATRIX:
+  description: allows you to configure multiple locales per theme as long as the theme is not excluded using
+    the SCD_EXCLUDE_THEMES variable during deployment. This is ideal if you want to speed up thedeployment process
+    by reducing the amount of unnecessary theme files. For example, you can deploy the magento/backend theme in
+    English and a custom theme in other languages.
+  type: array
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: {}
+    deploy: {}
+SKIP_SCD:
+  description: Skips static content deployment during the build/deploy phase.
+  type: boolean
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: false
+    deploy: false
