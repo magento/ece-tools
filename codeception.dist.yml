@@ -2,8 +2,7 @@ paths:
   tests: src/Test/Functional
   output: tests/functional/_output
   data: tests/functional/_data
-  support: tests/functional/_support
-  envs: tests/functional/_envs
+  support: vendor/magento/magento-cloud-docker/tests/functional/_support
 actor_suffix: Tester
 settings:
   colors: true
@@ -11,10 +10,10 @@ extensions:
   enabled:
     - Codeception\Extension\RunFailed
 params:
-  - tests/functional/configuration.dist.yml
+  - vendor/magento/magento-cloud-docker/tests/functional/configuration.dist.yml
 modules:
   config:
-    Magento\MagentoCloud\Test\Functional\Codeception\Docker:
+    Magento\CloudDocker\Test\Functional\Codeception\Docker:
       db_host: "%Magento.docker.settings.db.host%"
       db_port: "%Magento.docker.settings.db.port%"
       db_username: "%Magento.docker.settings.db.username%"
@@ -27,10 +26,10 @@ modules:
       env_base_url: "%Magento.docker.settings.env.url.base%"
       env_secure_base_url: "%Magento.docker.settings.env.url.secure_base%"
       volumes: []
-      printOutput: false
+      printOutput: true
     PhpBrowser:
       url: "%Magento.docker.settings.env.url.base%"
-    Magento\MagentoCloud\Test\Functional\Codeception\MagentoDb:
+    Magento\CloudDocker\Test\Functional\Codeception\MagentoDb:
       dsn: "mysql:host=127.0.0.1;port=3306;dbname=%Magento.docker.settings.db.path%"
       user: "%Magento.docker.settings.db.username%"
       password: "%Magento.docker.settings.db.password%"

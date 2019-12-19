@@ -10,7 +10,7 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 use CliTester;
 use Robo\Exception\TaskException;
 use Codeception\Example;
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
+use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 use Magento\MagentoCloud\Util\ArrayManager;
 
 /**

@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
+use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 
 /**
  * Test for cron:unlock.
