@@ -144,9 +144,10 @@ class DbConnection implements StepInterface
         }
 
         if (empty($enabledSplitConnections) || (!empty($enabledSplitConnections) && $isDifferentDefaultConnection)) {
-            $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig);
+            $isUseSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
+            $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig, $isUseSlave);
             $mageConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
-            $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB]);
+            $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $isUseSlave);
             $this->configWriter->create($mageConfig);
             return;
         }
@@ -190,15 +191,16 @@ class DbConnection implements StepInterface
      * Returns main database configuration
      *
      * @param array $dbConfig
+     * @param bool $isUseSlave
      * @return array
      */
-    private function getMainDbConfig(array $dbConfig): array
+    private function getMainDbConfig(array $dbConfig, bool $isUseSlave): array
     {
         $dbConfig[DbConfig::KEY_CONNECTION] = array_intersect_key(
             $dbConfig[DbConfig::KEY_CONNECTION],
             array_flip(DbConfig::MAIN_CONNECTIONS)
         );
-        if (isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION])) {
+        if ($isUseSlave && isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION])) {
             $dbConfig[DbConfig::KEY_SLAVE_CONNECTION] = array_intersect_key(
                 $dbConfig[DbConfig::KEY_SLAVE_CONNECTION],
                 array_flip(DbConfig::MAIN_CONNECTIONS)
@@ -267,11 +269,11 @@ class DbConnection implements StepInterface
      * Adds logging about slave connection.
      *
      * @param array $dbConfig
+     * @param bool $isUseSlave
      */
-    private function addLoggingAboutSlaveConnection(array $dbConfig)
+    private function addLoggingAboutSlaveConnection(array $dbConfig, bool $isUseSlave)
     {
         $customDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
-        $isUseSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
         $isMergeRequired = !$this->configMerger->isEmpty($customDbConfig)
             && !$this->configMerger->isMergeRequired($customDbConfig);
         foreach (array_keys($dbConfig[DbConfig::KEY_CONNECTION]) as $connectionName) {

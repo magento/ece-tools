@@ -62,22 +62,22 @@ class DbConnectionTest extends TestCase
     /**
      * @var RelationshipConnectionFactory|MockObject
      */
-    private $connectionDataFactoryMock;
+    private $envConnectionDataFactoryMock;
 
     /**
      * @var ConnectionInterface|MockObject
      */
-    private $connectionDataMock;
-
-    /**
-     * @var DbConnection
-     */
-    private $step;
+    private $envConnectionDataMock;
 
     /**
      * @var FlagManager|MockObject
      */
     private $flagManagerMock;
+
+    /**
+     * @var DbConnection
+     */
+    private $step;
 
     /**
      * @inheritdoc
@@ -89,14 +89,14 @@ class DbConnectionTest extends TestCase
         $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
         $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->connectionDataFactoryMock = $this->createMock(RelationshipConnectionFactory::class);
+        $this->envConnectionDataFactoryMock = $this->createMock(RelationshipConnectionFactory::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
 
-        $this->connectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->connectionDataFactoryMock->expects($this->any())
+        $this->envConnectionDataMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->envConnectionDataFactoryMock->expects($this->any())
             ->method('create')
-            ->willReturn($this->connectionDataMock);
+            ->willReturn($this->envConnectionDataMock);
 
         $this->step = new DbConnection(
             $this->stageConfigMock,
@@ -105,7 +105,7 @@ class DbConnectionTest extends TestCase
             $this->configWriterMock,
             $this->configReaderMock,
             new ConfigMerger(),
-            $this->connectionDataFactoryMock,
+            $this->envConnectionDataFactoryMock,
             $this->loggerMock,
             $this->flagManagerMock
         );
@@ -165,12 +165,13 @@ class DbConnectionTest extends TestCase
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($resourceConfig);
-        $this->stageConfigMock->expects($this->any())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->willReturnMap([
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, false],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION, []],
-            ]);
+            ->withConsecutive(
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
+            )
+            ->willReturnOnConsecutiveCalls(false, []);
         $this->loggerMock->expects($this->never())
             ->method('warning');
         $this->configWriterMock->expects($this->once())
@@ -217,18 +218,19 @@ class DbConnectionTest extends TestCase
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($resourceConfig);
-        $this->stageConfigMock->expects($this->any())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->willReturnMap([
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, true],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION, []],
-            ]);
-        $this->connectionDataMock->expects($this->once())
+            ->withConsecutive(
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
+            )
+            ->willReturnOnConsecutiveCalls(true, []);
+        $this->envConnectionDataMock->expects($this->once())
             ->method('getHost')
             ->willReturn('host');
         $this->dbConfigMock->expects($this->once())
             ->method('isDbConfigCompatibleWithSlaveConnection')
-            ->with([], 'default', $this->connectionDataMock)
+            ->with([], 'default', $this->envConnectionDataMock)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
             ->method('warning')
@@ -268,18 +270,19 @@ class DbConnectionTest extends TestCase
             ]);
         $this->loggerMock->expects($this->never())
             ->method('warning');
-        $this->stageConfigMock->expects($this->any())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->willReturnMap([
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, true],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION, []],
-            ]);
-        $this->connectionDataMock->expects($this->once())
+            ->withConsecutive(
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
+            )
+            ->willReturnOnConsecutiveCalls(true, []);
+        $this->envConnectionDataMock->expects($this->once())
             ->method('getHost')
             ->willReturn('some.host');
         $this->dbConfigMock->expects($this->once())
             ->method('isDbConfigCompatibleWithSlaveConnection')
-            ->with([], 'default', $this->connectionDataMock)
+            ->with([], 'default', $this->envConnectionDataMock)
             ->willReturn(true);
 
         $this->step->execute();
@@ -313,18 +316,19 @@ class DbConnectionTest extends TestCase
             ->willReturn(['default_setup' => ['connection' => 'default']]);
         $this->loggerMock->expects($this->never())
             ->method('warning');
-        $this->stageConfigMock->expects($this->any())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->willReturnMap([
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, true],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION, []],
-            ]);
-        $this->connectionDataMock->expects($this->once())
+            ->withConsecutive(
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
+            )
+            ->willReturnOnConsecutiveCalls(true, []);
+        $this->envConnectionDataMock->expects($this->once())
             ->method('getHost')
             ->willReturn('some.host');
         $this->dbConfigMock->expects($this->once())
             ->method('isDbConfigCompatibleWithSlaveConnection')
-            ->with([], 'default', $this->connectionDataMock)
+            ->with([], 'default', $this->envConnectionDataMock)
             ->willReturn(true);
 
         $this->configWriterMock->expects($this->once())
