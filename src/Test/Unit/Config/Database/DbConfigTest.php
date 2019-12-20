@@ -107,7 +107,7 @@ class DbConfigTest extends TestCase
         array $envenvConnectionsData,
         array $customDbConfig,
         array $expectedConfig
-    ){
+    ) {
         $this->setEnvConnectionData($envenvConnectionsData);
         $this->stageConfigMock->expects($this->once())
             ->method('get')

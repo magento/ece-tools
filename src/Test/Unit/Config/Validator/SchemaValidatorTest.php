@@ -237,7 +237,11 @@ class SchemaValidatorTest extends TestCase
             ],
             [DeployInterface::VAR_SPLIT_DB, [], null],
             [DeployInterface::VAR_SPLIT_DB, [DeployInterface::VAL_SPLIT_DB_QUOTE], null],
-            [DeployInterface::VAR_SPLIT_DB, [DeployInterface::VAL_SPLIT_DB_QUOTE, DeployInterface::VAL_SPLIT_DB_SALES], null],
+            [
+                DeployInterface::VAR_SPLIT_DB,
+                [DeployInterface::VAL_SPLIT_DB_QUOTE, DeployInterface::VAL_SPLIT_DB_SALES],
+                null
+            ],
             [
                 DeployInterface::VAR_SPLIT_DB,
                 DeployInterface::VAL_SPLIT_DB_QUOTE,
