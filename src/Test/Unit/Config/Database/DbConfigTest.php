@@ -28,7 +28,7 @@ class DbConfigTest extends TestCase
     /**
      * @var RelationshipConnectionFactory|MockObject
      */
-    private $connectionFactoryMock;
+    private $envConnectionDataFactoryMock;
 
     /**
      * @var DbConfig
@@ -38,30 +38,30 @@ class DbConfigTest extends TestCase
     /**
      * @var ConnectionInterface|MockObject
      */
-    private $connectionDataDefaultMock;
+    private $envConnectionDataDefaultMock;
 
     /**
      * @var ConnectionInterface|MockObject
      */
-    private $connectionDataCheckoutMock;
+    private $envConnectionDataCheckoutMock;
 
     /**
      * @var ConnectionInterface|MockObject
      */
-    private $connectionDataSaleMock;
+    private $envConnectionDataSaleMock;
 
     /**
      * @var ConnectionInterface|MockObject
      */
-    private $connectionDataDefaultSlaveMock;
+    private $envConnectionDataDefaultSlaveMock;
     /**
      * @var ConnectionInterface|MockObject
      */
-    private $connectionDataCheckoutSlaveMock;
+    private $envConnectionDataCheckoutSlaveMock;
     /**
      * @var ConnectionInterface|MockObject
      */
-    private $connectionDataSaleSlaveMock;
+    private $envConnectionDataSaleSlaveMock;
 
     /**
      * @throws \ReflectionException
@@ -69,95 +69,91 @@ class DbConfigTest extends TestCase
     protected function setUp()
     {
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
-        $this->connectionFactoryMock = $this->createMock(RelationshipConnectionFactory::class);
+        $this->envConnectionDataFactoryMock = $this->createMock(RelationshipConnectionFactory::class);
 
-        $this->connectionDataDefaultMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->connectionDataCheckoutMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->connectionDataSaleMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->envConnectionDataDefaultMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->envConnectionDataCheckoutMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->envConnectionDataSaleMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 
-        $this->connectionDataDefaultSlaveMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->connectionDataCheckoutSlaveMock = $this->getMockForAbstractClass(ConnectionInterface::class);
-        $this->connectionDataSaleSlaveMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->envConnectionDataDefaultSlaveMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->envConnectionDataCheckoutSlaveMock = $this->getMockForAbstractClass(ConnectionInterface::class);
+        $this->envConnectionDataSaleSlaveMock = $this->getMockForAbstractClass(ConnectionInterface::class);
 
-        $this->connectionFactoryMock->expects($this->any())
+        $this->envConnectionDataFactoryMock->expects($this->any())
             ->method('create')
             ->willReturnMap([
-                [RelationshipConnectionFactory::CONNECTION_MAIN, $this->connectionDataDefaultMock],
-                [RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN, $this->connectionDataCheckoutMock],
-                [RelationshipConnectionFactory::CONNECTION_SALES_MAIN, $this->connectionDataSaleMock],
-                [RelationshipConnectionFactory::CONNECTION_SLAVE, $this->connectionDataDefaultSlaveMock],
-                [RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE, $this->connectionDataCheckoutSlaveMock],
-                [RelationshipConnectionFactory::CONNECTION_SALES_SLAVE, $this->connectionDataSaleSlaveMock],
+                [RelationshipConnectionFactory::CONNECTION_MAIN, $this->envConnectionDataDefaultMock],
+                [RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN, $this->envConnectionDataCheckoutMock],
+                [RelationshipConnectionFactory::CONNECTION_SALES_MAIN, $this->envConnectionDataSaleMock],
+                [RelationshipConnectionFactory::CONNECTION_SLAVE, $this->envConnectionDataDefaultSlaveMock],
+                [RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE, $this->envConnectionDataCheckoutSlaveMock],
+                [RelationshipConnectionFactory::CONNECTION_SALES_SLAVE, $this->envConnectionDataSaleSlaveMock],
             ]);
 
         $this->dbConfig = new DbConfig(
             $this->stageConfigMock,
             new ConfigMerger(),
-            $this->connectionFactoryMock
+            $this->envConnectionDataFactoryMock
         );
     }
 
     /**
-     * @param array $connectionsData
-     * @param array $envDbConfig
-     * @param boolean $setSlave
+     * @param array $envenvConnectionsData
+     * @param array $customDbConfig
      * @param array $expectedConfig
      * @dataProvider getDataProvider
      */
     public function testGet(
-        array $connectionsData,
-        array $envDbConfig,
-        $setSlave,
+        array $envenvConnectionsData,
+        array $customDbConfig,
         array $expectedConfig
-    ) {
-        $this->setConnectionData($connectionsData);
-        $this->stageConfigMock->expects($this->any())
+    ){
+        $this->setEnvConnectionData($envenvConnectionsData);
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->willReturnMap([
-                [DeployInterface::VAR_DATABASE_CONFIGURATION, $envDbConfig],
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, $setSlave],
-            ]);
+            ->with(DeployInterface::VAR_DATABASE_CONFIGURATION)
+            ->willReturn($customDbConfig);
 
         $this->assertEquals($expectedConfig, $this->dbConfig->get());
     }
 
     /**
-     * @param array $connectionsData
+     * @param array $envConnectionsData
      * @return void
      */
-    private function setConnectionData(array $connectionsData)
+    private function setEnvConnectionData(array $envConnectionsData)
     {
-        foreach ($this->getRelationshipConnectionMap() as $connectionKey => $connectionDataMock) {
+        foreach ($this->getEnvConnectionMap() as $connectionKey => $connectionDataMock) {
             $connectionDataMock->expects($this->any())
                 ->method('getHost')
-                ->willReturn($connectionsData[$connectionKey]['host'] ?? '');
+                ->willReturn($envConnectionsData[$connectionKey]['host'] ?? '');
             $connectionDataMock->expects($this->any())
                 ->method('getPort')
-                ->willReturn($connectionsData[$connectionKey]['port'] ?? '');
+                ->willReturn($envConnectionsData[$connectionKey]['port'] ?? '');
             $connectionDataMock->expects($this->any())
                 ->method('getDbName')
-                ->willReturn($connectionsData[$connectionKey]['dbname'] ?? '');
+                ->willReturn($envConnectionsData[$connectionKey]['dbname'] ?? '');
             $connectionDataMock->expects($this->any())
                 ->method('getUser')
-                ->willReturn($connectionsData[$connectionKey]['username'] ?? '');
+                ->willReturn($envConnectionsData[$connectionKey]['username'] ?? '');
             $connectionDataMock->expects($this->any())
                 ->method('getPassword')
-                ->willReturn($connectionsData[$connectionKey]['password'] ?? '');
+                ->willReturn($envConnectionsData[$connectionKey]['password'] ?? '');
         }
     }
 
     /**
      * @return ConnectionInterface[]|MockObject[]
      */
-    private function getRelationshipConnectionMap(): array
+    private function getEnvConnectionMap(): array
     {
         return [
-            RelationshipConnectionFactory::CONNECTION_MAIN => $this->connectionDataDefaultMock,
-            RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN => $this->connectionDataCheckoutMock,
-            RelationshipConnectionFactory::CONNECTION_SALES_MAIN => $this->connectionDataSaleMock,
-            RelationshipConnectionFactory::CONNECTION_SLAVE => $this->connectionDataDefaultSlaveMock,
-            RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE => $this->connectionDataCheckoutSlaveMock,
-            RelationshipConnectionFactory::CONNECTION_SALES_SLAVE => $this->connectionDataSaleSlaveMock,
+            RelationshipConnectionFactory::CONNECTION_MAIN => $this->envConnectionDataDefaultMock,
+            RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN => $this->envConnectionDataCheckoutMock,
+            RelationshipConnectionFactory::CONNECTION_SALES_MAIN => $this->envConnectionDataSaleMock,
+            RelationshipConnectionFactory::CONNECTION_SLAVE => $this->envConnectionDataDefaultSlaveMock,
+            RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE => $this->envConnectionDataCheckoutSlaveMock,
+            RelationshipConnectionFactory::CONNECTION_SALES_SLAVE => $this->envConnectionDataSaleSlaveMock,
         ];
     }
 
@@ -165,7 +161,7 @@ class DbConfigTest extends TestCase
      * @param array $relationshipConnections
      * @return array
      */
-    private function getConnectionsData(array $relationshipConnections): array
+    private function getEnvenvConnectionsData(array $relationshipConnections): array
     {
         return array_intersect_key(
             [
@@ -220,9 +216,8 @@ class DbConfigTest extends TestCase
      * Data provider for testExecute.
      *
      * Return data for 5 parameters:
-     * connectionsData - connections data from environment variable $MAGENTO_CLOUD_RELATIONSHIP
-     * envDbConfig - custom db configuration from DATABASE_CONFIGURATION variable of .magento.env.yaml file
-     * setSlave - value for MYSQL_USE_SLAVE_CONNECTION variable of .magento.env.yaml file
+     * envConnectionsData - connections data from environment variable $MAGENTO_CLOUD_RELATIONSHIP
+     * customDbConfig - custom db configuration from DATABASE_CONFIGURATION variable of .magento.env.yaml file
      * expectedConfig - result of updated config data for configuration file
      *
      * @return array
@@ -233,9 +228,10 @@ class DbConfigTest extends TestCase
     {
         return [
             'default connection without slave' => [
-                'connectionsData' => $this->getConnectionsData([RelationshipConnectionFactory::CONNECTION_MAIN]),
-                'envDbConfig' => [],
-                'setSlave' => false,
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
+                    RelationshipConnectionFactory::CONNECTION_MAIN,
+                ]),
+                'customDbConfig' => [],
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -254,12 +250,11 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'default connection with slave' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => [],
-                'setSlave' => true,
+                'customDbConfig' => [],
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -290,12 +285,11 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration only merge option' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => ['_merge' => true],
-                'setSlave' => true,
+                'customDbConfig' => ['_merge' => true],
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -326,11 +320,11 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration without merge' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     'connection' => [
                         'default' => [
                             'host' => 'custom_host',
@@ -347,7 +341,6 @@ class DbConfigTest extends TestCase
                         ],
                     ],
                 ],
-                'setSlave' => true,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -367,11 +360,10 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with merge and without slave' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
-                    RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     'connection' => [
                         'default' => [
                             'host' => 'custom_host',
@@ -384,7 +376,6 @@ class DbConfigTest extends TestCase
                     ],
                     '_merge' => true,
                 ],
-                'setSlave' => false,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -405,11 +396,10 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with merge set to false and without slave' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
-                    RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     'connection' => [
                         'default' => [
                             'host' => 'custom_host',
@@ -422,7 +412,6 @@ class DbConfigTest extends TestCase
                     ],
                     '_merge' => false,
                 ],
-                'setSlave' => false,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -437,11 +426,11 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with merge and with slave' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     'connection' => [
                         'default' => [
                             'driver_options' => [\PDO::MYSQL_ATTR_LOCAL_INFILE => 1],
@@ -452,7 +441,6 @@ class DbConfigTest extends TestCase
                     ],
                     '_merge' => true,
                 ],
-                'setSlave' => true,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -485,11 +473,11 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with merge, with slave, and host changed' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     'connection' => [
                         'default' => [
                             'host' => 'custom_host',
@@ -501,7 +489,6 @@ class DbConfigTest extends TestCase
                     ],
                     '_merge' => true,
                 ],
-                'setSlave' => true,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -522,11 +509,11 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'custom environment db configuration with custom slave connection and without merge' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     'connection' => [
                         'default' => [
                             'host' => 'custom_host',
@@ -543,7 +530,6 @@ class DbConfigTest extends TestCase
                         ],
                     ],
                 ],
-                'setSlave' => true,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -563,11 +549,11 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'environment db configuration with custom slave connection and with merge and use slave connection' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     'slave_connection' => [
                         'default' => [
                             'host' => 'custom_slave_host:3377',
@@ -578,7 +564,6 @@ class DbConfigTest extends TestCase
                     ],
                     '_merge' => true
                 ],
-                'setSlave' => true,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -609,8 +594,10 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'environment db config with custom slave connection and with merge and use without slave connection' => [
-                'connectionsData' => $this->getConnectionsData([RelationshipConnectionFactory::CONNECTION_MAIN]),
-                'envDbConfig' => [
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
+                    RelationshipConnectionFactory::CONNECTION_MAIN
+                ]),
+                'customDbConfig' => [
                     'slave_connection' => [
                         'default' => [
                             'host' => 'custom_slave_host:3398',
@@ -621,7 +608,6 @@ class DbConfigTest extends TestCase
                     ],
                     '_merge' => true
                 ],
-                'setSlave' => false,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -648,16 +634,12 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'environment db config with split connections without slave and custom db configuration' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
-                    RelationshipConnectionFactory::CONNECTION_SLAVE,
                     RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
-                    RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE,
                     RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
-                    RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
                 ]),
-                'envDbConfig' => [],
-                'setSlave' => false,
+                'customDbConfig' => [],
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -696,7 +678,7 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'environment db config with split and slave connections and without custom db configuration' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                     RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
@@ -704,8 +686,7 @@ class DbConfigTest extends TestCase
                     RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
                 ]),
-                'envDbConfig' => [],
-                'setSlave' => true,
+                'customDbConfig' => [],
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -776,7 +757,7 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'environment db config with split and slave connections and with custom split db config without merge' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                     RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
@@ -784,7 +765,7 @@ class DbConfigTest extends TestCase
                     RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     '_merge' => false,
                     'connection' => [
                         'default' => [
@@ -833,7 +814,6 @@ class DbConfigTest extends TestCase
                         ],
                     ],
                 ],
-                'setSlave' => true,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
@@ -862,7 +842,7 @@ class DbConfigTest extends TestCase
                 ],
             ],
             'environment db config with split and slave connections and with custom split db config with merge' => [
-                'connectionsData' => $this->getConnectionsData([
+                'envConnectionsData' => $this->getEnvenvConnectionsData([
                     RelationshipConnectionFactory::CONNECTION_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SLAVE,
                     RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
@@ -870,7 +850,7 @@ class DbConfigTest extends TestCase
                     RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
                     RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
                 ]),
-                'envDbConfig' => [
+                'customDbConfig' => [
                     '_merge' => true,
                     'connection' => [
                         'default' => [
@@ -919,7 +899,6 @@ class DbConfigTest extends TestCase
                         ],
                     ],
                 ],
-                'setSlave' => true,
                 'expectedConfig' => [
                     'connection' => [
                         'default' => [
