@@ -344,7 +344,8 @@ class DbConnectionTest extends TestCase
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('notice')
-            ->with('Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect'
+            ->with(
+                'Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect'
                 . ' for default connection, because default slave connection is not configured on your environment.'
             );
         $this->configWriterMock->expects($this->once())
@@ -614,7 +615,8 @@ class DbConnectionTest extends TestCase
             ->withConsecutive(
                 [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
                 [DeployInterface::VAR_DATABASE_CONFIGURATION],
-                [DeployInterface::VAR_SPLIT_DB])
+                [DeployInterface::VAR_SPLIT_DB]
+            )
             ->willReturnOnConsecutiveCalls(false, [], $varSplitDb);
         $this->loggerMock->expects($expectsWarning)
             ->method('warning')
@@ -710,7 +712,8 @@ class DbConnectionTest extends TestCase
             ->withConsecutive(
                 [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
                 [DeployInterface::VAR_DATABASE_CONFIGURATION],
-                [DeployInterface::VAR_SPLIT_DB])
+                [DeployInterface::VAR_SPLIT_DB]
+            )
             ->willReturnOnConsecutiveCalls(false, [], ['quote', 'sales']);
         $this->configWriterMock->expects($this->once())
             ->method('create')
