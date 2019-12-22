@@ -107,8 +107,6 @@ class DbConnection implements StepInterface
      */
     public function execute()
     {
-        $this->logger->info('Updating env.php DB connection configuration.');
-
         $dbConfig = $this->dbConfig->get();
 
         if (!isset($dbConfig[DbConfig::KEY_CONNECTION])) {
@@ -126,7 +124,36 @@ class DbConnection implements StepInterface
             return;
         }
 
+        $this->logger->info('Updating env.php DB connection configuration.');
+
         $mageConfig = $this->configReader->read();
+
+        $isCustomDefaultConnection = !$this->isSameConnection(
+            $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
+            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT]
+        );
+
+        if (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection) {
+            $this->logger->notice(
+                'Database was already split but deploy was configured with new connection.'
+                . ' The previous connection data will be ignored.'
+            );
+        }
+
+        $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
+        $slaveIsAvailable = isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
+
+        if (empty($mageSplitConnectionsConfig)
+            || (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection)) {
+            $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig, $useSlave && $slaveIsAvailable);
+            $mageConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
+            $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $useSlave);
+            $this->configWriter->create($mageConfig);
+            return;
+        }
+
+        $this->updateSlaveConnectionsConfig($dbConfig, $mageConfig, $useSlave, $slaveIsAvailable);
+
         $mageSplitConnectionsConfig = array_intersect_key(
             $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
             array_flip(DbConfig::SPLIT_CONNECTIONS)
@@ -136,7 +163,6 @@ class DbConnection implements StepInterface
             $mageSplitConnectionsConfig,
             $dbConfig[DbConfig::KEY_CONNECTION]
         );
-        $missedTypes = $this->getMissedSplitTypesFromVarSplitDB(array_keys($mageSplitConnectionsConfig));
 
         if (!empty($customSplitConnections)) {
             $this->logger->warning(sprintf(
@@ -146,15 +172,31 @@ class DbConnection implements StepInterface
             $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
             return;
         }
-        if (!empty($missedTypes)) {
-            $this->logger->warning(sprintf(
-                'Db %s was split before, but SPLIT_DB does not have this info',
-                implode(', ', $missedTypes)
-            ));
-            return;
-        }
 
-        $this->updateMageConfig($mageConfig, $dbConfig);
+        $this->checkMissedSplitTypes(array_keys($mageSplitConnectionsConfig));
+    }
+
+    /**
+     * @param array $dbConfig
+     * @param array $mageConfig
+     * @param bool $useSlave
+     * @param bool $slaveIsAvailable
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    private function updateSlaveConnectionsConfig(
+        array $dbConfig,
+        array $mageConfig,
+        bool $useSlave,
+        bool $slaveIsAvailable
+    ) {
+        if ($useSlave && $slaveIsAvailable) {
+            $slaveConnectionsConfig = $this->getMainConnections($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
+            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION] = $slaveConnectionsConfig;
+        } else {
+            unset($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION]);
+        }
+        $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $useSlave);
+        $this->configWriter->create($mageConfig);
     }
 
     /**
@@ -193,56 +235,22 @@ class DbConnection implements StepInterface
      * @param array $connections
      * @return array
      */
-    private function getMissedSplitTypesFromVarSplitDB(array $connections)
+    private function checkMissedSplitTypes(array $connections)
     {
         $varSplitDb = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
-        $types = [];
+        $missedTypes = [];
         foreach ($connections as $connectionName) {
             $type = SplitDbConnection::SPLIT_CONNECTION_MAP[$connectionName];
             if (!in_array($type, $varSplitDb)) {
-                $types[] = $type;
+                $missedTypes[] = $type;
             }
         }
-        return $types;
-    }
-
-    /**
-     * Updates app/etc/env.php configuration
-     * @param array $mageConfig
-     * @param array $dbConfig
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
-     */
-    private function updateMageConfig(array $mageConfig, array $dbConfig)
-    {
-        $isCustomDefaultConnection = !$this->isSameConnection(
-            $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT]
-        );
-
-        if (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection) {
-            $this->logger->notice(
-                'Database was already split but deploy was configured with new connection.'
-                . ' The previous connection data will be ignored.'
-            );
+        if (!empty($missedTypes)) {
+            $this->logger->warning(sprintf(
+                'Db %s was split before, but SPLIT_DB does not have this info',
+                implode(', ', $missedTypes)
+            ));
         }
-
-        $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
-        $slaveIsAvailable = isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
-
-        if (empty($mageSplitConnectionsConfig)
-            || (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection)) {
-            $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig, $useSlave && $slaveIsAvailable);
-            $mageConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
-        } elseif ($useSlave && $slaveIsAvailable) {
-            $slaveConnectionsConfig = $this->getMainConnections($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION] = $slaveConnectionsConfig;
-        } else {
-            unset($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION]);
-        }
-
-        $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $useSlave);
-
-        $this->configWriter->create($mageConfig);
     }
 
     /**
