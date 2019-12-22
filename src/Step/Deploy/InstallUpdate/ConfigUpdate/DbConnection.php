@@ -127,6 +127,10 @@ class DbConnection implements StepInterface
         $this->logger->info('Updating env.php DB connection configuration.');
 
         $mageConfig = $this->configReader->read();
+        $mageSplitConnectionsConfig = array_intersect_key(
+            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
+            array_flip(DbConfig::SPLIT_CONNECTIONS)
+        );
 
         $isCustomDefaultConnection = !$this->isSameConnection(
             $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
@@ -154,11 +158,6 @@ class DbConnection implements StepInterface
 
         $this->updateSlaveConnectionsConfig($dbConfig, $mageConfig, $useSlave, $slaveIsAvailable);
 
-        $mageSplitConnectionsConfig = array_intersect_key(
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
-            array_flip(DbConfig::SPLIT_CONNECTIONS)
-        );
-
         $customSplitConnections = $this->getDifferentConnections(
             $mageSplitConnectionsConfig,
             $dbConfig[DbConfig::KEY_CONNECTION]
@@ -177,6 +176,8 @@ class DbConnection implements StepInterface
     }
 
     /**
+     * Updates db slave configurations
+     *
      * @param array $dbConfig
      * @param array $mageConfig
      * @param bool $useSlave
@@ -232,8 +233,8 @@ class DbConnection implements StepInterface
 
     /**
      * Returns missed split types from VAR SPLIT_DB variable form .magento.env.yaml
+     *
      * @param array $connections
-     * @return array
      */
     private function checkMissedSplitTypes(array $connections)
     {

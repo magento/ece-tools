@@ -114,7 +114,7 @@ class DbConnectionTest extends TestCase
     /**
      * Case when an environment has no database configuration
      */
-    public function testExecuteWithoutDbConnectionInEnvironment()
+    public function testExecuteWithoutDbConfigInEnvironment()
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -124,6 +124,8 @@ class DbConnectionTest extends TestCase
             ->with('Database relationship configuration doesn\'t exist'
                 . ' and database is not configured through .magento.env.yaml or env variable.'
                 . ' Will be applied the previous database configuration.');
+        $this->flagManagerMock->expects($this->never())
+            ->method('set');
         $this->configWriterMock->expects($this->never())
             ->method('create');
         $this->step->execute();
@@ -132,7 +134,7 @@ class DbConnectionTest extends TestCase
     /**
      * Case when slave connections and split database are not used
      */
-    public function testExecute()
+    public function testExecuteWithoutSplitAndSlaveConfig()
     {
         $defaultConnection = [
             'host' => 'host',
@@ -172,14 +174,71 @@ class DbConnectionTest extends TestCase
                 [DeployInterface::VAR_DATABASE_CONFIGURATION]
             )
             ->willReturnOnConsecutiveCalls(false, []);
-        $this->loggerMock->expects($this->never())
-            ->method('warning');
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with([
                 'db' => $dbConfig,
                 'resource' => $resourceConfig
             ]);
+        $this->flagManagerMock->expects($this->never())
+            ->method('set');
+
+        $this->step->execute();
+    }
+
+    /**
+     * Case with slave connections and without split config
+     */
+    public function testExecuteWithSlaveWithoutSplitConfigs()
+    {
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'connection' => ['default' => ['host' => 'some.host']],
+                'slave_connection' => ['default' => ['host' => 'some_slave.host']],
+            ]);
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Updating env.php DB connection configuration.'],
+                ['Set DB slave connection for default connection.']
+            );
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'db' => ['connection' => ['default' => ['host' => 'some.host']]],
+                'resource' => ['default_setup' => ['connection' => 'default']]
+            ]);
+        $this->resourceConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn(['default_setup' => ['connection' => 'default']]);
+        $this->loggerMock->expects($this->never())
+            ->method('warning');
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->withConsecutive(
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
+            )
+            ->willReturnOnConsecutiveCalls(true, []);
+        $this->envConnectionDataMock->expects($this->once())
+            ->method('getHost')
+            ->willReturn('some.host');
+        $this->dbConfigMock->expects($this->once())
+            ->method('isDbConfigCompatibleWithSlaveConnection')
+            ->with([], 'default', $this->envConnectionDataMock)
+            ->willReturn(true);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'db' => [
+                    'connection' => ['default' => ['host' => 'some.host']],
+                    'slave_connection' => ['default' => ['host' => 'some_slave.host']]
+                ],
+                'resource' => ['default_setup' => ['connection' => 'default']]
+            ]);
+        $this->flagManagerMock->expects($this->never())
+            ->method('set');
 
         $this->step->execute();
     }
@@ -187,7 +246,7 @@ class DbConnectionTest extends TestCase
     /**
      * Case when with not compatible database settings for slave connection
      */
-    public function testExecuteWithNotCompatibleDatabaseSettingsForSlaveConnection()
+    public function testExecuteWithNotCompatibleDatabaseConfigForSlaveConnection()
     {
         $resourceConfig = [
             'default_setup' => ['connection' => 'default'],
@@ -241,49 +300,8 @@ class DbConnectionTest extends TestCase
                 'db' => $dbConfig,
                 'resource' => $resourceConfig
             ]);
-
-        $this->step->execute();
-    }
-
-    /**
-     * Case with slave connections
-     */
-    public function testExecuteSetSlaveConnection()
-    {
-        $this->dbConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn([
-                'connection' => ['default' => ['host' => 'some.host']],
-                'slave_connection' => ['default' => ['host' => 'some_slave.host']],
-            ]);
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Updating env.php DB connection configuration.'],
-                ['Set DB slave connection for default connection.']
-            );
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([
-                'db' => ['connection' => ['default' => ['host' => 'some.host']]],
-                'resource' => ['default_setup' => ['connection' => 'default']]
-            ]);
-        $this->loggerMock->expects($this->never())
-            ->method('warning');
-        $this->stageConfigMock->expects($this->exactly(2))
-            ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION]
-            )
-            ->willReturnOnConsecutiveCalls(true, []);
-        $this->envConnectionDataMock->expects($this->once())
-            ->method('getHost')
-            ->willReturn('some.host');
-        $this->dbConfigMock->expects($this->once())
-            ->method('isDbConfigCompatibleWithSlaveConnection')
-            ->with([], 'default', $this->envConnectionDataMock)
-            ->willReturn(true);
+        $this->flagManagerMock->expects($this->never())
+            ->method('set');
 
         $this->step->execute();
     }
@@ -296,15 +314,9 @@ class DbConnectionTest extends TestCase
         $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(['connection' => ['default' => ['host' => 'some.host']]]);
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Updating env.php DB connection configuration.'],
-                [
-                    'Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect because ' .
-                    'slave connection is not configured on your environment.'
-                ]
-            );
+            ->with('Updating env.php DB connection configuration.');
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([
@@ -330,13 +342,19 @@ class DbConnectionTest extends TestCase
             ->method('isDbConfigCompatibleWithSlaveConnection')
             ->with([], 'default', $this->envConnectionDataMock)
             ->willReturn(true);
-
+        $this->loggerMock->expects($this->once())
+            ->method('notice')
+            ->with('Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect'
+                . ' for default connection, because default slave connection is not configured on your environment.'
+            );
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with([
                 'db' => ['connection' => ['default' => ['host' => 'some.host']]],
                 'resource' => ['default_setup' => ['connection' => 'default']],
             ]);
+        $this->flagManagerMock->expects($this->never())
+            ->method('set');
 
         $this->step->execute();
     }
@@ -344,13 +362,38 @@ class DbConnectionTest extends TestCase
     /**
      * Case when database was split before but with custom split connections
      */
-    public function testExecuteSplitDbWasEnabledWithCustomConfiguration()
+    public function testExecuteSplitWasEnabledWithCustomConfiguration()
     {
         $defaultConnection = [
             'host' => 'host',
             'dbname' => 'dbname',
             'password' => 'password',
             'username' => 'username',
+        ];
+        $mageConfig = [
+            'db' => [
+                'connection' => [
+                    'default' => $defaultConnection,
+                    'indexer' => $defaultConnection,
+                    'checkout' => [
+                        'host' => 'custom_checkout.host',
+                        'dbname' => 'checkout.dbname',
+                        'password' => 'checkout.password',
+                        'username' => 'checkout.username',
+                    ],
+                    'sale' => [
+                        'host' => 'custom_sale.host',
+                        'dbname' => 'sale.dbname',
+                        'password' => 'sale.password',
+                        'username' => 'sale.username',
+                    ],
+                ]
+            ],
+            'resource' => [
+                'default_setup' => ['connection' => 'default'],
+                'checkout' => ['connection' => 'checkout'],
+                'sale' => ['connection' => 'sale'],
+            ],
         ];
         $this->dbConfigMock->expects($this->once())
             ->method('get')
@@ -377,39 +420,24 @@ class DbConnectionTest extends TestCase
             ->with('Updating env.php DB connection configuration.');
         $this->configReaderMock->expects($this->once())
             ->method('read')
-            ->willReturn([
-                'db' => [
-                    'connection' => [
-                        'default' => $defaultConnection,
-                        'indexer' => $defaultConnection,
-                        'checkout' => [
-                            'host' => 'custom_checkout.host',
-                            'dbname' => 'checkout.dbname',
-                            'password' => 'checkout.password',
-                            'username' => 'checkout.username',
-                        ],
-                        'sale' => [
-                            'host' => 'custom_sale.host',
-                            'dbname' => 'sale.dbname',
-                            'password' => 'sale.password',
-                            'username' => 'sale.username',
-                        ],
-                    ]
-                ],
-                'resource' => [
-                    'default_setup' => ['connection' => 'default'],
-                    'checkout' => ['connection' => 'checkout'],
-                    'sale' => ['connection' => 'sale'],
-                ],
-            ]);
-        $this->configWriterMock->expects($this->never())
-            ->method('create');
+            ->willReturn($mageConfig);
+        $this->stageConfigMock->expects($this->exactly(2))
+            ->method('get')
+            ->withConsecutive(
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
+            )
+            ->willReturnOnConsecutiveCalls(false, []);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with($mageConfig);
         $this->loggerMock->expects($this->once())
             ->method('warning')
             ->with('For split databases used custom connections: checkout, sale');
         $this->flagManagerMock->expects($this->once())
             ->method('set')
             ->with(FlagManager::FLAG_IGNORE_SPLIT_DB);
+
         $this->step->execute();
     }
 
@@ -511,12 +539,15 @@ class DbConnectionTest extends TestCase
                     'default_setup' => ['connection' => 'default'],
                 ],
             ]);
+        $this->flagManagerMock->expects($this->never())
+            ->method('set');
 
         $this->step->execute();
     }
 
     /**
      * Cases when database was split
+     *
      * @param array $varSplitDb
      * @param InvokedCount $expectsWarning
      * @param string $missedSplitConnection
@@ -524,7 +555,7 @@ class DbConnectionTest extends TestCase
      *
      * @throws \Magento\MagentoCloud\Step\StepException
      */
-    public function testExecuteSplitDbEnabled(
+    public function testExecuteSplitEnabled(
         array $varSplitDb,
         InvokedCount $expectsWarning,
         string $missedSplitConnection
@@ -548,42 +579,43 @@ class DbConnectionTest extends TestCase
             'username' => 'sale.username',
         ];
 
+        $connections = [
+            'connection' => [
+                'default' => $defaultConnection,
+                'indexer' => $defaultConnection,
+                'checkout' => $checkoutConnection,
+                'sale' => $saleConnection,
+            ]
+        ];
+
         $this->dbConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn([
-                'connection' => [
-                    'default' => $defaultConnection,
-                    'indexer' => $defaultConnection,
-                    'checkout' => $checkoutConnection,
-                    'sale' => $saleConnection,
-                ]
-            ]);
+            ->willReturn($connections);
+
+        $mageConfig = [
+            'db' => $connections,
+            'resource' => [
+                'default_setup' => ['connection' => 'default'],
+                'checkout' => ['connection' => 'checkout'],
+                'sale' => ['connection' => 'sale'],
+            ],
+        ];
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php DB connection configuration.');
         $this->configReaderMock->expects($this->once())
             ->method('read')
-            ->willReturn([
-                'db' => [
-                    'connection' => [
-                        'default' => $defaultConnection,
-                        'indexer' => $defaultConnection,
-                        'checkout' => $checkoutConnection,
-                        'sale' => $saleConnection,
-                    ]
-                ],
-                'resource' => [
-                    'default_setup' => ['connection' => 'default'],
-                    'checkout' => ['connection' => 'checkout'],
-                    'sale' => ['connection' => 'sale'],
-                ],
-            ]);
-        $this->configWriterMock->expects($this->never())
-            ->method('create');
-        $this->stageConfigMock->expects($this->once())
+            ->willReturn($mageConfig);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with($mageConfig);
+        $this->stageConfigMock->expects($this->exactly(3))
             ->method('get')
-            ->with(DeployInterface::VAR_SPLIT_DB)
-            ->willReturn($varSplitDb);
+            ->withConsecutive(
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION],
+                [DeployInterface::VAR_SPLIT_DB])
+            ->willReturnOnConsecutiveCalls(false, [], $varSplitDb);
         $this->loggerMock->expects($expectsWarning)
             ->method('warning')
             ->with('Db ' . $missedSplitConnection . ' was split before, but SPLIT_DB does not have this info');
@@ -591,6 +623,10 @@ class DbConnectionTest extends TestCase
         $this->step->execute();
     }
 
+    /**
+     * DataProvider for testExecuteSplitEnabled test
+     * @return array
+     */
     public function dataProviderExecuteSplitDbEnabled(): array
     {
         return [
@@ -610,5 +646,92 @@ class DbConnectionTest extends TestCase
                 'mossedSplitConnection' => 'quote',
             ]
         ];
+    }
+
+    /**
+     * Case when split and slave was enabled previous deploy but salve is disabled right now
+     *
+     * @throws \Magento\MagentoCloud\Step\StepException
+     */
+    public function testExecuteDisableSlaveConnectionsWhenSplitDbEnabled()
+    {
+        $defaultConnection = [
+            'host' => 'host',
+            'dbname' => 'dbname',
+            'password' => 'password',
+            'username' => 'username',
+        ];
+        $checkoutConnection = [
+            'host' => 'checkout.host',
+            'dbname' => 'checkout.dbname',
+            'password' => 'checkout.password',
+            'username' => 'checkout.username',
+        ];
+        $saleConnection = [
+            'host' => 'sale.host',
+            'dbname' => 'sale.dbname',
+            'password' => 'sale.password',
+            'username' => 'sale.username',
+        ];
+
+        $connections = [
+            'connection' => [
+                'default' => $defaultConnection,
+                'indexer' => $defaultConnection,
+                'checkout' => $checkoutConnection,
+                'sale' => $saleConnection,
+            ],
+            'slave_connection' => [
+                'default' => $defaultConnection,
+                'indexer' => $defaultConnection,
+                'checkout' => $checkoutConnection,
+                'sale' => $saleConnection,
+            ],
+        ];
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn($connections);
+        $mageConfig = [
+            'db' => $connections,
+            'resource' => [
+                'default_setup' => ['connection' => 'default'],
+                'checkout' => ['connection' => 'checkout'],
+                'sale' => ['connection' => 'sale'],
+            ],
+        ];
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Updating env.php DB connection configuration.');
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn($mageConfig);
+        $this->stageConfigMock->expects($this->exactly(3))
+            ->method('get')
+            ->withConsecutive(
+                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION],
+                [DeployInterface::VAR_SPLIT_DB])
+            ->willReturnOnConsecutiveCalls(false, [], ['quote', 'sales']);
+        $this->configWriterMock->expects($this->once())
+            ->method('create')
+            ->with([
+                'db' => [
+                    'connection' => [
+                        'default' => $defaultConnection,
+                        'indexer' => $defaultConnection,
+                        'checkout' => $checkoutConnection,
+                        'sale' => $saleConnection,
+                    ]
+                ],
+                'resource' => [
+                    'default_setup' => ['connection' => 'default'],
+                    'checkout' => ['connection' => 'checkout'],
+                    'sale' => ['connection' => 'sale'],
+                ],
+            ]);
+        $this->flagManagerMock->expects($this->never())
+            ->method('set');
+
+        $this->step->execute();
     }
 }
