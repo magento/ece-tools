@@ -107,6 +107,8 @@ class DbConnection implements StepInterface
      */
     public function execute()
     {
+        $this->logger->info('Updating env.php DB connection configuration.');
+
         $dbConfig = $this->dbConfig->get();
 
         if (!isset($dbConfig[DbConfig::KEY_CONNECTION])) {
@@ -124,38 +126,17 @@ class DbConnection implements StepInterface
             return;
         }
 
-        $this->logger->info('Updating env.php DB connection configuration.');
-
         $mageConfig = $this->configReader->read();
-        $mageDbConfig = $mageConfig[DbConfig::KEY_DB];
-
-        $enabledSplitConnections = $this->getEnabledSplitConnections($mageDbConfig[DbConfig::KEY_CONNECTION]);
-
-        $isDifferentDefaultConnection = !$this->isSameConnection(
-            $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
-            $mageDbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT]
+        $mageSplitConnectionsConfig = array_intersect_key(
+            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
+            array_flip(DbConfig::SPLIT_CONNECTIONS)
         );
 
-        if (!empty($enabledSplitConnections) && $isDifferentDefaultConnection) {
-            $this->logger->notice(
-                'Database was already split but deploy was configured with new connection.'
-                . ' The previous connection data will be ignored.'
-            );
-        }
-
-        if (empty($enabledSplitConnections) || (!empty($enabledSplitConnections) && $isDifferentDefaultConnection)) {
-            $isUseSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
-            $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig, $isUseSlave);
-            $mageConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
-            $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $isUseSlave);
-            $this->configWriter->create($mageConfig);
-            return;
-        }
-
-        $customSplitConnections = $this->getCustomSplitConnections(
-            $enabledSplitConnections,
+        $customSplitConnections = $this->getDifferentConnections(
+            $mageSplitConnectionsConfig,
             $dbConfig[DbConfig::KEY_CONNECTION]
         );
+        $missedTypes = $this->getMissedSplitTypesFromVarSplitDB(array_keys($mageSplitConnectionsConfig));
 
         if (!empty($customSplitConnections)) {
             $this->logger->warning(sprintf(
@@ -165,46 +146,119 @@ class DbConnection implements StepInterface
             $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
             return;
         }
+        if (!empty($missedTypes)) {
+            $this->logger->warning(sprintf(
+                'Db %s was split before, but SPLIT_DB does not have this info',
+                implode(', ', $missedTypes)
+            ));
+            return;
+        }
 
-        $this->checkEnabledSplitConnections(array_keys($enabledSplitConnections));
+        $this->updateMageConfig($mageConfig, $dbConfig);
     }
 
     /**
-     * @param array $connections
+     * Returns connections whose hosts are different
+     *
+     * @param array $connectionsConfig1
+     * @param array $connectionsConfig2
+     * @return array
      */
-    private function checkEnabledSplitConnections(array $connections)
+    private function getDifferentConnections(array $connectionsConfig1, array $connectionsConfig2): array
+    {
+        $differentConnections = [];
+        foreach ($connectionsConfig1 as $connectionName => $connectionData) {
+            if (isset($connectionsConfig2[$connectionName])
+                && !$this->isSameConnection($connectionsConfig2[$connectionName], $connectionData)) {
+                $differentConnections[] = $connectionName;
+            }
+        }
+        return $differentConnections;
+    }
+
+    /**
+     * Checks connection parameters for equality
+     *
+     * @param array $connection1
+     * @param array $connection2
+     * @return bool
+     */
+    private function isSameConnection(array $connection1, array $connection2): bool
+    {
+        return $connection1[DbConfig::KEY_HOST] === $connection2[DbConfig::KEY_HOST];
+    }
+
+    /**
+     * Returns missed split types from VAR SPLIT_DB variable form .magento.env.yaml
+     * @param array $connections
+     * @return array
+     */
+    private function getMissedSplitTypesFromVarSplitDB(array $connections)
     {
         $varSplitDb = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
+        $types = [];
         foreach ($connections as $connectionName) {
             $type = SplitDbConnection::SPLIT_CONNECTION_MAP[$connectionName];
             if (!in_array($type, $varSplitDb)) {
-                $this->logger->warning(sprintf(
-                    'Db %s was split before, but SPLIT_DB does not have this info',
-                    $type
-                ));
-                return;
+                $types[] = $type;
             }
         }
+        return $types;
     }
 
     /**
-     * Returns main database configuration
+     * Updates app/etc/env.php configuration
+     * @param array $mageConfig
+     * @param array $dbConfig
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    private function updateMageConfig(array $mageConfig, array $dbConfig)
+    {
+        $isCustomDefaultConnection = !$this->isSameConnection(
+            $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
+            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT]
+        );
+
+        if (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection) {
+            $this->logger->notice(
+                'Database was already split but deploy was configured with new connection.'
+                . ' The previous connection data will be ignored.'
+            );
+        }
+
+        $useSlave = $this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION);
+        $slaveIsAvailable = isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
+
+        if (empty($mageSplitConnectionsConfig)
+            || (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection)) {
+            $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig, $useSlave && $slaveIsAvailable);
+            $mageConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
+        } elseif ($useSlave && $slaveIsAvailable) {
+            $slaveConnectionsConfig = $this->getMainConnections($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
+            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION] = $slaveConnectionsConfig;
+        } else {
+            unset($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION]);
+        }
+
+        $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $useSlave);
+
+        $this->configWriter->create($mageConfig);
+    }
+
+    /**
+     * Returns database configuration with default and slave connections
      *
      * @param array $dbConfig
-     * @param bool $isUseSlave
+     * @param bool $withSlave
      * @return array
      */
-    private function getMainDbConfig(array $dbConfig, bool $isUseSlave): array
+    private function getMainDbConfig(array $dbConfig, bool $withSlave): array
     {
-        $dbConfig[DbConfig::KEY_CONNECTION] = array_intersect_key(
-            $dbConfig[DbConfig::KEY_CONNECTION],
-            array_flip(DbConfig::MAIN_CONNECTIONS)
-        );
-        if ($isUseSlave && isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION])) {
-            $dbConfig[DbConfig::KEY_SLAVE_CONNECTION] = array_intersect_key(
-                $dbConfig[DbConfig::KEY_SLAVE_CONNECTION],
-                array_flip(DbConfig::MAIN_CONNECTIONS)
-            );
+        $dbConfig[DbConfig::KEY_CONNECTION] = $this->getMainConnections($dbConfig[DbConfig::KEY_CONNECTION]);
+
+        if ($withSlave) {
+            $slaveConnections = $dbConfig[DbConfig::KEY_SLAVE_CONNECTION];
+            $dbConfig[DbConfig::KEY_SLAVE_CONNECTION] = $this->getMainConnections($slaveConnections);
         }
 
         return $dbConfig;
@@ -224,45 +278,17 @@ class DbConnection implements StepInterface
     }
 
     /**
-     * Returns enabled custom split connections
+     * Returns main connection configurations
      *
-     * @param array $enabledSplitConnections
      * @param array $connections
      * @return array
      */
-    private function getCustomSplitConnections(array $enabledSplitConnections, array $connections): array
+    private function getMainConnections(array $connections): array
     {
-        $customSplitConnections = [];
-        foreach ($enabledSplitConnections as $connectionName => $connectionData) {
-            if (isset($connections[$connectionName])
-                && !$this->isSameConnection($connections[$connectionName], $connectionData)) {
-                $customSplitConnections[] = $connectionName;
-            }
-        }
-        return $customSplitConnections;
-    }
-
-    /**
-     * Returns enabled split connections
-     *
-     * @param array $mageDbConnections
-     * @return array
-     */
-    private function getEnabledSplitConnections(array $mageDbConnections): array
-    {
-        return array_intersect_key($mageDbConnections, array_flip(DbConfig::SPLIT_CONNECTIONS));
-    }
-
-    /**
-     * Checks connection parameters for equality
-     *
-     * @param array $connection1
-     * @param array $connection2
-     * @return bool
-     */
-    private function isSameConnection(array $connection1, array $connection2): bool
-    {
-        return $connection1[DbConfig::KEY_HOST] === $connection2[DbConfig::KEY_HOST];
+        return array_intersect_key(
+            $connections,
+            array_flip(DbConfig::MAIN_CONNECTIONS)
+        );
     }
 
     /**
@@ -287,16 +313,18 @@ class DbConnection implements StepInterface
                 $connectionData
             )) {
                 $this->logger->warning(sprintf(
-                    'You have changed db configuration that not compatible with % s slave connection.',
+                    'You have changed db configuration that not compatible with %s slave connection.',
                     $connectionName
                 ));
             } elseif (!empty($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$connectionName])) {
                 $this->logger->info(sprintf('Set DB slave connection for %s connection.', $connectionName));
             } else {
-                $this->logger->info(
-                    'Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect ' .
-                    'because slave connection is not configured on your environment.'
-                );
+                $this->logger->notice(sprintf(
+                    'Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect for %s connection, ' .
+                    'because %s slave connection is not configured on your environment.',
+                    $connectionName,
+                    $connectionName
+                ));
             }
         }
     }
