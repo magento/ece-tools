@@ -16,7 +16,6 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\DbConnection;
-use PHPUnit\Framework\MockObject\Matcher\InvokedCount;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -547,110 +546,6 @@ class DbConnectionTest extends TestCase
     }
 
     /**
-     * Cases when database was split
-     *
-     * @param array $varSplitDb
-     * @param InvokedCount $expectsWarning
-     * @param string $missedSplitConnection
-     * @dataProvider dataProviderExecuteSplitDbEnabled
-     *
-     * @throws \Magento\MagentoCloud\Step\StepException
-     */
-    public function testExecuteSplitEnabled(
-        array $varSplitDb,
-        InvokedCount $expectsWarning,
-        string $missedSplitConnection
-    ) {
-        $defaultConnection = [
-            'host' => 'host',
-            'dbname' => 'dbname',
-            'password' => 'password',
-            'username' => 'username',
-        ];
-        $checkoutConnection = [
-            'host' => 'checkout.host',
-            'dbname' => 'checkout.dbname',
-            'password' => 'checkout.password',
-            'username' => 'checkout.username',
-        ];
-        $saleConnection = [
-            'host' => 'sale.host',
-            'dbname' => 'sale.dbname',
-            'password' => 'sale.password',
-            'username' => 'sale.username',
-        ];
-
-        $connections = [
-            'connection' => [
-                'default' => $defaultConnection,
-                'indexer' => $defaultConnection,
-                'checkout' => $checkoutConnection,
-                'sale' => $saleConnection,
-            ]
-        ];
-
-        $this->dbConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn($connections);
-
-        $mageConfig = [
-            'db' => $connections,
-            'resource' => [
-                'default_setup' => ['connection' => 'default'],
-                'checkout' => ['connection' => 'checkout'],
-                'sale' => ['connection' => 'sale'],
-            ],
-        ];
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Updating env.php DB connection configuration.');
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn($mageConfig);
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with($mageConfig);
-        $this->stageConfigMock->expects($this->exactly(3))
-            ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION],
-                [DeployInterface::VAR_SPLIT_DB]
-            )
-            ->willReturnOnConsecutiveCalls(false, [], $varSplitDb);
-        $this->loggerMock->expects($expectsWarning)
-            ->method('warning')
-            ->with('Db ' . $missedSplitConnection . ' was split before, but SPLIT_DB does not have this info');
-
-        $this->step->execute();
-    }
-
-    /**
-     * DataProvider for testExecuteSplitEnabled test
-     * @return array
-     */
-    public function dataProviderExecuteSplitDbEnabled(): array
-    {
-        return [
-            [
-                'varSplitDb' => ['quote', 'sales'],
-                'expectsWarning' => $this->never(),
-                'mossedSplitConnection' => '',
-            ],
-            [
-                'varSplitDb' => ['quote',],
-                'expectsWarning' => $this->once(),
-                'mossedSplitConnection' => 'sales',
-            ],
-            [
-                'varSplitDb' => ['sales',],
-                'expectsWarning' => $this->once(),
-                'mossedSplitConnection' => 'quote',
-            ]
-        ];
-    }
-
-    /**
      * Case when split and slave was enabled previous deploy but salve is disabled right now
      *
      * @throws \Magento\MagentoCloud\Step\StepException
@@ -707,14 +602,13 @@ class DbConnectionTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($mageConfig);
-        $this->stageConfigMock->expects($this->exactly(3))
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
             ->withConsecutive(
                 [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION],
-                [DeployInterface::VAR_SPLIT_DB]
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
             )
-            ->willReturnOnConsecutiveCalls(false, [], ['quote', 'sales']);
+            ->willReturnOnConsecutiveCalls(false, []);
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with([

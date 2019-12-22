@@ -15,7 +15,6 @@ use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
-use Magento\MagentoCloud\Step\Deploy\SplitDbConnection;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -163,16 +162,15 @@ class DbConnection implements StepInterface
             $dbConfig[DbConfig::KEY_CONNECTION]
         );
 
-        if (!empty($customSplitConnections)) {
-            $this->logger->warning(sprintf(
-                'For split databases used custom connections: %s',
-                implode(', ', $customSplitConnections)
-            ));
-            $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
+        if (empty($customSplitConnections)) {
             return;
         }
 
-        $this->checkMissedSplitTypes(array_keys($mageSplitConnectionsConfig));
+        $this->logger->warning(sprintf(
+            'For split databases used custom connections: %s',
+            implode(', ', $customSplitConnections)
+        ));
+        $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
     }
 
     /**
@@ -229,29 +227,6 @@ class DbConnection implements StepInterface
     private function isSameConnection(array $connection1, array $connection2): bool
     {
         return $connection1[DbConfig::KEY_HOST] === $connection2[DbConfig::KEY_HOST];
-    }
-
-    /**
-     * Returns missed split types from VAR SPLIT_DB variable form .magento.env.yaml
-     *
-     * @param array $connections
-     */
-    private function checkMissedSplitTypes(array $connections)
-    {
-        $varSplitDb = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
-        $missedTypes = [];
-        foreach ($connections as $connectionName) {
-            $type = SplitDbConnection::SPLIT_CONNECTION_MAP[$connectionName];
-            if (!in_array($type, $varSplitDb)) {
-                $missedTypes[] = $type;
-            }
-        }
-        if (!empty($missedTypes)) {
-            $this->logger->warning(sprintf(
-                'Db %s was split before, but SPLIT_DB does not have this info',
-                implode(', ', $missedTypes)
-            ));
-        }
     }
 
     /**
