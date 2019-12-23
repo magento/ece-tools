@@ -148,10 +148,7 @@ class DbConnection implements StepInterface
 
         if (empty($mageSplitConnectionsConfig)
             || (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection)) {
-            $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig, $useSlave && $slaveIsAvailable);
-            $mageConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
-            $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $useSlave);
-            $this->configWriter->create($mageConfig);
+            $this->updateMainConnectionsConfig($dbConfig, $mageConfig, $useSlave, $slaveIsAvailable);
             return;
         }
 
@@ -171,6 +168,27 @@ class DbConnection implements StepInterface
             implode(', ', $customSplitConnections)
         ));
         $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
+    }
+
+    /**
+     * Update main connection configurations of app/etc/env.php
+     *
+     * @param array $dbConfig
+     * @param array $mageConfig,
+     * @param bool $useSlave
+     * @param bool $slaveIsAvailable
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    public function updateMainConnectionsConfig(
+        array $dbConfig,
+        array $mageConfig,
+        bool $useSlave,
+        bool $slaveIsAvailable
+    ) {
+        $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig, $useSlave && $slaveIsAvailable);
+        $mageConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
+        $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $useSlave);
+        $this->configWriter->create($mageConfig);
     }
 
     /**
