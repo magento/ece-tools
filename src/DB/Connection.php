@@ -51,16 +51,16 @@ class Connection implements ConnectionInterface
     /**
      * @param LoggerInterface $logger
      * @param ConnectionFactory $connectionFactory
-     * @param DbConfig $mergedConfig
+     * @param DbConfig $dbConfig
      */
     public function __construct(
         LoggerInterface $logger,
         ConnectionFactory $connectionFactory,
-        DbConfig $mergedConfig
+        DbConfig $dbConfig
     ) {
         $this->logger = $logger;
         $this->connectionFactory = $connectionFactory;
-        $this->dbConfig = $mergedConfig;
+        $this->dbConfig = $dbConfig;
     }
 
     /**

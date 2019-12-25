@@ -45,19 +45,19 @@ class DatabaseSplitConnection implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $dbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
+        $customConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
 
-        $splitConnections = [];
+        $customSplitConnections = [];
         foreach (DbConfig::CONNECTION_TYPES as $connectionType) {
-            foreach (DbConfig::SPLIT_CONNECTIONS as $splitConnection) {
-                if (!isset($dbConfig[$connectionType][$splitConnection])) {
+            foreach (DbConfig::SPLIT_CONNECTIONS as $splitConnectionName) {
+                if (!isset($customConfig[$connectionType][$splitConnectionName])) {
                     continue;
                 }
-                $splitConnections[$connectionType][] = $splitConnection;
+                $customSplitConnections[$connectionType][] = $splitConnectionName;
             }
         }
 
-        if (empty($splitConnections)) {
+        if (empty($customSplitConnections)) {
             return $this->resultFactory->success();
         }
 
@@ -66,7 +66,7 @@ class DatabaseSplitConnection implements ValidatorInterface
             . ' of the file .magento.env.yaml:',
             DeployInterface::VAR_DATABASE_CONFIGURATION
         );
-        foreach ($splitConnections as $type => $connections) {
+        foreach ($customSplitConnections as $type => $connections) {
             $messages[] = "- $type: " . implode(', ', $connections);
         }
         $messages[] = 'Custom split database configuration will be ignored in during current deploy phase.';

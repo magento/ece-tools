@@ -101,32 +101,40 @@ class ResourceConfig implements ConfigInterface
             return $this->resourceConfig;
         }
 
-        $envConfig = $this->stageConfig->get(DeployInterface::VAR_RESOURCE_CONFIGURATION);
+        $customConfig = $this->stageConfig->get(DeployInterface::VAR_RESOURCE_CONFIGURATION);
 
         /**
          * Ece-tools do not support custom configuration of a split database.
          */
         foreach (self::RESOURCE_MAP as $connectionName => $resourceName) {
             if (in_array($connectionName, DbConfig::SPLIT_CONNECTIONS)
-                && isset($envConfig[$resourceName])) {
-                unset($envConfig[$resourceName]);
+                && isset($customConfig[$resourceName])) {
+                unset($customConfig[$resourceName]);
             }
         }
 
-        if (!$this->configMerger->isEmpty($envConfig) && !$this->configMerger->isMergeRequired($envConfig)) {
-            return $this->configMerger->clear($envConfig);
+        if (!$this->configMerger->isEmpty($customConfig) && !$this->configMerger->isMergeRequired($customConfig)) {
+            return $this->configMerger->clear($customConfig);
         }
 
+        return $this->resourceConfig = $this->configMerger->merge($this->createConfig(), $customConfig);
+    }
+
+    /**
+     * Creates resource configuration
+     *
+     * @return array
+     */
+    private function createConfig(): array
+    {
         $connections = array_keys($this->dbConfig->get()[DbConfig::KEY_CONNECTION] ?? []);
-
         $config = [];
-
         foreach ($connections as $connectionName) {
             if (isset(self::RESOURCE_MAP[$connectionName])) {
                 $config[self::RESOURCE_MAP[$connectionName]][self::KEY_CONNECTION] = $connectionName;
             }
         }
 
-        return $this->resourceConfig = $this->configMerger->merge($config, $envConfig);
+        return $config;
     }
 }
