@@ -120,8 +120,8 @@ class SplitDbConnection implements StepInterface
 
         $dbConfig = $this->dbConfig->get();
         $notAvailableSplitTypes = $this->getMissedSplitTypes(
-            $dbConfig[DbConfig::KEY_CONNECTION] ?? [],
-            $splitTypes
+            $splitTypes,
+            $dbConfig[DbConfig::KEY_CONNECTION] ?? []
         );
 
         if (!empty($notAvailableSplitTypes)) {
@@ -135,8 +135,8 @@ class SplitDbConnection implements StepInterface
 
         $mageConfig = $this->configReader->read();
         $missedSplitTypes = $this->getMissedSplitTypes(
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION] ?? [],
-            $splitTypes
+            $splitTypes,
+            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION] ?? []
         );
 
         if (!empty($missedSplitTypes)) {
@@ -159,11 +159,11 @@ class SplitDbConnection implements StepInterface
     /**
      * Returns split types that do not exist in $connectionsConfig but exists in $splitTypes
      *
-     * @param array $connectionsConfig
      * @param array $splitTypes
+     * @param array $connectionsConfig
      * @return array
      */
-    private function getMissedSplitTypes(array $connectionsConfig, array $splitTypes): array
+    private function getMissedSplitTypes(array $splitTypes, array $connectionsConfig): array
     {
         return array_values(array_diff_key(
             array_intersect(self::SPLIT_CONNECTION_MAP, $splitTypes),
@@ -234,19 +234,19 @@ class SplitDbConnection implements StepInterface
             return;
         }
         $mageConfig = $this->configReader->read();
-        $mageDbConnectionsConfig = $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION];
-        foreach (array_keys($this->getSplitConnectionsConfig($mageDbConnectionsConfig)) as $connectionName) {
-            if (!isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$connectionName])) {
+        $mageConnectionsConfig = $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION];
+        foreach (array_keys($this->getSplitConnectionsConfig($mageConnectionsConfig)) as $mageConnectionName) {
+            if (!isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName])) {
                 $this->logger->warning(sprintf(
                     'Slave connection for %s connection not set. '
                     . 'Relationships not has configuration for this slave connection',
-                    $connectionName
+                    $mageConnectionName
                 ));
                 continue;
             }
-            $connectionConfig = $dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$connectionName];
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION][$connectionName] = $connectionConfig;
-            $this->logger->info(sprintf('Slave connection for %s connection was set', $connectionName));
+            $connectionConfig = $dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName];
+            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName] = $connectionConfig;
+            $this->logger->info(sprintf('Slave connection for %s connection was set', $mageConnectionName));
         }
         $this->configWriter->create($mageConfig);
     }
