@@ -111,7 +111,8 @@ class SplitDbConnection implements StepInterface
         }
 
         if ($this->flagManager->exists(FlagManager::FLAG_IGNORE_SPLIT_DB)) {
-            $this->logger->info(sprintf('Enabling a split database will be skipped. The flag %s was detected.',
+            $this->logger->info(sprintf(
+                'Enabling a split database will be skipped. The flag %s was detected.',
                 FlagManager::FLAG_IGNORE_SPLIT_DB
             ));
             $this->flagManager->delete(FlagManager::FLAG_IGNORE_SPLIT_DB);

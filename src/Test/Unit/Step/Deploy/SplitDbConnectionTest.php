@@ -20,6 +20,9 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Shell\ProcessInterface;
 
+/**
+ * @inheritdoc
+ */
 class SplitDbConnectionTest extends TestCase
 {
     private const CHECKOUT_CONNECTION_CONFIG = [
@@ -110,6 +113,11 @@ class SplitDbConnectionTest extends TestCase
      */
     private $step;
 
+    /**
+     * {@inheritdoc}
+     *
+     * @throws \ReflectionException
+     */
     protected function setUp()
     {
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
@@ -135,7 +143,7 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Case when the variable SPLIT_DB has a empty array
+     * Variable SPLIT_DB is a empty array
      *
      * @throws \Magento\MagentoCloud\Step\StepException
      */
@@ -154,7 +162,7 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Case when the variable SPLIT_DB is not empty and the flag IGNORES_SPLIT_DB exists
+     * Variable SPLIT_DB is not empty and the flag IGNORES_SPLIT_DB exists
      */
     public function testExecuteVarSplitDbIsNotEmptyAndFlagIgnoreSplitDbExists()
     {
@@ -178,7 +186,7 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Case when the relationships have no connections for split database
+     * Relationships have no connections for split database
      *
      * @param array $dbConfig
      * @param array $splitTypes
@@ -249,8 +257,7 @@ class SplitDbConnectionTest extends TestCase
         array $dbConfig,
         array $mageConfig,
         array $splitTypes
-    )
-    {
+    ) {
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_SPLIT_DB)
@@ -302,7 +309,7 @@ class SplitDbConnectionTest extends TestCase
     }
 
     /**
-     * Case when split db will be enabled without slave connections
+     * Split db will be enabled without slave connections
      *
      * @throws \Magento\MagentoCloud\Step\StepException
      */
@@ -393,7 +400,8 @@ class SplitDbConnectionTest extends TestCase
             ->method('read')
             ->willReturnOnConsecutiveCalls(
                 ['db' => ['connection' => []]],
-                ['db' => ['connection' => self::CONNECTION]]);
+                ['db' => ['connection' => self::CONNECTION]]
+            );
         $this->processMock->expects($this->exactly(2))
             ->method('getOutput')
             ->willReturnOnConsecutiveCalls(
@@ -439,7 +447,7 @@ class SplitDbConnectionTest extends TestCase
      *
      * @throws \Magento\MagentoCloud\Step\StepException
      */
-    public function testExecuteEnableSlaveConnections()
+    public function testExecuteEnableSlaveConnectionsOnly()
     {
         $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')

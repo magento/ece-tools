@@ -28,6 +28,52 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
  */
 class DbConnectionTest extends TestCase
 {
+    private const DEFAULT_CONNECTION = [
+        'host' => 'host',
+        'dbname' => 'dbname',
+        'password' => 'password',
+        'username' => 'username',
+    ];
+
+    private const CHECKOUT_CONNECTION = [
+        'host' => 'checkout.host',
+        'dbname' => 'checkout.dbname',
+        'password' => 'checkout.password',
+        'username' => 'checkout.username',
+    ];
+
+    private const SALE_CONNECTION = [
+        'host' => 'sale.host',
+        'dbname' => 'sale.dbname',
+        'password' => 'sale.password',
+        'username' => 'sale.username',
+    ];
+
+    private const SLAVE_DEFAULT_CONNECTION = [
+        'host' => 'slave.host',
+        'dbname' => 'slave.dbname',
+        'password' => 'slave.password',
+        'username' => 'slave.username',
+    ];
+
+    private const SLAVE_CHECKOUT_CONNECTION = [
+        'host' => 'slave.checkout.host',
+        'dbname' => 'slave.checkout.dbname',
+        'password' => 'slave.checkout.password',
+        'username' => 'slave.checkout.username',
+    ];
+
+    private const SLAVE_SALE_CONNECTION = [
+        'host' => 'slave.sale.host',
+        'dbname' => 'slave.sale.dbname',
+        'password' => 'slave.sale.password',
+        'username' => 'slave.sale.username',
+    ];
+
+    private const RESOURCE_DEFAULT_SETUP = ['connection' => 'default'];
+    private const RESOURCE_CHECKOUT = ['connection' => 'checkout'];
+    private const RESOURCE_SALE = ['connection' => 'sale'];
+
     /**
      * @var DeployInterface|MockObject
      */
@@ -135,20 +181,14 @@ class DbConnectionTest extends TestCase
      */
     public function testExecuteWithoutSplitAndSlaveConfig()
     {
-        $defaultConnection = [
-            'host' => 'host',
-            'dbname' => 'dbname',
-            'password' => 'password',
-            'username' => 'username',
-        ];
         $resourceConfig = [
-            'default_setup' => ['connection' => 'default'],
+            'default_setup' => self::RESOURCE_DEFAULT_SETUP,
         ];
 
         $dbConfig = [
             'connection' => [
-                'default' => $defaultConnection,
-                'indexer' => $defaultConnection,
+                'default' => self::DEFAULT_CONNECTION,
+                'indexer' => self::DEFAULT_CONNECTION,
             ]
         ];
         $this->dbConfigMock->expects($this->once())
@@ -193,8 +233,8 @@ class DbConnectionTest extends TestCase
         $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn([
-                'connection' => ['default' => ['host' => 'some.host']],
-                'slave_connection' => ['default' => ['host' => 'some_slave.host']],
+                'connection' => ['default' => self::DEFAULT_CONNECTION],
+                'slave_connection' => ['default' => self::SLAVE_DEFAULT_CONNECTION],
             ]);
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
@@ -205,12 +245,12 @@ class DbConnectionTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([
-                'db' => ['connection' => ['default' => ['host' => 'some.host']]],
-                'resource' => ['default_setup' => ['connection' => 'default']]
+                'db' => ['connection' => ['default' => self::DEFAULT_CONNECTION]],
+                'resource' => ['default_setup' => self::RESOURCE_DEFAULT_SETUP]
             ]);
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn(['default_setup' => ['connection' => 'default']]);
+            ->willReturn(['default_setup' => self::RESOURCE_DEFAULT_SETUP]);
         $this->loggerMock->expects($this->never())
             ->method('warning');
         $this->stageConfigMock->expects($this->exactly(2))
@@ -222,7 +262,7 @@ class DbConnectionTest extends TestCase
             ->willReturnOnConsecutiveCalls(true, []);
         $this->envConnectionDataMock->expects($this->once())
             ->method('getHost')
-            ->willReturn('some.host');
+            ->willReturn('host');
         $this->dbConfigMock->expects($this->once())
             ->method('isDbConfigCompatibleWithSlaveConnection')
             ->with([], 'default', $this->envConnectionDataMock)
@@ -231,10 +271,10 @@ class DbConnectionTest extends TestCase
             ->method('create')
             ->with([
                 'db' => [
-                    'connection' => ['default' => ['host' => 'some.host']],
-                    'slave_connection' => ['default' => ['host' => 'some_slave.host']]
+                    'connection' => ['default' => self::DEFAULT_CONNECTION],
+                    'slave_connection' => ['default' => self::SLAVE_DEFAULT_CONNECTION]
                 ],
-                'resource' => ['default_setup' => ['connection' => 'default']]
+                'resource' => ['default_setup' => self::RESOURCE_DEFAULT_SETUP]
             ]);
         $this->flagManagerMock->expects($this->never())
             ->method('set');
@@ -248,17 +288,12 @@ class DbConnectionTest extends TestCase
     public function testExecuteWithNotCompatibleDatabaseConfigForSlaveConnection()
     {
         $resourceConfig = [
-            'default_setup' => ['connection' => 'default'],
+            'default_setup' => self::RESOURCE_DEFAULT_SETUP,
         ];
 
         $dbConfig = [
             'connection' => [
-                'default' => [
-                    'host' => 'host',
-                    'dbname' => 'dbname',
-                    'password' => 'password',
-                    'username' => 'username',
-                ],
+                'default' => self::DEFAULT_CONNECTION,
             ]
         ];
         $this->dbConfigMock->expects($this->once())
@@ -312,19 +347,19 @@ class DbConnectionTest extends TestCase
     {
         $this->dbConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn(['connection' => ['default' => ['host' => 'some.host']]]);
+            ->willReturn(['connection' => ['default' => self::DEFAULT_CONNECTION]]);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Updating env.php DB connection configuration.');
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn([
-                'db' => ['connection' => ['default' => ['host' => 'some.host']]],
-                'resource' => ['default_setup' => ['connection' => 'default']]
+                'db' => ['connection' => ['default' => self::DEFAULT_CONNECTION]],
+                'resource' => ['default_setup' => self::RESOURCE_DEFAULT_SETUP]
             ]);
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
-            ->willReturn(['default_setup' => ['connection' => 'default']]);
+            ->willReturn(['default_setup' => self::RESOURCE_DEFAULT_SETUP]);
         $this->loggerMock->expects($this->never())
             ->method('warning');
         $this->stageConfigMock->expects($this->exactly(2))
@@ -336,7 +371,7 @@ class DbConnectionTest extends TestCase
             ->willReturnOnConsecutiveCalls(true, []);
         $this->envConnectionDataMock->expects($this->once())
             ->method('getHost')
-            ->willReturn('some.host');
+            ->willReturn('host');
         $this->dbConfigMock->expects($this->once())
             ->method('isDbConfigCompatibleWithSlaveConnection')
             ->with([], 'default', $this->envConnectionDataMock)
@@ -350,8 +385,8 @@ class DbConnectionTest extends TestCase
         $this->configWriterMock->expects($this->once())
             ->method('create')
             ->with([
-                'db' => ['connection' => ['default' => ['host' => 'some.host']]],
-                'resource' => ['default_setup' => ['connection' => 'default']],
+                'db' => ['connection' => ['default' => self::DEFAULT_CONNECTION]],
+                'resource' => ['default_setup' => self::RESOURCE_DEFAULT_SETUP],
             ]);
         $this->flagManagerMock->expects($this->never())
             ->method('set');
@@ -364,17 +399,11 @@ class DbConnectionTest extends TestCase
      */
     public function testExecuteSplitWasEnabledWithCustomConfiguration()
     {
-        $defaultConnection = [
-            'host' => 'host',
-            'dbname' => 'dbname',
-            'password' => 'password',
-            'username' => 'username',
-        ];
         $mageConfig = [
             'db' => [
                 'connection' => [
-                    'default' => $defaultConnection,
-                    'indexer' => $defaultConnection,
+                    'default' => self::DEFAULT_CONNECTION,
+                    'indexer' => self::DEFAULT_CONNECTION,
                     'checkout' => [
                         'host' => 'custom_checkout.host',
                         'dbname' => 'checkout.dbname',
@@ -390,29 +419,19 @@ class DbConnectionTest extends TestCase
                 ]
             ],
             'resource' => [
-                'default_setup' => ['connection' => 'default'],
-                'checkout' => ['connection' => 'checkout'],
-                'sale' => ['connection' => 'sale'],
+                'default_setup' => self::RESOURCE_DEFAULT_SETUP,
+                'checkout' => self::RESOURCE_CHECKOUT,
+                'sale' => self::RESOURCE_SALE,
             ],
         ];
         $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn([
                 'connection' => [
-                    'default' => $defaultConnection,
-                    'indexer' => $defaultConnection,
-                    'checkout' => [
-                        'host' => 'checkout.host',
-                        'dbname' => 'checkout.dbname',
-                        'password' => 'checkout.password',
-                        'username' => 'checkout.username',
-                    ],
-                    'sale' => [
-                        'host' => 'sale.host',
-                        'dbname' => 'sale.dbname',
-                        'password' => 'sale.password',
-                        'username' => 'sale.username',
-                    ],
+                    'default' => self::DEFAULT_CONNECTION,
+                    'indexer' => self::DEFAULT_CONNECTION,
+                    'checkout' => self::CHECKOUT_CONNECTION,
+                    'sale' => self::SALE_CONNECTION,
                 ]
             ]);
         $this->loggerMock->expects($this->once())
@@ -446,12 +465,6 @@ class DbConnectionTest extends TestCase
      */
     public function testExecuteSplitDbWasEnabledWithDifferentMainConnection()
     {
-        $defaultConnection = [
-            'host' => 'host',
-            'dbname' => 'dbname',
-            'password' => 'password',
-            'username' => 'username',
-        ];
         $customDefaultConnection = [
             'host' => 'custom.host',
             'dbname' => 'custom.dbname',
@@ -462,20 +475,10 @@ class DbConnectionTest extends TestCase
             ->method('get')
             ->willReturn([
                 'connection' => [
-                    'default' => $defaultConnection,
-                    'indexer' => $defaultConnection,
-                    'checkout' => [
-                        'host' => 'checkout.host',
-                        'dbname' => 'checkout.dbname',
-                        'password' => 'checkout.password',
-                        'username' => 'checkout.username',
-                    ],
-                    'sale' => [
-                        'host' => 'sale.host',
-                        'dbname' => 'sale.dbname',
-                        'password' => 'sale.password',
-                        'username' => 'sale.username',
-                    ],
+                    'default' => self::DEFAULT_CONNECTION,
+                    'indexer' => self::DEFAULT_CONNECTION,
+                    'checkout' => self::CHECKOUT_CONNECTION,
+                    'sale' => self::SALE_CONNECTION,
                 ]
             ]);
         $this->loggerMock->expects($this->once())
@@ -503,9 +506,9 @@ class DbConnectionTest extends TestCase
                     ]
                 ],
                 'resource' => [
-                    'default_setup' => ['connection' => 'default'],
-                    'checkout' => ['connection' => 'checkout'],
-                    'sale' => ['connection' => 'sale'],
+                    'default_setup' => self::RESOURCE_DEFAULT_SETUP,
+                    'checkout' => self::RESOURCE_CHECKOUT,
+                    'sale' => self::RESOURCE_SALE,
                 ],
             ]);
         $this->loggerMock->expects($this->once())
@@ -515,9 +518,9 @@ class DbConnectionTest extends TestCase
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
             ->willReturn([
-                'default_setup' => ['connection' => 'default'],
-                'checkout' => ['connection' => 'checkout'],
-                'sale' => ['connection' => 'sale'],
+                'default_setup' => self::RESOURCE_DEFAULT_SETUP,
+                'checkout' => self::RESOURCE_CHECKOUT,
+                'sale' => self::RESOURCE_SALE,
             ]);
         $this->stageConfigMock->expects($this->any())
             ->method('get')
@@ -531,12 +534,12 @@ class DbConnectionTest extends TestCase
             ->with([
                 'db' => [
                     'connection' => [
-                        'default' => $defaultConnection,
-                        'indexer' => $defaultConnection,
+                        'default' => self::DEFAULT_CONNECTION,
+                        'indexer' => self::DEFAULT_CONNECTION,
                     ]
                 ],
                 'resource' => [
-                    'default_setup' => ['connection' => 'default'],
+                    'default_setup' => self::RESOURCE_DEFAULT_SETUP,
                 ],
             ]);
         $this->flagManagerMock->expects($this->never())
@@ -552,37 +555,18 @@ class DbConnectionTest extends TestCase
      */
     public function testExecuteDisableSlaveConnectionsWhenSplitDbEnabled()
     {
-        $defaultConnection = [
-            'host' => 'host',
-            'dbname' => 'dbname',
-            'password' => 'password',
-            'username' => 'username',
-        ];
-        $checkoutConnection = [
-            'host' => 'checkout.host',
-            'dbname' => 'checkout.dbname',
-            'password' => 'checkout.password',
-            'username' => 'checkout.username',
-        ];
-        $saleConnection = [
-            'host' => 'sale.host',
-            'dbname' => 'sale.dbname',
-            'password' => 'sale.password',
-            'username' => 'sale.username',
-        ];
-
         $connections = [
             'connection' => [
-                'default' => $defaultConnection,
-                'indexer' => $defaultConnection,
-                'checkout' => $checkoutConnection,
-                'sale' => $saleConnection,
+                'default' => self::DEFAULT_CONNECTION,
+                'indexer' => self::DEFAULT_CONNECTION,
+                'checkout' => self::CHECKOUT_CONNECTION,
+                'sale' => self::SALE_CONNECTION,
             ],
             'slave_connection' => [
-                'default' => $defaultConnection,
-                'indexer' => $defaultConnection,
-                'checkout' => $checkoutConnection,
-                'sale' => $saleConnection,
+                'default' => self::SLAVE_DEFAULT_CONNECTION,
+                'indexer' => self::SLAVE_DEFAULT_CONNECTION,
+                'checkout' => self::SLAVE_CHECKOUT_CONNECTION,
+                'sale' => self::SLAVE_SALE_CONNECTION,
             ],
         ];
         $this->dbConfigMock->expects($this->once())
@@ -591,9 +575,9 @@ class DbConnectionTest extends TestCase
         $mageConfig = [
             'db' => $connections,
             'resource' => [
-                'default_setup' => ['connection' => 'default'],
-                'checkout' => ['connection' => 'checkout'],
-                'sale' => ['connection' => 'sale'],
+                'default_setup' => self::RESOURCE_DEFAULT_SETUP,
+                'checkout' => self::RESOURCE_CHECKOUT,
+                'sale' => self::RESOURCE_SALE,
             ],
         ];
         $this->loggerMock->expects($this->once())
@@ -614,16 +598,16 @@ class DbConnectionTest extends TestCase
             ->with([
                 'db' => [
                     'connection' => [
-                        'default' => $defaultConnection,
-                        'indexer' => $defaultConnection,
-                        'checkout' => $checkoutConnection,
-                        'sale' => $saleConnection,
+                        'default' => self::DEFAULT_CONNECTION,
+                        'indexer' => self::DEFAULT_CONNECTION,
+                        'checkout' => self::CHECKOUT_CONNECTION,
+                        'sale' => self::SALE_CONNECTION,
                     ]
                 ],
                 'resource' => [
-                    'default_setup' => ['connection' => 'default'],
-                    'checkout' => ['connection' => 'checkout'],
-                    'sale' => ['connection' => 'sale'],
+                    'default_setup' => self::RESOURCE_DEFAULT_SETUP,
+                    'checkout' => self::RESOURCE_CHECKOUT,
+                    'sale' => self::RESOURCE_SALE,
                 ],
             ]);
         $this->flagManagerMock->expects($this->never())
