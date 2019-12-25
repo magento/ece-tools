@@ -119,16 +119,16 @@ class SplitDbConnection implements StepInterface
         }
 
         $dbConfig = $this->dbConfig->get();
-        $notAvailableSplitTypesInDbConfig = $this->getMissedSplitTypes(
+        $notAvailableSplitTypes = $this->getMissedSplitTypes(
             $dbConfig[DbConfig::KEY_CONNECTION] ?? [],
             $splitTypes
         );
 
-        if (!empty($notAvailableSplitTypesInDbConfig)) {
+        if (!empty($notAvailableSplitTypes)) {
             $this->logger->error(sprintf(
                 'Enabling a split database will be skipped.'
                 . ' Relationship do not have configuration for next types: %s',
-                implode(', ', $notAvailableSplitTypesInDbConfig)
+                implode(', ', $notAvailableSplitTypes)
             ));
             return;
         }
