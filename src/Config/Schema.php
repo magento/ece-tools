@@ -323,12 +323,12 @@ class Schema
                     StageConfigInterface::STAGE_DEPLOY => [],
                 ],
                 self::SCHEMA_VALUE_VALIDATION => function (string $key, $value) {
-                    if (array_diff($value, DeployInterface::VAL_SPLIT_DB)) {
+                    if (array_diff($value, DeployInterface::SPLIT_DB_VALUES)) {
                         return sprintf(
                             'The %s variable contains the invalid value. '
                             . 'It should be array with next available values: [%s].',
                             $key,
-                            implode(', ', DeployInterface::VAL_SPLIT_DB)
+                            implode(', ', DeployInterface::SPLIT_DB_VALUES)
                         );
                     }
                 },

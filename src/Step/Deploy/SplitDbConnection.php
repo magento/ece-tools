@@ -26,8 +26,8 @@ class SplitDbConnection implements StepInterface
      * Types of split database
      */
     const SPLIT_CONNECTION_MAP = [
-        DbConfig::CONNECTION_SALE => DeployInterface::VAL_SPLIT_DB_SALES,
-        DbConfig::CONNECTION_CHECKOUT => DeployInterface::VAL_SPLIT_DB_QUOTE,
+        DbConfig::CONNECTION_SALE => DeployInterface::SPLIT_DB_VALUE_SALES,
+        DbConfig::CONNECTION_CHECKOUT => DeployInterface::SPLIT_DB_VALUE_QUOTE,
     ];
 
     /**
@@ -134,10 +134,13 @@ class SplitDbConnection implements StepInterface
         }
 
         $mageConfig = $this->configReader->read();
-        $missedSplitTypes = $this->getMissedSplitTypes(
-            $splitTypes,
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION] ?? []
-        );
+
+        $enabledSplitTypes = array_values(array_intersect_key(
+            self::SPLIT_CONNECTION_MAP,
+            $this->getSplitConnectionsConfig($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION])
+        ));
+
+        $missedSplitTypes = array_diff($enabledSplitTypes, $splitTypes);
 
         if (!empty($missedSplitTypes)) {
             $this->logger->warning(
@@ -146,12 +149,6 @@ class SplitDbConnection implements StepInterface
             );
             return;
         }
-
-        $enabledSplitTypes = array_values(array_intersect_key(
-            self::SPLIT_CONNECTION_MAP,
-            $this->getSplitConnectionsConfig($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION])
-        ));
-
         $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
         $this->updateSlaveConnections($dbConfig);
     }

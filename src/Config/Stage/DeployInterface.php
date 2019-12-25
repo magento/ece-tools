@@ -52,19 +52,19 @@ interface DeployInterface extends StageConfigInterface
     /**
      * The value of the variable SPLIT_DB
      */
-    const VAL_SPLIT_DB_QUOTE = 'quote';
+    const SPLIT_DB_VALUE_QUOTE = 'quote';
 
     /**
      * The value of the variable SPLIT_DB
      */
-    const VAL_SPLIT_DB_SALES = 'sales';
+    const SPLIT_DB_VALUE_SALES = 'sales';
 
     /**
      * Values for variable SPLIT_DB
      */
-    const VAL_SPLIT_DB = [
-        self::VAL_SPLIT_DB_QUOTE,
-        self::VAL_SPLIT_DB_SALES
+    const SPLIT_DB_VALUES = [
+        self::SPLIT_DB_VALUE_QUOTE,
+        self::SPLIT_DB_VALUE_SALES
     ];
 
     /**
