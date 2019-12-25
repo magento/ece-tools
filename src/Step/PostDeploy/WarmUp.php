@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\PostDeploy;
 
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Promise\PromiseInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\WarmUp\Urls;
 use Magento\MagentoCloud\Step\StepException;
@@ -85,7 +86,9 @@ class WarmUp implements StepInterface
         try {
             $pool = $this->poolFactory->create($urls, compact('fulfilled', 'rejected'));
 
-            $pool->promise()->wait();
+            /** @var PromiseInterface $promise */
+            $promise = $pool->promise();
+            $promise->wait();
         } catch (\Throwable $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
