@@ -12,17 +12,15 @@ use Magento\MagentoCloud\Config\Database\DbConfig;
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
  */
-class ConnectionFactory implements ConnectionFactoryInterface
+class ConnectionFactory
 {
+    const CONNECTION_MAIN = 'main';
+    const CONNECTION_SLAVE = 'slave';
+
     /**
      * @var DbConfig
      */
     private $dbConfig;
-
-    /**
-     * @var array
-     */
-    private $config;
 
     /**
      * @param DbConfig $dbConfig
@@ -43,41 +41,21 @@ class ConnectionFactory implements ConnectionFactoryInterface
     {
         switch ($connectionType) {
             case self::CONNECTION_MAIN:
-                return $this->getConnectionData(DbConfig::CONNECTION_DEFAULT);
+                $connectionData = $this->dbConfig->get()['connection']['default'] ?? [];
+                $connection = new Connection($connectionData);
+                break;
             case self::CONNECTION_SLAVE:
-                return $this->getConnectionData(DbConfig::CONNECTION_DEFAULT, false);
-            case self::CONNECTION_QUOTE_MAIN:
-                return $this->getConnectionData(DbConfig::CONNECTION_CHECKOUT);
-            case self::CONNECTION_QUOTE_SLAVE:
-                return $this->getConnectionData(DbConfig::CONNECTION_CHECKOUT, false);
-            case self::CONNECTION_SALES_MAIN:
-                return $this->getConnectionData(DbConfig::CONNECTION_SALE);
-            case self::CONNECTION_SALES_SLAVE:
-                return $this->getConnectionData(DbConfig::CONNECTION_SALE, false);
+                $connectionData = $this->dbConfig->get()['slave_connection']['default']
+                    ?? $this->dbConfig->get()['connection']['default']
+                    ?? [];
+                $connection = new Connection($connectionData);
+                break;
             default:
                 throw new \RuntimeException(
                     sprintf('Connection with type %s doesn\'t exist', $connectionType)
                 );
         }
-    }
 
-    private function getConnectionData($name, $isMain = true): ConnectionInterface
-    {
-        if ($isMain) {
-            $connectionConfig = $this->getConfig()[DbConfig::KEY_CONNECTION][$name] ?? [];
-        } else {
-            $connectionConfig = $this->getConfig()[DbConfig::KEY_SLAVE_CONNECTION][$name]
-                ?? $this->getConfig()[DbConfig::KEY_CONNECTION][$name]
-                ?? [];
-        }
-        return new Connection($connectionConfig);
-    }
-
-    private function getConfig(): array
-    {
-        if (null === $this->config) {
-            $this->config = $this->dbConfig->get();
-        }
-        return $this->config;
+        return $connection;
     }
 }
