@@ -59,7 +59,8 @@ class DbConfig implements ConfigInterface
     const SPLIT_CONNECTIONS = [self::CONNECTION_CHECKOUT, self::CONNECTION_SALE];
 
     /**
-     * Main connection map with data from environment relationship connections
+     * Main connection map with data from environment relationship connections:
+     * {magento connection name} => {connection name from environment}
      */
     const MAIN_CONNECTION_MAP = [
         self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_MAIN,
@@ -139,62 +140,66 @@ class DbConfig implements ConfigInterface
             return $this->dbConfig;
         }
 
-        $customConfig = $this->getCustomDbConfig();
+        $customConfig = $this->getSupportedCustomConfig();
 
         if (!$this->configMerger->isEmpty($customConfig) && !$this->configMerger->isMergeRequired($customConfig)) {
             return $this->configMerger->clear($customConfig);
         }
 
-        return $this->dbConfig = $this->configMerger->merge($this->createDbConfig($customConfig), $customConfig);
+        return $this->dbConfig = $this->configMerger->merge($this->collectEnvConfig($customConfig), $customConfig);
     }
 
     /**
-     *  Creates Database configuration
+     *  Collects DB connections which exist in environment.
+     *
      *
      * @param array $customDbConfig
      * @return array
      */
-    private function createDbConfig(array $customDbConfig): array
+    private function collectEnvConfig(array $customDbConfig): array
     {
         $config = [];
-        foreach (self::MAIN_CONNECTION_MAP as $connection => $service) {
-            $envDbConfig = $this->getEnvConnectionData($service);
+        foreach (self::MAIN_CONNECTION_MAP as $mageConnName => $envConnName) {
+            // collect main connections
+            $envDbConfig = $this->getEnvConnectionData($envConnName);
             if (empty($envDbConfig->getHost())) {
                 continue;
             }
-            $config[self::KEY_CONNECTION][$connection] = $this->convertToMageDbConfig(
+            $config[self::KEY_CONNECTION][$mageConnName] = $this->convertToMageFormat(
                 $envDbConfig,
-                !in_array($connection, self::MAIN_CONNECTIONS)
+                !in_array($mageConnName, self::MAIN_CONNECTIONS)
             );
-            if (!isset(self::SLAVE_CONNECTION_MAP[$connection])) {
+            // collect slave connections
+            if (!isset(self::SLAVE_CONNECTION_MAP[$mageConnName])) {
                 continue;
             }
-            $slaveConnectionData = $this->getEnvConnectionData(self::SLAVE_CONNECTION_MAP[$connection]);
+            $slaveConnectionData = $this->getEnvConnectionData(self::SLAVE_CONNECTION_MAP[$mageConnName]);
             if (empty($slaveConnectionData->getHost())
-                || !$this->isDbConfigCompatibleWithSlaveConnection($customDbConfig, $connection, $envDbConfig)) {
+                || !$this->isCustomConnectionCompatibleForSlave($customDbConfig, $mageConnName, $envDbConfig)) {
                 continue;
             }
-            $config[self::KEY_SLAVE_CONNECTION][$connection] = $this->convertToMageDbConfig($slaveConnectionData, true);
+            $config[self::KEY_SLAVE_CONNECTION][$mageConnName] = $this->convertToMageFormat($slaveConnectionData, true);
         }
         return $config;
     }
 
     /**
      * Returns a custom database configuration from the variable DATABASE_CONFIGURATION from .magento.env.yaml
+     * Custom split connections are removed as they are not supported.
      *
      * @return array
      */
-    private function getCustomDbConfig(): array
+    private function getSupportedCustomConfig(): array
     {
         $customConfig = (array)$this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
 
         /**
          * Ece-tools do not support custom configuration of a split database.
          */
-        foreach (self::SPLIT_CONNECTIONS as $connection) {
+        foreach (self::SPLIT_CONNECTIONS as $splitConnection) {
             foreach (self::CONNECTION_TYPES as $connectionType) {
-                if (isset($customConfig[$connectionType][$connection])) {
-                    unset($customConfig[$connectionType][$connection]);
+                if (isset($customConfig[$connectionType][$splitConnection])) {
+                    unset($customConfig[$connectionType][$splitConnection]);
                 }
             }
         }
@@ -208,20 +213,20 @@ class DbConfig implements ConfigInterface
      * Returns true if $envDbConfig contains host or dbname for default connection
      * that doesn't match connection from relationships,
      * otherwise return false.
-     * @param array $envDbConfig database configuration from DATABASE_CONFIGURATION of .magento.env.yaml
+     * @param array $customConfig database configuration from DATABASE_CONFIGURATION of .magento.env.yaml
      * @param string $connectionName
-     * @param ConnectionInterface $connectionData
+     * @param ConnectionInterface $envConfig
      * @return boolean
      */
-    public function isDbConfigCompatibleWithSlaveConnection(
-        array $envDbConfig,
+    public function isCustomConnectionCompatibleForSlave(
+        array $customConfig,
         string $connectionName,
-        ConnectionInterface $connectionData
+        ConnectionInterface $envConfig
     ): bool {
-        if ((isset($envDbConfig[self::KEY_CONNECTION][$connectionName]['host'])
-                && $envDbConfig[self::KEY_CONNECTION][$connectionName]['host'] !== $connectionData->getHost())
-            || (isset($envDbConfig[self::KEY_CONNECTION][$connectionName]['dbname'])
-                && $envDbConfig[self::KEY_CONNECTION][$connectionName]['dbname'] !== $connectionData->getDbName())
+        if ((isset($customConfig[self::KEY_CONNECTION][$connectionName]['host'])
+                && $customConfig[self::KEY_CONNECTION][$connectionName]['host'] !== $envConfig->getHost())
+            || (isset($customConfig[self::KEY_CONNECTION][$connectionName]['dbname'])
+                && $customConfig[self::KEY_CONNECTION][$connectionName]['dbname'] !== $envConfig->getDbName())
         ) {
             return false;
         }
@@ -249,10 +254,10 @@ class DbConfig implements ConfigInterface
      * Convert DB configuration to format which is used in Magento configuration file
      *
      * @param ConnectionInterface $connectionData
-     * @param bool $additionalParams
+     * @param bool $additionalParams. True if connection should have
      * @return array
      */
-    private function convertToMageDbConfig(ConnectionInterface $connectionData, bool $additionalParams = false): array
+    private function convertToMageFormat(ConnectionInterface $connectionData, bool $additionalParams = false): array
     {
         $host = $connectionData->getHost();
 

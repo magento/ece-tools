@@ -309,7 +309,7 @@ class DbConnection implements StepInterface
             if (!$connectionData->getHost() || !$isUseSlave || $isMergeRequired) {
                 continue;
             }
-            if (!$this->dbConfig->isDbConfigCompatibleWithSlaveConnection(
+            if (!$this->dbConfig->isCustomConnectionCompatibleForSlave(
                 $customDbConfig,
                 $connectionName,
                 $connectionData

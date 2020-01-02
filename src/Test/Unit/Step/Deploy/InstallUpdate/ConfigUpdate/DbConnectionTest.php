@@ -264,7 +264,7 @@ class DbConnectionTest extends TestCase
             ->method('getHost')
             ->willReturn('host');
         $this->dbConfigMock->expects($this->once())
-            ->method('isDbConfigCompatibleWithSlaveConnection')
+            ->method('isCustomConnectionCompatibleForSlave')
             ->with([], 'default', $this->envConnectionDataMock)
             ->willReturn(true);
         $this->configWriterMock->expects($this->once())
@@ -322,7 +322,7 @@ class DbConnectionTest extends TestCase
             ->method('getHost')
             ->willReturn('host');
         $this->dbConfigMock->expects($this->once())
-            ->method('isDbConfigCompatibleWithSlaveConnection')
+            ->method('isCustomConnectionCompatibleForSlave')
             ->with([], 'default', $this->envConnectionDataMock)
             ->willReturn(false);
         $this->loggerMock->expects($this->once())
@@ -373,7 +373,7 @@ class DbConnectionTest extends TestCase
             ->method('getHost')
             ->willReturn('host');
         $this->dbConfigMock->expects($this->once())
-            ->method('isDbConfigCompatibleWithSlaveConnection')
+            ->method('isCustomConnectionCompatibleForSlave')
             ->with([], 'default', $this->envConnectionDataMock)
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
