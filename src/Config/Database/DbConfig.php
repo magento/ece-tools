@@ -14,8 +14,8 @@ use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 
 /**
  * Returns merged database configuration from the .magento.env.yaml file
- * and environment variable MAGENTO_CLOUD_RELATIONSHIPS.
- * Database configuration includes all all types of connections: main connection, slave connection
+ * and cloud environment variable.
+ * Database configuration includes all types of connections: main connection, slave connection
  * and include split connections if they exist. Exception: custom split connections from .magento.env.yaml are ignored.
  */
 class DbConfig implements ConfigInterface
@@ -130,9 +130,22 @@ class DbConfig implements ConfigInterface
 
     /**
      * Returns database configurations as merge result of customer configurations from .magento.env.yaml
-     * and connection data from cloud environment
+     * and connection data from cloud environment.
+     * Result is in the format which is used in magento env.php file.
+     * Result may contain 2 elements: 'connection' and/or 'slave_connection'
      *
      * @return array
+     * ```php
+     * [
+     *   'connection' => [
+     *     'default' => [
+     *       'host' => {host},
+     *       ...
+     *     ],
+     *   ],
+     *   'slave_connection' => [...]
+     * ]
+     * ```
      */
     public function get(): array
     {
