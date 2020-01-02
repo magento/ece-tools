@@ -254,7 +254,7 @@ class DbConfig implements ConfigInterface
      * Convert DB configuration to format which is used in Magento configuration file
      *
      * @param ConnectionInterface $connectionData
-     * @param bool $additionalParams. True if connection should have
+     * @param bool $additionalParams True if connection should have additional parameters
      * @return array
      */
     private function convertToMageFormat(ConnectionInterface $connectionData, bool $additionalParams = false): array
