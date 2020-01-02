@@ -112,9 +112,12 @@ class DbConfigTest extends TestCase
             ->method('getDbName')
             ->willReturn('dbname');
 
-        $this->assertEquals($expectedResult,
+        $this->assertEquals(
+            $expectedResult,
             $this->dbConfig->isCustomConnectionCompatibleForSlave(
-                $customConfig, $connectionName, $this->envConnectionDataDefaultMock
+                $customConfig,
+                $connectionName,
+                $this->envConnectionDataDefaultMock
             )
         );
     }
