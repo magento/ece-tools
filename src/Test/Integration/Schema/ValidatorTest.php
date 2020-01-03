@@ -149,17 +149,17 @@ class ValidatorTest extends TestCase
             ],
             [
                 StageConfigInterface::VAR_SCD_STRATEGY,
-                'quick',
+                'quick_error',
                 new Error(
-                    'The SCD_STRATEGY variable contains an invalid value quick. ' .
+                    'The SCD_STRATEGY variable contains an invalid value quick_error. ' .
                     'Use one of the available value options: compact, quick, standard.'
                 ),
             ],
             [
                 StageConfigInterface::VAR_SCD_STRATEGY,
-                'standard',
+                'standard_error',
                 new Error(
-                    'The SCD_STRATEGY variable contains an invalid value standard. ' .
+                    'The SCD_STRATEGY variable contains an invalid value standard_error. ' .
                     'Use one of the available value options: compact, quick, standard.'
                 )
             ],
