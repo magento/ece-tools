@@ -15,8 +15,9 @@ use Magento\MagentoCloud\Config\Schema\Validator;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
 use PHPUnit\Framework\TestCase;
-use \Exception;
+use Exception;
 
 /**
  * @inheritdoc
@@ -31,9 +32,9 @@ class ValidatorTest extends TestCase
     /**
      * @throws Exception
      */
-    protected function setUp()
+    protected function setUp(): void
     {
-        $container = new Container(ECE_BP, __DIR__ . '/_files');
+        $container = Container::getInstance(ECE_BP, __DIR__ . '/_files');
 
         $this->validator = new Validator(
             $container->get(Schema::class),
@@ -44,15 +45,15 @@ class ValidatorTest extends TestCase
 
     /**
      * @param string $key
-     * @param $value
-     * @param $expected
+     * @param string|int|bool|array $value
+     * @param ResultInterface|null $expected
      * @param string $stage
      * @dataProvider validateDataProvider
      */
     public function testValidate(
         string $key,
         $value,
-        $expected,
+        ResultInterface $expected = null,
         string $stage = StageConfigInterface::STAGE_DEPLOY
     ): void {
         $expected = $expected ?? new Success();
@@ -174,7 +175,9 @@ class ValidatorTest extends TestCase
             [
                 StageConfigInterface::VAR_SKIP_SCD,
                 0,
-                'The SKIP_SCD variable contains an invalid value of type integer. Use the following type: boolean.'
+                new Error(
+                    'The SKIP_SCD variable contains an invalid value of type integer. Use the following type: boolean.'
+                )
             ],
             [
                 StageConfigInterface::VAR_SKIP_SCD,

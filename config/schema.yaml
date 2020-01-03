@@ -21,14 +21,14 @@ ENV_VARIABLES:
   default:
     variables: MAGENTO_CLOUD_VARIABLES
 ENV_APPLICATION:
-  description: Environment variable used to get application configuration
+  description: Environment variable used to get application configuration.
   type: string
   system:
     - variables
   default:
     variables: MAGENTO_CLOUD_APPLICATION
 ENV_ENVIRONMENT:
-  description: Environment variable used to get application environment
+  description: Environment variable used to get application environment.
   type: string
   system:
     - variables
@@ -205,5 +205,52 @@ LOCK_PROVIDER:
     - file
   default:
     deploy: file
-
-
+REDIS_USE_SLAVE_CONNECTION:
+  description: Set to true to automatically use a read-only connection to a Redis instance to receive read-only
+    traffic on a non-master node. This improves performance through load balancing because only one node needs to
+    handle read-write traffic.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: false
+MYSQL_USE_SLAVE_CONNECTION:
+  description: Set to true to automatically use a read-only connection to the database to receive read-only traffic on
+    a non-master node. This improves performance through load balancing, because only one node needs to
+    handle read-write traffic.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: false
+UPDATE_URLS:
+  description: On deployment, replace Magento base URLs in the database with project URLs. This is useful for local
+    development, where base URLs are set up for your local environment. When you deploy to a Cloud environment,
+    we change the URLs so you can access your storefront and Magento Admin using project URLs.
+    To update URLs when deploying to Staging or Production environments, use the FORCE_UPDATE_URLS variable.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: true
+FORCE_UPDATE_URLS:
+  description: This setting overrides the default behavior for the UPDATE_URLS variable
+    which is ignored when deploying to Staging or Production environments.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: false
+CLEAN_STATIC_FILES:
+  description: Cleans generated static files. By specifying the value of this configuration to "false",
+    you can leave the static files which were generated during the previous deployment.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: true

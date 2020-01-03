@@ -122,56 +122,6 @@ class Schema
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [StageConfigInterface::STAGE_BUILD => 1]
             ],
-            DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => [
-                self::SCHEMA_TYPE => 'boolean',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_DEPLOY => false,
-                ],
-            ],
-            DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION => [
-                self::SCHEMA_TYPE => 'boolean',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_DEPLOY => false,
-                ],
-            ],
-            DeployInterface::VAR_UPDATE_URLS => [
-                self::SCHEMA_TYPE => 'boolean',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_DEPLOY => true,
-                ],
-            ],
-            DeployInterface::VAR_FORCE_UPDATE_URLS => [
-                self::SCHEMA_TYPE => 'boolean',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_DEPLOY => false,
-                ],
-            ],
-            DeployInterface::VAR_CLEAN_STATIC_FILES => [
-                self::SCHEMA_TYPE => 'boolean',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_DEPLOY => true,
-                ],
-            ],
             DeployInterface::VAR_SEARCH_CONFIGURATION => [
                 self::SCHEMA_TYPE => 'array',
                 self::SCHEMA_STAGES => [
