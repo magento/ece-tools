@@ -1,10 +1,39 @@
 # Environment variables
 ENV_RELATIONSHIPS:
+  description: Environment variable used to get services relationships.
   type: string
   system:
     - variables
   default:
     variables: MAGENTO_CLOUD_RELATIONSHIPS
+ENV_ROUTES:
+  description: Environment variable used to get variables.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_ROUTES
+ENV_VARIABLES:
+  description: Environment variable used to get variables.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_VARIABLES
+ENV_APPLICATION:
+  description: Environment variable used to get application configuration
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_APPLICATION
+ENV_ENVIRONMENT:
+  description: Environment variable used to get application environment
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_ENVIRONMENT
 
 # Stage variables
 VERBOSE_COMMANDS:
@@ -28,12 +57,12 @@ VERBOSE_COMMANDS:
           VERBOSE_COMMANDS: '-vv'
     - stage:
         deploy:
-          VERBOSE_COMMANDS: '-vv-'
+          VERBOSE_COMMANDS: '-vvv'
 SCD_COMPRESSION_LEVEL:
   description: Gzip compression level (0 to 9) to use when compressing static content; 0 disables compression.
   type: integer
   validators:
-    - 'Magento\MagentoCloud\Config\Schema\Validation\CompressionLevel'
+    - 'Magento\MagentoCloud\Config\Schema\Validator\CompressionLevel'
   stages:
     - global
     - build
@@ -65,7 +94,7 @@ SCD_STRATEGY:
     Compact is not compatible with multi-threaded deployment and will set the value of `SCD_THREADS` to 1. The default
     value is "quick".
   type: string
-  magento_version: ">=2.2.0"
+  magento_version: '>=2.2.0'
   allowed:
     - compact
     - quick
@@ -104,7 +133,7 @@ SCD_MAX_EXECUTION_TIME:
     build: null
     deploy: null
 SCD_MATRIX:
-  description: allows you to configure multiple locales per theme as long as the theme is not excluded using
+  description: Allows you to configure multiple locales per theme as long as the theme is not excluded using
     the SCD_EXCLUDE_THEMES variable during deployment. This is ideal if you want to speed up thedeployment process
     by reducing the amount of unnecessary theme files. For example, you can deploy the magento/backend theme in
     English and a custom theme in other languages.
@@ -126,3 +155,55 @@ SKIP_SCD:
   default:
     build: false
     deploy: false
+SKIP_HTML_MINIFICATION:
+  description: Skip copying the static view files in the var/view_preprocessed directory
+    to reduce downtime when deploying to the Staging and Production environments
+    and generates minified HTML when requested.
+  type: boolean
+  stages:
+    - global
+  default:
+    global: true
+SCD_ON_DEMAND:
+  description: Enable generation of static content when requested by a user.
+    Pre-loading the cache using the post_deploy hook reduces site downtime.
+  type: boolean
+  stages:
+    - global
+  default:
+    global: false
+MIN_LOGGING_LEVEL:
+  description: Use to override the minimum logging level for all output streams without making changes to the code.
+    This helps to improve troubleshooting problems with deployment. For example, if your deployment fails,
+    you can use this variable to increase the logging granularity globally. Doesn't affect log level for the file output.
+    See Set up notifications—Log levels.
+  type: string
+  allowed:
+    - ''
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_DEBUG
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_INFO
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_NOTICE
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_WARNING
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_ERROR
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_CRITICAL
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_ALERT
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_EMERGENCY
+  stages:
+    - global
+  default:
+    global: ''
+LOCK_PROVIDER:
+  description: Use to set the lock provider. The lock provider prevents the launch of duplicate cron jobs and cron groups.
+    You must use the file lock provider in the Production environment. Starter environments and the Pro Integration
+    environment do not use the MAGENTO_CLOUD_LOCKS_DIR variable, so ece-tools applies the db lock provider automatically.
+  type: string
+  stages:
+    - global
+    - deploy
+  allowed:
+    - db
+    - file
+  default:
+    deploy: file
+
+

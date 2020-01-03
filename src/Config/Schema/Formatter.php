@@ -7,10 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Schema;
 
+use Magento\MagentoCloud\Config\Schema;
+use Magento\MagentoCloud\Package\MagentoVersion;
 use Symfony\Component\Yaml\Dumper;
 
 /**
- * @inheritDoc
+ * The Markdown syntax formatter
  */
 class Formatter implements FormatterInterface
 {
@@ -37,23 +39,38 @@ class Formatter implements FormatterInterface
         $text = '';
 
         foreach ($data as $key => $item) {
-            $text .= '# ' . $key . self::EMPTY_LINE;
-            $text .= $item['description'];
-            $text .= self::EMPTY_LINE;
+            $description = $item[Schema::SCHEMA_DESCRIPTION] ?? 'N/A';
+            $magentoVersion = $item[Schema::SCHEMA_MAGENTO_VERSION] ?? '>=' . MagentoVersion::MIN_VERSION;
 
-            $text .= '## Magento version' . self::EMPTY_LINE;
-            $text .= '`' . $item['magento_version'] . '`' . self::EMPTY_LINE;
+            $text .= sprintf(
+                '# %s%s%s%s',
+                $key,
+                self::EMPTY_LINE,
+                wordwrap($description, 100),
+                self::EMPTY_LINE
+            );
 
-            if (!empty($item['stages'])) {
-                $text .= '## Stages' . self::EMPTY_LINE;
-                $text .= implode(', ', $item['stages']);
-                $text .= self::EMPTY_LINE;
+            $text .= $this->wrapTableRow('Attribute', 'Values');
+            $text .= $this->wrapTableRow('---', '---');
+            $text .= $this->wrapTableRow('Type', $item[Schema::SCHEMA_TYPE]);
+            $text .= $this->wrapTableRow('Magento version', '\\' . $magentoVersion);
+
+            if (!empty($item[Schema::SCHEMA_STAGES])) {
+                $text .= $this->wrapTableRow('Stages', implode(', ', $item[Schema::SCHEMA_STAGES]));
             }
 
-            if (!empty($item['examples'])) {
+            if (!empty($item[Schema::SCHEMA_ALLOWED_VALUES])) {
+                $allowedValues = array_filter($item[Schema::SCHEMA_ALLOWED_VALUES]);
+
+                $text .= $this->wrapTableRow('Allowed values', implode(', ', $allowedValues));
+            }
+
+            $text .= "\n";
+
+            if (!empty($item[Schema::SCHEMA_EXAMPLES])) {
                 $text .= '## Examples' . self::EMPTY_LINE;
 
-                foreach ($item['examples'] as $example) {
+                foreach ($item[Schema::SCHEMA_EXAMPLES] as $example) {
                     $text .= $this->wrapCode($this->dumper->dump($example, 4, 2), 'yaml');
                 }
             }
@@ -70,5 +87,15 @@ class Formatter implements FormatterInterface
     private function wrapCode(string $code, string $lang = null): string
     {
         return '```' . ($lang ?: '') . "\n" . $code . "\n" . '```' . self::EMPTY_LINE;
+    }
+
+    /**
+     * @param string $property
+     * @param string $values
+     * @return string
+     */
+    private function wrapTableRow(string $property, string $values): string
+    {
+        return sprintf("|%s|%s|\n", $property, $values);
     }
 }

@@ -8,13 +8,17 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Config\Schema;
 
 use Magento\MagentoCloud\Config\Schema;
-use Magento\MagentoCloud\Config\Stage\DeployInterface;
-use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\Schema\Validator;
+use Magento\MagentoCloud\Config\StageConfigInterface;
+use Magento\MagentoCloud\Config\Validator\Result\Error;
+use Magento\MagentoCloud\Config\Validator\Result\Success;
+use Magento\MagentoCloud\Config\Validator\ResultFactory;
+use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @inheritdoc
+ * @inheritDoc
  */
 class ValidatorTest extends TestCase
 {
@@ -24,25 +28,100 @@ class ValidatorTest extends TestCase
     private $validator;
 
     /**
-     * @inheritdoc
+     * @var Schema|MockObject
+     */
+    private $schemaMock;
+
+    /**
+     * @var ResultFactory|MockObject
+     */
+    private $resultFactoryMock;
+
+    /**
+     * @var Validator\ValidatorFactory|MockObject
+     */
+    private $validatorFactoryMock;
+
+    /**
+     * @inheritDoc
      */
     protected function setUp()
     {
-        $this->markTestIncomplete();
+        $this->schemaMock = $this->createMock(Schema::class);
+        $this->resultFactoryMock = $this->createTestProxy(ResultFactory::class);
+        $this->validatorFactoryMock = $this->createMock(Validator\ValidatorFactory::class);
 
-        $this->validator = new Validator(new Schema());
+        $this->validator = new Validator(
+            $this->schemaMock,
+            $this->resultFactoryMock,
+            $this->validatorFactoryMock
+        );
     }
 
     /**
      * @param string $key
-     * @param $value
-     * @param $expected
+     * @param string|bool|int $value
+     * @param ResultInterface $expected
      * @param string $stage
+     *
      * @dataProvider validateDataProvider
      */
-    public function testValidate(string $key, $value, $expected, string $stage = StageConfigInterface::STAGE_DEPLOY)
-    {
-        $this->assertSame(
+    public function testValidate(
+        string $key,
+        $value,
+        $expected,
+        string $stage = StageConfigInterface::STAGE_DEPLOY
+    ): void {
+        $schema = [
+            'TEST_BOOLEAN' => [
+                Schema::SCHEMA_TYPE => 'boolean',
+                Schema::SCHEMA_STAGES => [
+                    StageConfigInterface::STAGE_GLOBAL
+                ],
+                Schema::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => true,
+                ],
+            ],
+            'TEST_STRING' => [
+                Schema::SCHEMA_TYPE => 'string',
+                Schema::SCHEMA_STAGES => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                Schema::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'test',
+                ],
+                Schema::SCHEMA_ALLOWED_VALUES => [
+                    'test'
+                ]
+            ],
+            'TEST_STRING_VALIDATOR' => [
+                Schema::SCHEMA_TYPE => 'string',
+                Schema::SCHEMA_STAGES => [
+                    StageConfigInterface::STAGE_GLOBAL,
+                    StageConfigInterface::STAGE_DEPLOY
+                ],
+                Schema::SCHEMA_DEFAULT_VALUE => [
+                    StageConfigInterface::STAGE_GLOBAL => 'test',
+                ],
+                Schema::SCHEMA_VALUE_VALIDATORS => [
+                    'ErrorValidator'
+                ]
+            ],
+        ];
+
+        $mockValidatorError = $this->getMockForAbstractClass(Validator\ValidatorInterface::class);
+        $mockValidatorError->method('validate')
+            ->willReturn(new Error('Some error'));
+
+        $this->validatorFactoryMock->method('create')
+            ->with('ErrorValidator')
+            ->willReturn($mockValidatorError);
+        $this->schemaMock->expects($this->once())
+            ->method('getSchema')
+            ->willReturn($schema);
+
+        $this->assertEquals(
             $expected,
             $this->validator->validate($key, $stage, $value)
         );
@@ -50,193 +129,68 @@ class ValidatorTest extends TestCase
 
     /**
      * @return array
-     *
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function validateDataProvider(): array
     {
         return [
-            ['keyNotExist', 'someValue', 'The keyNotExist variable is not allowed in configuration.'],
-            [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-v', null],
-            [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-vv', null],
-            [StageConfigInterface::VAR_VERBOSE_COMMANDS, '-vvv', null],
-            [StageConfigInterface::VAR_VERBOSE_COMMANDS, '', null],
-            [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, 0, null],
-            [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, 9, null],
-            [StageConfigInterface::VAR_SCD_STRATEGY, 'quick', null],
-            [StageConfigInterface::VAR_SCD_STRATEGY, 'compact', null],
-            [StageConfigInterface::VAR_SCD_STRATEGY, 'standard', null],
-            [StageConfigInterface::VAR_SCD_THREADS, 3, null],
-            [StageConfigInterface::VAR_SKIP_SCD, true, null],
-            [StageConfigInterface::VAR_SKIP_SCD, false, null],
-            [StageConfigInterface::VAR_SKIP_HTML_MINIFICATION, true, null, StageConfigInterface::STAGE_GLOBAL],
-            [StageConfigInterface::VAR_SKIP_HTML_MINIFICATION, false, null, StageConfigInterface::STAGE_GLOBAL],
-            [StageConfigInterface::VAR_SCD_ON_DEMAND, true, null, StageConfigInterface::STAGE_GLOBAL],
-            [StageConfigInterface::VAR_SCD_ON_DEMAND, false, null, StageConfigInterface::STAGE_GLOBAL],
             [
-                StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS,
-                ['someOptions' => 'someValue'],
-                null,
-                StageConfigInterface::STAGE_GLOBAL
-            ],
-            [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, true, null],
-            [DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION, false, null],
-            [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, true, null],
-            [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, false, null],
-            [DeployInterface::VAR_UPDATE_URLS, true, null],
-            [DeployInterface::VAR_UPDATE_URLS, false, null],
-            [DeployInterface::VAR_CLEAN_STATIC_FILES, true, null],
-            [DeployInterface::VAR_CLEAN_STATIC_FILES, false, null],
-            [DeployInterface::VAR_SEARCH_CONFIGURATION, ['someOptions' => 'someValue'], null],
-            [DeployInterface::VAR_QUEUE_CONFIGURATION, ['someOptions' => 'someValue'], null],
-            [DeployInterface::VAR_SESSION_CONFIGURATION, ['someOptions' => 'someValue'], null],
-            [DeployInterface::VAR_CRON_CONSUMERS_RUNNER, ['someOptions' => 'someValue'], null],
-            [
-                StageConfigInterface::VAR_VERBOSE_COMMANDS,
-                1,
-                'The VERBOSE_COMMANDS variable contains an invalid value of type integer. ' .
-                'Use the following types: string.',
+                'TEST_BOOLEAN',
+                2,
+                new Error(
+                    'The TEST_BOOLEAN variable contains an invalid value of type integer. ' .
+                    'Use the following type: boolean.'
+                )
             ],
             [
-                StageConfigInterface::VAR_VERBOSE_COMMANDS,
-                '1',
-                'The VERBOSE_COMMANDS variable contains an invalid value 1. ' .
-                'Use one of the available value options: -v, -vv, -vvv.',
-            ],
-            [StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL, 0, null],
-            [
-                StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
-                10,
-                'The SCD_COMPRESSION_LEVEL variable contains an invalid value 10. ' .
-                'Use an integer value from 0 to 9.'
-            ],
-            [
-                StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL,
-                '1',
-                'The SCD_COMPRESSION_LEVEL variable contains an invalid value of type string. '.
-                'Use the following types: integer.',
-            ],
-            [
-                StageConfigInterface::VAR_SCD_STRATEGY,
-                12,
-                'The SCD_STRATEGY variable contains an invalid value of type integer. ' .
-                'Use the following types: string.',
-            ],
-            [
-                StageConfigInterface::VAR_SCD_STRATEGY,
-                'quickk',
-                'The SCD_STRATEGY variable contains an invalid value quickk. ' .
-                'Use one of the available value options: compact, quick, standard.',
-            ],
-            [
-                StageConfigInterface::VAR_SCD_STRATEGY,
-                'standart',
-                'The SCD_STRATEGY variable contains an invalid value standart. ' .
-                'Use one of the available value options: compact, quick, standard.'
-            ],
-            [
-                StageConfigInterface::VAR_SCD_THREADS,
+                'TEST_BOOLEAN',
                 'test',
-                'The SCD_THREADS variable contains an invalid value of type string. Use the following types: integer.'
+                new Error(
+                    'The TEST_BOOLEAN variable contains an invalid value of type string. ' .
+                    'Use the following type: boolean.'
+                )
             ],
             [
-                StageConfigInterface::VAR_SKIP_SCD,
-                0,
-                'The SKIP_SCD variable contains an invalid value of type integer. Use the following types: boolean.'
-            ],
-            [
-                StageConfigInterface::VAR_SKIP_SCD,
-                'enable',
-                'The SKIP_SCD variable contains an invalid value of type string. Use the following types: boolean.'
-            ],
-            [
-                StageConfigInterface::VAR_SKIP_HTML_MINIFICATION,
-                0,
-                'The SKIP_HTML_MINIFICATION variable contains an invalid value of type integer. ' .
-                'Use the following types: boolean.',
-                StageConfigInterface::STAGE_GLOBAL,
-            ],
-            [
-                StageConfigInterface::VAR_SKIP_HTML_MINIFICATION,
+                'TEST_BOOLEAN',
                 true,
-                'The SKIP_HTML_MINIFICATION variable is not supposed to be in stage deploy. ' .
-                'Move it to one of the possible stages: global.',
-                StageConfigInterface::STAGE_DEPLOY,
+                new Error(
+                    'The TEST_BOOLEAN variable is not supposed to be in stage deploy. ' .
+                    'Move it to one of the possible stages: global.'
+                )
             ],
             [
-                StageConfigInterface::VAR_SCD_ON_DEMAND,
-                0,
-                'The SCD_ON_DEMAND variable contains an invalid value of type integer. ' .
-                'Use the following types: boolean.',
-                StageConfigInterface::STAGE_GLOBAL
-            ],
-            [
-                StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS,
-                'someOption',
-                'The DEPLOY_FROM_GIT_OPTIONS variable contains an invalid value of type string. ' .
-                'Use the following types: array.'
-            ],
-            [
-                DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
-                0,
-                'The REDIS_USE_SLAVE_CONNECTION variable contains an invalid value of type integer. ' .
-                'Use the following types: boolean.'
-            ],
-            [
-                DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
-                0,
-                'The MYSQL_USE_SLAVE_CONNECTION variable contains an invalid value of type integer. ' .
-                'Use the following types: boolean.'
-            ],
-            [
-                DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
+                'TEST_BOOLEAN',
                 true,
-                'The MYSQL_USE_SLAVE_CONNECTION variable is not supposed to be in stage build. ' .
-                'Move it to one of the possible stages: global, deploy.',
-                StageConfigInterface::STAGE_BUILD
+                new Success(),
+                'global'
             ],
             [
-                DeployInterface::VAR_UPDATE_URLS,
-                0,
-                'The UPDATE_URLS variable contains an invalid value of type integer. ' .
-                'Use the following types: boolean.'
+                'TEST_STRING',
+                1,
+                new Error(
+                    'The TEST_STRING variable contains an invalid value of type integer. ' .
+                    'Use the following type: string.'
+                )
             ],
             [
-                DeployInterface::VAR_CLEAN_STATIC_FILES,
-                0,
-                'The CLEAN_STATIC_FILES variable contains an invalid value of type integer. ' .
-                'Use the following types: boolean.'
+                'TEST_STRING',
+                'test_undefined',
+                new Error(
+                    'The TEST_STRING variable contains an invalid value test_undefined. '
+                    . 'Use one of the available value options: test.'
+                ),
             ],
             [
-                DeployInterface::VAR_SEARCH_CONFIGURATION,
-                'someOption',
-                'The SEARCH_CONFIGURATION variable contains an invalid value of type string. ' .
-                'Use the following types: array.'
+                'TEST_UNDEFINED',
+                1,
+                new Error(
+                    'The TEST_UNDEFINED variable is not allowed in configuration.'
+                )
             ],
             [
-                DeployInterface::VAR_CACHE_CONFIGURATION,
-                'someOption',
-                'The CACHE_CONFIGURATION variable contains an invalid value of type string. ' .
-                'Use the following types: array.'
-            ],
-            [
-                DeployInterface::VAR_DATABASE_CONFIGURATION,
-                'someOption',
-                'The DATABASE_CONFIGURATION variable contains an invalid value of type string. ' .
-                'Use the following types: array.'
-            ],
-            [
-                DeployInterface::VAR_SESSION_CONFIGURATION,
-                'someOption',
-                'The SESSION_CONFIGURATION variable contains an invalid value of type string. ' .
-                'Use the following types: array.'
-            ],
-            [
-                DeployInterface::VAR_CRON_CONSUMERS_RUNNER,
-                'someOption',
-                'The CRON_CONSUMERS_RUNNER variable contains an invalid value of type string. ' .
-                'Use the following types: array.'
-            ],
+                'TEST_STRING_VALIDATOR',
+                'test',
+                new Error('Some error')
+            ]
         ];
     }
 }

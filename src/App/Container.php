@@ -33,7 +33,6 @@ class Container implements ContainerInterface
      * @param string $toolsBasePath
      * @param string $magentoBasePath
      *
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      * @throws \Exception
      */
     public function __construct(string $toolsBasePath, string $magentoBasePath)

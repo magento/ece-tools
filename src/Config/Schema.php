@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Filesystem\SystemList;
 use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Configuration schema for .magento.env.yaml file
@@ -89,64 +90,11 @@ class Schema
     public function getSchema(): array
     {
         $schema = $this->parser->parseFile(
-            $this->systemList->getConfig() . '/schema.yaml'
+            $this->systemList->getConfig() . '/schema.yaml',
+            Yaml::PARSE_CONSTANT
         );
 
         return array_replace($schema, [
-            SystemConfigInterface::VAR_ENV_ROUTES => [
-                self::SCHEMA_TYPE => 'string',
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ROUTES',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_VARIABLES => [
-                self::SCHEMA_TYPE => 'string',
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_VARIABLES',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_APPLICATION => [
-                self::SCHEMA_TYPE => 'string',
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_APPLICATION',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_ENVIRONMENT => [
-                self::SCHEMA_TYPE => 'string',
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ENVIRONMENT',
-                ],
-            ],
-            StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => [
-                self::SCHEMA_TYPE => 'boolean',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => true,
-                ],
-            ],
-            StageConfigInterface::VAR_SCD_ON_DEMAND => [
-                self::SCHEMA_TYPE => 'boolean',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => false,
-                ],
-            ],
             StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => [
                 self::SCHEMA_TYPE => 'string',
                 self::SCHEMA_STAGES => [
@@ -165,26 +113,6 @@ class Schema
                     StageConfigInterface::STAGE_GLOBAL => [],
                 ],
             ],
-            StageConfigInterface::VAR_MIN_LOGGING_LEVEL => [
-                self::SCHEMA_TYPE => 'string',
-                self::SCHEMA_ALLOWED_VALUES => [
-                    '',
-                    Log::LEVEL_DEBUG,
-                    Log::LEVEL_INFO,
-                    Log::LEVEL_NOTICE,
-                    Log::LEVEL_WARNING,
-                    Log::LEVEL_ERROR,
-                    Log::LEVEL_CRITICAL,
-                    Log::LEVEL_ALERT,
-                    Log::LEVEL_EMERGENCY,
-                ],
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => '',
-                ],
-            ],
             BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => [
                 self::SCHEMA_TYPE => 'integer',
                 self::SCHEMA_ALLOWED_VALUES => range(0, 32),
@@ -193,17 +121,6 @@ class Schema
                     StageConfigInterface::STAGE_BUILD,
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [StageConfigInterface::STAGE_BUILD => 1]
-            ],
-            DeployInterface::VAR_LOCK_PROVIDER => [
-                self::SCHEMA_TYPE => 'string',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_ALLOWED_VALUES => ['db', 'file'],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_DEPLOY => 'file',
-                ],
             ],
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION => [
                 self::SCHEMA_TYPE => 'boolean',
