@@ -29,6 +29,8 @@ class Schema
     public const SCHEMA_MAGENTO_VERSION = 'magento_version';
     public const SCHEMA_EXAMPLES = 'examples';
 
+    public const SCHEMA_EXAMPLE_COMMENT = 'comment';
+
     /**
      * @var SystemList
      */

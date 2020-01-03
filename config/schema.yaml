@@ -1,40 +1,3 @@
-# Environment variables
-ENV_RELATIONSHIPS:
-  description: Environment variable used to get services relationships.
-  type: string
-  system:
-    - variables
-  default:
-    variables: MAGENTO_CLOUD_RELATIONSHIPS
-ENV_ROUTES:
-  description: Environment variable used to get variables.
-  type: string
-  system:
-    - variables
-  default:
-    variables: MAGENTO_CLOUD_ROUTES
-ENV_VARIABLES:
-  description: Environment variable used to get variables.
-  type: string
-  system:
-    - variables
-  default:
-    variables: MAGENTO_CLOUD_VARIABLES
-ENV_APPLICATION:
-  description: Environment variable used to get application configuration.
-  type: string
-  system:
-    - variables
-  default:
-    variables: MAGENTO_CLOUD_APPLICATION
-ENV_ENVIRONMENT:
-  description: Environment variable used to get application environment.
-  type: string
-  system:
-    - variables
-  default:
-    variables: MAGENTO_CLOUD_ENVIRONMENT
-
 # Stage variables
 VERBOSE_COMMANDS:
   description: Adjust the output verbosity level of Magento commands.
@@ -120,11 +83,16 @@ SCD_THREADS:
   default:
     build: -1
     deploy: -1
+  examples:
+    - stage:
+        global:
+          SCD_THREADS: 2
 SCD_MAX_EXECUTION_TIME:
   description: Allows you to increase the maximum expected execution time for the static content deploy command.
     By default, Magento Commerce sets the maximum expected execution to 400 seconds, but in some scenarios you might
     need more time to complete the static content deployment for a Cloud project.
   type: integer
+  magento_version: '>=2.2.0'
   stages:
     - global
     - build
@@ -132,6 +100,10 @@ SCD_MAX_EXECUTION_TIME:
   default:
     build: null
     deploy: null
+  examples:
+    - stage:
+        global:
+          SCD_MAX_EXECUTION_TIME: 3600
 SCD_MATRIX:
   description: Allows you to configure multiple locales per theme as long as the theme is not excluded using
     the SCD_EXCLUDE_THEMES variable during deployment. This is ideal if you want to speed up thedeployment process
@@ -145,6 +117,21 @@ SCD_MATRIX:
   default:
     build: {}
     deploy: {}
+  examples:
+    - comment: The following example deploys the magento/backend theme with three locales
+      stage:
+        deploy:
+          SCD_MATRIX:
+            "magento/backend":
+              language:
+                - en_US
+                - fr_FR
+                - af_ZA
+    - comment: Also, you can choose to not deploy a theme
+      stage:
+        deploy:
+          SCD_MATRIX:
+            "magento/backend": []
 SKIP_SCD:
   description: Skips static content deployment during the build/deploy phase.
   type: boolean
@@ -155,6 +142,10 @@ SKIP_SCD:
   default:
     build: false
     deploy: false
+  examples:
+    - stage:
+        build:
+          SKIP_SCD: true
 SKIP_HTML_MINIFICATION:
   description: Skip copying the static view files in the var/view_preprocessed directory
     to reduce downtime when deploying to the Staging and Production environments
@@ -164,6 +155,10 @@ SKIP_HTML_MINIFICATION:
     - global
   default:
     global: true
+  examples:
+    - stage:
+        global:
+          SKIP_HTML_MINIFICATION: true
 SCD_ON_DEMAND:
   description: Enable generation of static content when requested by a user.
     Pre-loading the cache using the post_deploy hook reduces site downtime.
@@ -172,6 +167,10 @@ SCD_ON_DEMAND:
     - global
   default:
     global: false
+  examples:
+    stage:
+      global:
+        SCD_ON_DEMAND: true
 MIN_LOGGING_LEVEL:
   description: Use to override the minimum logging level for all output streams without making changes to the code.
     This helps to improve troubleshooting problems with deployment. For example, if your deployment fails,
@@ -192,6 +191,10 @@ MIN_LOGGING_LEVEL:
     - global
   default:
     global: ''
+  examples:
+    - stage:
+        global:
+          MIN_LOGGING_LEVEL: debug
 LOCK_PROVIDER:
   description: Use to set the lock provider. The lock provider prevents the launch of duplicate cron jobs and cron groups.
     You must use the file lock provider in the Production environment. Starter environments and the Pro Integration
@@ -205,6 +208,10 @@ LOCK_PROVIDER:
     - file
   default:
     deploy: file
+  examples:
+    - stage:
+        deploy:
+          LOCK_PROVIDER: "db"
 REDIS_USE_SLAVE_CONNECTION:
   description: Set to true to automatically use a read-only connection to a Redis instance to receive read-only
     traffic on a non-master node. This improves performance through load balancing because only one node needs to
@@ -215,6 +222,10 @@ REDIS_USE_SLAVE_CONNECTION:
     - deploy
   default:
     deploy: false
+  examples:
+    - stage:
+        deploy:
+          REDIS_USE_SLAVE_CONNECTION: true
 MYSQL_USE_SLAVE_CONNECTION:
   description: Set to true to automatically use a read-only connection to the database to receive read-only traffic on
     a non-master node. This improves performance through load balancing, because only one node needs to
@@ -225,6 +236,10 @@ MYSQL_USE_SLAVE_CONNECTION:
     - deploy
   default:
     deploy: false
+  examples:
+    - stage:
+        deploy:
+          MYSQL_USE_SLAVE_CONNECTION: true
 UPDATE_URLS:
   description: On deployment, replace Magento base URLs in the database with project URLs. This is useful for local
     development, where base URLs are set up for your local environment. When you deploy to a Cloud environment,
@@ -236,6 +251,10 @@ UPDATE_URLS:
     - deploy
   default:
     deploy: true
+  examples:
+    - stage:
+        deploy:
+          UPDATE_URLS: false
 FORCE_UPDATE_URLS:
   description: This setting overrides the default behavior for the UPDATE_URLS variable
     which is ignored when deploying to Staging or Production environments.
@@ -245,6 +264,10 @@ FORCE_UPDATE_URLS:
     - deploy
   default:
     deploy: false
+  examples:
+    - stage:
+      deploy:
+        FORCE_UPDATE_URLS: true
 CLEAN_STATIC_FILES:
   description: Cleans generated static files. By specifying the value of this configuration to "false",
     you can leave the static files which were generated during the previous deployment.
@@ -254,3 +277,64 @@ CLEAN_STATIC_FILES:
     - deploy
   default:
     deploy: true
+  examples:
+    - stage:
+        deploy:
+          CLEAN_STATIC_FILES: false
+
+# Environment variables
+ENV_RELATIONSHIPS:
+  description: Environment variable used to get services relationships.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_RELATIONSHIPS
+  examples:
+    - system:
+        variables:
+          ENV_RELATIONSHIPS: "MAGENTO_CLOUD_RELATIONSHIPS"
+ENV_ROUTES:
+  description: Environment variable used to get variables.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_ROUTES
+  examples:
+    - system:
+        variables:
+          ENV_ROUTES: "MAGENTO_CLOUD_ROUTES"
+ENV_VARIABLES:
+  description: Environment variable used to get variables.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_VARIABLES
+  examples:
+    - system:
+        variables:
+          ENV_VARIABLES: "MAGENTO_CLOUD_VARIABLES"
+ENV_APPLICATION:
+  description: Environment variable used to get application configuration.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_APPLICATION
+  examples:
+    - system:
+        variables:
+          ENV_APPLICATION: "MAGENTO_CLOUD_APPLICATION"
+ENV_ENVIRONMENT:
+  description: Environment variable used to get application environment.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_ENVIRONMENT
+  examples:
+    - system:
+        variables:
+          ENV_ENVIRONMENT: "MAGENTO_CLOUD_ENVIRONMENT"

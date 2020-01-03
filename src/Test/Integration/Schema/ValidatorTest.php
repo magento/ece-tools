@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Integration\Schema;
 
 use Magento\MagentoCloud\App\Container;
+use Magento\MagentoCloud\App\ContainerException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -30,7 +31,7 @@ class ValidatorTest extends TestCase
     private $validator;
 
     /**
-     * @throws Exception
+     * @throws ContainerException
      */
     protected function setUp(): void
     {

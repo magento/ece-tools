@@ -71,7 +71,13 @@ class Formatter implements FormatterInterface
                 $text .= '## Examples' . self::EMPTY_LINE;
 
                 foreach ($item[Schema::SCHEMA_EXAMPLES] as $example) {
-                    $text .= $this->wrapCode($this->dumper->dump($example, 4, 2), 'yaml');
+                    if (!empty($example[Schema::SCHEMA_EXAMPLE_COMMENT])) {
+                        $text .= $example[Schema::SCHEMA_EXAMPLE_COMMENT] . self::EMPTY_LINE;
+
+                        unset($example[Schema::SCHEMA_EXAMPLE_COMMENT]);
+                    }
+
+                    $text .= $this->wrapCode($this->dumper->dump($example, 6, 2));
                 }
             }
         }
@@ -81,10 +87,10 @@ class Formatter implements FormatterInterface
 
     /**
      * @param string $code
-     * @param string|null $lang
+     * @param string $lang
      * @return string
      */
-    private function wrapCode(string $code, string $lang = null): string
+    private function wrapCode(string $code, string $lang = 'yaml'): string
     {
         return '```' . ($lang ?: '') . "\n" . $code . "\n" . '```' . self::EMPTY_LINE;
     }
