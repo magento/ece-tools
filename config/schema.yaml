@@ -74,7 +74,7 @@ SCD_STRATEGY:
         build:
           SCD_STRATEGY: compact
 SCD_THREADS:
-  description: 'The number of threads for static content deployment'
+  description: The number of threads for static content deployment
   type: integer
   stages:
     - global
@@ -122,7 +122,7 @@ SCD_MATRIX:
       stage:
         deploy:
           SCD_MATRIX:
-            "magento/backend":
+            magento/backend:
               language:
                 - en_US
                 - fr_FR
@@ -131,7 +131,7 @@ SCD_MATRIX:
       stage:
         deploy:
           SCD_MATRIX:
-            "magento/backend": []
+            magento/backend: []
 SKIP_SCD:
   description: Skips static content deployment during the build/deploy phase.
   type: boolean
@@ -211,7 +211,7 @@ LOCK_PROVIDER:
   examples:
     - stage:
         deploy:
-          LOCK_PROVIDER: "db"
+          LOCK_PROVIDER: db
 REDIS_USE_SLAVE_CONNECTION:
   description: Set to true to automatically use a read-only connection to a Redis instance to receive read-only
     traffic on a non-master node. This improves performance through load balancing because only one node needs to
@@ -293,7 +293,7 @@ ENV_RELATIONSHIPS:
   examples:
     - system:
         variables:
-          ENV_RELATIONSHIPS: "MAGENTO_CLOUD_RELATIONSHIPS"
+          ENV_RELATIONSHIPS: MAGENTO_CLOUD_RELATIONSHIPS
 ENV_ROUTES:
   description: Environment variable used to get variables.
   type: string
@@ -304,7 +304,7 @@ ENV_ROUTES:
   examples:
     - system:
         variables:
-          ENV_ROUTES: "MAGENTO_CLOUD_ROUTES"
+          ENV_ROUTES: MAGENTO_CLOUD_ROUTES
 ENV_VARIABLES:
   description: Environment variable used to get variables.
   type: string
@@ -315,7 +315,7 @@ ENV_VARIABLES:
   examples:
     - system:
         variables:
-          ENV_VARIABLES: "MAGENTO_CLOUD_VARIABLES"
+          ENV_VARIABLES: MAGENTO_CLOUD_VARIABLES
 ENV_APPLICATION:
   description: Environment variable used to get application configuration.
   type: string
@@ -326,7 +326,7 @@ ENV_APPLICATION:
   examples:
     - system:
         variables:
-          ENV_APPLICATION: "MAGENTO_CLOUD_APPLICATION"
+          ENV_APPLICATION: MAGENTO_CLOUD_APPLICATION
 ENV_ENVIRONMENT:
   description: Environment variable used to get application environment.
   type: string
@@ -337,4 +337,4 @@ ENV_ENVIRONMENT:
   examples:
     - system:
         variables:
-          ENV_ENVIRONMENT: "MAGENTO_CLOUD_ENVIRONMENT"
+          ENV_ENVIRONMENT: MAGENTO_CLOUD_ENVIRONMENT
