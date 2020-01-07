@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Command;
 
 use Magento\MagentoCloud\DB\DumpGenerator;
+use Magento\MagentoCloud\Util\BackgroundProcess;
+use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -37,13 +39,31 @@ class DbDump extends Command
     private $dumpGenerator;
 
     /**
+     * @var MaintenanceModeSwitcher
+     */
+    private $maintenanceModeSwitcher;
+
+    /**
+     * @var BackgroundProcess
+     */
+    private $backgroundProcess;
+
+    /**
      * @param DumpGenerator $dumpGenerator
      * @param LoggerInterface $logger
+     * @param MaintenanceModeSwitcher $maintenanceModeSwitcher
+     * @param BackgroundProcess $backgroundProcess
      */
-    public function __construct(DumpGenerator $dumpGenerator, LoggerInterface $logger)
-    {
+    public function __construct(
+        DumpGenerator $dumpGenerator,
+        LoggerInterface $logger,
+        MaintenanceModeSwitcher $maintenanceModeSwitcher,
+        BackgroundProcess $backgroundProcess
+    ) {
         $this->dumpGenerator = $dumpGenerator;
         $this->logger = $logger;
+        $this->maintenanceModeSwitcher = $maintenanceModeSwitcher;
+        $this->backgroundProcess = $backgroundProcess;
 
         parent::__construct();
     }
@@ -74,22 +94,37 @@ class DbDump extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $helper = $this->getHelper('question');
-        $question = new ConfirmationQuestion(
-            'We suggest to enable maintenance mode before running this command. Do you want to continue [y/N]?',
-            false
-        );
-        if (!$helper->ask($input, $output, $question) && $input->isInteractive()) {
-            return null;
+        if ($input->isInteractive()) {
+            $helper = $this->getHelper('question');
+
+            $questionParts = [
+                'The db-dump command requires the site to be placed into maintenance mode. ',
+                'We will set the site into maintenance mode, run the db-dump command, and disable maintenance mode. ',
+                'This action will stop your site from receiving traffic. (Please see dev docs for more information.) ',
+                'Do you wish to proceed with this process? (y/N)?',
+            ];
+            $question = new ConfirmationQuestion(
+                implode(PHP_EOL, $questionParts),
+                false
+            );
+
+            if (!$helper->ask($input, $output, $question)) {
+                return null;
+            }
         }
+
         try {
             $this->logger->info('Starting backup.');
+            $this->maintenanceModeSwitcher->enable();
+            $this->backgroundProcess->kill();
             $this->dumpGenerator->create((bool)$input->getOption(self::OPTION_REMOVE_DEFINERS));
             $this->logger->info('Backup completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
             throw $exception;
+        } finally {
+            $this->maintenanceModeSwitcher->disable();
         }
     }
 }
