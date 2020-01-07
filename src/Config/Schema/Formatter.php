@@ -43,7 +43,7 @@ class Formatter implements FormatterInterface
             $magentoVersion = $item[Schema::SCHEMA_MAGENTO_VERSION] ?? '>=' . MagentoVersion::MIN_VERSION;
 
             $text .= sprintf(
-                '# %s%s%s%s',
+                '## %s%s%s%s',
                 $key,
                 self::EMPTY_LINE,
                 wordwrap($description, 100),
@@ -68,7 +68,7 @@ class Formatter implements FormatterInterface
             $text .= "\n";
 
             if (!empty($item[Schema::SCHEMA_EXAMPLES])) {
-                $text .= '## Examples' . self::EMPTY_LINE;
+                $text .= '### Examples' . self::EMPTY_LINE;
 
                 foreach ($item[Schema::SCHEMA_EXAMPLES] as $example) {
                     if (!empty($example[Schema::SCHEMA_EXAMPLE_COMMENT])) {
