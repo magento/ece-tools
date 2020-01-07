@@ -31,11 +31,6 @@ class Container implements ContainerInterface
     private $container;
 
     /**
-     * @var Container
-     */
-    private static $instance;
-
-    /**
      * @param string $toolsBasePath
      * @param string $magentoBasePath
      * @throws ContainerException
@@ -129,20 +124,5 @@ class Container implements ContainerInterface
         }
 
         return new $abstract(...array_values($params));
-    }
-
-    /**
-     * @param string $toolsBasePath
-     * @param string $magentoBasePath
-     * @return Container
-     * @throws ContainerException
-     */
-    public static function getInstance(string $toolsBasePath, string $magentoBasePath): Container
-    {
-        if (null === self::$instance) {
-            self::$instance = new self($toolsBasePath, $magentoBasePath);
-        }
-
-        return self::$instance;
     }
 }

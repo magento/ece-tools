@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Integration\Schema;
 
-use Magento\MagentoCloud\App\Container;
 use Magento\MagentoCloud\App\ContainerException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -17,6 +16,7 @@ use Magento\MagentoCloud\Config\Validator\Result\Error;
 use Magento\MagentoCloud\Config\Validator\Result\Success;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
+use Magento\MagentoCloud\Test\Integration\Container;
 use PHPUnit\Framework\TestCase;
 
 /**
