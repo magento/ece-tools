@@ -15,12 +15,11 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
  */
 class ResourceConfig implements ConfigInterface
 {
-    /**#@+
+    /**
      * Keys for the description of the resource configuration
      */
     const KEY_RESOURCE = 'resource';
     const KEY_CONNECTION = 'connection';
-    /**#@-*/
 
     /**
      * Names fo resources

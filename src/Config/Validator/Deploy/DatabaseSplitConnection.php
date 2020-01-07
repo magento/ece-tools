@@ -14,7 +14,7 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
 
 /**
- * Validates the split database connections in DATABASE_CONFIGURATION variable
+ * Validates existence the split database connections in DATABASE CONFIGURATION variable
  */
 class DatabaseSplitConnection implements ValidatorInterface
 {
@@ -45,33 +45,29 @@ class DatabaseSplitConnection implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $customConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
+        $config = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
 
-        $customSplitConnections = [];
-        foreach (DbConfig::CONNECTION_TYPES as $connectionType) {
-            foreach (DbConfig::SPLIT_CONNECTIONS as $splitConnectionName) {
-                if (!isset($customConfig[$connectionType][$splitConnectionName])) {
-                    continue;
+        $messageItem = [];
+        foreach (DbConfig::CONNECTION_TYPES as $type) {
+            foreach (DbConfig::SPLIT_CONNECTIONS as $name) {
+                if (isset($config[$type][$name])) {
+                    $messageItem[] = "- $type: $name";
                 }
-                $customSplitConnections[$connectionType][] = $splitConnectionName;
             }
         }
 
-        if (empty($customSplitConnections)) {
+        if (empty($messageItem)) {
             return $this->resultFactory->success();
         }
 
-        $messages[] = sprintf(
+        return $this->resultFactory->error(sprintf(
             'Split database configuration was detected in the property %s'
-            . ' of the file .magento.env.yaml:',
-            DeployInterface::VAR_DATABASE_CONFIGURATION
-        );
-        foreach ($customSplitConnections as $type => $connections) {
-            $messages[] = "- $type: " . implode(', ', $connections);
-        }
-        $messages[] = 'Custom split database configuration will be ignored in during current deploy phase.';
-        $messages[] = 'Magento Cloud not support a custom split database configuration';
-
-        return $this->resultFactory->error(implode(PHP_EOL, $messages));
+            .' of the file .magento.env.yaml:'.PHP_EOL
+            .'%s'.PHP_EOL
+            . 'Magento Cloud does not support a custom split database configuration,'
+            .' such configurations will be ignored',
+            DeployInterface::VAR_DATABASE_CONFIGURATION,
+            implode(PHP_EOL, $messageItem)
+        ));
     }
 }

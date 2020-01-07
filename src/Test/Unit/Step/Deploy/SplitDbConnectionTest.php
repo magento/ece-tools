@@ -310,8 +310,6 @@ class SplitDbConnectionTest extends TestCase
 
     /**
      * Split db will be enabled without slave connections
-     *
-     * @throws \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteEnableSplitDbWithoutSlaveConnection()
     {
@@ -360,7 +358,7 @@ class SplitDbConnectionTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Quote tables were split to DB checkout.dbname in checkout.host'],
-                ['Quote tables were split to DB sale.dbname in sale.host']
+                ['Sales tables were split to DB sale.dbname in sale.host']
             );
 
         $this->configWriterMock->expects($this->never())
@@ -371,8 +369,6 @@ class SplitDbConnectionTest extends TestCase
 
     /**
      * Case when split db will be enabled with slave connections
-     *
-     * @throws \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteEnableSplitDbWithSlaveConnections()
     {
@@ -427,7 +423,7 @@ class SplitDbConnectionTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Quote tables were split to DB checkout.dbname in checkout.host'],
-                ['Quote tables were split to DB sale.dbname in sale.host'],
+                ['Sales tables were split to DB sale.dbname in sale.host'],
                 ['Slave connection for checkout connection was set'],
                 ['Slave connection for sale connection was set']
             );

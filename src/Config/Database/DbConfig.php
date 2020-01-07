@@ -70,7 +70,8 @@ class DbConfig implements ConfigInterface
     ];
 
     /**
-     * Slave connection map with data from environment relationship connections
+     * Slave connection map with data from environment relationship connections:
+     * {magento connection name} => {connection name from environment}
      */
     const SLAVE_CONNECTION_MAP = [
         self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_SLAVE,
@@ -165,33 +166,33 @@ class DbConfig implements ConfigInterface
     /**
      *  Collects DB connections which exist in environment.
      *
-     *
      * @param array $customDbConfig
      * @return array
      */
     private function collectEnvConfig(array $customDbConfig): array
     {
         $config = [];
-        foreach (self::MAIN_CONNECTION_MAP as $mageConnName => $envConnName) {
+        foreach (self::MAIN_CONNECTION_MAP as $mageConnectionName => $envConnectionName) {
             // collect main connections
-            $envDbConfig = $this->getEnvConnectionData($envConnName);
+            $envDbConfig = $this->getEnvConnectionData($envConnectionName);
             if (empty($envDbConfig->getHost())) {
                 continue;
             }
-            $config[self::KEY_CONNECTION][$mageConnName] = $this->convertToMageFormat(
+            $config[self::KEY_CONNECTION][$mageConnectionName] = $this->convertToMageFormat(
                 $envDbConfig,
-                !in_array($mageConnName, self::MAIN_CONNECTIONS)
+                !in_array($mageConnectionName, self::MAIN_CONNECTIONS)
             );
             // collect slave connections
-            if (!isset(self::SLAVE_CONNECTION_MAP[$mageConnName])) {
+            if (!isset(self::SLAVE_CONNECTION_MAP[$mageConnectionName])) {
                 continue;
             }
-            $slaveConnectionData = $this->getEnvConnectionData(self::SLAVE_CONNECTION_MAP[$mageConnName]);
+            $slaveConnectionData = $this->getEnvConnectionData(self::SLAVE_CONNECTION_MAP[$mageConnectionName]);
             if (empty($slaveConnectionData->getHost())
-                || !$this->isCustomConnectionCompatibleForSlave($customDbConfig, $mageConnName, $envDbConfig)) {
+                || !$this->isCustomConnectionCompatibleForSlave($customDbConfig, $mageConnectionName, $envDbConfig)) {
                 continue;
             }
-            $config[self::KEY_SLAVE_CONNECTION][$mageConnName] = $this->convertToMageFormat($slaveConnectionData, true);
+            $mageConnectionConfig = $this->convertToMageFormat($slaveConnectionData, true);
+            $config[self::KEY_SLAVE_CONNECTION][$mageConnectionName] = $mageConnectionConfig;
         }
         return $config;
     }

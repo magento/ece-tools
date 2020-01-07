@@ -69,6 +69,20 @@ class DbConnection implements StepInterface
     private $flagManager;
 
     /**
+     * Cached configuration from app/etc/env.php
+     *
+     * @var array
+     */
+    private $mageConfigData;
+
+    /**
+     * Cached database configuration from environment
+     *
+     * @var array
+     */
+    private $dbConfigData;
+
+    /**
      * @param DeployInterface $stageConfig
      * @param DbConfig $dbConfig
      * @param ResourceConfig $resourceConfig
@@ -102,11 +116,16 @@ class DbConnection implements StepInterface
     }
 
     /**
-     * @inheritdoc
+     * Sets the database configuration to the configuration file app/etc/env.php
+     * In the case when the database was split with the user configuration then sets the flag '.ignore_split_db'
+     * If the flag '.ignore_split_db' exists, the split process will be ignored
+     *
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws \Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException
      */
     public function execute()
     {
-        $dbConfig = $this->dbConfig->get();
+        $dbConfig = $this->getDbConfigData();
 
         if (!isset($dbConfig[DbConfig::KEY_CONNECTION])) {
             /**
@@ -125,15 +144,15 @@ class DbConnection implements StepInterface
 
         $this->logger->info('Updating env.php DB connection configuration.');
 
-        $mageConfig = $this->configReader->read();
+        $mageConfigDbConnections = $this->getMageConfigData()[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION];
         $mageSplitConnectionsConfig = array_intersect_key(
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION],
+            $mageConfigDbConnections,
             array_flip(DbConfig::SPLIT_CONNECTIONS)
         );
 
         $isCustomDefaultConnection = !$this->isSameConnection(
             $dbConfig[DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT],
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][DbConfig::CONNECTION_DEFAULT]
+            $mageConfigDbConnections[DbConfig::CONNECTION_DEFAULT]
         );
 
         if (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection) {
@@ -148,11 +167,11 @@ class DbConnection implements StepInterface
 
         if (empty($mageSplitConnectionsConfig)
             || (!empty($mageSplitConnectionsConfig) && $isCustomDefaultConnection)) {
-            $this->updateMainConnectionsConfig($dbConfig, $mageConfig, $useSlave, $slaveIsAvailable);
+            $this->updateMainConnectionsConfig($useSlave, $slaveIsAvailable);
             return;
         }
 
-        $this->updateSlaveConnectionsConfig($dbConfig, $mageConfig, $useSlave, $slaveIsAvailable);
+        $this->updateSlaveConnectionsConfig($useSlave, $slaveIsAvailable);
 
         $customSplitConnections = $this->getDifferentConnections(
             $mageSplitConnectionsConfig,
@@ -173,19 +192,16 @@ class DbConnection implements StepInterface
     /**
      * Update main connection configurations of app/etc/env.php
      *
-     * @param array $dbConfig
-     * @param array $mageConfig,
      * @param bool $useSlave
      * @param bool $slaveIsAvailable
      * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     public function updateMainConnectionsConfig(
-        array $dbConfig,
-        array $mageConfig,
         bool $useSlave,
         bool $slaveIsAvailable
     ) {
-        $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($dbConfig, $useSlave && $slaveIsAvailable);
+        $mageConfig = $this->getMageConfigData();
+        $mageConfig[DbConfig::KEY_DB] = $this->getMainDbConfig($useSlave && $slaveIsAvailable);
         $mageConfig[ResourceConfig::KEY_RESOURCE] = $this->getMainResourceConfig();
         $this->addLoggingAboutSlaveConnection($mageConfig[DbConfig::KEY_DB], $useSlave);
         $this->configWriter->create($mageConfig);
@@ -194,19 +210,17 @@ class DbConnection implements StepInterface
     /**
      * Updates db slave configurations
      *
-     * @param array $dbConfig
-     * @param array $mageConfig
      * @param bool $useSlave
      * @param bool $slaveIsAvailable
      * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     private function updateSlaveConnectionsConfig(
-        array $dbConfig,
-        array $mageConfig,
         bool $useSlave,
         bool $slaveIsAvailable
     ) {
+        $mageConfig = $this->getMageConfigData();
         if ($useSlave && $slaveIsAvailable) {
+            $dbConfig = $this->getDbConfigData();
             $slaveConnectionsConfig = $this->getMainConnections($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
             $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION] = $slaveConnectionsConfig;
         } else {
@@ -250,12 +264,12 @@ class DbConnection implements StepInterface
     /**
      * Returns database configuration with default and slave connections
      *
-     * @param array $dbConfig
      * @param bool $withSlave
      * @return array
      */
-    private function getMainDbConfig(array $dbConfig, bool $withSlave): array
+    private function getMainDbConfig(bool $withSlave): array
     {
+        $dbConfig = $this->getDbConfigData();
         $dbConfig[DbConfig::KEY_CONNECTION] = $this->getMainConnections($dbConfig[DbConfig::KEY_CONNECTION]);
 
         if ($withSlave) {
@@ -329,5 +343,33 @@ class DbConnection implements StepInterface
                 ));
             }
         }
+    }
+
+    /**
+     * Returns config from app/etc/env.php
+     *
+     * @return array
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    private function getMageConfigData(): array
+    {
+        if (null === $this->mageConfigData) {
+            $this->mageConfigData = $this->configReader->read();
+        }
+        return $this->mageConfigData;
+    }
+
+    /**
+     * Returns database configurations as merge result of customer configurations from .magento.env.yaml
+     * and connection data from cloud environment.
+     *
+     * @return array
+     */
+    private function getDbConfigData(): array
+    {
+        if (null === $this->dbConfigData) {
+            $this->dbConfigData = $this->dbConfig->get();
+        }
+        return $this->dbConfigData;
     }
 }

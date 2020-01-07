@@ -101,7 +101,8 @@ class SplitDbConnection implements StepInterface
     }
 
     /**
-     * @inheritdoc
+     * Starts the database splitting process
+     * Updates the configuration of slave connections for split connections
      */
     public function execute()
     {
@@ -194,7 +195,8 @@ class SplitDbConnection implements StepInterface
             $cmd = $this->buildSplitDbCommand($type, $connectionConfig);
             $this->logger->debug($this->magentoShell->execute($cmd)->getOutput());
             $this->logger->info(sprintf(
-                'Quote tables were split to DB %s in %s',
+                '%s tables were split to DB %s in %s',
+                ucfirst($type),
                 $connectionConfig['dbname'],
                 $connectionConfig['host']
             ));
@@ -237,7 +239,7 @@ class SplitDbConnection implements StepInterface
             if (!isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName])) {
                 $this->logger->warning(sprintf(
                     'Slave connection for %s connection not set. '
-                    . 'Relationships not has configuration for this slave connection',
+                    . 'Relationships do not have the configuration for this slave connection',
                     $mageConnectionName
                 ));
                 continue;
