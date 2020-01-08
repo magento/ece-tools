@@ -83,7 +83,8 @@ class SplitDbState extends Command
             if (isset($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][$mageConnectionName])) {
                 $existedSplits[] = DbConfig::MAIN_CONNECTION_MAP[$mageConnectionName];
             }
-            $envDBConfig[$mageConnectionName] = $this->connectionDataFactory->create($mageConnectionName);
+            $envDBConfig[$mageConnectionName] = $this->connectionDataFactory
+                ->create(DbConfig::MAIN_CONNECTION_MAP[$mageConnectionName]);
         }
 
         if (!$existedSplits) {
