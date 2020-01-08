@@ -78,6 +78,7 @@ class SplitDbState extends Command
         $info = [];
         $mageConfig = $this->configReader->read();
         $envDBConfig = [];
+        $existedSplits = [];
 
         foreach (DbConfig::SPLIT_CONNECTIONS as $mageConnectionName) {
             if (isset($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][$mageConnectionName])) {
