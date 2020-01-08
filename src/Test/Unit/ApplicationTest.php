@@ -74,6 +74,7 @@ class ApplicationTest extends TestCase
         Command\ModuleRefresh::NAME => Command\ModuleRefresh::class,
         Command\Wizard\IdealState::NAME => Command\Wizard\IdealState::class,
         Command\Wizard\MasterSlave::NAME => Command\Wizard\MasterSlave::class,
+        Command\Wizard\SplitDbState::NAME => Command\Wizard\SplitDbState::class,
         Command\CronKill::NAME => Command\CronKill::class,
         Command\CronEnable::NAME => Command\CronEnable::class,
         Command\CronDisable::NAME => Command\CronDisable::class,

@@ -76,7 +76,6 @@ class SplitDbState extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $info = [];
-
         $mageConfig = $this->configReader->read();
         $envDBConfig = [];
 
@@ -95,7 +94,7 @@ class SplitDbState extends Command
                 );
                 $info[] = 'Once you split DB you won\'t be able to change the state back';
             } else {
-                $info[] = 'DB cannot be split on this environment. Create support ticket to add this ability';
+                $info[] = 'DB cannot be split on this environment';
             }
         }
 
