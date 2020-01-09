@@ -7,13 +7,14 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Build;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 
 /**
  * @inheritdoc
@@ -26,24 +27,23 @@ class BuildTest extends TestCase
     private $config;
 
     /**
-     * @var EnvironmentReader|Mock
+     * @var EnvironmentReader|MockObject
      */
     private $environmentReaderMock;
 
     /**
-     * @var Schema|Mock
+     * @var Schema|MockObject
      */
     private $schemaMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->schemaMock = $this->createMock(Schema::class);
-        $this->schemaMock->expects($this->any())
-            ->method('getDefaults')
+        $this->schemaMock->method('getDefaults')
             ->with(StageConfigInterface::STAGE_BUILD)
             ->willReturn([
                 BuildInterface::VAR_SCD_STRATEGY => '',
@@ -65,8 +65,10 @@ class BuildTest extends TestCase
      * @param array $envConfig
      * @param mixed $expectedValue
      * @dataProvider getDataProvider
+     *
+     * @throws ConfigException
      */
-    public function testGet(string $name, array $envConfig, $expectedValue)
+    public function testGet(string $name, array $envConfig, $expectedValue): void
     {
         $this->environmentReaderMock->expects($this->once())
             ->method('read')
@@ -77,6 +79,7 @@ class BuildTest extends TestCase
 
     /**
      * @return array
+     *
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
@@ -255,13 +258,15 @@ class BuildTest extends TestCase
         ];
     }
 
-    public function testNotExists()
+    /**
+     * @throws ConfigException
+     */
+    public function testNotExists(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
 
-        $this->environmentReaderMock->expects($this->any())
-            ->method('read')
+        $this->environmentReaderMock->method('read')
             ->willReturn([]);
 
         $this->config->get('NOT_EXISTS_VALUE');
