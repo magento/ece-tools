@@ -27,12 +27,12 @@
     "nesbot/carbon": "^1.0||^2.0",
     "psr/container": "^1.0",
     "psr/log": "^1.0",
-    "symfony/config": "^3.4||^4.3",
+    "symfony/config": "^2.8||^3.4||^4.3",
     "symfony/console": "^2.3||^4.0",
-    "symfony/dependency-injection": "^3.4||^4.3",
+    "symfony/dependency-injection": "^2.8||^3.4||^4.3",
     "symfony/process": "^2.1||^4.1",
-    "symfony/serializer": "^3.3",
-    "symfony/yaml": "^3.3||^4.0"
+    "symfony/serializer": "^2.8||^3.3",
+    "symfony/yaml": "^2.8||^3.3||^4.0"
   },
   "require-dev": {
     "codeception/codeception": "^2.5.3",
