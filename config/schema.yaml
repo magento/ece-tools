@@ -1,0 +1,340 @@
+# Stage variables
+VERBOSE_COMMANDS:
+  description: Adjust the output verbosity level of Magento commands.
+  type: string
+  allowed:
+    - ''
+    - '-v'
+    - '-vv'
+    - '-vvv'
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: ''
+    deploy: ''
+  examples:
+    - stage:
+        build:
+          VERBOSE_COMMANDS: '-vv'
+    - stage:
+        deploy:
+          VERBOSE_COMMANDS: '-vvv'
+SCD_COMPRESSION_LEVEL:
+  description: Gzip compression level (0 to 9) to use when compressing static content; 0 disables compression.
+  type: integer
+  validators:
+    - 'Magento\MagentoCloud\Config\Schema\Validator\CompressionLevel'
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: 6
+    deploy: 4
+  examples:
+    - stage:
+        build:
+          SCD_COMPRESSION_LEVEL: 8
+SCD_COMPRESSION_TIMEOUT:
+  description: The maximum time (in seconds) allowed for compressing static content.
+  type: integer
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: 600
+    deploy: 600
+  examples:
+    - stage:
+        build:
+          SCD_COMPRESSION_TIMEOUT: 900
+SCD_STRATEGY:
+  description: Customize the deployment strategy for static content. The value "standard" will deploy all static view
+    files for all packages, "quick" will minimize deployment time, and "compact" will conserve space on the server.
+    Compact is not compatible with multi-threaded deployment and will set the value of `SCD_THREADS` to 1. The default
+    value is "quick".
+  type: string
+  magento_version: '>=2.2.0'
+  allowed:
+    - compact
+    - quick
+    - standard
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: ''
+    deploy: ''
+  examples:
+    - stage:
+        build:
+          SCD_STRATEGY: compact
+SCD_THREADS:
+  description: The number of threads for static content deployment
+  type: integer
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: -1
+    deploy: -1
+  examples:
+    - stage:
+        global:
+          SCD_THREADS: 2
+SCD_MAX_EXECUTION_TIME:
+  description: Allows you to increase the maximum expected execution time for the static content deploy command.
+    By default, Magento Commerce sets the maximum expected execution to 400 seconds, but in some scenarios you might
+    need more time to complete the static content deployment for a Cloud project.
+  type: integer
+  magento_version: '>=2.2.0'
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: null
+    deploy: null
+  examples:
+    - stage:
+        global:
+          SCD_MAX_EXECUTION_TIME: 3600
+SCD_MATRIX:
+  description: Allows you to configure multiple locales per theme as long as the theme is not excluded using
+    the SCD_EXCLUDE_THEMES variable during deployment. This is ideal if you want to speed up thedeployment process
+    by reducing the amount of unnecessary theme files. For example, you can deploy the magento/backend theme in
+    English and a custom theme in other languages.
+  type: array
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: {}
+    deploy: {}
+  examples:
+    - comment: The following example deploys the magento/backend theme with three locales
+      stage:
+        deploy:
+          SCD_MATRIX:
+            magento/backend:
+              language:
+                - en_US
+                - fr_FR
+                - af_ZA
+    - comment: Also, you can choose to not deploy a theme
+      stage:
+        deploy:
+          SCD_MATRIX:
+            magento/backend: []
+SKIP_SCD:
+  description: Skips static content deployment during the build/deploy phase.
+  type: boolean
+  stages:
+    - global
+    - build
+    - deploy
+  default:
+    build: false
+    deploy: false
+  examples:
+    - stage:
+        build:
+          SKIP_SCD: true
+SKIP_HTML_MINIFICATION:
+  description: Skip copying the static view files in the var/view_preprocessed directory
+    to reduce downtime when deploying to the Staging and Production environments
+    and generates minified HTML when requested.
+  type: boolean
+  stages:
+    - global
+  default:
+    global: true
+  examples:
+    - stage:
+        global:
+          SKIP_HTML_MINIFICATION: true
+SCD_ON_DEMAND:
+  description: Enable generation of static content when requested by a user.
+    Pre-loading the cache using the post_deploy hook reduces site downtime.
+  type: boolean
+  stages:
+    - global
+  default:
+    global: false
+  examples:
+    stage:
+      global:
+        SCD_ON_DEMAND: true
+MIN_LOGGING_LEVEL:
+  description: Use to override the minimum logging level for all output streams without making changes to the code.
+    This helps to improve troubleshooting problems with deployment. For example, if your deployment fails,
+    you can use this variable to increase the logging granularity globally. Doesn't affect log level for the file output.
+    See Set up notifications—Log levels.
+  type: string
+  allowed:
+    - ''
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_DEBUG
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_INFO
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_NOTICE
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_WARNING
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_ERROR
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_CRITICAL
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_ALERT
+    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_EMERGENCY
+  stages:
+    - global
+  default:
+    global: ''
+  examples:
+    - stage:
+        global:
+          MIN_LOGGING_LEVEL: debug
+LOCK_PROVIDER:
+  description: Use to set the lock provider. The lock provider prevents the launch of duplicate cron jobs and cron groups.
+    You must use the file lock provider in the Production environment. Starter environments and the Pro Integration
+    environment do not use the MAGENTO_CLOUD_LOCKS_DIR variable, so ece-tools applies the db lock provider automatically.
+  type: string
+  stages:
+    - global
+    - deploy
+  allowed:
+    - db
+    - file
+  default:
+    deploy: file
+  examples:
+    - stage:
+        deploy:
+          LOCK_PROVIDER: db
+REDIS_USE_SLAVE_CONNECTION:
+  description: Set to true to automatically use a read-only connection to a Redis instance to receive read-only
+    traffic on a non-master node. This improves performance through load balancing because only one node needs to
+    handle read-write traffic.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: false
+  examples:
+    - stage:
+        deploy:
+          REDIS_USE_SLAVE_CONNECTION: true
+MYSQL_USE_SLAVE_CONNECTION:
+  description: Set to true to automatically use a read-only connection to the database to receive read-only traffic on
+    a non-master node. This improves performance through load balancing, because only one node needs to
+    handle read-write traffic.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: false
+  examples:
+    - stage:
+        deploy:
+          MYSQL_USE_SLAVE_CONNECTION: true
+UPDATE_URLS:
+  description: On deployment, replace Magento base URLs in the database with project URLs. This is useful for local
+    development, where base URLs are set up for your local environment. When you deploy to a Cloud environment,
+    we change the URLs so you can access your storefront and Magento Admin using project URLs.
+    To update URLs when deploying to Staging or Production environments, use the FORCE_UPDATE_URLS variable.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: true
+  examples:
+    - stage:
+        deploy:
+          UPDATE_URLS: false
+FORCE_UPDATE_URLS:
+  description: This setting overrides the default behavior for the UPDATE_URLS variable
+    which is ignored when deploying to Staging or Production environments.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: false
+  examples:
+    - stage:
+      deploy:
+        FORCE_UPDATE_URLS: true
+CLEAN_STATIC_FILES:
+  description: Cleans generated static files. By specifying the value of this configuration to "false",
+    you can leave the static files which were generated during the previous deployment.
+  type: boolean
+  stages:
+    - global
+    - deploy
+  default:
+    deploy: true
+  examples:
+    - stage:
+        deploy:
+          CLEAN_STATIC_FILES: false
+
+# Environment variables
+ENV_RELATIONSHIPS:
+  description: Environment variable used to get services relationships.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_RELATIONSHIPS
+  examples:
+    - system:
+        variables:
+          ENV_RELATIONSHIPS: MAGENTO_CLOUD_RELATIONSHIPS
+ENV_ROUTES:
+  description: Environment variable used to get variables.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_ROUTES
+  examples:
+    - system:
+        variables:
+          ENV_ROUTES: MAGENTO_CLOUD_ROUTES
+ENV_VARIABLES:
+  description: Environment variable used to get variables.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_VARIABLES
+  examples:
+    - system:
+        variables:
+          ENV_VARIABLES: MAGENTO_CLOUD_VARIABLES
+ENV_APPLICATION:
+  description: Environment variable used to get application configuration.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_APPLICATION
+  examples:
+    - system:
+        variables:
+          ENV_APPLICATION: MAGENTO_CLOUD_APPLICATION
+ENV_ENVIRONMENT:
+  description: Environment variable used to get application environment.
+  type: string
+  system:
+    - variables
+  default:
+    variables: MAGENTO_CLOUD_ENVIRONMENT
+  examples:
+    - system:
+        variables:
+          ENV_ENVIRONMENT: MAGENTO_CLOUD_ENVIRONMENT
