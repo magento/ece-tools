@@ -11,6 +11,7 @@ use Magento\MagentoCloud\Command\Wizard\Util\OutputFormatter;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Step\Deploy\SplitDbConnection;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -82,7 +83,7 @@ class SplitDbState extends Command
 
         foreach (DbConfig::SPLIT_CONNECTIONS as $mageConnectionName) {
             if (isset($mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION][$mageConnectionName])) {
-                $existedSplits[] = DbConfig::MAIN_CONNECTION_MAP[$mageConnectionName];
+                $existedSplits[] = SplitDbConnection::SPLIT_CONNECTION_MAP[$mageConnectionName];
             }
             $connection = $this->connectionDataFactory->create(DbConfig::MAIN_CONNECTION_MAP[$mageConnectionName]);
             if ($connection->getHost()) {
@@ -96,7 +97,6 @@ class SplitDbState extends Command
                     'You may split DB using %s variable in .magento.env.yaml file',
                     DeployInterface::VAR_SPLIT_DB
                 );
-                $info[] = 'Once you split DB you won\'t be able to change the state back';
             } else {
                 $info[] = 'DB cannot be split on this environment';
             }
