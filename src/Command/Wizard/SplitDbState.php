@@ -102,14 +102,14 @@ class SplitDbState extends Command
             }
         }
 
+        $message = $existedSplits
+            ? sprintf('DB is already split with type(s): %s', implode(', ', $existedSplits))
+            : 'DB is not split:';
+
+        $this->outputFormatter->writeResult($output, true, $message);
+
         foreach ($info as $msg) {
             $this->outputFormatter->writeItem($output, $msg);
         }
-
-        $message = $existedSplits
-            ? sprintf('DB is already split with type(s): %s', implode(', ', $existedSplits))
-            : 'DB is not split';
-
-        $this->outputFormatter->writeResult($output, true, $message);
     }
 }
