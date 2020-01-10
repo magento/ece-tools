@@ -76,13 +76,6 @@ class CopyPubStaticTest extends TestCase
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/pub/front-static.php')
-            ->willReturn(true);
-        $this->fileMock->expects($this->once())
-            ->method('deleteFile')
-            ->with('magento_root/pub/front-static.php');
         $this->fileListMock->expects($this->once())
             ->method('getFrontStaticDist')
             ->willReturn($frontStaticDistPath);
@@ -107,12 +100,6 @@ class CopyPubStaticTest extends TestCase
         $this->directoryListMock->expects($this->once())
             ->method('getMagentoRoot')
             ->willReturn('magento_root');
-        $this->fileMock->expects($this->once())
-            ->method('isExists')
-            ->with('magento_root/pub/front-static.php')
-            ->willReturn(false);
-        $this->fileMock->expects($this->never())
-            ->method('deleteFile');
         $this->fileListMock->expects($this->once())
             ->method('getFrontStaticDist')
             ->willReturn($frontStaticDistPath);
