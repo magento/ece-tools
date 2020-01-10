@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\Build;
 use Magento\MagentoCloud\Step\Build\CopyPubStatic;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Step\StepException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -41,6 +42,11 @@ class CopyPubStaticTest extends TestCase
     private $directoryListMock;
 
     /**
+     * @var FileList|MockObject
+     */
+    private $fileListMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
@@ -48,6 +54,7 @@ class CopyPubStaticTest extends TestCase
         $this->fileMock = $this->createMock(File::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->directoryListMock = $this->createMock(DirectoryList::class);
+        $this->fileListMock = $this->createMock(FileList::class);
 
         $this->directoryListMock->method('getMagentoRoot')
             ->willReturn('magento_root');
@@ -55,7 +62,8 @@ class CopyPubStaticTest extends TestCase
         $this->step = new CopyPubStatic(
             $this->loggerMock,
             $this->fileMock,
-            $this->directoryListMock
+            $this->directoryListMock,
+            $this->fileListMock
         );
     }
 
@@ -64,20 +72,28 @@ class CopyPubStaticTest extends TestCase
      */
     public function testExecute(): void
     {
+        $frontStaticDistPath = 'path/dist/front-static.php.dist';
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with('magento_root/pub/static.php')
+            ->with('magento_root/pub/front-static.php')
             ->willReturn(true);
+        $this->fileMock->expects($this->once())
+            ->method('deleteFile')
+            ->with('magento_root/pub/front-static.php');
+        $this->fileListMock->expects($this->once())
+            ->method('getFrontStaticDist')
+            ->willReturn($frontStaticDistPath);
         $this->fileMock->expects($this->once())
             ->method('copy')
             ->with(
-                'magento_root/pub/static.php',
+                $frontStaticDistPath,
                 'magento_root/pub/front-static.php'
             );
         $this->loggerMock->method('info')
-            ->withConsecutive(
-                ['File "static.php" was copied']
-            );
+            ->with('File "front-static.php" was copied');
 
         $this->step->execute();
     }
@@ -87,16 +103,27 @@ class CopyPubStaticTest extends TestCase
      */
     public function testExecuteNotFound(): void
     {
+        $frontStaticDistPath = 'path/dist/front-static.php.dist';
+        $this->directoryListMock->expects($this->once())
+            ->method('getMagentoRoot')
+            ->willReturn('magento_root');
         $this->fileMock->expects($this->once())
             ->method('isExists')
-            ->with('magento_root/pub/static.php')
+            ->with('magento_root/pub/front-static.php')
             ->willReturn(false);
         $this->fileMock->expects($this->never())
-            ->method('copy');
-        $this->loggerMock->method('notice')
-            ->withConsecutive(
-                ['File "static.php" was not found']
+            ->method('deleteFile');
+        $this->fileListMock->expects($this->once())
+            ->method('getFrontStaticDist')
+            ->willReturn($frontStaticDistPath);
+        $this->fileMock->expects($this->once())
+            ->method('copy')
+            ->with(
+                $frontStaticDistPath,
+                'magento_root/pub/front-static.php'
             );
+        $this->loggerMock->method('info')
+            ->with('File "front-static.php" was copied');
 
         $this->step->execute();
     }
