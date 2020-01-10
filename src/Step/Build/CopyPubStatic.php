@@ -54,16 +54,14 @@ class CopyPubStatic implements StepInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
 
-        if (!$this->file->isExists($magentoRoot . '/pub/static.php')) {
-            $this->logger->notice('File "static.php" was not found');
-
-            return;
+        if (!$this->file->isExists($magentoRoot . '/pub/front-static.php')) {
+            $this->file->deleteFile($magentoRoot . '/pub/front-static.php');
         }
 
         $this->file->copy(
-            $magentoRoot . '/pub/static.php',
+            $magentoRoot . '/dist/front-static.php.dist',
             $magentoRoot . '/pub/front-static.php'
         );
-        $this->logger->info('File "static.php" was copied');
+        $this->logger->info('File "front-static.php" was copied');
     }
 }
