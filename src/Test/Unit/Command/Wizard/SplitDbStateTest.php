@@ -88,7 +88,6 @@ class SplitDbStateTest extends TestCase
             ->method('writeResult')
             ->with($outputMock, true, $message);
 
-
         $this->command->execute($inputMock, $outputMock);
     }
 
@@ -128,7 +127,6 @@ class SplitDbStateTest extends TestCase
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')
             ->with($outputMock, true, 'DB is not split');
-
 
         $this->command->execute($inputMock, $outputMock);
     }

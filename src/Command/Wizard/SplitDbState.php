@@ -53,14 +53,13 @@ class SplitDbState extends Command
         OutputFormatter $outputFormatter,
         ConfigReader $configReader,
         RelationshipConnectionFactory $connectionDataFactory
-    ){
+    ) {
         $this->outputFormatter = $outputFormatter;
         $this->configReader = $configReader;
         $this->connectionDataFactory = $connectionDataFactory;
 
         parent::__construct();
     }
-
 
     /**
      * @inheritdoc
