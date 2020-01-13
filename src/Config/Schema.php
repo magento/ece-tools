@@ -10,23 +10,51 @@ namespace Magento\MagentoCloud\Config;
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
+use Magento\MagentoCloud\Filesystem\SystemList;
+use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Yaml\Yaml;
 
 /**
  * Configuration schema for .magento.env.yaml file
  */
 class Schema
 {
-    const SCHEMA_TYPE = 'type';
-    const SCHEMA_VALUE_VALIDATION = 'value_validation';
-    const SCHEMA_STAGE = 'stage';
-    const SCHEMA_SYSTEM = 'system';
-    const SCHEMA_DEFAULT_VALUE = 'default_values';
-    const SCHEMA_REPLACEMENT = 'replacement';
+    public const SCHEMA_TYPE = 'type';
+    public const SCHEMA_ALLOWED_VALUES = 'allowed';
+    public const SCHEMA_VALUE_VALIDATORS = 'validators';
+    public const SCHEMA_STAGES = 'stages';
+    public const SCHEMA_SYSTEM = 'system';
+    public const SCHEMA_DEFAULT_VALUE = 'default';
+    public const SCHEMA_DESCRIPTION = 'description';
+    public const SCHEMA_MAGENTO_VERSION = 'magento_version';
+    public const SCHEMA_EXAMPLES = 'examples';
+
+    public const SCHEMA_EXAMPLE_COMMENT = 'comment';
+
+    /**
+     * @var SystemList
+     */
+    private $systemList;
+
+    /**
+     * @var Parser
+     */
+    private $parser;
 
     /**
      * @var array
      */
     private $defaults = [];
+
+    /**
+     * @param SystemList $systemList
+     * @param Parser $parser
+     */
+    public function __construct(SystemList $systemList, Parser $parser)
+    {
+        $this->systemList = $systemList;
+        $this->parser = $parser;
+    }
 
     /**
      * Returns default values for given stage.
@@ -61,183 +89,17 @@ class Schema
      * @return array
      * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
-    public function getSchema()
+    public function getSchema(): array
     {
-        return [
-            StageConfigInterface::VAR_VERBOSE_COMMANDS => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_VALUE_VALIDATION => ['', '-v', '-vv', '-vvv'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => '',
-                    StageConfigInterface::STAGE_DEPLOY => '',
-                ],
-            ],
-            StageConfigInterface::VAR_SCD_COMPRESSION_LEVEL => [
-                self::SCHEMA_TYPE => ['integer'],
-                self::SCHEMA_VALUE_VALIDATION => function (string $key, $value) {
-                    if (!in_array($value, range(0, 9))) {
-                        return sprintf(
-                            'The %s variable contains an invalid value %d. ' .
-                            'Use an integer value from 0 to 9.',
-                            $key,
-                            $value
-                        );
-                    }
-                },
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => 6,
-                    StageConfigInterface::STAGE_DEPLOY => 4,
-                ],
-            ],
-            StageConfigInterface::VAR_SCD_COMPRESSION_TIMEOUT => [
-                self::SCHEMA_TYPE => ['integer'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => 600,
-                    StageConfigInterface::STAGE_DEPLOY => 600,
-                ],
-            ],
-            StageConfigInterface::VAR_SCD_STRATEGY => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_VALUE_VALIDATION => ['compact', 'quick', 'standard'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => '',
-                    StageConfigInterface::STAGE_DEPLOY => '',
-                ],
-            ],
-            StageConfigInterface::VAR_SCD_THREADS => [
-                self::SCHEMA_TYPE => ['integer'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE,
-                    StageConfigInterface::STAGE_DEPLOY => StageConfigInterface::VAR_SCD_THREADS_DEFAULT_VALUE,
-                ],
-            ],
-            StageConfigInterface::VAR_SCD_MAX_EXEC_TIME => [
-                self::SCHEMA_TYPE => ['integer'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => null,
-                    StageConfigInterface::STAGE_DEPLOY => null,
-                ],
-            ],
-            StageConfigInterface::VAR_SCD_MATRIX => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => [],
-                    StageConfigInterface::STAGE_DEPLOY => [],
-                ],
-            ],
-            StageConfigInterface::VAR_SKIP_SCD => [
-                self::SCHEMA_TYPE => ['boolean'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                    StageConfigInterface::STAGE_BUILD,
-                    StageConfigInterface::STAGE_DEPLOY
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_BUILD => false,
-                    StageConfigInterface::STAGE_DEPLOY => false,
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_RELATIONSHIPS => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_RELATIONSHIPS',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_ROUTES => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ROUTES',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_VARIABLES => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_VARIABLES',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_APPLICATION => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_APPLICATION',
-                ],
-            ],
-            SystemConfigInterface::VAR_ENV_ENVIRONMENT => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_SYSTEM => [
-                    SystemConfigInterface::SYSTEM_VARIABLES
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    SystemConfigInterface::SYSTEM_VARIABLES => 'MAGENTO_CLOUD_ENVIRONMENT',
-                ],
-            ],
-            StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => [
-                self::SCHEMA_TYPE => ['boolean'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => true,
-                ],
-            ],
-            StageConfigInterface::VAR_SCD_ON_DEMAND => [
-                self::SCHEMA_TYPE => ['boolean'],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => false,
-                ],
-            ],
+        $schema = $this->parser->parseFile(
+            $this->systemList->getConfig() . '/schema.yaml',
+            Yaml::PARSE_CONSTANT
+        );
+
+        return array_replace($schema, [
             StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'string',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
@@ -245,38 +107,18 @@ class Schema
                 ],
             ],
             StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_GLOBAL => [],
                 ],
             ],
-            StageConfigInterface::VAR_MIN_LOGGING_LEVEL => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_VALUE_VALIDATION => [
-                    '',
-                    Log::LEVEL_DEBUG,
-                    Log::LEVEL_INFO,
-                    Log::LEVEL_NOTICE,
-                    Log::LEVEL_WARNING,
-                    Log::LEVEL_ERROR,
-                    Log::LEVEL_CRITICAL,
-                    Log::LEVEL_ALERT,
-                    Log::LEVEL_EMERGENCY,
-                ],
-                self::SCHEMA_STAGE => [
-                    StageConfigInterface::STAGE_GLOBAL,
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => '',
-                ],
-            ],
             BuildInterface::VAR_ERROR_REPORT_DIR_NESTING_LEVEL => [
-                self::SCHEMA_TYPE => ['integer'],
-                self::SCHEMA_VALUE_VALIDATION => range(0, 32),
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'integer',
+                self::SCHEMA_ALLOWED_VALUES => range(0, 32),
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_BUILD,
                 ],
@@ -364,8 +206,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_SEARCH_CONFIGURATION => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -374,8 +216,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_ELASTICSUITE_CONFIGURATION => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -384,8 +226,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_QUEUE_CONFIGURATION => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -394,8 +236,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_CACHE_CONFIGURATION => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -404,8 +246,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_SESSION_CONFIGURATION => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -414,8 +256,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_DATABASE_CONFIGURATION => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -424,8 +266,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_RESOURCE_CONFIGURATION => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -434,8 +276,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_CRON_CONSUMERS_RUNNER => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -444,8 +286,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => [
-                self::SCHEMA_TYPE => ['boolean'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'boolean',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -454,8 +296,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_ENABLE_GOOGLE_ANALYTICS => [
-                self::SCHEMA_TYPE => ['boolean'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'boolean',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -464,8 +306,8 @@ class Schema
                 ],
             ],
             DeployInterface::VAR_GENERATED_CODE_SYMLINK => [
-                self::SCHEMA_TYPE => ['boolean'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'boolean',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_DEPLOY
                 ],
@@ -474,8 +316,8 @@ class Schema
                 ],
             ],
             PostDeployInterface::VAR_WARM_UP_PAGES => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_POST_DEPLOY
                 ],
@@ -484,8 +326,8 @@ class Schema
                 ],
             ],
             PostDeployInterface::VAR_TTFB_TESTED_PAGES => [
-                self::SCHEMA_TYPE => ['array'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'array',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL,
                     StageConfigInterface::STAGE_POST_DEPLOY
                 ],
@@ -494,14 +336,14 @@ class Schema
                 ],
             ],
             StageConfigInterface::VAR_X_FRAME_CONFIGURATION => [
-                self::SCHEMA_TYPE => ['string'],
-                self::SCHEMA_STAGE => [
+                self::SCHEMA_TYPE => 'string',
+                self::SCHEMA_STAGES => [
                     StageConfigInterface::STAGE_GLOBAL
                 ],
                 self::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_GLOBAL => 'SAMEORIGIN'
                 ]
             ]
-        ];
+        ]);
     }
 }
