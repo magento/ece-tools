@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Stage;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Environment\ReaderInterface as EnvironmentReader;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\StageConfigInterface;
@@ -46,7 +47,7 @@ class PostDeploy implements PostDeployInterface
     public function get(string $name)
     {
         if (!array_key_exists($name, $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY))) {
-            throw new \RuntimeException(sprintf(
+            throw new ConfigException(sprintf(
                 'Config %s was not defined.',
                 $name
             ));
@@ -55,7 +56,7 @@ class PostDeploy implements PostDeployInterface
         try {
             return $this->mergeConfig()[$name];
         } catch (\Exception $exception) {
-            throw new \RuntimeException(
+            throw new ConfigException(
                 $exception->getMessage(),
                 $exception->getCode(),
                 $exception

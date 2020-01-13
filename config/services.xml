@@ -16,6 +16,8 @@
         <service id="Magento\MagentoCloud\Step\Build\DeployStaticContent" autowire="false" />
         <service id="Magento\MagentoCloud\App\Container" autowire="false" />
         <service id="Magento\MagentoCloud\App\GenericException" autowire="false" />
+        <service id="Magento\MagentoCloud\App\ContainerException" autowire="false" />
+        <service id="Magento\MagentoCloud\Config\ConfigException" autowire="false" />
         <service id="Magento\MagentoCloud\App\Logger\Gelf\Handler" autowire="false" />
         <service id="Magento\MagentoCloud\App\Container" autowire="false" />
         <service id="Magento\MagentoCloud\Config\Validator\Result\Error" autowire="false" />
@@ -39,6 +41,8 @@
         <service id="Magento\MagentoCloud\Service\ServiceMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\Process" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />
+        <service id="Symfony\Component\Yaml\Parser" autowire="false" />
+        <service id="Symfony\Component\Yaml\Dumper" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\Flag\Pool">
             <argument type="collection">
                 <argument key="regenerate">var/.regenerate</argument>
@@ -71,5 +75,6 @@
         <service id="Magento\MagentoCloud\Config\Magento\Env\WriterInterface" alias="Magento\MagentoCloud\Config\Magento\Env\Writer" />
         <service id="Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface" alias="Magento\MagentoCloud\Config\Magento\Shared\Reader" />
         <service id="Magento\MagentoCloud\Config\Magento\Shared\WriterInterface" alias="Magento\MagentoCloud\Config\Magento\Shared\Writer" />
+        <service id="Magento\MagentoCloud\Config\Schema\FormatterInterface" alias="Magento\MagentoCloud\Config\Schema\Formatter" />
     </services>
 </container>
