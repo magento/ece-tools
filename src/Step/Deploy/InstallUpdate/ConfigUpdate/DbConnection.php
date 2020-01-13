@@ -14,6 +14,8 @@ use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\RelationshipConnectionFactory;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -120,8 +122,8 @@ class DbConnection implements StepInterface
      * In the case when the database was split with the user configuration then sets the flag '.ignore_split_db'
      * If the flag '.ignore_split_db' exists, the split process will be ignored
      *
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
-     * @throws \Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException
+     * @throws FileSystemException
+     * @throws ConfigurationMismatchException
      */
     public function execute()
     {
@@ -194,7 +196,7 @@ class DbConnection implements StepInterface
      *
      * @param bool $useSlave
      * @param bool $slaveIsAvailable
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     public function updateMainConnectionsConfig(
         bool $useSlave,
@@ -212,7 +214,7 @@ class DbConnection implements StepInterface
      *
      * @param bool $useSlave
      * @param bool $slaveIsAvailable
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     private function updateSlaveConnectionsConfig(
         bool $useSlave,
@@ -349,7 +351,7 @@ class DbConnection implements StepInterface
      * Returns config from app/etc/env.php
      *
      * @return array
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     private function getMageConfigData(): array
     {

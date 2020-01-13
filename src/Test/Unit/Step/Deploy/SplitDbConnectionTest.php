@@ -144,8 +144,6 @@ class SplitDbConnectionTest extends TestCase
 
     /**
      * Variable SPLIT_DB is a empty array
-     *
-     * @throws \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteVarSplitDbIsEmpty()
     {
@@ -153,6 +151,28 @@ class SplitDbConnectionTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SPLIT_DB)
             ->willReturn([]);
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'connection' => [
+                    'checkout' => [],
+                    'sale' => [],
+                ]
+            ]);
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'db' => [
+                    'connection' => [
+                        'checkout' => [],
+                        'sale' => [],
+                    ]
+                ]
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Variable SPLIT_DB does not have data which were already split types: sales, quote');
+
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
         $this->configWriterMock->expects($this->never())
@@ -249,7 +269,6 @@ class SplitDbConnectionTest extends TestCase
      * @param array $dbConfig
      * @param array $mageConfig
      * @param array $splitTypes
-     * @throws \Magento\MagentoCloud\Step\StepException
      * @dataProvider dataProviderExecuteVarSplitDbDoesNotHaveSplitTypes
      */
     public function testExecuteVarSplitDbDoesNotHaveSplitTypes(

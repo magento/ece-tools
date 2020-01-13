@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -107,9 +108,6 @@ class SplitDbConnection implements StepInterface
     public function execute()
     {
         $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
-        if (empty($splitTypes)) {
-            return;
-        }
 
         if ($this->flagManager->exists(FlagManager::FLAG_IGNORE_SPLIT_DB)) {
             $this->logger->info(sprintf(
@@ -147,7 +145,7 @@ class SplitDbConnection implements StepInterface
         if (!empty($missedSplitTypes)) {
             $this->logger->warning(
                 'Variable SPLIT_DB does not have data which were already split types: '
-                . implode(',', $missedSplitTypes)
+                . implode(', ', $missedSplitTypes)
             );
             return;
         }
@@ -226,7 +224,7 @@ class SplitDbConnection implements StepInterface
      * Updates slave connections
      *
      * @param array $dbConfig
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     private function updateSlaveConnections(array $dbConfig)
     {
