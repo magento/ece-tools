@@ -75,7 +75,7 @@ class BalerSupport implements ValidatorInterface
             }
         }
 
-        return empty($errors)
+        return $errors === []
             ? $this->resultFactory->success()
             : $this->resultFactory->error(
                 'Baler JS bundling cannot be used because of the following issues:',

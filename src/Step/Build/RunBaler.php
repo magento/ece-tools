@@ -44,6 +44,13 @@ class RunBaler implements StepInterface
      */
     private $shell;
 
+    /**
+     * @param LoggerInterface $logger,
+     * @param BuildInterface $buildConfig,
+     * @param Flag\Manager $flagManager,
+     * @param ValidatorInterface $validator,
+     * @param ShellInterface $shell
+     */
     public function __construct(
         LoggerInterface $logger,
         BuildInterface $buildConfig,
@@ -58,6 +65,9 @@ class RunBaler implements StepInterface
         $this->shell = $shell;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function execute()
     {
         if (!$this->buildConfig->get(BuildInterface::VAR_SCD_USE_BALER)) {
