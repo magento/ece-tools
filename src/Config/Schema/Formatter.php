@@ -46,7 +46,7 @@ class Formatter implements FormatterInterface
                 '## %s%s%s%s',
                 $key,
                 self::EMPTY_LINE,
-                wordwrap($description, 100),
+                wordwrap($description, 120),
                 self::EMPTY_LINE
             );
 
@@ -77,7 +77,7 @@ class Formatter implements FormatterInterface
                         unset($example[Schema::SCHEMA_EXAMPLE_COMMENT]);
                     }
 
-                    $text .= $this->wrapCode($this->dumper->dump($example, 6, 2));
+                    $text .= $this->wrapCode($this->dumper->dump($example, 6, 0));
                 }
             }
         }

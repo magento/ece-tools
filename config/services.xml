@@ -20,6 +20,7 @@
         <service id="Magento\MagentoCloud\App\Logger\Gelf\Handler" autowire="false" />
         <service id="Magento\MagentoCloud\App\Container" autowire="false" />
         <service id="Magento\MagentoCloud\Config\Validator\Result\Error" autowire="false" />
+        <service id="Magento\MagentoCloud\Config\Schema\Validator\Range" autowire="false" />
         <service id="Magento\MagentoCloud\DB\Data\Connection" autowire="false" />
         <service id="Magento\MagentoCloud\DB\Data\RelationshipConnection" autowire="false" />
         <service id="Magento\MagentoCloud\DB\PDOException" autowire="false" />
