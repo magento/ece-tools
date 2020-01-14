@@ -98,9 +98,8 @@ class DbDump extends Command
             $helper = $this->getHelper('question');
 
             $questionParts = [
-                'The db-dump command requires the site to be placed into maintenance mode. ',
-                'We will set the site into maintenance mode, run the db-dump command, and disable maintenance mode. ',
-                'This action will stop your site from receiving traffic. (Please see dev docs for more information.) ',
+                'The db-dump command switches the site to maintenance mode during the dump process.',
+                'Your site will not receive any traffic until the operation completes.',
                 'Do you wish to proceed with this process? (y/N)?',
             ];
             $question = new ConfirmationQuestion(
