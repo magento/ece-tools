@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Database;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -147,6 +148,7 @@ class DbConfig implements ConfigInterface
      *   'slave_connection' => [...]
      * ]
      * ```
+     * @throws ConfigException
      */
     public function get(): array
     {
@@ -202,6 +204,7 @@ class DbConfig implements ConfigInterface
      * Custom split connections are removed as they are not supported.
      *
      * @return array
+     * @throws ConfigException
      */
     private function getSupportedCustomConfig(): array
     {

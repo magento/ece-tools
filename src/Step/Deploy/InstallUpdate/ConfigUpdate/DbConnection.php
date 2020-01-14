@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Database\ResourceConfig;
@@ -123,6 +124,7 @@ class DbConnection implements StepInterface
      * If the flag '.ignore_split_db' exists, the split process will be ignored
      *
      * @throws FileSystemException
+     * @throws ConfigException
      * @throws ConfigurationMismatchException
      */
     public function execute()
@@ -197,6 +199,7 @@ class DbConnection implements StepInterface
      * @param bool $useSlave
      * @param bool $slaveIsAvailable
      * @throws FileSystemException
+     * @throws ConfigException
      */
     public function updateMainConnectionsConfig(
         bool $useSlave,
@@ -215,6 +218,7 @@ class DbConnection implements StepInterface
      * @param bool $useSlave
      * @param bool $slaveIsAvailable
      * @throws FileSystemException
+     * @throws ConfigException
      */
     private function updateSlaveConnectionsConfig(
         bool $useSlave,
@@ -268,6 +272,7 @@ class DbConnection implements StepInterface
      *
      * @param bool $withSlave
      * @return array
+     * @throws ConfigException
      */
     private function getMainDbConfig(bool $withSlave): array
     {
@@ -314,6 +319,7 @@ class DbConnection implements StepInterface
      *
      * @param array $dbConfig
      * @param bool $isUseSlave
+     * @throws ConfigException
      */
     private function addLoggingAboutSlaveConnection(array $dbConfig, bool $isUseSlave)
     {
@@ -366,6 +372,7 @@ class DbConnection implements StepInterface
      * and connection data from cloud environment.
      *
      * @return array
+     * @throws ConfigException
      */
     private function getDbConfigData(): array
     {

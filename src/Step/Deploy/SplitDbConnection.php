@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -225,6 +226,7 @@ class SplitDbConnection implements StepInterface
      *
      * @param array $dbConfig
      * @throws FileSystemException
+     * @throws ConfigException
      */
     private function updateSlaveConnections(array $dbConfig)
     {
