@@ -3,11 +3,15 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
 
+    <parameters>
+        <parameter key="error_level_warning">300</parameter>
+        <parameter key="error_level_notice">250</parameter>
+    </parameters>
+
     <services>
-        <defaults autowire="true" autoconfigure="true" public="true">
-            <bind key="int $errorLevel">300</bind>
-        </defaults>
+        <defaults autowire="true" autoconfigure="true" public="true" />
         <!-- ... -->
+
         <prototype namespace="Magento\MagentoCloud\" resource="../src/*" exclude="../src/{Test}"/>
 
         <service id="Composer\Package\Version\VersionParser" autowire="false" />
@@ -38,6 +42,7 @@
         <service id="Magento\MagentoCloud\Service\ServiceMismatchException" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\Process" autowire="false" />
         <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />
+        <service id="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\Flag\Pool">
             <argument type="collection">
                 <argument key="regenerate">var/.regenerate</argument>
@@ -45,9 +50,11 @@
                 <argument key="deploy_is_failed">var/.deploy_is_failed</argument>
             </argument>
         </service>
-        <service id="ServiceEol.Warnings" class="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol" />
+        <service id="ServiceEol.Warnings" class="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol">
+            <argument key="$errorLevel">%error_level_warning</argument>
+        </service>
         <service id="ServiceEol.Notices" class="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol">
-            <bind key="int $errorLevel">250</bind>
+            <argument key="$errorLevel">%error_level_notice</argument>
         </service>
         <service id="Composer\Package\Version\VersionParser"/>
         <service id="Composer\Semver\VersionParser"/>
