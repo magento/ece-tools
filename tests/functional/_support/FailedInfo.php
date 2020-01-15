@@ -26,7 +26,6 @@ class FailedInfo extends Extension
      */
     public function testFailed(FailEvent $e) {
         $failure = $e->getFail();
-        $failure->getPrevious()
         $this->writeln('------------------------------------');
         $this->writeln('Message: ' . $failure->getMessage());
         $this->writeln('------------------------------------');
