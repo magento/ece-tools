@@ -228,8 +228,8 @@ class DbConfig implements ConfigInterface
      * in not compatible way with slave_connection.
      *
      * Returns true if $envDbConfig contains host or dbname for default connection
-     * that does matchSpl connection from relationships,
-     * otherwise return false.
+     * that does match connection from relationships, otherwise return false.
+     *
      * @param array $customConfig database configuration from DATABASE_CONFIGURATION of .magento.env.yaml
      * @param string $connectionName
      * @param ConnectionInterface $envConfig

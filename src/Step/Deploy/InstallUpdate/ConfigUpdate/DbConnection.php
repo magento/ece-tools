@@ -282,6 +282,8 @@ class DbConnection implements StepInterface
         if ($withSlave) {
             $slaveConnections = $dbConfig[DbConfig::KEY_SLAVE_CONNECTION];
             $dbConfig[DbConfig::KEY_SLAVE_CONNECTION] = $this->getMainConnections($slaveConnections);
+        } else {
+            unset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION]);
         }
 
         return $dbConfig;
