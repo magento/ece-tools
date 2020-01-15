@@ -31,6 +31,7 @@ class CronUnlockCest extends AbstractCest
      */
     public function testCronUnlock(\CliTester $I)
     {
+        $I->assertTrue(false);
         $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
         $I->startEnvironment();
         $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
