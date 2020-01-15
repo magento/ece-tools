@@ -83,6 +83,8 @@ class CronUnlock extends Command
         try {
             $this->logger->info('Starting unlocking.');
 
+            throw new \Exception('testing');
+
             $jobCodesToUnlock = array_filter($input->getOption(self::OPTION_JOB_CODE));
 
             if (count($jobCodesToUnlock)) {
