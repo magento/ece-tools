@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Command\DbDump;
+use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
@@ -60,6 +61,11 @@ class DbDumpTest extends TestCase
     private $backgroundProcessMock;
 
     /**
+     * @var Switcher|MockObject
+     */
+    private $cronSwitcherMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -67,6 +73,7 @@ class DbDumpTest extends TestCase
         $this->dumpGeneratorMock = $this->createMock(DumpGenerator::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->maintenanceModeSwitcherMock = $this->createMock(MaintenanceModeSwitcher::class);
+        $this->cronSwitcherMock = $this->createMock(Switcher::class);
         $this->backgroundProcessMock = $this->createMock(BackgroundProcess::class);
 
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
@@ -82,6 +89,7 @@ class DbDumpTest extends TestCase
             $this->dumpGeneratorMock,
             $this->loggerMock,
             $this->maintenanceModeSwitcherMock,
+            $this->cronSwitcherMock,
             $this->backgroundProcessMock
         );
         $this->command->setHelperSet($this->helperSetMock);
@@ -97,6 +105,10 @@ class DbDumpTest extends TestCase
             ->method('enable');
         $this->maintenanceModeSwitcherMock->expects($this->once())
             ->method('disable');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('disable');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable');
         $this->backgroundProcessMock->expects($this->once())
             ->method('kill');
         $this->loggerMock->expects($this->exactly(2))
@@ -127,6 +139,8 @@ class DbDumpTest extends TestCase
             ->method('enable');
         $this->maintenanceModeSwitcherMock->expects($this->never())
             ->method('disable');
+        $this->cronSwitcherMock->expects($this->never())
+            ->method('enable');
         $this->backgroundProcessMock->expects($this->never())
             ->method('kill');
         $this->loggerMock->expects($this->never())
@@ -229,6 +243,10 @@ class DbDumpTest extends TestCase
             ->method('kill');
         $this->dumpGeneratorMock->expects($this->never())
             ->method('create');
+        $this->cronSwitcherMock->expects($this->never())
+            ->method('disable');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable');
 
         $tester = new CommandTester(
             $this->command

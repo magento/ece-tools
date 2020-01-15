@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\Util\BackgroundProcess;
 use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
@@ -47,22 +48,29 @@ class DbDump extends Command
      * @var BackgroundProcess
      */
     private $backgroundProcess;
+    /**
+     * @var Switcher
+     */
+    private $cronSwitcher;
 
     /**
      * @param DumpGenerator $dumpGenerator
      * @param LoggerInterface $logger
      * @param MaintenanceModeSwitcher $maintenanceModeSwitcher
+     * @param Switcher $cronSwitcher
      * @param BackgroundProcess $backgroundProcess
      */
     public function __construct(
         DumpGenerator $dumpGenerator,
         LoggerInterface $logger,
         MaintenanceModeSwitcher $maintenanceModeSwitcher,
+        Switcher $cronSwitcher,
         BackgroundProcess $backgroundProcess
     ) {
         $this->dumpGenerator = $dumpGenerator;
         $this->logger = $logger;
         $this->maintenanceModeSwitcher = $maintenanceModeSwitcher;
+        $this->cronSwitcher = $cronSwitcher;
         $this->backgroundProcess = $backgroundProcess;
 
         parent::__construct();
@@ -115,6 +123,7 @@ class DbDump extends Command
         try {
             $this->logger->info('Starting backup.');
             $this->maintenanceModeSwitcher->enable();
+            $this->cronSwitcher->disable();
             $this->backgroundProcess->kill();
             $this->dumpGenerator->create((bool)$input->getOption(self::OPTION_REMOVE_DEFINERS));
             $this->logger->info('Backup completed.');
@@ -123,6 +132,7 @@ class DbDump extends Command
 
             throw $exception;
         } finally {
+            $this->cronSwitcher->enable();
             $this->maintenanceModeSwitcher->disable();
         }
     }
