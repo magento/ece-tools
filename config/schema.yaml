@@ -641,7 +641,7 @@ DEPLOYED_MAGENTO_VERSION_FROM_GIT:
   dump: false
   description: Magento version for installation from git
   type: string
-  stage:
+  stages:
     - global
   default:
     global: ""
@@ -649,7 +649,7 @@ DEPLOY_FROM_GIT_OPTIONS:
   dump: false
   description: Options for installation from git
   type: array
-  stage:
-      - global
+  stages:
+    - global
   default:
     global: []
