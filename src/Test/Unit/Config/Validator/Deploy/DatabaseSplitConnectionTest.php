@@ -62,13 +62,13 @@ class DatabaseSplitConnectionTest extends TestCase
                 'default' => [],
                 'indexer' => [],
                 'checkout' => [],
-                'sale' => [],
+                'sales' => [],
             ],
             'slave_connection' => [
                 'default' => [],
                 'indexer' => [],
                 'checkout' => [],
-                'sale' => [],
+                'sales' => [],
             ],
         ];
         $this->stageConfigMock->expects($this->once())
@@ -80,9 +80,9 @@ class DatabaseSplitConnectionTest extends TestCase
             ->with('Split database configuration was detected in the property DATABASE_CONFIGURATION of the'
                 . ' file .magento.env.yaml:' . PHP_EOL
                 . '- connection: checkout' . PHP_EOL
-                . '- connection: sale' . PHP_EOL
+                . '- connection: sales' . PHP_EOL
                 . '- slave_connection: checkout' . PHP_EOL
-                . '- slave_connection: sale' . PHP_EOL
+                . '- slave_connection: sales' . PHP_EOL
                 . 'Magento Cloud does not support a custom split database configuration,'
                 .' such configurations will be ignored');
 
@@ -133,7 +133,7 @@ class DatabaseSplitConnectionTest extends TestCase
                     'connection' => [
                         'default' => [],
                         'indexer' => [],
-                        'sale' => [],
+                        'sales' => [],
                     ],
                     'slave_connection' => [
                         'default' => [],
@@ -151,7 +151,7 @@ class DatabaseSplitConnectionTest extends TestCase
                     'slave_connection' => [
                         'default' => [],
                         'indexer' => [],
-                        'sale' => [],
+                        'sales' => [],
                     ],
                 ],
                 Error::class,

@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Database;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -146,17 +147,18 @@ class DbConfigTest extends TestCase
     }
 
     /**
-     * @param array $envenvConnectionsData
+     * @param array $envConnectionsData
      * @param array $customDbConfig
      * @param array $expectedConfig
      * @dataProvider getDataProvider
+     * @throws ConfigException
      */
     public function testGet(
-        array $envenvConnectionsData,
+        array $envConnectionsData,
         array $customDbConfig,
         array $expectedConfig
     ) {
-        $this->setEnvConnectionData($envenvConnectionsData);
+        $this->setEnvConnectionData($envConnectionsData);
         $this->stageConfigMock->expects($this->once())
             ->method('get')
             ->with(DeployInterface::VAR_DATABASE_CONFIGURATION)
@@ -689,7 +691,7 @@ class DbConfigTest extends TestCase
                             'initStatements' => 'SET NAMES utf8;',
                             'active' => '1',
                         ],
-                        'sale' => [
+                        'sales' => [
                             'username' => 'some_username_sales',
                             'host' => 'some_host_sales:3308',
                             'dbname' => 'some_dbname_sales',
@@ -736,7 +738,7 @@ class DbConfigTest extends TestCase
                             'initStatements' => 'SET NAMES utf8;',
                             'active' => '1',
                         ],
-                        'sale' => [
+                        'sales' => [
                             'username' => 'some_username_sales',
                             'host' => 'some_host_sales:3308',
                             'dbname' => 'some_dbname_sales',
@@ -768,7 +770,7 @@ class DbConfigTest extends TestCase
                             'initStatements' => 'SET NAMES utf8;',
                             'active' => '1',
                         ],
-                        'sale' => [
+                        'sales' => [
                             'host' => 'some_host_sales_slave:3311',
                             'username' => 'some_username_sales_slave',
                             'dbname' => 'some_dbname_sales_slave',
@@ -811,7 +813,7 @@ class DbConfigTest extends TestCase
                             'dbname' => 'custom_dbname_quote',
                             'password' => 'custom_password_quote',
                         ],
-                        'sale' => [
+                        'sales' => [
                             'username' => 'custom_username_sales',
                             'host' => 'custom_host_sales:3355',
                             'dbname' => 'custom_dbname_sales',
@@ -831,7 +833,7 @@ class DbConfigTest extends TestCase
                             'dbname' => 'custom_dbname_quote_slave',
                             'password' => 'custom_password_quote_slave',
                         ],
-                        'sale' => [
+                        'sales' => [
                             'host' => 'custom_host_sales_slave:3388',
                             'username' => 'custom_username_sales_slave',
                             'dbname' => 'custom_dbname_sales_slave',
@@ -896,7 +898,7 @@ class DbConfigTest extends TestCase
                             'dbname' => 'custom_dbname_quote',
                             'password' => 'custom_password_quote',
                         ],
-                        'sale' => [
+                        'sales' => [
                             'username' => 'custom_username_sales',
                             'host' => 'custom_host_sales:3355',
                             'dbname' => 'custom_dbname_sales',
@@ -916,7 +918,7 @@ class DbConfigTest extends TestCase
                             'dbname' => 'custom_dbname_quote_slave',
                             'password' => 'custom_password_quote_slave',
                         ],
-                        'sale' => [
+                        'sales' => [
                             'host' => 'custom_host_sales_slave:3388',
                             'username' => 'custom_username_sales_slave',
                             'dbname' => 'custom_dbname_sales_slave',
@@ -948,7 +950,7 @@ class DbConfigTest extends TestCase
                             'initStatements' => 'SET NAMES utf8;',
                             'active' => '1',
                         ],
-                        'sale' => [
+                        'sales' => [
                             'host' => 'some_host_sales:3308',
                             'username' => 'some_username_sales',
                             'dbname' => 'some_dbname_sales',
@@ -976,7 +978,7 @@ class DbConfigTest extends TestCase
                             'initStatements' => 'SET NAMES utf8;',
                             'active' => '1',
                         ],
-                        'sale' => ['host' => 'some_host_sales_slave:3311',
+                        'sales' => ['host' => 'some_host_sales_slave:3311',
                             'username' => 'some_username_sales_slave',
                             'dbname' => 'some_dbname_sales_slave',
                             'password' => 'some_password_sales_slave',

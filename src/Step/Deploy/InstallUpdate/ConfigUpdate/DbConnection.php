@@ -175,22 +175,21 @@ class DbConnection implements StepInterface
             return;
         }
 
-        $this->updateSlaveConnectionsConfig($useSlave, $slaveIsAvailable);
-
         $customSplitConnections = $this->getDifferentConnections(
             $mageSplitConnectionsConfig,
             $dbConfig[DbConfig::KEY_CONNECTION]
         );
 
-        if (empty($customSplitConnections)) {
+        if (!empty($customSplitConnections)) {
+            $this->logger->warning(sprintf(
+                'For split databases used custom connections: %s',
+                implode(', ', $customSplitConnections)
+            ));
+            $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
             return;
         }
 
-        $this->logger->warning(sprintf(
-            'For split databases used custom connections: %s',
-            implode(', ', $customSplitConnections)
-        ));
-        $this->flagManager->set(FlagManager::FLAG_IGNORE_SPLIT_DB);
+        $this->updateSlaveConnectionsConfig($useSlave, $slaveIsAvailable);
     }
 
     /**

@@ -28,7 +28,7 @@ class SplitDbConnection implements StepInterface
      * Types of split database
      */
     const SPLIT_CONNECTION_MAP = [
-        DbConfig::CONNECTION_SALE => DeployInterface::SPLIT_DB_VALUE_SALES,
+        DbConfig::CONNECTION_SALES => DeployInterface::SPLIT_DB_VALUE_SALES,
         DbConfig::CONNECTION_CHECKOUT => DeployInterface::SPLIT_DB_VALUE_QUOTE,
     ];
 
@@ -108,8 +108,6 @@ class SplitDbConnection implements StepInterface
      */
     public function execute()
     {
-        $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
-
         if ($this->flagManager->exists(FlagManager::FLAG_IGNORE_SPLIT_DB)) {
             $this->logger->info(sprintf(
                 'Enabling a split database will be skipped. The flag %s was detected.',
@@ -118,6 +116,8 @@ class SplitDbConnection implements StepInterface
             $this->flagManager->delete(FlagManager::FLAG_IGNORE_SPLIT_DB);
             return;
         }
+
+        $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
 
         $dbConfig = $this->dbConfig->get();
         $notAvailableSplitTypes = $this->getMissedSplitTypes(

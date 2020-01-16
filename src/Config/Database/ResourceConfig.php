@@ -25,17 +25,8 @@ class ResourceConfig implements ConfigInterface
      * Names fo resources
      */
     const RESOURCE_CHECKOUT = 'checkout';
-    const RESOURCE_SALE = 'sale';
+    const RESOURCE_SALES = 'sales';
     const RESOURCE_DEFAULT_SETUP = 'default_setup';
-
-    /**
-     * Resource list
-     */
-    const RESOURCE_LIST = [
-        self::RESOURCE_CHECKOUT,
-        self::RESOURCE_SALE,
-        self::RESOURCE_DEFAULT_SETUP,
-    ];
 
     /**
      * Resources map
@@ -43,7 +34,7 @@ class ResourceConfig implements ConfigInterface
     const RESOURCE_MAP = [
         DbConfig::CONNECTION_DEFAULT => self::RESOURCE_DEFAULT_SETUP,
         DbConfig::CONNECTION_CHECKOUT => self::RESOURCE_CHECKOUT,
-        DbConfig::CONNECTION_SALE => self::RESOURCE_SALE,
+        DbConfig::CONNECTION_SALES => self::RESOURCE_SALES,
     ];
 
     /**

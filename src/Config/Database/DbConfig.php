@@ -42,7 +42,7 @@ class DbConfig implements ConfigInterface
     const CONNECTION_DEFAULT = 'default';
     const CONNECTION_INDEXER = 'indexer';
     const CONNECTION_CHECKOUT = 'checkout';
-    const CONNECTION_SALE = 'sale';
+    const CONNECTION_SALES = 'sales';
 
     /**
      * Types of connections
@@ -57,7 +57,7 @@ class DbConfig implements ConfigInterface
     /**
      * Split connections
      */
-    const SPLIT_CONNECTIONS = [self::CONNECTION_CHECKOUT, self::CONNECTION_SALE];
+    const SPLIT_CONNECTIONS = [self::CONNECTION_CHECKOUT, self::CONNECTION_SALES];
 
     /**
      * Main connection map with data from environment relationship connections:
@@ -67,7 +67,7 @@ class DbConfig implements ConfigInterface
         self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_MAIN,
         self::CONNECTION_INDEXER => RelationshipConnectionFactory::CONNECTION_MAIN,
         self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
-        self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
+        self::CONNECTION_SALES => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
     ];
 
     /**
@@ -77,7 +77,7 @@ class DbConfig implements ConfigInterface
     const SLAVE_CONNECTION_MAP = [
         self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_SLAVE,
         self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE,
-        self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
+        self::CONNECTION_SALES => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
     ];
 
     /**

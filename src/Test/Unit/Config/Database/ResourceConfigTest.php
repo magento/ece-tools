@@ -151,7 +151,7 @@ class ResourceConfigTest extends TestCase
                         'default' => [],
                         'indexer' => [],
                         'checkout' => [],
-                        'sale' => [],
+                        'sales' => [],
                     ]
                 ],
                 'expectedResult' => [
@@ -161,8 +161,8 @@ class ResourceConfigTest extends TestCase
                     'checkout' => [
                         'connection' => 'checkout',
                     ],
-                    'sale' => [
-                        'connection' => 'sale',
+                    'sales' => [
+                        'connection' => 'sales',
                     ],
                 ],
             ],
@@ -172,8 +172,8 @@ class ResourceConfigTest extends TestCase
                     'checkout' => [
                         'connection' => 'checkout',
                     ],
-                    'sale' => [
-                        'connection' => 'sale',
+                    'sales' => [
+                        'connection' => 'sales',
                     ],
                 ],
                 'dbConfig' => [
@@ -194,8 +194,8 @@ class ResourceConfigTest extends TestCase
                     'checkout' => [
                         'connection' => 'checkout',
                     ],
-                    'sale' => [
-                        'connection' => 'sale',
+                    'sales' => [
+                        'connection' => 'sales',
                     ],
                 ],
                 'dbConfig' => [
