@@ -288,8 +288,6 @@ ERROR_REPORT_DIR_NESTING_LEVEL:
     to create in the `<magento_root>/var/report/` directory before saving the error report.
     A value of this property will be ignored in case when the file `<magento_root>/errors/local.xml` exists in a git repository
   type: integer
-  allowed:
-    - "0 - 32"
   validators:
     - class: 'Magento\MagentoCloud\Config\Schema\Validator\Range'
       from: 0
