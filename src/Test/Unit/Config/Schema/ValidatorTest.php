@@ -104,9 +104,9 @@ class ValidatorTest extends TestCase
                 Schema::SCHEMA_DEFAULT_VALUE => [
                     StageConfigInterface::STAGE_GLOBAL => 'test',
                 ],
-                Schema::SCHEMA_VALUE_VALIDATORS => [
-                    'ErrorValidator'
-                ]
+                Schema::SCHEMA_VALUE_VALIDATORS => [[
+                    'class' => 'ErrorValidator'
+                ]]
             ],
         ];
 

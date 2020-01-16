@@ -23,6 +23,7 @@ class Schema
     public const SCHEMA_SYSTEM = 'system';
     public const SCHEMA_DEFAULT_VALUE = 'default';
     public const SCHEMA_DESCRIPTION = 'description';
+    public const SCHEMA_DUMP = 'dump';
     public const SCHEMA_MAGENTO_VERSION = 'magento_version';
     public const SCHEMA_EXAMPLES = 'examples';
 
@@ -88,30 +89,9 @@ class Schema
      */
     public function getSchema(): array
     {
-        $schema = $this->parser->parseFile(
+        return $this->parser->parseFile(
             $this->systemList->getConfig() . '/schema.yaml',
             Yaml::PARSE_CONSTANT
         );
-
-        return array_replace($schema, [
-            StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => [
-                self::SCHEMA_TYPE => 'string',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => '',
-                ],
-            ],
-            StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [
-                self::SCHEMA_TYPE => 'array',
-                self::SCHEMA_STAGES => [
-                    StageConfigInterface::STAGE_GLOBAL
-                ],
-                self::SCHEMA_DEFAULT_VALUE => [
-                    StageConfigInterface::STAGE_GLOBAL => [],
-                ],
-            ],
-        ]);
     }
 }

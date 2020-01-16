@@ -1,6 +1,6 @@
 # Stage variables
 VERBOSE_COMMANDS:
-  description: "Adjust the output verbosity level of Magento commands."
+  description: Adjust the output verbosity level of Magento commands.
   type: string
   allowed:
     - ''
@@ -22,10 +22,8 @@ VERBOSE_COMMANDS:
         deploy:
           VERBOSE_COMMANDS: '-vvv'
 SCD_COMPRESSION_LEVEL:
-  description: "Gzip compression level (0 to 9) to use when compressing static content; 0 disables compression."
+  description: Gzip compression level (0 to 9) to use when compressing static content; 0 disables compression.
   type: integer
-  allowed:
-    - "0 - 9"
   validators:
       - class: 'Magento\MagentoCloud\Config\Schema\Validator\Range'
         from: 0
@@ -42,7 +40,7 @@ SCD_COMPRESSION_LEVEL:
         build:
           SCD_COMPRESSION_LEVEL: 8
 SCD_COMPRESSION_TIMEOUT:
-  description: "The maximum time (in seconds) allowed for compressing static content."
+  description: The maximum time (in seconds) allowed for compressing static content.
   type: integer
   stages:
     - global
@@ -56,10 +54,10 @@ SCD_COMPRESSION_TIMEOUT:
         build:
           SCD_COMPRESSION_TIMEOUT: 900
 SCD_STRATEGY:
-  description: "Customize the deployment strategy for static content. The value \"standard\" will deploy all static view
-    files for all packages, \"quick\" will minimize deployment time, and \"compact\" will conserve space on the server.
+  description: Customize the deployment strategy for static content. The value "standard" will deploy all static view
+    files for all packages, "quick" will minimize deployment time, and "compact" will conserve space on the server.
     Compact is not compatible with multi-threaded deployment and will set the value of `SCD_THREADS` to 1. The default
-    value is \"quick\"."
+    value is "quick".
   type: string
   magento_version: '>=2.2.0'
   allowed:
@@ -78,7 +76,7 @@ SCD_STRATEGY:
         build:
           SCD_STRATEGY: compact
 SCD_THREADS:
-  description: "The number of threads for static content deployment"
+  description: The number of threads for static content deployment
   type: integer
   stages:
     - global
@@ -92,9 +90,9 @@ SCD_THREADS:
         global:
           SCD_THREADS: 2
 SCD_MAX_EXECUTION_TIME:
-  description: "Allows you to increase the maximum expected execution time for the static content deploy command.
+  description: Allows you to increase the maximum expected execution time for the static content deploy command.
     By default, Magento Commerce sets the maximum expected execution to 400 seconds, but in some scenarios you might
-    need more time to complete the static content deployment for a Cloud project."
+    need more time to complete the static content deployment for a Cloud project.
   type: integer
   magento_version: '>=2.2.0'
   stages:
@@ -109,10 +107,10 @@ SCD_MAX_EXECUTION_TIME:
         global:
           SCD_MAX_EXECUTION_TIME: 3600
 SCD_MATRIX:
-  description: "Allows you to configure multiple locales per theme as long as the theme is not excluded using
+  description: Allows you to configure multiple locales per theme as long as the theme is not excluded using
     the SCD_EXCLUDE_THEMES variable during deployment. This is ideal if you want to speed up the deployment process
     by reducing the amount of unnecessary theme files. For example, you can deploy the magento/backend theme in
-    English and a custom theme in other languages."
+    English and a custom theme in other languages.
   type: array
   stages:
     - global
@@ -137,7 +135,7 @@ SCD_MATRIX:
           SCD_MATRIX:
             magento/backend: []
 SKIP_SCD:
-  description: "Skips static content deployment during the build/deploy phase."
+  description: Skips static content deployment during the build/deploy phase.
   type: boolean
   stages:
     - global
@@ -151,9 +149,9 @@ SKIP_SCD:
         build:
           SKIP_SCD: true
 SKIP_HTML_MINIFICATION:
-  description: "Skip copying the static view files in the var/view_preprocessed directory
+  description: Skip copying the static view files in the var/view_preprocessed directory
     to reduce downtime when deploying to the Staging and Production environments
-    and generates minified HTML when requested."
+    and generates minified HTML when requested.
   type: boolean
   stages:
     - global
@@ -164,8 +162,8 @@ SKIP_HTML_MINIFICATION:
         global:
           SKIP_HTML_MINIFICATION: true
 SCD_ON_DEMAND:
-  description: "Enable generation of static content when requested by a user.
-    Pre-loading the cache using the post_deploy hook reduces site downtime."
+  description: Enable generation of static content when requested by a user.
+    Pre-loading the cache using the post_deploy hook reduces site downtime.
   type: boolean
   stages:
     - global
@@ -176,10 +174,10 @@ SCD_ON_DEMAND:
       global:
         SCD_ON_DEMAND: true
 MIN_LOGGING_LEVEL:
-  description: "Use to override the minimum logging level for all output streams without making changes to the code.
+  description: Use to override the minimum logging level for all output streams without making changes to the code.
     This helps to improve troubleshooting problems with deployment. For example, if your deployment fails,
     you can use this variable to increase the logging granularity globally. Doesn't affect log level for the file output.
-    See Set up notifications—Log levels."
+    See Set up notifications—Log levels.
   type: string
   allowed:
     - ''
@@ -200,9 +198,9 @@ MIN_LOGGING_LEVEL:
         global:
           MIN_LOGGING_LEVEL: debug
 LOCK_PROVIDER:
-  description: "Use to set the lock provider. The lock provider prevents the launch of duplicate cron jobs and cron groups.
+  description: Use to set the lock provider. The lock provider prevents the launch of duplicate cron jobs and cron groups.
     You must use the file lock provider in the Production environment. Starter environments and the Pro Integration
-    environment do not use the MAGENTO_CLOUD_LOCKS_DIR variable, so ece-tools applies the db lock provider automatically."
+    environment do not use the MAGENTO_CLOUD_LOCKS_DIR variable, so ece-tools applies the db lock provider automatically.
   type: string
   stages:
     - global
@@ -217,9 +215,9 @@ LOCK_PROVIDER:
         deploy:
           LOCK_PROVIDER: db
 REDIS_USE_SLAVE_CONNECTION:
-  description: "Set to true to automatically use a read-only connection to a Redis instance to receive read-only
+  description: Set to true to automatically use a read-only connection to a Redis instance to receive read-only
     traffic on a non-master node. This improves performance through load balancing because only one node needs to
-    handle read-write traffic."
+    handle read-write traffic.
   type: boolean
   stages:
     - global
@@ -231,9 +229,9 @@ REDIS_USE_SLAVE_CONNECTION:
         deploy:
           REDIS_USE_SLAVE_CONNECTION: true
 MYSQL_USE_SLAVE_CONNECTION:
-  description: "Set to true to automatically use a read-only connection to the database to receive read-only traffic on
+  description: Set to true to automatically use a read-only connection to the database to receive read-only traffic on
     a non-master node. This improves performance through load balancing, because only one node needs to
-    handle read-write traffic."
+    handle read-write traffic.
   type: boolean
   stages:
     - global
@@ -245,10 +243,10 @@ MYSQL_USE_SLAVE_CONNECTION:
         deploy:
           MYSQL_USE_SLAVE_CONNECTION: true
 UPDATE_URLS:
-  description: "On deployment, replace Magento base URLs in the database with project URLs. This is useful for local
+  description: On deployment, replace Magento base URLs in the database with project URLs. This is useful for local
     development, where base URLs are set up for your local environment. When you deploy to a Cloud environment,
     we change the URLs so you can access your storefront and Magento Admin using project URLs.
-    To update URLs when deploying to Staging or Production environments, use the FORCE_UPDATE_URLS variable."
+    To update URLs when deploying to Staging or Production environments, use the FORCE_UPDATE_URLS variable.
   type: boolean
   stages:
     - global
@@ -273,8 +271,8 @@ FORCE_UPDATE_URLS:
       deploy:
         FORCE_UPDATE_URLS: true
 CLEAN_STATIC_FILES:
-  description: "Cleans generated static files. By specifying the value of this configuration to \"false\",
-    you can leave the static files which were generated during the previous deployment."
+  description: Cleans generated static files. By specifying the value of this configuration to "false",
+    you can leave the static files which were generated during the previous deployment.
   type: boolean
   stages:
     - global
@@ -286,9 +284,9 @@ CLEAN_STATIC_FILES:
         deploy:
           CLEAN_STATIC_FILES: false
 ERROR_REPORT_DIR_NESTING_LEVEL:
-  description: "Subdirectory nesting level, which determines the number of nested subdirectories
+  description: Subdirectory nesting level, which determines the number of nested subdirectories
     to create in the `<magento_root>/var/report/` directory before saving the error report.
-    A value of this property will be ignored in case when the file `<magento_root>/errors/local.xml` exists in a git repository"
+    A value of this property will be ignored in case when the file `<magento_root>/errors/local.xml` exists in a git repository
   type: integer
   allowed:
     - "0 - 32"
@@ -324,6 +322,29 @@ SEARCH_CONFIGURATION:
             elasticsearch_server_port: '123456'
             elasticsearch_index_prefix: magento
             elasticsearch_server_timeout: '15'
+ELASTICSUITE_CONFIGURATION:
+  description: "Customize ElasticSuite service configuration stored in the 'system/default/smile_elasticsuite_core_base_settings'
+    section of the config.php file. To replace the existing configuration, specify values for each configuration option
+    required for your environment. To modify the existing configuration, specify values only for the options to add or update.
+    Then, add the `_merge: true` option."
+  magento_version: '>=2.2.0'
+  type: array
+  stages:
+    - deploy
+  default:
+    deploy: []
+  examples:
+    - comment: Default value depends on template configuration of ElasticSearch (i.e. default number of replicas and shards)
+        and ElasticSearch host.
+      stage:
+        deploy:
+          ELASTICSUITE_CONFIGURATION:
+            _merge: false if true configuration merging with default"
+            es_client:
+              servers: 'remote-host:9200'
+            indices_settings:
+              number_of_shards: 3
+              number_of_replicas: 3
 QUEUE_CONFIGURATION:
   description: "Replace or modify the AMQP configuration generated during the deployment process. This configuration
     is generated only if your project has been configured with a RabbitMQ service. To replace the existing
@@ -476,13 +497,13 @@ CRON_CONSUMERS_RUNNER:
               - consumer1
               - consumer2
 CONSUMERS_WAIT_FOR_MAX_MESSAGES:
-  description: "Use this variable to configure how consumers process messages. If this value is true, a consumer waits
+  description: Use this variable to configure how consumers process messages. If this value is true, a consumer waits
     to process the number of messages (max_messages) from the message queue specified in the CRONS_CONSUMERS_RUNNER
     variable before closing the connection and terminating consumer process. If you use workers to run consumers
     instead of using a cron job, set the CONSUMERS_WAIT_FOR_MAX_MESSAGES variable to true.
     If this value is false, consumers process available messages in the queue, close the TCP connection and terminate.
     Consumers do not wait for additional messages to enter the queue, even if the number of processed messages
-    is less than the max_messages value."
+    is less than the max_messages value.
   magento_version: '>=2.2.0'
   type: boolean
   stages:
@@ -494,22 +515,21 @@ CONSUMERS_WAIT_FOR_MAX_MESSAGES:
         deploy:
           CONSUMERS_WAIT_FOR_MAX_MESSAGES: true
 ENABLE_GOOGLE_ANALYTICS:
-  description: "Prevents the disabling of Google Analytics.  By default, Google Analytics is enabled only
+  description: Prevents the disabling of Google Analytics.  By default, Google Analytics is enabled only
     on Production environments. Set this value to true to enable Google Analytics on other environments as well.
-    Google Analytics is always enabled in Production."
+    Google Analytics is always enabled in Production.
   type: boolean
   stages:
     - deploy
     - global
   default:
     deploy: false
-    global: false
   examples:
     - stage:
         deploy:
           ENABLE_GOOGLE_ANALYTICS: false
 GENERATED_CODE_SYMLINK:
-  description: "Generates symlinks for the var/generation and var/di generated folders."
+  description: Generates symlinks for the var/generation and var/di generated folders.
   magento_version: '2.1.*'
   type: boolean
   stages:
@@ -521,7 +541,7 @@ GENERATED_CODE_SYMLINK:
         deploy:
           GENERATED_CODE_SYMLINK: false
 WARM_UP_PAGES:
-  description: "Customize the list of pages used to preload the cache in the post_deploy stage."
+  description: Customize the list of pages used to preload the cache in the post_deploy stage.
   type: array
   stages:
     - post-deploy
@@ -534,7 +554,7 @@ WARM_UP_PAGES:
             - "index.php"
             - "index.php/customer/account/create"
 TTFB_TESTED_PAGES:
-  description: "List pages you wish to perform time to first byte (TTFB) testing on"
+  description: List pages you wish to perform time to first byte (TTFB) testing on
   type: array
   stages:
     - post-deploy
@@ -615,3 +635,21 @@ ENV_ENVIRONMENT:
     - system:
         variables:
           ENV_ENVIRONMENT: MAGENTO_CLOUD_ENVIRONMENT
+
+# Dev variables
+DEPLOYED_MAGENTO_VERSION_FROM_GIT:
+  dump: false
+  description: Magento version for installation from git
+  type: string
+  stage:
+    - global
+  default:
+    global: ""
+DEPLOY_FROM_GIT_OPTIONS:
+  dump: false
+  description: Options for installation from git
+  type: array
+  stage:
+      - global
+  default:
+    global: []

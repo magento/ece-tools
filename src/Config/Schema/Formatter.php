@@ -39,6 +39,10 @@ class Formatter implements FormatterInterface
         $text = '';
 
         foreach ($data as $key => $item) {
+            if (isset($item[Schema::SCHEMA_DUMP]) && !$item[Schema::SCHEMA_DUMP]) {
+                continue;
+            }
+
             $description = $item[Schema::SCHEMA_DESCRIPTION] ?? 'N/A';
             $magentoVersion = $item[Schema::SCHEMA_MAGENTO_VERSION] ?? '>=' . MagentoVersion::MIN_VERSION;
 
@@ -77,7 +81,7 @@ class Formatter implements FormatterInterface
                         unset($example[Schema::SCHEMA_EXAMPLE_COMMENT]);
                     }
 
-                    $text .= $this->wrapCode($this->dumper->dump($example, 6, 0));
+                    $text .= $this->wrapCode($this->dumper->dump($example, 6, 2));
                 }
             }
         }

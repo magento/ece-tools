@@ -21,12 +21,12 @@ class Range implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var int
+     * @var integer
      */
     private $from;
 
     /**
-     * @var int
+     * @var integer
      */
     private $to;
 
@@ -47,7 +47,7 @@ class Range implements ValidatorInterface
      */
     public function validate(string $key, $value): ResultInterface
     {
-        if (!in_array($value, range($this->from, $this->to), false)) {
+        if ($value < $this->from || $value > $this->to) {
             return $this->resultFactory->error(sprintf(
                 'The %s variable contains an invalid value %d. ' .
                 'Use an integer value from %d to %d.',
