@@ -3,11 +3,6 @@
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
            xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <parameters>
-        <parameter key="error_level_warning">300</parameter>
-        <parameter key="error_level_notice">250</parameter>
-    </parameters>
-
     <services>
         <defaults autowire="true" autoconfigure="true" public="true" />
         <!-- ... -->
@@ -68,10 +63,14 @@
         <service id="Magento\MagentoCloud\Step\ValidateConfiguration" autowire="false" />
         <service id="Psr\Log\LoggerInterface" alias="Magento\MagentoCloud\App\Logger" />
         <service id="ServiceEol.Warnings" class="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol">
-            <argument key="$errorLevel">%error_level_warning</argument>
+            <argument key="$errorLevel" type="constant">
+                Magento\MagentoCloud\Config\ValidatorInterface::LEVEL_WARNING
+            </argument>
         </service>
         <service id="ServiceEol.Notices" class="Magento\MagentoCloud\Config\Validator\Deploy\ServiceEol">
-            <argument key="$errorLevel">%error_level_notice</argument>
+            <argument key="$errorLevel" type="constant">
+                Magento\MagentoCloud\Config\ValidatorInterface::LEVEL_NOTICE
+            </argument>
         </service>
         <service id="Symfony\Component\Serializer\Encoder\XmlEncoder"/>
     </services>
