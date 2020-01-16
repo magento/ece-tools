@@ -12,6 +12,7 @@ use Magento\MagentoCloud\Config\Schema\FormatterInterface;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,17 +45,25 @@ class GenerateSchema extends Command
     private $schema;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
+     * @param LoggerInterface $logger
      * @param FormatterInterface $formatter
      * @param File $file
      * @param FileList $fileList
      * @param Schema $schema
      */
     public function __construct(
+        LoggerInterface $logger,
         FormatterInterface $formatter,
         File $file,
         FileList $fileList,
         Schema $schema
     ) {
+        $this->logger = $logger;
         $this->formatter = $formatter;
         $this->file = $file;
         $this->fileList = $fileList;
@@ -82,9 +91,13 @@ class GenerateSchema extends Command
     {
         $data = $this->schema->getSchema();
 
+        $this->logger->info('Starting schema dist file generation');
+
         $this->file->filePutContents(
             $this->fileList->getEnvDistConfig(),
             $this->formatter->format($data)
         );
+
+        $this->logger->info(sprintf('Dist file was successfully generated: %s', $this->fileList->getEnvDistConfig()));
     }
 }

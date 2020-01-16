@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Filesystem\FileList;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -47,16 +48,23 @@ class GenerateSchemaTest extends TestCase
     private $schemaMock;
 
     /**
+     * @var LoggerInterface|MockObject
+     */
+    private $loggerMock;
+
+    /**
      * @inheritDoc
      */
     protected function setUp(): void
     {
+        $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->formatterMock = $this->createMock(Schema\Formatter::class);
         $this->fileMock = $this->createMock(File::class);
         $this->fileListMock = $this->createMock(FileList::class);
         $this->schemaMock = $this->createMock(Schema::class);
 
         $this->command = new GenerateSchema(
+            $this->loggerMock,
             $this->formatterMock,
             $this->fileMock,
             $this->fileListMock,
@@ -71,6 +79,8 @@ class GenerateSchemaTest extends TestCase
         /** @var OutputInterface|MockObject $output */
         $output = $this->getMockForAbstractClass(OutputInterface::class);
 
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info');
         $this->schemaMock->method('getSchema')
             ->willReturn(['some' => 'schema']);
         $this->fileListMock->method('getEnvDistConfig')
