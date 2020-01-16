@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
+use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\Util\BackgroundProcess;
@@ -54,24 +55,32 @@ class DbDump extends Command
     private $cronSwitcher;
 
     /**
+     * @var JobUnlocker
+     */
+    private $jobUnlocker;
+
+    /**
      * @param DumpGenerator $dumpGenerator
      * @param LoggerInterface $logger
      * @param MaintenanceModeSwitcher $maintenanceModeSwitcher
      * @param Switcher $cronSwitcher
      * @param BackgroundProcess $backgroundProcess
+     * @param JobUnlocker $jobUnlocker
      */
     public function __construct(
         DumpGenerator $dumpGenerator,
         LoggerInterface $logger,
         MaintenanceModeSwitcher $maintenanceModeSwitcher,
         Switcher $cronSwitcher,
-        BackgroundProcess $backgroundProcess
+        BackgroundProcess $backgroundProcess,
+        JobUnlocker $jobUnlocker
     ) {
         $this->dumpGenerator = $dumpGenerator;
         $this->logger = $logger;
         $this->maintenanceModeSwitcher = $maintenanceModeSwitcher;
         $this->cronSwitcher = $cronSwitcher;
         $this->backgroundProcess = $backgroundProcess;
+        $this->jobUnlocker = $jobUnlocker;
 
         parent::__construct();
     }
@@ -132,6 +141,7 @@ class DbDump extends Command
 
             throw $exception;
         } finally {
+            $this->jobUnlocker->unlockAll('The job is terminated due to database dump');
             $this->cronSwitcher->enable();
             $this->maintenanceModeSwitcher->disable();
         }
