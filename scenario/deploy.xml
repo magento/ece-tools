@@ -70,8 +70,8 @@
                 <item name="lock" xsi:type="object" priority="1000">Magento\MagentoCloud\Step\Deploy\InstallUpdate\ConfigUpdate\Lock</item>
                 <!-- Config update end -->
                 <item name="config-import" xsi:type="object" priority="1100">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ConfigImport</item>
-                <item name="split-db" xsi:type="object" priority="1200">Magento\MagentoCloud\Step\Deploy\SplitDbConnection</item>
-                <item name="reset-password" xsi:type="object" priority="1300">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ResetPassword</item>
+                <item name="split-db" xsi:type="object" priority="1150">Magento\MagentoCloud\Step\Deploy\SplitDbConnection</item>
+                <item name="reset-password" xsi:type="object" priority="1200">Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ResetPassword</item>
             </argument>
             <argument name="updateSteps" xsi:type="array">
                 <!-- Config update start -->

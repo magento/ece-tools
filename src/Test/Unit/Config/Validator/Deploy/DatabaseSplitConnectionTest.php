@@ -84,7 +84,7 @@ class DatabaseSplitConnectionTest extends TestCase
                 . '- slave_connection: checkout' . PHP_EOL
                 . '- slave_connection: sales' . PHP_EOL
                 . 'Magento Cloud does not support a custom split database configuration,'
-                .' such configurations will be ignored');
+                . ' such configurations will be ignored');
 
         $this->assertInstanceOf(Error::class, $this->validator->validate());
     }
