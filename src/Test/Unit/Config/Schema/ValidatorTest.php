@@ -105,7 +105,9 @@ class ValidatorTest extends TestCase
                     StageConfigInterface::STAGE_GLOBAL => 'test',
                 ],
                 Schema::SCHEMA_VALUE_VALIDATORS => [[
-                    'class' => 'ErrorValidator'
+                    'class' => 'ErrorValidator',
+                    'arg1' => 'value1',
+                    'arg2' => 'value2',
                 ]]
             ],
         ];
@@ -115,7 +117,7 @@ class ValidatorTest extends TestCase
             ->willReturn(new Error('Some error'));
 
         $this->validatorFactoryMock->method('create')
-            ->with('ErrorValidator')
+            ->with('ErrorValidator', ['value1', 'value2'])
             ->willReturn($mockValidatorError);
         $this->schemaMock->expects($this->once())
             ->method('getSchema')
