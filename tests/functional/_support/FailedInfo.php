@@ -16,9 +16,9 @@ use Codeception\Event\FailEvent;
  */
 class FailedInfo extends Extension
 {
-    public static $events = array(
+    public static $events = [
         Events::TEST_FAIL => 'testFailed'
-    );
+    ];
 
     /**
      * Method to handle failed tests.
