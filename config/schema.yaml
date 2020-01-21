@@ -311,7 +311,7 @@ SEARCH_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - comment: If `_merge` is true configuration merging with default
+    - comment: If `_merge` is true configuration is being merged with the default
       stage:
         deploy:
           SEARCH_CONFIGURATION:
@@ -335,7 +335,7 @@ ELASTICSUITE_CONFIGURATION:
   examples:
     - comment: Default value depends on template configuration of ElasticSearch (i.e. default number of replicas and shards)
         and ElasticSearch host.
-        If `_merge` is true configuration merging with default.
+        If `_merge` is true configuration is being merged with the default.
       stage:
         deploy:
           ELASTICSUITE_CONFIGURATION:
@@ -357,7 +357,7 @@ QUEUE_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - comment: If `_merge` is true configuration merging with default
+    - comment: If `_merge` is true configuration is being merged with the default
       stage:
         deploy:
           QUEUE_CONFIGURATION:
@@ -381,7 +381,7 @@ CACHE_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - comment: If `_merge` is true configuration merging with default
+    - comment: If `_merge` is true configuration is being merged with the default
       stage:
         deploy:
           CACHE_CONFIGURATION:
@@ -403,7 +403,7 @@ SESSION_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - comment: If `_merge` is true configuration merging with default
+    - comment: If `_merge` is true configuration is being merged with the default
       stage:
         deploy:
           SESSION_CONFIGURATION:
@@ -430,7 +430,7 @@ DATABASE_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - comment: If `_merge` is true configuration merging with default
+    - comment: If `_merge` is true configuration is being merged with the default
       stage:
         deploy:
           DATABASE_CONFIGURATION:
@@ -471,7 +471,7 @@ RESOURCE_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - comment: If `_merge` is true configuration merging with default
+    - comment: If `_merge` is true configuration is being merged with the default
       stage:
         deploy:
           RESOURCE_CONFIGURATION:
