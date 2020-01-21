@@ -53,7 +53,7 @@ class FormatterTest extends TestCase
                 Schema::SCHEMA_STAGES => [
                     'global'
                 ],
-                Schema::SCHEMA_DUMP => false
+                Schema::SCHEMA_SKIP_DUMP => true
             ],
         ];
         $expected = file_get_contents(__DIR__ . '/_files/.magento.env.md');

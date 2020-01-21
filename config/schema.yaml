@@ -311,10 +311,11 @@ SEARCH_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - stage:
+    - comment: If `_merge` is true configuration merging with default
+      stage:
         deploy:
           SEARCH_CONFIGURATION:
-            _merge: false if true configuration merging with default
+            _merge: false
             engine: elasticsearch
             elasticsearch_server_hostname: hostname
             elasticsearch_server_port: '123456'
@@ -334,10 +335,11 @@ ELASTICSUITE_CONFIGURATION:
   examples:
     - comment: Default value depends on template configuration of ElasticSearch (i.e. default number of replicas and shards)
         and ElasticSearch host.
+        If `_merge` is true configuration merging with default.
       stage:
         deploy:
           ELASTICSUITE_CONFIGURATION:
-            _merge: false if true configuration merging with default"
+            _merge: false
             es_client:
               servers: 'remote-host:9200'
             indices_settings:
@@ -355,10 +357,11 @@ QUEUE_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - stage:
+    - comment: If `_merge` is true configuration merging with default
+      stage:
         deploy:
           QUEUE_CONFIGURATION:
-            _merge: false if true configuration merging with default
+            _merge: false
             amqp:
               host: test.host
               port: 1234
@@ -378,10 +381,11 @@ CACHE_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - stage:
+    - comment: If `_merge` is true configuration merging with default
+      stage:
         deploy:
           CACHE_CONFIGURATION:
-            _merge: false if true configuration merging with default
+            _merge: false
             frontend:
               default:
                 backend: file
@@ -399,10 +403,11 @@ SESSION_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - stage:
+    - comment: If `_merge` is true configuration merging with default
+      stage:
         deploy:
           SESSION_CONFIGURATION:
-            _merge: false if true configuration merging with default
+            _merge: false
             redis:
               bot_first_lifetime: 100
               bot_lifetime: 10001
@@ -425,10 +430,11 @@ DATABASE_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - stage:
+    - comment: If `_merge` is true configuration merging with default
+      stage:
         deploy:
           DATABASE_CONFIGURATION:
-            _merge: false if true configuration merging with default
+            _merge: false
             connection:
               default:
                 username: user
@@ -465,10 +471,11 @@ RESOURCE_CONFIGURATION:
   default:
     deploy: []
   examples:
-    - stage:
+    - comment: If `_merge` is true configuration merging with default
+      stage:
         deploy:
           RESOURCE_CONFIGURATION:
-            _merge: false  if true configuration merging with default
+            _merge: false
             default_setup:
               connection: default
 CRON_CONSUMERS_RUNNER:
@@ -551,6 +558,7 @@ WARM_UP_PAGES:
           WARM_UP_PAGES:
             - "index.php"
             - "index.php/customer/account/create"
+            - "https://example.com/catalog/some-category"
 TTFB_TESTED_PAGES:
   description: List pages you wish to perform time to first byte (TTFB) testing on
   type: array
@@ -636,7 +644,7 @@ ENV_ENVIRONMENT:
 
 # Dev variables
 DEPLOYED_MAGENTO_VERSION_FROM_GIT:
-  dump: false
+  skip_dump: true
   description: Magento version for installation from git
   type: string
   stages:
@@ -644,7 +652,7 @@ DEPLOYED_MAGENTO_VERSION_FROM_GIT:
   default:
     global: ""
 DEPLOY_FROM_GIT_OPTIONS:
-  dump: false
+  skip_dump: true
   description: Options for installation from git
   type: array
   stages:

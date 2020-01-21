@@ -23,7 +23,7 @@ class Schema
     public const SCHEMA_SYSTEM = 'system';
     public const SCHEMA_DEFAULT_VALUE = 'default';
     public const SCHEMA_DESCRIPTION = 'description';
-    public const SCHEMA_DUMP = 'dump';
+    public const SCHEMA_SKIP_DUMP = 'skip_dump';
     public const SCHEMA_MAGENTO_VERSION = 'magento_version';
     public const SCHEMA_EXAMPLES = 'examples';
 

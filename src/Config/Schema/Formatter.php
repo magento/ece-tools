@@ -39,7 +39,7 @@ class Formatter implements FormatterInterface
         $text = '';
 
         foreach ($data as $key => $item) {
-            if (isset($item[Schema::SCHEMA_DUMP]) && !$item[Schema::SCHEMA_DUMP]) {
+            if (!empty($item[Schema::SCHEMA_SKIP_DUMP])) {
                 continue;
             }
 
