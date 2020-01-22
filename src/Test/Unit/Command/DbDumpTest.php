@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Test\Unit\Command;
 
 use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Command\DbDump;
+use Magento\MagentoCloud\Cron\JobUnlocker;
 use Magento\MagentoCloud\Cron\Switcher;
 use Magento\MagentoCloud\DB\DumpGenerator;
 use Magento\MagentoCloud\Util\BackgroundProcess;
@@ -66,6 +67,11 @@ class DbDumpTest extends TestCase
     private $cronSwitcherMock;
 
     /**
+     * @var JobUnlocker|MockObject
+     */
+    private $jobUnlockerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -75,6 +81,7 @@ class DbDumpTest extends TestCase
         $this->maintenanceModeSwitcherMock = $this->createMock(MaintenanceModeSwitcher::class);
         $this->cronSwitcherMock = $this->createMock(Switcher::class);
         $this->backgroundProcessMock = $this->createMock(BackgroundProcess::class);
+        $this->jobUnlockerMock = $this->createMock(JobUnlocker::class);
 
         $this->questionMock = $this->getMockBuilder(QuestionHelper::class)
             ->setMethods(['ask'])
@@ -90,7 +97,8 @@ class DbDumpTest extends TestCase
             $this->loggerMock,
             $this->maintenanceModeSwitcherMock,
             $this->cronSwitcherMock,
-            $this->backgroundProcessMock
+            $this->backgroundProcessMock,
+            $this->jobUnlockerMock
         );
         $this->command->setHelperSet($this->helperSetMock);
     }
@@ -213,6 +221,8 @@ class DbDumpTest extends TestCase
         $this->dumpGeneratorMock->expects($this->once())
             ->method('create')
             ->willThrowException(new \Exception('Some error'));
+        $this->jobUnlockerMock->expects($this->once())
+            ->method('unlockAll');
 
         $tester = new CommandTester(
             $this->command
