@@ -115,7 +115,7 @@ class DbDump extends Command
             $helper = $this->getHelper('question');
 
             $questionParts = [
-                'The db-dump command switches the site to maintenance mode during the dump process.',
+                'The db-dump operation switches the site to maintenance mode, stops all active cron jobs and consumer queue processes and disables cron jobs before starting the the dump process.',
                 'Your site will not receive any traffic until the operation completes.',
                 'Do you wish to proceed with this process? (y/N)?',
             ];
