@@ -344,7 +344,8 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
             }
         }
 
-        $commands[] = $this->taskComposerUpdate('composer');
+        $commands[] = $this->taskComposerUpdate('composer')
+            ->getCommand();
 
         $result = $this->taskBash(self::BUILD_CONTAINER)
             ->workingDir((string)$this->_getConfig('system_magento_dir'))
