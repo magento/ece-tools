@@ -11,9 +11,9 @@ use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\Validator\ResultInterface;
 
 /**
- * Validates the compression level value
+ * Validates the range value
  */
-class CompressionLevel implements ValidatorInterface
+class Range implements ValidatorInterface
 {
     /**
      * @var ResultFactory
@@ -21,11 +21,25 @@ class CompressionLevel implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @param ResultFactory $resultFactory
+     * @var integer
      */
-    public function __construct(ResultFactory $resultFactory)
+    private $from;
+
+    /**
+     * @var integer
+     */
+    private $to;
+
+    /**
+     * @param ResultFactory $resultFactory
+     * @param int $from
+     * @param int $to
+     */
+    public function __construct(ResultFactory $resultFactory, int $from, int $to)
     {
         $this->resultFactory = $resultFactory;
+        $this->from = $from;
+        $this->to = $to;
     }
 
     /**
@@ -33,12 +47,14 @@ class CompressionLevel implements ValidatorInterface
      */
     public function validate(string $key, $value): ResultInterface
     {
-        if (!in_array($value, range(0, 9), false)) {
+        if ($value < $this->from || $value > $this->to) {
             return $this->resultFactory->error(sprintf(
                 'The %s variable contains an invalid value %d. ' .
-                'Use an integer value from 0 to 9.',
+                'Use an integer value from %d to %d.',
                 $key,
-                $value
+                $value,
+                $this->from,
+                $this->to
             ));
         }
 

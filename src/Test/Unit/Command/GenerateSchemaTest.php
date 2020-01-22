@@ -70,6 +70,8 @@ class GenerateSchemaTest extends TestCase
         $input = $this->getMockForAbstractClass(InputInterface::class);
         /** @var OutputInterface|MockObject $output */
         $output = $this->getMockForAbstractClass(OutputInterface::class);
+        $output->expects($this->exactly(2))
+            ->method('writeln');
 
         $this->schemaMock->method('getSchema')
             ->willReturn(['some' => 'schema']);
