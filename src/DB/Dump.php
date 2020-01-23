@@ -7,37 +7,20 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\DB;
 
-use Magento\MagentoCloud\DB\Data\ConnectionFactory;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
 
 /**
- * Class Dump generate mysqldump command with read only connection
+ * Class Dump generate mysqldump command
  */
 class Dump implements DumpInterface
 {
-    /**
-     * Factory for creation database data connection classes
-     *
-     * @var ConnectionFactory
-     */
-    private $connectionFactory;
-
-    /**
-     * @param ConnectionFactory $connectionFactory
-     */
-    public function __construct(
-        ConnectionFactory $connectionFactory
-    ) {
-        $this->connectionFactory = $connectionFactory;
-    }
-
     /**
      * Returns mysqldump command for executing in shell.
      *
      * {@inheritdoc}
      */
-    public function getCommand(): string
+    public function getCommand(ConnectionInterface $connectionData): string
     {
-        $connectionData = $this->connectionFactory->create(ConnectionFactory::CONNECTION_SLAVE);
         $command = 'mysqldump -h ' . escapeshellarg($connectionData->getHost())
             . ' -u ' . escapeshellarg($connectionData->getUser());
 

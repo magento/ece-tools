@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
+use Symfony\Component\Console\Input\InputArgument;
 
 /**
  * Class DbDump for safely creating backup of database
@@ -23,7 +24,7 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 class DbDump extends Command
 {
     const NAME = 'db-dump';
-
+    const ARGUMENT_DATABASES = 'databases';
     const OPTION_REMOVE_DEFINERS = 'remove-definers';
 
     /**
@@ -54,8 +55,17 @@ class DbDump extends Command
     protected function configure()
     {
         $this->setName(self::NAME)
-            ->setDescription('Creates backup of database');
-
+            ->setDescription('Creates backups of databases');
+        $this->addArgument(
+            self::ARGUMENT_DATABASES,
+            InputArgument::IS_ARRAY,
+            sprintf(
+                'Databases to backup. Available values: %s or empty. By default will backup the databases'
+                . ' based on the databases configuration from the file <magento_root>/app/etc/env.php ',
+                implode(',', DumpGenerator::DATABASE_MAP)
+            ),
+            []
+        );
         $this->addOption(
             self::OPTION_REMOVE_DEFINERS,
             'd',
@@ -79,12 +89,16 @@ class DbDump extends Command
             'We suggest to enable maintenance mode before running this command. Do you want to continue [y/N]?',
             false
         );
+
         if (!$helper->ask($input, $output, $question) && $input->isInteractive()) {
             return null;
         }
         try {
             $this->logger->info('Starting backup.');
-            $this->dumpGenerator->create((bool)$input->getOption(self::OPTION_REMOVE_DEFINERS));
+            $this->dumpGenerator->create(
+                (bool)$input->getOption(self::OPTION_REMOVE_DEFINERS),
+                (array)$input->getArgument(self::ARGUMENT_DATABASES)
+            );
             $this->logger->info('Backup completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
