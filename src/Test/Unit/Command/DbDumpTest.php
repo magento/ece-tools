@@ -176,4 +176,25 @@ class DbDumpTest extends TestCase
         );
         $tester->execute([]);
     }
+
+    public function testExecuteWithDatabases()
+    {
+        $this->questionMock->expects($this->once())
+            ->method('ask')
+            ->willReturn(true);
+
+        $this->loggerMock->expects($this->exactly(2))
+            ->method('info')
+            ->withConsecutive(
+                ['Starting backup.'],
+                ['Backup completed.']
+            );
+        $this->dumpGeneratorMock->expects($this->once())
+            ->method('create')
+            ->with(false, ['main', 'sales', 'quote']);
+        $tester = new CommandTester(
+            $this->command
+        );
+        $tester->execute([DbDump::ARGUMENT_DATABASES => ['main', 'sales', 'quote']]);
+    }
 }

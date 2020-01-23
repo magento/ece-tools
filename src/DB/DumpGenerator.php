@@ -196,6 +196,7 @@ class DumpGenerator
             );
         }
     }
+
     /**
      * @param array $connections
      * @throws GenericException
@@ -207,8 +208,8 @@ class DumpGenerator
         foreach ($connections as $connection) {
             if (!isset($envConnections[self::CONNECTION_MAP[$connection]])) {
                 $messages[] = sprintf(
-                    'Environment doesn\'t has connection `%s` associated with database `%s`',
-                    $connection,
+                    'Environment has not connection `%s` associated with database `%s`',
+                    self::CONNECTION_MAP[$connection],
                     self::DATABASE_MAP[$connection]
                 );
             }
