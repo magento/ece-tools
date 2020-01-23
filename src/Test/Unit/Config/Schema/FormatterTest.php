@@ -47,6 +47,14 @@ class FormatterTest extends TestCase
                     'Some example 2'
                 ]
             ],
+            'ENV_VARIABLE_NO_DUMP' => [
+                Schema::SCHEMA_DESCRIPTION => 'Some description',
+                Schema::SCHEMA_TYPE => 'string',
+                Schema::SCHEMA_STAGES => [
+                    'global'
+                ],
+                Schema::SCHEMA_SKIP_DUMP => true
+            ],
         ];
         $expected = file_get_contents(__DIR__ . '/_files/.magento.env.md');
 
