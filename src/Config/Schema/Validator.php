@@ -93,8 +93,12 @@ class Validator
             ));
         }
 
-        foreach ($validators as $validatorName) {
-            $validator = $this->validatorFactory->create($validatorName);
+        foreach ($validators as $validatorData) {
+            $validator = $this->validatorFactory->create(
+                $validatorData['class'],
+                array_slice(array_values($validatorData), 1)
+            );
+
             $result = $validator->validate($key, $value);
 
             if ($result instanceof Error) {

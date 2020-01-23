@@ -80,11 +80,15 @@ class GenerateSchema extends Command
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $output->writeln('Starting schema dist file generation');
+
         $data = $this->schema->getSchema();
 
         $this->file->filePutContents(
             $this->fileList->getEnvDistConfig(),
             $this->formatter->format($data)
         );
+
+        $output->writeln(sprintf('Dist file was successfully generated: %s', $this->fileList->getEnvDistConfig()));
     }
 }
