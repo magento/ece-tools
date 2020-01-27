@@ -25,7 +25,7 @@ class AbstractInstallCest extends AbstractCest
     {
         parent::_before($I);
 
-        $I->cloneTemplate(null, static::EDITION);
-        $I->addEceComposerRepo();
+        //$I->cloneTemplate(null, static::EDITION);
+        //$I->addEceComposerRepo();
     }
 }

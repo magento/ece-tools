@@ -2,7 +2,7 @@
   "name": "magento/ece-tools",
   "description": "Provides tools to build and deploy Magento 2 Enterprise Edition",
   "type": "magento2-component",
-  "version": "2002.0.21",
+  "version": "2002.0.99",
   "license": "OSL-3.0",
   "repositories": {
     "repo.magento.com": {
@@ -25,7 +25,7 @@
     "guzzlehttp/guzzle": "^6.2",
     "illuminate/config": "^5.6",
     "magento/magento-cloud-components": "^1.0.1",
-    "magento/magento-cloud-docker": "dev-MAGECLOUD-4486 as 1.0.99",
+    "magento/magento-cloud-docker": "dev-MAGECLOUD-4486 as 1.1.0",
     "magento/magento-cloud-patches": "^1.0.0",
     "monolog/monolog": "^1.16",
     "nesbot/carbon": "^2.25",

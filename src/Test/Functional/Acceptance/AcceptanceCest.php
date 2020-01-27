@@ -32,7 +32,18 @@ class AcceptanceCest extends AbstractInstallCest
     {
         parent::_before($I);
 
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+        $I->copyToWorkDir('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml');
+    }
+
+    public function testTmp(\CliTester $I): void
+    {
+        $I->runEceDockerCommand('build:compose --mode=production --no-cron');
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
     }
 
     /**
@@ -45,25 +56,26 @@ class AcceptanceCest extends AbstractInstallCest
      */
     public function testDefault(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --no-cron --env-cloud-vars="%s" --env-raw-vars="%s"',
+                addslashes(json_encode($data['cloudVariables'])),
+                addslashes(json_encode($data['rawVariables']))
+            )
+        );
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand(
-            'deploy',
-            Docker::DEPLOY_CONTAINER,
-            $data['cloudVariables'],
-            $data['rawVariables']
-        ));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
-
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->amOnPage('/');
         $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
 
         $destination = sys_get_temp_dir() . '/app/etc/env.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/env.php', $destination, Docker::DEPLOY_CONTAINER));
         $config = require $destination;
         $I->assertArraySubset($data['expectedConfig'], $config);
 
-        $I->assertTrue($I->runEceToolsCommand('config:dump', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command config:dump'));
         $destination = sys_get_temp_dir() . '/app/etc/config.php';
         $I->assertTrue($I->downloadFromContainer('/app/etc/config.php', $destination, Docker::DEPLOY_CONTAINER));
         $config = require $destination;
@@ -85,6 +97,7 @@ class AcceptanceCest extends AbstractInstallCest
 
         $I->amOnPage('/');
         $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains('--admin-password=\'******\'', $log);
@@ -125,127 +138,127 @@ class AcceptanceCest extends AbstractInstallCest
                     ],
                 ],
             ],
-            'test cron_consumers_runner with array and there is MAGENTO_CLOUD_LOCKS_DIR' => [
-                'cloudVariables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'CRON_CONSUMERS_RUNNER' => [
-                            'cron_run' => true,
-                            'max_messages' => 5000,
-                            'consumers' => ['test'],
-                        ],
-                    ],
-                ],
-                'rawVariables' => [
-                    'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
-                ],
-                'expectedConfig' => [
-                    'cron_consumers_runner' => [
-                        'cron_run' => true,
-                        'max_messages' => 5000,
-                        'consumers' => ['test'],
-                    ],
-                    'directories' => [
-                        'document_root_is_pub' => true,
-                    ],
-                    'lock' => [
-                        'provider' => 'file',
-                        'config' => [
-                            'path' => '/tmp/locks',
-                        ],
-                    ],
-                ],
-            ],
-            'test cron_consumers_runner with wrong array, there is MAGENTO_CLOUD_LOCKS_DIR, LOCK_PROVIDER is db' => [
-                'cloudVariables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'LOCK_PROVIDER' => 'db',
-                        'CRON_CONSUMERS_RUNNER' => [
-                            'cron_run' => 'true',
-                            'max_messages' => 5000,
-                            'consumers' => ['test'],
-                        ],
-                    ],
-                ],
-                'rawVariables' => [
-                    'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
-                ],
-                'expectedConfig' => [
-                    'cron_consumers_runner' => [
-                        'cron_run' => false,
-                        'max_messages' => 5000,
-                        'consumers' => ['test'],
-                    ],
-                    'directories' => [
-                        'document_root_is_pub' => true,
-                    ],
-                    'lock' => [
-                        'provider' => 'db',
-                        'config' => [
-                            'prefix' => null,
-                        ],
-                    ],
-                ],
-            ],
-            'test cron_consumers_runner with string' => [
-                'cloudVariables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
-                    ],
-                ],
-                'rawVariables' => [],
-                'expectedConfig' => [
-                    'cron_consumers_runner' => [
-                        'cron_run' => true,
-                        'max_messages' => 100,
-                        'consumers' => ['test2'],
-                    ],
-                    'directories' => [
-                        'document_root_is_pub' => true,
-                    ],
-                ],
-            ],
-            'test cron_consumers_runner with wrong string' => [
-                'cloudVariables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
-                    ],
-                ],
-                'rawVariables' => [],
-                'expectedConfig' => [
-                    'cron_consumers_runner' => [
-                        'cron_run' => false,
-                        'max_messages' => 100,
-                        'consumers' => ['test2'],
-                    ],
-                    'directories' => [
-                        'document_root_is_pub' => true,
-                    ],
-                ],
-            ],
-            'disabled static content symlinks 3 jobs' => [
-                'cloudVariables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'STATIC_CONTENT_SYMLINK' => 'disabled',
-                        'STATIC_CONTENT_THREADS' => 3,
-                    ],
-                ],
-                'rawVariables' => [],
-                'expectedConfig' => [
-                    'cron_consumers_runner' => [
-                        'cron_run' => false,
-                        'max_messages' => 10000,
-                        'consumers' => [],
-                    ],
-                    'directories' => [
-                        'document_root_is_pub' => true,
-                    ],
-                ],
-            ],
+//            'test cron_consumers_runner with array and there is MAGENTO_CLOUD_LOCKS_DIR' => [
+//                'cloudVariables' => [
+//                    'MAGENTO_CLOUD_VARIABLES' => [
+//                        'ADMIN_EMAIL' => 'admin@example.com',
+//                        'CRON_CONSUMERS_RUNNER' => [
+//                            'cron_run' => true,
+//                            'max_messages' => 5000,
+//                            'consumers' => ['test'],
+//                        ],
+//                    ],
+//                ],
+//                'rawVariables' => [
+//                    'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
+//                ],
+//                'expectedConfig' => [
+//                    'cron_consumers_runner' => [
+//                        'cron_run' => true,
+//                        'max_messages' => 5000,
+//                        'consumers' => ['test'],
+//                    ],
+//                    'directories' => [
+//                        'document_root_is_pub' => true,
+//                    ],
+//                    'lock' => [
+//                        'provider' => 'file',
+//                        'config' => [
+//                            'path' => '/tmp/locks',
+//                        ],
+//                    ],
+//                ],
+//            ],
+//            'test cron_consumers_runner with wrong array, there is MAGENTO_CLOUD_LOCKS_DIR, LOCK_PROVIDER is db' => [
+//                'cloudVariables' => [
+//                    'MAGENTO_CLOUD_VARIABLES' => [
+//                        'ADMIN_EMAIL' => 'admin@example.com',
+//                        'LOCK_PROVIDER' => 'db',
+//                        'CRON_CONSUMERS_RUNNER' => [
+//                            'cron_run' => 'true',
+//                            'max_messages' => 5000,
+//                            'consumers' => ['test'],
+//                        ],
+//                    ],
+//                ],
+//                'rawVariables' => [
+//                    'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
+//                ],
+//                'expectedConfig' => [
+//                    'cron_consumers_runner' => [
+//                        'cron_run' => false,
+//                        'max_messages' => 5000,
+//                        'consumers' => ['test'],
+//                    ],
+//                    'directories' => [
+//                        'document_root_is_pub' => true,
+//                    ],
+//                    'lock' => [
+//                        'provider' => 'db',
+//                        'config' => [
+//                            'prefix' => null,
+//                        ],
+//                    ],
+//                ],
+//            ],
+//            'test cron_consumers_runner with string' => [
+//                'cloudVariables' => [
+//                    'MAGENTO_CLOUD_VARIABLES' => [
+//                        'ADMIN_EMAIL' => 'admin@example.com',
+//                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
+//                    ],
+//                ],
+//                'rawVariables' => [],
+//                'expectedConfig' => [
+//                    'cron_consumers_runner' => [
+//                        'cron_run' => true,
+//                        'max_messages' => 100,
+//                        'consumers' => ['test2'],
+//                    ],
+//                    'directories' => [
+//                        'document_root_is_pub' => true,
+//                    ],
+//                ],
+//            ],
+//            'test cron_consumers_runner with wrong string' => [
+//                'cloudVariables' => [
+//                    'MAGENTO_CLOUD_VARIABLES' => [
+//                        'ADMIN_EMAIL' => 'admin@example.com',
+//                        'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
+//                    ],
+//                ],
+//                'rawVariables' => [],
+//                'expectedConfig' => [
+//                    'cron_consumers_runner' => [
+//                        'cron_run' => false,
+//                        'max_messages' => 100,
+//                        'consumers' => ['test2'],
+//                    ],
+//                    'directories' => [
+//                        'document_root_is_pub' => true,
+//                    ],
+//                ],
+//            ],
+//            'disabled static content symlinks 3 jobs' => [
+//                'cloudVariables' => [
+//                    'MAGENTO_CLOUD_VARIABLES' => [
+//                        'ADMIN_EMAIL' => 'admin@example.com',
+//                        'STATIC_CONTENT_SYMLINK' => 'disabled',
+//                        'STATIC_CONTENT_THREADS' => 3,
+//                    ],
+//                ],
+//                'rawVariables' => [],
+//                'expectedConfig' => [
+//                    'cron_consumers_runner' => [
+//                        'cron_run' => false,
+//                        'max_messages' => 10000,
+//                        'consumers' => [],
+//                    ],
+//                    'directories' => [
+//                        'document_root_is_pub' => true,
+//                    ],
+//                ],
+//            ],
         ];
     }
 

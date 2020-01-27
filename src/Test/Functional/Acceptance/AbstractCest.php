@@ -16,10 +16,21 @@ abstract class AbstractCest
     /**
      * @param \CliTester $I
      */
-    public function _before(\CliTester $I)
+    public function _before(\CliTester $I): void
     {
-        $I->generateDockerCompose();
-        $I->cleanUpEnvironment();
+        $I->cleanupWorkDir();
+        $I->cloneTemplateToWorkDir('2.3.2');
+        $I->createAuthJson();
+        $I->createArtifactsDir();
+        $I->createArtifactCurrentTestedCode('ece-tools');
+        $I->addArtifactsRepoToComposer();
+        $I->addDependencyToComposer('magento/ece-tools', '2002.0.99');
+        $I->addEceDockerGitRepoToComposer();
+        $I->addDependencyToComposer(
+            'magento/magento-cloud-docker',
+            $I->getDependencyVersion('magento/magento-cloud-docker')
+        );
+        $I->composerUpdate();
     }
 
     /**
@@ -27,7 +38,8 @@ abstract class AbstractCest
      */
     public function _after(\CliTester $I): void
     {
-        $I->stopEnvironment();
-        $I->removeDockerCompose();
+        //$I->resetFilesOwner();
+        //$I->stopEnvironment();
+        //$I->removeWorkDir();
     }
 }
