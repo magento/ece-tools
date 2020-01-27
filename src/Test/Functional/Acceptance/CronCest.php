@@ -56,7 +56,6 @@ class CronCest extends AbstractCest
 
         $successfulJobs2 = $I->grabNumRecords('cron_schedule', ['job_code' => 'cron_test_job', 'status' => 'success']);
 
-
         if (version_compare($data['version'], '2.2.5', '<')) {
             $I->assertEquals($successfulJobs1, $successfulJobs2, 'Number of successful jobs changed');
         } else {
