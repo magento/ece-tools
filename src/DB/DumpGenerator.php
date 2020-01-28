@@ -170,8 +170,8 @@ class DumpGenerator
         if (!empty($invalidDatabaseNames)) {
             $this->logger->error(sprintf(
                 'Incorrect the database names:[ %s ]. Available database names: [ %s ]',
-                implode(', ', $invalidDatabaseNames),
-                implode(', ', self::DATABASE_MAP)
+                implode(' ', $invalidDatabaseNames),
+                implode(' ', self::DATABASE_MAP)
             ));
             return false;
         }

@@ -328,8 +328,8 @@ class DumpGeneratorTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('error')
             ->with(
-                'Incorrect the database names:[ dbname1, dbname2, dbname3 ].'
-                . ' Available database names: [ main, quote, sales ]'
+                'Incorrect the database names:[ dbname1 dbname2 dbname3 ].'
+                . ' Available database names: [ main quote sales ]'
             );
         $this->dbConfigMock->expects($this->never())
             ->method('get');

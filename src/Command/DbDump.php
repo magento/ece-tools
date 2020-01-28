@@ -101,7 +101,7 @@ class DbDump extends Command
             sprintf(
                 'Databases to backup. Available values: %s or empty. By default will backup the databases'
                 . ' based on the databases configuration from the file <magento_root>/app/etc/env.php ',
-                implode(',', DumpGenerator::DATABASE_MAP)
+                implode(' ', DumpGenerator::DATABASE_MAP)
             ),
             []
         );
@@ -151,7 +151,7 @@ class DbDump extends Command
                 (bool)$input->getOption(self::OPTION_REMOVE_DEFINERS),
                 (array)$input->getArgument(self::ARGUMENT_DATABASES)
             );
-            $this->logger->info('Backup completed.');
+
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
