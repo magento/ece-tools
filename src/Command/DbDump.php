@@ -29,6 +29,8 @@ class DbDump extends Command
 {
     const NAME = 'db-dump';
 
+    const ARGUMENT_DATABASES = 'databases';
+
     const OPTION_REMOVE_DEFINERS = 'remove-definers';
 
     /**
