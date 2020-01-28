@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellException;
@@ -30,6 +31,11 @@ class Module
     private $reader;
 
     /**
+     * @var BuildInterface
+     */
+    private $stageConfig;
+
+    /**
      * @var WriterInterface
      */
     private $writer;
@@ -37,12 +43,18 @@ class Module
     /**
      * @param ReaderInterface $reader
      * @param WriterInterface $writer
+     * @param BuildInterface $stageConfig
      * @param ShellFactory $shellFactory
      */
-    public function __construct(ReaderInterface $reader, WriterInterface $writer, ShellFactory $shellFactory)
-    {
+    public function __construct(
+        ReaderInterface $reader,
+        WriterInterface $writer,
+        BuildInterface $stageConfig,
+        ShellFactory $shellFactory
+    ) {
         $this->reader = $reader;
         $this->writer = $writer;
+        $this->stageConfig = $stageConfig;
         $this->magentoShell = $shellFactory->createMagento();
     }
 
@@ -60,7 +72,10 @@ class Module
 
         $moduleConfig = $this->reader->read()['modules'] ?? [];
 
-        $this->magentoShell->execute('module:enable --all');
+        $this->magentoShell->execute(
+            'module:enable --all',
+            [$this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)]
+        );
 
         $updatedModuleConfig = $this->reader->read()['modules'] ?? [];
 

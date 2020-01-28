@@ -11,6 +11,7 @@ VERBOSE_COMMANDS:
     - global
     - build
     - deploy
+    - post-deploy
   default:
     build: ''
     deploy: ''
