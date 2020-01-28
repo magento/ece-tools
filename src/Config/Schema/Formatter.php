@@ -39,6 +39,10 @@ class Formatter implements FormatterInterface
         $text = '';
 
         foreach ($data as $key => $item) {
+            if (!empty($item[Schema::SCHEMA_SKIP_DUMP])) {
+                continue;
+            }
+
             $description = $item[Schema::SCHEMA_DESCRIPTION] ?? 'N/A';
             $magentoVersion = $item[Schema::SCHEMA_MAGENTO_VERSION] ?? '>=' . MagentoVersion::MIN_VERSION;
 
@@ -46,7 +50,7 @@ class Formatter implements FormatterInterface
                 '## %s%s%s%s',
                 $key,
                 self::EMPTY_LINE,
-                wordwrap($description, 100),
+                wordwrap($description, 120),
                 self::EMPTY_LINE
             );
 
