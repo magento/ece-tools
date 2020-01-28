@@ -327,30 +327,29 @@ class DbConnection implements StepInterface
         $customDbConfig = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
         $isMergeRequired = !$this->configMerger->isEmpty($customDbConfig)
             && !$this->configMerger->isMergeRequired($customDbConfig);
-        foreach (array_keys($dbConfig[DbConfig::KEY_CONNECTION]) as $connectionName) {
-            $connectionData = $this->connectionDataFactory->create(DbConfig::MAIN_CONNECTION_MAP[$connectionName]);
-            if (!$connectionData->getHost() || !$isUseSlave || $isMergeRequired) {
-                continue;
-            }
-            if (!$this->dbConfig->isCustomConnectionCompatibleForSlave(
-                $customDbConfig,
-                $connectionName,
-                $connectionData
-            )) {
-                $this->logger->warning(sprintf(
-                    'You have changed db configuration that not compatible with %s slave connection.',
-                    $connectionName
-                ));
-            } elseif (!empty($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$connectionName])) {
-                $this->logger->info(sprintf('Set DB slave connection for %s connection.', $connectionName));
-            } else {
-                $this->logger->notice(sprintf(
-                    'Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect for %s connection, ' .
-                    'because %s slave connection is not configured on your environment.',
-                    $connectionName,
-                    $connectionName
-                ));
-            }
+        $envConnectionName = DbConfig::MAIN_CONNECTION_MAP[DbConfig::CONNECTION_DEFAULT];
+        $connectionData = $this->connectionDataFactory->create($envConnectionName);
+        if (!$connectionData->getHost() || !$isUseSlave || $isMergeRequired) {
+            return;
+        }
+        if (!$this->dbConfig->isCustomConnectionCompatibleForSlave(
+            $customDbConfig,
+            DbConfig::CONNECTION_DEFAULT,
+            $connectionData
+        )) {
+            $this->logger->warning(sprintf(
+                'You have changed db configuration that not compatible with %s slave connection.',
+                DbConfig::CONNECTION_DEFAULT
+            ));
+        } elseif (!empty($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][DbConfig::CONNECTION_DEFAULT])) {
+            $this->logger->info(sprintf('Set DB slave connection for %s connection.', DbConfig::CONNECTION_DEFAULT));
+        } else {
+            $this->logger->notice(sprintf(
+                'Enabling of the variable MYSQL_USE_SLAVE_CONNECTION had no effect for %s connection, ' .
+                'because %s slave connection is not configured on your environment.',
+                DbConfig::CONNECTION_DEFAULT,
+                DbConfig::CONNECTION_DEFAULT
+            ));
         }
     }
 
