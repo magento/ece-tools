@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator;
@@ -42,9 +43,14 @@ class DatabaseSplitConnection implements ValidatorInterface
 
     /**
      * @return Validator\ResultInterface
+     * @throws ConfigException
      */
     public function validate(): Validator\ResultInterface
     {
+        $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
+        if (empty($splitTypes)) {
+            return $this->resultFactory->success();
+        }
         $config = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
 
         $messageItem = [];

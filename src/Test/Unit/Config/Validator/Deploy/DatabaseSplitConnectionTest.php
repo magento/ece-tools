@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Validator\Deploy;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Validator\Deploy\DatabaseSplitConnection;
 use Magento\MagentoCloud\Config\Validator\Result\Error;
@@ -71,10 +72,16 @@ class DatabaseSplitConnectionTest extends TestCase
                 'sales' => [],
             ],
         ];
-        $this->stageConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(DeployInterface::VAR_DATABASE_CONFIGURATION)
-            ->willReturn($dbConfiguration);
+            ->withConsecutive(
+                [DeployInterface::VAR_SPLIT_DB],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
+            )
+            ->willReturnOnConsecutiveCalls(
+                ['sales', 'quote'],
+                $dbConfiguration
+            );
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with('Split database configuration was detected in the property DATABASE_CONFIGURATION of the'
@@ -93,13 +100,20 @@ class DatabaseSplitConnectionTest extends TestCase
      * @param array $dbConfiguration
      * @param string $expectedResultClass
      * @dataProvider validateDataProvider
+     * @throws ConfigException
      */
     public function testValidate(array $dbConfiguration, string $expectedResultClass)
     {
-        $this->stageConfigMock->expects($this->once())
+        $this->stageConfigMock->expects($this->exactly(2))
             ->method('get')
-            ->with(DeployInterface::VAR_DATABASE_CONFIGURATION)
-            ->willReturn($dbConfiguration);
+            ->withConsecutive(
+                [DeployInterface::VAR_SPLIT_DB],
+                [DeployInterface::VAR_DATABASE_CONFIGURATION]
+            )
+            ->willReturnOnConsecutiveCalls(
+                ['sales', 'quote'],
+                $dbConfiguration
+            );
 
         $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
     }
