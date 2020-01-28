@@ -102,7 +102,6 @@ class DbDump extends Command
             $this->logger->info('Backup completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
-
             throw $exception;
         }
     }

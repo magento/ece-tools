@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\DB;
 
-use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -94,13 +93,6 @@ class DumpGenerator
     private $dbConfig;
 
     /**
-     * Stores cached environment database configuration
-     *
-     * @var array
-     */
-    private $dbConfigData;
-
-    /**
      * Factory for creation database data connection classes
      *
      * @var ConnectionFactory
@@ -137,19 +129,24 @@ class DumpGenerator
      * @param bool $removeDefiners
      * @param array $databases
      * @return void
-     * @throws GenericException
+     * @throws ConfigException
+     * @throws UndefinedPackageException
      */
     public function create(bool $removeDefiners, array $databases = [])
     {
         if (empty($databases)) {
             $connections = array_values(array_intersect_key(
                 array_flip(self::CONNECTION_MAP),
-                $this->getDbConfigData()[DbConfig::KEY_CONNECTION] ?? []
+                $this->dbConfig->get()[DbConfig::KEY_CONNECTION] ?? []
             ));
         } else {
-            $this->validateDatabaseNames($databases);
+            if (!$this->validateDatabaseNames($databases)) {
+                return;
+            }
             $connections = array_keys(array_intersect(self::DATABASE_MAP, $databases));
-            $this->checkConnectionsAvailability($connections);
+            if (!$this->checkConnectionsAvailability($connections)) {
+                return;
+            }
         }
 
         foreach ($connections as $connection) {
@@ -162,61 +159,47 @@ class DumpGenerator
     }
 
     /**
-     * Returns environment database configuration
-     *
-     * @return array
-     * @throws ConfigException
-     */
-    private function getDbConfigData(): array
-    {
-        if (null === $this->dbConfigData) {
-            $this->dbConfigData = $this->dbConfig->get();
-        }
-        return $this->dbConfigData;
-    }
-
-    /**
      * Validates database names
      *
-     * Throws Magento\MagentoCloud\App\GenericException if any item from $database is invalid
-     *
      * @param array $databases
-     * @throws GenericException
+     * @return bool
      */
-    private function validateDatabaseNames(array $databases)
+    private function validateDatabaseNames(array $databases): bool
     {
         $invalidDatabaseNames = array_diff($databases, self::DATABASE_MAP);
         if (!empty($invalidDatabaseNames)) {
-            throw new GenericException(
-                sprintf(
-                    'Incorrect the database names: %s. Available database names: %s',
-                    implode(', ', $invalidDatabaseNames),
-                    implode(',', self::DATABASE_MAP)
-                )
-            );
+            $this->logger->error(sprintf(
+                'Incorrect the database names:[ %s ]. Available database names: [ %s ]',
+                implode(', ', $invalidDatabaseNames),
+                implode(', ', self::DATABASE_MAP)
+            ));
+            return false;
         }
+        return true;
     }
 
     /**
+     * Checks availability of connections
+     *
      * @param array $connections
-     * @throws GenericException
+     * @return bool
+     * @throws ConfigException
      */
-    private function checkConnectionsAvailability(array $connections)
+    private function checkConnectionsAvailability(array $connections): bool
     {
-        $messages = [];
-        $envConnections = $this->getDbConfigData()[DbConfig::KEY_CONNECTION] ?? [];
+        $result = true;
+        $envConnections = $this->dbConfig->get()[DbConfig::KEY_CONNECTION] ?? [];
         foreach ($connections as $connection) {
             if (!isset($envConnections[self::CONNECTION_MAP[$connection]])) {
-                $messages[] = sprintf(
+                $this->logger->error(sprintf(
                     'Environment has not connection `%s` associated with database `%s`',
                     self::CONNECTION_MAP[$connection],
                     self::DATABASE_MAP[$connection]
-                );
+                ));
+                $result = false;
             }
         }
-        if (!empty($messages)) {
-            throw new GenericException(implode(PHP_EOL, $messages));
-        }
+        return $result;
     }
 
     /**
@@ -254,39 +237,37 @@ class DumpGenerator
         }
 
         try {
-            if (flock($lockFileHandle, LOCK_EX)) {
-                $this->logger->info(sprintf('Start creation DB dump for %s database...', $database));
-
-                $command = 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dump->getCommand($connectionData);
-                if ($removeDefiners) {
-                    $command .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
-                }
-                $command .= ' | gzip > ' . $dumpFile;
-
-                $process = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
-
-                if ($process->getExitCode() !== ShellInterface::CODE_SUCCESS) {
-                    $this->logger->error('Error has occurred during mysqldump');
-                    $this->shell->execute('rm ' . $dumpFile);
-                } else {
-                    $this->logger->info(sprintf(
-                        'Finished DB dump for %s database, it can be found here: %s',
-                        $database,
-                        $dumpFile
-                    ));
-                    fwrite(
-                        $lockFileHandle,
-                        sprintf('[%s] Dump was written in %s', date("Y-m-d H:i:s"), $dumpFile) . PHP_EOL
-                    );
-                    fflush($lockFileHandle);
-                }
-                flock($lockFileHandle, LOCK_UN);
-            } else {
+            if (!flock($lockFileHandle, LOCK_EX)) {
                 $this->logger->info('Dump process is locked!');
+                return;
             }
-            fclose($lockFileHandle);
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            $this->logger->info(sprintf('Start creation DB dump for %s database...', $database));
+
+            $command = 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dump->getCommand($connectionData);
+            if ($removeDefiners) {
+                $command .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
+            }
+            $command .= ' | gzip > ' . $dumpFile;
+
+            $process = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
+
+            if ($process->getExitCode() !== ShellInterface::CODE_SUCCESS) {
+                $this->logger->error('Error has occurred during mysqldump');
+                $this->shell->execute('rm ' . $dumpFile);
+            } else {
+                $this->logger->info(sprintf(
+                    'Finished DB dump for %s database, it can be found here: %s',
+                    $database,
+                    $dumpFile
+                ));
+                fwrite(
+                    $lockFileHandle,
+                    sprintf('[%s] Dump was written in %s', date("Y-m-d H:i:s"), $dumpFile) . PHP_EOL
+                );
+                fflush($lockFileHandle);
+            }
+            flock($lockFileHandle, LOCK_UN);
+        } finally {
             fclose($lockFileHandle);
         }
     }
