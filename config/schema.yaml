@@ -247,7 +247,7 @@ SPLIT_DB:
     There are 2 types for split: quote and sales
     The split database process is irreversible. Deleting a value will not produce the opposite result.'
   validators:
-    - 'Magento\MagentoCloud\Config\Schema\Validator\SplitDb'
+      - class: 'Magento\MagentoCloud\Config\Schema\Validator\SplitDb'
   type: array
   stages:
     - global
