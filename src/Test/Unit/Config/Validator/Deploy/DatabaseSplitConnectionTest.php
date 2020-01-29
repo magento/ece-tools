@@ -72,16 +72,10 @@ class DatabaseSplitConnectionTest extends TestCase
                 'sales' => [],
             ],
         ];
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_SPLIT_DB],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION]
-            )
-            ->willReturnOnConsecutiveCalls(
-                ['sales', 'quote'],
-                $dbConfiguration
-            );
+            ->with(DeployInterface::VAR_DATABASE_CONFIGURATION)
+            ->willReturn($dbConfiguration);
         $this->resultFactoryMock->expects($this->once())
             ->method('error')
             ->with('Split database configuration was detected in the property DATABASE_CONFIGURATION of the'
@@ -104,16 +98,10 @@ class DatabaseSplitConnectionTest extends TestCase
      */
     public function testValidate(array $dbConfiguration, string $expectedResultClass)
     {
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_SPLIT_DB],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION]
-            )
-            ->willReturnOnConsecutiveCalls(
-                ['sales', 'quote'],
-                $dbConfiguration
-            );
+            ->with(DeployInterface::VAR_DATABASE_CONFIGURATION)
+            ->willReturn($dbConfiguration);
 
         $this->assertInstanceOf($expectedResultClass, $this->validator->validate());
     }

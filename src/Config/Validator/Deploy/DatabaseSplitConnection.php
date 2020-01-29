@@ -47,10 +47,6 @@ class DatabaseSplitConnection implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
-        if (empty($splitTypes)) {
-            return $this->resultFactory->success();
-        }
         $config = $this->stageConfig->get(DeployInterface::VAR_DATABASE_CONFIGURATION);
 
         $messageItem = [];
