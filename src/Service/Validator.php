@@ -50,7 +50,7 @@ class Validator
         ],
         ServiceInterface::NAME_RABBITMQ => [
             '<2.3.0' => '~3.5.0',
-            '>=2.3.0' => '~3.5.0 || ~3.7.0',
+            '>=2.3.0' => '~3.5.0 || ~3.7.0 || ~3.8.0',
         ],
         ServiceInterface::NAME_NODE => [
             '*' => '^6 || ^8 || ^10 || ^11',

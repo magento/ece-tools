@@ -131,4 +131,12 @@ class FileList extends ConfigFileList
     {
         return $this->directoryList->getMagentoRoot() . '/.magento.env.md';
     }
+
+    /**
+     * @return string
+     */
+    public function getFrontStaticDist(): string
+    {
+        return $this->directoryList->getRoot() . '/dist/front-static.php.dist';
+    }
 }
