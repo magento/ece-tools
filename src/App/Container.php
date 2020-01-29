@@ -38,7 +38,7 @@ class Container implements ContainerInterface
     public function __construct(string $toolsBasePath, string $magentoBasePath)
     {
         $containerBuilder = new ContainerBuilder();
-        $containerBuilder->set('container', $containerBuilder);
+        $containerBuilder->set('container', $this);
         $containerBuilder->setDefinition('container', new Definition(__CLASS__))
             ->setArguments([$toolsBasePath, $magentoBasePath]);
 
