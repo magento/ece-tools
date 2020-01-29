@@ -206,12 +206,9 @@ class DbConnectionTest extends TestCase
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($resourceConfig);
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION]
-            )
+            ->with(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
             ->willReturnOnConsecutiveCalls(false, []);
         $this->configWriterMock->expects($this->once())
             ->method('create')
@@ -580,12 +577,9 @@ class DbConnectionTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($mageConfig);
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION]
-            )
+            ->with(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
             ->willReturnOnConsecutiveCalls(false, []);
         $this->configWriterMock->expects($this->once())
             ->method('create')
