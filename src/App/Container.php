@@ -39,7 +39,7 @@ class Container implements ContainerInterface
     {
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->set('container', $this);
-        $containerBuilder->setDefinition('container', new Definition(__CLASS__)))
+        $containerBuilder->setDefinition('container', new Definition(__CLASS__))
             ->setArguments([$toolsBasePath, $magentoBasePath]);
 
         $systemList = new SystemList($toolsBasePath, $magentoBasePath);
