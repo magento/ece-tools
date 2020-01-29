@@ -28,6 +28,15 @@ class Cron22Cest extends CronCest
                 ],
             ],
             [
+                'version' => '2.2.4',
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'ADMIN_LOCALE' => 'ar_KW'
+                    ],
+                ],
+            ],
+            [
                 'version' => '2.2.5',
                 'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
