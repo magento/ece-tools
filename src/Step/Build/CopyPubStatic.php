@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step\Build;
 
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
 
@@ -33,18 +34,26 @@ class CopyPubStatic implements StepInterface
     private $directoryList;
 
     /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
      * @param LoggerInterface $logger
      * @param File $file
      * @param DirectoryList $directoryList
+     * @param FileList $fileList
      */
     public function __construct(
         LoggerInterface $logger,
         File $file,
-        DirectoryList $directoryList
+        DirectoryList $directoryList,
+        FileList $fileList
     ) {
         $this->logger = $logger;
         $this->file = $file;
         $this->directoryList = $directoryList;
+        $this->fileList = $fileList;
     }
 
     /**
@@ -54,16 +63,10 @@ class CopyPubStatic implements StepInterface
     {
         $magentoRoot = $this->directoryList->getMagentoRoot();
 
-        if (!$this->file->isExists($magentoRoot . '/pub/static.php')) {
-            $this->logger->notice('File "static.php" was not found');
-
-            return;
-        }
-
         $this->file->copy(
-            $magentoRoot . '/pub/static.php',
+            $this->fileList->getFrontStaticDist(),
             $magentoRoot . '/pub/front-static.php'
         );
-        $this->logger->info('File "static.php" was copied');
+        $this->logger->info('File "front-static.php" was copied');
     }
 }
