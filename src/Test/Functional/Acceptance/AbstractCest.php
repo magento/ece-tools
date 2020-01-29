@@ -14,12 +14,17 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 abstract class AbstractCest
 {
     /**
+     * @var string
+     */
+    protected $magentoCloudTemplate = 'master';
+
+    /**
      * @param \CliTester $I
      */
     public function _before(\CliTester $I): void
     {
         $I->cleanupWorkDir();
-        $I->cloneTemplateToWorkDir('2.3.2');
+        $I->cloneTemplateToWorkDir($this->magentoCloudTemplate);
         $I->createAuthJson();
         $I->createArtifactsDir();
         $I->createArtifactCurrentTestedCode('ece-tools');
@@ -38,8 +43,17 @@ abstract class AbstractCest
      */
     public function _after(\CliTester $I): void
     {
-        //$I->resetFilesOwner();
-        //$I->stopEnvironment();
-        //$I->removeWorkDir();
+        $I->resetFilesOwner();
+        $I->stopEnvironment();
+        $I->removeWorkDir();
+    }
+
+    /**
+     * @param array $data
+     * @return string
+     */
+    protected function convertEnvFromArrayToJson(array $data): string
+    {
+        return addslashes(json_encode($data));
     }
 }

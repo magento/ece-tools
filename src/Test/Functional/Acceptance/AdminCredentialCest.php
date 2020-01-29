@@ -7,28 +7,19 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
  * This test runs on the latest version of PHP
  */
 class AdminCredentialCest extends AbstractCest
 {
     /**
-     * @var string
-     */
-    protected $magentoCloudTemplate = 'master';
-
-    /**
      * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
      */
-    public function _before(\CliTester $I)
+    public function _before(\CliTester $I): void
     {
         parent::_before($I);
-        $I->cloneTemplate($this->magentoCloudTemplate);
-        $I->addEceComposerRepo();
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+
+        $I->copyToWorkDir('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml');
     }
 
     /**
@@ -39,10 +30,19 @@ class AdminCredentialCest extends AbstractCest
      */
     public function testInstallWithoutAdminEmail(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --no-cron --env-cloud-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
+            )
+        );
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains($data['installMessage'], $log);
@@ -53,8 +53,7 @@ class AdminCredentialCest extends AbstractCest
         $I->assertNotContains('--admin-password', $log);
 
         // Upgrade
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         $I->assertContains($data['upgradeMessage'], $I->grabFileContent('/var/log/cloud.log'));
     }
@@ -88,10 +87,18 @@ class AdminCredentialCest extends AbstractCest
      */
     public function testInstallWithDifferentVariables(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --no-cron --env-cloud-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
+            )
+        );
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->amOnPage('/');
+        $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
 
         $credentialsEmail = $I->grabFileContent('/var/credentials_email.txt');
         $I->assertContains($data['expectedAdminEmail'], $credentialsEmail);
@@ -110,8 +117,7 @@ class AdminCredentialCest extends AbstractCest
         );
 
         // Upgrade
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         $I->assertNotContains(
             'The following admin data is required to create an admin user during initial installation only'
