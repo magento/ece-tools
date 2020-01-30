@@ -59,7 +59,12 @@ class CronCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy magento-command cron:run');
 
         $successfulJobs2 = $I->grabNumRecords('cron_schedule', ['job_code' => 'cron_test_job', 'status' => 'success']);
-        $I->assertEquals($successfulJobs1, $successfulJobs2, 'Number of successful jobs changed');
+
+        if (version_compare($data['version'], '2.2.5', '<')) {
+            $I->assertEquals($successfulJobs1, $successfulJobs2, 'Number of successful jobs changed');
+        } else {
+            $I->assertGreaterThan($successfulJobs1, $successfulJobs2, 'Number of successful jobs did not change');
+        }
 
         $I->updateInDatabase(
             'cron_schedule',
@@ -80,7 +85,11 @@ class CronCest extends AbstractCest
         $I->runDockerComposeCommand('run deploy magento-command cron:run');
 
         $successfulJobs3 = $I->grabNumRecords('cron_schedule', ['job_code' => 'cron_test_job', 'status' => 'success']);
-        $I->assertGreaterThan($successfulJobs1, $successfulJobs3, 'Number of successful jobs did not change');
+        $I->assertGreaterThan(
+            version_compare($data['version'], '2.2.5', '<') ? $successfulJobs1 : $successfulJobs2,
+            $successfulJobs3,
+            'Number of successful jobs did not change'
+        );
     }
 
     /**

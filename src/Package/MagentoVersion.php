@@ -16,6 +16,8 @@ use Magento\MagentoCloud\Config\GlobalSection;
  */
 class MagentoVersion
 {
+    public const MIN_VERSION = '2.1.14';
+
     /**
      * @var Manager
      */

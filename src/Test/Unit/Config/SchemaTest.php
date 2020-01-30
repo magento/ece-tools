@@ -13,7 +13,10 @@ use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
+use Magento\MagentoCloud\Filesystem\SystemList;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Yaml\Parser;
 
 /**
  * @inheritdoc
@@ -21,16 +24,35 @@ use PHPUnit\Framework\TestCase;
 class SchemaTest extends TestCase
 {
     /**
-     * @var Schema
+     * @var Schema|MockObject
      */
     private $schema;
+
+    /**
+     * @var SystemList
+     */
+    private $systemListMock;
+
+    /**
+     * @var Parser|MockObject
+     */
+    private $parserMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        $this->schema = new Schema();
+        $this->systemListMock = $this->createMock(SystemList::class);
+        $this->parserMock = $this->createTestProxy(Parser::class);
+
+        $this->systemListMock->method('getConfig')
+            ->willReturn(ECE_BP . '/config');
+
+        $this->schema = new Schema(
+            $this->systemListMock,
+            $this->parserMock
+        );
     }
 
     public function testGetDefaultsForBuild(): void
@@ -128,7 +150,7 @@ class SchemaTest extends TestCase
             [
                 StageConfigInterface::VAR_SCD_ON_DEMAND => false,
                 StageConfigInterface::VAR_SKIP_HTML_MINIFICATION => true,
-                StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => false,
+                StageConfigInterface::VAR_DEPLOYED_MAGENTO_VERSION_FROM_GIT => '',
                 StageConfigInterface::VAR_DEPLOY_FROM_GIT_OPTIONS => [],
                 StageConfigInterface::VAR_MIN_LOGGING_LEVEL => '',
                 StageConfigInterface::VAR_X_FRAME_CONFIGURATION => 'SAMEORIGIN',

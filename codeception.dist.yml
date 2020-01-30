@@ -9,6 +9,7 @@ settings:
 extensions:
   enabled:
     - Codeception\Extension\RunFailed
+    - Codeception\Extension\FailedInfo
 params:
   - vendor/magento/magento-cloud-docker/tests/functional/configuration.dist.yml
 modules:

@@ -7,10 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Config\Schema;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject as Mock;
 use Magento\MagentoCloud\Config\Environment\Reader as EnvironmentReader;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 
@@ -25,24 +26,23 @@ class GlobalSectionTest extends TestCase
     private $config;
 
     /**
-     * @var EnvironmentReader|Mock
+     * @var EnvironmentReader|MockObject
      */
     private $environmentReaderMock;
 
     /**
-     * @var Schema|Mock
+     * @var Schema|MockObject
      */
     private $schemaMock;
 
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $this->environmentReaderMock = $this->createMock(EnvironmentReader::class);
         $this->schemaMock = $this->createMock(Schema::class);
-        $this->schemaMock->expects($this->any())
-            ->method('getDefaults')
+        $this->schemaMock->method('getDefaults')
             ->with(StageConfigInterface::STAGE_GLOBAL)
             ->willReturn([
                 StageConfigInterface::VAR_SCD_ON_DEMAND => false,
@@ -58,6 +58,8 @@ class GlobalSectionTest extends TestCase
      * @param string $name
      * @param array $config
      * @param bool $expectedValue
+     * @throws ConfigException
+     *
      * @dataProvider getDataProvider
      */
     public function testGet(string $name, array $config, $expectedValue)
@@ -162,7 +164,10 @@ class GlobalSectionTest extends TestCase
         ];
     }
 
-    public function testNotExists()
+    /**
+     * @throws ConfigException
+     */
+    public function testNotExists(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Config NOT_EXISTS_VALUE was not defined.');
@@ -173,9 +178,12 @@ class GlobalSectionTest extends TestCase
         $this->config->get('NOT_EXISTS_VALUE');
     }
 
-    public function testGetWithException()
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithException(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Some error');
 
         $this->environmentReaderMock->expects($this->once())
