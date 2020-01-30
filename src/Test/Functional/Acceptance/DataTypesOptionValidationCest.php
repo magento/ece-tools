@@ -7,24 +7,11 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
  * This test runs on the latest version of PHP
  */
 class DataTypesOptionValidationCest extends AbstractCest
 {
-    /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    public function _before(\CliTester $I)
-    {
-        parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-    }
-
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
@@ -33,13 +20,16 @@ class DataTypesOptionValidationCest extends AbstractCest
      */
     public function dataTypesValidationOnDeploy(\CliTester $I, \Codeception\Example $data)
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --no-cron --env-cloud-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['cloudVariables'])
+            )
+        );
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand(
-            'deploy',
-            Docker::DEPLOY_CONTAINER,
-            $data['cloudVariables']
-        ));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains($data['expectedError'], $log);
     }
