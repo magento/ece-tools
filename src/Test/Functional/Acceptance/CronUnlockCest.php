@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
  * Test for cron:unlock.
  */
@@ -18,23 +16,12 @@ class CronUnlockCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function _before(\CliTester $I)
-    {
-        parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-    }
-
-    /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
     public function testCronUnlock(\CliTester $I)
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand('build:compose --mode=production --no-cron --expose-db-port=3306');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
 
         $sampleData = $this->getSampleData();
         $scheduleIds = [];
@@ -49,7 +36,7 @@ class CronUnlockCest extends AbstractCest
         }
         $I->seeInDatabase('cron_schedule', ['status' => 'running']);
 
-        $I->assertTrue($I->runEceToolsCommand('cron:unlock', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command cron:unlock'));
         $I->seeInDatabase('cron_schedule', ['status' => 'error']);
         foreach (array_slice($scheduleIds, 0, 3) as $scheduleId) {
             $I->seeInDatabase('cron_schedule', ['schedule_id' => $scheduleId, 'status' => 'error']);
@@ -61,13 +48,12 @@ class CronUnlockCest extends AbstractCest
         $I->seeInDatabase('cron_schedule', ['status' => 'running']);
 
         $I->assertTrue(
-            $I->runEceToolsCommand(
+            $I->runDockerComposeCommand(
                 sprintf(
-                    'cron:unlock --job-code=%s --job-code=%s',
+                    'run deploy ece-command cron:unlock --job-code=%s --job-code=%s',
                     'catalog_product_frontend_actions_flush',
                     'catalog_product_outdated_price_values_cleanup'
-                ),
-                Docker::DEPLOY_CONTAINER
+                )
             )
         );
 

@@ -19,7 +19,7 @@ class AdminCredentialCest extends AbstractCest
     {
         parent::_before($I);
 
-        $I->copyToWorkDir('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml');
+        $I->copyFileToWorkDir('files/debug_logging/.magento.env.yaml', '.magento.env.yaml');
     }
 
     /**

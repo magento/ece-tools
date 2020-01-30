@@ -23,19 +23,7 @@ abstract class AbstractCest
      */
     public function _before(\CliTester $I): void
     {
-        $I->cleanupWorkDir();
-        $I->cloneTemplateToWorkDir($this->magentoCloudTemplate);
-        $I->createAuthJson();
-        $I->createArtifactsDir();
-        $I->createArtifactCurrentTestedCode('ece-tools');
-        $I->addArtifactsRepoToComposer();
-        $I->addDependencyToComposer('magento/ece-tools', '2002.0.99');
-        $I->addEceDockerGitRepoToComposer();
-        $I->addDependencyToComposer(
-            'magento/magento-cloud-docker',
-            $I->getDependencyVersion('magento/magento-cloud-docker')
-        );
-        $I->composerUpdate();
+        $this->prepareWorkplace($I, $this->magentoCloudTemplate);
     }
 
     /**
@@ -55,5 +43,26 @@ abstract class AbstractCest
     protected function convertEnvFromArrayToJson(array $data): string
     {
         return addslashes(json_encode($data));
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param string $version
+     */
+    protected function prepareWorkplace(\CliTester $I, string $version): void
+    {
+        $I->cleanupWorkDir();
+        $I->cloneTemplateToWorkDir($version);
+        $I->createAuthJson();
+        $I->createArtifactsDir();
+        $I->createArtifactCurrentTestedCode('ece-tools');
+        $I->addArtifactsRepoToComposer();
+        $I->addDependencyToComposer('magento/ece-tools', '2002.0.99');
+        $I->addEceDockerGitRepoToComposer();
+        $I->addDependencyToComposer(
+            'magento/magento-cloud-docker',
+            $I->getDependencyVersion('magento/magento-cloud-docker')
+        );
+        $I->composerUpdate();
     }
 }

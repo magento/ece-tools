@@ -32,7 +32,7 @@ class AcceptanceCest extends AbstractInstallCest
     {
         parent::_before($I);
 
-        $I->copyToWorkDir('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml');
+        $I->copyFileToWorkDir('files/debug_logging/.magento.env.yaml', '.magento.env.yaml');
     }
 
     /**
@@ -300,7 +300,7 @@ class AcceptanceCest extends AbstractInstallCest
         );
 
         $I->assertTrue($I->stopEnvironment());
-        $I->assertTrue($I->copyToWorkDir($tmpConfig, '/app/etc/config.php'));
+        $I->assertTrue($I->copyFileToWorkDir($tmpConfig, 'app/etc/config.php'));
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
