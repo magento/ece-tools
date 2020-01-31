@@ -11,6 +11,7 @@ use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Command\ConfigDump;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Env\WriterInterface;
+use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
@@ -21,6 +22,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @inheritdoc
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class ConfigDumpTest extends TestCase
 {
@@ -65,6 +67,11 @@ class ConfigDumpTest extends TestCase
     private $magentoVersionMock;
 
     /**
+     * @var PostDeployInterface|MockObject
+     */
+    private $stageConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -76,6 +83,7 @@ class ConfigDumpTest extends TestCase
         $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
         $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->stageConfigMock = $this->createMock(PostDeployInterface::class);
 
         $this->shellFactoryMock->method('createMagento')
             ->willReturn($this->shellMock);
@@ -86,7 +94,8 @@ class ConfigDumpTest extends TestCase
             $this->generateMock,
             $this->readerMock,
             $this->writerMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->stageConfigMock
         );
     }
 
@@ -121,6 +130,9 @@ class ConfigDumpTest extends TestCase
 
     public function testExecute21Version()
     {
+        $this->stageConfigMock->method('get')
+            ->with(PostDeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-v');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -138,7 +150,7 @@ class ConfigDumpTest extends TestCase
             ->willReturn(false);
         $this->shellMock->expects($this->once())
             ->method('execute')
-            ->withConsecutive(['app:config:dump']);
+            ->with('app:config:dump', ['-v']);
 
         $tester = new CommandTester(
             $this->command

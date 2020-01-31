@@ -74,7 +74,7 @@ class Module
 
         $this->magentoShell->execute(
             'module:enable --all',
-            [$this->stageConfig->get(PostDeployInterface::VAR_VERBOSE_COMMANDS)]
+            [$this->stageConfig->get(BuildInterface::VAR_VERBOSE_COMMANDS)]
         );
 
         $updatedModuleConfig = $this->reader->read()['modules'] ?? [];
