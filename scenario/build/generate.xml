@@ -42,4 +42,13 @@
             </argument>
         </arguments>
     </step>
+    <step name="run-baler" type="Magento\MagentoCloud\Step\Build\RunBaler" priority="1300">
+        <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="build-config" xsi:type="object">Magento\MagentoCloud\Config\Stage\BuildInterface</argument>
+            <argument name="flag-manager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>
+            <argument name="baler-validator" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\BalerSupport</argument>
+            <argument name="shell" xsi:type="object">Magento\MagentoCloud\Shell\ShellInterface</argument>
+        </arguments>
+    </step>
 </scenario>
