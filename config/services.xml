@@ -45,6 +45,7 @@
         <service id="Magento\MagentoCloud\Shell\ProcessException" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Build\BackupData" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Build\DeployStaticContent" autowire="false" />
+        <service id="Magento\MagentoCloud\Step\Build\RunBaler" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\DeployCompletion" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\DeployStaticContent" autowire="false" />
         <service id="Magento\MagentoCloud\Step\Deploy\InstallUpdate" autowire="false" />
@@ -77,6 +78,7 @@
             </argument>
         </service>
         <service id="Symfony\Component\Serializer\Encoder\XmlEncoder"/>
+        <service id="Symfony\Component\Process\ExecutableFinder"/>
         <!-- Interface mappings -->
         <service id="Magento\MagentoCloud\PlatformVariable\DecoderInterface" alias="Magento\MagentoCloud\PlatformVariable\Decoder" />
         <service id="Magento\MagentoCloud\Shell\ShellInterface" alias="Magento\MagentoCloud\Shell\Shell" />
