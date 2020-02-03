@@ -15,6 +15,7 @@ VERBOSE_COMMANDS:
   default:
     build: ''
     deploy: ''
+    post-deploy: ''
   examples:
     - stage:
         build:
