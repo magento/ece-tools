@@ -7,9 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Validator\Deploy;
 
-use Magento\MagentoCloud\Config\Database\DbConfig;
-use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
+use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Validator;
 use Magento\MagentoCloud\Config\Validator\ResultFactory;
 use Magento\MagentoCloud\Config\ValidatorInterface;
@@ -25,11 +24,6 @@ class ResourceConfiguration implements ValidatorInterface
     private $resultFactory;
 
     /**
-     * @var DbConfig
-     */
-    private $dbConfig;
-
-    /**
      * @var ResourceConfig
      */
     private $resourceConfig;
@@ -37,15 +31,12 @@ class ResourceConfiguration implements ValidatorInterface
     /**
      * @param ResultFactory $resultFactory
      * @param ResourceConfig $resourceConfig
-     * @param DbConfig $dbConfig
      */
     public function __construct(
         ResultFactory $resultFactory,
-        ResourceConfig $resourceConfig,
-        DbConfig $dbConfig
+        ResourceConfig $resourceConfig
     ) {
         $this->resultFactory = $resultFactory;
-        $this->dbConfig = $dbConfig;
         $this->resourceConfig = $resourceConfig;
     }
 
@@ -54,26 +45,17 @@ class ResourceConfiguration implements ValidatorInterface
      */
     public function validate(): Validator\ResultInterface
     {
-        $dbConfig = $this->dbConfig->get();
-        $resourceConfig = $this->resourceConfig->get();
         $wrongResources = [];
-        foreach ($resourceConfig as $resourceName => $resourceData) {
-            if (!isset($resourceData[ResourceConfig::KEY_CONNECTION])
-                || !isset($dbConfig[DbConfig::KEY_CONNECTION][$resourceData[ResourceConfig::KEY_CONNECTION]])) {
+        foreach ($this->resourceConfig->get() as $resourceName => $resourceData) {
+            if (!isset($resourceData['connection'])) {
                 $wrongResources[] = $resourceName;
             }
         }
 
         if ($wrongResources) {
             return $this->resultFactory->error(
-                sprintf(
-                    'Variable %s is not configured properly',
-                    DeployInterface::VAR_RESOURCE_CONFIGURATION
-                ),
-                sprintf(
-                    'Add correct connection information to the following resources: %s',
-                    implode(', ', $wrongResources)
-                )
+                sprintf('Variable %s is not configured properly', DeployInterface::VAR_RESOURCE_CONFIGURATION),
+                sprintf('Add connection information to the following resources: %s', implode(', ', $wrongResources))
             );
         }
 
