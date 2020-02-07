@@ -24,6 +24,8 @@ elasticsearch:
     eol: 2018-07-31
   - version: '6.5'
     eol: 2020-05-14
+  - version: '7.2'
+    eol: 2020-12-25    
 rabbitmq:
   - version: '3.5'
     eol: 2016-10-31
