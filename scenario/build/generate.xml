@@ -18,9 +18,6 @@
                     <item name="scd-options-ignorance" xsi:type="object" priority="500">Magento\MagentoCloud\Config\Validator\Build\ScdOptionsIgnorance</item>
                     <item name="ideal-state" xsi:type="object" priority="600">Magento\MagentoCloud\Config\Validator\IdealState</item>
                 </item>
-                <item name="notice" xsi:type="array">
-                    <item name="ideal-state" xsi:type="object" priority="600">Magento\MagentoCloud\Config\Validator\IdealState</item>
-                </item>
             </argument>
         </arguments>
     </step>
