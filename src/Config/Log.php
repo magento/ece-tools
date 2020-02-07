@@ -17,19 +17,19 @@ use Magento\MagentoCloud\App\Logger\HandlerFactory;
  */
 class Log
 {
-    const SECTION_CONFIG = 'log';
+    public const SECTION_CONFIG = 'log';
 
     /**
      * Log levels.
      */
-    const LEVEL_DEBUG = 'debug';
-    const LEVEL_INFO = 'info';
-    const LEVEL_NOTICE = 'notice';
-    const LEVEL_WARNING = 'warning';
-    const LEVEL_ERROR = 'error';
-    const LEVEL_CRITICAL = 'critical';
-    const LEVEL_ALERT = 'alert';
-    const LEVEL_EMERGENCY = 'emergency';
+    public const LEVEL_DEBUG = 'debug';
+    public const LEVEL_INFO = 'info';
+    public const LEVEL_NOTICE = 'notice';
+    public const LEVEL_WARNING = 'warning';
+    public const LEVEL_ERROR = 'error';
+    public const LEVEL_CRITICAL = 'critical';
+    public const LEVEL_ALERT = 'alert';
+    public const LEVEL_EMERGENCY = 'emergency';
 
     /**
      * @var FileList
