@@ -30,7 +30,7 @@ class CronCest extends AbstractCest
     public function testCron(\CliTester $I, \Codeception\Example $data)
     {
         $this->prepareWorkplace($I, $data['version']);
-        $I->runEceDockerCommand('build:compose --mode=production --no-cron --expose-db-port=3306');
+        $I->runEceDockerCommand('build:compose --mode=production --expose-db-port=3306');
         $I->copyDirToWorkDir('modules/Magento/CronTest', 'app/code/Magento/CronTest');
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();

@@ -22,7 +22,7 @@ class DataTypesOptionValidationCest extends AbstractCest
     {
         $I->runEceDockerCommand(
             sprintf(
-                'build:compose --mode=production --no-cron --env-cloud-vars="%s"',
+                'build:compose --mode=production --env-cloud-vars="%s"',
                 $this->convertEnvFromArrayToJson($data['cloudVariables'])
             )
         );
