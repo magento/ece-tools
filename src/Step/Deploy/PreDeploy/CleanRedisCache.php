@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
+use Credis_Client;
 use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
 use Magento\MagentoCloud\Step\StepInterface;
@@ -74,12 +75,15 @@ class CleanRedisCache implements StepInterface
             }
             $redisConfig = $cacheConfig['backend_options'];
             $this->logger->info("Clearing redis cache: $cacheType");
-            $cmd = 'redis-cli';
-            $cmd .= isset($redisConfig['server']) ? ' -h ' . $redisConfig['server'] : '';
-            $cmd .= isset($redisConfig['port']) ? ' -p ' . $redisConfig['port'] : '';
-            $cmd .= isset($redisConfig['database']) ? ' -n ' . $redisConfig['database'] : '';
-            $cmd .= ' flushdb';
-            $this->shell->execute($cmd);
+            $redisClient = new Credis_Client(
+                isset($redisConfig['server']) ? $redisConfig['server'] : '127.0.0.1',
+                isset($redisConfig['server']) ? $redisConfig['port'] : 6379,
+                null,
+                '',
+                isset($redisConfig['database']) ? $redisConfig['database'] : 0
+            );
+            $redisClient->connect();
+            $redisClient->flushDb();
         }
     }
 }
