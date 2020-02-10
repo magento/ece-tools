@@ -20,12 +20,12 @@ class ElasticSearch22Cest extends ElasticSearchCest
         return [
             [
                 'magento' => '2.2.8',
-                'services' => [],
+                'removeES' => true,
                 'expectedResult' => ['engine' => 'mysql'],
             ],
             [
                 'magento' => '2.2.8',
-                'services' => ['es' => '2.4'],
+                'removeES' => false,
                 'expectedResult' => [
                     'engine' => 'elasticsearch',
                     'elasticsearch_server_hostname' => 'elasticsearch',

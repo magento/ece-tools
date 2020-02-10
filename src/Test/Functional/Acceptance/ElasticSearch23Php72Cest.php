@@ -20,12 +20,12 @@ class ElasticSearch23Php72Cest extends ElasticSearchCest
         return [
             [
                 'magento' => '2.3.0',
-                'services' => [],
+                'removeES' => true,
                 'expectedResult' => ['engine' => 'mysql'],
             ],
             [
                 'magento' => '2.3.0',
-                'services' => ['es' => '5.2'],
+                'removeES' => false,
                 'expectedResult' => [
                     'engine' => 'elasticsearch5',
                     'elasticsearch5_server_hostname' => 'elasticsearch',
@@ -34,7 +34,7 @@ class ElasticSearch23Php72Cest extends ElasticSearchCest
             ],
             [
                 'magento' => '2.3.2',
-                'services' => ['es' => '6.5'],
+                'removeES' => false,
                 'expectedResult' => [
                     'engine' => 'elasticsearch6',
                     'elasticsearch6_server_hostname' => 'elasticsearch',

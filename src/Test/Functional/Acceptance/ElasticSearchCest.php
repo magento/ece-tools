@@ -17,7 +17,7 @@ class ElasticSearchCest extends AbstractCest
     /**
      * @param \CliTester $I
      */
-    public function _before(\CliTester $I)
+    public function _before(\CliTester $I): void
     {
         // Do nothing
     }
@@ -30,16 +30,19 @@ class ElasticSearchCest extends AbstractCest
      */
     public function testElastic(\CliTester $I, \Codeception\Example $data)
     {
-        $I->generateDockerCompose($data['services']);
-        $I->cleanUpEnvironment();
-        $I->cloneTemplate($data['magento']);
-        $I->addEceComposerRepo();
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $this->prepareWorkplace($I, $data['magento']);
 
-        $I->runBinMagentoCommand('config:set general/region/state_required US --lock-env', Docker::DEPLOY_CONTAINER);
+        if ($data['removeES']) {
+            $this->removeESIfExists($I);
+        }
+
+        $I->runEceDockerCommand('build:compose --mode=production');
+
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
+        $I->runDockerComposeCommand('run deploy magento-command config:set general/region/state_required US --lock-env');
         $this->checkConfigurationIsNotRemoved($I);
 
         $I->amOnPage('/');
@@ -52,19 +55,15 @@ class ElasticSearchCest extends AbstractCest
         );
 
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
+        $I->stopEnvironment(true);
+        $this->removeESIfExists($I);
 
-        $relationships = [
-            'MAGENTO_CLOUD_RELATIONSHIPS' => [
-                'database' => [
-                    $I->getDbCredential(),
-                ],
-            ],
-        ];
+        $I->runEceDockerCommand('build:compose --mode=production');
 
-        $I->composerInstall();
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $relationships));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $relationships));
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
         $this->checkConfigurationIsNotRemoved($I);
 
         $I->amOnPage('/');
@@ -75,6 +74,23 @@ class ElasticSearchCest extends AbstractCest
             ['engine' => 'mysql'],
             $config['system']['default']['catalog']['search']
         );
+    }
+
+    /**
+     * @param \CliTester $I
+     */
+    private function removeESIfExists(\CliTester $I): void
+    {
+        $services = $I->readServicesYaml();
+
+        if (isset($services['elasticsearch'])) {
+            unset($services['elasticsearch']);
+            $I->writeServicesYaml($services);
+
+            $app = $I->readAppMagentoYaml();
+            unset($app['relationships']['elasticsearch']);
+            $I->writeAppMagentoYaml($app);
+        }
     }
 
     /**
@@ -109,13 +125,13 @@ class ElasticSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => '2.3.3',
-                'services' => [],
+                'magento' => '2.3.4',
+                'removeES' => true,
                 'expectedResult' => ['engine' => 'mysql'],
             ],
             [
-                'magento' => '2.3.3',
-                'services' => ['es' => '6.5'],
+                'magento' => '2.3.4',
+                'removeES' => false,
                 'expectedResult' => [
                     'engine' => 'elasticsearch6',
                     'elasticsearch6_server_hostname' => 'elasticsearch',
