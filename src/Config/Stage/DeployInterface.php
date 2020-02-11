@@ -16,33 +16,56 @@ use Magento\MagentoCloud\Config\StageConfigInterface;
  */
 interface DeployInterface extends StageConfigInterface
 {
-    const VAR_QUEUE_CONFIGURATION = 'QUEUE_CONFIGURATION';
-    const VAR_SEARCH_CONFIGURATION = 'SEARCH_CONFIGURATION';
-    const VAR_ELASTICSUITE_CONFIGURATION = 'ELASTICSUITE_CONFIGURATION';
-    const VAR_CACHE_CONFIGURATION = 'CACHE_CONFIGURATION';
-    const VAR_SESSION_CONFIGURATION = 'SESSION_CONFIGURATION';
-    const VAR_DATABASE_CONFIGURATION = 'DATABASE_CONFIGURATION';
-    const VAR_RESOURCE_CONFIGURATION = 'RESOURCE_CONFIGURATION';
-    const VAR_CRON_CONSUMERS_RUNNER = 'CRON_CONSUMERS_RUNNER';
-    const VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES = 'CONSUMERS_WAIT_FOR_MAX_MESSAGES';
-    const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
-    const VAR_UPDATE_URLS = 'UPDATE_URLS';
-    const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
+    public const VAR_QUEUE_CONFIGURATION = 'QUEUE_CONFIGURATION';
+    public const VAR_SEARCH_CONFIGURATION = 'SEARCH_CONFIGURATION';
+    public const VAR_ELASTICSUITE_CONFIGURATION = 'ELASTICSUITE_CONFIGURATION';
+    public const VAR_CACHE_CONFIGURATION = 'CACHE_CONFIGURATION';
+    public const VAR_SESSION_CONFIGURATION = 'SESSION_CONFIGURATION';
+    public const VAR_DATABASE_CONFIGURATION = 'DATABASE_CONFIGURATION';
+    public const VAR_RESOURCE_CONFIGURATION = 'RESOURCE_CONFIGURATION';
+    public const VAR_CRON_CONSUMERS_RUNNER = 'CRON_CONSUMERS_RUNNER';
+    public const VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES = 'CONSUMERS_WAIT_FOR_MAX_MESSAGES';
+    public const VAR_CLEAN_STATIC_FILES = 'CLEAN_STATIC_FILES';
+    public const VAR_UPDATE_URLS = 'UPDATE_URLS';
+    public const VAR_FORCE_UPDATE_URLS = 'FORCE_UPDATE_URLS';
 
     /**
      * The variable responsible to set lock provider for Magento 2.2.5 and higher.
      */
-    const VAR_LOCK_PROVIDER = 'LOCK_PROVIDER';
+    public const VAR_LOCK_PROVIDER = 'LOCK_PROVIDER';
 
     /**
      * The variable responsible to set Redis slave connection when it has true value.
      */
-    const VAR_REDIS_USE_SLAVE_CONNECTION = 'REDIS_USE_SLAVE_CONNECTION';
+    public const VAR_REDIS_USE_SLAVE_CONNECTION = 'REDIS_USE_SLAVE_CONNECTION';
 
     /**
      * The variable responsible to set mysql slave connection when it has true value.
      */
-    const VAR_MYSQL_USE_SLAVE_CONNECTION = 'MYSQL_USE_SLAVE_CONNECTION';
+    public const VAR_MYSQL_USE_SLAVE_CONNECTION = 'MYSQL_USE_SLAVE_CONNECTION';
+
+    /**
+     * The variable responsible to use split database.
+     */
+    const VAR_SPLIT_DB = 'SPLIT_DB';
+
+    /**
+     * The value of the variable SPLIT_DB
+     */
+    const SPLIT_DB_VALUE_QUOTE = 'quote';
+
+    /**
+     * The value of the variable SPLIT_DB
+     */
+    const SPLIT_DB_VALUE_SALES = 'sales';
+
+    /**
+     * Values for variable SPLIT_DB
+     */
+    const SPLIT_DB_VALUES = [
+        self::SPLIT_DB_VALUE_QUOTE,
+        self::SPLIT_DB_VALUE_SALES
+    ];
 
     /**
      * The variable responsible to use split database.
@@ -70,10 +93,10 @@ interface DeployInterface extends StageConfigInterface
     /**
      * @deprecated 2.1 specific variable.
      */
-    const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';
+    public const VAR_GENERATED_CODE_SYMLINK = 'GENERATED_CODE_SYMLINK';
 
     /**
      * The variable responsible for enabling google analytics in environments other than prod.
      */
-    const VAR_ENABLE_GOOGLE_ANALYTICS = 'ENABLE_GOOGLE_ANALYTICS';
+    public const VAR_ENABLE_GOOGLE_ANALYTICS = 'ENABLE_GOOGLE_ANALYTICS';
 }

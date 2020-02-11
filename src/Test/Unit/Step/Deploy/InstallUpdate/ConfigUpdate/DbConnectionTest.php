@@ -42,11 +42,11 @@ class DbConnectionTest extends TestCase
         'username' => 'checkout.username',
     ];
 
-    private const SALE_CONNECTION = [
-        'host' => 'sale.host',
-        'dbname' => 'sale.dbname',
-        'password' => 'sale.password',
-        'username' => 'sale.username',
+    private const SALES_CONNECTION = [
+        'host' => 'sales.host',
+        'dbname' => 'sales.dbname',
+        'password' => 'sales.password',
+        'username' => 'sales.username',
     ];
 
     private const SLAVE_DEFAULT_CONNECTION = [
@@ -64,15 +64,15 @@ class DbConnectionTest extends TestCase
     ];
 
     private const SLAVE_SALE_CONNECTION = [
-        'host' => 'slave.sale.host',
-        'dbname' => 'slave.sale.dbname',
-        'password' => 'slave.sale.password',
-        'username' => 'slave.sale.username',
+        'host' => 'slave.sales.host',
+        'dbname' => 'slave.sales.dbname',
+        'password' => 'slave.sales.password',
+        'username' => 'slave.sales.username',
     ];
 
     private const RESOURCE_DEFAULT_SETUP = ['connection' => 'default'];
     private const RESOURCE_CHECKOUT = ['connection' => 'checkout'];
-    private const RESOURCE_SALE = ['connection' => 'sale'];
+    private const RESOURCE_SALE = ['connection' => 'sales'];
 
     /**
      * @var DeployInterface|MockObject
@@ -206,12 +206,9 @@ class DbConnectionTest extends TestCase
         $this->resourceConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($resourceConfig);
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION]
-            )
+            ->with(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
             ->willReturnOnConsecutiveCalls(false, []);
         $this->configWriterMock->expects($this->once())
             ->method('create')
@@ -410,18 +407,18 @@ class DbConnectionTest extends TestCase
                         'password' => 'checkout.password',
                         'username' => 'checkout.username',
                     ],
-                    'sale' => [
-                        'host' => 'custom_sale.host',
-                        'dbname' => 'sale.dbname',
-                        'password' => 'sale.password',
-                        'username' => 'sale.username',
+                    'sales' => [
+                        'host' => 'custom_sales.host',
+                        'dbname' => 'sales.dbname',
+                        'password' => 'sales.password',
+                        'username' => 'sales.username',
                     ],
                 ]
             ],
             'resource' => [
                 'default_setup' => self::RESOURCE_DEFAULT_SETUP,
                 'checkout' => self::RESOURCE_CHECKOUT,
-                'sale' => self::RESOURCE_SALE,
+                'sales' => self::RESOURCE_SALE,
             ],
         ];
         $this->dbConfigMock->expects($this->once())
@@ -431,7 +428,7 @@ class DbConnectionTest extends TestCase
                     'default' => self::DEFAULT_CONNECTION,
                     'indexer' => self::DEFAULT_CONNECTION,
                     'checkout' => self::CHECKOUT_CONNECTION,
-                    'sale' => self::SALE_CONNECTION,
+                    'sales' => self::SALES_CONNECTION,
                 ]
             ]);
         $this->loggerMock->expects($this->once())
@@ -440,110 +437,16 @@ class DbConnectionTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($mageConfig);
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->exactly(1))
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION]
-            )
+            ->with(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
             ->willReturnOnConsecutiveCalls(false, []);
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with($mageConfig);
         $this->loggerMock->expects($this->once())
             ->method('warning')
-            ->with('For split databases used custom connections: checkout, sale');
+            ->with('For split databases used custom connections: checkout, sales');
         $this->flagManagerMock->expects($this->once())
             ->method('set')
             ->with(FlagManager::FLAG_IGNORE_SPLIT_DB);
-
-        $this->step->execute();
-    }
-
-    /**
-     * Case when database was split before but with custom default connections
-     */
-    public function testExecuteSplitDbWasEnabledWithDifferentMainConnection()
-    {
-        $customDefaultConnection = [
-            'host' => 'custom.host',
-            'dbname' => 'custom.dbname',
-            'password' => 'custom.password',
-            'username' => 'custom.username',
-        ];
-        $this->dbConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn([
-                'connection' => [
-                    'default' => self::DEFAULT_CONNECTION,
-                    'indexer' => self::DEFAULT_CONNECTION,
-                    'checkout' => self::CHECKOUT_CONNECTION,
-                    'sale' => self::SALE_CONNECTION,
-                ]
-            ]);
-        $this->loggerMock->expects($this->once())
-            ->method('info')
-            ->with('Updating env.php DB connection configuration.');
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([
-                'db' => [
-                    'connection' => [
-                        'default' => $customDefaultConnection,
-                        'indexer' => $customDefaultConnection,
-                        'checkout' => [
-                            'host' => 'custom_checkout.host',
-                            'dbname' => 'checkout.dbname',
-                            'password' => 'checkout.password',
-                            'username' => 'checkout.username',
-                        ],
-                        'sale' => [
-                            'host' => 'custom_sale.host',
-                            'dbname' => 'sale.dbname',
-                            'password' => 'sale.password',
-                            'username' => 'sale.username',
-                        ],
-                    ]
-                ],
-                'resource' => [
-                    'default_setup' => self::RESOURCE_DEFAULT_SETUP,
-                    'checkout' => self::RESOURCE_CHECKOUT,
-                    'sale' => self::RESOURCE_SALE,
-                ],
-            ]);
-        $this->loggerMock->expects($this->once())
-            ->method('notice')
-            ->with('Database was already split but deploy was configured with new connection.'
-                . ' The previous connection data will be ignored.');
-        $this->resourceConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn([
-                'default_setup' => self::RESOURCE_DEFAULT_SETUP,
-                'checkout' => self::RESOURCE_CHECKOUT,
-                'sale' => self::RESOURCE_SALE,
-            ]);
-        $this->stageConfigMock->expects($this->any())
-            ->method('get')
-            ->willReturnMap([
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION, false],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION, []],
-            ]);
-
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with([
-                'db' => [
-                    'connection' => [
-                        'default' => self::DEFAULT_CONNECTION,
-                        'indexer' => self::DEFAULT_CONNECTION,
-                    ]
-                ],
-                'resource' => [
-                    'default_setup' => self::RESOURCE_DEFAULT_SETUP,
-                ],
-            ]);
-        $this->flagManagerMock->expects($this->never())
-            ->method('set');
 
         $this->step->execute();
     }
@@ -560,13 +463,13 @@ class DbConnectionTest extends TestCase
                 'default' => self::DEFAULT_CONNECTION,
                 'indexer' => self::DEFAULT_CONNECTION,
                 'checkout' => self::CHECKOUT_CONNECTION,
-                'sale' => self::SALE_CONNECTION,
+                'sales' => self::SALES_CONNECTION,
             ],
             'slave_connection' => [
                 'default' => self::SLAVE_DEFAULT_CONNECTION,
                 'indexer' => self::SLAVE_DEFAULT_CONNECTION,
                 'checkout' => self::SLAVE_CHECKOUT_CONNECTION,
-                'sale' => self::SLAVE_SALE_CONNECTION,
+                'sales' => self::SLAVE_SALE_CONNECTION,
             ],
         ];
         $this->dbConfigMock->expects($this->once())
@@ -577,7 +480,7 @@ class DbConnectionTest extends TestCase
             'resource' => [
                 'default_setup' => self::RESOURCE_DEFAULT_SETUP,
                 'checkout' => self::RESOURCE_CHECKOUT,
-                'sale' => self::RESOURCE_SALE,
+                'sales' => self::RESOURCE_SALE,
             ],
         ];
         $this->loggerMock->expects($this->once())
@@ -586,12 +489,9 @@ class DbConnectionTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn($mageConfig);
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION],
-                [DeployInterface::VAR_DATABASE_CONFIGURATION]
-            )
+            ->with(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)
             ->willReturnOnConsecutiveCalls(false, []);
         $this->configWriterMock->expects($this->once())
             ->method('create')
@@ -601,13 +501,13 @@ class DbConnectionTest extends TestCase
                         'default' => self::DEFAULT_CONNECTION,
                         'indexer' => self::DEFAULT_CONNECTION,
                         'checkout' => self::CHECKOUT_CONNECTION,
-                        'sale' => self::SALE_CONNECTION,
+                        'sales' => self::SALES_CONNECTION,
                     ]
                 ],
                 'resource' => [
                     'default_setup' => self::RESOURCE_DEFAULT_SETUP,
                     'checkout' => self::RESOURCE_CHECKOUT,
-                    'sale' => self::RESOURCE_SALE,
+                    'sales' => self::RESOURCE_SALE,
                 ],
             ]);
         $this->flagManagerMock->expects($this->never())

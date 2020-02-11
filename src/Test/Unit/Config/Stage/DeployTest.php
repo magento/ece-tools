@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Config\Stage;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Schema;
 use Magento\MagentoCloud\Config\Stage\Deploy;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
@@ -54,8 +55,10 @@ class DeployTest extends TestCase
      * @param array $mergedConfig
      * @param array|null $schema
      * @dataProvider getDataProvider
+     *
+     * @throws ConfigException
      */
-    public function testGet(string $name, $expectedValue, array $mergedConfig, array $schema = null)
+    public function testGet(string $name, $expectedValue, array $mergedConfig, array $schema = null): void
     {
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
@@ -75,7 +78,6 @@ class DeployTest extends TestCase
 
     /**
      * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getDataProvider(): array
     {
@@ -162,9 +164,12 @@ class DeployTest extends TestCase
         ];
     }
 
-    public function testGetConfigNotDefined()
+    /**
+     * @throws ConfigException
+     */
+    public function testGetConfigNotDefined(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Config NO_EXISTS_CONFIG was not defined');
 
         $this->mergedConfigMock->expects($this->once())
@@ -174,14 +179,17 @@ class DeployTest extends TestCase
         $this->deployConfig->get('NO_EXISTS_CONFIG');
     }
 
-    public function testGetWithMergedConfigException()
+    /**
+     * @throws ConfigException
+     */
+    public function testGetWithMergedConfigException(): void
     {
-        $this->expectException(\RuntimeException::class);
+        $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Some error');
 
         $this->mergedConfigMock->expects($this->once())
             ->method('get')
-            ->willThrowException(new \RuntimeException('Some error'));
+            ->willThrowException(new ConfigException('Some error'));
 
         $this->deployConfig->get(Deploy::VAR_SCD_STRATEGY);
     }

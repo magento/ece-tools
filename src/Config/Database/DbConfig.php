@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Config\Database;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\ConfigMerger;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -41,7 +42,7 @@ class DbConfig implements ConfigInterface
     const CONNECTION_DEFAULT = 'default';
     const CONNECTION_INDEXER = 'indexer';
     const CONNECTION_CHECKOUT = 'checkout';
-    const CONNECTION_SALE = 'sale';
+    const CONNECTION_SALES = 'sales';
 
     /**
      * Types of connections
@@ -56,7 +57,7 @@ class DbConfig implements ConfigInterface
     /**
      * Split connections
      */
-    const SPLIT_CONNECTIONS = [self::CONNECTION_CHECKOUT, self::CONNECTION_SALE];
+    const SPLIT_CONNECTIONS = [self::CONNECTION_CHECKOUT, self::CONNECTION_SALES];
 
     /**
      * Main connection map with data from environment relationship connections:
@@ -66,7 +67,7 @@ class DbConfig implements ConfigInterface
         self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_MAIN,
         self::CONNECTION_INDEXER => RelationshipConnectionFactory::CONNECTION_MAIN,
         self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_MAIN,
-        self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
+        self::CONNECTION_SALES => RelationshipConnectionFactory::CONNECTION_SALES_MAIN,
     ];
 
     /**
@@ -76,7 +77,7 @@ class DbConfig implements ConfigInterface
     const SLAVE_CONNECTION_MAP = [
         self::CONNECTION_DEFAULT => RelationshipConnectionFactory::CONNECTION_SLAVE,
         self::CONNECTION_CHECKOUT => RelationshipConnectionFactory::CONNECTION_QUOTE_SLAVE,
-        self::CONNECTION_SALE => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
+        self::CONNECTION_SALES => RelationshipConnectionFactory::CONNECTION_SALES_SLAVE,
     ];
 
     /**
@@ -147,6 +148,7 @@ class DbConfig implements ConfigInterface
      *   'slave_connection' => [...]
      * ]
      * ```
+     * @throws ConfigException
      */
     public function get(): array
     {
@@ -202,6 +204,7 @@ class DbConfig implements ConfigInterface
      * Custom split connections are removed as they are not supported.
      *
      * @return array
+     * @throws ConfigException
      */
     private function getSupportedCustomConfig(): array
     {
@@ -225,8 +228,8 @@ class DbConfig implements ConfigInterface
      * in not compatible way with slave_connection.
      *
      * Returns true if $envDbConfig contains host or dbname for default connection
-     * that doesn't match connection from relationships,
-     * otherwise return false.
+     * that does match connection from relationships, otherwise return false.
+     *
      * @param array $customConfig database configuration from DATABASE_CONFIGURATION of .magento.env.yaml
      * @param string $connectionName
      * @param ConnectionInterface $envConfig

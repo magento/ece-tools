@@ -18,9 +18,6 @@
                     <item name="scd-options-ignorance" xsi:type="object" priority="500">Magento\MagentoCloud\Config\Validator\Build\ScdOptionsIgnorance</item>
                     <item name="ideal-state" xsi:type="object" priority="600">Magento\MagentoCloud\Config\Validator\IdealState</item>
                 </item>
-                <item name="notice" xsi:type="array">
-                    <item name="ideal-state" xsi:type="object" priority="600">Magento\MagentoCloud\Config\Validator\IdealState</item>
-                </item>
             </argument>
         </arguments>
     </step>
@@ -40,6 +37,15 @@
             <argument name="steps" xsi:type="array">
                 <item name="generate" xsi:type="object" priority="100">Magento\MagentoCloud\Step\Build\DeployStaticContent\Generate</item>
             </argument>
+        </arguments>
+    </step>
+    <step name="run-baler" type="Magento\MagentoCloud\Step\Build\RunBaler" priority="1300">
+        <arguments>
+            <argument name="logger" xsi:type="object">Psr\Log\LoggerInterface</argument>
+            <argument name="build-config" xsi:type="object">Magento\MagentoCloud\Config\Stage\BuildInterface</argument>
+            <argument name="flag-manager" xsi:type="object">Magento\MagentoCloud\Filesystem\Flag\Manager</argument>
+            <argument name="baler-validator" xsi:type="object">Magento\MagentoCloud\Config\Validator\Build\BalerSupport</argument>
+            <argument name="shell" xsi:type="object">Magento\MagentoCloud\Shell\ShellInterface</argument>
         </arguments>
     </step>
 </scenario>

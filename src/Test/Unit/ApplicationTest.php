@@ -80,6 +80,7 @@ class ApplicationTest extends TestCase
         Command\CronDisable::NAME => Command\CronDisable::class,
         Command\ConfigShow::NAME => Command\ConfigShow::class,
         Command\RunCommand::NAME => Command\RunCommand::class,
+        Command\GenerateSchema::NAME => Command\GenerateSchema::class,
     ];
 
     /**
@@ -126,7 +127,7 @@ class ApplicationTest extends TestCase
         );
     }
 
-    public function testHasCommand()
+    public function testHasCommand(): void
     {
         foreach (array_keys($this->classMap) as $name) {
             $this->assertTrue(
@@ -135,7 +136,7 @@ class ApplicationTest extends TestCase
         }
     }
 
-    public function testGetName()
+    public function testGetName(): void
     {
         $this->assertSame(
             $this->applicationName,
@@ -143,7 +144,7 @@ class ApplicationTest extends TestCase
         );
     }
 
-    public function testGetVersion()
+    public function testGetVersion(): void
     {
         $this->assertSame(
             $this->applicationVersion,
@@ -151,7 +152,7 @@ class ApplicationTest extends TestCase
         );
     }
 
-    public function testGetContainer()
+    public function testGetContainer(): void
     {
         $this->application->getContainer();
     }

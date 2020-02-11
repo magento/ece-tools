@@ -32,16 +32,16 @@ class SplitDbConnectionTest extends TestCase
         'password' => 'checkout.password',
     ];
 
-    private const SALE_CONNECTION_CONFIG = [
-        'host' => 'sale.host',
-        'dbname' => 'sale.dbname',
-        'username' => 'sale.username',
-        'password' => 'sale.password',
+    private const SALES_CONNECTION_CONFIG = [
+        'host' => 'sales.host',
+        'dbname' => 'sales.dbname',
+        'username' => 'sales.username',
+        'password' => 'sales.password',
     ];
 
     private const CONNECTION = [
         'checkout' => self::CHECKOUT_CONNECTION_CONFIG,
-        'sale' => self::SALE_CONNECTION_CONFIG,
+        'sales' => self::SALES_CONNECTION_CONFIG,
     ];
 
     private const SLAVE_CHECKOUT_CONNECTION_CONFIG = [
@@ -51,16 +51,16 @@ class SplitDbConnectionTest extends TestCase
         'password' => 'slave.checkout.password',
     ];
 
-    private const SLAVE_SALE_CONNECTION_CONFIG = [
-        'host' => 'slave.sale.host',
-        'dbname' => 'slave.sale.dbname',
-        'username' => 'slave.sale.username',
-        'password' => 'slave.sale.password',
+    private const SLAVE_SALES_CONNECTION_CONFIG = [
+        'host' => 'slave.sales.host',
+        'dbname' => 'slave.sales.dbname',
+        'username' => 'slave.sales.username',
+        'password' => 'slave.sales.password',
     ];
 
     private const SLAVE_CONNECTION = [
         'checkout' => self::SLAVE_CHECKOUT_CONNECTION_CONFIG,
-        'sale' => self::SLAVE_SALE_CONNECTION_CONFIG,
+        'sales' => self::SLAVE_SALES_CONNECTION_CONFIG,
     ];
 
     /**
@@ -144,8 +144,6 @@ class SplitDbConnectionTest extends TestCase
 
     /**
      * Variable SPLIT_DB is a empty array
-     *
-     * @throws \Magento\MagentoCloud\Step\StepException
      */
     public function testExecuteVarSplitDbIsEmpty()
     {
@@ -153,6 +151,28 @@ class SplitDbConnectionTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_SPLIT_DB)
             ->willReturn([]);
+        $this->dbConfigMock->expects($this->once())
+            ->method('get')
+            ->willReturn([
+                'connection' => [
+                    'checkout' => [],
+                    'sales' => [],
+                ]
+            ]);
+        $this->configReaderMock->expects($this->once())
+            ->method('read')
+            ->willReturn([
+                'db' => [
+                    'connection' => [
+                        'checkout' => [],
+                        'sales' => [],
+                    ]
+                ]
+            ]);
+        $this->loggerMock->expects($this->once())
+            ->method('warning')
+            ->with('Variable SPLIT_DB does not have data which were already split types: sales, quote');
+
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
         $this->configWriterMock->expects($this->never())
@@ -166,10 +186,6 @@ class SplitDbConnectionTest extends TestCase
      */
     public function testExecuteVarSplitDbIsNotEmptyAndFlagIgnoreSplitDbExists()
     {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_SPLIT_DB)
-            ->willReturn(DeployInterface::SPLIT_DB_VALUES);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_IGNORE_SPLIT_DB)
@@ -190,7 +206,6 @@ class SplitDbConnectionTest extends TestCase
      *
      * @param array $dbConfig
      * @param array $splitTypes
-     * @throws \Magento\MagentoCloud\Step\StepException
      * @dataProvider  dataProviderExecuteRelationshipNotHaveConfigurations
      */
     public function testExecuteRelationshipNotHaveConfigurations(array $dbConfig, array $splitTypes)
@@ -232,7 +247,7 @@ class SplitDbConnectionTest extends TestCase
                 ['sales', 'quote'],
             ],
             [
-                ['connection' => ['sale' => []]],
+                ['connection' => ['sales' => []]],
                 ['quote'],
             ],
             [
@@ -249,7 +264,6 @@ class SplitDbConnectionTest extends TestCase
      * @param array $dbConfig
      * @param array $mageConfig
      * @param array $splitTypes
-     * @throws \Magento\MagentoCloud\Step\StepException
      * @dataProvider dataProviderExecuteVarSplitDbDoesNotHaveSplitTypes
      */
     public function testExecuteVarSplitDbDoesNotHaveSplitTypes(
@@ -295,13 +309,13 @@ class SplitDbConnectionTest extends TestCase
             [
                 ['quote'],
                 ['connection' => ['checkout' => []]],
-                ['db' => ['connection' => ['sale' => []]]],
+                ['db' => ['connection' => ['sales' => []]]],
                 ['sales']
             ],
 
             [
                 ['sales'],
-                ['connection' => ['sale' => []]],
+                ['connection' => ['sales' => []]],
                 ['db' => ['connection' => ['checkout' => []]]],
                 ['quote']
             ]
@@ -344,8 +358,8 @@ class SplitDbConnectionTest extends TestCase
             ->withConsecutive(
                 ['setup:db-schema:split-quote --host="checkout.host" --dbname="checkout.dbname"'
                     . ' --username="checkout.username" --password="checkout.password"'],
-                ['setup:db-schema:split-sales --host="sale.host" --dbname="sale.dbname"'
-                    . ' --username="sale.username" --password="sale.password"']
+                ['setup:db-schema:split-sales --host="sales.host" --dbname="sales.dbname"'
+                    . ' --username="sales.username" --password="sales.password"']
             )
             ->willReturn($this->processMock);
         $this->loggerMock->expects($this->exactly(2))
@@ -358,7 +372,7 @@ class SplitDbConnectionTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Quote tables were split to DB checkout.dbname in checkout.host'],
-                ['Sales tables were split to DB sale.dbname in sale.host']
+                ['Sales tables were split to DB sales.dbname in sales.host']
             );
 
         $this->configWriterMock->expects($this->never())
@@ -409,8 +423,8 @@ class SplitDbConnectionTest extends TestCase
             ->withConsecutive(
                 ['setup:db-schema:split-quote --host="checkout.host" --dbname="checkout.dbname"'
                     . ' --username="checkout.username" --password="checkout.password"'],
-                ['setup:db-schema:split-sales --host="sale.host" --dbname="sale.dbname"'
-                    . ' --username="sale.username" --password="sale.password"']
+                ['setup:db-schema:split-sales --host="sales.host" --dbname="sales.dbname"'
+                    . ' --username="sales.username" --password="sales.password"']
             )
             ->willReturn($this->processMock);
         $this->loggerMock->expects($this->exactly(2))
@@ -423,9 +437,9 @@ class SplitDbConnectionTest extends TestCase
             ->method('info')
             ->withConsecutive(
                 ['Quote tables were split to DB checkout.dbname in checkout.host'],
-                ['Sales tables were split to DB sale.dbname in sale.host'],
+                ['Sales tables were split to DB sales.dbname in sales.host'],
                 ['Slave connection for checkout connection was set'],
-                ['Slave connection for sale connection was set']
+                ['Slave connection for sales connection was set']
             );
 
         $this->configWriterMock->expects($this->once())

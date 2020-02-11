@@ -7,6 +7,9 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy;
 
+use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -26,7 +29,7 @@ class SplitDbConnection implements StepInterface
      * Types of split database
      */
     const SPLIT_CONNECTION_MAP = [
-        DbConfig::CONNECTION_SALE => DeployInterface::SPLIT_DB_VALUE_SALES,
+        DbConfig::CONNECTION_SALES => DeployInterface::SPLIT_DB_VALUE_SALES,
         DbConfig::CONNECTION_CHECKOUT => DeployInterface::SPLIT_DB_VALUE_QUOTE,
     ];
 
@@ -103,14 +106,13 @@ class SplitDbConnection implements StepInterface
     /**
      * Starts the database splitting process
      * Updates the configuration of slave connections for split connections
+     *
+     * @throws ConfigException
+     * @throws FileSystemException
+     * @throws ConfigurationMismatchException
      */
     public function execute()
     {
-        $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
-        if (empty($splitTypes)) {
-            return;
-        }
-
         if ($this->flagManager->exists(FlagManager::FLAG_IGNORE_SPLIT_DB)) {
             $this->logger->info(sprintf(
                 'Enabling a split database will be skipped. The flag %s was detected.',
@@ -119,6 +121,8 @@ class SplitDbConnection implements StepInterface
             $this->flagManager->delete(FlagManager::FLAG_IGNORE_SPLIT_DB);
             return;
         }
+
+        $splitTypes = $this->stageConfig->get(DeployInterface::VAR_SPLIT_DB);
 
         $dbConfig = $this->dbConfig->get();
         $notAvailableSplitTypes = $this->getMissedSplitTypes(
@@ -147,11 +151,13 @@ class SplitDbConnection implements StepInterface
         if (!empty($missedSplitTypes)) {
             $this->logger->warning(
                 'Variable SPLIT_DB does not have data which were already split types: '
-                . implode(',', $missedSplitTypes)
+                . implode(', ', $missedSplitTypes)
             );
             return;
         }
-        $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
+        if (!empty($splitTypes)) {
+            $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
+        }
         $this->updateSlaveConnections($dbConfig);
     }
 
@@ -226,7 +232,8 @@ class SplitDbConnection implements StepInterface
      * Updates slave connections
      *
      * @param array $dbConfig
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
+     * @throws ConfigException
      */
     private function updateSlaveConnections(array $dbConfig)
     {
