@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup;
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
 use Magento\MagentoCloud\DB\Data\ConnectionInterface;
@@ -56,9 +56,9 @@ class InstallCommandFactory
      */
     private $elasticSuite;
     /**
-     * @var MergedConfig
+     * @var DbConfig
      */
-    private $mergedConfig;
+    private $dbConfig;
 
     /**
      * @param UrlManager $urlManager
@@ -67,7 +67,7 @@ class InstallCommandFactory
      * @param PasswordGenerator $passwordGenerator
      * @param DeployInterface $stageConfig
      * @param ElasticSuite $elasticSuite
-     * @param MergedConfig $mergedConfig
+     * @param DbConfig $dbConfig
      */
     public function __construct(
         UrlManager $urlManager,
@@ -76,7 +76,7 @@ class InstallCommandFactory
         PasswordGenerator $passwordGenerator,
         DeployInterface $stageConfig,
         ElasticSuite $elasticSuite,
-        MergedConfig $mergedConfig
+        DbConfig $dbConfig
     ) {
         $this->urlManager = $urlManager;
         $this->adminData = $adminData;
@@ -84,7 +84,7 @@ class InstallCommandFactory
         $this->passwordGenerator = $passwordGenerator;
         $this->stageConfig = $stageConfig;
         $this->elasticSuite = $elasticSuite;
-        $this->mergedConfig = $mergedConfig;
+        $this->dbConfig = $dbConfig;
     }
 
     /**
@@ -143,7 +143,7 @@ class InstallCommandFactory
             $command .= ' --db-password=' . escapeshellarg($dbPassword);
         }
 
-        if ($table_prefix = $this->mergedConfig->get()['table_prefix'] ?? '') {
+        if ($table_prefix = $this->dbConfig->get()['table_prefix'] ?? '') {
             $command .= ' --db-prefix=' . escapeshellarg($table_prefix);
         }
 
