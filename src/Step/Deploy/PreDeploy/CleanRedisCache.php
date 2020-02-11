@@ -76,11 +76,11 @@ class CleanRedisCache implements StepInterface
             $redisConfig = $cacheConfig['backend_options'];
             $this->logger->info("Clearing redis cache: $cacheType");
             $redisClient = new Credis_Client(
-                isset($redisConfig['server']) ? $redisConfig['server'] : '127.0.0.1',
-                isset($redisConfig['server']) ? $redisConfig['port'] : 6379,
+                isset($redisConfig['server']) ?? '127.0.0.1',
+                isset($redisConfig['port']) ?? 6379,
                 null,
                 '',
-                isset($redisConfig['database']) ? $redisConfig['database'] : 0
+                isset($redisConfig['database']) ?? 0
             );
             $redisClient->connect();
             $redisClient->flushDb();
