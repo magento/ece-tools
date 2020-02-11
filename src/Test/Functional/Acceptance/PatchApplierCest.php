@@ -18,25 +18,26 @@ class PatchApplierCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function _before(\CliTester $I)
+    public function _before(\CliTester $I): void
     {
         parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+
+        $I->copyFileToWorkDir('files/debug_logging/.magento.env.yaml', '.magento.env.yaml');
     }
 
     /**
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testApplyingPatch(\CliTester $I)
+    public function testApplyingPatch(\CliTester $I): void
     {
-        $I->uploadToContainer('files/patches/target_file.md', '/target_file.md', Docker::BUILD_CONTAINER);
-        $I->uploadToContainer('files/patches/patch.patch', '/m2-hotfixes/patch.patch', Docker::BUILD_CONTAINER);
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->copyFileToWorkDir('files/patches/target_file.md', 'target_file.md');
+        $I->copyFileToWorkDir('files/patches/patch.patch', 'm2-hotfixes/patch.patch');
 
         // For this test, only the build phase is enough
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->startEnvironment();
 
         $targetFile = $I->grabFileContent('/target_file.md', Docker::BUILD_CONTAINER);
         $I->assertContains('# Hello Magento', $targetFile);
@@ -49,13 +50,15 @@ class PatchApplierCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testApplyingExistingPatch(\CliTester $I)
+    public function testApplyingExistingPatch(\CliTester $I): void
     {
-        $I->uploadToContainer('files/patches/target_file_applied_patch.md', '/target_file.md', Docker::BUILD_CONTAINER);
-        $I->uploadToContainer('files/patches/patch.patch', '/m2-hotfixes/patch.patch', Docker::BUILD_CONTAINER);
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->copyFileToWorkDir('files/patches/target_file_applied_patch.md', 'target_file.md');
+        $I->copyFileToWorkDir('files/patches/patch.patch', 'm2-hotfixes/patch.patch');
 
         // For this test, only the build phase is enough
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->startEnvironment();
 
         $targetFile = $I->grabFileContent('/target_file.md', Docker::BUILD_CONTAINER);
         $I->assertContains('# Hello Magento', $targetFile);
