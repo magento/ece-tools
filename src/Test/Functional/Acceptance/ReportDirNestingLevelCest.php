@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
 use Magento\MagentoCloud\Config\Stage\BuildInterface;
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 
 /**
  * This test runs on the latest version of PHP
@@ -21,17 +20,6 @@ class ReportDirNestingLevelCest extends AbstractCest
     private $expectedPathLocalXml = '/app/pub/errors/local.xml';
 
     /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    public function _before(\CliTester $I)
-    {
-        parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-    }
-
-    /**
      * The case when the property ERROR_REPORT_DIR_NESTING_LEVEL not set in .magento.env.yaml file
      * and the file <magento_root>/errors/local.xml not exist on build phase
      * and the environment variable MAGE_ERROR_REPORT_DIR_NESTING_LEVEL not exist on deploy phase
@@ -39,11 +27,12 @@ class ReportDirNestingLevelCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testDefault(\CliTester $I)
+    public function testDefault(\CliTester $I): void
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->assertContains(
             $this->getTemplateLocalXm(1),
             $I->grabFileContent('/pub/errors/local.xml')
@@ -66,16 +55,13 @@ class ReportDirNestingLevelCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testWithPropertyInMagentoEnvFile(\CliTester $I)
+    public function testWithPropertyInMagentoEnvFile(\CliTester $I): void
     {
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/.magento.env.yaml',
-            '/.magento.env.yaml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->assertContains(
             $this->getTemplateLocalXm(3),
             $I->grabFileContent('/pub/errors/local.xml')
@@ -98,21 +84,14 @@ class ReportDirNestingLevelCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testWithPropertyInLocalXmlFile(\CliTester $I)
+    public function testWithPropertyInLocalXmlFile(\CliTester $I): void
     {
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/.magento.env.yaml',
-            '/.magento.env.yaml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/local_with_property.xml',
-            '/pub/errors/local.xml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/local_with_property.xml', 'pub/errors/local.xml');
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains(
             sprintf(
@@ -133,26 +112,18 @@ class ReportDirNestingLevelCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testWhenSetEnvVar(\CliTester $I)
+    public function testWhenSetEnvVar(\CliTester $I): void
     {
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/.magento.env.yaml',
-            '/.magento.env.yaml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/local_with_property.xml',
-            '/pub/errors/local.xml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand(
-            'deploy',
-            Docker::DEPLOY_CONTAINER,
-            [],
-            ['MAGE_ERROR_REPORT_DIR_NESTING_LEVEL' => 7]
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/local_with_property.xml', 'pub/errors/local.xml');
+        $I->runEceDockerCommand(sprintf(
+            'build:compose --mode=production --env-raw-vars="%s"',
+            $this->convertEnvFromArrayToJson(['MAGE_ERROR_REPORT_DIR_NESTING_LEVEL' => 7])
         ));
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains(
             sprintf(
@@ -173,21 +144,14 @@ class ReportDirNestingLevelCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testErrorReportDirNestingLevelNotSet(\CliTester $I)
+    public function testErrorReportDirNestingLevelNotSet(\CliTester $I): void
     {
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/.magento.env.yaml',
-            '/.magento.env.yaml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/local_without_property.xml',
-            '/pub/errors/local.xml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/local_without_property.xml', 'pub/errors/local.xml');
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains(
             sprintf(
@@ -217,21 +181,14 @@ class ReportDirNestingLevelCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testWithInvalidLocalXmlFile(\CliTester $I)
+    public function testWithInvalidLocalXmlFile(\CliTester $I): void
     {
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/.magento.env.yaml',
-            '/.magento.env.yaml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->uploadToContainer(
-            'files/report_dir_nesting_level/invalid_local.xml',
-            '/pub/errors/local.xml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
+        $I->copyFileToWorkDir('files/report_dir_nesting_level/invalid_local.xml', 'pub/errors/local.xml');
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains(
             sprintf(
