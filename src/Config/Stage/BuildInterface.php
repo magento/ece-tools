@@ -19,5 +19,10 @@ interface BuildInterface extends StageConfigInterface
     /**
      * Subdirectory nesting level
      */
-    const VAR_ERROR_REPORT_DIR_NESTING_LEVEL = 'ERROR_REPORT_DIR_NESTING_LEVEL';
+    public const VAR_ERROR_REPORT_DIR_NESTING_LEVEL = 'ERROR_REPORT_DIR_NESTING_LEVEL';
+
+    /**
+     * Perfom Baler JS bundling
+     */
+    public const VAR_SCD_USE_BALER = 'SCD_USE_BALER';
 }

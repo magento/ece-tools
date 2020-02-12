@@ -8,7 +8,6 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\DB\Data;
 
 use Magento\MagentoCloud\Config\Database\DbConfig;
-use RuntimeException;
 
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
@@ -38,7 +37,7 @@ class ConnectionFactory implements ConnectionFactoryInterface
      *
      * @param string $connectionType
      * @return ConnectionInterface
-     * @throws RuntimeException
+     * @throws \RuntimeException
      */
     public function create(string $connectionType): ConnectionInterface
     {
@@ -56,7 +55,7 @@ class ConnectionFactory implements ConnectionFactoryInterface
             case self::CONNECTION_SALES_SLAVE:
                 return $this->getConnectionData(DbConfig::CONNECTION_SALES, false);
             default:
-                throw new RuntimeException(
+                throw new \RuntimeException(
                     sprintf('Connection with type %s doesn\'t exist', $connectionType)
                 );
         }

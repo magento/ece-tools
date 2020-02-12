@@ -9,6 +9,7 @@ namespace Magento\MagentoCloud\Step\Deploy;
 
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
+use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Step\StepInterface;
 use Psr\Log\LoggerInterface;
@@ -105,6 +106,10 @@ class SplitDbConnection implements StepInterface
     /**
      * Starts the database splitting process
      * Updates the configuration of slave connections for split connections
+     *
+     * @throws ConfigException
+     * @throws FileSystemException
+     * @throws ConfigurationMismatchException
      */
     public function execute()
     {
@@ -150,7 +155,9 @@ class SplitDbConnection implements StepInterface
             );
             return;
         }
-        $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
+        if (!empty($splitTypes)) {
+            $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
+        }
         $this->updateSlaveConnections($dbConfig);
     }
 

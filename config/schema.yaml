@@ -134,6 +134,18 @@ SCD_MATRIX:
         deploy:
           SCD_MATRIX:
             magento/backend: []
+SCD_USE_BALER:
+  description: Run Baler after performing static content deployment in order to generate an optimized JavaScript bundle.
+  type: boolean
+  stages:
+    - global
+    - build
+  default:
+    build: false
+  examples:
+    - stage:
+        build:
+          SCD_USE_BALER: true
 SKIP_SCD:
   description: Skips static content deployment during the build/deploy phase.
   type: boolean

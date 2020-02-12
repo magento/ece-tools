@@ -24,11 +24,15 @@ elasticsearch:
     eol: 2018-07-31
   - version: '6.5'
     eol: 2020-05-14
+  - version: '7.5'
+    eol: 2021-06-02    
 rabbitmq:
   - version: '3.5'
     eol: 2016-10-31
   - version: '3.7'
     eol: 2020-03-31
+  - version: '3.8'
+    eol:
 redis:
   - version: '3.2'
     eol: 2018-10-17
