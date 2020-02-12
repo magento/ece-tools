@@ -151,7 +151,6 @@ class DbDump extends Command
                 (bool)$input->getOption(self::OPTION_REMOVE_DEFINERS),
                 (array)$input->getArgument(self::ARGUMENT_DATABASES)
             );
-
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 

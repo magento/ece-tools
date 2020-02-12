@@ -108,26 +108,26 @@ class DbDumpTest extends TestCase
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);
-
+        $this->loggerMock->expects($this->once())
+            ->method('info')
+            ->with('Starting backup.');
         $this->maintenanceModeSwitcherMock->expects($this->once())
             ->method('enable');
-        $this->maintenanceModeSwitcherMock->expects($this->once())
-            ->method('disable');
         $this->cronSwitcherMock->expects($this->once())
             ->method('disable');
-        $this->cronSwitcherMock->expects($this->once())
-            ->method('enable');
         $this->backgroundProcessMock->expects($this->once())
             ->method('kill');
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('info')
-            ->withConsecutive(
-                ['Starting backup.'],
-                ['Backup completed.']
-            );
         $this->dumpGeneratorMock->expects($this->once())
             ->method('create')
             ->with(false);
+        $this->loggerMock->expects($this->never())
+            ->method('critical');
+        $this->jobUnlockerMock->expects($this->once())
+            ->method('unlockAll');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable');
+        $this->maintenanceModeSwitcherMock->expects($this->once())
+            ->method('disable');
 
         $tester = new CommandTester(
             $this->command
@@ -142,20 +142,22 @@ class DbDumpTest extends TestCase
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(false);
-
+        $this->loggerMock->expects($this->never())
+            ->method('info');
         $this->maintenanceModeSwitcherMock->expects($this->never())
+            ->method('enable');
+        $this->cronSwitcherMock->expects($this->never())
+            ->method('disable');
+        $this->backgroundProcessMock->expects($this->never())
+            ->method('kill');
+        $this->dumpGeneratorMock->expects($this->never())
+            ->method('create');
+        $this->jobUnlockerMock->expects($this->never())
+            ->method('unlockAll');
+        $this->cronSwitcherMock->expects($this->never())
             ->method('enable');
         $this->maintenanceModeSwitcherMock->expects($this->never())
             ->method('disable');
-        $this->cronSwitcherMock->expects($this->never())
-            ->method('enable');
-        $this->backgroundProcessMock->expects($this->never())
-            ->method('kill');
-        $this->loggerMock->expects($this->never())
-            ->method('info');
-        $this->dumpGeneratorMock->expects($this->never())
-            ->method('create')
-            ->with(false);
 
         $tester = new CommandTester(
             $this->command
@@ -174,16 +176,26 @@ class DbDumpTest extends TestCase
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);
-
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Starting backup.'],
-                ['Backup completed.']
-            );
+            ->with('Starting backup.');
+        $this->maintenanceModeSwitcherMock->expects($this->once())
+            ->method('enable');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('disable');
+        $this->backgroundProcessMock->expects($this->once())
+            ->method('kill');
         $this->dumpGeneratorMock->expects($this->once())
             ->method('create')
             ->with(true);
+        $this->loggerMock->expects($this->never())
+            ->method('critical');
+        $this->jobUnlockerMock->expects($this->once())
+            ->method('unlockAll');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable');
+        $this->maintenanceModeSwitcherMock->expects($this->once())
+            ->method('disable');
 
         $tester = new CommandTester(
             $this->command
@@ -206,61 +218,75 @@ class DbDumpTest extends TestCase
 
     public function testExecuteWithException()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Some error');
-
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting backup.');
-        $this->loggerMock->expects($this->once())
-            ->method('critical')
-            ->with('Some error');
+        $this->maintenanceModeSwitcherMock->expects($this->once())
+            ->method('enable');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('disable');
+        $this->backgroundProcessMock->expects($this->once())
+            ->method('kill');
         $this->dumpGeneratorMock->expects($this->once())
             ->method('create')
             ->willThrowException(new \Exception('Some error'));
+        $this->loggerMock->expects($this->once())
+            ->method('critical')
+            ->with('Some error');
         $this->jobUnlockerMock->expects($this->once())
             ->method('unlockAll');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable');
+        $this->maintenanceModeSwitcherMock->expects($this->once())
+            ->method('disable');
 
         $tester = new CommandTester(
             $this->command
         );
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some error');
+
         $tester->execute([]);
     }
 
     public function testExecuteMaintenanceEnableFailed()
     {
-        $this->expectException(\Exception::class);
-        $this->expectExceptionMessage('Some error');
-
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Starting backup.');
-        $this->loggerMock->expects($this->once())
-            ->method('critical')
-            ->with('Some error');
         $this->maintenanceModeSwitcherMock->expects($this->once())
             ->method('enable')
             ->willThrowException(new GenericException('Some error'));
-        $this->maintenanceModeSwitcherMock->expects($this->once())
+        $this->cronSwitcherMock->expects($this->never())
             ->method('disable');
         $this->backgroundProcessMock->expects($this->never())
             ->method('kill');
         $this->dumpGeneratorMock->expects($this->never())
             ->method('create');
-        $this->cronSwitcherMock->expects($this->never())
-            ->method('disable');
+        $this->loggerMock->expects($this->once())
+            ->method('critical')
+            ->with('Some error');
+        $this->jobUnlockerMock->expects($this->once())
+            ->method('unlockAll');
         $this->cronSwitcherMock->expects($this->once())
             ->method('enable');
+        $this->maintenanceModeSwitcherMock->expects($this->once())
+            ->method('disable');
 
         $tester = new CommandTester(
             $this->command
         );
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Some error');
+
         $tester->execute([]);
     }
 
@@ -269,16 +295,27 @@ class DbDumpTest extends TestCase
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);
-
-        $this->loggerMock->expects($this->exactly(2))
+        $this->loggerMock->expects($this->once())
             ->method('info')
-            ->withConsecutive(
-                ['Starting backup.'],
-                ['Backup completed.']
-            );
+            ->with('Starting backup.');
+        $this->maintenanceModeSwitcherMock->expects($this->once())
+            ->method('enable');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('disable');
+        $this->backgroundProcessMock->expects($this->once())
+            ->method('kill');
         $this->dumpGeneratorMock->expects($this->once())
             ->method('create')
             ->with(false, ['main', 'sales', 'quote']);
+        $this->loggerMock->expects($this->never())
+            ->method('critical');
+        $this->jobUnlockerMock->expects($this->once())
+            ->method('unlockAll');
+        $this->cronSwitcherMock->expects($this->once())
+            ->method('enable');
+        $this->maintenanceModeSwitcherMock->expects($this->once())
+            ->method('disable');
+
         $tester = new CommandTester(
             $this->command
         );

@@ -199,7 +199,7 @@ class SplitDbConnection implements StepInterface
         foreach ($types as $type) {
             $connectionConfig = $dbConfig[DbConfig::KEY_CONNECTION][$splitTypeMap[$type]];
             $cmd = $this->buildSplitDbCommand($type, $connectionConfig);
-            $this->logger->debug($this->magentoShell->execute($cmd)->getOutput());
+            $this->magentoShell->execute($cmd);
             $this->logger->info(sprintf(
                 '%s tables were split to DB %s in %s',
                 ucfirst($type),
