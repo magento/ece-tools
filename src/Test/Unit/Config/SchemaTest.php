@@ -103,6 +103,7 @@ class SchemaTest extends TestCase
                 DeployInterface::VAR_RESOURCE_CONFIGURATION => [],
                 DeployInterface::VAR_LOCK_PROVIDER => 'file',
                 DeployInterface::VAR_CONSUMERS_WAIT_FOR_MAX_MESSAGES => false,
+                DeployInterface::VAR_SPLIT_DB => [],
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_DEPLOY)
         );
@@ -184,6 +185,7 @@ class SchemaTest extends TestCase
             DeployInterface::VAR_REDIS_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION,
             DeployInterface::VAR_GENERATED_CODE_SYMLINK,
+            DeployInterface::VAR_SPLIT_DB,
             PostDeployInterface::VAR_WARM_UP_PAGES,
             PostDeployInterface::VAR_TTFB_TESTED_PAGES,
             SystemConfigInterface::VAR_ENV_RELATIONSHIPS,

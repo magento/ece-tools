@@ -11,7 +11,7 @@ use Magento\MagentoCloud\Filesystem\Flag\Manager;
 use Magento\MagentoCloud\Step\StepInterface;
 
 /**
- * Removes failed deploy flag.
+ * Removes flags which set during the deploy phase.
  */
 class RemoveDeployFailedFlag implements StepInterface
 {
@@ -34,5 +34,6 @@ class RemoveDeployFailedFlag implements StepInterface
     public function execute()
     {
         $this->manager->delete(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
+        $this->manager->delete(Manager::FLAG_IGNORE_SPLIT_DB);
     }
 }
