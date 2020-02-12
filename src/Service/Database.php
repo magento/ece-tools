@@ -17,6 +17,12 @@ class Database implements ServiceInterface
     const RELATIONSHIP_KEY = 'database';
     const RELATIONSHIP_SLAVE_KEY = 'database-slave';
 
+    const RELATIONSHIP_QUOTE_KEY = 'database-quote';
+    const RELATIONSHIP_QUOTE_SLAVE_KEY = 'database-quote-slave';
+
+    const RELATIONSHIP_SALES_KEY = 'database-sales';
+    const RELATIONSHIP_SALES_SLAVE_KEY = 'database-sales-slave';
+
     /**
      * @var Environment
      */
@@ -51,6 +57,42 @@ class Database implements ServiceInterface
     public function getSlaveConfiguration(): array
     {
         return $this->environment->getRelationship(self::RELATIONSHIP_SLAVE_KEY)[0] ?? [];
+    }
+
+    /**
+     * Returns configuration for quote service.
+     */
+    public function getQuoteConfiguration(): array
+    {
+        return $this->environment->getRelationship(self::RELATIONSHIP_QUOTE_KEY)[0] ?? [];
+    }
+
+    /**
+     * Returns configuration for quote slave service.
+     *
+     * @return array
+     */
+    public function getQuoteSlaveConfiguration(): array
+    {
+        return $this->environment->getRelationship(self::RELATIONSHIP_QUOTE_SLAVE_KEY)[0] ?? [];
+    }
+
+    /**
+     * Returns configuration for sales service.
+     */
+    public function getSalesConfiguration(): array
+    {
+        return $this->environment->getRelationship(self::RELATIONSHIP_SALES_KEY)[0] ?? [];
+    }
+
+    /**
+     * Returns configuration for slave sales service.
+     *
+     * @return array
+     */
+    public function getSalesSlaveConfiguration(): array
+    {
+        return $this->environment->getRelationship(self::RELATIONSHIP_SALES_SLAVE_KEY)[0] ?? [];
     }
 
     /**
