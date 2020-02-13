@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Package\MagentoVersion;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\ConfigImport;
 use Magento\MagentoCloud\Shell\MagentoShell;
@@ -41,6 +42,11 @@ class ConfigImportTest extends TestCase
     private $magentoVersionMock;
 
     /**
+     * @var DeployInterface|MockObject
+     */
+    private $stageConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -48,6 +54,8 @@ class ConfigImportTest extends TestCase
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
+        $this->stageConfigMock = $this->createMock(DeployInterface::class);
+
         /** @var ShellFactory|MockObject $shellFactoryMock */
         $shellFactoryMock = $this->createMock(ShellFactory::class);
         $shellFactoryMock->expects($this->once())
@@ -57,12 +65,16 @@ class ConfigImportTest extends TestCase
         $this->step = new ConfigImport(
             $shellFactoryMock,
             $this->loggerMock,
-            $this->magentoVersionMock
+            $this->magentoVersionMock,
+            $this->stageConfigMock
         );
     }
 
     public function testExecute()
     {
+        $this->stageConfigMock->method('get')
+            ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-vvv');
         $this->magentoVersionMock->method('isGreaterOrEqual')
             ->willReturn(true);
         $this->loggerMock->expects($this->once())
@@ -70,7 +82,7 @@ class ConfigImportTest extends TestCase
             ->with('Run app:config:import command');
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('app:config:import');
+            ->with('app:config:import', ['-vvv']);
 
         $this->step->execute();
     }

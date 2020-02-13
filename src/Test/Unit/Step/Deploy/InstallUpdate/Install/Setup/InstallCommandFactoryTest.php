@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy\InstallUpdate\Install\Setup;
 
 use Magento\MagentoCloud\Config\AdminDataInterface;
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 use Magento\MagentoCloud\Config\SearchEngine\ElasticSuite;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\DB\Data\ConnectionFactory;
@@ -60,9 +60,9 @@ class InstallCommandFactoryTest extends TestCase
     private $elasticSuiteMock;
 
     /**
-     * @var MergedConfig|MockObject
+     * @var DbConfig|MockObject
      */
-    private $mergedConfigMock;
+    private $dbConfigMock;
 
     /**
      * @inheritdoc
@@ -80,7 +80,7 @@ class InstallCommandFactoryTest extends TestCase
             ->method('create')
             ->willReturn($this->connectionDataMock);
         $this->elasticSuiteMock = $this->createMock(ElasticSuite::class);
-        $this->mergedConfigMock = $this->createMock(MergedConfig::class);
+        $this->dbConfigMock = $this->createMock(DbConfig::class);
 
         $this->installCommandFactory = new InstallCommandFactory(
             $this->urlManagerMock,
@@ -89,7 +89,7 @@ class InstallCommandFactoryTest extends TestCase
             $this->passwordGeneratorMock,
             $this->stageConfigMock,
             $this->elasticSuiteMock,
-            $this->mergedConfigMock
+            $this->dbConfigMock
         );
     }
 
@@ -172,7 +172,7 @@ class InstallCommandFactoryTest extends TestCase
         $this->adminDataMock->expects($this->any())
             ->method('getDefaultCurrency')
             ->willReturn('USD');
-        $this->mergedConfigMock->expects($this->once())
+        $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($mergedConfig);
 

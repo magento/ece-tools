@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\DB\Data;
 
-use Magento\MagentoCloud\Config\Database\MergedConfig;
+use Magento\MagentoCloud\Config\Database\DbConfig;
 
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
@@ -18,16 +18,16 @@ class ConnectionFactory
     const CONNECTION_SLAVE = 'slave';
 
     /**
-     * @var MergedConfig
+     * @var DbConfig
      */
-    private $mergedConfig;
+    private $dbConfig;
 
     /**
-     * @param MergedConfig $mergedConfig
+     * @param DbConfig $dbConfig
      */
-    public function __construct(MergedConfig $mergedConfig)
+    public function __construct(DbConfig $dbConfig)
     {
-        $this->mergedConfig = $mergedConfig;
+        $this->dbConfig = $dbConfig;
     }
 
     /**
@@ -41,12 +41,12 @@ class ConnectionFactory
     {
         switch ($connectionType) {
             case self::CONNECTION_MAIN:
-                $connectionData = $this->mergedConfig->get()['connection']['default'] ?? [];
+                $connectionData = $this->dbConfig->get()['connection']['default'] ?? [];
                 $connection = new Connection($connectionData);
                 break;
             case self::CONNECTION_SLAVE:
-                $connectionData = $this->mergedConfig->get()['slave_connection']['default']
-                    ?? $this->mergedConfig->get()['connection']['default']
+                $connectionData = $this->dbConfig->get()['slave_connection']['default']
+                    ?? $this->dbConfig->get()['connection']['default']
                     ?? [];
                 $connection = new Connection($connectionData);
                 break;
