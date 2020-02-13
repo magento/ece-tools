@@ -18,7 +18,7 @@ class DataTypesOptionValidationCest extends AbstractCest
      * @throws \Robo\Exception\TaskException
      * @dataProvider dataTypesDataProvider
      */
-    public function dataTypesValidationOnDeploy(\CliTester $I, \Codeception\Example $data)
+    public function dataTypesValidationOnDeploy(\CliTester $I, \Codeception\Example $data): void
     {
         $I->runEceDockerCommand(
             sprintf(

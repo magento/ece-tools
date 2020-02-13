@@ -28,7 +28,7 @@ class AdminCredentialCest extends AbstractCest
      * @throws \Robo\Exception\TaskException
      * @dataProvider installWithoutAdminEmailDataProvider
      */
-    public function testInstallWithoutAdminEmail(\CliTester $I, \Codeception\Example $data)
+    public function testInstallWithoutAdminEmail(\CliTester $I, \Codeception\Example $data): void
     {
         $I->runEceDockerCommand(
             sprintf(
@@ -61,7 +61,7 @@ class AdminCredentialCest extends AbstractCest
     /**
      * @return array
      */
-    protected function installWithoutAdminEmailDataProvider()
+    protected function installWithoutAdminEmailDataProvider(): array
     {
         return [
             [

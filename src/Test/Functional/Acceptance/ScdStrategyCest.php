@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
  * This test runs on the latest version of PHP
  */
@@ -16,28 +14,19 @@ class ScdStrategyCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    public function _before(\CliTester $I)
-    {
-        parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-    }
-
-    /**
-     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider scdStrategyDataProvider
      */
-    public function testScdStrategyOnDeploy(\CliTester $I, \Codeception\Example $data)
+    public function testScdStrategyOnDeploy(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->assertTrue($I->uploadToContainer($data['env_yaml'], '/.magento.env.yaml', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->copyFileToWorkDir($data['env_yaml'], '.magento.env.yaml');
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+
         $I->amOnPage('/');
         $I->see('Home page');
         $I->see('CMS homepage content goes here.');
@@ -55,7 +44,6 @@ class ScdStrategyCest extends AbstractCest
               'env_yaml' => 'files/scd/scd-strategy-quick.yaml',
               'strategy' => 'quick'
             ],
-
             [
               'env_yaml' => 'files/scd/scd-strategy-standard.yaml',
               'strategy' => 'standard'

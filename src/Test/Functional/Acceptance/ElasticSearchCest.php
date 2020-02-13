@@ -28,7 +28,7 @@ class ElasticSearchCest extends AbstractCest
      * @throws \Robo\Exception\TaskException
      * @dataProvider elasticDataProvider
      */
-    public function testElastic(\CliTester $I, \Codeception\Example $data)
+    public function testElastic(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['magento']);
 
@@ -108,7 +108,7 @@ class ElasticSearchCest extends AbstractCest
      * @param \CliTester $I
      * @return array
      */
-    private function checkConfigurationIsNotRemoved(\CliTester $I)
+    private function checkConfigurationIsNotRemoved(\CliTester $I): void
     {
         $config = $this->getConfig($I);
 

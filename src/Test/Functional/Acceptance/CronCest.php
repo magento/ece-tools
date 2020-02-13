@@ -27,7 +27,7 @@ class CronCest extends AbstractCest
      * @throws \Robo\Exception\TaskException
      * @dataProvider cronDataProvider
      */
-    public function testCron(\CliTester $I, \Codeception\Example $data)
+    public function testCron(\CliTester $I, \Codeception\Example $data): void
     {
         $this->prepareWorkplace($I, $data['version']);
         $I->runEceDockerCommand('build:compose --mode=production --expose-db-port=3306');
@@ -98,7 +98,7 @@ class CronCest extends AbstractCest
      * @param int $timeInterval
      * @throws \Exception
      */
-    private function checkCronJobForLocale(\CliTester $I, string $jobCode, int $timeInterval)
+    private function checkCronJobForLocale(\CliTester $I, string $jobCode, int $timeInterval): void
     {
         $schedule = $I->grabColumnFromDatabase(
             'cron_schedule',

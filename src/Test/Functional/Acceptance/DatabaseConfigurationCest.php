@@ -18,7 +18,7 @@ class DatabaseConfigurationCest extends AbstractCest
      * @throws \Robo\Exception\TaskException
      * @dataProvider databaseConfigurationDataProvider
      */
-    public function databaseConfiguration(\CliTester $I, \Codeception\Example $data)
+    public function databaseConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
         $I->runEceDockerCommand(
             sprintf(

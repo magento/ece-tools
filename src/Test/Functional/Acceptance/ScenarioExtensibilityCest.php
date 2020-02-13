@@ -16,39 +16,34 @@ class ScenarioExtensibilityCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
      */
-    public function _before(\CliTester $I)
+    public function _before(\CliTester $I): void
     {
         parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-        $I->addEceExtendComposerRepo();
-        $I->uploadToContainer('files/debug_logging/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
+
+        $I->copyFileToWorkDir('files/debug_logging/.magento.env.yaml', '.magento.env.yaml');
+        $I->createArtifact('ece-tools-extend', 'packages/ece-tools-extend');
+        $I->addDependencyToComposer('magento/ece-tools-extend', '*');
+        $I->composerUpdate();
     }
 
     /**
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testScenarioExtensibilityAndPriority(\CliTester $I)
+    public function testScenarioExtensibilityAndPriority(\CliTester $I): void
     {
-        $generateScenarios = [
-            './vendor/magento/ece-tools/scenario/build/generate.xml',
-            './vendor/magento/ece-tools-extend/scenario/extend-build-generate.xml',
-            './vendor/magento/ece-tools-extend/scenario/extend-build-generate-skip-di.xml',
-        ];
-        $transferScenarios = [
-            './vendor/magento/ece-tools/scenario/build/transfer.xml',
-            './vendor/magento/ece-tools-extend/scenario/extend-build-transfer.xml',
-        ];
+        $app = $I->readAppMagentoYaml();
+        $app['hooks']['build'] = 'set -e' . PHP_EOL
+            . 'php ./vendor/bin/ece-tools run ./vendor/magento/ece-tools/scenario/build/generate.xml'
+            . ' ./vendor/magento/ece-tools-extend/scenario/extend-build-generate.xml'
+            . ' ./vendor/magento/ece-tools-extend/scenario/extend-build-generate-skip-di.xml' . PHP_EOL
+            . 'php ./vendor/bin/ece-tools run ./vendor/magento/ece-tools/scenario/build/transfer.xml'
+            . ' ./vendor/magento/ece-tools-extend/scenario/extend-build-transfer.xml';
+        $I->writeAppMagentoYaml($app);
 
-        $I->assertTrue(
-            $I->runEceToolsCommand(sprintf('run %s', implode(' ', $generateScenarios)), Docker::BUILD_CONTAINER)
-        );
-        $I->assertTrue(
-            $I->runEceToolsCommand(sprintf('run %s', implode(' ', $transferScenarios)), Docker::BUILD_CONTAINER)
-        );
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
 
         $cloudLog = $I->grabFileContent('/var/log/cloud.log', Docker::BUILD_CONTAINER);

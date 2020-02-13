@@ -16,7 +16,6 @@ class PatchApplierCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
      */
     public function _before(\CliTester $I): void
     {

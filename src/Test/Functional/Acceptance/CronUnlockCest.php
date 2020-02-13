@@ -16,7 +16,7 @@ class CronUnlockCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testCronUnlock(\CliTester $I)
+    public function testCronUnlock(\CliTester $I): void
     {
         $I->runEceDockerCommand('build:compose --mode=production --expose-db-port=3306');
         $I->runDockerComposeCommand('run build cloud-build');
@@ -67,7 +67,7 @@ class CronUnlockCest extends AbstractCest
      * @param $scheduleId
      * @param $status
      */
-    private function updateScheduleInDb(\CLITester $I, $scheduleId, $status)
+    private function updateScheduleInDb(\CLITester $I, $scheduleId, $status): void
     {
         $I->updateInDatabase(
             'cron_schedule',
