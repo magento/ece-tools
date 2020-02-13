@@ -12,8 +12,17 @@ use Magento\MagentoCloud\Service\Database;
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
  */
-class RelationshipConnectionFactory implements ConnectionFactoryInterface
+class RelationshipConnectionFactory
 {
+    const CONNECTION_MAIN = 'main';
+    const CONNECTION_SLAVE = 'slave';
+
+    const CONNECTION_QUOTE_MAIN = 'quote-main';
+    const CONNECTION_QUOTE_SLAVE = 'quote-slave';
+
+    const CONNECTION_SALES_MAIN = 'sales-main';
+    const CONNECTION_SALES_SLAVE = 'sales-slave';
+
     /**
      * @var Database
      */

@@ -7,13 +7,23 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\DB\Data;
 
+use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Config\Database\DbConfig;
 
 /**
  * Responsible for creating and configuring Magento\MagentoCloud\DB\Data\ConnectionInterface instances.
  */
-class ConnectionFactory implements ConnectionFactoryInterface
+class ConnectionFactory
 {
+    const CONNECTION_MAIN = 'main';
+    const CONNECTION_SLAVE = 'slave';
+
+    const CONNECTION_QUOTE_MAIN = 'quote-main';
+    const CONNECTION_QUOTE_SLAVE = 'quote-slave';
+
+    const CONNECTION_SALES_MAIN = 'sales-main';
+    const CONNECTION_SALES_SLAVE = 'sales-slave';
+
     /**
      * @var DbConfig
      */
@@ -38,6 +48,7 @@ class ConnectionFactory implements ConnectionFactoryInterface
      * @param string $connectionType
      * @return ConnectionInterface
      * @throws \RuntimeException
+     * @throws ConfigException
      */
     public function create(string $connectionType): ConnectionInterface
     {
@@ -61,7 +72,16 @@ class ConnectionFactory implements ConnectionFactoryInterface
         }
     }
 
-    private function getConnectionData($name, $isMain = true): ConnectionInterface
+    /**
+     * Returns connection data by name
+     *
+     * @param string $name
+     * @param bool $isMain
+     *
+     * @return ConnectionInterface
+     * @throws ConfigException
+     */
+    private function getConnectionData(string $name, bool $isMain = true): ConnectionInterface
     {
         if ($isMain) {
             $connectionConfig = $this->getConfig()[DbConfig::KEY_CONNECTION][$name] ?? [];
@@ -73,6 +93,12 @@ class ConnectionFactory implements ConnectionFactoryInterface
         return new Connection($connectionConfig);
     }
 
+    /**
+     * Returns database configuration
+     *
+     * @return array
+     * @throws ConfigException
+     */
     private function getConfig(): array
     {
         if (null === $this->config) {

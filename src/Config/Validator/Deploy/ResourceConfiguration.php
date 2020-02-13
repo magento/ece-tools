@@ -59,7 +59,8 @@ class ResourceConfiguration implements ValidatorInterface
         $wrongResources = [];
         foreach ($resourceConfig as $resourceName => $resourceData) {
             if (!isset($resourceData[ResourceConfig::KEY_CONNECTION])
-                || !isset($dbConfig[DbConfig::KEY_CONNECTION][$resourceData[ResourceConfig::KEY_CONNECTION]])) {
+                || !isset($dbConfig[DbConfig::KEY_CONNECTION][$resourceData[ResourceConfig::KEY_CONNECTION]])
+            ) {
                 $wrongResources[] = $resourceName;
             }
         }

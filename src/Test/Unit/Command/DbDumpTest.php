@@ -108,9 +108,12 @@ class DbDumpTest extends TestCase
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->with('Starting backup.');
+            ->withConsecutive(
+                ['Starting backup.'],
+                ['Backup completed.']
+            );
         $this->maintenanceModeSwitcherMock->expects($this->once())
             ->method('enable');
         $this->cronSwitcherMock->expects($this->once())
@@ -176,9 +179,12 @@ class DbDumpTest extends TestCase
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->with('Starting backup.');
+            ->withConsecutive(
+                ['Starting backup.'],
+                ['Backup completed.']
+            );
         $this->maintenanceModeSwitcherMock->expects($this->once())
             ->method('enable');
         $this->cronSwitcherMock->expects($this->once())
@@ -295,9 +301,12 @@ class DbDumpTest extends TestCase
         $this->questionMock->expects($this->once())
             ->method('ask')
             ->willReturn(true);
-        $this->loggerMock->expects($this->once())
+        $this->loggerMock->expects($this->exactly(2))
             ->method('info')
-            ->with('Starting backup.');
+            ->withConsecutive(
+                ['Starting backup.'],
+                ['Backup completed.']
+            );
         $this->maintenanceModeSwitcherMock->expects($this->once())
             ->method('enable');
         $this->cronSwitcherMock->expects($this->once())

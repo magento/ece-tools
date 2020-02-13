@@ -151,6 +151,7 @@ class DbDump extends Command
                 (bool)$input->getOption(self::OPTION_REMOVE_DEFINERS),
                 (array)$input->getArgument(self::ARGUMENT_DATABASES)
             );
+            $this->logger->info('Backup completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 

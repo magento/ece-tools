@@ -347,12 +347,6 @@ class SplitDbConnectionTest extends TestCase
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn(['db' => ['connection' => []]]);
-        $this->processMock->expects($this->exactly(2))
-            ->method('getOutput')
-            ->willReturnOnConsecutiveCalls(
-                'Some output about split quote',
-                'Some output about split sales'
-            );
         $this->magentoShellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
@@ -362,12 +356,6 @@ class SplitDbConnectionTest extends TestCase
                     . ' --username="sales.username" --password="sales.password"']
             )
             ->willReturn($this->processMock);
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('debug')
-            ->withConsecutive(
-                ['Some output about split quote'],
-                ['Some output about split sales']
-            );
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
@@ -412,12 +400,6 @@ class SplitDbConnectionTest extends TestCase
                 ['db' => ['connection' => []]],
                 ['db' => ['connection' => self::CONNECTION]]
             );
-        $this->processMock->expects($this->exactly(2))
-            ->method('getOutput')
-            ->willReturnOnConsecutiveCalls(
-                'Some output about split quote',
-                'Some output about split sales'
-            );
         $this->magentoShellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
@@ -427,12 +409,6 @@ class SplitDbConnectionTest extends TestCase
                     . ' --username="sales.username" --password="sales.password"']
             )
             ->willReturn($this->processMock);
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('debug')
-            ->withConsecutive(
-                ['Some output about split quote'],
-                ['Some output about split sales']
-            );
         $this->loggerMock->expects($this->exactly(4))
             ->method('info')
             ->withConsecutive(
