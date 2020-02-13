@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\CloudDocker\Test\Functional\Codeception\Docker;
-
 /**
  * This test runs on the latest version of PHP
  *
@@ -18,18 +16,27 @@ class UpgradeCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
+     */
+    public function _before(\CliTester $I): void
+    {
+        // Do nothing...
+    }
+
+    /**
+     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider testProvider
      */
-    public function test(\CliTester $I, \Codeception\Example $data)
+    public function test(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->startEnvironment();
-        $I->assertTrue($I->cloneTemplate($data['from']));
-        $I->assertTrue($I->addEceComposerRepo());
+        $this->prepareWorkplace($I, $data['from']);
+        $I->runEceDockerCommand('build:compose --mode=production');
         $this->assert($I);
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
-        $I->assertTrue($I->composerRequireMagentoCloud($data['to']));
+        $I->stopEnvironment(true);
+        $I->addDependencyToComposer('magento/magento-cloud-metapackage', $data['to']);
+        $I->composerUpdate();
         $this->assert($I);
     }
 
@@ -37,25 +44,29 @@ class UpgradeCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    protected function assert(\CliTester $I)
+    protected function assert(\CliTester $I): void
     {
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
 
         $I->amOnPage('/');
         $I->see('Home page');
+        $I->see('CMS homepage content goes here.');
     }
 
     /**
      * @return array
      */
-    protected function testProvider()
+    protected function testProvider(): array
     {
         // @TODO change version to 2.3.* after fix in magento core.
         // https://magento2.atlassian.net/browse/MAGECLOUD-3725
         return [
-            ['from' => '2.3.0', 'to' => '2.3.1']
+            ['from' => '2.3.0', 'to' => '2.3.1'],
+            //['from' => '2.3.3', 'to' => '2.3.4'],
         ];
     }
 }
