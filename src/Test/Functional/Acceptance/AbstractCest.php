@@ -59,9 +59,19 @@ abstract class AbstractCest
         $I->addArtifactsRepoToComposer();
         $I->addDependencyToComposer('magento/ece-tools', '2002.1.99');
         $I->addEceDockerGitRepoToComposer();
+        $I->addCloudComponentsGitRepoToComposer();
+        $I->addCloudPatchesGitRepoToComposer();
         $I->addDependencyToComposer(
             'magento/magento-cloud-docker',
             $I->getDependencyVersion('magento/magento-cloud-docker')
+        );
+        $I->addDependencyToComposer(
+            'magento/magento-cloud-components',
+            $I->getDependencyVersion('magento/magento-cloud-components')
+        );
+        $I->addDependencyToComposer(
+            'magento/magento-cloud-patches',
+            $I->getDependencyVersion('magento/magento-cloud-patches')
         );
         $I->composerUpdate();
     }
