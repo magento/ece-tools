@@ -17,14 +17,13 @@ php:
   - '7.3'
 
 env:
-  matrix:
-    - TEST_SUITE=functional-ce
-    - TEST_SUITE=functional-ee
-    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
-    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=2
-    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=3
-    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
-    - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
+  - TEST_SUITE=functional-ce
+  - TEST_SUITE=functional-ee
+  - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
+  - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=2
+  - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=3
+  - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=4
+  - TEST_SUITE=functional-ee FUNCTIONAL_INDEX=5
 
 stages:
   - static-unit
@@ -60,8 +59,6 @@ jobs:
       php: '7.3'
       env:
         - TEST_SUITE=integration
-
-matrix:
   exclude:
     - php: '7.1'
       env: TEST_SUITE=functional-ee FUNCTIONAL_INDEX=1
