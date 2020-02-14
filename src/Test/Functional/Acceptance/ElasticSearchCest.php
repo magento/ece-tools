@@ -42,7 +42,9 @@ class ElasticSearchCest extends AbstractCest
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
 
-        $I->runDockerComposeCommand('run deploy magento-command config:set general/region/state_required US --lock-env');
+        $I->runDockerComposeCommand(
+            'run deploy magento-command config:set general/region/state_required US --lock-env'
+        );
         $this->checkConfigurationIsNotRemoved($I);
 
         $I->amOnPage('/');
