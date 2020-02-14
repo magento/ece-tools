@@ -31,7 +31,6 @@ abstract class AbstractCest
      */
     public function _after(\CliTester $I): void
     {
-        $I->resetFilesOwner();
         $I->stopEnvironment();
         $I->removeWorkDir();
     }
