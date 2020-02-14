@@ -7,11 +7,10 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Command;
 
-use Magento\MagentoCloud\Cron\JobUnlocker;
-use Magento\MagentoCloud\Cron\Switcher;
-use Magento\MagentoCloud\DB\DumpGenerator;
-use Magento\MagentoCloud\Util\BackgroundProcess;
-use Magento\MagentoCloud\Util\MaintenanceModeSwitcher;
+use Magento\MagentoCloud\App\GenericException;
+use Magento\MagentoCloud\Config\ConfigException;
+use Magento\MagentoCloud\Config\Database\DbConfig;
+use Magento\MagentoCloud\DB\DumpProcessor;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -39,51 +38,28 @@ class DbDump extends Command
     private $logger;
 
     /**
-     * @var DumpGenerator
+     * @var DumpProcessor
      */
-    private $dumpGenerator;
+    private $dumpProcessor;
 
     /**
-     * @var MaintenanceModeSwitcher
+     * @var DbConfig
      */
-    private $maintenanceModeSwitcher;
+    private $dbConfig;
 
     /**
-     * @var BackgroundProcess
-     */
-    private $backgroundProcess;
-    /**
-     * @var Switcher
-     */
-    private $cronSwitcher;
-
-    /**
-     * @var JobUnlocker
-     */
-    private $jobUnlocker;
-
-    /**
-     * @param DumpGenerator $dumpGenerator
+     * @param DumpProcessor $dumpProcessor
      * @param LoggerInterface $logger
-     * @param MaintenanceModeSwitcher $maintenanceModeSwitcher
-     * @param Switcher $cronSwitcher
-     * @param BackgroundProcess $backgroundProcess
-     * @param JobUnlocker $jobUnlocker
+     * @param DbConfig $dbConfig
      */
     public function __construct(
-        DumpGenerator $dumpGenerator,
+        DumpProcessor $dumpProcessor,
         LoggerInterface $logger,
-        MaintenanceModeSwitcher $maintenanceModeSwitcher,
-        Switcher $cronSwitcher,
-        BackgroundProcess $backgroundProcess,
-        JobUnlocker $jobUnlocker
+        DbConfig $dbConfig
     ) {
-        $this->dumpGenerator = $dumpGenerator;
+        $this->dumpProcessor = $dumpProcessor;
         $this->logger = $logger;
-        $this->maintenanceModeSwitcher = $maintenanceModeSwitcher;
-        $this->cronSwitcher = $cronSwitcher;
-        $this->backgroundProcess = $backgroundProcess;
-        $this->jobUnlocker = $jobUnlocker;
+        $this->dbConfig = $dbConfig;
 
         parent::__construct();
     }
@@ -101,7 +77,7 @@ class DbDump extends Command
             sprintf(
                 'Databases to backup. Available values: %s or empty. By default will backup the databases'
                 . ' based on the databases configuration from the file <magento_root>/app/etc/env.php ',
-                implode(' ', DumpGenerator::DATABASE_MAP)
+                implode(' ', DumpProcessor::DATABASE_MAP)
             ),
             []
         );
@@ -120,9 +96,27 @@ class DbDump extends Command
      * Command requires confirmation before execution.
      *
      * {@inheritdoc}
+     * @throws ConfigException
+     * @throws GenericException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $databases = (array)$input->getArgument(self::ARGUMENT_DATABASES);
+        if (!empty($databases)) {
+            if (!$this->validateDatabaseNames($databases)) {
+                return null;
+            }
+            $connections = array_keys(array_intersect(DumpProcessor::DATABASE_MAP, $databases));
+            if (!$this->checkConnectionsAvailability($connections)) {
+                return null;
+            }
+        } else {
+            $connections = array_values(array_intersect_key(
+                array_flip(DumpProcessor::CONNECTION_MAP),
+                $this->dbConfig->get()[DbConfig::KEY_CONNECTION] ?? []
+            ));
+        }
+
         if ($input->isInteractive()) {
             $helper = $this->getHelper('question');
 
@@ -144,22 +138,58 @@ class DbDump extends Command
 
         try {
             $this->logger->info('Starting backup.');
-            $this->maintenanceModeSwitcher->enable();
-            $this->cronSwitcher->disable();
-            $this->backgroundProcess->kill();
-            $this->dumpGenerator->create(
-                (bool)$input->getOption(self::OPTION_REMOVE_DEFINERS),
-                (array)$input->getArgument(self::ARGUMENT_DATABASES)
+            $this->dumpProcessor->execute(
+                $connections,
+                (bool)$input->getOption(self::OPTION_REMOVE_DEFINERS)
             );
             $this->logger->info('Backup completed.');
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
-
             throw $exception;
-        } finally {
-            $this->jobUnlocker->unlockAll('The job is terminated due to database dump');
-            $this->cronSwitcher->enable();
-            $this->maintenanceModeSwitcher->disable();
         }
+    }
+
+    /**
+     * Validates database names
+     *
+     * @param array $databases
+     * @return bool
+     */
+    private function validateDatabaseNames(array $databases): bool
+    {
+        $invalidDatabaseNames = array_diff($databases, DumpProcessor::DATABASE_MAP);
+        if (!empty($invalidDatabaseNames)) {
+            $this->logger->error(sprintf(
+                'Incorrect the database names:[ %s ]. Available database names: [ %s ]',
+                implode(' ', $invalidDatabaseNames),
+                implode(' ', DumpProcessor::DATABASE_MAP)
+            ));
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks availability of connections
+     *
+     * @param array $connections
+     * @return bool
+     * @throws ConfigException
+     */
+    private function checkConnectionsAvailability(array $connections): bool
+    {
+        $result = true;
+        $envConnections = $this->dbConfig->get()[DbConfig::KEY_CONNECTION] ?? [];
+        foreach ($connections as $connection) {
+            if (!isset($envConnections[DumpProcessor::CONNECTION_MAP[$connection]])) {
+                $this->logger->error(sprintf(
+                    'Environment has not connection `%s` associated with database `%s`',
+                    DumpProcessor::CONNECTION_MAP[$connection],
+                    DumpProcessor::DATABASE_MAP[$connection]
+                ));
+                $result = false;
+            }
+        }
+        return $result;
     }
 }
