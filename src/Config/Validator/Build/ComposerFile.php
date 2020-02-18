@@ -78,6 +78,11 @@ class ComposerFile implements ValidatorInterface
             return $this->resultFactory->error('Can\'t read composer.json file: ' . $e->getMessage());
         }
 
+        var_dump($autoloadPsr4);
+        var_dump(isset($autoloadPsr4['Zend\Mvc\Controller\\']));
+        var_dump($composerJson);
+        return $this->resultFactory->success();
+
         if (!isset($autoloadPsr4['Zend\Mvc\Controller\\'])) {
             return $this->resultFactory->error(
                 'Required configuration is missed in autoload section of composer.json file.',
