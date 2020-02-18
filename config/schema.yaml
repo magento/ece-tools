@@ -11,9 +11,11 @@ VERBOSE_COMMANDS:
     - global
     - build
     - deploy
+    - post-deploy
   default:
     build: ''
     deploy: ''
+    post-deploy: ''
   examples:
     - stage:
         build:
