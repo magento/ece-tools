@@ -24,14 +24,21 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class SplitDbState extends Command
 {
+    /**
+     * Command name
+     */
     const NAME = 'wizard:split-db-state';
 
     /**
+     * Console output formatter
+     *
      * @var OutputFormatter
      */
     private $outputFormatter;
 
     /**
+     * Reader of Magento environment configuration file
+     *
      * @var ConfigReader
      */
     private $configReader;
@@ -44,7 +51,6 @@ class SplitDbState extends Command
     private $connectionDataFactory;
 
     /**
-     * SplitDb constructor.
      * @param OutputFormatter $outputFormatter
      * @param ConfigReader $configReader
      * @param RelationshipConnectionFactory $connectionDataFactory
