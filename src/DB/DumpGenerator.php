@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © Magento, Inc. All rights reserved.
+ * Copyright © Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 declare(strict_types=1);
@@ -10,6 +10,9 @@ namespace Magento\MagentoCloud\DB;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
+use Magento\MagentoCloud\DB\Data\ConnectionInterface;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
+use Magento\MagentoCloud\Shell\ShellException;
 
 /**
  * Creates database dump and archives it
@@ -17,9 +20,10 @@ use Psr\Log\LoggerInterface;
 class DumpGenerator
 {
     /**
-     * Template for dump file name where %s should be changed to timestamp for uniqueness
+     * Template for dump file name where first %s should be changed to database name
+     * and second %s should be changed to timestamp for uniqueness
      */
-    const DUMP_FILE_NAME_TEMPLATE = 'dump-%s.sql.gz';
+    const DUMP_FILE_NAME_TEMPLATE = 'dump-%s-%s.sql.gz';
 
     /**
      * Lock file name.
@@ -33,8 +37,6 @@ class DumpGenerator
     const DUMP_TIMEOUT = 3600;
 
     /**
-     * Used for execution shell operations
-     *
      * @var ShellInterface
      */
     private $shell;
@@ -73,23 +75,24 @@ class DumpGenerator
     }
 
     /**
-     * Creates database dump and archives it.
+     * Creates database dump and archives it for each database.
      *
      * Lock file is created at the beginning of dumping.
      * This file has dual purpose, it creates a lock, so another DB backup process cannot be executed,
      * as well as serves a log with the name of created dump file.
      * If any error happened during dumping, dump file is removed.
      *
+     * @param string $database
+     * @param ConnectionInterface $connectionData
      * @param bool $removeDefiners
-     * @return void
-     * @throws \Magento\MagentoCloud\Package\UndefinedPackageException
+     *
+     * @throws UndefinedPackageException
+     * @throws ShellException
      */
-    public function create(bool $removeDefiners)
+    public function create(string $database, ConnectionInterface $connectionData, bool $removeDefiners)
     {
-        $dumpFileName = sprintf(self::DUMP_FILE_NAME_TEMPLATE, time());
-
+        $dumpFileName = sprintf(self::DUMP_FILE_NAME_TEMPLATE, $database, time());
         $temporaryDirectory = sys_get_temp_dir();
-
         $dumpFile = $temporaryDirectory . '/' . $dumpFileName;
         $lockFile = $this->directoryList->getVar() . '/' . self::LOCK_FILE_NAME;
 
@@ -105,36 +108,38 @@ class DumpGenerator
             return;
         }
 
+        if (!flock($lockFileHandle, LOCK_EX)) {
+            $this->logger->info('Dump process is locked!');
+            return;
+        }
+
+        $this->logger->info(sprintf('Start creation DB dump for %s database...', $database));
+
+        $command = 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dump->getCommand($connectionData);
+        if ($removeDefiners) {
+            $command .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
+        }
+        $command .= ' | gzip > ' . $dumpFile;
+
         try {
-            if (flock($lockFileHandle, LOCK_EX)) {
-                $this->logger->info('Start creation DB dump...');
-
-                $command = 'timeout ' . self::DUMP_TIMEOUT . ' ' . $this->dump->getCommand();
-                if ($removeDefiners) {
-                    $command .= ' | sed -e \'s/DEFINER[ ]*=[ ]*[^*]*\*/\*/\'';
-                }
-                $command .= ' | gzip > ' . $dumpFile;
-
-                $process = $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
-
-                if ($process->getExitCode() !== ShellInterface::CODE_SUCCESS) {
-                    $this->logger->error('Error has occurred during mysqldump');
-                    $this->shell->execute('rm ' . $dumpFile);
-                } else {
-                    $this->logger->info('Finished DB dump, it can be found here: ' . $dumpFile);
-                    fwrite(
-                        $lockFileHandle,
-                        sprintf('[%s] Dump was written in %s', date("Y-m-d H:i:s"), $dumpFile) . PHP_EOL
-                    );
-                    fflush($lockFileHandle);
-                }
-                flock($lockFileHandle, LOCK_UN);
-            } else {
-                $this->logger->info('Dump process is locked!');
+            $this->shell->execute('bash -c "set -o pipefail; ' . $command . '"');
+            $this->logger->info(sprintf(
+                'Finished DB dump for %s database, it can be found here: %s',
+                $database,
+                $dumpFile
+            ));
+            fwrite(
+                $lockFileHandle,
+                sprintf('[%s] Dump was written in %s', date("Y-m-d H:i:s"), $dumpFile) . PHP_EOL
+            );
+            fflush($lockFileHandle);
+            flock($lockFileHandle, LOCK_UN);
+        } catch (ShellException $exception) {
+            if (file_exists($dumpFile)) {
+                $this->shell->execute('rm -rf' . $dumpFile);
             }
-            fclose($lockFileHandle);
-        } catch (\Exception $e) {
-            $this->logger->error($e->getMessage());
+            throw $exception;
+        } finally {
             fclose($lockFileHandle);
         }
     }
