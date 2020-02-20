@@ -33,6 +33,7 @@ class CronCest extends AbstractCest
         $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
         $I->deleteFromDatabase('cron_schedule');
         $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
 
         $this->checkCronJobForLocale($I, 'cron_test_job_timeformat', 5);
         $this->checkCronJobForLocale($I, 'cron_test_job_timeformat_six', 6);
@@ -51,9 +52,15 @@ class CronCest extends AbstractCest
         $I->updateInDatabase('cron_schedule', ['scheduled_at' => date('Y-m-d H:i:s')], ['status' => 'pending']);
 
         $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
+        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
 
         $successfulJobs2 = $I->grabNumRecords('cron_schedule', ['job_code' => 'cron_test_job', 'status' => 'success']);
-        $I->assertEquals($successfulJobs1, $successfulJobs2, 'Number of successful jobs changed');
+
+        if (version_compare($data['version'], '2.2.5', '<')) {
+            $I->assertEquals($successfulJobs1, $successfulJobs2, 'Number of successful jobs changed');
+        } else {
+            $I->assertGreaterThan($successfulJobs1, $successfulJobs2, 'Number of successful jobs did not change');
+        }
 
         $I->updateInDatabase(
             'cron_schedule',
@@ -74,7 +81,11 @@ class CronCest extends AbstractCest
         $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
 
         $successfulJobs3 = $I->grabNumRecords('cron_schedule', ['job_code' => 'cron_test_job', 'status' => 'success']);
-        $I->assertGreaterThan($successfulJobs1, $successfulJobs3, 'Number of successful jobs did not change');
+        $I->assertGreaterThan(
+            version_compare($data['version'], '2.2.5', '<') ? $successfulJobs1 : $successfulJobs2,
+            $successfulJobs3,
+            'Number of successful jobs did not change'
+        );
     }
 
     /**
