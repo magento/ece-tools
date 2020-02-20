@@ -7,12 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\PreDeploy;
 
-use Credis_Client;
-use Magento\MagentoCloud\Config\Environment;
 use Magento\MagentoCloud\Config\Factory\Cache as CacheConfig;
+use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Service\Adapter\CredisFactory;
 use Psr\Log\LoggerInterface;
+use CredisException;
 
 /**
  * Cleans Redis cache.
@@ -20,19 +20,9 @@ use Psr\Log\LoggerInterface;
 class CleanRedisCache implements StepInterface
 {
     /**
-     * @var Environment
-     */
-    private $env;
-
-    /**
      * @var LoggerInterface
      */
     private $logger;
-
-    /**
-     * @var ShellInterface
-     */
-    private $shell;
 
     /**
      * @var CacheConfig
@@ -40,50 +30,58 @@ class CleanRedisCache implements StepInterface
     private $cacheConfig;
 
     /**
+     * @var CredisFactory
+     */
+    private $credisFactory;
+
+    /**
      * @param LoggerInterface $logger
-     * @param ShellInterface $shell
-     * @param Environment $env
      * @param CacheConfig $cacheConfig
+     * @param CredisFactory $credisFactory
      */
     public function __construct(
         LoggerInterface $logger,
-        ShellInterface $shell,
-        Environment $env,
-        CacheConfig $cacheConfig
+        CacheConfig $cacheConfig,
+        CredisFactory $credisFactory
     ) {
         $this->logger = $logger;
-        $this->shell = $shell;
-        $this->env = $env;
         $this->cacheConfig = $cacheConfig;
+        $this->credisFactory = $credisFactory;
     }
 
     /**
      * Clears redis cache
      *
-     * @return void
+     * {@inheritDoc}
      */
-    public function execute()
+    public function execute(): void
     {
         $cacheConfigs = $this->cacheConfig->get();
 
         if (!isset($cacheConfigs['frontend'])) {
             return;
         }
+
         foreach ($cacheConfigs['frontend'] as $cacheType => $cacheConfig) {
-            if ($cacheConfig['backend'] != 'Cm_Cache_Backend_Redis') {
+            if ($cacheConfig['backend'] !== 'Cm_Cache_Backend_Redis') {
                 continue;
             }
+
             $redisConfig = $cacheConfig['backend_options'];
-            $this->logger->info("Clearing redis cache: $cacheType");
-            $redisClient = new Credis_Client(
-                isset($redisConfig['server']) ?? '127.0.0.1',
-                isset($redisConfig['port']) ?? 6379,
-                null,
-                '',
-                isset($redisConfig['database']) ?? 0
+            $this->logger->info('Clearing redis cache: ' . $cacheType);
+
+            $client = $this->credisFactory->create(
+                isset($redisConfig['server']) ? (string)$redisConfig['server'] : '127.0.0.1',
+                isset($redisConfig['port']) ? (int)$redisConfig['port'] : 6379,
+                isset($redisConfig['database']) ? (int)$redisConfig['database'] : 0
             );
-            $redisClient->connect();
-            $redisClient->flushDb();
+
+            try {
+                $client->connect();
+                $client->flushDb();
+            } catch (CredisException $exception) {
+                throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
+            }
         }
     }
 }
