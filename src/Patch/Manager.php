@@ -7,6 +7,7 @@ namespace Magento\MagentoCloud\Patch;
 
 use Magento\MagentoCloud\Config\GlobalSection;
 use Magento\MagentoCloud\Filesystem\DirectoryList;
+use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Driver\File;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
@@ -43,18 +44,25 @@ class Manager
     private $globalSection;
 
     /**
+     * @var FileList
+     */
+    private $fileList;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param File $file
      * @param DirectoryList $directoryList
      * @param GlobalSection $globalSection
+     * @param FileList $fileList
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
         File $file,
         DirectoryList $directoryList,
-        GlobalSection $globalSection
+        GlobalSection $globalSection,
+        FileList $fileList
     ) {
 
         $this->logger = $logger;
@@ -62,6 +70,7 @@ class Manager
         $this->file = $file;
         $this->directoryList = $directoryList;
         $this->globalSection = $globalSection;
+        $this->fileList = $fileList;
     }
 
     /**
@@ -71,18 +80,11 @@ class Manager
      */
     public function apply()
     {
-        $magentoRoot = $this->directoryList->getMagentoRoot();
-
-        if (!$this->file->isExists($magentoRoot . '/pub/static.php')) {
-            $this->logger->notice('File static.php was not found');
-        } else {
-            $this->file->copy(
-                $magentoRoot . '/pub/static.php',
-                $magentoRoot . '/pub/front-static.php'
-            );
-
-            $this->logger->info('File static.php was copied');
-        }
+        $this->file->copy(
+            $this->fileList->getFrontStaticDist(),
+            $this->directoryList->getMagentoRoot() . '/pub/front-static.php'
+        );
+        $this->logger->info('File "front-static.php" was copied');
 
         $this->logger->notice('Applying patches');
 
