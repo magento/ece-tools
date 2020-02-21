@@ -1,7 +1,7 @@
 # Contributing to Magento Cloud Tools code
 
 Use the GitHub fork & pull model contribution model to submit your code contributions to the Magento Cloud Tools codebase.
-In this contribution model, you maintain your own [fork](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/working-with-forks) of the Magento Cloud Tools repository, and create a [pull request](https://help.github.com/articles/about-pull-requests/) to submit your proposed changes to the base repository. For details on the fork & pull contribution model, see the [Beginners guide](https://github.com/magento/magento2/wiki/Getting-Started).
+In this contribution model, you maintain your own [fork](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/working-with-forks) of the ECE-Tools repository, and create a [pull request](https://help.github.com/articles/about-pull-requests/) to submit your proposed changes to the base repository. For details on the fork & pull contribution model, see the [Beginners guide](https://github.com/magento/magento2/wiki/Getting-Started).
 
 Contributions can take the form of new features, changes to existing features, tests, bug fixes, or optimizations. You can also contribute new or updated documentation.
 
