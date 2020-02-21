@@ -18,7 +18,7 @@ class Upgrade21Cest extends UpgradeCest
     protected function testProvider()
     {
         return [
-            ['from' => '2.1.12', 'to' => '2.2.0']
+            ['from' => '2.1.4', 'to' => '2.2.0']
         ];
     }
 }
