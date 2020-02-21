@@ -9,7 +9,7 @@ The Magento Cloud development team and community maintainers review all issues a
 
 ## Prerequisites
 
-You must have a [GitHub account](https://help.github.com/en/github/getting-started-with-github/signing-up-for-a-new-github-account) with [two-factor authentication](https://help.github.com/en/github/authenticating-to-github/configuring-two-factor-authentication) enabled to contribute to Magento repositories. We also recommend creating a [personal access token](https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line) to use when interacting with GitHub in script or from the command line. 
+You must have a [GitHub account](https://help.github.com/en/github/getting-started-with-github/signing-up-for-a-new-github-account) with [two-factor authentication](https://help.github.com/en/github/authenticating-to-github/configuring-two-factor-authentication) enabled to contribute to Magento repositories. We also recommend creating a [personal access token](https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line) to use when interacting with GitHub from scripts or from the command line.
 
 ## Contribution requirements
 
