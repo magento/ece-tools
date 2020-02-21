@@ -26,7 +26,7 @@ You must have a [GitHub account](https://help.github.com/en/github/getting-start
 1. Search current [listed issues](https://github.com/magento/ece-tools/issues) (open or closed) for similar proposals of intended contribution before starting work on a new contribution.
 2. Review and sign the [Contributor License Agreement (CLA)](https://opensource.adobe.com/cla.html) if this is your first time contributing. You only need to sign the CLA once.
 3. Create and test your work.
-4. Fork the Magento Cloud repository according to the [Fork A Repository instructions](https://devdocs.magento.com/guides/v2.3/contributor-guide/contributing.html#fork) and when you are ready to send us a pull request – follow the [Create A Pull Request instructions](https://devdocs.magento.com/guides/v2.3/contributor-guide/contributing.html#pull_request).
+4. Fork the ECE-Tools repository according to the [Fork A Repository instructions](https://github.com/magento/magento2/wiki/Forking-and-Branching) and when you are ready to send us a pull request – follow the [Create A Pull Request instructions](https://github.com/magento/magento2/wiki/Working-Issues-and-PRs#submitting-prs).
 5. After you submit the pull request, the Magento Cloud development team will review the contribution and collaborate with you as needed to incorporate your proposed changes.
 
 ## Code of Conduct
