@@ -8,6 +8,8 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Test\Unit\Step\Deploy;
 
 use Magento\MagentoCloud\Step\Deploy\SplitDbConnection;
+use Magento\MagentoCloud\Step\Deploy\SplitDbConnection\SlaveConnection;
+use Magento\MagentoCloud\Util\UpgradeProcess;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -15,10 +17,7 @@ use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Database\DbConfig;
-use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
-use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
-use Magento\MagentoCloud\Shell\ProcessInterface;
 
 /**
  * @inheritdoc
@@ -74,11 +73,6 @@ class SplitDbConnectionTest extends TestCase
     private $dbConfigMock;
 
     /**
-     * @var ResourceConfig|MockObject
-     */
-    private $resourceConfigMock;
-
-    /**
      * @var DeployInterface|MockObject
      */
     private $stageConfigMock;
@@ -94,19 +88,19 @@ class SplitDbConnectionTest extends TestCase
     private $configReaderMock;
 
     /**
-     * @var ConfigWriter|MockObject
-     */
-    private $configWriterMock;
-
-    /**
      * @var MagentoShell|MockObject
      */
     private $magentoShellMock;
 
     /**
-     * @var ProcessInterface|MockObject
+     * @var UpgradeProcess|MockObject
      */
-    private $processMock;
+    private $upgradeProcessMock;
+
+    /**
+     * @var SlaveConnection|MockObject
+     */
+    private $slaveConnectionMock;
 
     /**
      * @var SplitDbConnection
@@ -122,69 +116,29 @@ class SplitDbConnectionTest extends TestCase
     {
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
         $this->dbConfigMock = $this->createMock(DbConfig::class);
-        $this->resourceConfigMock = $this->createMock(ResourceConfig::class);
         $this->loggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
         $this->flagManagerMock = $this->createMock(FlagManager::class);
         $this->configReaderMock = $this->createMock(ConfigReader::class);
-        $this->configWriterMock = $this->createMock(ConfigWriter::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
-        $this->processMock = $this->getMockForAbstractClass(ProcessInterface::class);
+        $this->upgradeProcessMock = $this->createMock(UpgradeProcess::class);
+        $this->slaveConnectionMock = $this->createMock(SlaveConnection::class);
 
         $this->step = new SplitDbConnection(
             $this->stageConfigMock,
             $this->dbConfigMock,
-            $this->resourceConfigMock,
             $this->loggerMock,
             $this->flagManagerMock,
             $this->configReaderMock,
-            $this->configWriterMock,
-            $this->magentoShellMock
+            $this->magentoShellMock,
+            $this->upgradeProcessMock,
+            $this->slaveConnectionMock
         );
     }
 
     /**
-     * Variable SPLIT_DB is a empty array
+     * Flag IGNORES_SPLIT_DB exists
      */
-    public function testExecuteVarSplitDbIsEmpty()
-    {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_SPLIT_DB)
-            ->willReturn([]);
-        $this->dbConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn([
-                'connection' => [
-                    'checkout' => [],
-                    'sales' => [],
-                ]
-            ]);
-        $this->configReaderMock->expects($this->once())
-            ->method('read')
-            ->willReturn([
-                'db' => [
-                    'connection' => [
-                        'checkout' => [],
-                        'sales' => [],
-                    ]
-                ]
-            ]);
-        $this->loggerMock->expects($this->once())
-            ->method('warning')
-            ->with('Variable SPLIT_DB does not have data which were already split types: sales, quote');
-
-        $this->magentoShellMock->expects($this->never())
-            ->method('execute');
-        $this->configWriterMock->expects($this->never())
-            ->method('create');
-
-        $this->step->execute();
-    }
-
-    /**
-     * Variable SPLIT_DB is not empty and the flag IGNORES_SPLIT_DB exists
-     */
-    public function testExecuteVarSplitDbIsNotEmptyAndFlagIgnoreSplitDbExists()
+    public function testExecuteFlagIgnoreSplitDbExists()
     {
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
@@ -193,10 +147,15 @@ class SplitDbConnectionTest extends TestCase
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Enabling a split database will be skipped. The flag ignore_split_db was detected.');
+        $this->flagManagerMock->expects($this->once())
+            ->method('delete')
+            ->with(FlagManager::FLAG_IGNORE_SPLIT_DB);
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
-        $this->configWriterMock->expects($this->never())
-            ->method('create');
+        $this->upgradeProcessMock->expects($this->never())
+            ->method('execute');
+        $this->slaveConnectionMock->expects($this->never())
+            ->method('update');
 
         $this->step->execute();
     }
@@ -210,14 +169,14 @@ class SplitDbConnectionTest extends TestCase
      */
     public function testExecuteRelationshipNotHaveConfigurations(array $dbConfig, array $splitTypes)
     {
-        $this->stageConfigMock->expects($this->once())
-            ->method('get')
-            ->with(DeployInterface::VAR_SPLIT_DB)
-            ->willReturn(DeployInterface::SPLIT_DB_VALUES);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_IGNORE_SPLIT_DB)
             ->willReturn(false);
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SPLIT_DB)
+            ->willReturn(DeployInterface::SPLIT_DB_VALUES);
         $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn($dbConfig);
@@ -229,8 +188,10 @@ class SplitDbConnectionTest extends TestCase
             );
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
-        $this->configWriterMock->expects($this->never())
-            ->method('create');
+        $this->upgradeProcessMock->expects($this->never())
+            ->method('execute');
+        $this->slaveConnectionMock->expects($this->never())
+            ->method('update');
 
         $this->step->execute();
     }
@@ -294,8 +255,10 @@ class SplitDbConnectionTest extends TestCase
             );
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
-        $this->configWriterMock->expects($this->never())
-            ->method('create');
+        $this->upgradeProcessMock->expects($this->never())
+            ->method('execute');
+        $this->slaveConnectionMock->expects($this->never())
+            ->method('update');
 
         $this->step->execute();
     }
@@ -307,52 +270,70 @@ class SplitDbConnectionTest extends TestCase
     {
         return [
             [
-                ['quote'],
-                ['connection' => ['checkout' => []]],
-                ['db' => ['connection' => ['sales' => []]]],
-                ['sales']
+                'varSplitDb' => [],
+                'dbConfig' => [],
+                'mageConfig' => [
+                    'db' => [
+                        'connection' => [
+                            'sales' => [],
+                            'checkout' => []
+                        ]
+                    ]
+                ],
+                'splitTypes' => ['sales', 'quote']
             ],
-
             [
-                ['sales'],
-                ['connection' => ['sales' => []]],
-                ['db' => ['connection' => ['checkout' => []]]],
-                ['quote']
-            ]
+                'varSplitDb' => [],
+                'dbConfig' => [
+                    'connection' => [
+                        'sales' => [],
+                        'checkout' => []
+                    ]
+                ],
+                'mageConfig' => [
+                    'db' => [
+                        'connection' => [
+                            'sales' => [],
+                            'checkout' => []
+                        ]
+                    ]
+                ],
+                'splitTypes' => ['sales', 'quote']
+            ],
+            [
+                'varSplitDb' => ['quote'],
+                'dbConfig' => ['connection' => ['checkout' => []]],
+                'mageConfig' => ['db' => ['connection' => ['sales' => []]]],
+                'splitTypes' => ['sales']
+            ],
+            [
+                'varSplitDb' => ['sales'],
+                'dbConfig' => ['connection' => ['sales' => []]],
+                'mageConfig' => ['db' => ['connection' => ['checkout' => []]]],
+                'splitTypes' => ['quote']
+            ],
         ];
     }
 
     /**
-     * Split db will be enabled without slave connections
+     * Split db will be enabled with slave connections
      */
-    public function testExecuteEnableSplitDbWithoutSlaveConnection()
+    public function testExecuteEnableSplitDbWithSlaveConnection()
     {
-        $this->stageConfigMock->expects($this->exactly(2))
-            ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_SPLIT_DB],
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION]
-            )
-            ->willReturnOnConsecutiveCalls(
-                DeployInterface::SPLIT_DB_VALUES,
-                false
-            );
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_IGNORE_SPLIT_DB)
             ->willReturn(false);
+        $this->stageConfigMock->expects($this->once())
+            ->method('get')
+            ->with(DeployInterface::VAR_SPLIT_DB)
+            ->willReturn(DeployInterface::SPLIT_DB_VALUES);
         $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(['connection' => self::CONNECTION]);
         $this->configReaderMock->expects($this->once())
             ->method('read')
             ->willReturn(['db' => ['connection' => []]]);
-        $this->processMock->expects($this->exactly(2))
-            ->method('getOutput')
-            ->willReturnOnConsecutiveCalls(
-                'Some output about split quote',
-                'Some output about split sales'
-            );
         $this->magentoShellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
@@ -360,115 +341,30 @@ class SplitDbConnectionTest extends TestCase
                     . ' --username="checkout.username" --password="checkout.password"'],
                 ['setup:db-schema:split-sales --host="sales.host" --dbname="sales.dbname"'
                     . ' --username="sales.username" --password="sales.password"']
-            )
-            ->willReturn($this->processMock);
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('debug')
-            ->withConsecutive(
-                ['Some output about split quote'],
-                ['Some output about split sales']
             );
+        $this->upgradeProcessMock->expects($this->exactly(2))
+            ->method('execute');
         $this->loggerMock->expects($this->exactly(2))
             ->method('info')
             ->withConsecutive(
                 ['Quote tables were split to DB checkout.dbname in checkout.host'],
                 ['Sales tables were split to DB sales.dbname in sales.host']
             );
-
-        $this->configWriterMock->expects($this->never())
-            ->method('create');
-
-        $this->step->execute();
-    }
-
-    /**
-     * Case when split db will be enabled with slave connections
-     */
-    public function testExecuteEnableSplitDbWithSlaveConnections()
-    {
-        $this->stageConfigMock->expects($this->exactly(2))
-            ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_SPLIT_DB],
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION]
-            )
-            ->willReturnOnConsecutiveCalls(
-                DeployInterface::SPLIT_DB_VALUES,
-                true
-            );
-        $this->flagManagerMock->expects($this->once())
-            ->method('exists')
-            ->with(FlagManager::FLAG_IGNORE_SPLIT_DB)
-            ->willReturn(false);
-        $this->dbConfigMock->expects($this->once())
-            ->method('get')
-            ->willReturn([
-                'connection' => self::CONNECTION,
-                'slave_connection' => self::SLAVE_CONNECTION
-            ]);
-        $this->configReaderMock->expects($this->exactly(2))
-            ->method('read')
-            ->willReturnOnConsecutiveCalls(
-                ['db' => ['connection' => []]],
-                ['db' => ['connection' => self::CONNECTION]]
-            );
-        $this->processMock->expects($this->exactly(2))
-            ->method('getOutput')
-            ->willReturnOnConsecutiveCalls(
-                'Some output about split quote',
-                'Some output about split sales'
-            );
-        $this->magentoShellMock->expects($this->exactly(2))
-            ->method('execute')
-            ->withConsecutive(
-                ['setup:db-schema:split-quote --host="checkout.host" --dbname="checkout.dbname"'
-                    . ' --username="checkout.username" --password="checkout.password"'],
-                ['setup:db-schema:split-sales --host="sales.host" --dbname="sales.dbname"'
-                    . ' --username="sales.username" --password="sales.password"']
-            )
-            ->willReturn($this->processMock);
-        $this->loggerMock->expects($this->exactly(2))
-            ->method('debug')
-            ->withConsecutive(
-                ['Some output about split quote'],
-                ['Some output about split sales']
-            );
-        $this->loggerMock->expects($this->exactly(4))
-            ->method('info')
-            ->withConsecutive(
-                ['Quote tables were split to DB checkout.dbname in checkout.host'],
-                ['Sales tables were split to DB sales.dbname in sales.host'],
-                ['Slave connection for checkout connection was set'],
-                ['Slave connection for sales connection was set']
-            );
-
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with(['db' => [
-                'connection' => self::CONNECTION,
-                'slave_connection' => self::SLAVE_CONNECTION
-            ]]);
+        $this->slaveConnectionMock->expects($this->once())
+            ->method('update');
 
         $this->step->execute();
     }
 
     /**
      * Case when enable slave connections only
-     *
-     * @throws \Magento\MagentoCloud\Step\StepException
      */
-    public function testExecuteEnableSlaveConnectionsOnly()
+    public function testExecuteOnlyUpdateSlaveConnections()
     {
-        $this->stageConfigMock->expects($this->exactly(2))
+        $this->stageConfigMock->expects($this->once())
             ->method('get')
-            ->withConsecutive(
-                [DeployInterface::VAR_SPLIT_DB],
-                [DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION]
-            )
-            ->willReturnOnConsecutiveCalls(
-                DeployInterface::SPLIT_DB_VALUES,
-                true
-            );
+            ->with(DeployInterface::VAR_SPLIT_DB)
+            ->willReturn(DeployInterface::SPLIT_DB_VALUES);
         $this->flagManagerMock->expects($this->once())
             ->method('exists')
             ->with(FlagManager::FLAG_IGNORE_SPLIT_DB)
@@ -477,24 +373,17 @@ class SplitDbConnectionTest extends TestCase
             ->method('get')
             ->willReturn([
                 'connection' => self::CONNECTION,
-                'slave_connection' => self::SLAVE_CONNECTION,
+                'slave_connection' => self::SLAVE_CONNECTION
             ]);
-        $this->configReaderMock->expects($this->exactly(2))
+        $this->configReaderMock->expects($this->once())
             ->method('read')
-            ->willReturn([
-                'db' => [
-                    'connection' => self::CONNECTION,
-                ]
-            ]);
+            ->willReturn(['db' => ['connection' => self::CONNECTION]]);
         $this->magentoShellMock->expects($this->never())
             ->method('execute');
-
-        $this->configWriterMock->expects($this->once())
-            ->method('create')
-            ->with(['db' => [
-                'connection' => self::CONNECTION,
-                'slave_connection' => self::SLAVE_CONNECTION,
-            ]]);
+        $this->upgradeProcessMock->expects($this->never())
+            ->method('execute');
+        $this->slaveConnectionMock->expects($this->once())
+            ->method('update');
 
         $this->step->execute();
     }
