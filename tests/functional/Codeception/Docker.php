@@ -302,8 +302,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
                 'repo' => [
                     'type' => 'vcs',
                     'url' => 'git@github.com:magento/magento-cloud-components.git'
-                ],
-                'constraint' => '1.0.x-dev',
+                ]
             ]
         ];
         $config = json_decode(
@@ -318,7 +317,7 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
                     ->noInteraction()
                     ->getCommand();
                 $commands[] = $this->taskComposerRequire('composer')
-                    ->dependency($extra['name'], $extra['constraint'] ?? $config['require'][$extra['name']])
+                    ->dependency($extra['name'], $config['require'][$extra['name']])
                     ->noInteraction()
                     ->getCommand();
             }
