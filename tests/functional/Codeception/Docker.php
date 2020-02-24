@@ -295,6 +295,13 @@ class Docker extends Module implements BuilderAwareInterface, ContainerAwareInte
                 'repo' => [
                     'type' => 'vcs',
                     'url' => 'git@github.com:magento/magento-cloud-patches.git'
+                ],
+            ],
+            'mcc' => [
+                'name' => 'magento/magento-cloud-components',
+                'repo' => [
+                    'type' => 'vcs',
+                    'url' => 'git@github.com:magento/magento-cloud-components.git'
                 ]
             ]
         ];
