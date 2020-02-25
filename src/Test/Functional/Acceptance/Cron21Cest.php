@@ -27,42 +27,6 @@ class Cron21Cest extends CronCest
                     ],
                 ],
             ],
-            [
-                'version' => '2.1.6',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'ar_KW'
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.1.11',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'fr_FR'
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.1.14',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'ar_KW'
-                    ],
-                ],
-            ],
-            [
-                'version' => '2.1.15',
-                'variables' => [
-                    'MAGENTO_CLOUD_VARIABLES' => [
-                        'ADMIN_EMAIL' => 'admin@example.com',
-                        'ADMIN_LOCALE' => 'ar_KW'
-                    ],
-                ],
-            ],
         ];
     }
 }
