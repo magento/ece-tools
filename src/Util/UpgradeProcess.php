@@ -24,6 +24,7 @@ class UpgradeProcess
      * @var ShellInterface
      */
     private $shell;
+
     /**
      * @var LoggerInterface
      */

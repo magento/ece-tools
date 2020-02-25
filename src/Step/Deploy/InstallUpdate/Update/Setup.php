@@ -53,7 +53,7 @@ class Setup implements StepInterface
             $this->upgradeRunner->execute();
         } catch (\Exception $exception) {
             //Rollback required by database
-            throw new StepException($exception->getMessage(), 6, $exception);
+            throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
     }
