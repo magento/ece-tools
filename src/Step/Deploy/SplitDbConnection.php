@@ -67,7 +67,7 @@ class SplitDbConnection implements StepInterface
     /**
      * @var UpgradeProcess
      */
-    private $upgradeRunner;
+    private $upgradeProcess;
 
     /**
      * @var SlaveConnection
@@ -81,7 +81,7 @@ class SplitDbConnection implements StepInterface
      * @param FlagManager $flagManager
      * @param ConfigReader $configReader
      * @param MagentoShell $magentoShell
-     * @param UpgradeProcess $upgradeRunner
+     * @param UpgradeProcess $upgradeProcess
      * @param SlaveConnection $slaveConnection
      */
     public function __construct(
@@ -91,7 +91,7 @@ class SplitDbConnection implements StepInterface
         FlagManager $flagManager,
         ConfigReader $configReader,
         MagentoShell $magentoShell,
-        UpgradeProcess $upgradeRunner,
+        UpgradeProcess $upgradeProcess,
         SlaveConnection $slaveConnection
     ) {
         $this->stageConfig = $stageConfig;
@@ -100,7 +100,7 @@ class SplitDbConnection implements StepInterface
         $this->flagManager = $flagManager;
         $this->configReader = $configReader;
         $this->magentoShell = $magentoShell;
-        $this->upgradeRunner = $upgradeRunner;
+        $this->upgradeProcess = $upgradeProcess;
         $this->slaveConnection = $slaveConnection;
     }
 
@@ -210,7 +210,7 @@ class SplitDbConnection implements StepInterface
                 $connectionConfig['dbname'],
                 $connectionConfig['host']
             ));
-            $this->upgradeRunner->execute();
+            $this->upgradeProcess->execute();
         }
     }
 

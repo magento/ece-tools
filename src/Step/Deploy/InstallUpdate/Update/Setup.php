@@ -26,18 +26,18 @@ class Setup implements StepInterface
     /**
      * @var UpgradeProcess
      */
-    private $upgradeRunner;
+    private $upgradeProcess;
 
     /**
      * @param FlagManager $flagManager
-     * @param UpgradeProcess $upgradeRunner
+     * @param UpgradeProcess $upgradeProcess
      */
     public function __construct(
         FlagManager $flagManager,
-        UpgradeProcess $upgradeRunner
+        UpgradeProcess $upgradeProcess
     ) {
         $this->flagManager = $flagManager;
-        $this->upgradeRunner = $upgradeRunner;
+        $this->upgradeProcess = $upgradeProcess;
     }
 
     /**
@@ -50,7 +50,7 @@ class Setup implements StepInterface
     {
         $this->flagManager->delete(FlagManager::FLAG_REGENERATE);
         try {
-            $this->upgradeRunner->execute();
+            $this->upgradeProcess->execute();
         } catch (\Exception $exception) {
             //Rollback required by database
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);

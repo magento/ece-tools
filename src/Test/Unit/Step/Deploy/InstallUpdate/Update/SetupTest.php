@@ -28,7 +28,7 @@ class SetupTest extends TestCase
     /**
      * @var UpgradeProcess|MockObject
      */
-    private $upgradeRunnerMock;
+    private $upgradeProcessMock;
 
     /**
      * @var FlagManager|MockObject
@@ -41,11 +41,11 @@ class SetupTest extends TestCase
     protected function setUp()
     {
         $this->flagManagerMock = $this->createMock(FlagManager::class);
-        $this->upgradeRunnerMock = $this->createMock(UpgradeProcess::class);
+        $this->upgradeProcessMock = $this->createMock(UpgradeProcess::class);
 
         $this->step = new Setup(
             $this->flagManagerMock,
-            $this->upgradeRunnerMock
+            $this->upgradeProcessMock
         );
     }
 
@@ -58,7 +58,7 @@ class SetupTest extends TestCase
         $this->flagManagerMock->expects($this->exactly(2))
             ->method('delete')
             ->with(FlagManager::FLAG_REGENERATE);
-        $this->upgradeRunnerMock->expects($this->exactly(1))
+        $this->upgradeProcessMock->expects($this->exactly(1))
             ->method('execute');
 
         $this->step->execute();
@@ -73,7 +73,7 @@ class SetupTest extends TestCase
         $this->flagManagerMock->expects($this->exactly(1))
             ->method('delete')
             ->with(FlagManager::FLAG_REGENERATE);
-        $this->upgradeRunnerMock->expects($this->once())
+        $this->upgradeProcessMock->expects($this->once())
             ->method('execute')
             ->willThrowException(new \RuntimeException('Error during command execution'));
 
