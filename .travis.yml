@@ -86,10 +86,7 @@ install:
   - composer update -n --no-suggest
 
 before_script:
-  - if [ $TEST_SUITE == "functional-ce" ]; then echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME_CE}" >> ./.env && echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD_CE}" >> ./.env; fi;
-  - if [ $TEST_SUITE == "functional-ee" ]; then echo "COMPOSER_MAGENTO_USERNAME=${REPO_USERNAME}" >> ./.env && echo "COMPOSER_MAGENTO_PASSWORD=${REPO_PASSWORD}" >> ./.env; fi;
-  - echo "COMPOSER_GITHUB_TOKEN=${GITHUB_TOKEN}" >> ./.env
-  - if [ $XDEBUG == "true" ]; then echo "PHP_ENABLE_XDEBUG=true" >> ./.docker/global.env; fi;
+  - if [ $TEST_SUITE == "functional-ce" ]; then cp codeception.dist.yml codeception.yml && sed -i "s/REPO_USERNAME/REPO_USERNAME_CE/" codeception.yml && sed -i "s/REPO_PASSWORD/REPO_PASSWORD_CE/" codeception.yml; fi;
 
 script:
   - if [ $TEST_SUITE == "functional-ce" ]; then ./tests/travis/functional_ce.sh; fi;

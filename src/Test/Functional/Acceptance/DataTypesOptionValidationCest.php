@@ -22,8 +22,8 @@ class DataTypesOptionValidationCest extends AbstractCest
     {
         $I->runEceDockerCommand(
             sprintf(
-                'build:compose --mode=production --env-cloud-vars="%s"',
-                $this->convertEnvFromArrayToJson($data['cloudVariables'])
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
         $I->runDockerComposeCommand('run build cloud-build');
@@ -41,7 +41,7 @@ class DataTypesOptionValidationCest extends AbstractCest
     {
         return [
             'string_instead_integer' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'SCD_THREADS' => 'one',
                     ],
@@ -49,7 +49,7 @@ class DataTypesOptionValidationCest extends AbstractCest
                 'expectedError' => 'SCD_THREADS has wrong value',
             ],
             'integer_instead_boolean' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'CLEAN_STATIC_FILES' => 1,
                     ],

@@ -117,7 +117,7 @@ class ReportDirNestingLevelCest extends AbstractCest
         $I->copyFileToWorkDir('files/report_dir_nesting_level/.magento.env.yaml', '.magento.env.yaml');
         $I->copyFileToWorkDir('files/report_dir_nesting_level/local_with_property.xml', 'pub/errors/local.xml');
         $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --env-raw-vars="%s"',
+            'build:compose --mode=production --env-vars="%s"',
             $this->convertEnvFromArrayToJson(['MAGE_ERROR_REPORT_DIR_NESTING_LEVEL' => 7])
         ));
         $I->runDockerComposeCommand('run build cloud-build');

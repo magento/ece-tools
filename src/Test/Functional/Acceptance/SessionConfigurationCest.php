@@ -23,8 +23,8 @@ class SessionConfigurationCest extends AbstractCest
     {
         $I->runEceDockerCommand(
             sprintf(
-                'build:compose --mode=production --env-cloud-vars="%s"',
-                $this->convertEnvFromArrayToJson($data['cloudVariables'])
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
         $I->runDockerComposeCommand('run build cloud-build');
@@ -43,7 +43,7 @@ class SessionConfigurationCest extends AbstractCest
     {
         return [
             'singleConfig' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'SESSION_CONFIGURATION'=>['max_concurrency' => '10', '_merge' => true],
                     ],
@@ -52,7 +52,7 @@ class SessionConfigurationCest extends AbstractCest
                 'defaultConfig' => 'redis',
             ],
             'withoutMerge' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'SESSION_CONFIGURATION'=>[
                             'save' => 'redis',

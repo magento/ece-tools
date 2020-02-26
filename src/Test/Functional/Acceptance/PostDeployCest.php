@@ -22,7 +22,7 @@ class PostDeployCest extends AbstractCest
     {
         $I->runEceDockerCommand(
             sprintf(
-                'build:compose --mode=production --env-cloud-vars="%s"',
+                'build:compose --mode=production --env-vars="%s"',
                 $this->convertEnvFromArrayToJson($data['variables'])
             )
         );

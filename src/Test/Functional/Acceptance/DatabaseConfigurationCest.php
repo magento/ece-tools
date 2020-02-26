@@ -22,8 +22,8 @@ class DatabaseConfigurationCest extends AbstractCest
     {
         $I->runEceDockerCommand(
             sprintf(
-                'build:compose --mode=production --env-cloud-vars="%s"',
-                $this->convertEnvFromArrayToJson($data['cloudVariables'])
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
         $I->runDockerComposeCommand('run build cloud-build');
@@ -42,7 +42,7 @@ class DatabaseConfigurationCest extends AbstractCest
     {
         return [
             'singleConfig' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'DATABASE_CONFIGURATION'=>['some_config' => 'value', '_merge' => true],
                     ],
@@ -51,7 +51,7 @@ class DatabaseConfigurationCest extends AbstractCest
                 'defaultConfig' => 'db',
             ],
             'multiConfig' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'DATABASE_CONFIGURATION'=>[
                             'connection' => [

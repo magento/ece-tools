@@ -66,7 +66,7 @@ class UpgradeCest extends AbstractCest
         // https://magento2.atlassian.net/browse/MAGECLOUD-3725
         return [
             ['from' => '2.3.0', 'to' => '2.3.1'],
-            //['from' => '2.3.3', 'to' => '2.3.4'],
+            ['from' => '2.3.3', 'to' => '2.3.4'],
         ];
     }
 }

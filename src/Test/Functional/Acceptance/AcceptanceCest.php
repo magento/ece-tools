@@ -47,9 +47,8 @@ class AcceptanceCest extends AbstractCest
     {
         $I->runEceDockerCommand(
             sprintf(
-                'build:compose --mode=production --env-cloud-vars="%s" --env-raw-vars="%s"',
-                $this->convertEnvFromArrayToJson($data['cloudVariables']),
-                $this->convertEnvFromArrayToJson($data['rawVariables'])
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
             )
         );
         $I->runDockerComposeCommand('run build cloud-build');
@@ -104,12 +103,11 @@ class AcceptanceCest extends AbstractCest
     {
         return [
             'default configuration' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                     ],
                 ],
-                'rawVariables' => [],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
@@ -128,7 +126,7 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'test cron_consumers_runner with array and there is MAGENTO_CLOUD_LOCKS_DIR' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'CRON_CONSUMERS_RUNNER' => [
@@ -137,8 +135,6 @@ class AcceptanceCest extends AbstractCest
                             'consumers' => ['test'],
                         ],
                     ],
-                ],
-                'rawVariables' => [
                     'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
                 ],
                 'expectedConfig' => [
@@ -159,7 +155,7 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'test cron_consumers_runner with wrong array, there is MAGENTO_CLOUD_LOCKS_DIR, LOCK_PROVIDER is db' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'LOCK_PROVIDER' => 'db',
@@ -169,8 +165,6 @@ class AcceptanceCest extends AbstractCest
                             'consumers' => ['test'],
                         ],
                     ],
-                ],
-                'rawVariables' => [
                     'MAGENTO_CLOUD_LOCKS_DIR' => '/tmp/locks',
                 ],
                 'expectedConfig' => [
@@ -191,13 +185,12 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'test cron_consumers_runner with string' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'CRON_CONSUMERS_RUNNER' => '{"cron_run":true, "max_messages":100, "consumers":["test2"]}',
                     ],
                 ],
-                'rawVariables' => [],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => true,
@@ -210,13 +203,12 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'test cron_consumers_runner with wrong string' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'CRON_CONSUMERS_RUNNER' => '{"cron_run":"true", "max_messages":100, "consumers":["test2"]}',
                     ],
                 ],
-                'rawVariables' => [],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
@@ -229,14 +221,13 @@ class AcceptanceCest extends AbstractCest
                 ],
             ],
             'disabled static content symlinks 3 jobs' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'ADMIN_EMAIL' => 'admin@example.com',
                         'STATIC_CONTENT_SYMLINK' => 'disabled',
                         'STATIC_CONTENT_THREADS' => 3,
                     ],
                 ],
-                'rawVariables' => [],
                 'expectedConfig' => [
                     'cron_consumers_runner' => [
                         'cron_run' => false,
