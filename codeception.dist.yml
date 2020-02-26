@@ -23,7 +23,7 @@ modules:
       composer_magento_username: "%REPO_USERNAME%"
       composer_magento_password: "%REPO_PASSWORD%"
       composer_github_token: "%GITHUB_TOKEN%"
-      printOutput: true
+      printOutput: false
     Magento\CloudDocker\Test\Functional\Codeception\Docker:
       db_host: "%Magento.docker.settings.db.host%"
       db_port: "%Magento.docker.settings.db.port%"
@@ -37,7 +37,7 @@ modules:
       env_base_url: "%Magento.docker.settings.env.url.base%"
       env_secure_base_url: "%Magento.docker.settings.env.url.secure_base%"
       volumes: []
-      printOutput: true
+      printOutput: false
     PhpBrowser:
       url: "%Magento.docker.settings.env.url.base%"
     Magento\CloudDocker\Test\Functional\Codeception\MagentoDb:
