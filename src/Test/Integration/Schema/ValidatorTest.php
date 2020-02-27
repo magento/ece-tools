@@ -302,6 +302,36 @@ class ValidatorTest extends TestCase
                     'Use the following type: array.'
                 )
             ],
+            [DeployInterface::VAR_SPLIT_DB, [], null],
+            [DeployInterface::VAR_SPLIT_DB, [DeployInterface::SPLIT_DB_VALUE_QUOTE], null],
+            [
+                DeployInterface::VAR_SPLIT_DB,
+                [DeployInterface::SPLIT_DB_VALUE_QUOTE, DeployInterface::SPLIT_DB_VALUE_SALES],
+                null
+            ],
+            [
+                DeployInterface::VAR_SPLIT_DB,
+                DeployInterface::SPLIT_DB_VALUE_QUOTE,
+                new Error(
+                    'The SPLIT_DB variable contains an invalid value of type string. Use the following type: array.'
+                )
+            ],
+            [
+                DeployInterface::VAR_SPLIT_DB,
+                ['wrong'],
+                new Error(
+                    'The SPLIT_DB variable contains the invalid value. It should be array with next available values: '
+                    . '[quote, sales].'
+                )
+            ],
+            [
+                DeployInterface::VAR_SPLIT_DB,
+                ['wrong', DeployInterface::SPLIT_DB_VALUE_QUOTE],
+                new Error(
+                    'The SPLIT_DB variable contains the invalid value. It should be array with next available values: '
+                    . '[quote, sales].'
+                )
+            ],
         ];
     }
 }

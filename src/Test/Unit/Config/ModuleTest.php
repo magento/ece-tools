@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Config;
 use Magento\MagentoCloud\Config\Magento\Shared\ReaderInterface;
 use Magento\MagentoCloud\Config\Magento\Shared\WriterInterface;
 use Magento\MagentoCloud\Config\Module;
+use Magento\MagentoCloud\Config\Stage\BuildInterface;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Shell\ShellFactory;
@@ -42,12 +43,18 @@ class ModuleTest extends TestCase
     private $magentoShellMock;
 
     /**
+     * @var BuildInterface|MockObject
+     */
+    private $stageConfigMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->readerMock = $this->getMockForAbstractClass(ReaderInterface::class);
         $this->writerMock = $this->getMockForAbstractClass(WriterInterface::class);
+        $this->stageConfigMock = $this->createMock(BuildInterface::class);
         $this->magentoShellMock = $this->createMock(MagentoShell::class);
 
         /** @var ShellFactory|MockObject $shellFactoryMock */
@@ -59,6 +66,7 @@ class ModuleTest extends TestCase
         $this->module = new Module(
             $this->readerMock,
             $this->writerMock,
+            $this->stageConfigMock,
             $shellFactoryMock
         );
     }
@@ -68,6 +76,9 @@ class ModuleTest extends TestCase
      */
     public function testRefreshWithMissingModuleConfig(): void
     {
+        $this->stageConfigMock->method('get')
+            ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('-vv');
         $this->readerMock->expects($this->exactly(2))
             ->method('read')
             ->willReturnOnConsecutiveCalls(
@@ -81,7 +92,7 @@ class ModuleTest extends TestCase
             );
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('module:enable --all');
+            ->with('module:enable --all', ['-vv']);
         $this->writerMock->expects($this->once())
             ->method('update')
             ->with(['modules' => []]);
@@ -100,6 +111,9 @@ class ModuleTest extends TestCase
      */
     public function testRefreshWithNewModules(): void
     {
+        $this->stageConfigMock->method('get')
+            ->with(BuildInterface::VAR_VERBOSE_COMMANDS)
+            ->willReturn('');
         $this->readerMock->expects($this->exactly(2))
             ->method('read')
             ->willReturnOnConsecutiveCalls(
@@ -122,7 +136,7 @@ class ModuleTest extends TestCase
             );
         $this->magentoShellMock->expects($this->once())
             ->method('execute')
-            ->with('module:enable --all');
+            ->with('module:enable --all', ['']);
         $this->writerMock->expects($this->exactly(2))
             ->method('update')
             ->withConsecutive(

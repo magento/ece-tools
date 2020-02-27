@@ -45,9 +45,12 @@ class RemoveDeployFailedFlagTest extends TestCase
      */
     public function testExecute(): void
     {
-        $this->flagManager->expects($this->once())
+        $this->flagManager->expects($this->at(0))
             ->method('delete')
             ->with(Manager::FLAG_DEPLOY_HOOK_IS_FAILED);
+        $this->flagManager->expects($this->at(1))
+            ->method('delete')
+            ->with(Manager::FLAG_IGNORE_SPLIT_DB);
 
         $this->step->execute();
     }

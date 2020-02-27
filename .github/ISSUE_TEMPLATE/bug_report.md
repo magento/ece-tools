@@ -1,3 +1,11 @@
+---
+name: Bug report
+about: Technical issue with the Magento ECE-Tools
+title: ''
+labels: ''
+assignees: ''
+---
+
 <!---
     Thank you for contributing to Magento.
     To help us process this issue we recommend that you add the following information:

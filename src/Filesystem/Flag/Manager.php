@@ -33,6 +33,11 @@ class Manager
     public const FLAG_DEPLOY_HOOK_IS_FAILED = 'deploy_is_failed';
 
     /**
+     * Used to mark that splitting database should be ignored
+     */
+    public const FLAG_IGNORE_SPLIT_DB = 'ignore_split_db';
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
