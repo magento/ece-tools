@@ -31,7 +31,8 @@ class CronCest extends AbstractCest
     {
         $this->prepareWorkplace($I, $data['version']);
         $I->runEceDockerCommand(sprintf(
-            'build:compose --mode=production --expose-db-port=3306 --env-vars="%s"',
+            'build:compose --mode=production --expose-db-port=%s --env-vars="%s"',
+            $I->getExposedPort(),
             $this->convertEnvFromArrayToJson($data['variables'])
         ));
         $I->copyDirToWorkDir('modules/Magento/CronTest', 'app/code/Magento/CronTest');

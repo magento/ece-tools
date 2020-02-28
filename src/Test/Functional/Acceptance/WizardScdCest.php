@@ -51,7 +51,7 @@ class WizardScdCest extends AbstractCest
     {
         $I->copyFileToWorkDir('files/scdondemand/.magento.env.yaml', '.magento.env.yaml');
         $I->runDockerComposeCommand('run build cloud-build');
-        $I->assertTrue($I->runDockerComposeCommand('run build ece-command wizard:scd-on-build'));
+        $I->assertTrue($I->runDockerComposeCommand('run build ece-command wizard:scd-on-demand'));
         $I->seeInOutput('SCD on demand is enabled');
     }
 }
