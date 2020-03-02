@@ -83,7 +83,7 @@ class SplitDbStateTest extends TestCase
             );
 
         $this->outputFormatterMock->expects($this->never())
-           ->method('writeItem');
+            ->method('writeItem');
         $this->outputFormatterMock->expects($this->once())
             ->method('writeResult')
             ->with($outputMock, true, $message);
@@ -140,7 +140,7 @@ class SplitDbStateTest extends TestCase
         $mageConfQuote = [
             'db' => [
                 'connection' => [
-                    'main' => ['host' => 'localhost'],
+                    'default' => ['host' => 'localhost'],
                     'checkout' => ['host' => 'localhost'],
                 ]
             ]
@@ -148,7 +148,7 @@ class SplitDbStateTest extends TestCase
         $mageConfSales = [
             'db' => [
                 'connection' => [
-                    'sale' => ['host' => 'localhost'],
+                    'sales' => ['host' => 'localhost'],
                 ]
             ]
         ];
