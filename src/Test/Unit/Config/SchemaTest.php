@@ -117,7 +117,7 @@ class SchemaTest extends TestCase
                     '',
                 ],
                 PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
-                PostDeployInterface::VAR_VERBOSE_COMMANDS => ''
+                PostDeployInterface::VAR_VERBOSE_COMMANDS => '',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
         );
@@ -128,7 +128,7 @@ class SchemaTest extends TestCase
                     '',
                 ],
                 PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
-                PostDeployInterface::VAR_VERBOSE_COMMANDS => ''
+                PostDeployInterface::VAR_VERBOSE_COMMANDS => '',
             ],
             $this->schema->getDefaults(StageConfigInterface::STAGE_POST_DEPLOY)
         );
