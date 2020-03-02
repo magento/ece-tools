@@ -31,6 +31,7 @@ abstract class AbstractCest
      */
     public function _after(\CliTester $I): void
     {
+        $I->runDockerComposeCommand('ps');
         $I->stopEnvironment();
         $I->removeWorkDir();
     }

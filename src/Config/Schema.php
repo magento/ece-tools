@@ -89,8 +89,8 @@ class Schema
      */
     public function getSchema(): array
     {
-        return $this->parser->parseFile(
-            $this->systemList->getConfig() . '/schema.yaml',
+        return $this->parser->parse(
+            file_get_contents($this->systemList->getConfig() . '/schema.yaml'),
             Yaml::PARSE_CONSTANT
         );
     }
