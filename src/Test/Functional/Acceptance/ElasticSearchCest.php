@@ -15,6 +15,11 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 class ElasticSearchCest extends AbstractCest
 {
     /**
+     * @var bool
+     */
+    protected $removeEs = false;
+
+    /**
      * @param \CliTester $I
      */
     public function _before(\CliTester $I): void
@@ -30,11 +35,9 @@ class ElasticSearchCest extends AbstractCest
      */
     public function testElastic(\CliTester $I, \Codeception\Example $data): void
     {
-        $this->prepareWorkplace($I, $data['magento']);
+        $this->removeEs = (bool) $data['removeES'] ?: false;
 
-        if ($data['removeES']) {
-            $this->removeESIfExists($I);
-        }
+        $this->prepareWorkplace($I, $data['magento']);
 
         $I->runEceDockerCommand('build:compose --mode=production');
 
@@ -80,19 +83,11 @@ class ElasticSearchCest extends AbstractCest
 
     /**
      * @param \CliTester $I
+     * @param bool $remove
      */
-    private function removeESIfExists(\CliTester $I): void
+    protected function removeESIfExists(\CliTester $I, bool $remove = true): void
     {
-        $services = $I->readServicesYaml();
-
-        if (isset($services['elasticsearch'])) {
-            unset($services['elasticsearch']);
-            $I->writeServicesYaml($services);
-
-            $app = $I->readAppMagentoYaml();
-            unset($app['relationships']['elasticsearch']);
-            $I->writeAppMagentoYaml($app);
-        }
+        parent::removeESIfExists($I, $this->removeEs);
     }
 
     /**

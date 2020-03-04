@@ -27,7 +27,7 @@ class ElasticSearch22Cest extends ElasticSearchCest
                 'magento' => '2.2.8',
                 'removeES' => false,
                 'expectedResult' => [
-                    'engine' => 'elasticsearch',
+                    'engine' => 'elasticsearch6',
                     'elasticsearch_server_hostname' => 'elasticsearch',
                     'elasticsearch_server_port' => '9200'
                 ],

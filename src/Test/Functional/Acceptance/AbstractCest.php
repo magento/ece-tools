@@ -31,7 +31,6 @@ abstract class AbstractCest
      */
     public function _after(\CliTester $I): void
     {
-        $I->runDockerComposeCommand('ps');
         $I->stopEnvironment();
         $I->removeWorkDir();
     }
@@ -74,5 +73,26 @@ abstract class AbstractCest
             $I->getDependencyVersion('magento/magento-cloud-patches')
         );
         $I->composerUpdate();
+        $this->removeESIfExists($I);
+    }
+
+    /**
+     * @param \CliTester $I
+     * @param bool $remove
+     */
+    protected function removeESIfExists(\CliTester $I, bool $remove = true): void
+    {
+        if ($remove) {
+            $services = $I->readServicesYaml();
+
+            if (isset($services['elasticsearch'])) {
+                unset($services['elasticsearch']);
+                $I->writeServicesYaml($services);
+
+                $app = $I->readAppMagentoYaml();
+                unset($app['relationships']['elasticsearch']);
+                $I->writeAppMagentoYaml($app);
+            }
+        }
     }
 }
