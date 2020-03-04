@@ -32,6 +32,7 @@ class ElasticSearchCest extends AbstractCest
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider elasticDataProvider
+     * @skip Skip Need to fix ElasticSearch containers
      */
     public function testElastic(\CliTester $I, \Codeception\Example $data): void
     {
