@@ -35,7 +35,7 @@ class ElasticSearchCest extends AbstractCest
      */
     public function testElastic(\CliTester $I, \Codeception\Example $data): void
     {
-        $this->removeEs = (bool) $data['removeES'] ?: false;
+        $this->removeEs = $data['removeES'];
 
         $this->prepareWorkplace($I, $data['magento']);
 
@@ -61,6 +61,7 @@ class ElasticSearchCest extends AbstractCest
 
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
         $I->stopEnvironment(true);
+        $this->removeEs = true;
         $this->removeESIfExists($I);
 
         $I->runEceDockerCommand('build:compose --mode=production');
