@@ -14,6 +14,11 @@ namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 abstract class AbstractCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = true;
+
+    /**
      * @var string
      */
     protected $magentoCloudTemplate = 'master';
@@ -78,11 +83,10 @@ abstract class AbstractCest
 
     /**
      * @param \CliTester $I
-     * @param bool $remove
      */
-    protected function removeESIfExists(\CliTester $I, bool $remove = true): void
+    protected function removeESIfExists(\CliTester $I): void
     {
-        if ($remove) {
+        if ($this->removeEs) {
             $services = $I->readServicesYaml();
 
             if (isset($services['elasticsearch'])) {

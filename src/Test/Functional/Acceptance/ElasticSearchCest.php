@@ -15,7 +15,7 @@ use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 class ElasticSearchCest extends AbstractCest
 {
     /**
-     * @var bool
+     * @var boolean
      */
     protected $removeEs = false;
 
@@ -79,15 +79,6 @@ class ElasticSearchCest extends AbstractCest
             ['engine' => 'mysql'],
             $config['system']['default']['catalog']['search']
         );
-    }
-
-    /**
-     * @param \CliTester $I
-     * @param bool $remove
-     */
-    protected function removeESIfExists(\CliTester $I, bool $remove = true): void
-    {
-        parent::removeESIfExists($I, $this->removeEs);
     }
 
     /**
