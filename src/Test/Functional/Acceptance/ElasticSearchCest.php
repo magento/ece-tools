@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
+use Magento\CloudDocker\Test\Functional\Codeception\Docker;
 
 /**
  * This test runs on the latest version of PHP
@@ -15,9 +15,14 @@ use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
 class ElasticSearchCest extends AbstractCest
 {
     /**
+     * @var boolean
+     */
+    protected $removeEs = false;
+
+    /**
      * @param \CliTester $I
      */
-    public function _before(\CliTester $I)
+    public function _before(\CliTester $I): void
     {
         // Do nothing
     }
@@ -27,19 +32,23 @@ class ElasticSearchCest extends AbstractCest
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider elasticDataProvider
+     * @skip Skip Need to fix ElasticSearch containers
      */
-    public function testElastic(\CliTester $I, \Codeception\Example $data)
+    public function testElastic(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->generateDockerCompose($data['services']);
-        $I->cleanUpEnvironment();
-        $I->cloneTemplate($data['magento']);
-        $I->addEceComposerRepo();
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $this->removeEs = $data['removeES'];
 
-        $I->runBinMagentoCommand('config:set general/region/state_required US --lock-env', Docker::DEPLOY_CONTAINER);
+        $this->prepareWorkplace($I, $data['magento']);
+
+        $I->runEceDockerCommand('build:compose --mode=production');
+
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
+        $I->runDockerComposeCommand(
+            'run deploy magento-command config:set general/region/state_required US --lock-env'
+        );
         $this->checkConfigurationIsNotRemoved($I);
 
         $I->amOnPage('/');
@@ -52,19 +61,16 @@ class ElasticSearchCest extends AbstractCest
         );
 
         $I->assertTrue($I->cleanDirectories(['/vendor/*', '/setup/*']));
+        $I->stopEnvironment(true);
+        $this->removeEs = true;
+        $this->removeESIfExists($I);
 
-        $relationships = [
-            'MAGENTO_CLOUD_RELATIONSHIPS' => [
-                'database' => [
-                    $I->getDbCredential(),
-                ],
-            ],
-        ];
+        $I->runEceDockerCommand('build:compose --mode=production');
 
-        $I->composerInstall();
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $relationships));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $relationships));
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
         $this->checkConfigurationIsNotRemoved($I);
 
         $I->amOnPage('/');
@@ -92,7 +98,7 @@ class ElasticSearchCest extends AbstractCest
      * @param \CliTester $I
      * @return array
      */
-    private function checkConfigurationIsNotRemoved(\CliTester $I)
+    private function checkConfigurationIsNotRemoved(\CliTester $I): void
     {
         $config = $this->getConfig($I);
 
@@ -109,13 +115,13 @@ class ElasticSearchCest extends AbstractCest
     {
         return [
             [
-                'magento' => '2.3.3',
-                'services' => [],
+                'magento' => '2.3.4',
+                'removeES' => true,
                 'expectedResult' => ['engine' => 'mysql'],
             ],
             [
-                'magento' => '2.3.3',
-                'services' => ['es' => '6.5'],
+                'magento' => '2.3.4',
+                'removeES' => false,
                 'expectedResult' => [
                     'engine' => 'elasticsearch6',
                     'elasticsearch6_server_hostname' => 'elasticsearch',

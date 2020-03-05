@@ -93,6 +93,12 @@
   },
   "prefer-stable": true,
   "extra": {
+    "map": [
+      [
+        "dist/.magento.env.yaml",
+        ".magento.env.yaml.dist"
+      ]
+    ],
     "include_files": [
       "vendor/codeception/phpunit-wrapper/src/phpunit7-interfaces.php"
     ]
