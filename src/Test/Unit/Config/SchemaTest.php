@@ -14,6 +14,7 @@ use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Config\StageConfigInterface;
 use Magento\MagentoCloud\Config\SystemConfigInterface;
 use Magento\MagentoCloud\Filesystem\SystemList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Parser;
@@ -39,19 +40,26 @@ class SchemaTest extends TestCase
     private $parserMock;
 
     /**
+     * @var File|MockObject
+     */
+    private $fileMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
     {
         $this->systemListMock = $this->createMock(SystemList::class);
         $this->parserMock = $this->createTestProxy(Parser::class);
+        $this->fileMock = $this->createTestProxy(File::class);
 
         $this->systemListMock->method('getConfig')
             ->willReturn(ECE_BP . '/config');
 
         $this->schema = new Schema(
             $this->systemListMock,
-            $this->parserMock
+            $this->parserMock,
+            $this->fileMock
         );
     }
 

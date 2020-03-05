@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\MagentoCloud\Config;
 
 use Magento\MagentoCloud\Filesystem\SystemList;
+use Magento\MagentoCloud\Filesystem\Driver\File;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Yaml;
 
@@ -40,6 +41,11 @@ class Schema
     private $parser;
 
     /**
+     * @var File
+     */
+    private $file;
+
+    /**
      * @var array
      */
     private $defaults = [];
@@ -47,11 +53,16 @@ class Schema
     /**
      * @param SystemList $systemList
      * @param Parser $parser
+     * @param File $file
      */
-    public function __construct(SystemList $systemList, Parser $parser)
-    {
+    public function __construct(
+        SystemList $systemList,
+        Parser $parser,
+        File $file
+    ) {
         $this->systemList = $systemList;
         $this->parser = $parser;
+        $this->file = $file;
     }
 
     /**
@@ -59,6 +70,7 @@ class Schema
      *
      * @param string $stage
      * @return array
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     public function getDefaults(string $stage): array
     {
@@ -85,12 +97,12 @@ class Schema
      * 'default_values' - array of default values
      *
      * @return array
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
      */
     public function getSchema(): array
     {
         return $this->parser->parse(
-            file_get_contents($this->systemList->getConfig() . '/schema.yaml'),
+            $this->file->fileGetContents($this->systemList->getConfig() . '/schema.yaml'),
             Yaml::PARSE_CONSTANT
         );
     }
