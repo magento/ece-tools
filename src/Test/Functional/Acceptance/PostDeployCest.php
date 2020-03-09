@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
-
 /**
  * This test runs on the latest version of PHP
  */
@@ -16,28 +14,25 @@ class PostDeployCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    public function _before(\CliTester $I)
-    {
-        parent::_before($I);
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-    }
-
-    /**
-     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider postDeployDataProvider
      */
-    public function testPostDeploy(\CliTester $I, \Codeception\Example $data)
+    public function testPostDeploy(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->uploadToContainer('files/scdondemand/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
+            )
+        );
+
+        $I->copyFileToWorkDir('files/scdondemand/.magento.env.yaml', '.magento.env.yaml');
+
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
 
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains('INFO: Starting scenario(s): scenario/post-deploy.xml', $log);
@@ -55,8 +50,14 @@ class PostDeployCest extends AbstractCest
     protected function postDeployDataProvider(): array
     {
         return [
-            ['variables' => ['ADMIN_EMAIL' => 'admin@example.com']],
-            ['variables' => []],
+            [
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => ['ADMIN_EMAIL' => 'admin@example.com']
+                ],
+            ],
+            [
+                'variables' => ['MAGENTO_CLOUD_VARIABLES' => []]
+            ],
         ];
     }
 
@@ -64,18 +65,17 @@ class PostDeployCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testPostDeployIsNotRun(\CliTester $I)
+    public function testPostDeployIsNotRun(\CliTester $I): void
     {
-        $I->uploadToContainer(
-            'files/wrong_db_configuration/.magento.env.yaml',
-            '/.magento.env.yaml',
-            Docker::BUILD_CONTAINER
-        );
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->copyFileToWorkDir('files/wrong_db_configuration/.magento.env.yaml', '.magento.env.yaml');
+
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertFalse($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER));
+        $I->assertFalse($I->runDockerComposeCommand('run deploy cloud-deploy'));
         $I->seeInOutput('Variable DATABASE_CONFIGURATION is not configured properly');
-        $I->assertFalse($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+
         $log = $I->grabFileContent('/var/log/cloud.log');
         $I->assertContains('Fix configuration with given suggestions', $log);
         $I->assertContains('Post-deploy is skipped because deploy was failed.', $log);

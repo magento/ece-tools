@@ -7,31 +7,26 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
-
 /**
  * This test runs on the latest version of PHP
  */
 class WizardScdCest extends AbstractCest
 {
-    /**
-     * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    public function _before(\CliTester $I)
+    public function _before(\CliTester $I): void
     {
         parent::_before($I);
-        $I->assertTrue($I->cloneTemplate());
-        $I->assertTrue($I->addEceComposerRepo());
+
+        $I->runEceDockerCommand('build:compose --mode=production');
     }
 
     /**
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testDefault(\CliTester $I)
+    public function testDefault(\CliTester $I): void
     {
-        $I->assertFalse($I->runEceToolsCommand('wizard:scd-on-build', Docker::BUILD_CONTAINER));
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->assertFalse($I->runDockerComposeCommand('run build ece-command wizard:scd-on-build'));
         $I->seeInOutput(' - No stores/website/locales found in');
         $I->seeInOutput('SCD on build is disabled');
     }
@@ -40,14 +35,11 @@ class WizardScdCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testScdInBuildIsEnabled(\CliTester $I)
+    public function testScdInBuildIsEnabled(\CliTester $I): void
     {
-        $I->assertTrue($I->uploadToContainer(
-            'files/scdinbuild/config.php',
-            '/app/etc/config.php',
-            Docker::BUILD_CONTAINER
-        ));
-        $I->assertTrue($I->runEceToolsCommand('wizard:scd-on-build', Docker::BUILD_CONTAINER));
+        $I->copyFileToWorkDir('files/scdinbuild/config.php', 'app/etc/config.php');
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->assertTrue($I->runDockerComposeCommand('run build ece-command wizard:scd-on-build'));
         $I->seeInOutput('SCD on build is enabled');
     }
 
@@ -55,10 +47,11 @@ class WizardScdCest extends AbstractCest
      * @param \CliTester $I
      * @throws \Robo\Exception\TaskException
      */
-    public function testScdOnDemandIsEnabled(\CliTester $I)
+    public function testScdOnDemandIsEnabled(\CliTester $I): void
     {
-        $I->uploadToContainer('files/scdondemand/.magento.env.yaml', '/.magento.env.yaml', Docker::BUILD_CONTAINER);
-        $I->assertTrue($I->runEceToolsCommand('wizard:scd-on-demand', Docker::BUILD_CONTAINER));
+        $I->copyFileToWorkDir('files/scdondemand/.magento.env.yaml', '.magento.env.yaml');
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->assertTrue($I->runDockerComposeCommand('run build ece-command wizard:scd-on-demand'));
         $I->seeInOutput('SCD on demand is enabled');
     }
 }
