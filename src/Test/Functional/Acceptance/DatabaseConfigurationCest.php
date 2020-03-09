@@ -87,6 +87,12 @@ class DatabaseConfigurationCest extends AbstractCest
      */
     public function installAndRedeployWithTablePrefix(\CliTester $I)
     {
+        $checkResult = function (\CliTester $I) {
+            $file = $I->grabFileContent('/app/etc/env.php');
+            $I->assertEquals($file['db']['table_prefix'], 'ece_', 'Wrong table prefix in app/etc/env.php');
+            $I->assertTrue($I->amOnPage('/'));
+        };
+
         $I->runEceDockerCommand(
             sprintf(
                 'build:compose --mode=production --env-vars="%s"',
@@ -108,12 +114,10 @@ class DatabaseConfigurationCest extends AbstractCest
             'Installation with table prefixes failed'
         );
         $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+        $checkResult($I);
 
         $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Re-deployment failed');
         $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-
-        $file = $I->grabFileContent('/app/etc/env.php');
-        $I->assertEquals($file['db']['table_prefix'], 'ece_', 'Wrong table prefix in app/etc/env.php');
-        $I->assertTrue($I->amOnPage('/'));
+        $checkResult($I);
     }
 }
