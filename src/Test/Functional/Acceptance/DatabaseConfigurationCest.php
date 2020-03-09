@@ -89,7 +89,7 @@ class DatabaseConfigurationCest extends AbstractCest
     {
         $checkResult = function (\CliTester $I) {
             $file = $I->grabFileContent('/app/etc/env.php');
-            $I->assertEquals($file['db']['table_prefix'], 'ece_', 'Wrong table prefix in app/etc/env.php');
+            $I->assertContains("'table_prefix' => 'ece_'", $file, 'Wrong table prefix in app/etc/env.php');
             $I->assertTrue($I->amOnPage('/'));
         };
 
