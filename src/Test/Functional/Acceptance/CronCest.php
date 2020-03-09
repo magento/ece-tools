@@ -7,13 +7,19 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
-
 /**
  * This test runs on the latest version of PHP
  */
 class CronCest extends AbstractCest
 {
+    /**
+     * @inheritdoc
+     */
+    public function _before(\CliTester $I): void
+    {
+        //Do nothing...
+    }
+
     /**
      * @param \CliTester $I
      * @param \Codeception\Example $data
@@ -21,19 +27,21 @@ class CronCest extends AbstractCest
      * @throws \Robo\Exception\TaskException
      * @dataProvider cronDataProvider
      */
-    public function testCron(\CliTester $I, \Codeception\Example $data)
+    public function testCron(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->assertTrue($I->cloneTemplate($data['version']));
-        $I->assertTrue($I->addEceComposerRepo());
-        $I->createDirectory('/app/code/Magento/CronTest', Docker::BUILD_CONTAINER);
-        $I->uploadToContainer('modules/Magento/CronTest/.', '/app/code/Magento/CronTest', Docker::BUILD_CONTAINER);
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER, $data['variables']));
+        $this->prepareWorkplace($I, $data['version']);
+        $I->runEceDockerCommand(sprintf(
+            'build:compose --mode=production --expose-db-port=%s --env-vars="%s"',
+            $I->getExposedPort(),
+            $this->convertEnvFromArrayToJson($data['variables'])
+        ));
+        $I->copyDirToWorkDir('modules/Magento/CronTest', 'app/code/Magento/CronTest');
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand('deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
-        $I->assertTrue($I->runEceToolsCommand('post-deploy', Docker::DEPLOY_CONTAINER, $data['variables']));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->deleteFromDatabase('cron_schedule');
-        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy magento-command cron:run');
+        $I->runDockerComposeCommand('run deploy magento-command cron:run');
 
         $this->checkCronJobForLocale($I, 'cron_test_job_timeformat', 5);
         $this->checkCronJobForLocale($I, 'cron_test_job_timeformat_six', 6);
@@ -51,8 +59,8 @@ class CronCest extends AbstractCest
 
         $I->updateInDatabase('cron_schedule', ['scheduled_at' => date('Y-m-d H:i:s')], ['status' => 'pending']);
 
-        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
-        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy magento-command cron:run');
+        $I->runDockerComposeCommand('run deploy magento-command cron:run');
 
         $successfulJobs2 = $I->grabNumRecords('cron_schedule', ['job_code' => 'cron_test_job', 'status' => 'success']);
 
@@ -78,7 +86,7 @@ class CronCest extends AbstractCest
             ['job_code' => 'cron_test_job', 'status' => 'pending']
         );
 
-        $I->assertTrue($I->runBinMagentoCommand('cron:run', Docker::DEPLOY_CONTAINER));
+        $I->runDockerComposeCommand('run deploy magento-command cron:run');
 
         $successfulJobs3 = $I->grabNumRecords('cron_schedule', ['job_code' => 'cron_test_job', 'status' => 'success']);
         $I->assertGreaterThan(
@@ -94,7 +102,7 @@ class CronCest extends AbstractCest
      * @param int $timeInterval
      * @throws \Exception
      */
-    private function checkCronJobForLocale(\CliTester $I, string $jobCode, int $timeInterval)
+    private function checkCronJobForLocale(\CliTester $I, string $jobCode, int $timeInterval): void
     {
         $schedule = $I->grabColumnFromDatabase(
             'cron_schedule',
@@ -122,6 +130,15 @@ class CronCest extends AbstractCest
     protected function cronDataProvider(): array
     {
         return [
+            [
+                'version' => '2.3.4',
+                'variables' => [
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'ADMIN_EMAIL' => 'admin@example.com',
+                        'ADMIN_LOCALE' => 'fr_FR'
+                    ],
+                ],
+            ],
             [
                 'version' => '2.3.3',
                 'variables' => [

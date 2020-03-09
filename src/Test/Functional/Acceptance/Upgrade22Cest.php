@@ -15,7 +15,7 @@ class Upgrade22Cest extends UpgradeCest
     /**
      * @return array
      */
-    protected function testProvider()
+    protected function testProvider(): array
     {
         return [
             ['from' => '2.2.0', 'to' => '2.2.*']

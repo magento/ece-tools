@@ -195,14 +195,14 @@ MIN_LOGGING_LEVEL:
   type: string
   allowed:
     - ''
-    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_DEBUG
-    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_INFO
-    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_NOTICE
-    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_WARNING
-    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_ERROR
-    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_CRITICAL
-    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_ALERT
-    - !php/const Magento\MagentoCloud\Config\Log::LEVEL_EMERGENCY
+    - 'debug'
+    - 'info'
+    - 'notice'
+    - 'warning'
+    - 'error'
+    - 'critical'
+    - 'alert'
+    - 'emergency'
   stages:
     - global
   default:

@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Test\Functional\Acceptance;
 
-use Magento\MagentoCloud\Test\Functional\Codeception\Docker;
-
 /**
  * This scenario checks that session can be configured through environment variable SESSION_CONFIGURATION
  * Zephyr ID MAGECLOUD-46
@@ -17,32 +15,22 @@ class SessionConfigurationCest extends AbstractCest
 {
     /**
      * @param \CliTester $I
-     * @throws \Robo\Exception\TaskException
-     */
-    public function _before(\CliTester $I)
-    {
-      // Do nothing
-    }
-
-    /**
-     * @param \CliTester $I
      * @param \Codeception\Example $data
      * @throws \Robo\Exception\TaskException
      * @dataProvider sessionConfigurationDataProvider
      */
-    public function sessionConfiguration(\CliTester $I, \Codeception\Example $data)
+    public function sessionConfiguration(\CliTester $I, \Codeception\Example $data): void
     {
-        $I->generateDockerCompose(['redis' => '5.0']);
-        $I->cleanUpEnvironment();
-        $I->cloneTemplate();
-        $I->addEceComposerRepo();
-        $I->assertTrue($I->runEceToolsCommand('build', Docker::BUILD_CONTAINER));
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson($data['variables'])
+            )
+        );
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
-        $I->assertTrue($I->runEceToolsCommand(
-            'deploy',
-            Docker::DEPLOY_CONTAINER,
-            $data['cloudVariables']
-        ));
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+
         $file = $I->grabFileContent('/app/etc/env.php');
         $I->assertContains($data['mergedConfig'], $file);
         $I->assertContains($data['defaultConfig'], $file);
@@ -55,7 +43,7 @@ class SessionConfigurationCest extends AbstractCest
     {
         return [
             'singleConfig' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'SESSION_CONFIGURATION'=>['max_concurrency' => '10', '_merge' => true],
                     ],
@@ -64,7 +52,7 @@ class SessionConfigurationCest extends AbstractCest
                 'defaultConfig' => 'redis',
             ],
             'withoutMerge' => [
-                'cloudVariables' => [
+                'variables' => [
                     'MAGENTO_CLOUD_VARIABLES' => [
                         'SESSION_CONFIGURATION'=>[
                             'save' => 'redis',
