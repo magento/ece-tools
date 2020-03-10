@@ -57,7 +57,7 @@ class ConnectionFactoryTest extends TestCase
 
     public function testCreateSlaveAsMain()
     {
-        $this->dbConfigMock->expects($this->exactly(2))
+        $this->dbConfigMock->expects($this->once())
             ->method('get')
             ->willReturn(['connection' => ['default' => ['test' => 'test']]]);
 
