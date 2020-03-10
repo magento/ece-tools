@@ -8,18 +8,6 @@
     "repo.magento.com": {
       "type": "composer",
       "url": "https://repo.magento.com/"
-    },
-    "mcd": {
-      "type": "git",
-      "url": "git@github.com:magento/magento-cloud-docker.git"
-    },
-    "mcc": {
-      "type": "git",
-      "url": "git@github.com:magento/magento-cloud-components.git"
-    },
-    "mcp": {
-      "type": "git",
-      "url": "git@github.com:magento/magento-cloud-patches.git"
     }
   },
   "require": {
@@ -33,9 +21,9 @@
     "graylog2/gelf-php": "^1.4.2",
     "guzzlehttp/guzzle": "^6.2",
     "illuminate/config": "^5.5",
-    "magento/magento-cloud-components": "^1.0",
-    "magento/magento-cloud-docker": "dev-develop as 1.1.99",
-    "magento/magento-cloud-patches": "1.*",
+    "magento/magento-cloud-components": "^1.0.1",
+    "magento/magento-cloud-docker": "^1.0.0",
+    "magento/magento-cloud-patches": "^1.0.0",
     "monolog/monolog": "^1.16",
     "nesbot/carbon": "^1.0||^2.0",
     "psr/container": "^1.0",
