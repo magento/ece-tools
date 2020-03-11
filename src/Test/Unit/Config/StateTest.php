@@ -136,6 +136,10 @@ class StateTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
+        $this->connectionMock->expects($this->exactly(2))
+            ->method('getTableName')
+            ->withConsecutive(['core_config_data'], ['setup_module'])
+            ->willReturnOnConsecutiveCalls('core_config_data', 'setup_module');
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn([]);
@@ -165,6 +169,10 @@ class StateTest extends TestCase
         $this->connectionMock->expects($this->once())
             ->method('listTables')
             ->willReturn(['core_config_data', 'setup_module']);
+        $this->connectionMock->expects($this->exactly(2))
+            ->method('getTableName')
+            ->withConsecutive(['core_config_data'], ['setup_module'])
+            ->willReturnOnConsecutiveCalls('core_config_data', 'setup_module');
         $this->readerMock->expects($this->once())
             ->method('read')
             ->willReturn($config);

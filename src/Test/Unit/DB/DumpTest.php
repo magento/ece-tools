@@ -44,7 +44,7 @@ class DumpTest extends TestCase
             ->method('create')
             ->willReturn($this->connectionDataMock);
 
-        $this->model = new Dump($this->connectionFactoryMock);
+        $this->model = new Dump();
     }
 
     /**
@@ -74,7 +74,7 @@ class DumpTest extends TestCase
         $this->connectionDataMock->expects($this->once())
             ->method('getPassword')
             ->willReturn($password);
-        $this->assertEquals($expectedCommand, $this->model->getCommand());
+        $this->assertEquals($expectedCommand, $this->model->getCommand($this->connectionDataMock));
     }
 
     /**

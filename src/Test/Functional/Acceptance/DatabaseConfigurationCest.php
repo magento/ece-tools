@@ -78,4 +78,48 @@ class DatabaseConfigurationCest extends AbstractCest
             ],
         ];
     }
+
+    /**
+     * Check that magento can be installed and updated with configured table prefixes
+     *
+     * @param \CliTester $I
+     * @throws \Robo\Exception\TaskException
+     */
+    public function installAndRedeployWithTablePrefix(\CliTester $I)
+    {
+        $checkResult = function (\CliTester $I) {
+            $file = $I->grabFileContent('/app/etc/env.php');
+            $I->assertContains("'table_prefix' => 'ece_'", $file, 'Wrong table prefix in app/etc/env.php');
+            $I->amOnPage('/');
+            $I->see('Home page');
+            $I->see('CMS homepage content goes here.');
+        };
+
+        $I->runEceDockerCommand(
+            sprintf(
+                'build:compose --mode=production --env-vars="%s"',
+                $this->convertEnvFromArrayToJson([
+                    'MAGENTO_CLOUD_VARIABLES' => [
+                        'DATABASE_CONFIGURATION'=>[
+                            'table_prefix' => 'ece_',
+                            '_merge' => true,
+                        ],
+                    ],
+                ])
+            )
+        );
+
+        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'));
+        $I->assertTrue($I->startEnvironment());
+        $I->assertTrue(
+            $I->runDockerComposeCommand('run deploy cloud-deploy'),
+            'Installation with table prefixes failed'
+        );
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+        $checkResult($I);
+
+        $I->assertTrue($I->runDockerComposeCommand('run deploy cloud-deploy'), 'Re-deployment failed');
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
+        $checkResult($I);
+    }
 }
