@@ -76,7 +76,9 @@ class State
             return false;
         }
 
-        if (!in_array('core_config_data', $output) || !in_array('setup_module', $output)) {
+        if (!in_array($this->connection->getTableName('core_config_data'), $output) ||
+            !in_array($this->connection->getTableName('setup_module'), $output)
+        ) {
             throw new GenericException('Missing either core_config_data or setup_module table');
         }
 
