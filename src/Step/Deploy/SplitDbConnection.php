@@ -10,15 +10,16 @@ namespace Magento\MagentoCloud\Step\Deploy;
 use Magento\MagentoCloud\Config\ConfigException;
 use Magento\MagentoCloud\Filesystem\FileSystemException;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
+use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\MagentoShell;
 use Magento\MagentoCloud\Step\StepInterface;
+use Magento\MagentoCloud\Util\UpgradeProcess;
 use Psr\Log\LoggerInterface;
 use Magento\MagentoCloud\Filesystem\Flag\Manager as FlagManager;
 use Magento\MagentoCloud\Config\Stage\DeployInterface;
 use Magento\MagentoCloud\Config\Database\DbConfig;
-use Magento\MagentoCloud\Config\Database\ResourceConfig;
 use Magento\MagentoCloud\Config\Magento\Env\ReaderInterface as ConfigReader;
-use Magento\MagentoCloud\Config\Magento\Env\WriterInterface as ConfigWriter;
+use Magento\MagentoCloud\Step\Deploy\SplitDbConnection\SlaveConnection;
 
 /**
  * Enables split database
@@ -44,11 +45,6 @@ class SplitDbConnection implements StepInterface
     private $dbConfig;
 
     /**
-     * @var ResourceConfig
-     */
-    private $resourceConfig;
-
-    /**
      * @var DeployInterface
      */
     private $stageConfig;
@@ -64,43 +60,48 @@ class SplitDbConnection implements StepInterface
     private $configReader;
 
     /**
-     * @var ConfigWriter
-     */
-    private $configWriter;
-
-    /**
      * @var MagentoShell
      */
     private $magentoShell;
 
     /**
+     * @var UpgradeProcess
+     */
+    private $upgradeProcess;
+
+    /**
+     * @var SlaveConnection
+     */
+    private $slaveConnection;
+
+    /**
      * @param DeployInterface $stageConfig
      * @param DbConfig $dbConfig
-     * @param ResourceConfig $resourceConfig
      * @param LoggerInterface $logger
      * @param FlagManager $flagManager
      * @param ConfigReader $configReader
-     * @param ConfigWriter $configWriter
      * @param MagentoShell $magentoShell
+     * @param UpgradeProcess $upgradeProcess
+     * @param SlaveConnection $slaveConnection
      */
     public function __construct(
         DeployInterface $stageConfig,
         DbConfig $dbConfig,
-        ResourceConfig $resourceConfig,
         LoggerInterface $logger,
         FlagManager $flagManager,
         ConfigReader $configReader,
-        ConfigWriter $configWriter,
-        MagentoShell $magentoShell
+        MagentoShell $magentoShell,
+        UpgradeProcess $upgradeProcess,
+        SlaveConnection $slaveConnection
     ) {
         $this->stageConfig = $stageConfig;
         $this->dbConfig = $dbConfig;
-        $this->resourceConfig = $resourceConfig;
         $this->logger = $logger;
         $this->flagManager = $flagManager;
         $this->configReader = $configReader;
-        $this->configWriter = $configWriter;
         $this->magentoShell = $magentoShell;
+        $this->upgradeProcess = $upgradeProcess;
+        $this->slaveConnection = $slaveConnection;
     }
 
     /**
@@ -110,6 +111,7 @@ class SplitDbConnection implements StepInterface
      * @throws ConfigException
      * @throws FileSystemException
      * @throws ConfigurationMismatchException
+     * @throws UndefinedPackageException
      */
     public function execute()
     {
@@ -158,7 +160,7 @@ class SplitDbConnection implements StepInterface
         if (!empty($splitTypes)) {
             $this->enableSplitConnections(array_diff($splitTypes, $enabledSplitTypes), $dbConfig);
         }
-        $this->updateSlaveConnections($dbConfig);
+        $this->slaveConnection->update();
     }
 
     /**
@@ -192,6 +194,8 @@ class SplitDbConnection implements StepInterface
      *
      * @param array $types
      * @param array $dbConfig
+     * @throws ConfigException
+     * @throws UndefinedPackageException
      */
     private function enableSplitConnections(array $types, array $dbConfig)
     {
@@ -199,13 +203,14 @@ class SplitDbConnection implements StepInterface
         foreach ($types as $type) {
             $connectionConfig = $dbConfig[DbConfig::KEY_CONNECTION][$splitTypeMap[$type]];
             $cmd = $this->buildSplitDbCommand($type, $connectionConfig);
-            $this->logger->debug($this->magentoShell->execute($cmd)->getOutput());
+            $this->magentoShell->execute($cmd);
             $this->logger->info(sprintf(
                 '%s tables were split to DB %s in %s',
                 ucfirst($type),
                 $connectionConfig['dbname'],
                 $connectionConfig['host']
             ));
+            $this->upgradeProcess->execute();
         }
     }
 
@@ -226,35 +231,5 @@ class SplitDbConnection implements StepInterface
             $connectionConfig['username'],
             $connectionConfig['password']
         );
-    }
-
-    /**
-     * Updates slave connections
-     *
-     * @param array $dbConfig
-     * @throws FileSystemException
-     * @throws ConfigException
-     */
-    private function updateSlaveConnections(array $dbConfig)
-    {
-        if (!$this->stageConfig->get(DeployInterface::VAR_MYSQL_USE_SLAVE_CONNECTION)) {
-            return;
-        }
-        $mageConfig = $this->configReader->read();
-        $mageConnectionsConfig = $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_CONNECTION];
-        foreach (array_keys($this->getSplitConnectionsConfig($mageConnectionsConfig)) as $mageConnectionName) {
-            if (!isset($dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName])) {
-                $this->logger->warning(sprintf(
-                    'Slave connection for %s connection not set. '
-                    . 'Relationships do not have the configuration for this slave connection',
-                    $mageConnectionName
-                ));
-                continue;
-            }
-            $connectionConfig = $dbConfig[DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName];
-            $mageConfig[DbConfig::KEY_DB][DbConfig::KEY_SLAVE_CONNECTION][$mageConnectionName] = $connectionConfig;
-            $this->logger->info(sprintf('Slave connection for %s connection was set', $mageConnectionName));
-        }
-        $this->configWriter->create($mageConfig);
     }
 }
