@@ -136,6 +136,7 @@ class SchemaTest extends TestCase
                 PostDeployInterface::VAR_WARM_UP_PAGES => [
                     '',
                 ],
+                PostDeployInterface::VAR_WARM_UP_CONCURRENCY => 0,
                 PostDeployInterface::VAR_TTFB_TESTED_PAGES => [],
                 PostDeployInterface::VAR_VERBOSE_COMMANDS => '',
             ],
