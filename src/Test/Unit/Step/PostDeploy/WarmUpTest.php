@@ -117,6 +117,7 @@ class WarmUpTest extends TestCase
                 $this->callBack(function (array $subject) use ($mockResponse, $mockException) {
                     if (array_key_exists('fulfilled', $subject) && array_key_exists('rejected', $subject)
                         && is_callable($subject['fulfilled']) && is_callable($subject['rejected'])
+                        && array_key_exists('concurrency', $subject) === false
                     ) {
                         $subject['fulfilled']($mockResponse, 0);
                         $subject['rejected']($mockException, 1);
@@ -167,6 +168,37 @@ class WarmUpTest extends TestCase
 
         $this->expectException(StepException::class);
         $this->expectExceptionMessage('some error');
+
+        $this->step->execute();
+    }
+
+    /**
+     * @throws StepException
+     */
+    public function testExecuteWithConcurrency()
+    {
+        $urls = [
+            'http://base-url.com/index.php',
+            'http://base-url.com/index.php/customer/account/create'
+        ];
+        $concurrency = 2;
+
+        $this->urlsMock->method('getAll')
+            ->willReturn($urls);
+        $this->postDeployMock->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_CONCURRENCY)
+            ->willReturn($concurrency);
+
+        $this->poolFactoryMock->expects($this->once())
+            ->method('create')
+            ->with(
+                $this->equalTo($urls),
+                $this->callBack(function (array $subject) use ($concurrency) {
+                    return array_key_exists('concurrency', $subject) && $subject['concurrency'] === $concurrency;
+                })
+            )->willReturn($this->poolMock);
+        $this->promiseMock->expects($this->once())
+            ->method('wait');
 
         $this->step->execute();
     }
