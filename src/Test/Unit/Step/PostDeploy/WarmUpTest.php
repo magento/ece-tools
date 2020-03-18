@@ -10,6 +10,7 @@ namespace Magento\MagentoCloud\Test\Unit\Step\PostDeploy;
 use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Pool;
 use GuzzleHttp\Promise\PromiseInterface;
+use Magento\MagentoCloud\Config\Stage\PostDeployInterface;
 use Magento\MagentoCloud\Http\PoolFactory;
 use Magento\MagentoCloud\Step\PostDeploy\WarmUp;
 use Magento\MagentoCloud\Step\StepException;
@@ -45,6 +46,11 @@ class WarmUpTest extends TestCase
     private $urlsMock;
 
     /**
+     * @var PostDeployInterface|MockObject
+     */
+    private $postDeployMock;
+
+    /**
      * @var LoggerInterface|MockObject
      */
     private $loggerMock;
@@ -64,6 +70,7 @@ class WarmUpTest extends TestCase
         $this->promiseMock = $this->createMock(PromiseInterface::class);
         $this->loggerMock = $this->createMock(LoggerInterface::class);
         $this->urlsMock = $this->createMock(Urls::class);
+        $this->postDeployMock = $this->createMock(PostDeployInterface::class);
 
         $this->poolMock->method('promise')
             ->willReturn($this->promiseMock);
@@ -71,7 +78,8 @@ class WarmUpTest extends TestCase
         $this->step = new WarmUp(
             $this->poolFactoryMock,
             $this->loggerMock,
-            $this->urlsMock
+            $this->urlsMock,
+            $this->postDeployMock
         );
     }
 
@@ -84,9 +92,13 @@ class WarmUpTest extends TestCase
             'http://base-url.com/index.php',
             'http://base-url.com/index.php/customer/account/create'
         ];
+        $concurrency = 0;
 
         $this->urlsMock->method('getAll')
             ->willReturn($urls);
+        $this->postDeployMock->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_CONCURRENCY)
+            ->willReturn($concurrency);
 
         $mockResponse = $this->createMock(ResponseInterface::class);
         $mockException = $this->createMock(RequestException::class);
@@ -136,10 +148,15 @@ class WarmUpTest extends TestCase
             'http://base-url.com/index.php',
             'http://base-url.com/index.php/customer/account/create'
         ];
+        $concurrency = 0;
 
         $this->urlsMock->expects($this->any())
             ->method('getAll')
             ->willReturn($urls);
+        $this->postDeployMock->method('get')
+            ->with(PostDeployInterface::VAR_WARM_UP_CONCURRENCY)
+            ->willReturn($concurrency);
+
         $this->poolFactoryMock->expects($this->once())
             ->method('create')
             ->with($this->equalTo($urls), $this->isType('array'))
