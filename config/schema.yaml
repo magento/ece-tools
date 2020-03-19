@@ -591,6 +591,17 @@ WARM_UP_PAGES:
             - "index.php"
             - "index.php/customer/account/create"
             - "https://example.com/catalog/some-category"
+WARM_UP_CONCURRENCY:
+  description: Specify the number of requests for warm-up which will be sent concurrently.
+  type: integer
+  stages:
+    - post-deploy
+  default:
+    post-deploy: 0
+  examples:
+    - stage:
+        post-deploy:
+          WARM_UP_CONCURRENCY: 4
 TTFB_TESTED_PAGES:
   description: List pages you wish to perform time to first byte (TTFB) testing on
   type: array
