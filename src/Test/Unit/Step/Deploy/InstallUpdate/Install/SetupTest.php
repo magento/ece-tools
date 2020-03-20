@@ -91,7 +91,7 @@ class SetupTest extends TestCase
             ->willReturn('magento install command');
         $this->utilityManagerMock->expects($this->once())
             ->method('get')
-            ->with(UtilityManager::UTILITY_BASH)
+            ->with(UtilityManager::UTILITY_SHELL)
             ->willReturn('/bin/sh');
 
         $this->shellMock->expects($this->exactly(2))

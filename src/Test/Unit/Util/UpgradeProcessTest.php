@@ -99,7 +99,7 @@ class UpgradeProcessTest extends TestCase
             ->with('Running setup upgrade.');
         $this->utilityManagerMock->expects($this->once())
             ->method('get')
-            ->with(UtilityManager::UTILITY_BASH)
+            ->with(UtilityManager::UTILITY_SHELL)
             ->willReturn('/bin/sh');
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')

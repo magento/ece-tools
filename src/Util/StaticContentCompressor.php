@@ -153,7 +153,7 @@ class StaticContentCompressor
             '%s -k 30 %s %s -c %s',
             $this->utilityManager->get(UtilityManager::UTILITY_TIMEOUT),
             $timeout,
-            $this->utilityManager->get(UtilityManager::UTILITY_BASH),
+            $this->utilityManager->get(UtilityManager::UTILITY_SHELL),
             escapeshellarg($this->innerCompressionCommand($compressionLevel))
         );
     }

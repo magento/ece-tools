@@ -82,7 +82,7 @@ class UpgradeProcess
         $this->shell->execute('echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog);
         $this->shell->execute(sprintf(
             '%s -c "set -o pipefail; %s | tee -a %s"',
-            $this->utilityManager->get(UtilityManager::UTILITY_BASH),
+            $this->utilityManager->get(UtilityManager::UTILITY_SHELL),
             'php ./bin/magento setup:upgrade --keep-generated --ansi --no-interaction ' . $verbosityLevel,
             $installUpgradeLog
         ));

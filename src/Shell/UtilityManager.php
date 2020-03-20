@@ -13,7 +13,7 @@ namespace Magento\MagentoCloud\Shell;
 class UtilityManager
 {
     public const UTILITY_TIMEOUT = 'timeout';
-    public const UTILITY_BASH = 'sh';
+    public const UTILITY_SHELL = 'sh';
 
     /**
      * @var ShellInterface
@@ -62,7 +62,7 @@ class UtilityManager
         if (null === $this->utilities) {
             $list = [
                 self::UTILITY_TIMEOUT,
-                self::UTILITY_BASH,
+                self::UTILITY_SHELL,
             ];
 
             foreach ($list as $name) {

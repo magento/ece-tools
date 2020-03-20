@@ -80,7 +80,7 @@ class Setup implements StepInterface
             $this->shell->execute('echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog);
             $this->shell->execute(sprintf(
                 '%s -c "set -o pipefail; %s | tee -a %s"',
-                $this->utilityManager->get(UtilityManager::UTILITY_BASH),
+                $this->utilityManager->get(UtilityManager::UTILITY_SHELL),
                 escapeshellcmd($this->commandFactory->create()),
                 $installUpgradeLog
             ));

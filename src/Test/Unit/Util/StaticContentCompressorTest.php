@@ -105,7 +105,7 @@ class StaticContentCompressorTest extends TestCase
         $this->utilityManagerMock->method('get')
             ->willReturnMap([
                 [UtilityManager::UTILITY_TIMEOUT, $timeoutCommand],
-                [UtilityManager::UTILITY_BASH, $bash],
+                [UtilityManager::UTILITY_SHELL, $bash],
             ]);
         $this->loggerMock->expects($this->once())
             ->method('info');
