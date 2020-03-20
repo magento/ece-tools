@@ -96,7 +96,7 @@ class UpgradeProcessTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 ['echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog],
-                ['/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
+                ['/bin/sh -c "set -o pipefail; php ./bin/magento setup:upgrade '
                     . '--keep-generated --ansi --no-interaction -v | tee -a '
                     . $installUpgradeLog . '"']
             );

@@ -61,7 +61,7 @@ class Shell implements ShellInterface
      * If your command contains pipe please use the next construction for correct logging:
      *
      * ```php
-     * $this->shell->execute('/bin/bash -c "set -o pipefail; firstCommand | secondCommand"');
+     * $this->shell->execute('/bin/sh -c "set -o pipefail; firstCommand | secondCommand"');
      * ```
      *
      *  `commandline` should be always a string as symfony/process package v2.x doesn't support array-type `commandLine`

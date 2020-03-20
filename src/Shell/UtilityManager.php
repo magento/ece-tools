@@ -12,8 +12,8 @@ namespace Magento\MagentoCloud\Shell;
  */
 class UtilityManager
 {
-    const UTILITY_TIMEOUT = 'timeout';
-    const UTILITY_BASH = 'bash';
+    public const UTILITY_TIMEOUT = 'timeout';
+    public const UTILITY_BASH = 'bash';
 
     /**
      * @var ShellInterface

@@ -7,11 +7,12 @@ declare(strict_types=1);
 
 namespace Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install;
 
+use Magento\MagentoCloud\App\GenericException;
 use Magento\MagentoCloud\Filesystem\FileList;
+use Magento\MagentoCloud\Shell\UtilityManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Install\Setup\InstallCommandFactory;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Step\StepInterface;
-use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
 use Psr\Log\LoggerInterface;
 
@@ -41,27 +42,35 @@ class Setup implements StepInterface
     private $commandFactory;
 
     /**
+     * @var UtilityManager
+     */
+    private $utilityManager;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param FileList $fileList
      * @param InstallCommandFactory $commandFactory
+     * @param UtilityManager $utilityManager
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
         FileList $fileList,
-        InstallCommandFactory $commandFactory
+        InstallCommandFactory $commandFactory,
+        UtilityManager $utilityManager
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->fileList = $fileList;
         $this->commandFactory = $commandFactory;
+        $this->utilityManager = $utilityManager;
     }
 
     /**
      * @inheritdoc
      */
-    public function execute()
+    public function execute(): void
     {
         $this->logger->info('Installing Magento.');
 
@@ -70,11 +79,12 @@ class Setup implements StepInterface
 
             $this->shell->execute('echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog);
             $this->shell->execute(sprintf(
-                '/bin/bash -c "set -o pipefail; %s | tee -a %s"',
+                '%s -c "set -o pipefail; %s | tee -a %s"',
+                $this->utilityManager->get(UtilityManager::UTILITY_BASH),
                 escapeshellcmd($this->commandFactory->create()),
                 $installUpgradeLog
             ));
-        } catch (ShellException $exception) {
+        } catch (GenericException $exception) {
             throw new StepException($exception->getMessage(), $exception->getCode(), $exception);
         }
     }
