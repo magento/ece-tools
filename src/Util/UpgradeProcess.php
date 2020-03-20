@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\UtilityManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -41,21 +42,29 @@ class UpgradeProcess
     private $stageConfig;
 
     /**
+     * @var UtilityManager
+     */
+    private $utilityManager;
+
+    /**
      * @param LoggerInterface $logger
      * @param ShellInterface $shell
      * @param FileList $fileList
      * @param DeployInterface $stageConfig
+     * @param UtilityManager $utilityManager
      */
     public function __construct(
         LoggerInterface $logger,
         ShellInterface $shell,
         FileList $fileList,
-        DeployInterface $stageConfig
+        DeployInterface $stageConfig,
+        UtilityManager $utilityManager
     ) {
         $this->logger = $logger;
         $this->shell = $shell;
         $this->fileList = $fileList;
         $this->stageConfig = $stageConfig;
+        $this->utilityManager = $utilityManager;
     }
 
     /**
@@ -63,7 +72,7 @@ class UpgradeProcess
      * @throws UndefinedPackageException
      * @throws ShellException
      */
-    public function execute()
+    public function execute(): void
     {
         $verbosityLevel = $this->stageConfig->get(DeployInterface::VAR_VERBOSE_COMMANDS);
         $installUpgradeLog = $this->fileList->getInstallUpgradeLog();
@@ -72,7 +81,8 @@ class UpgradeProcess
 
         $this->shell->execute('echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog);
         $this->shell->execute(sprintf(
-            '/bin/sh -c "set -o pipefail; %s | tee -a %s"',
+            '%s -c "set -o pipefail; %s | tee -a %s"',
+            $this->utilityManager->get(UtilityManager::UTILITY_BASH),
             'php ./bin/magento setup:upgrade --keep-generated --ansi --no-interaction ' . $verbosityLevel,
             $installUpgradeLog
         ));
