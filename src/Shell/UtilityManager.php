@@ -13,7 +13,11 @@ namespace Magento\MagentoCloud\Shell;
 class UtilityManager
 {
     public const UTILITY_TIMEOUT = 'timeout';
-    public const UTILITY_SHELL = 'sh';
+    public const UTILITY_SHELL = 'bash';
+    /**
+     * @deprecated
+     */
+    public const UTILITY_BASH = self::UTILITY_SHELL;
 
     /**
      * @var ShellInterface
@@ -38,7 +42,7 @@ class UtilityManager
      *
      * @param string $utility
      * @return string
-     * @throws \RuntimeException If utility does not present in the system
+     * @throws UtilityException If utility does not present in the system
      */
     public function get(string $utility): string
     {
@@ -48,7 +52,7 @@ class UtilityManager
             return $utilities[$utility];
         }
 
-        throw new \RuntimeException(sprintf(
+        throw new UtilityException(sprintf(
             'Utility %s not found',
             $utility
         ));
@@ -56,6 +60,8 @@ class UtilityManager
 
     /**
      * @return array
+     *
+     * @throws UtilityException
      */
     private function getUtilities(): array
     {
@@ -69,11 +75,12 @@ class UtilityManager
                 try {
                     $process = $this->shell->execute('which ' . $name);
                     $this->utilities[$name] = explode(PHP_EOL, $process->getOutput())[0];
-                } catch (\Exception $exception) {
-                    throw new \RuntimeException(sprintf(
-                        'Required utility %s was not found',
-                        $name
-                    ));
+                } catch (ShellException $exception) {
+                    throw new UtilityException(
+                        sprintf('Required utility %s was not found', $name),
+                        $exception->getCode(),
+                        $exception
+                    );
                 }
             }
         }

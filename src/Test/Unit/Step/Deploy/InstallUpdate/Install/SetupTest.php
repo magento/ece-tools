@@ -92,13 +92,13 @@ class SetupTest extends TestCase
         $this->utilityManagerMock->expects($this->once())
             ->method('get')
             ->with(UtilityManager::UTILITY_SHELL)
-            ->willReturn('/bin/sh');
+            ->willReturn('/bin/bash');
 
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
                 ['echo \'Installation time: \'$(date) | tee -a ' . $installUpgradeLog],
-                ['/bin/sh -c "set -o pipefail; magento install command | tee -a /tmp/log.log"']
+                ['/bin/bash -c "set -o pipefail; magento install command | tee -a /tmp/log.log"']
             );
 
         $this->step->execute();

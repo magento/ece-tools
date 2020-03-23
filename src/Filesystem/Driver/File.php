@@ -203,7 +203,7 @@ class File
          * Use shell for best performance.
          */
         exec(
-            '/bin/sh -c ' . escapeshellarg($command),
+            '/bin/bash -c ' . escapeshellarg($command),
             $output,
             $status
         );

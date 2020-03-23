@@ -53,7 +53,7 @@ class FileTest extends TestCase
     public function testCopyDirectory(string $source, string $destination): void
     {
 
-        $execCommand = "/bin/sh -c 'shopt -s dotglob; cp -R '\''source'\''/* '\''destination'\''/'";
+        $execCommand = "/bin/bash -c 'shopt -s dotglob; cp -R '\''source'\''/* '\''destination'\''/'";
 
         $this->shellMock->expects($this->once())
             ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand) {
@@ -82,7 +82,7 @@ class FileTest extends TestCase
         $this->expectExceptionMessage('The content of path "source" cannot be copied to "destination"');
         $this->expectException(FileSystemException::class);
 
-        $execCommand = "/bin/sh -c 'shopt -s dotglob; cp -R '\''source'\''/* '\''destination'\''/'";
+        $execCommand = "/bin/bash -c 'shopt -s dotglob; cp -R '\''source'\''/* '\''destination'\''/'";
 
         $this->shellMock->expects($this->once())
             ->willReturnCallback(function ($cmd, &$output, &$status) use ($execCommand) {

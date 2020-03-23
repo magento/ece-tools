@@ -100,13 +100,13 @@ class UpgradeProcessTest extends TestCase
         $this->utilityManagerMock->expects($this->once())
             ->method('get')
             ->with(UtilityManager::UTILITY_SHELL)
-            ->willReturn('/bin/sh');
+            ->willReturn('/bin/bash');
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
                 ['echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog],
                 [
-                    '/bin/sh -c "set -o pipefail; php ./bin/magento setup:upgrade '
+                    '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
                     . '--keep-generated --ansi --no-interaction -v | tee -a '
                     . $installUpgradeLog . '"'
                 ]
