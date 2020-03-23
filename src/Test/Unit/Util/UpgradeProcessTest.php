@@ -13,6 +13,7 @@ use Magento\MagentoCloud\Filesystem\FileList;
 use Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException;
 use Magento\MagentoCloud\Package\UndefinedPackageException;
 use Magento\MagentoCloud\Shell\ShellInterface;
+use Magento\MagentoCloud\Shell\UtilityManager;
 use Magento\MagentoCloud\Step\Deploy\InstallUpdate\Update\Setup;
 use Magento\MagentoCloud\Step\StepException;
 use Magento\MagentoCloud\Util\UpgradeProcess;
@@ -52,6 +53,11 @@ class UpgradeProcessTest extends TestCase
     private $stageConfigMock;
 
     /**
+     * @var UtilityManager|MockObject
+     */
+    private $utilityManagerMock;
+
+    /**
      * @inheritdoc
      */
     protected function setUp()
@@ -60,12 +66,14 @@ class UpgradeProcessTest extends TestCase
         $this->shellMock = $this->getMockForAbstractClass(ShellInterface::class);
         $this->fileListMock = $this->createMock(FileList::class);
         $this->stageConfigMock = $this->getMockForAbstractClass(DeployInterface::class);
+        $this->utilityManagerMock = $this->createMock(UtilityManager::class);
 
         $this->step = new UpgradeProcess(
             $this->loggerMock,
             $this->shellMock,
             $this->fileListMock,
-            $this->stageConfigMock
+            $this->stageConfigMock,
+            $this->utilityManagerMock
         );
     }
 
@@ -83,22 +91,25 @@ class UpgradeProcessTest extends TestCase
             ->method('get')
             ->with(DeployInterface::VAR_VERBOSE_COMMANDS)
             ->willReturn('-v');
-
         $this->fileListMock->expects($this->once())
             ->method('getInstallUpgradeLog')
             ->willReturn($installUpgradeLog);
-
         $this->loggerMock->expects($this->once())
             ->method('info')
             ->with('Running setup upgrade.');
-
+        $this->utilityManagerMock->expects($this->once())
+            ->method('get')
+            ->with(UtilityManager::UTILITY_SHELL)
+            ->willReturn('/bin/bash');
         $this->shellMock->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
                 ['echo \'Updating time: \'$(date) | tee -a ' . $installUpgradeLog],
-                ['/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
+                [
+                    '/bin/bash -c "set -o pipefail; php ./bin/magento setup:upgrade '
                     . '--keep-generated --ansi --no-interaction -v | tee -a '
-                    . $installUpgradeLog . '"']
+                    . $installUpgradeLog . '"'
+                ]
             );
 
         $this->step->execute();
