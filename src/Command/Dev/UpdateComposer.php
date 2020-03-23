@@ -115,8 +115,8 @@ class UpdateComposer extends Command
         }
 
         $this->file->filePutContents(
-            $this->fileList->getMagentoComposer(),
-            json_encode($composer, JSON_PRETTY_PRINT)
+            $this->fileList->getMagentoDevComposer(),
+            json_encode($composer, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
         );
 
         $output->writeln('Run composer update');
