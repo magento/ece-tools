@@ -44,7 +44,7 @@ class ComposerFileTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->fileListMock = $this->createMock(FileList::class);
         $this->magentoVersionMock = $this->createMock(MagentoVersion::class);
@@ -58,7 +58,7 @@ class ComposerFileTest extends TestCase
         );
     }
 
-    public function testValidateCorrectComposerJson()
+    public function testValidateCorrectComposerJson(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -73,7 +73,22 @@ class ComposerFileTest extends TestCase
         $this->validator->validate();
     }
 
-    public function testValidateWrongComposerJson()
+    public function testValidateCorrectLaminasComposerJson(): void
+    {
+        $this->magentoVersionMock->expects($this->once())
+            ->method('isGreaterOrEqual')
+            ->with('2.3')
+            ->willReturn(true);
+        $this->fileListMock->expects($this->once())
+            ->method('getMagentoComposer')
+            ->willReturn(__DIR__ . '/_files/correct_composer_2.3_2.json');
+        $this->resultFactoryMock->expects($this->once())
+            ->method('success');
+
+        $this->validator->validate();
+    }
+
+    public function testValidateWrongComposerJson(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -88,7 +103,7 @@ class ComposerFileTest extends TestCase
         $this->validator->validate();
     }
 
-    public function testValidateMagentoLover2dot3()
+    public function testValidateMagentoLower23(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -102,7 +117,7 @@ class ComposerFileTest extends TestCase
         $this->validator->validate();
     }
 
-    public function testValidateComposerFileNotExists()
+    public function testValidateComposerFileNotExists(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')
@@ -118,7 +133,7 @@ class ComposerFileTest extends TestCase
         $this->validator->validate();
     }
 
-    public function testValidateCantGetMagentoVersion()
+    public function testValidateCantGetMagentoVersion(): void
     {
         $this->magentoVersionMock->expects($this->once())
             ->method('isGreaterOrEqual')

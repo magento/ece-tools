@@ -78,14 +78,25 @@ class ComposerFile implements ValidatorInterface
             return $this->resultFactory->error('Can\'t read composer.json file: ' . $e->getMessage());
         }
 
-        if (!isset($autoloadPsr4['Zend\Mvc\Controller\\'])) {
-            return $this->resultFactory->error(
-                'Required configuration is missed in autoload section of composer.json file.',
-                'Add ("Zend\\\\Mvc\\\\Controller\\\\": "setup/src/Zend/Mvc/Controller/") to autoload -> psr-4 section' .
-                ' and re-run "composer update" command locally. Then commit new composer.json and composer.lock files.'
-            );
+        $map = [
+            'Zend\Mvc\Controller\\',
+            'Laminas\Mvc\Controller\\'
+        ];
+
+        foreach ($map as $name) {
+            if (isset($autoloadPsr4[$name])) {
+                return $this->resultFactory->success();
+            }
         }
 
-        return $this->resultFactory->success();
+        return $this->resultFactory->error(
+            'Required configuration is missed in autoload section of composer.json file.',
+            sprintf(
+                'Update autoload -> psr-4  section in composer.json similar to %s '
+                . 'and re-run "composer update" command locally. '
+                . 'Then commit new composer.json and composer.lock files.',
+                'https://github.com/magento/magento-cloud/blob/master/composer.json'
+            )
+        );
     }
 }
