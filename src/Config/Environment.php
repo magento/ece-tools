@@ -18,7 +18,7 @@ class Environment
      *   master - is for integration environment;
      *   production and staging are for production and staging environments respectively.
      */
-    private const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)(?:[a-z0-9-]+)?$/i';
+    private const GIT_MASTER_BRANCH_RE = '/^(master|production|staging)/i';
 
     public const VAL_ENABLED = 'enabled';
     public const VAL_DISABLED = 'disabled';
