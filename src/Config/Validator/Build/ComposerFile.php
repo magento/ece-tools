@@ -95,7 +95,7 @@ class ComposerFile implements ValidatorInterface
                 'Update autoload -> psr-4  section in composer.json similar to %s '
                 . 'and re-run "composer update" command locally. '
                 . 'Then commit new composer.json and composer.lock files.',
-                'https://github.com/magento/magento-cloud/blob/master/composer.json'
+                'https://github.com/magento/magento-cloud'
             )
         );
     }
