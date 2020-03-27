@@ -90,10 +90,10 @@ class ComposerFile implements ValidatorInterface
         }
 
         return $this->resultFactory->error(
-            'Required configuration is missed in autoload section of composer.json file.',
+            'The MVC framework configuration specified in the autoload section of the `composer.json` file is missing or incorrect. Complete the following steps to fix this issue:',
             sprintf(
-                'Update autoload -> psr-4  section in composer.json similar to %s '
-                . 'and re-run "composer update" command locally. '
+                '- Update autoload -> psr-4  section in composer.json similar to %s '
+                . 'and run the "composer update" command locally. '
                 . 'Then commit new composer.json and composer.lock files.',
                 'https://github.com/magento/magento-cloud'
             )
