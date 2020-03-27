@@ -86,7 +86,8 @@ class GenerateSchema extends Command
 
         $this->file->filePutContents(
             $this->fileList->getEnvDistConfig(),
-            $this->formatter->format($data)
+            $this->formatter->format($data) . PHP_EOL
+            . $this->file->fileGetContents($this->fileList->getLogDistConfig())
         );
 
         $output->writeln(sprintf('Dist file was successfully generated: %s', $this->fileList->getEnvDistConfig()));
