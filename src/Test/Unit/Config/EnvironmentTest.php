@@ -86,6 +86,11 @@ class EnvironmentTest extends TestCase
             [true, 'master-ad123m'],
             [true, 'production'],
             [true, 'production-lad13m'],
+            [true, 'staging-3'],
+            [true, 'staging3'],
+            [true, 'master3'],
+            [true, 'mastertest'],
+            [true, 'staging3-nf5kgsq'],
         ];
     }
 
