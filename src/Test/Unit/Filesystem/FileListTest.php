@@ -125,4 +125,9 @@ class FileListTest extends TestCase
     {
         $this->assertSame('magento_root/.magento.env.md', $this->fileList->getEnvDistConfig());
     }
+
+    public function testGetLogDistConfig(): void
+    {
+        $this->assertSame('root/dist/.log.env.md', $this->fileList->getLogDistConfig());
+    }
 }
