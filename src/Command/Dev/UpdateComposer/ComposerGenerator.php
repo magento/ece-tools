@@ -244,6 +244,9 @@ class ComposerGenerator
                     $add($dir);
                 }
             }
+            foreach (glob($baseRepoFolder . '/Inventory*') as $dir) {
+                $add($dir);
+            }
         }
 
         return $composer;
