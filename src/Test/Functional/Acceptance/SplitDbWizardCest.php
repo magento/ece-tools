@@ -24,9 +24,11 @@ class SplitDbWizardCest extends AbstractCest
     {
         $I->runEceDockerCommand('build:compose --mode=production');
         $I->runDockerComposeCommand('run build cloud-build');
-        $I->assertTrue($I->runDockerComposeCommand('run build ece-command wizard:split-db-state'));
-        $I->seeInOutput('DB is not split');
-        $I->seeInOutput('- DB cannot be split on this environment');
+        $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state'));
+        $I->seeInOutput([
+            'DB is not split',
+            '- DB cannot be split on this environment'
+        ]);
     }
 
     /**
@@ -55,9 +57,7 @@ class SplitDbWizardCest extends AbstractCest
         $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');
         $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state'));
-        foreach ($data['messages'] as $message) {
-            $I->seeInOutput($message);
-        }
+        $I->seeInOutput($data['messages']);
     }
 
     /**
