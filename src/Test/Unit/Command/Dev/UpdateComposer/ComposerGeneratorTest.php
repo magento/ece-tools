@@ -36,6 +36,11 @@ class ComposerGeneratorTest extends TestCase
             'branch' => '3.0.0',
             'type' => 'single-package'
         ],
+        'repo4' => [
+            'repo' => 'path_to_repo4',
+            'branch' => '1.1.0',
+            'type' => 'flat-structure'
+        ]
     ];
 
     /**
@@ -88,9 +93,9 @@ class ComposerGeneratorTest extends TestCase
         $this->magentoVersionMock->expects($this->once())
             ->method('getVersion')
             ->willReturn('2.2');
-        $this->fileMock->expects($this->exactly(5))
+        $this->fileMock->expects($this->exactly(6))
             ->method('isExists')
-            ->willReturn(true);
+            ->willReturn(true, true, true, true, false, true);
         $this->fileMock->expects($this->exactly(5))
             ->method('fileGetContents')
             ->willReturnOnConsecutiveCalls(
@@ -147,10 +152,11 @@ class ComposerGeneratorTest extends TestCase
         $this->assertEquals(
             [
                 'php -r"@mkdir(__DIR__ . \'/app/etc\', 0777, true);"',
-                'rm -rf repo1 repo2 repo3',
+                'rm -rf repo1 repo2 repo3 repo4',
                 'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo1 repo1',
                 'git clone -b 1.0.0 --single-branch --depth 1 path_to_repo2 repo2',
                 'git clone -b 3.0.0 --single-branch --depth 1 path_to_repo3 repo3',
+                'git clone -b 1.1.0 --single-branch --depth 1 path_to_repo4 repo4',
             ],
             $actual
         );
