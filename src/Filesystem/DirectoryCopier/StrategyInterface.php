@@ -14,10 +14,10 @@ use Magento\MagentoCloud\Filesystem\FileSystemException;
  */
 interface StrategyInterface
 {
-    const STRATEGY_COPY = 'copy';
-    const STRATEGY_SYMLINK = 'symlink';
-    const STRATEGY_SUB_SYMLINK = 'sub_symlink';
-    const STRATEGY_COPY_SUB_FOLDERS = 'copy_sub_folders';
+    public const STRATEGY_COPY = 'copy';
+    public const STRATEGY_SYMLINK = 'symlink';
+    public const STRATEGY_SUB_SYMLINK = 'sub_symlink';
+    public const STRATEGY_COPY_SUB_FOLDERS = 'copy_sub_folders';
 
     /**
      * @param string $fromDirectory Origin directory

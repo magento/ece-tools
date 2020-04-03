@@ -29,6 +29,7 @@
         <service id="Magento\MagentoCloud\DB\PDOException" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\FileSystemException" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\Flag\ConfigurationMismatchException" autowire="false" />
+        <service id="Magento\MagentoCloud\Shell\UtilityException" autowire="false" />
         <service id="Magento\MagentoCloud\Filesystem\Flag\Pool">
             <argument type="collection">
                 <argument key="regenerate">var/.regenerate</argument>
