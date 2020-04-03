@@ -135,6 +135,14 @@ class FileList extends ConfigFileList
     /**
      * @return string
      */
+    public function getLogDistConfig(): string
+    {
+        return $this->directoryList->getRoot() . '/dist/.log.env.md';
+    }
+
+    /**
+     * @return string
+     */
     public function getFrontStaticDist(): string
     {
         return $this->directoryList->getRoot() . '/dist/front-static.php.dist';
