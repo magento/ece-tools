@@ -39,6 +39,7 @@ class CronCest extends AbstractCest
         $I->runDockerComposeCommand('run build cloud-build');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
         $I->deleteFromDatabase('cron_schedule');
         $I->runDockerComposeCommand('run deploy magento-command cron:run');
         $I->runDockerComposeCommand('run deploy magento-command cron:run');
