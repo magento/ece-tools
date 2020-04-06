@@ -89,13 +89,19 @@ class Container implements ContainerInterface
     }
 
     /**
-     * {@inheritdoc}
-     *
-     * @see create() For factory-like usage
+     * @inheritDoc
      */
     public function get($id)
     {
-        return $this->container->get($id);
+        try {
+            return $this->container->get($id);
+        } catch (Exception $exception) {
+            throw new ContainerException(
+                $exception->getMessage(),
+                $exception->getCode(),
+                $exception
+            );
+        }
     }
 
     /**
