@@ -12,7 +12,7 @@ use Codeception\Example;
 use Robo\Exception\TaskException;
 
 /**
- * Functional test for Split Database Wizard
+ *  Checks Split Database Wizard
  */
 class SplitDbWizardCest extends AbstractCest
 {
@@ -20,10 +20,10 @@ class SplitDbWizardCest extends AbstractCest
      * @param CliTester $I
      * @throws TaskException
      */
-    public function testEnvDoesNotSupportSplitDb(CliTester $I)
+    public function testEnvWithoutSplitDbArchitecture(CliTester $I)
     {
-        $I->runEceDockerCommand('build:compose --mode=production');
-        $I->runDockerComposeCommand('run build cloud-build');
+        $I->assertTrue($I->runEceDockerCommand('build:compose --mode=production'));
+        $I->assertTrue($I->runDockerComposeCommand('run build cloud-build'));
         $I->assertTrue($I->runDockerComposeCommand('run deploy ece-command wizard:split-db-state'));
         $I->seeInOutput([
             'DB is not split',
@@ -34,17 +34,17 @@ class SplitDbWizardCest extends AbstractCest
     /**
      * @param CliTester $I
      * @param Example $data
-     * @dataProvider dataProviderEnvIsSupportSplitDb
+     * @dataProvider dataProviderTestEnvWithSplitDbArchitecture
      * @throws TaskException
      */
-    public function testEnvIsSupportSplitDb(CliTester $I, Example $data)
+    public function testEnvWithSplitDbArchitecture(CliTester $I, Example $data)
     {
         $services = $I->readServicesYaml();
         $magentoApp = $I->readAppMagentoYaml();
-        foreach (['quote', 'sales'] as $service) {
-            $services['mysql-' . $service]['type'] = 'mysql:10.2';
-            $magentoApp['relationships']['database-' . $service] = 'mysql-' . $service . ':mysql';
-        }
+        $services['mysql-quote']['type'] = 'mysql:10.2';
+        $services['mysql-sales']['type'] = 'mysql:10.2';
+        $magentoApp['relationships']['database-quote'] = 'mysql-quote:mysql';
+        $magentoApp['relationships']['database-sales'] = 'mysql-sales:mysql';
         $I->writeServicesYaml($services);
         $I->writeAppMagentoYaml($magentoApp);
         $I->runEceDockerCommand('build:compose --mode=production');
@@ -63,7 +63,7 @@ class SplitDbWizardCest extends AbstractCest
     /**
      * @return array
      */
-    protected function dataProviderEnvIsSupportSplitDb(): array
+    protected function dataProviderTestEnvWithSplitDbArchitecture(): array
     {
         return [
             [

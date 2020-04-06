@@ -12,31 +12,74 @@ use Codeception\Example;
 use Robo\Exception\TaskException;
 
 /**
- * Test of backup databases
+ * Checks backup databases
  */
 class BackupDbCest extends AbstractCest
 {
     /**
      * @param CliTester $I
+     * @param Example $data
+     * @throws TaskException
+     * @dataProvider dataProviderTestBackUpDbUnavailable
      */
-    public function testBackUpDbUnavailable(CliTester $I)
+    public function testBackUpDbUnavailable(CliTester $I, Example $data)
     {
-        $I->runDockerComposeCommand('run deploy ece-command db-dump quote');
-        $I->seeInOutput([
-            'INFO: Starting backup.',
-            'NOTICE: Maintenance mode is disabled.',
-            'CRITICAL: Environment does not have connection `checkout` associated with database `quote`',
-        ]);
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->runDockerComposeCommand('run build cloud-build');
+        $I->runDockerComposeCommand('run deploy cloud-deploy');
+        $I->runDockerComposeCommand(
+            'run deploy ece-command db-dump '
+            . implode(' ', $data['databases'])
+        );
+        $I->seeInOutput($data['messages']);
+    }
+
+    /**
+     * @return array
+     */
+    protected function dataProviderTestBackUpDbUnavailable(): array
+    {
+        return [
+            [
+                'databases' => ['quote'],
+                'messages' => [
+                    'INFO: Starting backup.',
+                    'NOTICE: Maintenance mode is disabled.',
+                    'CRITICAL: Environment does not have connection `checkout` associated with database `quote`',
+                ],
+            ],
+            [
+                'databases' => ['sales'],
+                'messages' => [
+                    'INFO: Starting backup.',
+                    'NOTICE: Maintenance mode is disabled.',
+                    'CRITICAL: Environment does not have connection `sales` associated with database `sales`',
+                ],
+            ],
+            [
+                'databases' => ['quote', 'sales'],
+                'messages' => [
+                    'INFO: Starting backup.',
+                    'NOTICE: Maintenance mode is disabled.',
+                    'CRITICAL: Environment does not have connection `checkout` associated with database `quote`',
+                ],
+            ]
+        ];
     }
 
     /**
      * @param CliTester $I
+     * @throws TaskException
      */
     public function testBackUpDbIncorrect(CliTester $I)
     {
+        $I->runEceDockerCommand('build:compose --mode=production');
+        $I->startEnvironment();
+        $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy ece-command db-dump incorrectName');
         $I->seeInOutput(
-            'CRITICAL: Incorrect the database names: [ incorrectName ]. Available database names: [ main quote sales ]'
+            'CRITICAL: Incorrect the database names: [ incorrectName ].'
+            . ' Available database names: [ main quote sales ]'
         );
     }
 
@@ -46,31 +89,20 @@ class BackupDbCest extends AbstractCest
      * @dataProvider dataProvider
      * @throws TaskException
      */
-    public function testBackUp(CliTester $I, Example $data)
+    public function testCreateBackUp(CliTester $I, Example $data)
     {
         $services = $I->readServicesYaml();
         $magentoApp = $I->readAppMagentoYaml();
-        $envMagentoYamlData = ['stage' => ['global' => ['SCD_ON_DEMAND' => true]]];
-        $buildComposeCommand = 'build:compose --mode=production --expose-db-port=' . $I->getExposedPort();
         foreach ($data['splitDbTypes'] as $splitDbType) {
             $services['mysql-' . $splitDbType]['type'] = 'mysql:10.2';
             $magentoApp['relationships']['database-' . $splitDbType] = 'mysql-' . $splitDbType . ':mysql';
-            $envMagentoYamlData['stage']['deploy']['SPLIT_DB'][] = $splitDbType;
-            $buildComposeCommand .= sprintf(
-                ' --expose-db-%s-port=%s',
-                $splitDbType,
-                $I->getExposedPort('db_' . $splitDbType)
-            );
         }
-        $I->writeEnvMagentoYaml($envMagentoYamlData);
         $I->writeServicesYaml($services);
         $I->writeAppMagentoYaml($magentoApp);
-        $I->runEceDockerCommand($buildComposeCommand);
+        $I->runEceDockerCommand('build:compose --mode=production');
         $I->startEnvironment();
         $I->runDockerComposeCommand('run build cloud-build');
         $I->runDockerComposeCommand('run deploy cloud-deploy');
-        $I->runDockerComposeCommand('run deploy cloud-post-deploy');
-
         $dumpCommand = 'run deploy /bin/bash -c \'ece-command db-dump';
         foreach ($data['databases'] as $database) {
             $dumpCommand .= ' ' . $database;
@@ -86,8 +118,9 @@ class BackupDbCest extends AbstractCest
         ];
 
         foreach ($data['dbDumps'] as $dbDump) {
-            $expectedLogs[] = "INFO: Start creation DB dump for {$dbDump} database...  ";
-            $expectedLogs[] = "INFO: Finished DB dump for main database, it can be found here: /tmp/dump-{$dbDump}";
+            $expectedLogs[] = "INFO: Start creation DB dump for {$dbDump} database...";
+            $expectedLogs[] = "INFO: Finished DB dump for {$dbDump} database,"
+                . " it can be found here: /tmp/dump-{$dbDump}";
             $expectedDumpList[] = 'dump-' . $dbDump;
         }
 
