@@ -101,9 +101,11 @@ class Schema
      */
     public function getSchema(): array
     {
-        return $this->parser->parse(
+        $schema = $this->parser->parse(
             $this->file->fileGetContents($this->systemList->getConfig() . '/schema.yaml'),
             Yaml::PARSE_CONSTANT
         );
+
+        return $schema['variables'] ?? [];
     }
 }
