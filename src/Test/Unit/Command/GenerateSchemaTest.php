@@ -77,11 +77,16 @@ class GenerateSchemaTest extends TestCase
             ->willReturn(['some' => 'schema']);
         $this->fileListMock->method('getEnvDistConfig')
             ->willReturn('.magento.env.md');
+        $this->fileListMock->method('getLogDistConfig')
+            ->willReturn('/dist/.log.env.md');
         $this->formatterMock->method('format')
             ->with(['some' => 'schema'])
             ->willReturn('some schema');
+        $this->fileMock->expects($this->once())
+            ->method('fileGetContents')
+            ->willReturn('some additional text');
         $this->fileMock->method('filePutContents')
-            ->with('.magento.env.md', 'some schema');
+            ->with('.magento.env.md', 'some schema' . PHP_EOL . 'some additional text');
 
         $this->command->execute($input, $output);
     }

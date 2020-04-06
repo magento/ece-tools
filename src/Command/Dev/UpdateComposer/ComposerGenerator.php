@@ -21,6 +21,11 @@ class ComposerGenerator
     public const REPO_TYPE_SINGLE_PACKAGE = 'single-package';
 
     /**
+     * Type for packages with modules in the root directory such as Inventory
+     */
+    public const REPO_TYPE_FLAT_STRUCTURE = 'flat-structure';
+
+    /**
      * @var DirectoryList
      */
     private $directoryList;
@@ -134,7 +139,7 @@ class ComposerGenerator
         $preparePackagesScripts = [];
 
         foreach ($repoOptions as $repoName => $gitOption) {
-            if ($this->isSinglePackage($gitOption)) {
+            if ($this->isSinglePackage($gitOption) || $this->isFlatStructurePackage($gitOption)) {
                 continue;
             }
 
@@ -210,6 +215,7 @@ class ComposerGenerator
      * @param array $composer
      * @return array
      * @codeCoverageIgnore
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
     private function addModules(array $repoOptions, array $composer): array
     {
@@ -234,27 +240,59 @@ class ComposerGenerator
         foreach ($repoOptions as $repoName => $gitOption) {
             $baseRepoFolder = $this->directoryList->getMagentoRoot() . '/' . $repoName;
             if ($this->isSinglePackage($gitOption)) {
-                $add($baseRepoFolder, '*');
+                $this->addModule($baseRepoFolder, $composer, '*');
+                continue;
+            }
+
+            if ($this->isFlatStructurePackage($gitOption)) {
+                foreach (glob($baseRepoFolder . '/*') as $dir) {
+                    $this->addModule($dir, $composer);
+                }
                 continue;
             }
 
             foreach (glob($baseRepoFolder . '/app/code/Magento/*') as $dir) {
-                $add($dir);
+                $this->addModule($dir, $composer);
             }
             foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
-                $add($dir);
+                $this->addModule($dir, $composer);
             }
             foreach (glob($baseRepoFolder . '/app/design/*/Magento/*/') as $dir) {
-                $add($dir);
+                $this->addModule($dir, $composer);
             }
             if ($this->file->isDirectory($baseRepoFolder . '/lib/internal/Magento/Framework/')) {
                 foreach (glob($baseRepoFolder . '/lib/internal/Magento/Framework/*') as $dir) {
-                    $add($dir);
+                    $this->addModule($dir, $composer);
                 }
             }
         }
 
         return $composer;
+    }
+
+    /**
+     * Add single module to composer json
+     *
+     * @param string $dir
+     * @param array $composer
+     * @param string|null $version
+     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     */
+    private function addModule(string $dir, array &$composer, string $version = null): void
+    {
+        if (!$this->file->isExists($dir . '/composer.json')) {
+            return;
+        }
+
+        $dirComposer = json_decode($this->file->fileGetContents($dir . '/composer.json'), true);
+        $composer['repositories'][$dirComposer['name']] = [
+            'type' => 'path',
+            'url' => ltrim(str_replace($this->directoryList->getMagentoRoot(), '', $dir), '/'),
+            'options' => [
+                'symlink' => false,
+            ],
+        ];
+        $composer['require'][$dirComposer['name']] = $version ?? $dirComposer['version'] ?? '*';
     }
 
     /**
@@ -264,5 +302,16 @@ class ComposerGenerator
     private function isSinglePackage(array $repoOptions): bool
     {
         return isset($repoOptions['type']) && $repoOptions['type'] === self::REPO_TYPE_SINGLE_PACKAGE;
+    }
+
+    /**
+     * Checks that package has option type and it equal to @see ComposerGenerator::REPO_TYPE_FLAT_STRUCTURE
+     *
+     * @param array $repoOptions
+     * @return bool
+     */
+    private function isFlatStructurePackage(array $repoOptions): bool
+    {
+        return isset($repoOptions['type']) && $repoOptions['type'] == self::REPO_TYPE_FLAT_STRUCTURE;
     }
 }
