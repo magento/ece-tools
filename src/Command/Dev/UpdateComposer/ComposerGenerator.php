@@ -214,8 +214,11 @@ class ComposerGenerator
      * @param array $repoOptions
      * @param array $composer
      * @return array
+     * @throws FilesystemException
      *
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     *
+     * @codeCoverageIgnore
      */
     private function addModules(array $repoOptions, array $composer): array
     {
@@ -258,7 +261,7 @@ class ComposerGenerator
      * @param string $dir
      * @param array $composer
      * @param string|null $version
-     * @throws \Magento\MagentoCloud\Filesystem\FileSystemException
+     * @throws FileSystemException
      */
     private function addModule(string $dir, array &$composer, string $version = null): void
     {
