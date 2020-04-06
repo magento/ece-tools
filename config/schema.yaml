@@ -1,4 +1,3 @@
-# Stage variables
 version: 1
 variables:
   VERBOSE_COMMANDS:
